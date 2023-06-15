@@ -17,6 +17,9 @@ describe('All hosts table', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risk_hosts');
+  });
+
+  beforeEach(() => {
     login();
   });
 

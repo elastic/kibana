@@ -87,6 +87,7 @@ export function createTopNFunctions(
           FileID: fileID,
           AddressOrLine: addressOrLine,
           FrameType: stackTrace.Types[i],
+          Inline: frame.Inline,
           FunctionName: frame.FunctionName,
           FunctionOffset: frame.FunctionOffset,
           SourceLine: frame.LineNumber,

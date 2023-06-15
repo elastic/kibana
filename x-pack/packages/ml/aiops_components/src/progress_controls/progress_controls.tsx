@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiProgress,
   EuiText,
@@ -45,33 +46,10 @@ export const ProgressControls: FC<ProgressControlProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
+  const analysisCompleteStyle = { display: 'none' };
 
   return (
     <EuiFlexGroup alignItems="center">
-      <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem data-test-subj="aiopProgressTitle">
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                data-test-subj="aiopsProgressTitleMessage"
-                id="xpack.aiops.progressTitle"
-                defaultMessage="Progress: {progress}% — {progressMessage}"
-                values={{ progress: Math.round(progress * 100), progressMessage }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem css={isRunning ? runningProgressBarStyles : undefined}>
-            <EuiProgress
-              aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
-                defaultMessage: 'Progress',
-              })}
-              value={Math.round(progress * 100)}
-              max={100}
-              size="m"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {!isRunning && (
           <EuiButton
@@ -79,13 +57,12 @@ export const ProgressControls: FC<ProgressControlProps> = ({
             size="s"
             onClick={onRefresh}
             color={shouldRerunAnalysis ? 'warning' : 'primary'}
-            fill
           >
             <EuiFlexGroup>
               <EuiFlexItem>
                 <FormattedMessage
                   id="xpack.aiops.rerunAnalysisButtonTitle"
-                  defaultMessage="Rerun analysis"
+                  defaultMessage="Run analysis"
                 />
               </EuiFlexItem>
               {shouldRerunAnalysis && (
@@ -107,10 +84,52 @@ export const ProgressControls: FC<ProgressControlProps> = ({
           </EuiButton>
         )}
         {isRunning && (
-          <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel} fill>
+          <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel}>
             <FormattedMessage id="xpack.aiops.cancelAnalysisButtonTitle" defaultMessage="Cancel" />
           </EuiButton>
         )}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {progress === 1 ? (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} data-test-subj="aiopsAnalysisComplete">
+              <small>
+                {i18n.translate('xpack.aiops.analysisCompleteLabel', {
+                  defaultMessage: 'Analysis complete',
+                })}
+              </small>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={progress === 1 ? analysisCompleteStyle : undefined}
+        >
+          <EuiFlexItem data-test-subj="aiopProgressTitle">
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                data-test-subj="aiopsProgressTitleMessage"
+                id="xpack.aiops.progressTitle"
+                defaultMessage="Progress: {progress}% — {progressMessage}"
+                values={{ progress: Math.round(progress * 100), progressMessage }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem css={isRunning ? runningProgressBarStyles : undefined}>
+            <EuiProgress
+              aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
+                defaultMessage: 'Progress',
+              })}
+              value={Math.round(progress * 100)}
+              max={100}
+              size="m"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       {children}
     </EuiFlexGroup>

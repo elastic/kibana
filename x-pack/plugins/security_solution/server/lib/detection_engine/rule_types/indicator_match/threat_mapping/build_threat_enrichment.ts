@@ -28,6 +28,7 @@ export const buildThreatEnrichment = ({
   exceptionFilter,
   threatMapping,
   runtimeMappings,
+  threatIndexFields,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   return async (signals) => {
     const threatFiltersFromEvents = buildThreatMappingFilter({
@@ -56,6 +57,7 @@ export const buildThreatEnrichment = ({
       runtimeMappings,
       listClient,
       exceptionFilter,
+      indexFields: threatIndexFields,
     };
 
     const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({

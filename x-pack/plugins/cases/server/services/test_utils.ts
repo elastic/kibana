@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectReference, SavedObjectsFindResult } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import type {
@@ -128,6 +134,7 @@ export const basicESCaseFields: CasePersistedAttributes = {
   assignees: [],
   total_alerts: -1,
   total_comments: -1,
+  category: null,
 };
 
 export const basicCaseFields: CaseAttributes = {
@@ -158,6 +165,7 @@ export const basicCaseFields: CaseAttributes = {
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
+  category: null,
 };
 
 export const createCaseSavedObjectResponse = ({
@@ -251,3 +259,17 @@ export const createSOFindResponse = <T>(savedObjects: Array<SavedObjectsFindResu
   per_page: savedObjects.length,
   page: 1,
 });
+
+export const mockPointInTimeFinder =
+  (unsecuredSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>) =>
+  (soFindRes: SavedObjectsFindResponse) => {
+    unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
+      close: jest.fn(),
+      // @ts-expect-error
+      find: function* asyncGenerator() {
+        yield {
+          ...soFindRes,
+        };
+      },
+    });
+  };

@@ -21,7 +21,7 @@ export const preparePack = (packName: string) => {
 
 export const deactivatePack = (packName: string) => {
   cy.react('ActiveStateSwitchComponent', {
-    props: { item: { attributes: { name: packName } } },
+    props: { item: { name: packName } },
   }).click();
   closeModalIfVisible();
 
@@ -32,7 +32,7 @@ export const deactivatePack = (packName: string) => {
 
 export const activatePack = (packName: string) => {
   cy.react('ActiveStateSwitchComponent', {
-    props: { item: { attributes: { name: packName } } },
+    props: { item: { name: packName } },
   }).click();
   closeModalIfVisible();
 
@@ -50,6 +50,6 @@ export const cleanupAllPrebuiltPacks = () => {
       some(pack.references, { type: 'osquery-pack-asset' })
     );
 
-    return Promise.all(prebuiltPacks?.map((pack) => cleanupPack(pack.id)));
+    return Promise.all(prebuiltPacks?.map((pack) => cleanupPack(pack.saved_object_id)));
   });
 };

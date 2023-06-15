@@ -22,6 +22,7 @@ import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesFindQueryParams } from '../types';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -100,17 +101,17 @@ export const find = async (
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
-    return CasesFindResponseRt.encode(
-      transformCases({
-        casesMap: cases.casesMap,
-        page: cases.page,
-        perPage: cases.perPage,
-        total: cases.total,
-        countOpenCases: statusStats.open,
-        countInProgressCases: statusStats['in-progress'],
-        countClosedCases: statusStats.closed,
-      })
-    );
+    const res = transformCases({
+      casesMap: cases.casesMap,
+      page: cases.page,
+      perPage: cases.perPage,
+      total: cases.total,
+      countOpenCases: statusStats.open,
+      countInProgressCases: statusStats['in-progress'],
+      countClosedCases: statusStats.closed,
+    });
+
+    return decodeOrThrow(CasesFindResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,

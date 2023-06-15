@@ -15,7 +15,6 @@ import {
 describe('Metrics case', () => {
   describe('SingleCaseMetricsRequestRt', () => {
     const defaultRequest = {
-      caseId: 'basic-case-id',
       features: ['alerts.count', 'lifespan'],
     };
 

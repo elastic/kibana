@@ -2158,5 +2158,150 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).equal(1);
       });
     });
+
+    // https://github.com/elastic/kibana/issues/149920
+    describe('field name wildcard queries', async () => {
+      const { indexEnhancedDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      it('should return correct documents with wildcard field query', async () => {
+        const id = uuidv4();
+        const firstDoc = { id, agent: { name: 'test-1' } };
+        const secondDoc = { id, agent: { name: 'test-2' } };
+
+        await indexEnhancedDocuments({ documents: [firstDoc, firstDoc, secondDoc], id });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['ecs_compliant']),
+          query: `id:${id} AND agent.n*: test-1`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+          sort: ['agent.name'],
+        });
+        expect(previewAlerts.length).to.eql(2);
+
+        // both alerts should have agent.name "test-1" as per rule query
+        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-1');
+        expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-1');
+      });
+
+      it('should return correct documents with negation wildcard field query', async () => {
+        const id = uuidv4();
+        const firstDoc = { id, agent: { name: 'test-1' } };
+        const secondDoc = { id, agent: { name: 'test-2' } };
+
+        await indexEnhancedDocuments({ documents: [firstDoc, firstDoc, secondDoc], id });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['ecs_compliant']),
+          query: `id:${id} AND NOT agent.na*: "test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['agent.name'],
+        });
+        expect(previewAlerts.length).to.eql(1);
+
+        //  alert should not have agent.name "test-1" as per rule query
+        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-2');
+      });
+
+      it('should return correct documents with wildcard field query across multiple different fields', async () => {
+        const id = uuidv4();
+        const firstDoc = { id, agent: { name: 'test-1' } };
+        const secondDoc = { id, agent: { name: 'test-2' } };
+        const thirdDoc = { id, agent: { name: 'test-3', version: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [firstDoc, secondDoc, thirdDoc], id });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['ecs_compliant']),
+          query: `id:${id} AND agent*: "test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+          sort: ['agent.name'],
+        });
+        expect(previewAlerts.length).to.eql(2);
+
+        // alert should have agent.name "test-1" as per rule query
+        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-1');
+        // alert should have agent.name "test-a"  and agent.version "test-1" as per rule query
+        expect(previewAlerts[1]._source?.agent).to.have.property('version', 'test-1');
+        expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-3');
+      });
+
+      it('should return correct documents with wildcard field query across multiple different fields for lucene language', async () => {
+        const id = uuidv4();
+        const firstDoc = { id, agent: { name: 'test-1' } };
+        const secondDoc = { id, agent: { name: 'test-2' } };
+        const thirdDoc = { id, agent: { name: 'test-3', version: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [firstDoc, secondDoc, thirdDoc], id });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['ecs_compliant']),
+          query: `id:${id} AND agent.\\*: test-1`,
+          from: 'now-1h',
+          interval: '1h',
+          language: 'lucene',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+          sort: ['agent.name'],
+        });
+        expect(previewAlerts.length).to.eql(2);
+
+        // alert should have agent.name "test-1" as per rule query
+        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-1');
+        // alert should have agent.name "test-a"  and agent.version "test-1" as per rule query
+        expect(previewAlerts[1]._source?.agent).to.have.property('version', 'test-1');
+        expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-3');
+      });
+    });
   });
 };

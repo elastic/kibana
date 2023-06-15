@@ -10,6 +10,7 @@ import {
   CaseUserActionConnectorRt,
   CaseConnectorRt,
   ConnectorTypes,
+  FindActionConnectorResponseRt,
 } from './connector';
 
 describe('Connector', () => {
@@ -144,6 +145,52 @@ describe('Connector', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+  });
+
+  describe('FindActionConnectorResponseRt', () => {
+    const response = [
+      {
+        id: 'test',
+        actionTypeId: '.test',
+        name: 'My connector',
+        isDeprecated: false,
+        isPreconfigured: false,
+        referencedByCount: 0,
+        config: { foo: 'bar' },
+        isMissingSecrets: false,
+      },
+      {
+        id: 'test-2',
+        actionTypeId: '.test',
+        name: 'My connector 2',
+        isDeprecated: false,
+        isPreconfigured: false,
+        referencedByCount: 0,
+      },
+    ];
+
+    it('has expected attributes in request', () => {
+      const query = FindActionConnectorResponseRt.decode(response);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: response,
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = FindActionConnectorResponseRt.decode([
+        {
+          ...response[0],
+          foo: 'bar',
+        },
+      ]);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: [response[0]],
       });
     });
   });

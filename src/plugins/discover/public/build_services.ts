@@ -39,6 +39,7 @@ import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -99,6 +100,7 @@ export interface DiscoverServices {
   charts: ChartsPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  savedSearch: SavedSearchPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
 }
@@ -154,6 +156,7 @@ export const buildServices = memoize(function (
     charts: plugins.charts,
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
     savedObjectsManagement: plugins.savedObjectsManagement,
+    savedSearch: plugins.savedSearch,
     unifiedSearch: plugins.unifiedSearch,
     lens: plugins.lens,
   };

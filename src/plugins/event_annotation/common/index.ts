@@ -33,4 +33,7 @@ export type {
   QueryPointEventAnnotationConfig,
   AvailableAnnotationIcon,
   EventAnnotationOutput,
+  EventAnnotationGroupAttributes,
 } from './types';
+
+export { EVENT_ANNOTATION_GROUP_TYPE } from './constants';

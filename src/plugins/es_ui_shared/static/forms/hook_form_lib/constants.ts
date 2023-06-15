@@ -20,6 +20,11 @@ export const FIELD_TYPES = {
   SUPER_SELECT: 'superSelect',
   MULTI_SELECT: 'multiSelect',
   JSON: 'json',
+  BUTTON_GROUP: 'buttonGroup',
+  MULTI_BUTTON_GROUP: 'multiButtonGroup',
+  DATE_PICKER: 'datePicker',
+  PASSWORD: 'password',
+  HIDDEN: 'hidden',
 };
 
 // Validation types

@@ -43,6 +43,7 @@ describe('CTI Enrichment', () => {
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
   });
@@ -153,6 +154,12 @@ describe('CTI Enrichment', () => {
   describe('with additional indicators', () => {
     before(() => {
       esArchiverLoad('threat_indicator2');
+    });
+
+    beforeEach(() => {
+      login();
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      goToRuleDetails();
     });
 
     after(() => {

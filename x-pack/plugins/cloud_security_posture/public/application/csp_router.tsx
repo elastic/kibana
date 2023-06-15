@@ -30,6 +30,10 @@ export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
       <Switch>
         <CspRoute {...cloudPosturePages.findings} component={pages.Findings} />
         <CspRoute {...cloudPosturePages.dashboard} component={pages.ComplianceDashboard} />
+        <CspRoute
+          {...cloudPosturePages.vulnerability_dashboard}
+          component={pages.VulnerabilityDashboard}
+        />
 
         <CspRoute {...cloudPosturePages.benchmarks}>
           <Switch>

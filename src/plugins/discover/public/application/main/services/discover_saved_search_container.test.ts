@@ -6,17 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-
-const mockSaveSavedSearch = jest.fn().mockResolvedValue('123');
-jest.mock('@kbn/saved-search-plugin/public', () => {
-  const actualPlugin = jest.requireActual('@kbn/saved-search-plugin/public');
-  return {
-    ...actualPlugin,
-    saveSavedSearch: (val: SavedSearch, opts?: SavedObjectSaveOpts) =>
-      mockSaveSavedSearch(val, opts),
-  };
-});
 import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
@@ -92,32 +81,7 @@ describe('DiscoverSavedSearchContainer', () => {
     discoverServiceMock.data.search.searchSource.create = jest
       .fn()
       .mockReturnValue(savedSearchMock.searchSource);
-    discoverServiceMock.core.savedObjects.client.resolve = jest.fn().mockReturnValue({
-      saved_object: {
-        attributes: {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON:
-              '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-          },
-          title: 'The saved search that will save the world',
-          sort: [],
-          columns: ['test123'],
-          description: 'description',
-          hideChart: false,
-        },
-        id: 'the-saved-search-id',
-        type: 'search',
-        references: [
-          {
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-            id: 'the-data-view-id',
-            type: 'index-pattern',
-          },
-        ],
-        namespaces: ['default'],
-      },
-      outcome: 'exactMatch',
-    });
+    discoverServiceMock.savedSearch.get = jest.fn().mockReturnValue(savedSearchMock);
 
     it('loads a saved search', async () => {
       const savedSearchContainer = getSavedSearchContainer({
@@ -143,7 +107,10 @@ describe('DiscoverSavedSearchContainer', () => {
       };
 
       await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
-      expect(mockSaveSavedSearch).toHaveBeenCalledWith(savedSearchToPersist, saveOptions);
+      expect(discoverServiceMock.savedSearch.save).toHaveBeenCalledWith(
+        savedSearchToPersist,
+        saveOptions
+      );
     });
 
     it('sets the initial and current saved search to the persisted saved search', async () => {
@@ -152,6 +119,9 @@ describe('DiscoverSavedSearchContainer', () => {
         ...savedSearch,
         title,
       };
+
+      discoverServiceMock.savedSearch.save = jest.fn().mockResolvedValue('123');
+
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
       });
@@ -200,7 +170,7 @@ describe('DiscoverSavedSearchContainer', () => {
     });
 
     it('Error thrown on persistence layer bubbling up, no changes to the initial saved search ', async () => {
-      mockSaveSavedSearch.mockImplementation(() => {
+      discoverServiceMock.savedSearch.save = jest.fn().mockImplementation(() => {
         throw new Error('oh-noes');
       });
 

@@ -62,6 +62,10 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
     "@kbn/ml-error-utils",
+    "@kbn/ml-data-grid",
+    "@kbn/ml-runtime-field-utils",
+    "@kbn/ml-date-utils",
+    "@kbn/saved-search-plugin",
   ],
   "exclude": [
     "target/**/*",

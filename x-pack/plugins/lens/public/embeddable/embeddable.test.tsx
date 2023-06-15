@@ -186,6 +186,7 @@ describe('embeddable', () => {
           },
           indexPatterns: {},
           indexPatternRefs: [],
+          activeVisualizationState: null,
         }),
       ...props,
     };
@@ -382,6 +383,7 @@ describe('embeddable', () => {
             },
             indexPatterns: {},
             indexPatternRefs: [],
+            activeVisualizationState: null,
           }),
       },
       { id: '123' } as LensEmbeddableInput
@@ -435,6 +437,7 @@ describe('embeddable', () => {
             },
             indexPatterns: {},
             indexPatternRefs: [],
+            activeVisualizationState: null,
           }),
       },
       { id: '123', searchSessionId: 'firstSession' } as LensEmbeddableInput
@@ -969,6 +972,7 @@ describe('embeddable', () => {
               },
               indexPatterns: {},
               indexPatternRefs: [],
+              activeVisualizationState: null,
             }),
           uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         },
@@ -1063,6 +1067,7 @@ describe('embeddable', () => {
               },
               indexPatterns: {},
               indexPatternRefs: [],
+              activeVisualizationState: null,
             }),
         },
         { id: '123', timeRange, query, filters } as LensEmbeddableInput
@@ -1161,6 +1166,7 @@ describe('embeddable', () => {
             },
             indexPatterns: {},
             indexPatternRefs: [],
+            activeVisualizationState: null,
           }),
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
       },

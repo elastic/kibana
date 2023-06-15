@@ -28,7 +28,6 @@ import {
   BulkCreateCommentRequestRt,
   BulkGetAttachmentsRequestRt,
   BulkGetAttachmentsResponseRt,
-  FindCommentsArgsRt,
 } from '.';
 
 describe('Comments', () => {
@@ -742,35 +741,6 @@ describe('Comments', () => {
 
     it('removes foo:bar attributes from request', () => {
       const query = FindCommentsQueryParamsRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-  });
-
-  describe('FindCommentsArgsRt', () => {
-    const defaultRequest = {
-      caseID: 'basic-case-id',
-      queryParams: {
-        page: 1,
-        perPage: 10,
-        sortOrder: 'asc',
-      },
-    };
-
-    it('has expected attributes in request', () => {
-      const query = FindCommentsArgsRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = FindCommentsArgsRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',

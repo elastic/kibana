@@ -7,7 +7,7 @@
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 import { APP_CASES_PATH, APP_ENDPOINTS_PATH } from '../../../../../common/constants';
-import { closeAllToasts } from '../../tasks/close_all_toasts';
+import { closeAllToasts } from '../../tasks/toasts';
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,

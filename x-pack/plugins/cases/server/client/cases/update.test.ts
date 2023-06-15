@@ -266,7 +266,9 @@ describe('update', () => {
           },
           clientArgs
         )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"foo\\""`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: invalid keys \\"foo\\""`
+      );
     });
   });
 });

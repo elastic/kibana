@@ -19,6 +19,7 @@ import { ATTACH_ALERT_TO_CASE_BUTTON, ATTACH_TO_NEW_CASE_BUTTON } from '../../sc
 import { LOADING_INDICATOR } from '../../screens/security_header';
 
 const loadDetectionsPage = (role: ROLES) => {
+  login(role);
   waitForPageWithoutDateRange(ALERTS_URL, role);
   waitForAlertsToPopulate();
 };
@@ -35,7 +36,6 @@ describe('Alerts timeline', () => {
 
   context('Privileges: read only', () => {
     beforeEach(() => {
-      login(ROLES.reader);
       loadDetectionsPage(ROLES.reader);
     });
 
@@ -54,7 +54,6 @@ describe('Alerts timeline', () => {
 
   context('Privileges: can crud', () => {
     beforeEach(() => {
-      login(ROLES.platform_engineer);
       loadDetectionsPage(ROLES.platform_engineer);
       cy.get(LOADING_INDICATOR).should('not.exist'); // on CI, waitForPageToBeLoaded fails because the loading icon can't be found
     });

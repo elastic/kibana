@@ -13,7 +13,7 @@ import path from 'path';
 
 import type { JobType, MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -176,7 +176,7 @@ export function MachineLearningStackManagementJobsProvider({
     async isSpaceSelectionRowSelected(spaceId: string): Promise<boolean> {
       const state = await testSubjects.getAttribute(
         `sts-space-selector-row-${spaceId}`,
-        'data-test-selected',
+        'aria-checked',
         1000
       );
       return state === 'true';

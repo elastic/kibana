@@ -7,12 +7,17 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { getApmPolicy } from './steps/get_apm_policy';
+import { getCollectorPolicy, getSymbolizerPolicy } from './fleet_policies';
 
 export interface SetupDataCollectionInstructions {
   variables: {
-    apmServerUrl: string;
-    secretToken: string;
+    collector: {
+      secretToken: string;
+      host: string;
+    };
+    symbolizer: {
+      host: string;
+    };
   };
 }
 
@@ -23,18 +28,31 @@ export async function getSetupInstructions({
   packagePolicyClient: PackagePolicyClient;
   soClient: SavedObjectsClientContract;
 }): Promise<SetupDataCollectionInstructions> {
-  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
+  const [collectorPolicy, symbolizerPolicy] = await Promise.all([
+    getCollectorPolicy({ packagePolicyClient, soClient }),
+    getSymbolizerPolicy({ packagePolicyClient, soClient }),
+  ]);
 
-  if (!apmPolicy) {
-    throw new Error('Could not find APM policy');
+  if (!collectorPolicy) {
+    throw new Error('Could not find Collector policy');
   }
 
-  const apmServerVars = apmPolicy.inputs[0].vars;
+  if (!symbolizerPolicy) {
+    throw new Error('Could not find Symbolizer policy');
+  }
+
+  const collectorVars = collectorPolicy.inputs[0].vars;
+  const symbolizerVars = symbolizerPolicy.inputs[0].vars;
 
   return {
     variables: {
-      apmServerUrl: apmServerVars!.url.value!,
-      secretToken: apmServerVars!.secret_token.value!,
+      collector: {
+        secretToken: collectorVars!.secret_token.value!,
+        host: collectorVars!.host.value,
+      },
+      symbolizer: {
+        host: symbolizerVars!.host.value,
+      },
     },
   };
 }
