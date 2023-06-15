@@ -35,6 +35,7 @@ import {
   esSearchHitToArtifact,
   newArtifactToElasticsearchProperties,
   uniqueIdFromArtifact,
+  uniqueIdFromId,
 } from './mappings';
 
 const deflateAsync = promisify(deflate);
@@ -143,6 +144,29 @@ export const deleteArtifact = async (esClient: ElasticsearchClient, id: string):
       id,
       refresh: 'wait_for',
     });
+  } catch (e) {
+    throw new ArtifactsElasticsearchError(e);
+  }
+};
+
+export const bulkDeleteArtifacts = async (
+  esClient: ElasticsearchClient,
+  ids: string[],
+  packageName: string
+): Promise<void> => {
+  try {
+    const body = ids.flatMap((id) => [
+      {
+        delete: { _index: FLEET_SERVER_ARTIFACTS_INDEX, _id: uniqueIdFromId(id, packageName) },
+      },
+    ]);
+
+    await withPackageSpan(`Bulk delete fleet artifacts`, () =>
+      esClient.bulk({
+        body,
+        refresh: 'wait_for',
+      })
+    );
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);
   }

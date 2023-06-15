@@ -384,17 +384,18 @@ export class ManifestManager {
    * @param artifactIds The IDs of the artifact to delete..
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  public async deleteArtifacts(artifactIds: string[]): Promise<Error[]> {
-    const errors: Error[] = [];
-    for (const artifactId of artifactIds) {
-      try {
-        await this.artifactClient.deleteArtifact(artifactId);
-        this.logger.info(`Cleaned up artifact ${artifactId}`);
-      } catch (err) {
-        errors.push(err);
+  public async deleteArtifacts(artifactIds: string[]): Promise<Error | undefined> {
+    try {
+      if (isEmpty(artifactIds)) {
+        return;
       }
+      await this.artifactClient.bulkDeleteArtifacts(artifactIds);
+      for (const artifactId of artifactIds) {
+        this.logger.info(`Cleaned up artifact ${artifactId}`);
+      }
+    } catch (err) {
+      return err;
     }
-    return errors;
   }
 
   /**

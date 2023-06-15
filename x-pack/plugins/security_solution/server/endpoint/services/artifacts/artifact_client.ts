@@ -22,6 +22,8 @@ export interface EndpointArtifactClientInterface {
     artifacts: InternalArtifactCompleteSchema[]
   ): Promise<{ artifacts?: InternalArtifactCompleteSchema[]; errors?: Error[] }>;
 
+  bulkDeleteArtifacts(ids: string[]): Promise<void>;
+
   deleteArtifact(id: string): Promise<void>;
 
   listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
@@ -95,5 +97,9 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const artifactId = (await this.getArtifact(id))?.id!;
     return this.fleetArtifacts.deleteArtifact(artifactId);
+  }
+
+  async bulkDeleteArtifacts(ids: string[]): Promise<void> {
+    await this.fleetArtifacts.bulkDeleteArtifacts(ids, 'endpoint');
   }
 }

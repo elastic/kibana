@@ -173,8 +173,8 @@ export class ManifestTask {
       const deleteErrors = await manifestManager.deleteArtifacts(
         diff.removals.map((artifact) => getArtifactId(artifact))
       );
-      if (deleteErrors.length) {
-        reportErrors(this.logger, deleteErrors);
+      if (deleteErrors) {
+        reportErrors(this.logger, [deleteErrors]);
       }
       await manifestManager.cleanup(newManifest);
     } catch (err) {

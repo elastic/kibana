@@ -28,6 +28,7 @@ import {
   getArtifact,
   listArtifacts,
   bulkCreateArtifacts,
+  bulkDeleteArtifacts,
 } from './artifacts';
 
 /**
@@ -110,6 +111,10 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     if (artifact) {
       await deleteArtifact(this.esClient, id);
     }
+  }
+
+  async bulkDeleteArtifacts(ids: string[], packageName: string) {
+    return await bulkDeleteArtifacts(this.esClient, ids, packageName);
   }
 
   /**
