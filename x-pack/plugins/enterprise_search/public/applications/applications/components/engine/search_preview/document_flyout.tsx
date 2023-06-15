@@ -33,10 +33,10 @@ import {
 } from './convert_results';
 import { useSelectedDocument } from './document_context';
 import { FieldValueCell } from './field_value_cell';
-import { EngineSearchPreviewLogic } from './search_preview_logic';
+import { SearchApplicationSearchPreviewLogic } from './search_preview_logic';
 
 export const DocumentFlyout: React.FC = () => {
-  const { fieldTypesByIndex } = useValues(EngineSearchPreviewLogic);
+  const { fieldTypesByIndex } = useValues(SearchApplicationSearchPreviewLogic);
   const { selectedDocument, setSelectedDocument } = useSelectedDocument();
 
   if (!selectedDocument) return null;

@@ -12,38 +12,38 @@ import { FieldConfiguration } from '@elastic/search-ui';
 import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../../api/search_applications/fetch_search_application_field_capabilities_api_logic';
 import { EngineNameLogic } from '../engine_name_logic';
 
-interface EngineSearchPreviewActions {
-  fetchEngineFieldCapabilities: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.actions.makeRequest;
+interface SearchApplicationSearchPreviewActions {
+  fetchSearchApplicationFieldCapabilities: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.actions.makeRequest;
 }
 
-export interface EngineSearchPreviewValues {
-  engineFieldCapabilitiesData: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.data;
-  engineName: typeof EngineNameLogic.values.engineName;
+export interface SearchApplicationPreviewValues {
   fieldTypesByIndex: Record<string, Record<string, string>>;
   resultFields: Record<string, FieldConfiguration>;
+  searchApplicationFieldCapabilitiesData: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.data;
+  searchApplicationName: typeof EngineNameLogic.values.engineName;
   sortableFields: string[];
 }
 
-export const EngineSearchPreviewLogic = kea<
-  MakeLogicType<EngineSearchPreviewValues, EngineSearchPreviewActions>
+export const SearchApplicationSearchPreviewLogic = kea<
+  MakeLogicType<SearchApplicationPreviewValues, SearchApplicationSearchPreviewActions>
 >({
   connect: {
     actions: [
       FetchSearchApplicationFieldCapabilitiesApiLogic,
-      ['makeRequest as fetchEngineFieldCapabilities'],
+      ['makeRequest as fetchSearchApplicationFieldCapabilities'],
     ],
     values: [
       EngineNameLogic,
-      ['engineName'],
+      ['engineName as searchApplicationName'],
       FetchSearchApplicationFieldCapabilitiesApiLogic,
-      ['data as engineFieldCapabilitiesData'],
+      ['data as searchApplicationFieldCapabilitiesData'],
     ],
   },
   events: ({ actions, values }) => ({
     afterMount: () => {
-      if (!values.engineFieldCapabilitiesData) {
-        actions.fetchEngineFieldCapabilities({
-          name: values.engineName,
+      if (!values.searchApplicationFieldCapabilitiesData) {
+        actions.fetchSearchApplicationFieldCapabilities({
+          name: values.searchApplicationName,
         });
       }
     },
@@ -51,8 +51,8 @@ export const EngineSearchPreviewLogic = kea<
   path: ['enterprise_search', 'content', 'engine_search_preview_logic'],
   selectors: ({ selectors }) => ({
     fieldTypesByIndex: [
-      () => [selectors.engineFieldCapabilitiesData],
-      (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
+      () => [selectors.searchApplicationFieldCapabilitiesData],
+      (data: SearchApplicationPreviewValues['searchApplicationFieldCapabilitiesData']) => {
         if (!data) return {};
 
         return data.fields.reduce(
@@ -72,8 +72,8 @@ export const EngineSearchPreviewLogic = kea<
       },
     ],
     resultFields: [
-      () => [selectors.engineFieldCapabilitiesData],
-      (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
+      () => [selectors.searchApplicationFieldCapabilitiesData],
+      (data: SearchApplicationPreviewValues['searchApplicationFieldCapabilitiesData']) => {
         if (!data) return {};
 
         return Object.fromEntries(
@@ -84,8 +84,8 @@ export const EngineSearchPreviewLogic = kea<
       },
     ],
     sortableFields: [
-      () => [selectors.engineFieldCapabilitiesData],
-      (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
+      () => [selectors.searchApplicationFieldCapabilitiesData],
+      (data: SearchApplicationPreviewValues['searchApplicationFieldCapabilitiesData']) => {
         if (!data) return [];
 
         return data.fields

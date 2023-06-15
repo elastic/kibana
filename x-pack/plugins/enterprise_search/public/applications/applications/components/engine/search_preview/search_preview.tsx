@@ -65,7 +65,7 @@ import { EngineViewLogic } from '../engine_view_logic';
 
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
-import { EngineSearchPreviewLogic } from './search_preview_logic';
+import { SearchApplicationSearchPreviewLogic } from './search_preview_logic';
 
 import {
   InputView,
@@ -351,7 +351,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
   // const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null); Uncomment when view this API call is needed
   const { engineName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
-  const { resultFields, sortableFields } = useValues(EngineSearchPreviewLogic);
+  const { resultFields, sortableFields } = useValues(SearchApplicationSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
