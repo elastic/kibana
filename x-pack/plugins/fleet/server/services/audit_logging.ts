@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
+import type { AuditEvent } from '@kbn/security-plugin/server';
 
 import { appContextService } from './app_context';
-import { getRequestStore } from './request_store';
 
 class AuditLoggingService {
   /**
