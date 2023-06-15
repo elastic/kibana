@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { getVulnerabilitiesTrends } from './get_vulnerabilities_trend';
 import type { CnvmDashboardData } from '../../../common/types';
 import { VULNERABILITIES_DASHBOARD_ROUTE_PATH } from '../../../common/constants';
 import { getSafeVulnerabilitiesQueryFilter } from '../../../common/utils/get_safe_vulnerabilities_query_filter';
@@ -34,10 +35,14 @@ export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void 
 
         const query = getSafeVulnerabilitiesQueryFilter();
 
-        const [cnvmStatistics] = await Promise.all([getVulnerabilitiesStatistics(esClient, query)]);
+        const [cnvmStatistics, vulnTrends] = await Promise.all([
+          getVulnerabilitiesStatistics(esClient, query),
+          getVulnerabilitiesTrends(esClient),
+        ]);
 
         const body: CnvmDashboardData = {
           cnvmStatistics,
+          vulnTrends,
         };
 
         return response.ok({
