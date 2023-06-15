@@ -11,5 +11,5 @@ export const ALERT_TAGS_VALIDATION_ERROR = (duplicates: string) =>
   i18n.translate('xpack.securitySolution.api.alertTags.validationError', {
     values: { duplicates },
     defaultMessage:
-      'Duplicate tags [{ duplicates }] were found in the tags_to_add and tags_to_remove parameters.',
+      'Duplicate tags { duplicates } were found in the tags_to_add and tags_to_remove parameters.',
   });

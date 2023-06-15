@@ -60,7 +60,7 @@ describe('setAlertTagsRoute', () => {
 
       expect(response.body).toEqual({
         message: [
-          `Duplicate tags [[\"tag-1\"]] were found in the tags_to_add and tags_to_remove parameters.`,
+          `Duplicate tags [\"tag-1\"] were found in the tags_to_add and tags_to_remove parameters.`,
         ],
         status_code: 400,
       });
