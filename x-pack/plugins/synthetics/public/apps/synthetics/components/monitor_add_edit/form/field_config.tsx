@@ -473,19 +473,15 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [AlertConfigKey.STATUS_ENABLED]: {
     fieldKey: AlertConfigKey.STATUS_ENABLED,
     component: Switch,
-    label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
-      defaultMessage: 'Enable status alerts',
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.create.alertEnabled.label', {
+      defaultMessage: 'Enable status alerts on this monitor.',
     }),
     controlled: true,
-    props: ({ isEdit, setValue, field }): EuiSwitchProps => ({
+    props: ({ setValue, field }): EuiSwitchProps => ({
       id: 'syntheticsMonitorConfigIsAlertEnabled',
-      label: isEdit
-        ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertEnabled.label', {
-            defaultMessage: 'Disabling will stop alerting on this monitor.',
-          })
-        : i18n.translate('xpack.synthetics.monitorConfig.create.alertEnabled.label', {
-            defaultMessage: 'Enable status alerts on this monitor.',
-          }),
+      label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
+        defaultMessage: 'Enable status alerts',
+      }),
       checked: field?.value || false,
       onChange: (event) => {
         setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
