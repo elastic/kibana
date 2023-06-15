@@ -374,13 +374,17 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   ];
 
   const onChange = useCallback((tableSettings) => {
-    const { index, size } = tableSettings.page;
-    const { field, direction } = tableSettings.sort;
+    if (tableSettings.page) {
+      const { index, size } = tableSettings.page;
+      setPageIndex(index);
+      setPageSize(size);
+    }
 
-    setPageIndex(index);
-    setPageSize(size);
-    setSortField(field);
-    setSortDirection(direction);
+    if (tableSettings.sort) {
+      const { field, direction } = tableSettings.sort;
+      setSortField(field);
+      setSortDirection(direction);
+    }
   }, []);
 
   const { pagination, pageOfItems, sorting } = useMemo(() => {
