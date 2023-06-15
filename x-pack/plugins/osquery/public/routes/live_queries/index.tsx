@@ -26,7 +26,7 @@ const LiveQueriesComponent = () => {
   }
 
   return (
-    <Routes>
+    <Routes legacySwitch={false}>
       <Route path={`${match.url}/new`}>
         {(permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks)) ||
         permissions.writeLiveQueries ? (
@@ -38,7 +38,7 @@ const LiveQueriesComponent = () => {
       <Route path={`${match.url}/:actionId`}>
         <LiveQueryDetailsPage />
       </Route>
-      <Route path={`${match.url}`}>
+      <Route path={`${match.url}/`}>
         <LiveQueriesPage />
       </Route>
     </Routes>

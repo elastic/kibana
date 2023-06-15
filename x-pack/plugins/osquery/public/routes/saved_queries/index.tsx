@@ -26,7 +26,7 @@ const SavedQueriesComponent = () => {
   }
 
   return (
-    <Routes>
+    <Routes legacySwitch={false}>
       <Route path={`${match.url}/new`}>
         {permissions.writeSavedQueries ? <NewSavedQueryPage /> : <MissingPrivileges />}
       </Route>

@@ -70,7 +70,7 @@ export const Route = ({
 /**
  * The match propogator that is part of the Route
  */
-const MatchPropagator = () => {
+export const MatchPropagator = () => {
   const { executionContext } = useKibanaSharedUX().services;
   const match = useRouteMatch();
 

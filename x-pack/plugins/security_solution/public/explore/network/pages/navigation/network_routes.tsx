@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Routes ,Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -100,7 +100,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
               </EuiFlexItem>
             </ConditionalFlexGroup>
           </>
-        </Routes>
+        </Route>
         <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.http})`}>
           <HttpQueryTabBody {...tabProps} />
         </Route>
@@ -120,7 +120,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
             {...tabProps}
           />
         </Route>
-      </Switch>
+      </Routes>
     );
   }
 );

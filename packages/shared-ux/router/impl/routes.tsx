@@ -6,16 +6,37 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { replace } from 'lodash';
+import React, { Children } from 'react';
 // eslint-disable-next-line no-restricted-imports
-import { Switch } from 'react-router-dom';
-import { Routes as ReactRouterRoutes } from 'react-router-dom-v5-compat';
+import { Switch, useRouteMatch } from 'react-router-dom';
+import { Routes as ReactRouterRoutes, Route } from 'react-router-dom-v5-compat';
+import { MatchPropagator } from './route';
 
 export const Routes = ({
   legacySwitch = true,
   children,
 }: {
-  legacySwitch: boolean;
+  legacySwitch?: boolean;
   children: React.ReactNode;
-}) =>
-  legacySwitch ? <Switch>{children}</Switch> : <ReactRouterRoutes>{children}</ReactRouterRoutes>;
+}) => {
+  const match = useRouteMatch();
+
+  return legacySwitch ? (
+    <Switch>{children}</Switch>
+  ) : (
+    <ReactRouterRoutes>
+      {Children.map(children, (child) => (
+        <Route
+          path={replace(child.props.path, match.url + '/', '')}
+          element={
+            <>
+              <MatchPropagator />
+              {child.props.children}
+            </>
+          }
+        />
+      ))}
+    </ReactRouterRoutes>
+  );
+};

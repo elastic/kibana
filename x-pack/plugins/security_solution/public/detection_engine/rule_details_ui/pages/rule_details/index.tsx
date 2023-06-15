@@ -847,7 +847,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       />
                     )}
                   </>
-                </Routes>
+                </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                   <ExceptionsViewer
                     rule={rule}
@@ -877,7 +877,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
                   <ExecutionEventsTable ruleId={ruleId} />
                 </Route>
-              </Switch>
+              </Routes>
             </StyledMinHeightTabContainer>
           </SecuritySolutionPageWrapper>
         </RuleDetailsContextProvider>
