@@ -9,15 +9,18 @@
 import React, { useEffect } from 'react';
 import { DefaultLandingPage } from './default';
 import { ServerlessLandingPage } from './serverless';
+import { ManagementSection } from '../../utils';
 
 interface ManagementLandingPageProps {
   version: string;
   onAppMounted: (id: string) => void;
   setBreadcrumbs: () => void;
+  sections: ManagementSection[];
 }
 
 export const ManagementLandingPage = ({
   version,
+  sections,
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
@@ -29,7 +32,7 @@ export const ManagementLandingPage = ({
   }, [onAppMounted]);
 
   if (isServerless) {
-    return <ServerlessLandingPage version={version} />;
+    return <ServerlessLandingPage sections={sections} />;
   }
 
   return <DefaultLandingPage version={version} />;

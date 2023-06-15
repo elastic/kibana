@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { flatMap } from 'lodash';
 import {
   EuiPageBody,
   EuiPageSection,
@@ -20,91 +21,114 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { ManagementSection, ManagementApp } from '../../../utils';
 
 interface ManagementLandingPageProps {
-  version: string;
+  sections: ManagementSection[];
 }
 
-const dataItems = [
-  {
-    id: 1,
-    title: 'Ingest Pipelines',
-    description:
-      'Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing.',
-    icon: <EuiIcon size="l" type="managementApp" />,
-  },
-  {
-    id: 2,
-    title: 'Logstash Pipelines',
-    description: 'Manage Logstash event processing and see the result visually.',
-    icon: <EuiIcon size="l" type="logsApp" />,
-  },
-  {
-    id: 3,
-    title: 'Index Management',
-    description: 'Update your Elasticsearch indices individually or in bulk.',
-    icon: <EuiIcon size="l" type="indexManagementApp" />,
-  },
-  {
-    id: 4,
-    title: 'Transforms',
-    description:
-      'Transforms pivot indices into summarized, entity-centric indices, or create an indexed view of the latest documents.',
-    icon: <EuiIcon size="l" type="managementApp" />,
-  },
-  {
-    id: 5,
-    title: 'Machine Learning',
-    description: 'View, export, and import machine learning analytics and anomaly detection items.',
-    icon: <EuiIcon size="l" type="machineLearningApp" />,
-  },
-  {
-    id: 6,
-    title: 'Data Views',
-    description:
-      'Create and manage the data views that help you retrieve your data from Elasticsearch.',
-    icon: <EuiIcon size="l" type="managementApp" />,
-  },
-];
+const getDataFromManagementApp = (section: ManagementApp) => {
+  return {
+    id: section.id,
+    title: section.title,
+    href: section.basePath,
+  };
+};
 
-const contentItems = [
-  {
-    id: 1,
-    title: 'Saved Objects',
-    description:
-      'Manage and share your saved objects. To edit the underlying data of an object, go to its associated application.',
-    icon: <EuiIcon size="l" type="savedObjectsApp" />,
-  },
-  {
-    id: 2,
-    title: 'Tags',
-    description: 'Use tags to categorize and easily find your objects.',
-    icon: <EuiIcon size="l" type="managementApp" />,
-  },
-  {
-    id: 3,
-    title: 'Files',
-    description: 'Any files created will be listed here.',
-    icon: <EuiIcon size="l" type="indexManagementApp" />,
-  },
-];
+const getEnabledAppsByCategory = (sections: ManagementSection[]) => {
+  // Flatten all apps into a single array
+  const flattenApps = flatMap(sections, (section) => section.apps);
+  // Filter out apps that are not enabled and create an object with the
+  // app id as the key so we can easily do app look up by id.
+  const filteredApps: { [key: string]: any } = flattenApps.reduce((obj, item: ManagementApp) => {
+    return item.enabled ? { ...obj, [item.id]: item } : obj;
+  }, {});
 
-const otherItems = [
-  {
-    id: 1,
-    title: 'API Keys',
-    description: 'Allow applications to access Elastic on your behalf.',
-    icon: <EuiIcon size="l" type="managementApp" />,
-  },
-  {
-    id: 2,
-    title: 'Advanced Settings',
-    description: 'Settings intended for advanced users.',
-    icon: <EuiIcon size="l" type="logsApp" />,
-  },
-];
+  return [
+    {
+      id: 'data',
+      title: 'Data',
+      apps: [
+        {
+          ...getDataFromManagementApp(filteredApps.ingest_pipelines),
+          description:
+            'Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing.',
+          icon: <EuiIcon size="l" type="managementApp" />,
+        },
+        {
+          ...getDataFromManagementApp(filteredApps.pipelines),
+          description: 'Manage Logstash event processing and see the result visually.',
+          icon: <EuiIcon size="l" type="logsApp" />,
+        },
+        {
+          ...getDataFromManagementApp(filteredApps.index_management),
+          description: 'Update your Elasticsearch indices individually or in bulk.',
+          icon: <EuiIcon size="l" type="indexManagementApp" />,
+        },
+        {
+          ...getDataFromManagementApp(filteredApps.transform),
+          description:
+            'Transforms pivot indices into summarized, entity-centric indices, or create an indexed view of the latest documents.',
+          icon: <EuiIcon size="l" type="managementApp" />,
+        },
+        {
+          ...getDataFromManagementApp(filteredApps.jobsListLink),
+          description:
+            'View, export, and import machine learning analytics and anomaly detection items.',
+          icon: <EuiIcon size="l" type="machineLearningApp" />,
+        },
+        {
+          ...getDataFromManagementApp(filteredApps.dataViews),
+          description:
+            'Create and manage the data views that help you retrieve your data from Elasticsearch.',
+          icon: <EuiIcon size="l" type="managementApp" />,
+        },
+      ],
+    },
+    {
+      id: 'content',
+      title: 'Content',
+      apps: [
+        {
+          ...getDataFromManagementApp(filteredApps.objects),
+          description:
+            'Manage and share your saved objects. To edit the underlying data of an object, go to its associated application.',
+          icon: <EuiIcon size="l" type="savedObjectsApp" />,
+        },
+        {
+          ...getDataFromManagementApp(filteredApps.tags),
+          description: 'Use tags to categorize and easily find your objects.',
+          icon: <EuiIcon size="l" type="managementApp" />,
+        },
+        {
+          ...getDataFromManagementApp(filteredApps.filesManagement),
+          description: 'Any files created will be listed here.',
+          icon: <EuiIcon size="l" type="indexManagementApp" />,
+        },
+      ],
+    },
+    {
+      id: 'other',
+      title: 'Other',
+      apps: [
+        {
+          ...getDataFromManagementApp(filteredApps.api_keys),
+          description: 'Allow applications to access Elastic on your behalf.',
+          icon: <EuiIcon size="l" type="managementApp" />,
+        },
+        {
+          ...getDataFromManagementApp(filteredApps.settings),
+          description: 'Settings intended for advanced users.',
+          icon: <EuiIcon size="l" type="logsApp" />,
+        },
+      ],
+    },
+  ];
+};
 
-export const ServerlessLandingPage = ({ version }: ManagementLandingPageProps) => {
+export const ServerlessLandingPage = ({ sections }: ManagementLandingPageProps) => {
+  const appsByCategory = getEnabledAppsByCategory(sections);
+
   return (
     <EuiPageBody restrictWidth={true}>
       <EuiPageSection color="transparent" paddingSize="none">
@@ -117,70 +141,37 @@ export const ServerlessLandingPage = ({ version }: ManagementLandingPageProps) =
             defaultMessage: 'Manage your indices, data views, saved objects, settings, and more.',
           })}
         />
-        <EuiSpacer size="l" />
 
-        <EuiText>
-          <h3>Data</h3>
-        </EuiText>
-        <EuiSpacer size="l" />
-        <EuiFlexGrid columns={3}>
-          {dataItems.map((item) => (
-            <EuiFlexItem key={item.id}>
-              <EuiCard
-                layout="horizontal"
-                icon={item.icon}
-                titleSize="xs"
-                title={item.title}
-                description={item.description}
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-
-        <EuiSpacer size="s" />
-        <EuiHorizontalRule />
-        <EuiSpacer size="s" />
-        <EuiText>
-          <h3>Content</h3>
-        </EuiText>
-        <EuiSpacer size="l" />
-        <EuiFlexGrid columns={3}>
-          {contentItems.map((item) => (
-            <EuiFlexItem key={item.id}>
-              <EuiCard
-                layout="horizontal"
-                icon={item.icon}
-                titleSize="xs"
-                title={item.title}
-                description={item.description}
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-
-        <EuiSpacer size="s" />
-        <EuiHorizontalRule />
-        <EuiSpacer size="s" />
-        <EuiText>
-          <h3>Other</h3>
-        </EuiText>
-        <EuiSpacer size="l" />
-        <EuiFlexGrid columns={3}>
-          {otherItems.map((item) => (
-            <EuiFlexItem key={item.id}>
-              <EuiCard
-                layout="horizontal"
-                icon={item.icon}
-                titleSize="xs"
-                title={item.title}
-                description={item.description}
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
+        {appsByCategory.map((category, index) => (
+          <div key={category.id}>
+            {index === 0 ? (
+              <EuiSpacer size="l" />
+            ) : (
+              <>
+                <EuiSpacer size="s" />
+                <EuiHorizontalRule />
+              </>
+            )}
+            <EuiText>
+              <h3>{category.title}</h3>
+            </EuiText>
+            <EuiSpacer size="l" />
+            <EuiFlexGrid columns={3}>
+              {category.apps.map((app) => (
+                <EuiFlexItem key={app.id}>
+                  <EuiCard
+                    layout="horizontal"
+                    icon={app.icon}
+                    titleSize="xs"
+                    title={app.title}
+                    description={app.description}
+                    href={`/app/management${app.href}`}
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
+          </div>
+        ))}
       </EuiPageSection>
     </EuiPageBody>
   );

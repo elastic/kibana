@@ -64,6 +64,7 @@ export const ManagementRouter = memo(
           component={() => (
             <ManagementLandingPage
               version={dependencies.kibanaVersion}
+              sections={sections}
               setBreadcrumbs={setBreadcrumbs}
               onAppMounted={onAppMounted}
             />
