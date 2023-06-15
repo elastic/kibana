@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AppClient } from './types';
+import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { AppClient, SecuritySolutionRequestHandlerContext } from './types';
+
+export type SecuritySolutionPluginRouterMock = RouterMock<SecuritySolutionRequestHandlerContext>;
 
 type AppClientMock = jest.Mocked<AppClient>;
 const createAppClientMock = (): AppClientMock =>

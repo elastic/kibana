@@ -47,7 +47,6 @@ import {
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { TRANSFORM_STATES } from '../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../types';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import type {
   ClusterClientMock,
@@ -58,9 +57,10 @@ import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators
 import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
+import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
 
 describe('test endpoint routes', () => {
-  let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
+  let routerMock: SecuritySolutionPluginRouterMock;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockClusterClient: ClusterClientMock;
   let mockScopedClient: ScopedClusterClientMock;

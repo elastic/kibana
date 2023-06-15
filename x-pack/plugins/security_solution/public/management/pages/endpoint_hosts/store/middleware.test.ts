@@ -255,6 +255,7 @@ describe('endpoint list middleware', () => {
 
       expect(mockedApis.responseProvider.pendingActions).toHaveBeenCalledWith({
         path: expect.any(String),
+        version: '2023-10-31',
         query: {
           agent_ids: [
             '0dc3661d-6e67-46b0-af39-6f12b025fcb0',
