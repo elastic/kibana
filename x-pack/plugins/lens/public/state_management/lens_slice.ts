@@ -178,6 +178,7 @@ export const updateStateFromSuggestion = createAction<{
   visualizationId: string | null;
   visualizationState: unknown;
   datasourceState: unknown;
+  dataViews: DataViewsState;
 }>('lens/updateStateFromSuggestion');
 export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
@@ -865,6 +866,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           visualizationId: string;
           visualizationState: unknown;
           datasourceState: unknown;
+          dataViews: DataViewsState;
         };
       }
     ) => {
@@ -887,6 +889,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         visualization: {
           ...visualization,
         },
+        dataViews: payload.dataViews,
       };
     },
     [navigateAway.type]: (state) => state,

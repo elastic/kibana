@@ -114,7 +114,6 @@ import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/emb
 import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
-  type TypedLensByValueInput,
 } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
@@ -127,6 +126,7 @@ import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator
 import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -261,13 +261,7 @@ export interface LensPublicStart {
   }>;
 }
 
-export type EditLensConfigPanelComponent = React.ComponentType<{
-  attributes: TypedLensByValueInput['attributes'];
-  dataView: DataView;
-  updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
-  setIsFlyoutVisible?: (flag: boolean) => void;
-  datasourceId: 'formBased' | 'textBased';
-}>;
+export type EditLensConfigPanelComponent = React.ComponentType<EditLensConfigurationProps>;
 
 export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,

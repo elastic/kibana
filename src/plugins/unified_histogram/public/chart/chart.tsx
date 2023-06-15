@@ -7,7 +7,6 @@
  */
 
 import React, { ReactElement, useMemo, useState, useEffect, useCallback, memo } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -18,11 +17,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
-import { isEqual } from 'lodash';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './hooks/use_chart_panels';
@@ -43,6 +42,7 @@ import { useTotalHits } from './hooks/use_total_hits';
 import { useRequestParams } from './hooks/use_request_params';
 import { useChartStyles } from './hooks/use_chart_styles';
 import { useChartActions } from './hooks/use_chart_actions';
+import { useChartConfigPanel } from './hooks/use_chart_config_panel';
 import { getLensAttributes } from './utils/get_lens_attributes';
 import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
@@ -68,6 +68,7 @@ export interface ChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
+  lensTablesAdapter?: Record<string, Datatable>;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -102,6 +103,7 @@ export function Chart({
   disableTriggers,
   disabledActions,
   input$: originalInput$,
+  lensTablesAdapter,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -114,9 +116,6 @@ export function Chart({
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [EditLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
-  const prevSuggestion = usePrevious(currentSuggestion);
-  const prevQuery = usePrevious(originalQuery);
   const {
     showChartOptionsPopover,
     chartRef,
@@ -220,17 +219,17 @@ export function Chart({
     ]
   );
 
-  const updateSuggestion = useCallback(
-    (datasourceState, visualizationState) => {
-      const updatedSuggestion = {
-        ...currentSuggestion,
-        ...(datasourceState && { datasourceState }),
-        ...(visualizationState && { visualizationState }),
-      } as Suggestion;
-      onSuggestionChange?.(updatedSuggestion);
-    },
-    [onSuggestionChange, currentSuggestion]
-  );
+  const ChartConfigPanel = useChartConfigPanel({
+    services,
+    lensAttributesContext,
+    dataView,
+    lensTablesAdapter,
+    currentSuggestion,
+    setIsFlyoutVisible,
+    isPlainRecord,
+    query: originalQuery,
+    onSuggestionChange,
+  });
 
   const onSuggestionSelectorChange = useCallback(
     (s: Suggestion | undefined) => {
@@ -240,42 +239,12 @@ export function Chart({
   );
 
   useEffect(() => {
+    // close the flyout for dataview mode
+    // or if no chart is visible
     if (!chartVisible && isFlyoutVisible) {
       setIsFlyoutVisible(false);
     }
   }, [chartVisible, isFlyoutVisible]);
-
-  useEffect(() => {
-    async function fetchLensConfigComponent() {
-      const Component = await services.lens.EditLensConfigPanelApi();
-      const panel = (
-        <Component
-          attributes={lensAttributesContext.attributes}
-          dataView={dataView}
-          updateAll={updateSuggestion}
-          setIsFlyoutVisible={setIsFlyoutVisible}
-          datasourceId="textBased"
-        />
-      );
-      setEditLensConfigPanel(panel);
-    }
-    const queryHasChanged = !isEqual(originalQuery, prevQuery);
-    const suggestionHasChanged = currentSuggestion?.title !== prevSuggestion?.title;
-    if (isPlainRecord && (suggestionHasChanged || queryHasChanged)) {
-      fetchLensConfigComponent();
-    }
-  }, [
-    lensAttributesContext.attributes,
-    services.lens,
-    dataView,
-    updateSuggestion,
-    isPlainRecord,
-    isFlyoutVisible,
-    currentSuggestion,
-    prevSuggestion,
-    originalQuery,
-    prevQuery,
-  ]);
 
   const onEditVisualization = useEditVisualization({
     services,
@@ -482,7 +451,7 @@ export function Chart({
           isSaveable={false}
         />
       )}
-      {isFlyoutVisible && EditLensConfigPanel}
+      {isFlyoutVisible && ChartConfigPanel}
     </EuiFlexGroup>
   );
 }

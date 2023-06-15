@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { PreloadedState } from '@reduxjs/toolkit';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   makeConfigureStore,
@@ -22,9 +21,16 @@ import {
 import { getPreloadedState } from '../../../state_management/lens_slice';
 
 import type { DatasourceMap, VisualizationMap } from '../../../types';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import { LensEditCongifurationFlyout } from './lens_configuration_flyout';
+import {
+  LensEditCongifurationFlyout,
+  type EditConfigPanelProps,
+} from './lens_configuration_flyout';
 import type { LensAppServices } from '../../types';
+
+export type EditLensConfigurationProps = Omit<
+  EditConfigPanelProps,
+  'startDependencies' | 'coreStart' | 'visualizationMap' | 'datasourceMap'
+>;
 
 function LoadingSpinnerWithOverlay() {
   return (
@@ -40,13 +46,14 @@ export function getEditLensConfiguration(
   visualizationMap?: VisualizationMap,
   datasourceMap?: DatasourceMap
 ) {
-  return (props: {
-    attributes: TypedLensByValueInput['attributes'];
-    dataView: DataView;
-    updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
-    setIsFlyoutVisible?: (flag: boolean) => void;
-    datasourceId: 'formBased' | 'textBased';
-  }) => {
+  return ({
+    attributes,
+    dataView,
+    updateAll,
+    setIsFlyoutVisible,
+    datasourceId,
+    adaptersTables,
+  }: EditLensConfigurationProps) => {
     const [lensServices, setLensServices] = useState<LensAppServices>();
     useEffect(() => {
       async function loadLensService() {
@@ -64,7 +71,7 @@ export function getEditLensConfiguration(
       loadLensService();
     }, []);
 
-    if (!lensServices || !datasourceMap || !visualizationMap || !props.dataView.id) {
+    if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
       return <LoadingSpinnerWithOverlay />;
     }
     const storeDeps = {
@@ -76,11 +83,16 @@ export function getEditLensConfiguration(
       lens: getPreloadedState(storeDeps) as LensAppState,
     } as unknown as PreloadedState<LensState>);
     const closeFlyout = () => {
-      props.setIsFlyoutVisible?.(false);
+      setIsFlyoutVisible?.(false);
     };
 
     const configPanelProps = {
-      ...props,
+      attributes,
+      dataView,
+      updateAll,
+      setIsFlyoutVisible,
+      datasourceId,
+      adaptersTables,
       coreStart,
       startDependencies,
       visualizationMap,

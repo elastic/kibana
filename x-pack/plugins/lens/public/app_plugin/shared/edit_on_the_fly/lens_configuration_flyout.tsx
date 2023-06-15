@@ -18,9 +18,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { LensPluginStartDependencies } from '../../../plugin';
 import { getResolvedDateRange } from '../../../utils';
+import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   DataViewsState,
   useLensDispatch,
@@ -32,7 +33,7 @@ import type { DatasourceMap, VisualizationMap, DatasourceLayers } from '../../..
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 
-interface EditConfigPanelProps {
+export interface EditConfigPanelProps {
   attributes: TypedLensByValueInput['attributes'];
   dataView: DataView;
   updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
@@ -42,6 +43,7 @@ interface EditConfigPanelProps {
   datasourceMap: DatasourceMap;
   setIsFlyoutVisible?: (flag: boolean) => void;
   datasourceId: 'formBased' | 'textBased';
+  adaptersTables?: Record<string, Datatable>;
 }
 
 export function LensEditCongifurationFlyout({
@@ -54,6 +56,7 @@ export function LensEditCongifurationFlyout({
   datasourceId,
   updateAll,
   setIsFlyoutVisible,
+  adaptersTables,
 }: EditConfigPanelProps) {
   const currentDataViewId = dataView.id ?? '';
   const datasourceState = attributes.state.datasourceStates[datasourceId];
@@ -61,14 +64,6 @@ export function LensEditCongifurationFlyout({
   const activeDatasource = datasourceMap[datasourceId];
   const dispatchLens = useLensDispatch();
   const { euiTheme } = useEuiTheme();
-  dispatchLens(
-    updateStateFromSuggestion({
-      newDatasourceId: datasourceId,
-      visualizationId: activeVisualization.id,
-      visualizationState: attributes.state.visualization,
-      datasourceState,
-    })
-  );
   const dataViews = useMemo(() => {
     return {
       indexPatterns: {
@@ -77,9 +72,20 @@ export function LensEditCongifurationFlyout({
       indexPatternRefs: [],
     } as unknown as DataViewsState;
   }, [currentDataViewId, dataView]);
+  dispatchLens(
+    updateStateFromSuggestion({
+      newDatasourceId: datasourceId,
+      visualizationId: activeVisualization.id,
+      visualizationState: attributes.state.visualization,
+      datasourceState,
+      dataViews,
+    })
+  );
 
-  const dateRange = getResolvedDateRange(startDependencies.data.query.timefilter.timefilter);
   const datasourceLayers: DatasourceLayers = useMemo(() => {
+    return {};
+  }, []);
+  const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
   }, []);
   const layers = activeDatasource.getLayers(datasourceState);
@@ -89,16 +95,20 @@ export function LensEditCongifurationFlyout({
       layerId: layer,
       indexPatterns: dataViews.indexPatterns,
     });
+    if (adaptersTables) {
+      activeData[layer] = Object.values(adaptersTables)[0];
+    }
   });
 
+  const dateRange = getResolvedDateRange(startDependencies.data.query.timefilter.timefilter);
   const framePublicAPI = useMemo(() => {
     return {
-      activeData: {},
+      activeData,
       dataViews,
       datasourceLayers,
       dateRange,
     };
-  }, [dataViews, dateRange, datasourceLayers]);
+  }, [activeData, dataViews, datasourceLayers, dateRange]);
 
   const closeFlyout = () => {
     setIsFlyoutVisible?.(false);
