@@ -24,56 +24,62 @@ const tableEntries = [
   {
     title: 'demo-stack-apache-01',
     cpuUsage: '1.2%',
-    diskLatency: '1.6 ms',
+    normalizedLoad: '0.5%',
+    memoryUsage: '18.4%',
+    memoryFree: '3.2 GB',
+    diskSpaceUsage: '17.6%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '18.4%',
   },
   {
     title: 'demo-stack-client-01',
     cpuUsage: '0.5%',
-    diskLatency: '8.7 ms',
+    normalizedLoad: '0.1%',
+    memoryUsage: '13.8%',
+    memoryFree: '3.3 GB',
+    diskSpaceUsage: '16.9%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '13.8%',
   },
   {
     title: 'demo-stack-haproxy-01',
     cpuUsage: '0.8%',
-    diskLatency: '7 ms',
+    normalizedLoad: '0%',
+    memoryUsage: '16.5%',
+    memoryFree: '3.2 GB',
+    diskSpaceUsage: '16.3%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '16.5%',
   },
   {
     title: 'demo-stack-mysql-01',
     cpuUsage: '0.9%',
-    diskLatency: '6.6 ms',
+    normalizedLoad: '0%',
+    memoryUsage: '18.2%',
+    memoryFree: '3.2 GB',
+    diskSpaceUsage: '17.8%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '18.2%',
   },
   {
     title: 'demo-stack-nginx-01',
     cpuUsage: '0.8%',
-    diskLatency: '5.7 ms',
+    normalizedLoad: '1.4%',
+    memoryUsage: '18%',
+    memoryFree: '3.2 GB',
+    diskSpaceUsage: '17.5%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '18%',
   },
   {
     title: 'demo-stack-redis-01',
     cpuUsage: '0.8%',
-    diskLatency: '6.3 ms',
+    normalizedLoad: '0%',
+    memoryUsage: '15.9%',
+    memoryFree: '3.3 GB',
+    diskSpaceUsage: '16.3%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '15.9%',
   },
 ];
 
@@ -388,10 +394,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         [
           { metric: 'hostsCount', value: '6' },
-          { metric: 'cpu', value: '1%' },
-          { metric: 'memory', value: '17%' },
-          { metric: 'tx', value: 'N/A' },
-          { metric: 'rx', value: 'N/A' },
+          { metric: 'cpuUsage', value: '0.8%' },
+          { metric: 'normalizedLoad1m', value: '0.3%' },
+          { metric: 'memoryUsage', value: '16.8%' },
+          { metric: 'diskSpaceUsage', value: '17.1%' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             await retry.try(async () => {
@@ -412,9 +418,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await browser.scrollTop();
         });
 
-        it('should load 8 lens metric charts', async () => {
+        it('should load 12 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
-          expect(metricCharts.length).to.equal(8);
+          expect(metricCharts.length).to.equal(12);
         });
 
         it('should have an option to open the chart in lens', async () => {
@@ -540,10 +546,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await Promise.all(
             [
               { metric: 'hostsCount', value: '3' },
-              { metric: 'cpu', value: '1%' },
-              { metric: 'memory', value: '16%' },
-              { metric: 'tx', value: 'N/A' },
-              { metric: 'rx', value: 'N/A' },
+              { metric: 'cpuUsage', value: '0.8%' },
+              { metric: 'normalizedLoad1m', value: '0.2%' },
+              { metric: 'memoryUsage', value: '16.3%' },
+              { metric: 'diskSpaceUsage', value: '16.9%' },
             ].map(async ({ metric, value }) => {
               await retry.try(async () => {
                 const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
@@ -624,20 +630,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
-        it('should sort by Disk Latency asc', async () => {
-          await pageObjects.infraHostsView.sortByDiskLatency();
-          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
-          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-          expect(hostDataFirtPage).to.eql(tableEntries[0]);
-
-          await pageObjects.infraHostsView.paginateTo(2);
-          hostRows = await pageObjects.infraHostsView.getHostsTableData();
-          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-          expect(hostDataLastPage).to.eql(tableEntries[1]);
-        });
-
-        it('should sort by Disk Latency desc', async () => {
-          await pageObjects.infraHostsView.sortByDiskLatency();
+        it('should sort by a numeric field asc', async () => {
+          await pageObjects.infraHostsView.sortByCpuUsage();
           let hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
           expect(hostDataFirtPage).to.eql(tableEntries[1]);
@@ -648,7 +642,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(hostDataLastPage).to.eql(tableEntries[0]);
         });
 
-        it('should sort by Title asc', async () => {
+        it('should sort by a numeric field desc', async () => {
+          await pageObjects.infraHostsView.sortByCpuUsage();
+          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataFirtPage).to.eql(tableEntries[0]);
+
+          await pageObjects.infraHostsView.paginateTo(2);
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataLastPage).to.eql(tableEntries[1]);
+        });
+
+        it('should sort by text field asc', async () => {
           await pageObjects.infraHostsView.sortByTitle();
           let hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
@@ -660,7 +666,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(hostDataLastPage).to.eql(tableEntries[5]);
         });
 
-        it('should sort by Title desc', async () => {
+        it('should sort by text field desc', async () => {
           await pageObjects.infraHostsView.sortByTitle();
           let hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
