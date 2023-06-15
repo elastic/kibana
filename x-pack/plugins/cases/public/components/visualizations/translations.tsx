@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADDED_VISUALIZATION = i18n.translate(
+  'xpack.cases.caseView.visualizations.addedVisualization',
+  {
+    defaultMessage: 'added visualization',
+  }
+);
+
 export const REMOVED_VISUALIZATION = i18n.translate(
   'xpack.cases.caseView.visualizations.removedVisualization',
   {

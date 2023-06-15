@@ -57,6 +57,3 @@ const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange }) =
 LensRendererComponent.displayName = 'LensRenderer';
 
 export const LensRenderer = React.memo(LensRendererComponent);
-
-// eslint-disable-next-line import/no-default-export
-export { LensRenderer as default };

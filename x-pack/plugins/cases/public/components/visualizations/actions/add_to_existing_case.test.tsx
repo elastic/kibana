@@ -175,18 +175,16 @@ describe('createAddToExistingCaseLensAction', () => {
         expect(mockOpenModal).toHaveBeenCalled();
 
         const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
-        expect(getAttachments()).toEqual(
-          expect.objectContaining([
-            {
-              persistableStateAttachmentState: {
-                attributes: mockAttributes,
-                timeRange: mockTimeRange,
-              },
-              persistableStateAttachmentTypeId: '.lens',
-              type: 'persistableState',
+        expect(getAttachments()).toEqual([
+          {
+            persistableStateAttachmentState: {
+              attributes: mockAttributes,
+              timeRange: mockTimeRange,
             },
-          ])
-        );
+            persistableStateAttachmentTypeId: '.lens',
+            type: 'persistableState',
+          },
+        ]);
       });
     });
 

@@ -18,6 +18,7 @@ import type {
 import { AttachmentActionType } from '../../client/attachment_framework/types';
 import type { LensProps } from './types';
 import { OpenLensButton } from './open_lens_button';
+import { LensRenderer } from './lens_renderer';
 
 function getOpenLensButton(attachmentId: string, props: LensProps) {
   return (
@@ -37,6 +38,24 @@ const getVisualizationAttachmentActions = (attachmentId: string, props: LensProp
   },
 ];
 
+const LensAttachment = React.memo(
+  (props: PersistableStateAttachmentViewProps) => {
+    const { attributes, timeRange } = props.persistableStateAttachmentState as unknown as LensProps;
+
+    return <LensRenderer attributes={attributes} timeRange={timeRange} />;
+  },
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.persistableStateAttachmentState, nextProps.persistableStateAttachmentState)
+);
+
+LensAttachment.displayName = 'LensAttachment';
+
+const LensAttachmentRendererLazyComponent = React.lazy(async () => {
+  return {
+    default: LensAttachment,
+  };
+});
+
 const getVisualizationAttachmentViewObject = ({
   attachmentId,
   persistableStateAttachmentState,
@@ -45,7 +64,7 @@ const getVisualizationAttachmentViewObject = ({
     persistableStateAttachmentState as unknown as LensProps;
 
   return {
-    event: 'added visualization',
+    event: i18n.ADDED_VISUALIZATION,
     timelineAvatar: 'lensApp',
     getActions: () =>
       getVisualizationAttachmentActions(attachmentId, {
@@ -53,26 +72,7 @@ const getVisualizationAttachmentViewObject = ({
         timeRange: lensTimeRange,
       }),
     hideDefaultActions: false,
-    children: React.lazy(async () => {
-      const { LensRenderer } = await import('./lens_renderer');
-
-      return {
-        // eslint-disable-next-line react/display-name
-        default: React.memo(
-          (props: PersistableStateAttachmentViewProps) => {
-            const { attributes, timeRange } =
-              props.persistableStateAttachmentState as unknown as LensProps;
-
-            return <LensRenderer attributes={attributes} timeRange={timeRange} />;
-          },
-          (prevProps, nextProps) =>
-            deepEqual(
-              prevProps.persistableStateAttachmentState,
-              nextProps.persistableStateAttachmentState
-            )
-        ),
-      };
-    }),
+    children: LensAttachmentRendererLazyComponent,
   };
 };
 

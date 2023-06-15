@@ -177,20 +177,18 @@ describe('createAddToNewCaseLensAction', () => {
 
     it('should open flyout', async () => {
       await waitFor(() => {
-        expect(mockOpenFlyout).toHaveBeenCalledWith(
-          expect.objectContaining({
-            attachments: [
-              {
-                persistableStateAttachmentState: {
-                  attributes: mockAttributes,
-                  timeRange: mockTimeRange,
-                },
-                persistableStateAttachmentTypeId: '.lens',
-                type: 'persistableState',
+        expect(mockOpenFlyout).toHaveBeenCalledWith({
+          attachments: [
+            {
+              persistableStateAttachmentState: {
+                attributes: mockAttributes,
+                timeRange: mockTimeRange,
               },
-            ],
-          })
-        );
+              persistableStateAttachmentTypeId: '.lens',
+              type: 'persistableState',
+            },
+          ],
+        });
       });
     });
 

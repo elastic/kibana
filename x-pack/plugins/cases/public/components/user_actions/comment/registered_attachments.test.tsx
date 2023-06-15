@@ -31,13 +31,13 @@ const getLazyComponent = () =>
     });
   });
 
-describe('createCommentUserActionBuilder', () => {
+describe('createRegisteredAttachmentUserActionBuilder', () => {
   let appMockRender: AppMockRenderer;
 
   const attachmentTypeId = 'test';
   const builderArgs = getMockBuilderArgs();
   const registry = new AttachmentTypeRegistry<AttachmentType<CommonAttachmentViewProps>>(
-    attachmentTypeId
+    'test-registry'
   );
 
   const viewProps = { foo: 'bar' };
@@ -58,10 +58,11 @@ describe('createCommentUserActionBuilder', () => {
     displayName: 'Test',
     getAttachmentViewObject,
     getAttachmentRemovalObject,
-    hideDefaultActions: false,
   };
 
   registry.register(item);
+
+  const comment = builderArgs.comments[0];
 
   const userActionBuilderArgs = {
     userAction: builderArgs.userAction,
@@ -71,7 +72,7 @@ describe('createCommentUserActionBuilder', () => {
     getId,
     getAttachmentViewProps,
     isLoading: false,
-    comment: builderArgs.comments[0],
+    comment,
     registry,
   };
 
@@ -101,12 +102,12 @@ describe('createCommentUserActionBuilder', () => {
     expect(getAttachmentViewProps).toHaveBeenCalled();
     expect(getAttachmentViewObject).toBeCalledWith({
       ...viewProps,
-      attachmentId: builderArgs.userAction.id,
+      attachmentId: comment.id,
       caseData: { id: builderArgs.caseData.id, title: builderArgs.caseData.title },
     });
   });
 
-  it('builds the action correctly', async () => {
+  it('builds the buttons correctly', async () => {
     const actions = [
       {
         type: AttachmentActionType.CUSTOM,
@@ -123,6 +124,33 @@ describe('createCommentUserActionBuilder', () => {
     ];
 
     getAttachmentViewObject.mockReturnValue({ ...viewObjectProps, getActions: () => actions });
+
+    expect(
+      createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build()
+    ).toMatchSnapshot();
+  });
+
+  it('builds the buttons correctly when hideDefaultActions=true', async () => {
+    const actions = [
+      {
+        type: AttachmentActionType.CUSTOM,
+        render: () => <>{'My button'}</>,
+        isPrimary: true,
+      },
+      {
+        type: AttachmentActionType.BUTTON,
+        onClick: () => {},
+        iconType: 'danger',
+        label: 'My button 2',
+        isPrimary: false,
+      },
+    ];
+
+    getAttachmentViewObject.mockReturnValue({
+      ...viewObjectProps,
+      getActions: () => actions,
+      hideDefaultActions: true,
+    });
 
     expect(
       createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build()

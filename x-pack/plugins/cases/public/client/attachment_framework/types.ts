@@ -68,7 +68,6 @@ export interface AttachmentType<Props> {
   displayName: string;
   getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
   getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
-  hideDefaultActions?: boolean;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;

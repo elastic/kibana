@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
+import React, { Suspense } from 'react';
+import { screen, waitFor } from '@testing-library/react';
 import { LENS_ATTACHMENT_TYPE } from '../../../common';
 import type { PersistableStateAttachmentViewProps } from '../../client/attachment_framework/types';
 import { AttachmentActionType } from '../../client/attachment_framework/types';
@@ -15,6 +16,10 @@ import { basicCase } from '../../containers/mock';
 import { getVisualizationAttachmentType } from './attachment';
 
 describe('getVisualizationAttachmentType', () => {
+  const mockEmbeddableComponent = jest
+    .fn()
+    .mockReturnValue(<div data-test-subj="embeddableComponent" />);
+
   let appMockRender: AppMockRenderer;
 
   const attachmentViewProps: PersistableStateAttachmentViewProps = {
@@ -27,6 +32,7 @@ describe('getVisualizationAttachmentType', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+    appMockRender.coreStart.lens.EmbeddableComponent = mockEmbeddableComponent;
   });
 
   it('create the attachment type correctly', () => {
@@ -93,6 +99,21 @@ describe('getVisualizationAttachmentType', () => {
       appMockRender.render(openLensButton.render());
 
       expect(screen.getByTestId('cases-open-in-visualization-btn')).toBeInTheDocument();
+    });
+
+    it('renders the children correctly', async () => {
+      const lensType = getVisualizationAttachmentType();
+      const Component = lensType.getAttachmentViewObject(attachmentViewProps).children!;
+
+      appMockRender.render(
+        <Suspense fallback={'Loading...'}>
+          <Component {...attachmentViewProps} />
+        </Suspense>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddableComponent'));
+      });
     });
   });
 

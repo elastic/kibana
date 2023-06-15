@@ -164,7 +164,7 @@ export const lensMigratorFactory = (
           context,
           error,
           docType: 'user action persistable lens attachment',
-          docKey: 'comment',
+          docKey: 'user-action',
         });
         return Object.assign(doc, { references: doc.references ?? [] });
       }
