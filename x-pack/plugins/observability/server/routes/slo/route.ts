@@ -57,7 +57,7 @@ const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerCont
 };
 
 const createSLORoute = createObservabilityServerRoute({
-  endpoint: 'POST /api/observability/slos 2023-05-22',
+  endpoint: 'POST /api/observability/slos 2023-10-31',
   options: {
     tags: ['access:slo_write'],
   },
@@ -84,7 +84,7 @@ const createSLORoute = createObservabilityServerRoute({
 });
 
 const updateSLORoute = createObservabilityServerRoute({
-  endpoint: 'PUT /api/observability/slos/{id} 2023-05-22',
+  endpoint: 'PUT /api/observability/slos/{id} 2023-10-31',
   options: {
     tags: ['access:slo_write'],
   },
@@ -110,7 +110,7 @@ const updateSLORoute = createObservabilityServerRoute({
 });
 
 const deleteSLORoute = createObservabilityServerRoute({
-  endpoint: 'DELETE /api/observability/slos/{id} 2023-05-22',
+  endpoint: 'DELETE /api/observability/slos/{id} 2023-10-31',
   options: {
     tags: ['access:slo_write'],
   },
@@ -142,7 +142,7 @@ const deleteSLORoute = createObservabilityServerRoute({
 });
 
 const getSLORoute = createObservabilityServerRoute({
-  endpoint: 'GET /api/observability/slos/{id} 2023-05-22',
+  endpoint: 'GET /api/observability/slos/{id} 2023-10-31',
   options: {
     tags: ['access:slo_read'],
   },
@@ -167,7 +167,7 @@ const getSLORoute = createObservabilityServerRoute({
 });
 
 const enableSLORoute = createObservabilityServerRoute({
-  endpoint: 'POST /api/observability/slos/{id}/enable 2023-05-22',
+  endpoint: 'POST /api/observability/slos/{id}/enable 2023-10-31',
   options: {
     tags: ['access:slo_write'],
   },
@@ -193,7 +193,7 @@ const enableSLORoute = createObservabilityServerRoute({
 });
 
 const disableSLORoute = createObservabilityServerRoute({
-  endpoint: 'POST /api/observability/slos/{id}/disable 2023-05-22',
+  endpoint: 'POST /api/observability/slos/{id}/disable 2023-10-31',
   options: {
     tags: ['access:slo_write'],
   },
@@ -219,7 +219,7 @@ const disableSLORoute = createObservabilityServerRoute({
 });
 
 const findSLORoute = createObservabilityServerRoute({
-  endpoint: 'GET /api/observability/slos 2023-05-22',
+  endpoint: 'GET /api/observability/slos 2023-10-31',
   options: {
     tags: ['access:slo_read'],
   },
