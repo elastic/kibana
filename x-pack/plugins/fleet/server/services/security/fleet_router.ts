@@ -17,13 +17,14 @@ import type {
 
 import type { FleetRequestHandlerContext } from '../..';
 
+import { getRequestStore } from '../request_store';
+
 import type { FleetAuthzRouteConfig, FleetAuthzRouter } from './types';
 import {
   checkSecurityEnabled,
   getAuthzFromRequest,
   doesNotHaveRequiredFleetAuthz,
 } from './security';
-import { getRequestStore } from '../request_store';
 
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>,
