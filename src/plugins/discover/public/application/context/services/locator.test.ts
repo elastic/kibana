@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { addProfile } from '../../../../common/customizations';
 import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverContextAppLocatorDefinition } from './locator';
 
@@ -49,8 +50,8 @@ describe('Discover context url generator', () => {
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(app).toBe('discover');
-    expect(_a).toEqual({});
-    expect(_g).toEqual({});
+    expect(_a).toEqual(undefined);
+    expect(_g).toEqual(undefined);
   });
 
   test('should fill history state for context view', async () => {
@@ -70,6 +71,18 @@ describe('Discover context url generator', () => {
     expect(state).toEqual({ referrer: 'mock-referrer' });
     expect(_a).toEqual(appStateParams);
     expect(_g).toEqual({ filters: [] });
+  });
+
+  test('can specify profile', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      profile: 'test',
+      index: dataViewId,
+      rowId: 'mock-row-id',
+      referrer: 'mock-referrer',
+    });
+
+    expect(path).toBe(`${addProfile('#/', 'test')}context/${dataViewId}/mock-row-id`);
   });
 
   test('when useHash set to false, sets data view ID in the generated URL', async () => {
