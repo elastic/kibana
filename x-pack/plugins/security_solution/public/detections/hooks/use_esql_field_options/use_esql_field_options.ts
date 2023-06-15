@@ -26,7 +26,7 @@ export const useEsqlFieldOptions: UseEsqlFieldOptions = (query) => {
 
   const { expressions } = kibana.services;
 
-  const queryToPerform = `${queryDebounced} | limit 2`;
+  const queryToPerform = `${queryDebounced} | limit 0`;
 
   const { data, isLoading } = useQuery<Datatable | undefined>(
     [`${queryDebounced?.trim()}`],

@@ -492,6 +492,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   //     : false;
 
   const { getEsqlFields } = useEsqlQuery();
+  const esqlValidationDataProvider = useCallback(
+    () => Promise.resolve({ getEsqlFields }),
+    [getEsqlFields]
+  );
 
   const EsqlDurationOptions = useCallback(
     ({ esqlSuppressionDurationValue, esqlSuppressionDurationUnit, esqlSuppressionMode }) => (
@@ -687,33 +691,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const queryBarProps = useMemo(
     () =>
       ({
-        browserFields,
         idAria: 'detectionEngineStepDefineRuleQueryBar',
+        // for ESQL rule index pattern property does not exist
         indexPattern,
-        isDisabled: isLoading || formShouldLoadQueryDynamically || timelineQueryLoading,
-        resetToSavedQuery: formShouldLoadQueryDynamically,
-        isLoading: isIndexPatternLoading || timelineQueryLoading,
+        isDisabled: isLoading,
+        isLoading,
         dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-        openTimelineSearch,
         onValidityChange: setIsQueryBarValid,
-        onCloseTimelineSearch: handleCloseTimelineSearch,
-        onSavedQueryError: handleSavedQueryError,
-        defaultSavedQuery,
-        onOpenTimeline,
       } as QueryBarDefineRuleProps),
-    [
-      formShouldLoadQueryDynamically,
-      browserFields,
-      indexPattern,
-      isLoading,
-      timelineQueryLoading,
-      isIndexPatternLoading,
-      openTimelineSearch,
-      handleCloseTimelineSearch,
-      handleSavedQueryError,
-      defaultSavedQuery,
-      onOpenTimeline,
-    ]
+    [indexPattern, isLoading]
   );
 
   const EsqlQueryBarMemo = useMemo(
@@ -721,8 +707,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <UseField
         key="QueryBarDefineRule"
         path="queryBar"
-        validationDataProvider={() => Promise.resolve({ getEsqlFields })}
+        validationDataProvider={esqlValidationDataProvider}
         config={{
+          // TODO: use memo
           ...schema.queryBar,
           label: 'ESQL query',
         }}
@@ -730,7 +717,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         componentProps={queryBarProps}
       />
     ),
-    [queryBarProps, getEsqlFields]
+    [queryBarProps, esqlValidationDataProvider]
   );
 
   const QueryBarMemo = useMemo(
@@ -918,7 +905,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 options: esqlFieldOptions,
                 isLoading: isEsqlFieldOptionsLoading,
               }}
-              validationData={{ options: esqlFieldOptions }}
+              validationDataProvider={esqlValidationDataProvider}
             />
           </RuleTypeEuiFormRow>
 

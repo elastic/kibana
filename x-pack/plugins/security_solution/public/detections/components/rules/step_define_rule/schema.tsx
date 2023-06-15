@@ -32,7 +32,7 @@ import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
-import { esqlValidator } from '../esql_fields_select/validators';
+import { esqlValidator, esqlGroupingFieldsValidator } from '../esql_fields_select/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
   EQL_QUERY_REQUIRED,
@@ -662,34 +662,7 @@ export const schema: FormSchema<DefineStepRule> = {
       ),
       validations: [
         {
-          validator: (
-            ...args: Parameters<ValidationFunc>
-          ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-            const [{ formData, value, path, customData }] = args;
-            if (!isEsqlRule(formData.ruleType)) {
-              return;
-            }
-
-            const validationData = customData.value as { options: Array<{ label: string }> };
-
-            const optionsSet = new Set(validationData?.options?.map((option) => option.label));
-
-            const errorFields: string[] = [];
-
-            (value as string[])?.forEach((field) => {
-              if (!optionsSet.has(field)) {
-                errorFields.push(field);
-              }
-            });
-
-            if (errorFields.length) {
-              return {
-                code: 'ERR_FIELD_FORMAT',
-                path,
-                message: `Fields are not available in ESQL response: ${errorFields.join(', ')}`,
-              };
-            }
-          },
+          validator: debounceAsync(esqlGroupingFieldsValidator, 300),
         },
       ],
     },

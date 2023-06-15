@@ -24,7 +24,7 @@ export default function listActionTypesTests({ getService }: FtrProviderContext)
             .auth(user.username, user.password);
 
           function createActionTypeMatcher(id: string, name: string) {
-            return (actionType: { id: string; name: string }) => {
+          return (actionType: { id: string; name: string }) => {
               return actionType.id === id && actionType.name === name;
             };
           }

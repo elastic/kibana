@@ -52,50 +52,74 @@ export const wrapGroupedEsqlAlerts = ({
   };
   // TODO latest fields
 }): Array<WrappedFieldsLatest<any>> => {
-  return results.values.slice(0, completeRule.ruleParams.maxSignals).map((row, i) => {
-    const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
-    const id = objectHash([
-      ruleRunId,
-      completeRule.ruleParams.query,
-      `${spaceId}:${completeRule.alertId}`,
-      //  i,
-      suppressionFields.length ? pickCells(results.columns, row, suppressionFields) : i,
-    ]);
-    console.log('>>>> pickCells', pickCells(results.columns, row, suppressionFields));
-    const instanceId = objectHash([
-      completeRule.ruleParams.query,
-      `${spaceId}:${completeRule.alertId}`,
-      suppressionFields.length ? pickCells(results.columns, row, suppressionFields) : ruleRunId,
-      // row.slice(1),
-      //   pickCells(results.columns, row, ['destination.domain']).join(),
-    ]);
+  const duplicatesMap = new Map<string, number>();
+  const wrapped = results.values
+    .slice(0, completeRule.ruleParams.maxSignals)
+    .reduce<Array<WrappedFieldsLatest<any>>>((acc, row, i) => {
+      const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
+      const id = objectHash([
+        ruleRunId,
+        completeRule.ruleParams.query,
+        `${spaceId}:${completeRule.alertId}`,
+        //  i,
+        suppressionFields.length ? pickCells(results.columns, row, suppressionFields) : i,
+      ]);
 
-    const document = rowToDocument(results.columns, row);
+      if (duplicatesMap.has(id)) {
+        duplicatesMap.set(id, (duplicatesMap.get(id) ?? 0) + 1);
+        return acc;
+      } else {
+        duplicatesMap.set(id, 0);
+      }
 
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
-      spaceId,
-      completeRule,
-      { _source: document },
-      mergeStrategy,
-      [],
-      true,
-      buildReasonMessageForNewTermsAlert,
-      [],
-      alertTimestampOverride,
-      ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
+      //   duplicatesMap.set(id, 0);
 
-    return {
-      _id: id,
-      _index: '',
-      _source: {
-        ...baseAlert,
-        //    [ALERT_SUPPRESSION_TERMS]: suppressionFields ?? [],
-        [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
-        [ALERT_INSTANCE_ID]: instanceId,
-      },
-    };
+      console.log('>>>> pickCells', pickCells(results.columns, row, suppressionFields));
+      const instanceId = objectHash([
+        completeRule.ruleParams.query,
+        `${spaceId}:${completeRule.alertId}`,
+        suppressionFields.length ? pickCells(results.columns, row, suppressionFields) : ruleRunId,
+        // row.slice(1),
+        //   pickCells(results.columns, row, ['destination.domain']).join(),
+      ]);
+
+      const document = rowToDocument(results.columns, row);
+
+      const baseAlert: BaseFieldsLatest = buildBulkBody(
+        spaceId,
+        completeRule,
+        { _source: document },
+        mergeStrategy,
+        [],
+        true,
+        buildReasonMessageForNewTermsAlert,
+        [],
+        alertTimestampOverride,
+        ruleExecutionLogger,
+        id,
+        publicBaseUrl
+      );
+
+      acc.push({
+        _id: id,
+        _index: '',
+        _source: {
+          ...baseAlert,
+          //    [ALERT_SUPPRESSION_TERMS]: suppressionFields ?? [],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: duplicatesMap.get(id) ?? 0,
+          [ALERT_INSTANCE_ID]: instanceId,
+        },
+      });
+
+      return acc;
+    }, []);
+
+  return wrapped.map((x) => {
+    if (duplicatesMap.has(x._id)) {
+      //  delete x._source[ALERT_SUPPRESSION_DOCS_COUNT];
+
+      x._source[ALERT_SUPPRESSION_DOCS_COUNT] = duplicatesMap.get(x._id);
+    }
+    return x;
   });
 };
