@@ -10,7 +10,6 @@ import { ReactNode } from 'react';
 
 import { Filter } from '@kbn/es-query';
 import {
-  Embeddable,
   EmbeddableFactory,
   EmbeddableOutput,
   EmbeddableSetup,
