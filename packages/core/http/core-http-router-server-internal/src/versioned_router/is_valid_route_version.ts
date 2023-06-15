@@ -19,7 +19,7 @@ const ALLOWED_PUBLIC_VERSION = '2023-10-31';
 
 export function isAllowedPublicVersion(version: string): undefined | string {
   if (ALLOWED_PUBLIC_VERSION !== version) {
-    return `Invalid public version, for now please use "2023-10-31" as the version for all public routes. Received "${version}".}"`;
+    return `Invalid public version, for now please use "${ALLOWED_PUBLIC_VERSION}" as the version for all public routes. Received "${version}".}"`;
   }
 }
 
