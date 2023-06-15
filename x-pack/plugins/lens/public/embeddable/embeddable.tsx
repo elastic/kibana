@@ -710,11 +710,6 @@ export class Embeddable
     return this.lensInspector.adapters;
   }
 
-  private fullAttributes: LensSavedObjectAttributes | undefined;
-  public getFullAttributes() {
-    return this.fullAttributes;
-  }
-
   async initializeSavedVis(input: LensEmbeddableInput) {
     const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
       .unwrapAttributes(input)
@@ -727,8 +722,6 @@ export class Embeddable
     }
 
     const { metaInfo, attributes } = unwrapResult;
-
-    this.fullAttributes = attributes;
 
     this.savedVis = {
       ...attributes,
