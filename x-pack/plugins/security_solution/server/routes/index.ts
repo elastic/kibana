@@ -135,7 +135,7 @@ export const initRoutes = (
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
   setSignalsStatusRoute(router, logger, security, telemetrySender);
-  setAlertTagsRoute(router, logger, security);
+  setAlertTagsRoute(router);
   querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);

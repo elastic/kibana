@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { Logger } from '@kbn/core/server';
 import { uniq } from 'lodash/fp';
 import type { SetAlertTagsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema';
 import { setAlertTagsSchema } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema';
@@ -16,15 +15,10 @@ import {
   DETECTION_ENGINE_ALERT_TAGS_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import type { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { validateAlertTagsArrays } from './helpers';
 
-export const setAlertTagsRoute = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  security: SetupPlugins['security']
-) => {
+export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
     {
       path: DETECTION_ENGINE_ALERT_TAGS_URL,

@@ -143,6 +143,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
         onChange={handleTagsOnChange}
         emptyMessage={i18n.ALERT_TAGS_MENU_EMPTY}
         noMatchesMessage={i18n.ALERT_TAGS_MENU_SEARCH_NO_TAGS_FOUND}
+        data-test-subj="alert-tags-selectable-menu"
       >
         {(list, search) => (
           <div>
@@ -151,7 +152,12 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
           </div>
         )}
       </EuiSelectable>
-      <EuiButton fullWidth size="s" onClick={onTagsUpdate}>
+      <EuiButton
+        data-test-subj="alert-tags-update-button"
+        fullWidth
+        size="s"
+        onClick={onTagsUpdate}
+      >
         {i18n.ALERT_TAGS_UPDATE_BUTTON_MESSAGE}
       </EuiButton>
     </>

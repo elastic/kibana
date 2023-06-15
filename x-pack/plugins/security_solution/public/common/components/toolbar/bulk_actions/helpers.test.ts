@@ -29,4 +29,72 @@ describe('createInitialTagsState', () => {
       ]
     `);
   });
+
+  it('should return the correctly sorted and merged state if tags from a singular alert are provided', () => {
+    const mockAlertTags = ['test 1'];
+    const initialState = createInitialTagsState([mockAlertTags], defaultTags);
+    expect(initialState).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "checked": "on",
+          "label": "test 1",
+        },
+        Object {
+          "checked": undefined,
+          "label": "test 2",
+        },
+        Object {
+          "checked": undefined,
+          "label": "test 3",
+        },
+      ]
+    `);
+  });
+
+  it('should return the correctly sorted and merged state if tags from multiple alerts', () => {
+    const mockAlertTags1 = ['test 1'];
+    const mockAlertTags2 = ['test 1', 'test 2'];
+    const initialState = createInitialTagsState([mockAlertTags1, mockAlertTags2], defaultTags);
+    expect(initialState).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "checked": "on",
+          "label": "test 1",
+        },
+        Object {
+          "checked": "mixed",
+          "label": "test 2",
+        },
+        Object {
+          "checked": undefined,
+          "label": "test 3",
+        },
+      ]
+    `);
+  });
+
+  it('should return the correctly sorted and merged state if a tag not in the default tag options is provided', () => {
+    const mockAlertTags = ['test 1', 'test 4'];
+    const initialState = createInitialTagsState([mockAlertTags], defaultTags);
+    expect(initialState).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "checked": "on",
+          "label": "test 1",
+        },
+        Object {
+          "checked": "on",
+          "label": "test 4",
+        },
+        Object {
+          "checked": undefined,
+          "label": "test 2",
+        },
+        Object {
+          "checked": undefined,
+          "label": "test 3",
+        },
+      ]
+    `);
+  });
 });

@@ -12,7 +12,7 @@ import { intersection, union } from 'lodash';
 const checkedSortCallback = (a: EuiSelectableOption, b: EuiSelectableOption) => {
   if (a.checked) {
     if (b.checked) {
-      return a.checked < b.checked ? 1 : -1;
+      return a.checked <= b.checked ? 1 : -1;
     }
     return -1;
   }
