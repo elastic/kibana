@@ -11,8 +11,9 @@ import {
   RULES_CREATE_PATH,
   EXCEPTIONS_PATH,
   RULES_LANDING_PATH,
+  RULES_ADD_PATH,
 } from '../../common/constants';
-import { CREATE_NEW_RULE, EXCEPTIONS, RULES, SIEM_RULES } from '../app/translations';
+import { ADD_RULES, CREATE_NEW_RULE, EXCEPTIONS, RULES, SIEM_RULES } from '../app/translations';
 import { SecurityPageName } from '../app/types';
 import { benchmarksLinks } from '../cloud_security_posture/links';
 import type { LinkItem } from '../common/links';
@@ -40,6 +41,13 @@ export const links: LinkItem = {
         }),
       ],
       links: [
+        {
+          id: SecurityPageName.rulesAdd,
+          title: ADD_RULES,
+          path: RULES_ADD_PATH,
+          skipUrlState: true,
+          hideTimeline: true,
+        },
         {
           id: SecurityPageName.rulesCreate,
           title: CREATE_NEW_RULE,

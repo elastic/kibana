@@ -23,6 +23,7 @@ import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
+import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
 
@@ -43,8 +44,13 @@ const RulesSubRoutes = [
     exact: true,
   },
   {
-    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring})`,
+    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
     main: RulesPage,
+    exact: true,
+  },
+  {
+    path: '/rules/add_rules',
+    main: AddRulesPage,
     exact: true,
   },
 ];
@@ -100,7 +106,6 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: RULES_LANDING_PATH,
     component: RulesLandingPage,
-    exact: true,
   },
   {
     path: RULES_PATH,
