@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core-http-server';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { Logger } from '@kbn/core/server';
 import { CreateJobFn, RunTaskFn } from '../../types';
 
 export { decryptJobHeaders } from './decrypt_job_headers';
@@ -39,4 +41,5 @@ export interface ExportType<
 
   createJob: CreateJobFn<JobParamsType>;
   runTask: RunTaskFn<TaskPayloadType>;
+  getSpaceId: (req: KibanaRequest, logger: Logger) => string | undefined;
 }

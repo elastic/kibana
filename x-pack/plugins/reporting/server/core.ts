@@ -8,31 +8,23 @@
 import type {
   CoreSetup,
   DocLinksServiceSetup,
-  FakeRawRequest,
-  Headers,
   IBasePath,
   IClusterClient,
   KibanaRequest,
   Logger,
   PackageInfo,
   PluginInitializerContext,
-  SavedObjectsClientContract,
   SavedObjectsServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import {
-  PdfScreenshotResult,
-  PngScreenshotResult,
-  ScreenshotOptions,
-  ScreenshottingStart,
-} from '@kbn/screenshotting-plugin/server';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
@@ -42,16 +34,15 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, first, map, switchMap, take } from 'rxjs/operators';
+import { filter, first, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
 import { PdfExportType } from './export_types/printable_pdf_v2';
 import { checkLicense, ExportTypesRegistry, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
+import type { ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -344,16 +335,16 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
-  private async getSavedObjectsClient(request: KibanaRequest) {
-    const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
-  }
+  // private async getSavedObjectsClient(request: KibanaRequest) {
+  //   const { savedObjects } = await this.getPluginStartDeps();
+  //   return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
+  // }
 
-  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-    const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
-    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
-    return scopedUiSettingsService;
-  }
+  // public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+  //   const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
+  //   const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
+  //   return scopedUiSettingsService;
+  // }
 
   public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
@@ -369,37 +360,37 @@ export class ReportingCore {
     }
   }
 
-  public getFakeRequest(
-    headers: Headers,
-    spaceId: string | undefined,
-    logger = this.logger
-  ): KibanaRequest {
-    const rawRequest: FakeRawRequest = {
-      headers,
-      path: '/',
-    };
-    const fakeRequest = CoreKibanaRequest.from(rawRequest);
+  // public getFakeRequest(
+  //   headers: Headers,
+  //   spaceId: string | undefined,
+  //   logger = this.logger
+  // ): KibanaRequest {
+  //   const rawRequest: FakeRawRequest = {
+  //     headers,
+  //     path: '/',
+  //   };
+  //   const fakeRequest = CoreKibanaRequest.from(rawRequest);
 
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
+  //   const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+  //   if (spacesService) {
+  //     if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+  //       logger.info(`Generating request for space: ${spaceId}`);
+  //       this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
+  //     }
+  //   }
 
-    return fakeRequest;
-  }
+  //   return fakeRequest;
+  // }
 
-  public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
-    // const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    // const spaceId = this.getSpaceId(request, logger);
-    // if (spacesService && spaceId) {
-    //   logger.info(`Creating UI Settings Client for space: ${spaceId}`);
-    // }
-    const savedObjectsClient = await this.getSavedObjectsClient(request);
-    return await this.getUiSettingsServiceFactory(savedObjectsClient);
-  }
+  // public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
+  // const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+  // const spaceId = this.getSpaceId(request, logger);
+  // if (spacesService && spaceId) {
+  //   logger.info(`Creating UI Settings Client for space: ${spaceId}`);
+  // }
+  //   const savedObjectsClient = await this.getSavedObjectsClient(request);
+  //   return await this.getUiSettingsServiceFactory(savedObjectsClient);
+  // }
 
   public async getDataViewsService(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
@@ -421,24 +412,24 @@ export class ReportingCore {
     return startDeps.esClient;
   }
 
-  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
-  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
-  public getScreenshots(
-    options: PngScreenshotOptions | PdfScreenshotOptions
-  ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
-    return Rx.defer(() => this.getPluginStartDeps()).pipe(
-      switchMap(({ screenshotting }) => {
-        return screenshotting.getScreenshots({
-          ...options,
-          urls: options.urls.map((url) =>
-            typeof url === 'string'
-              ? url
-              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-          ),
-        } as ScreenshotOptions);
-      })
-    );
-  }
+  // public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
+  // public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
+  // public getScreenshots(
+  //   options: PngScreenshotOptions | PdfScreenshotOptions
+  // ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
+  //   return Rx.defer(() => this.getPluginStartDeps()).pipe(
+  //     switchMap(({ screenshotting }) => {
+  //       return screenshotting.getScreenshots({
+  //         ...options,
+  //         urls: options.urls.map((url) =>
+  //           typeof url === 'string'
+  //             ? url
+  //             : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+  //         ),
+  //       } as ScreenshotOptions);
+  //     })
+  //   );
+  // }
 
   public trackReport(reportId: string) {
     this.executing.add(reportId);

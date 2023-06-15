@@ -254,15 +254,9 @@ export class ExecuteReportTask implements ReportingTask {
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
-      Rx.from(
-        exportType.runTask(
-          task.id,
-          task.payload,
-          cancellationToken,
-          stream,
-          this.reporting.getUiSettingsClient
-        )
-      ).pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
+      Rx.from(exportType.runTask(task.id, task.payload, cancellationToken, stream)).pipe(
+        timeout(queueTimeout)
+      ) // throw an error if a value is not emitted before timeout
     );
   }
 

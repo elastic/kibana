@@ -107,6 +107,20 @@ export class PdfExportType
     console.log('startDeps', Object.keys(startDeps));
   }
 
+  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
+    const spacesService = this.setupDeps.spaces?.spacesService;
+    if (spacesService) {
+      const spaceId = spacesService?.getSpaceId(request);
+
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Request uses Space ID: ${spaceId}`);
+        return spaceId;
+      } else {
+        logger.debug(`Request uses default Space`);
+      }
+    }
+  }
+
   private async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = this.startDeps;
 
@@ -119,13 +133,11 @@ export class PdfExportType
     return scopedUiSettingsService;
   }
 
-  public async getUiSettingsClient(
-    request: KibanaRequest,
-    spaceId: string | undefined,
-    logger = this.logger
-  ) {
-    // const spacesService = this.setupDeps.spaces?.spacesService;
-    if (spaceId) {
+  public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
+    const spacesService = this.setupDeps.spaces?.spacesService;
+    const spaceId = this.getSpaceId(request, logger);
+
+    if (spacesService !== undefined) {
       logger.info(`Creating UI Settings Client for space: ${spaceId}`);
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
@@ -205,8 +217,7 @@ export class PdfExportType
     jobId: string,
     payload: TaskPayloadPDFV2,
     cancellationToken: CancellationToken,
-    stream: Writable,
-    getUiSettingsClient: Function
+    stream: Writable
   ) {
     const jobLogger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
@@ -218,7 +229,7 @@ export class PdfExportType
       mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
       mergeMap(async (headers) => {
         const fakeRequest = await this.getFakeRequest(headers, payload.spaceId, jobLogger);
-        const uiSettingsClient = await getUiSettingsClient(fakeRequest, jobLogger);
+        const uiSettingsClient = await this.getUiSettingsClient(fakeRequest, jobLogger);
         return getCustomLogo(uiSettingsClient, headers);
       }),
       mergeMap(({ logo, headers }) => {
