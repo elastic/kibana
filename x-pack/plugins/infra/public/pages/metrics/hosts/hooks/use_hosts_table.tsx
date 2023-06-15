@@ -6,11 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
 import { isEqual } from 'lodash';
-import { CriteriaWithPagination } from '@elastic/eui';
 import { isNumber } from 'lodash/fp';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
@@ -24,6 +23,8 @@ import { useHostFlyoutUrlState } from './use_host_flyout_url_state';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { ColumnHeader } from '../components/column_header';
+import { TOOLTIP } from '../translations';
 
 /**
  * Columns and items types
@@ -257,7 +258,13 @@ export const useHostsTable = () => {
         ),
       },
       {
-        name: averageCpuUsageLabel,
+        name: (
+          <ColumnHeader
+            text={averageCpuUsageLabel}
+            toolTip={TOOLTIP.cpuUsage}
+            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+          />
+        ),
         field: 'cpu',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-cpuUsage',
@@ -265,7 +272,13 @@ export const useHostsTable = () => {
         align: 'right',
       },
       {
-        name: diskLatencyLabel,
+        name: (
+          <ColumnHeader
+            text={diskLatencyLabel}
+            toolTip={TOOLTIP.diskLatency}
+            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+          />
+        ),
         field: 'diskLatency',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-diskLatency',
@@ -273,7 +286,13 @@ export const useHostsTable = () => {
         align: 'right',
       },
       {
-        name: averageRXLabel,
+        name: (
+          <ColumnHeader
+            text={averageRXLabel}
+            toolTip={TOOLTIP.rx}
+            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+          />
+        ),
         field: 'rx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
@@ -281,7 +300,13 @@ export const useHostsTable = () => {
         align: 'right',
       },
       {
-        name: averageTXLabel,
+        name: (
+          <ColumnHeader
+            text={averageTXLabel}
+            toolTip={TOOLTIP.tx}
+            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+          />
+        ),
         field: 'tx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',
@@ -289,7 +314,13 @@ export const useHostsTable = () => {
         align: 'right',
       },
       {
-        name: averageTotalMemoryLabel,
+        name: (
+          <ColumnHeader
+            text={averageTotalMemoryLabel}
+            toolTip={TOOLTIP.memoryTotal}
+            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+          />
+        ),
         field: 'memoryTotal',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memoryTotal',
@@ -297,7 +328,13 @@ export const useHostsTable = () => {
         align: 'right',
       },
       {
-        name: averageMemoryUsageLabel,
+        name: (
+          <ColumnHeader
+            text={averageMemoryUsageLabel}
+            toolTip={TOOLTIP.memoryUsage}
+            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+          />
+        ),
         field: 'memory',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memory',

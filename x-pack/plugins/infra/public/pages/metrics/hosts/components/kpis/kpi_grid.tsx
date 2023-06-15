@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { KPIChartProps, Tile } from './tile';
 import { HostCountProvider } from '../../hooks/use_host_count';
 import { HostsTile } from './hosts_tile';
+import { TOOLTIP } from '../../translations';
 
 const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
   {
@@ -20,10 +21,7 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpu.title', {
       defaultMessage: 'CPU usage',
     }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpu.tooltip', {
-      defaultMessage:
-        'Average of percentage of CPU time spent in states other than Idle and IOWait, normalized by the number of CPU cores. Includes both time spent on user space and kernel space. 100% means all CPUs of the host are busy.',
-    }),
+    toolTip: TOOLTIP.cpuUsage,
   },
   {
     type: 'memory',
@@ -32,10 +30,7 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memory.title', {
       defaultMessage: 'Memory usage',
     }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memory.tooltip', {
-      defaultMessage:
-        "Average of percentage of main memory usage excluding page cache. This includes resident memory for all processes plus memory used by the kernel structures and code apart the page cache. A high level indicates a situation of memory saturation for a host. 100% means the main memory is entirely filled with memory that can't be reclaimed, except by swapping out.",
-    }),
+    toolTip: TOOLTIP.memoryUsage,
   },
   {
     type: 'rx',
@@ -44,10 +39,7 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.rx.title', {
       defaultMessage: 'Network inbound (RX)',
     }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.rx.tooltip', {
-      defaultMessage:
-        'Number of bytes which have been received per second on the public interfaces of the hosts.',
-    }),
+    toolTip: TOOLTIP.rx,
   },
   {
     type: 'tx',
@@ -56,10 +48,7 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.title', {
       defaultMessage: 'Network outbound (TX)',
     }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.tx.tooltip', {
-      defaultMessage:
-        'Number of bytes which have been received per second on the public interfaces of the hosts.',
-    }),
+    toolTip: TOOLTIP.tx,
   },
 ];
 
