@@ -22,12 +22,17 @@ const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   symbolizer: schema.maybe(packageInputSchema),
   collector: schema.maybe(packageInputSchema),
-  elasticsearch: schema.maybe(
-    schema.object({
-      hosts: schema.string(),
-      username: schema.string(),
-      password: schema.string(),
-    })
+  elasticsearch: schema.conditional(
+    schema.contextRef('dist'),
+    schema.literal(true),
+    schema.never(),
+    schema.maybe(
+      schema.object({
+        hosts: schema.string(),
+        username: schema.string(),
+        password: schema.string(),
+      })
+    )
   ),
 });
 
