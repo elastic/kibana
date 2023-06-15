@@ -67,7 +67,7 @@ import { AlertsHistogramPanel } from '../../../../detections/components/alerts_k
 import { useUserData } from '../../../../detections/components/user_info';
 import { StepDefineRuleReadOnly } from '../../../../detections/components/rules/step_define_rule';
 import { StepScheduleRuleReadOnly } from '../../../../detections/components/rules/step_schedule_rule';
-import { StepActionsRule } from '../../../../detections/components/rules/step_rule_actions/step_actions';
+import { StepRuleActionsReadOnly } from '../../../../detections/components/rules/step_rule_actions';
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
@@ -799,11 +799,15 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         )}
                       </StepPanel>
                     </EuiFlexItem>
-                    {ruleActionsData != null && (
-                      <StepActionsRule
-                        isRuleLoading={isLoading}
-                        ruleActionsData={ruleActionsData}
-                      />
+                    {ruleActionsData != null && ruleActionsData.actions.length > 0 && (
+                      <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
+                        <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
+                          <StepRuleActionsReadOnly
+                            addPadding={false}
+                            defaultValues={ruleActionsData}
+                          />
+                        </StepPanel>
+                      </EuiFlexItem>
                     )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
