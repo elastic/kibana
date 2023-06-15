@@ -280,7 +280,7 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * The category of the case.
      */
-    category: rt.string,
+    category: rt.union([rt.array(rt.string), rt.string]),
   })
 );
 
@@ -383,9 +383,20 @@ export const AllTagsFindRequestRt = rt.exact(
   })
 );
 
+export const AllCategoriesFindRequestRt = rt.exact(
+  rt.partial({
+    /**
+     * The owner of the cases to retrieve the categories from. If no owner is provided the categories
+     * from all cases that the user has access to will be returned.
+     */
+    owner: rt.union([rt.array(rt.string), rt.string]),
+  })
+);
+
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
 export const GetTagsResponseRt = rt.array(rt.string);
+export const GetCategoriesResponseRt = rt.array(rt.string);
 export const GetReportersResponseRt = rt.array(UserRt);
 
 export const CasesBulkGetRequestRt = rt.strict({
@@ -421,6 +432,7 @@ export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt
 export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasicRt>;
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
+export type AllCategoriesFindRequest = rt.TypeOf<typeof AllCategoriesFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
 
 export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
