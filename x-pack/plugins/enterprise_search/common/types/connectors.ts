@@ -46,6 +46,7 @@ export interface ConnectorConfigProperties {
   label: string;
   options: SelectOption[];
   order?: number | null;
+  placeholder?: string;
   required: boolean;
   sensitive: boolean;
   tooltip: string;
