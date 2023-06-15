@@ -25,7 +25,7 @@ const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
 export const ingestPipelineTabOnClick = async (
   services: Partial<CoreStart & { dashboard: DashboardStart; fleet: FleetStart }>
 ) => {
-  const response = await services.fleet?.getBulkAssets({
+  const response = await services.fleet?.hooks.getBulkAssets({
     assetIds: [
       {
         id: INGEST_PIPELINE_DASHBOARD_ID,
