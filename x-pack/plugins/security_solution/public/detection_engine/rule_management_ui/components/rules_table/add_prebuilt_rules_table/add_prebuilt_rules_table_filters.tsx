@@ -63,7 +63,7 @@ const AddPrebuiltRulesTableFiltersComponent = () => {
         <EuiFilterGroup>
           <TagsFilterPopover
             onSelectedTagsChanged={handleSelectedTags}
-            selectedTags={selectedTags ?? []}
+            selectedTags={selectedTags}
             tags={tags}
             data-test-subj="allRulesTagPopover"
           />

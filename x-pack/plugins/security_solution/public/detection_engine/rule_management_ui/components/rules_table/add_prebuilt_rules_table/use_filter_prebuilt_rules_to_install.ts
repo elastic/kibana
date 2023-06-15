@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 import type { FilterOptions } from '../../../../rule_management/logic/types';
 
-export type AddPrebuiltRulesTableFilterOptions = Partial<Pick<FilterOptions, 'filter' | 'tags'>>;
+export type AddPrebuiltRulesTableFilterOptions = Pick<FilterOptions, 'filter' | 'tags'>;
 
 export const useFilterPrebuiltRulesToInstall = ({
   rules,

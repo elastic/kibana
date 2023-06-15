@@ -7,7 +7,6 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import type { FilterOptions } from '../../../../rule_management/logic';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -16,9 +15,9 @@ import {
   usePerformInstallSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
+import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
 import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
 
-type AddPrebuiltRulesTableFilterOptions = Partial<Pick<FilterOptions, 'filter' | 'tags'>>;
 export interface AddPrebuiltRulesTableState {
   /**
    * Rules available to be installed
@@ -67,7 +66,7 @@ export interface AddPrebuiltRulesTableActions {
   installOneRule: (ruleId: RuleSignatureId) => void;
   installAllRules: () => void;
   installSelectedRules: () => void;
-  setFilterOptions: Dispatch<SetStateAction<Partial<AddPrebuiltRulesTableFilterOptions>>>;
+  setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleInstallationInfoForReview[]) => void;
 }
 

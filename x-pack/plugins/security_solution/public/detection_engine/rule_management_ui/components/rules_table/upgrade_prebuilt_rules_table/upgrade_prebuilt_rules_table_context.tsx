@@ -68,7 +68,7 @@ export interface UpgradePrebuiltRulesTableActions {
   upgradeOneRule: (ruleId: string) => void;
   upgradeSelectedRules: () => void;
   upgradeAllRules: () => void;
-  setFilterOptions: Dispatch<SetStateAction<Partial<UpgradePrebuiltRulesTableFilterOptions>>>;
+  setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleUpgradeInfoForReview[]) => void;
 }
 

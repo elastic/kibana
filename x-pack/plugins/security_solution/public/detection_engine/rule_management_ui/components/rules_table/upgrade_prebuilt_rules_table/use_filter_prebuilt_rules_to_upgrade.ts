@@ -9,9 +9,7 @@ import { useMemo } from 'react';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 import type { FilterOptions } from '../../../../rule_management/logic/types';
 
-export type UpgradePrebuiltRulesTableFilterOptions = Partial<
-  Pick<FilterOptions, 'filter' | 'tags'>
->;
+export type UpgradePrebuiltRulesTableFilterOptions = Pick<FilterOptions, 'filter' | 'tags'>;
 
 export const useFilterPrebuiltRulesToUpgrade = ({
   rules,
