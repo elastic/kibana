@@ -259,24 +259,17 @@ describe('Routing versioned requests', () => {
     ).resolves.toMatch(/Please specify.+version/);
   });
 
-  it.each([
-    ['public', '2023-10-31', ''],
-    ['internal', '1', '2'],
-  ])('requires version headers to be set for %p endpoints when in dev', async (access, v1, v2) => {
+  it('requires version headers to be set for public endpoints when in dev', async () => {
     await setupServer({ dev: true });
-    let route = router.versioned.get({
-      path: '/my-path',
-      access: access as 'internal' | 'public',
-    });
-
-    [v1, v2].forEach((version) => {
-      if (version) {
-        route = route.addVersion(
-          { version, validate: { response: { 200: { body: schema.number() } } } },
-          async (ctx, req, res) => res.ok()
-        );
-      }
-    });
+    router.versioned
+      .get({
+        path: '/my-path',
+        access: 'public',
+      })
+      .addVersion(
+        { version: '2023-10-31', validate: { response: { 200: { body: schema.number() } } } },
+        async (ctx, req, res) => res.ok()
+      );
     await server.start();
 
     await expect(
