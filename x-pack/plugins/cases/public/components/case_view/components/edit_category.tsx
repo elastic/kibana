@@ -55,10 +55,8 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
   const [selectedCategory, setSelectedCategory] = useState<string | null | undefined>(category);
 
   const onSubmitCategory = () => {
-    if (selectedCategory) {
-      onSubmit(selectedCategory);
-      setIsEditCategory(false);
-    }
+    onSubmit(selectedCategory);
+    setIsEditCategory(false);
   };
 
   const handleOnChange = useCallback(
