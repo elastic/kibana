@@ -9,12 +9,8 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 // Because mocks are for testing only, should be ok to import the FleetArtifactsClient directly
-import { appContextService, FleetArtifactsClient } from '@kbn/fleet-plugin/server/services';
-import {
-  createAppContextStartContractMock,
-  createArtifactsClientMock,
-} from '@kbn/fleet-plugin/server/mocks';
-import type { FleetConfigType } from '@kbn/fleet-plugin/server';
+import { FleetArtifactsClient } from '@kbn/fleet-plugin/server/services';
+import { createArtifactsClientMock } from '@kbn/fleet-plugin/server/mocks';
 
 import type { EndpointArtifactClientInterface } from './artifact_client';
 import { EndpointArtifactClient } from './artifact_client';
@@ -42,18 +38,16 @@ export const createEndpointArtifactClientMock = (
   const fleetArtifactClientMocked = createArtifactsClientMock();
   const endpointArtifactClientMocked = new EndpointArtifactClient(fleetArtifactClientMocked);
 
-  appContextService.start(createAppContextStartContractMock());
-  const fleetConfig = appContextService.getConfig() as FleetConfigType;
   // Return the interface mocked with jest.fn() that fowards calls to the real instance
   return {
     createArtifact: jest.fn(async (...args) => {
-      const fleetArtifactClient = new FleetArtifactsClient(esClient, 'endpoint', fleetConfig);
+      const fleetArtifactClient = new FleetArtifactsClient(esClient, 'endpoint');
       const endpointArtifactClient = new EndpointArtifactClient(fleetArtifactClient);
       const response = await endpointArtifactClient.createArtifact(...args);
       return response;
     }),
     bulkCreateArtifacts: jest.fn(async (...args) => {
-      const fleetArtifactClient = new FleetArtifactsClient(esClient, 'endpoint', fleetConfig);
+      const fleetArtifactClient = new FleetArtifactsClient(esClient, 'endpoint');
       const endpointArtifactClient = new EndpointArtifactClient(fleetArtifactClient);
       const response = await endpointArtifactClient.bulkCreateArtifacts(...args);
       return response;

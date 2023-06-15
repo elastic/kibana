@@ -6,7 +6,7 @@
  */
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { FleetConfigType, ListResult } from '../../../common/types';
+import type { ListResult } from '../../../common/types';
 
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
 
@@ -37,7 +37,7 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
   constructor(
     private esClient: ElasticsearchClient,
     private packageName: string,
-    private config: FleetConfigType
+    private createArtifactsBulkBatchSize?: number
   ) {
     if (!packageName) {
       throw new ArtifactsClientError('packageName is required');
@@ -108,7 +108,7 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
       this.esClient,
       newArtifactsData,
       false,
-      this.config.createArtifactsBulkBatchSize
+      this.createArtifactsBulkBatchSize
     );
   }
 

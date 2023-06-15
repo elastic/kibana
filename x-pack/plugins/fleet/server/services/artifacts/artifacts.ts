@@ -89,12 +89,12 @@ export const createArtifact = async (
 };
 
 // Max length in bytes for artifacts batch
-const MAX_LENGTH_BYTES = 2_000;
+export const BULK_CREATE_MAX_ARTIFACTS_BYTES = 2_000;
 
 // Function to split artifacts in batches depending on the encoded_size value.
 const generateArtifactBatches = (
   artifacts: NewArtifact[],
-  maxLengthBytes: number
+  maxArtifactsBatchSizeInBytes: number
 ): {
   batches: Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>>;
   artifactsEsResponse: Artifact[];
@@ -118,7 +118,7 @@ const generateArtifactBatches = (
 
     // Before adding the next artifact to the current batch, check if it can be added depending on the batch size limit.
     // If there is no artifact yet added to the current batch, we add it anyway ignoring the batch limit as the batch size has to be > 0.
-    if (artifact.encodedSize + artifactsBatchLengthInBytes >= maxLengthBytes) {
+    if (artifact.encodedSize + artifactsBatchLengthInBytes >= maxArtifactsBatchSizeInBytes) {
       artifactsBatchLengthInBytes = artifact.encodedSize;
       // Use non sorted artifacts array to preserve the artifacts order in the response
       artifactsEsResponse.push(esArtifactResponse);
@@ -145,11 +145,11 @@ export const bulkCreateArtifacts = async (
   esClient: ElasticsearchClient,
   artifacts: NewArtifact[],
   refresh = false,
-  createArtifactsBulkBatchSize: number = MAX_LENGTH_BYTES
+  bulkCreateMaxArtifactsBytes: number = BULK_CREATE_MAX_ARTIFACTS_BYTES
 ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
   const { batches, artifactsEsResponse } = generateArtifactBatches(
     artifacts,
-    createArtifactsBulkBatchSize
+    bulkCreateMaxArtifactsBytes
   );
 
   const logger = appContextService.getLogger();

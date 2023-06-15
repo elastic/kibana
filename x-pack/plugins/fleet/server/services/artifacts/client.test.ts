@@ -38,17 +38,11 @@ describe('When using the Fleet Artifacts Client', () => {
     appContextService.start(createAppContextStartContractMock());
 
     esClientMock = elasticsearchServiceMock.createInternalClient();
-    artifactClient = new FleetArtifactsClient(
-      esClientMock,
-      'endpoint',
-      appContextService.getConfig()!
-    );
+    artifactClient = new FleetArtifactsClient(esClientMock, 'endpoint');
   });
 
   it('should error if input argument is not set', () => {
-    expect(
-      () => new FleetArtifactsClient(esClientMock, '', appContextService.getConfig()!)
-    ).toThrow(ArtifactsClientError);
+    expect(() => new FleetArtifactsClient(esClientMock, '')).toThrow(ArtifactsClientError);
   });
 
   describe('and calling `getArtifact()`', () => {
