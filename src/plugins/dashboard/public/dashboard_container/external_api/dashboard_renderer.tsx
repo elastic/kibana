@@ -142,12 +142,12 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       <EuiLoadingElastic size="xxl" />
     );
 
-    return (
-      <div className={viewportClasses}>
-        {loading && loadingSpinner}
-        {fatalError && fatalError.render()}
-        {!fatalError && !loading && <div ref={dashboardRoot} />}
-      </div>
-    );
+    const renderDashboardContents = () => {
+      if (fatalError) return fatalError.render();
+      if (loading) return loadingSpinner;
+      return <div ref={dashboardRoot} />;
+    };
+
+    return <div className={viewportClasses}>{renderDashboardContents()}</div>;
   }
 );
