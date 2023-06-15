@@ -43,7 +43,7 @@ export function NoDataView({ subTitle }: { subTitle: string }) {
 
   const secretToken = data?.variables.collector.secretToken;
   const collectionAgentHost = data?.variables.collector?.host?.replace('https://', '');
-  const symbolUrl = data?.variables?.symbolizer?.host?.replace('https://', '');
+  const symbolUrl = data?.variables?.symbolizer?.host;
   const hostAgentVersion = 'v3';
 
   const tabs = [
