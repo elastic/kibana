@@ -7,7 +7,7 @@
 
 import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import { getDataViewAndSavedSearch } from '../../util/index_utils';
+import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 import { JobType } from '../../../../common/types/saved_objects';
 import { newJobCapsServiceAnalytics } from './new_job_capabilities_service_analytics';
 import { newJobCapsService } from './new_job_capabilities_service';
@@ -37,11 +37,10 @@ export function loadNewJobCapabilities(
       } else if (savedSearchId !== undefined) {
         // saved search is being used
         // load the data view from the saved search
-        const { dataView } = await getDataViewAndSavedSearch({
+        const { dataView } = await getDataViewAndSavedSearchCallback({
           savedSearchService,
           dataViewsService,
-          savedSearchId,
-        });
+        })(savedSearchId);
         if (dataView === null) {
           // eslint-disable-next-line no-console
           console.error('Cannot retrieve data view from saved search');

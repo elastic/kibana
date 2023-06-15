@@ -51,33 +51,30 @@ export interface DataViewAndSavedSearch {
   dataView: DataView | null;
 }
 
-export async function getDataViewAndSavedSearch({
-  savedSearchService,
-  dataViewsService,
-  savedSearchId,
-}: {
-  savedSearchService: SavedSearchPublicPluginStart;
-  dataViewsService: DataViewsContract;
-  savedSearchId: string;
-}) {
-  const resp: DataViewAndSavedSearch = {
-    savedSearch: null,
-    dataView: null,
+export const getDataViewAndSavedSearchCallback =
+  (deps: {
+    savedSearchService: SavedSearchPublicPluginStart;
+    dataViewsService: DataViewsContract;
+  }) =>
+  async (savedSearchId: string) => {
+    const resp: DataViewAndSavedSearch = {
+      savedSearch: null,
+      dataView: null,
+    };
+
+    if (savedSearchId === undefined) {
+      return resp;
+    }
+
+    const ss = await deps.savedSearchService.get(savedSearchId);
+    if (ss === null) {
+      return resp;
+    }
+    const dataViewId = ss.references?.find((r) => r.type === 'index-pattern')?.id;
+    resp.dataView = await deps.dataViewsService.get(dataViewId!);
+    resp.savedSearch = ss;
+    return resp;
   };
-
-  if (savedSearchId === undefined) {
-    return resp;
-  }
-
-  const ss = await savedSearchService.get(savedSearchId);
-  if (ss === null) {
-    return resp;
-  }
-  const dataViewId = ss.references?.find((r) => r.type === 'index-pattern')?.id;
-  resp.dataView = await dataViewsService.get(dataViewId!);
-  resp.savedSearch = ss;
-  return resp;
-}
 
 export function getQueryFromSavedSearchObject(savedSearch: SavedSearch) {
   return {

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { DataViewAndSavedSearch, getDataViewAndSavedSearch } from '../../util/index_utils';
+import { DataViewAndSavedSearch, getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 import { useMlKibana } from '../kibana';
 import { createSearchItems } from '../../jobs/new_job/utils/new_job_utils';
 
@@ -50,14 +50,12 @@ export const DataSourceContextProvider: FC = ({ children }) => {
     sort: false,
   }) as { index: string; savedSearchId: string };
 
-  const getDataViewAndSavedSearchCallback = useCallback(
-    async (ssId: string) => {
-      return await getDataViewAndSavedSearch({
+  const getDataViewAndSavedSearchCb = useCallback(
+    (ssId: string) =>
+      getDataViewAndSavedSearchCallback({
         savedSearchService,
         dataViewsService: dataViews,
-        savedSearchId: ssId,
-      });
-    },
+      })(ssId),
     [savedSearchService, dataViews]
   );
 
@@ -79,7 +77,7 @@ export const DataSourceContextProvider: FC = ({ children }) => {
     };
 
     if (savedSearchId !== undefined) {
-      dataViewAndSavedSearch = await getDataViewAndSavedSearchCallback(savedSearchId);
+      dataViewAndSavedSearch = await getDataViewAndSavedSearchCb(savedSearchId);
     } else if (dataViewId !== undefined) {
       dataViewAndSavedSearch.dataView = await dataViews.get(dataViewId);
     }
@@ -97,7 +95,7 @@ export const DataSourceContextProvider: FC = ({ children }) => {
       selectedDataView: dataView,
       selectedSavedSearch: savedSearch,
     };
-  }, [dataViewId, savedSearchId, uiSettings, dataViews, getDataViewAndSavedSearchCallback]);
+  }, [dataViewId, savedSearchId, uiSettings, dataViews, getDataViewAndSavedSearchCb]);
 
   useEffect(() => {
     resolveDataSource()

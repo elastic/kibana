@@ -21,7 +21,7 @@ export const fromLensRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ location }) => {
-  const { lensId, vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
+  const { vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
     location.search,
     {
       sort: false,
@@ -38,15 +38,13 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
       uiSettings: kibanaConfig,
       mlServices: { mlApiServices },
       lens,
-      contentManagement,
     },
   } = useMlKibana();
 
   const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () =>
       resolver(
-        { lens, mlApiServices, timeFilter, kibanaConfig, share, contentManagement },
-        lensId,
+        { lens, mlApiServices, timeFilter, kibanaConfig, share },
         vis,
         from,
         to,

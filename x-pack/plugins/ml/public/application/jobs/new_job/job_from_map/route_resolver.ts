@@ -16,18 +16,14 @@ import { QuickGeoJobCreator } from './quick_create_job';
 
 import { getDefaultQuery } from '../utils/new_job_utils';
 
+interface Dependencies {
+  kibanaConfig: IUiSettingsClient;
+  timeFilter: TimefilterContract;
+  share: SharePluginStart;
+  mlApiServices: MlApiServices;
+}
 export async function resolver(
-  {
-    kibanaConfig,
-    timeFilter,
-    share,
-    mlApiServices,
-  }: {
-    kibanaConfig: IUiSettingsClient;
-    timeFilter: TimefilterContract;
-    share: SharePluginStart;
-    mlApiServices: MlApiServices;
-  },
+  deps: Dependencies,
   dashboard: string,
   dataViewId: string,
   embeddable: string,
@@ -37,6 +33,7 @@ export async function resolver(
   toRisonString: string,
   layer?: string
 ) {
+  const { kibanaConfig, timeFilter, share, mlApiServices } = deps;
   let decodedDashboard;
   let decodedEmbeddable;
   let decodedLayer;
