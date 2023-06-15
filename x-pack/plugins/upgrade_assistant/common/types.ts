@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObject } from '@kbn/core/types';
 
@@ -207,7 +208,9 @@ export interface ClusterSettingAction {
 
 export interface HealthIndicatorAction {
   type: 'healthIndicator';
-  deprecatedSettings: string[];
+  cause: string;
+  action: string;
+  impacts: HealthReportImpact[];
 }
 
 export interface EnrichedDeprecationInfo

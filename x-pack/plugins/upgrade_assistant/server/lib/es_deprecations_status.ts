@@ -15,30 +15,34 @@ import {
   convertFeaturesToIndicesArray,
 } from './es_system_indices_migration';
 
-
 export async function getHealthIndicators(dataClient: IScopedClusterClient): Promise<EnrichedDeprecationInfo[]> {
   const healthIndicators = await dataClient.asCurrentUser.healthReport();
-console.log('healthIndicators.indicators.shards_capacity:', healthIndicators.indicators.shards_capacity);
+
+  // Temporarily ignoring due to untyped ES indicators
+  // types will be available during 8.9.0
+  // @ts-ignore
   return [
-    healthIndicators.indicators.disk,
-    //@ts-ignore
-    healthIndicators.indicators.shards_capacity,
-  ].filter(({ status }) => {
-    return status !== 'green';
+    (healthIndicators.indicators.disk as estypes.HealthReportDiskIndicator),
+    // @ts-ignore
+    (healthIndicators.indicators.shards_capacity as estypes.HealthReportBaseIndicator),
+  ].filter(indicator => {
+    const { status } = indicator || {};
+
+    return status && status !== 'green';
   }).flatMap(({
     status,
     symptom,
-    details,
+    impacts, 
     diagnosis,
   }) => {
-    return diagnosis.map(({ cause, action, help_url }) => ({
-      type: 'healthIndicator',
-      details,
+    return (diagnosis || []).map(({ cause, action, help_url }) => ({
+      type: 'health_indicator',
+      details: symptom,
       message: cause,
       url: help_url,
-      isCritical: true,
+      isCritical: status === 'red',
       resolveDuringUpgrade: false,
-      correctiveAction: { type: 'healthIndicator', action },
+      correctiveAction: { type: 'healthIndicator', cause, action, impacts },
     }));
   })
 }
@@ -125,8 +129,6 @@ export async function getESUpgradeStatus(
 
       return combinedDeprecations;
     }, [] as EnrichedDeprecationInfo[]);
-
-    console.log('healthIndicators::', healthIndicators);
 
     const enrichedHealthIndicators = healthIndicators.filter(({ status }) => {
       return status !== 'green';

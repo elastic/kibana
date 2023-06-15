@@ -33,6 +33,7 @@ import {
   IndexSettingsTableRow,
   ReindexTableRow,
   ClusterSettingsTableRow,
+  HealthIndicatorTableRow,
 } from './deprecation_types';
 import { DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
@@ -123,11 +124,11 @@ const renderTableRowCells = (
     case 'clusterSetting':
       return <ClusterSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
-    case 'healthIndicator':
-      return <ClusterSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
-
     case 'reindex':
       return <ReindexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+
+    case 'healthIndicator':
+      return <HealthIndicatorTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     default:
       return <DefaultTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
