@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { HashRouter as Router, Switch } from 'react-router-dom';
+import { HashRouter as Router } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
