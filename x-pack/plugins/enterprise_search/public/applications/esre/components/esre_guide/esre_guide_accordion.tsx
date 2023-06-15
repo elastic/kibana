@@ -27,14 +27,14 @@ export interface EsreGuideAccordionProps {
   children?: React.ReactNode;
 }
 
-export const EsreGuideAccordion = ({
+export const EsreGuideAccordion: React.FC<EsreGuideAccordionProps> = ({
   id,
   icon,
   title,
   description,
   initialIsOpen = false,
   children,
-}: EsreGuideAccordionProps) => {
+}) => {
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiAccordion
