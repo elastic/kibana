@@ -378,7 +378,8 @@ describe('Task Runner', () => {
     expect(call.rule.actions).toEqual(RULE_ACTIONS);
     expect(call.services.alertFactory.create).toBeTruthy();
     expect(call.services.alertsClient).not.toBe(null);
-    expect(call.services.alertsClient?.create).toBeTruthy();
+    expect(call.services.alertsClient?.report).toBeTruthy();
+    expect(call.services.alertsClient?.setAlertData).toBeTruthy();
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
     expect(logger.debug).toHaveBeenCalledTimes(6);
@@ -438,7 +439,7 @@ describe('Task Runner', () => {
         string,
         RuleAlertData
       >) => {
-        executorServices.alertsClient?.create({
+        executorServices.alertsClient?.report({
           id: '1',
           actionGroup: 'default',
           payload: { textField: 'foo', numericField: 27 },

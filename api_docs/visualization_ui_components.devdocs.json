@@ -448,6 +448,97 @@
       },
       {
         "parentPluginId": "visualizationUiComponents",
+        "id": "def-public.DimensionTrigger",
+        "type": "Function",
+        "tags": [],
+        "label": "DimensionTrigger",
+        "description": [],
+        "signature": [
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+          "Property",
+          ".Color | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/trigger.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.DimensionTrigger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  id,\n  label,\n  color,\n  dataTestSubj,\n}",
+            "description": [],
+            "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/trigger.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.DimensionTrigger.$1.label",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/trigger.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.DimensionTrigger.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/trigger.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.DimensionTrigger.$1.color",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "color",
+                "description": [],
+                "signature": [
+                  "\"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+                  "Property",
+                  ".Color | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/trigger.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.DimensionTrigger.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/trigger.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizationUiComponents",
         "id": "def-public.DragDropBuckets",
         "type": "Function",
         "tags": [],
@@ -660,6 +751,106 @@
       },
       {
         "parentPluginId": "visualizationUiComponents",
+        "id": "def-public.EmptyDimensionButton",
+        "type": "Function",
+        "tags": [],
+        "label": "EmptyDimensionButton",
+        "description": [],
+        "signature": [
+          "({ label, ariaLabel, onClick, dataTestSubj, iconType, ...otherProps }: { label: React.ReactNode; ariaLabel: string; onClick: () => void; dataTestSubj?: string | undefined; iconType?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/empty_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.EmptyDimensionButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  label,\n  ariaLabel,\n  onClick,\n  dataTestSubj,\n  iconType,\n  ...otherProps // from Drag&Drop integration\n}",
+            "description": [],
+            "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/empty_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.EmptyDimensionButton.$1.label",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/empty_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.EmptyDimensionButton.$1.ariaLabel",
+                "type": "string",
+                "tags": [],
+                "label": "ariaLabel",
+                "description": [],
+                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/empty_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.EmptyDimensionButton.$1.onClick",
+                "type": "Function",
+                "tags": [],
+                "label": "onClick",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/empty_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.EmptyDimensionButton.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/empty_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.EmptyDimensionButton.$1.iconType",
+                "type": "string",
+                "tags": [],
+                "label": "iconType",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/empty_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizationUiComponents",
         "id": "def-public.FieldPicker",
         "type": "Function",
         "tags": [],
@@ -762,7 +953,13 @@
             "text": "DataViewBase"
           },
           "; helpMessage?: string | null | undefined; label?: string | undefined; initiallyOpen?: boolean | undefined; \"data-test-subj\"?: string | undefined; queryInputServices: ",
-          "QueryInputServices",
+          {
+            "pluginId": "visualizationUiComponents",
+            "scope": "public",
+            "docId": "kibVisualizationUiComponentsPluginApi",
+            "section": "def-public.QueryInputServices",
+            "text": "QueryInputServices"
+          },
           "; appName: string; }) => JSX.Element"
         ],
         "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx",
@@ -933,7 +1130,13 @@
                 "label": "queryInputServices",
                 "description": [],
                 "signature": [
-                  "QueryInputServices"
+                  {
+                    "pluginId": "visualizationUiComponents",
+                    "scope": "public",
+                    "docId": "kibVisualizationUiComponentsPluginApi",
+                    "section": "def-public.QueryInputServices",
+                    "text": "QueryInputServices"
+                  }
                 ],
                 "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx",
                 "deprecated": false,
@@ -1188,6 +1391,53 @@
       },
       {
         "parentPluginId": "visualizationUiComponents",
+        "id": "def-public.isFieldLensCompatible",
+        "type": "Function",
+        "tags": [],
+        "label": "isFieldLensCompatible",
+        "description": [],
+        "signature": [
+          "(field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ") => boolean"
+        ],
+        "path": "src/plugins/visualization_ui_components/public/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.isFieldLensCompatible.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/visualization_ui_components/public/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizationUiComponents",
         "id": "def-public.isQueryValid",
         "type": "Function",
         "tags": [],
@@ -1257,6 +1507,94 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizationUiComponents",
+        "id": "def-public.LineStyleSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "LineStyleSettings",
+        "description": [],
+        "signature": [
+          "({ currentConfig, setConfig, idPrefix, }: { currentConfig?: LineStyleConfig | undefined; setConfig: (config: LineStyleConfig) => void; idPrefix: string; }) => JSX.Element"
+        ],
+        "path": "src/plugins/visualization_ui_components/public/components/line_style_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.LineStyleSettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  currentConfig,\n  setConfig,\n  idPrefix,\n}",
+            "description": [],
+            "path": "src/plugins/visualization_ui_components/public/components/line_style_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.LineStyleSettings.$1.currentConfig",
+                "type": "Object",
+                "tags": [],
+                "label": "currentConfig",
+                "description": [],
+                "signature": [
+                  "LineStyleConfig | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/line_style_settings.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.LineStyleSettings.$1.setConfig",
+                "type": "Function",
+                "tags": [],
+                "label": "setConfig",
+                "description": [],
+                "signature": [
+                  "(config: LineStyleConfig) => void"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/line_style_settings.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "visualizationUiComponents",
+                    "id": "def-public.LineStyleSettings.$1.setConfig.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "config",
+                    "description": [],
+                    "signature": [
+                      "LineStyleConfig"
+                    ],
+                    "path": "src/plugins/visualization_ui_components/public/components/line_style_settings.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.LineStyleSettings.$1.idPrefix",
+                "type": "string",
+                "tags": [],
+                "label": "idPrefix",
+                "description": [],
+                "path": "src/plugins/visualization_ui_components/public/components/line_style_settings.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1408,7 +1746,13 @@
             "text": "Query"
           },
           ") => void; dataView: string | { type: \"id\" | \"title\"; value: string; }; isInvalid: boolean; onSubmit: () => void; disableAutoFocus?: boolean | undefined; 'data-test-subj'?: string | undefined; placeholder?: string | undefined; appName: string; services: ",
-          "QueryInputServices",
+          {
+            "pluginId": "visualizationUiComponents",
+            "scope": "public",
+            "docId": "kibVisualizationUiComponentsPluginApi",
+            "section": "def-public.QueryInputServices",
+            "text": "QueryInputServices"
+          },
           "; }) => JSX.Element"
         ],
         "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
@@ -1588,11 +1932,153 @@
                 "label": "services",
                 "description": [],
                 "signature": [
-                  "QueryInputServices"
+                  {
+                    "pluginId": "visualizationUiComponents",
+                    "scope": "public",
+                    "docId": "kibVisualizationUiComponentsPluginApi",
+                    "section": "def-public.QueryInputServices",
+                    "text": "QueryInputServices"
+                  }
                 ],
                 "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizationUiComponents",
+        "id": "def-public.TextDecorationSetting",
+        "type": "Function",
+        "tags": [],
+        "label": "TextDecorationSetting",
+        "description": [],
+        "signature": [
+          "({\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}: { idPrefix: string; currentConfig?: TextDecorationConfig | undefined; setConfig: (config: TextDecorationConfig) => void; isQueryBased?: boolean | undefined; children?: ((textDecoration: \"none\" | \"name\" | \"field\") => JSX.Element | null) | undefined; }) => JSX.Element"
+        ],
+        "path": "src/plugins/visualization_ui_components/public/components/text_decoration_setting.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.TextDecorationSetting.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}",
+            "description": [],
+            "path": "src/plugins/visualization_ui_components/public/components/text_decoration_setting.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.TextDecorationSetting.$1.idPrefix",
+                "type": "string",
+                "tags": [],
+                "label": "idPrefix",
+                "description": [],
+                "path": "src/plugins/visualization_ui_components/public/components/text_decoration_setting.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.TextDecorationSetting.$1.currentConfig",
+                "type": "Object",
+                "tags": [],
+                "label": "currentConfig",
+                "description": [],
+                "signature": [
+                  "TextDecorationConfig | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/text_decoration_setting.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.TextDecorationSetting.$1.setConfig",
+                "type": "Function",
+                "tags": [],
+                "label": "setConfig",
+                "description": [],
+                "signature": [
+                  "(config: TextDecorationConfig) => void"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/text_decoration_setting.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "visualizationUiComponents",
+                    "id": "def-public.TextDecorationSetting.$1.setConfig.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "config",
+                    "description": [],
+                    "signature": [
+                      "TextDecorationConfig"
+                    ],
+                    "path": "src/plugins/visualization_ui_components/public/components/text_decoration_setting.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.TextDecorationSetting.$1.isQueryBased",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isQueryBased",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/text_decoration_setting.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "visualizationUiComponents",
+                "id": "def-public.TextDecorationSetting.$1.children",
+                "type": "Function",
+                "tags": [],
+                "label": "children",
+                "description": [
+                  "A children render function for custom sub fields on textDecoration change"
+                ],
+                "signature": [
+                  "((textDecoration: \"none\" | \"name\" | \"field\") => JSX.Element | null) | undefined"
+                ],
+                "path": "src/plugins/visualization_ui_components/public/components/text_decoration_setting.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "visualizationUiComponents",
+                    "id": "def-public.TextDecorationSetting.$1.children.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "textDecoration",
+                    "description": [],
+                    "signature": [
+                      "\"none\" | \"name\" | \"field\""
+                    ],
+                    "path": "src/plugins/visualization_ui_components/public/components/text_decoration_setting.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -2005,6 +2491,181 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizationUiComponents",
+        "id": "def-public.QueryInputServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryInputServices",
+        "description": [],
+        "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.QueryInputServices.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              }
+            ],
+            "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.QueryInputServices.storage",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.IStorageWrapper",
+                "text": "IStorageWrapper"
+              },
+              "<any, void>"
+            ],
+            "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.QueryInputServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.QueryInputServices.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.QueryInputServices.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.QueryInputServices.notifications",
+            "type": "Object",
+            "tags": [],
+            "label": "notifications",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.NotificationsStart",
+                "text": "NotificationsStart"
+              }
+            ],
+            "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.QueryInputServices.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.QueryInputServices.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-doc-links-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
+                "section": "def-common.DocLinksStart",
+                "text": "DocLinksStart"
+              }
+            ],
+            "path": "src/plugins/visualization_ui_components/public/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -2039,6 +2700,76 @@
         "path": "src/plugins/visualization_ui_components/public/components/field_picker/types.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizationUiComponents",
+        "id": "def-public.FormatFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "FormatFactory",
+        "description": [],
+        "signature": [
+          "(mapping?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined) => ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormat",
+            "text": "FieldFormat"
+          }
+        ],
+        "path": "src/plugins/visualization_ui_components/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "visualizationUiComponents",
+            "id": "def-public.FormatFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "mapping",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "> | undefined"
+            ],
+            "path": "src/plugins/visualization_ui_components/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

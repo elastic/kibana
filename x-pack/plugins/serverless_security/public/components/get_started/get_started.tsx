@@ -5,67 +5,58 @@
  * 2.0.
  */
 
-import {
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import { EuiTitle, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { css } from '@emotion/react';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Props {}
+import { WelcomePanel } from './welcome_panel';
+import { TogglePanel } from './toggle_panel';
+import {
+  GET_STARTED_PAGE_DESCRIPTION,
+  GET_STARTED_PAGE_SUBTITLE,
+  GET_STARTED_PAGE_TITLE,
+} from './translations';
 
-const icons = ['Kibana', 'Kibana', 'Kibana'];
+export const GetStartedComponent: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
 
-export const GetStartedComponent: React.FC<Props> = ({}) => {
-  const cardNodes = useMemo(
-    () =>
-      icons.map(function (item, index) {
-        return (
-          <EuiFlexItem key={index}>
-            <EuiCard icon={<EuiIcon size="xxl" type={`logo${item}`} />} title={`Elastic ${item}`} />
-          </EuiFlexItem>
-        );
-      }),
-    []
-  );
   return (
-    <KibanaPageTemplate restrictWidth={false}>
+    <KibanaPageTemplate restrictWidth={false} contentBorder={false}>
       <KibanaPageTemplate.Header
-        paddingSize="m"
-        pageTitle={i18n.translate('xpack.serverlessSecurity.getStarted.title', {
-          defaultMessage: `Welcome`,
-        })}
+        css={css`
+          padding: 0 ${euiTheme.base * 2.25}px;
+        `}
+        pageTitle={
+          <EuiTitle
+            size="l"
+            css={css`
+              padding-left: ${euiTheme.size.xs};
+            `}
+          >
+            <span>{GET_STARTED_PAGE_TITLE}</span>
+          </EuiTitle>
+        }
         description={
           <>
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('xpack.serverlessSecurity.getStarted.subTitle', {
-                  defaultMessage: `Let’s  get started`,
-                })}
-              </h3>
-            </EuiTitle>
-            <EuiText size="m">
-              {i18n.translate('xpack.serverlessSecurity.getStarted.description', {
-                defaultMessage: `Set up your Elastic Security workspace.  Use the toggles below to curate a list of tasks that best fits your environment`,
-              })}
-            </EuiText>
+            <strong className="eui-displayBlock">{GET_STARTED_PAGE_SUBTITLE}</strong>
+            <span className="eui-displayBlock">{GET_STARTED_PAGE_DESCRIPTION}</span>
           </>
         }
       >
-        <EuiFlexGroup gutterSize="l">{cardNodes}</EuiFlexGroup>
+        <WelcomePanel />
       </KibanaPageTemplate.Header>
-      <KibanaPageTemplate.Section>
-        <EuiSpacer size="m" />
+      <KibanaPageTemplate.Section
+        bottomBorder="extended"
+        grow={true}
+        restrictWidth={false}
+        paddingSize="none"
+      >
+        <TogglePanel />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };
 
+GetStartedComponent.displayName = 'GetStartedComponent';
 export const GetStarted = React.memo(GetStartedComponent);
