@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React, { memo, useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import type { Store } from 'redux';

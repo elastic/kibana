@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Switch, useParams } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { ENGINE_PATH, ENGINE_TAB_PATH, EngineViewTabs } from '../../routes';
@@ -35,7 +35,7 @@ export const EngineRouter: React.FC = () => {
   }, [engineName]);
 
   return (
-    <Switch>
+    <Routes>
       <Redirect
         from={ENGINE_PATH}
         to={generateEncodedPath(ENGINE_TAB_PATH, {
@@ -47,6 +47,6 @@ export const EngineRouter: React.FC = () => {
       <Route path={ENGINE_TAB_PATH}>
         <EngineView />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

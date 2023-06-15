@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { ENGINES_PATH, ENGINE_CREATION_PATH, ENGINE_PATH } from '../../routes';
 
@@ -19,7 +18,7 @@ import { EnginesList } from './engines_list';
 
 export const EnginesRouter: React.FC = () => {
   return (
-    <Switch>
+    <Routes>
       <Route exact path={ENGINES_PATH}>
         <EnginesList />
       </Route>
@@ -32,6 +31,6 @@ export const EnginesRouter: React.FC = () => {
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

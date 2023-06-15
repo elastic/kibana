@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import React from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import {

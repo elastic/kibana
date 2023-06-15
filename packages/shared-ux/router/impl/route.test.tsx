@@ -8,7 +8,7 @@
 
 import React, { Component, FC } from 'react';
 import { shallow } from 'enzyme';
-import { Route } from './router';
+import { Route } from './route';
 import { createMemoryHistory } from 'history';
 
 describe('Route', () => {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Cases } from '.';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';

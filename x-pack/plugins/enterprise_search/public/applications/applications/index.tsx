@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EnginesRouter } from './components/engines/engines_router';
 import { NotFound } from './components/not_found';
@@ -16,7 +16,7 @@ import { ROOT_PATH, ENGINES_PATH } from './routes';
 
 export const Applications = () => {
   return (
-    <Switch>
+    <Routes>
       <Redirect exact from={ROOT_PATH} to={ENGINES_PATH} />
       <Route path={ENGINES_PATH}>
         <EnginesRouter />
@@ -24,6 +24,6 @@ export const Applications = () => {
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

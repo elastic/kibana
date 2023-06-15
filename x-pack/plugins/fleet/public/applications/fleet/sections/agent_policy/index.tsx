@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Router, Switch, useHistory } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useHistory } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';
@@ -25,7 +25,7 @@ export const AgentPolicyApp: React.FunctionComponent = () => {
 
   return (
     <Router history={history}>
-      <Switch>
+      <Routes>
         <Route path={FLEET_ROUTING_PATHS.edit_integration}>
           <EditPackagePolicyPage />
         </Route>
@@ -40,7 +40,7 @@ export const AgentPolicyApp: React.FunctionComponent = () => {
             <AgentPolicyListPage />
           </DefaultLayout>
         </Route>
-      </Switch>
+      </Routes>
     </Router>
   );
 };

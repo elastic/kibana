@@ -6,7 +6,7 @@
  */
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';

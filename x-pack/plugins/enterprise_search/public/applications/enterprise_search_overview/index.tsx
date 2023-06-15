@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -54,13 +53,13 @@ export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
   };
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
       <Route exact path={ROOT_PATH}>
         {showView()}
       </Route>
-    </Switch>
+    </Routes>
   );
 };

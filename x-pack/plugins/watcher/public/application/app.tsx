@@ -17,10 +17,8 @@ import {
 } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
-import { Router, Switch, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/management-plugin/public';
 
@@ -68,25 +66,23 @@ export const App = (deps: AppDeps) => {
   }
   return (
     <Router history={deps.history}>
-      <CompatRouter>
-        <ShareRouter>
-          <AppContextProvider value={deps}>
-            <AppWithoutRouter />
-          </AppContextProvider>
-        </ShareRouter>
-      </CompatRouter>
+      <ShareRouter>
+        <AppContextProvider value={deps}>
+          <AppWithoutRouter />
+        </AppContextProvider>
+      </ShareRouter>
     </Router>
   );
 };
 
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
-  <Switch>
+  <Routes>
     <Route exact path="/watches" component={WatchListPage} />
     <Route exact path="/watches/watch/:id/status" component={WatchStatusPage} />
     <Route exact path="/watches/watch/:id/edit" component={WatchEditPage} />
     <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEditPage} />
     <Redirect exact from="/" to="/watches" />
     <Redirect exact from="" to="/watches" />
-  </Switch>
+  </Routes>
 );

@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { DashboardView } from '.';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';

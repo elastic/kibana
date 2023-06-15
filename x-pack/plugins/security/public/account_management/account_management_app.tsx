@@ -9,7 +9,6 @@ import type { History } from 'history';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router } from 'react-router-dom';
 import type { Observable } from 'rxjs';
 
 import type {
@@ -23,6 +22,7 @@ import { AppNavLinkStatus } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 
 import type { AuthenticationServiceSetup } from '../authentication';
 import type { SecurityApiClients } from '../components';

@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -24,7 +23,7 @@ export const Analytics: React.FC<InitialAppData> = (props) => {
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={ROOT_PATH}>
         {incompatibleVersions ? (
           <VersionMismatchPage
@@ -38,6 +37,6 @@ export const Analytics: React.FC<InitialAppData> = (props) => {
       <Route path={COLLECTION_VIEW_PATH}>
         <AnalyticsCollectionView />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

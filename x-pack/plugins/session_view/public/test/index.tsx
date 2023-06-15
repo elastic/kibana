@@ -9,7 +9,7 @@ import React, { memo, ReactNode, useMemo } from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import { I18nProvider } from '@kbn/i18n-react';

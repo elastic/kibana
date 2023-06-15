@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Router, Switch, useHistory } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useHistory } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -88,7 +88,7 @@ export const AgentsApp: React.FunctionComponent = () => {
 
   return (
     <Router history={history}>
-      <Switch>
+      <Routes>
         <Route path={FLEET_ROUTING_PATHS.agent_details}>
           <AgentDetailsPage />
         </Route>
@@ -101,7 +101,7 @@ export const AgentsApp: React.FunctionComponent = () => {
             )}
           </DefaultLayout>
         </Route>
-      </Switch>
+      </Routes>
     </Router>
   );
 };

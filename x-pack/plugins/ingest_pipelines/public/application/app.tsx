@@ -8,9 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
-import { Router, Switch } from 'react-router-dom';
-
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { useKibana } from '../shared_imports';
 
@@ -33,7 +31,7 @@ import {
 import { ROUTES } from './services/navigation';
 
 export const AppWithoutRouter = () => (
-  <Switch>
+  <Routes>
     <Route exact path={ROUTES.list} component={PipelinesList} />
     <Route exact path={ROUTES.clone} component={PipelinesClone} />
     <Route exact path={ROUTES.create} component={PipelinesCreate} />
@@ -41,7 +39,7 @@ export const AppWithoutRouter = () => (
     <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />
     {/* Catch all */}
     <Route component={PipelinesList} />
-  </Switch>
+  </Routes>
 );
 
 export const App: FunctionComponent = () => {

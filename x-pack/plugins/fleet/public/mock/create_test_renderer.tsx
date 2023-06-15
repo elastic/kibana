@@ -12,7 +12,7 @@ import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import type { RenderHookResult } from '@testing-library/react-hooks';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 
 import { themeServiceMock } from '@kbn/core/public/mocks';
 

@@ -8,8 +8,8 @@
 
 import './app.scss';
 import React, { useEffect, useCallback, useState } from 'react';
-import { Switch, useLocation } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useLocation } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -130,7 +130,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
   }
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={`${VisualizeConstants.EDIT_BY_VALUE_PATH}`}>
         <VisualizeByValueEditor onAppLeave={onAppLeave} />
       </Route>
@@ -148,6 +148,6 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         <VisualizeListing />
       </Route>
       <VisualizeNoMatch />
-    </Switch>
+    </Routes>
   );
 };

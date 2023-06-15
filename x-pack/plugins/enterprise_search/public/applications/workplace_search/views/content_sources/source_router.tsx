@@ -7,11 +7,11 @@
 
 import React, { useEffect } from 'react';
 
-import { Switch, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { AppLogic } from '../../app_logic';
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
@@ -66,7 +66,7 @@ export const SourceRouter: React.FC = () => {
   const showSynchronization = !isCustomSource && isOrganization;
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}>
         <Overview />
       </Route>
@@ -99,6 +99,6 @@ export const SourceRouter: React.FC = () => {
       <Route>
         <NotFound isOrganization={isOrganization} pageChrome={[NAV.SOURCES]} />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

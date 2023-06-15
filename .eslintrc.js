@@ -245,7 +245,7 @@ const RESTRICTED_IMPORTS = [
   },
   {
     name: 'react-router-dom',
-    importNames: ['Route'],
+    importNames: ['Router', 'Switch', 'Route'],
     message: 'Please use @kbn/shared-ux-router instead',
   },
   {

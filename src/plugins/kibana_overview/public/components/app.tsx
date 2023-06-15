@@ -48,11 +48,11 @@ export const KibanaOverviewApp = ({
   return (
     <Router basename={basename}>
       <I18nProvider>
-        <Switch>
+        <Routes>
           <Route exact path="/">
             <Overview {...{ newsFetchResult, solutions, features }} />
           </Route>
-        </Switch>
+        </Routes>
       </I18nProvider>
     </Router>
   );

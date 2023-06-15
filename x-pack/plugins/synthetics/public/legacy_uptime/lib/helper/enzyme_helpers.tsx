@@ -6,7 +6,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { MemoryHistory } from 'history/createMemoryHistory';
 import { createMemoryHistory, History } from 'history';
 import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';

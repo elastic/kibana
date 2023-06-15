@@ -6,11 +6,10 @@
  */
 
 import React, { useEffect } from 'react';
-import { Switch } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { GROUP_PATH, GROUPS_PATH } from '../../routes';
 
@@ -28,13 +27,13 @@ export const GroupsRouter: React.FC = () => {
   }, []);
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={GROUPS_PATH}>
         <Groups />
       </Route>
       <Route path={GROUP_PATH}>
         <GroupRouter />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

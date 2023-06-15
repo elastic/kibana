@@ -8,8 +8,7 @@
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LicenseDashboard, UploadLicense } from './sections';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { APP_PERMISSION } from '../../common/constants';
 import { SectionLoading, useExecutionContext } from '../shared_imports';
 import {
@@ -102,10 +101,10 @@ export const App = ({
   const withTelemetry = (Component) => (props) => <Component {...props} telemetry={telemetry} />;
   return (
     <EuiPageBody>
-      <Switch>
+      <Routes>
         <Route path={`/${UPLOAD_LICENSE_ROUTE}`} component={withTelemetry(UploadLicense)} />
         <Route path={['/']} component={withTelemetry(LicenseDashboard)} />
-      </Switch>
+      </Routes>
     </EuiPageBody>
   );
 };

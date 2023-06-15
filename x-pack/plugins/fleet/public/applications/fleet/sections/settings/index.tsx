@@ -7,8 +7,8 @@
 
 import React, { useCallback } from 'react';
 import { EuiPortal } from '@elastic/eui';
-import { Router, Switch, useHistory, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useHistory, Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   useBreadcrumbs,
@@ -96,7 +96,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
   return (
     <DefaultLayout section="settings">
       <Router history={history}>
-        <Switch>
+        <Routes>
           <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
             {(route: { match: { params: { itemId: string } } }) => {
               const fleetServerHost = fleetServerHosts.data?.items.find(
@@ -189,7 +189,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
               );
             }}
           </Route>
-        </Switch>
+        </Routes>
       </Router>
       <SettingsPage
         deleteFleetProxy={deleteFleetProxy}

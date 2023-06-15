@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Switch } from '@kbn/shared-ux-router';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataViewBase, Filter } from '@kbn/es-query';
@@ -54,7 +54,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
     const commonPropsWithFlowTarget = { ...commonProps, flowTarget };
 
     return (
-      <Switch>
+      <Routes>
         <Route
           path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.flows})`}
         >
@@ -82,7 +82,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
               </EuiFlexItem>
             </ConditionalFlexGroup>
           </>
-        </Route>
+        </Routes>
         <Route
           path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.users})`}
         >

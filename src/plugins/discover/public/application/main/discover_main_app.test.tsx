@@ -15,7 +15,7 @@ import { DiscoverTopNav } from './components/top_nav/discover_topnav';
 import { setHeaderActionMenuMounter, setUrlTracker } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { urlTrackerMock } from '../../__mocks__/url_tracker.mock';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';

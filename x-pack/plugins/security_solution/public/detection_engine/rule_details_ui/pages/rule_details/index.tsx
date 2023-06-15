@@ -19,12 +19,12 @@ import {
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { i18n as i18nTranslate } from '@kbn/i18n';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { noop, omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Switch, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -799,7 +799,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>
-              <Switch>
+              <Routes>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                   <>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -847,7 +847,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       />
                     )}
                   </>
-                </Route>
+                </Routes>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                   <ExceptionsViewer
                     rule={rule}

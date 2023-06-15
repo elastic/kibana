@@ -7,8 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { CaptureTest } from './containers/capture_test';
@@ -27,10 +26,10 @@ export const renderApp = (
     <ApplicationContextProvider forwardedState={forwardedParams}>
       <KibanaThemeProvider theme$={coreStart.theme.theme$}>
         <Router history={history}>
-          <Switch>
+          <Routes>
             <Route path={ROUTES.captureTest} exact render={() => <CaptureTest />} />
             <Route render={() => <Main basename={appBasePath} {...coreStart} {...deps} />} />
-          </Switch>
+          </Routes>
         </Router>
       </KibanaThemeProvider>
     </ApplicationContextProvider>,
