@@ -88,7 +88,6 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     return {
       kibanaVersion: deps.kibanaVersion,
       share: deps.share,
-      contentManagement: deps.contentManagement,
       data: deps.data,
       security: deps.security,
       licenseManagement: deps.licenseManagement,
