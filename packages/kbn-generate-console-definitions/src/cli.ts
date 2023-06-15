@@ -56,6 +56,12 @@ export function runGenerateConsoleDefinitionsCli() {
       log.info('completed console definitions generation');
     },
     {
+      description: `Generate Console autocomplete defiitions from the ES specification repo`,
+      usage: `
+node scripts/generate_console_definitions.js --help
+node scripts/generate_console_definitions.js --source <ES_SPECIFICATION_REPO>
+node scripts/generate_console_definitions.js --source <ES_SPECIFICATION_REPO> [--dest <DEFINITIONS_FOLDER] [--emptyDest]
+`,
       flags: {
         string: ['source', 'dest'],
         boolean: ['emptyDest'],
@@ -63,7 +69,7 @@ export function runGenerateConsoleDefinitionsCli() {
 --source        Folder containing the root of the Elasticsearch specification repo
 --dest          Folder where console autocomplete definitions will be generated (relative to the Kibana repo root)
 --emptyDest     Flag to empty definitions folder if it already contain any files
-  `,
+`,
       },
     }
   );
