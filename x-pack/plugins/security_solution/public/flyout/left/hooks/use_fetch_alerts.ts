@@ -28,7 +28,7 @@ export interface UseAlertsQueryResult {
    */
   totalItemCount: number;
   /**
-   * Individual records returend from ruinning the query
+   * Individual records returned from running the query
    */
   data: SearchResponse<Record<string, unknown>>['hits']['hits'];
 }
