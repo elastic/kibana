@@ -321,7 +321,7 @@ export const SESSION_PREVIEW_TIME_TEXT = i18n.translate(
 export const SESSION_PREVIEW_RULE_TEXT = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.sessionPreview.ruleText',
   {
-    defaultMessage: 'with alert',
+    defaultMessage: 'with rule',
   }
 );
 

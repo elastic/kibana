@@ -49,7 +49,8 @@ describe('SessionPreview', () => {
       processName: 'process1',
       userName: 'user1',
       startAt: '2022-01-01T00:00:00.000Z',
-      rule: 'rule1',
+      ruleName: 'rule1',
+      ruleId: 'id',
       workdir: '/path/to/workdir',
       command: 'command1',
     });
@@ -61,7 +62,7 @@ describe('SessionPreview', () => {
     expect(screen.getByText('process1')).toBeInTheDocument();
     expect(screen.getByText('at')).toBeInTheDocument();
     expect(screen.getByText('Jan 1, 2022 @ 00:00:00.000')).toBeInTheDocument();
-    expect(screen.getByText('with alert')).toBeInTheDocument();
+    expect(screen.getByText('with rule')).toBeInTheDocument();
     expect(screen.getByText('rule1')).toBeInTheDocument();
     expect(screen.getByText('by')).toBeInTheDocument();
     expect(screen.getByText('/path/to/workdir command1')).toBeInTheDocument();
@@ -71,10 +72,11 @@ describe('SessionPreview', () => {
     jest.mocked(useProcessData).mockReturnValue({
       processName: 'process1',
       userName: 'user1',
-      startAt: undefined,
-      rule: undefined,
-      command: undefined,
-      workdir: undefined,
+      startAt: null,
+      ruleName: null,
+      ruleId: null,
+      command: null,
+      workdir: null,
     });
 
     renderSessionPreview();
@@ -83,7 +85,7 @@ describe('SessionPreview', () => {
     expect(screen.getByText('started')).toBeInTheDocument();
     expect(screen.getByText('process1')).toBeInTheDocument();
     expect(screen.queryByText('at')).not.toBeInTheDocument();
-    expect(screen.queryByText('with alert')).not.toBeInTheDocument();
+    expect(screen.queryByText('with rule')).not.toBeInTheDocument();
     expect(screen.queryByText('by')).not.toBeInTheDocument();
   });
 
@@ -92,7 +94,8 @@ describe('SessionPreview', () => {
       processName: 'process1',
       userName: 'user1',
       startAt: '2022-01-01T00:00:00.000Z',
-      rule: 'rule1',
+      ruleName: 'rule1',
+      ruleId: 'id',
       workdir: '/path/to/workdir',
       command: 'command1',
     });

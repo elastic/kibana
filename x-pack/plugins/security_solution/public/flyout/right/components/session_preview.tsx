@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCode, EuiIcon, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCode, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import React, { useMemo, type FC, useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 
@@ -21,6 +22,7 @@ import {
   SESSION_PREVIEW_TITLE,
 } from './translations';
 import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
+import { RenderRuleName } from '../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
 
 /**
  * One-off helper to make sure that inline values are rendered consistently
@@ -57,7 +59,7 @@ export const SessionPreview: FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const { processName, userName, startAt, rule, workdir, command } = useProcessData();
+  const { processName, userName, startAt, ruleName, ruleId, workdir, command } = useProcessData();
   const { euiTheme } = useEuiTheme();
 
   const emphasisStyles = useMemo(
@@ -87,13 +89,23 @@ export const SessionPreview: FC = () => {
 
   const ruleFragment = useMemo(() => {
     return (
-      rule && (
+      ruleName &&
+      ruleId && (
         <ValueContainer text={SESSION_PREVIEW_RULE_TEXT}>
-          <EuiLink>{rule}</EuiLink>
+          <RenderRuleName
+            contextId={scopeId}
+            eventId={eventId}
+            fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
+            fieldType={'string'}
+            isAggregatable={false}
+            isDraggable={false}
+            linkValue={ruleId}
+            value={ruleName}
+          />
         </ValueContainer>
       )
     );
-  }, [rule]);
+  }, [ruleName, ruleId, scopeId, eventId]);
 
   const commandFragment = useMemo(() => {
     return (
