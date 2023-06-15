@@ -127,6 +127,31 @@ export default function (providerContext: FtrProviderContext) {
             expect(generatedPolicyIds.has(policyId)).to.be(true)
           );
         });
+
+        it('should return tokens correctly paginated and sorted by their creation date desc', async () => {
+          let prevCreatedAt = Date.now();
+
+          for (let i = 1; i <= 4; i++) {
+            const response = await supertest
+              .get(uninstallTokensRouteService.getListPath())
+              .query({
+                perPage: 6,
+                page: i,
+              })
+              .expect(200);
+
+            const body: GetUninstallTokensResponse = response.body;
+
+            body.items.forEach(({ created_at: createdAt }) => {
+              const currentCreatedAt = new Date(createdAt!).getTime();
+
+              const isCurrentOlderThanPrevious = currentCreatedAt <= prevCreatedAt;
+              expect(isCurrentOlderThanPrevious).to.be(true);
+
+              prevCreatedAt = currentCreatedAt;
+            });
+          }
+        });
       });
 
       describe('when there are multiple tokens for a policy', () => {
