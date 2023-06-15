@@ -37,6 +37,11 @@ import { getLatencyColumnLabel } from './get_latency_column_label';
 import { ApmRoutes } from '../../routing/apm_route_config';
 import { unit } from '../../../utils/style';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import {
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../common/es_fields/apm';
+import { fieldValuePairToKql } from '../../../../common/utils/field_value_pair_to_kql';
 
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -83,7 +88,7 @@ export function getColumns({
               { defaultMessage: 'Active alerts' }
             ),
             width: `${unit * 6}px`,
-            render: (_, { alertsCount }) => {
+            render: (_, { alertsCount, name, transactionType }) => {
               if (!alertsCount) {
                 return null;
               }
@@ -104,6 +109,16 @@ export function getColumns({
                       path: { serviceName },
                       query: {
                         ...query,
+                        kuery: [
+                          query.kuery,
+                          ...fieldValuePairToKql(TRANSACTION_NAME, name),
+                          ...fieldValuePairToKql(
+                            TRANSACTION_TYPE,
+                            transactionType
+                          ),
+                        ]
+                          .filter(Boolean)
+                          .join(' and '),
                         alertStatus: ALERT_STATUS_ACTIVE,
                       },
                     })}
