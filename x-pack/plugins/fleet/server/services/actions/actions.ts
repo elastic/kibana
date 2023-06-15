@@ -18,6 +18,10 @@ import { auditLoggingService } from '../audit_logging';
 
 import type { FleetActionRequest, FleetActionResult, BulkCreateResponse } from './types';
 
+const queryOptions = Object.freeze({
+  ignore: [404],
+});
+
 export const createAction = async (
   esClient: ElasticsearchClient,
   action: FleetActionRequest
@@ -136,22 +140,25 @@ export const getActionsByIds = async (
   actionIds: string[]
 ): Promise<{ items: FleetActionRequest[]; total: number }> => {
   try {
-    const getActionsResponse = await esClient.search({
-      index: AGENT_ACTIONS_INDEX,
-      from: 0,
-      size: ES_SEARCH_LIMIT,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                action_id: actionIds,
+    const getActionsResponse = await esClient.search(
+      {
+        index: AGENT_ACTIONS_INDEX,
+        from: 0,
+        size: ES_SEARCH_LIMIT,
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  action_id: actionIds,
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
-    });
+      queryOptions
+    );
 
     const actions = getActionsResponse.hits.hits.reduce<FleetActionRequest[]>((acc, hit) => {
       if (hit._source) {
@@ -178,12 +185,15 @@ export const getActionsWithKuery = async (
 ): Promise<{ items: FleetActionRequest[]; total: number }> => {
   try {
     const query = toElasticsearchQuery(fromKueryExpression(kuery));
-    const getActionSearchResponse = await esClient.search({
-      index: AGENT_ACTIONS_INDEX,
-      from: 0,
-      size: ES_SEARCH_LIMIT,
-      query,
-    });
+    const getActionSearchResponse = await esClient.search(
+      {
+        index: AGENT_ACTIONS_INDEX,
+        from: 0,
+        size: ES_SEARCH_LIMIT,
+        query,
+      },
+      queryOptions
+    );
 
     const actions = getActionSearchResponse.hits.hits.reduce<FleetActionRequest[]>((acc, hit) => {
       if (hit._source) {
@@ -209,22 +219,25 @@ export const getActionResultsByIds = async (
   actionIds: string[]
 ): Promise<{ items: FleetActionResult[]; total: number }> => {
   try {
-    const getActionsResultsResponse = await esClient.search({
-      index: AGENT_ACTIONS_RESULTS_INDEX,
-      from: 0,
-      size: ES_SEARCH_LIMIT,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                action_id: actionIds,
+    const getActionsResultsResponse = await esClient.search(
+      {
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        from: 0,
+        size: ES_SEARCH_LIMIT,
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  action_id: actionIds,
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
-    });
+      queryOptions
+    );
     const actionsResults = getActionsResultsResponse.hits.hits.reduce<FleetActionResult[]>(
       (acc, hit) => {
         if (hit._source) {
@@ -253,12 +266,15 @@ export const getActionResultsWithKuery = async (
 ): Promise<{ items: FleetActionResult[]; total: number }> => {
   try {
     const query = toElasticsearchQuery(fromKueryExpression(kuery));
-    const getActionSearchResponse = await esClient.search({
-      index: AGENT_ACTIONS_INDEX,
-      from: 0,
-      size: ES_SEARCH_LIMIT,
-      query,
-    });
+    const getActionSearchResponse = await esClient.search(
+      {
+        index: AGENT_ACTIONS_INDEX,
+        from: 0,
+        size: ES_SEARCH_LIMIT,
+        query,
+      },
+      queryOptions
+    );
 
     const actionsResults = getActionSearchResponse.hits.hits.reduce<FleetActionResult[]>(
       (acc, hit) => {
