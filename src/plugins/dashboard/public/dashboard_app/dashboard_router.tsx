@@ -91,10 +91,10 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     routeParams: ParsedQuery<string>
   ): DashboardEmbedSettings | undefined => {
     return {
-      forceShowTopNavMenu: Boolean(routeParams[dashboardUrlParams.showTopMenu]),
-      forceShowQueryInput: Boolean(routeParams[dashboardUrlParams.showQueryInput]),
-      forceShowDatePicker: Boolean(routeParams[dashboardUrlParams.showTimeFilter]),
-      forceHideFilterBar: Boolean(routeParams[dashboardUrlParams.hideFilterBar]),
+      forceShowTopNavMenu: routeParams[dashboardUrlParams.showTopMenu] === 'true',
+      forceShowQueryInput: routeParams[dashboardUrlParams.showQueryInput] === 'true',
+      forceShowDatePicker: routeParams[dashboardUrlParams.showTimeFilter] === 'true',
+      forceHideFilterBar: routeParams[dashboardUrlParams.hideFilterBar] === 'true',
     };
   };
 
