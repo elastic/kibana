@@ -11,7 +11,6 @@ import { ProfilingPlugin } from './plugin';
 
 const packageInputSchema = schema.object({
   host: schema.maybe(schema.string()),
-  secret_token: schema.maybe(schema.string()),
   tls_enabled: schema.maybe(schema.boolean()),
   tls_supported_protocols: schema.maybe(schema.arrayOf(schema.string())),
   tls_certificate_path: schema.maybe(schema.string()),
