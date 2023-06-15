@@ -7,7 +7,7 @@
 
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
