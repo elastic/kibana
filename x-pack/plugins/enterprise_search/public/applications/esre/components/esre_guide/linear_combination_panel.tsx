@@ -1,0 +1,80 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+  EuiSteps,
+  EuiText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from 'react-intl';
+import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { generatePath } from 'react-router-dom';
+import { docLinks } from '../../../shared/doc_links';
+import { DEV_TOOLS_CONSOLE_PATH } from '../../../enterprise_search_content/routes';
+
+const steps: EuiContainedStepProps[] = [
+  {
+    title: i18n.translate('xpack.enterpriseSearch.esre.linearCombinationPanel.step1.title', {
+      defaultMessage: 'Discover how to use linear combination in _search queries',
+    }),
+    children: (
+      <EuiLink href={docLinks.knnSearchCombine} target="_blank" external>
+        {i18n.translate(
+          'xpack.enterpriseSearch.esre.linearCombinationPanel.step1.knnSearchCombineLinkText',
+          {
+            defaultMessage: 'Combine approximate kNN with other features',
+          }
+        )}
+      </EuiLink>
+    ),
+    status: 'incomplete',
+  },
+  {
+    title: i18n.translate('xpack.enterpriseSearch.esre.linearCombinationPanel.step2.title', {
+      defaultMessage: 'Try it today in Console',
+    }),
+    children: (
+      <EuiLinkTo to={generatePath(DEV_TOOLS_CONSOLE_PATH)} shouldNotCreateHref>
+        <EuiButton>
+          {i18n.translate('xpack.enterpriseSearch.esre.linearCombinationPanel.step2.buttonLabel', {
+            defaultMessage: 'Open Console',
+          })}
+        </EuiButton>
+      </EuiLinkTo>
+    ),
+    status: 'incomplete',
+  },
+];
+
+export const LinearCombinationPanel: React.FC = () => (
+  <>
+    <EuiSpacer />
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem grow={false}>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.esre.linearCombinationPanel.description"
+              defaultMessage="Used to calculate a similarity score or distance between data points. It combines attributes or features using weights, allowing customization of the relevance of different factors for determining nearest neighbors."
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSteps steps={steps} titleSize="xs" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </>
+);
