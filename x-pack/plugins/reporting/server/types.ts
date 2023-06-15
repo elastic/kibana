@@ -67,7 +67,8 @@ export type RunTaskFn<TaskPayloadType> = (
   jobId: string,
   payload: TaskPayloadType,
   cancellationToken: CancellationToken,
-  stream: Writable
+  stream: Writable,
+  getUiSettingsClient: Function
 ) => Promise<TaskRunResult>;
 
 export interface ReportingSetupDeps {

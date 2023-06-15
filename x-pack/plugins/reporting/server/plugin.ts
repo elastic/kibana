@@ -16,7 +16,6 @@ import { ReportingCore } from '.';
 import { PLUGIN_ID } from '../common/constants';
 import { registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
-import { ExportType } from './export_types/common';
 import { PdfExportType } from './export_types/printable_pdf_v2';
 import { ExportTypesRegistry, ReportingStore } from './lib';
 import { registerRoutes } from './routes';
@@ -50,15 +49,6 @@ export class ReportingPlugin
     const reportingCore = new ReportingCore(core, this.logger, this.initContext);
     this.reportingCore = reportingCore;
 
-    this.pdfExport = new PdfExportType(
-      core,
-      reportingCore.getConfig(),
-      this.logger,
-      this.initContext
-    );
-
-    this.exportTypesRegistry.register(this.pdfExport as unknown as ExportType);
-
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
     http.registerRouteHandlerContext(PLUGIN_ID, () => {
@@ -72,6 +62,13 @@ export class ReportingPlugin
 
     // Usage counter for reporting telemetry
     const usageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
+
+    this.pdfExport = new PdfExportType(
+      core,
+      reportingCore.getConfig(),
+      this.logger,
+      this.initContext
+    );
 
     reportingCore.pluginSetup({
       logger: this.logger,
@@ -101,6 +98,8 @@ export class ReportingPlugin
       this.logger.error(`Error in Reporting setup, reporting may not function properly`);
       this.logger.error(e);
     });
+
+    this.exportTypesRegistry.register(this.pdfExport);
 
     return reportingCore.getContract();
   }

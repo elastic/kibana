@@ -9,7 +9,6 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
-import { JobParamsPDFV2 } from '../../../common/types';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
@@ -46,7 +45,7 @@ export class RequestHandler {
   }
 
   public async enqueueJob(exportTypeId: string, jobParams: BaseParams) {
-    const { reporting, logger, context, user } = this;
+    const { reporting, logger, context, user, req } = this;
 
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
@@ -63,12 +62,9 @@ export class RequestHandler {
     // 1. ensure the incoming params have a version field (should be set by the UI)
     jobParams.version = checkParamsVersion(jobParams, logger);
     // 2. encrypt request headers for the running report job to authenticate itself with Kibana
-    // 3. call the export type's createJobFn to create the job payload
-    const [headers, job, spaceId] = await Promise.all([
-      this.encryptHeaders(),
-      exportType.createJob(jobParams as JobParamsPDFV2, context, this.req),
-      exportType.getSpaceId(this.req, logger),
-    ]);
+    const headers = await this.encryptHeaders();
+
+    const job = exportType.createJob(jobParams, context, req);
 
     const payload = {
       ...job,
@@ -77,7 +73,7 @@ export class RequestHandler {
       objectType: jobParams.objectType,
       browserTimezone: jobParams.browserTimezone,
       version: jobParams.version,
-      spaceId,
+      spaceId: reporting.getSpaceId(req, logger),
     };
 
     // 4. Add the report to ReportingStore to show as pending

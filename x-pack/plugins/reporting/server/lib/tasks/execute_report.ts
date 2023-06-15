@@ -26,7 +26,7 @@ import {
   TaskRunResult,
 } from '@kbn/reporting-common';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { getContentStream, getExportTypesRegistry } from '..';
+import { ExportTypesRegistry, getContentStream } from '..';
 import type { ReportingCore } from '../..';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
@@ -36,7 +36,6 @@ import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
-import { ExportType } from '../../export_types/common';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -76,11 +75,10 @@ export class ExecuteReportTask implements ReportingTask {
 
   private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
-  private taskExecutors?: Map<string, ExportType>;
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
-  exportTypesRegistry = getExportTypesRegistry();
+  exportTypesRegistry?: ExportTypesRegistry;
 
   constructor(
     private reporting: ReportingCore,
@@ -98,7 +96,6 @@ export class ExecuteReportTask implements ReportingTask {
 
     const { reporting } = this;
     this.exportTypesRegistry = this.reporting.getExportTypesRegistry();
-
     const { uuid, name } = reporting.getServerInfo();
     this.kibanaId = uuid;
     this.kibanaName = name;
@@ -124,7 +121,10 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   private getJobContentEncoding(jobType: string) {
-    return this.taskExecutors?.get(jobType)?.jobContentEncoding;
+    const exportType = this.exportTypesRegistry!.get(
+      ({ jobType: _jobType }) => _jobType === jobType
+    );
+    return exportType.jobContentEncoding;
   }
 
   public async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
@@ -245,15 +245,24 @@ export class ExecuteReportTask implements ReportingTask {
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
-    const exportType = this.exportTypesRegistry.get(({ jobType }) => jobType === task.jobtype);
+    const exportType = this.exportTypesRegistry?.get(({ jobType }) => jobType === task.jobtype);
+    if (!exportType) {
+      throw new Error(`No export type from ${task.jobtype} found to execute report`);
+    }
 
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
-      Rx.from(exportType.runTask(task.id, task.payload, cancellationToken, stream)).pipe(
-        timeout(queueTimeout)
-      ) // throw an error if a value is not emitted before timeout
+      Rx.from(
+        exportType.runTask(
+          task.id,
+          task.payload,
+          cancellationToken,
+          stream,
+          this.reporting.getUiSettingsClient
+        )
+      ).pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
     );
   }
 
@@ -365,6 +374,7 @@ export class ExecuteReportTask implements ReportingTask {
               this._performJob(task, cancellationToken, stream),
               this.throwIfKibanaShutsDown(),
             ]);
+
             stream.end();
 
             await finishedWithNoPendingCallbacks(stream);
