@@ -265,10 +265,11 @@ export const SearchBar: FC<SearchBarProps> = ({
     };
     return (
       <EuiButtonIcon
-        buttonRef={visibilityButtonRef}
         aria-label={i18nStrings.showSearchAriaText}
-        iconType="search"
+        buttonRef={visibilityButtonRef}
         color="text"
+        data-test-subj="nav-search-reveal"
+        iconType="search"
         onClick={onShowSearch}
       />
     );
@@ -279,8 +280,9 @@ export const SearchBar: FC<SearchBarProps> = ({
       return (
         <EuiButtonIcon
           aria-label={i18nStrings.closeSearchAriaText}
-          iconType="cross"
           color="text"
+          data-test-subj="nav-search-conceal"
+          iconType="cross"
           onClick={() => {
             setIsVisible(false);
           }}
