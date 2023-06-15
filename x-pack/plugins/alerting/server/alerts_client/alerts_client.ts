@@ -30,6 +30,7 @@ import {
   ProcessAndLogAlertsOpts,
   TrackedAlerts,
   ReportedAlert,
+  UpdateableAlert,
 } from './types';
 import {
   buildNewAlert,
@@ -169,7 +170,7 @@ export class AlertsClient<
     return hits;
   }
 
-  public create(
+  public report(
     alert: ReportedAlert<
       AlertData,
       LegacyState,
@@ -190,7 +191,31 @@ export class AlertsClient<
       legacyAlert.replaceState(state);
     }
 
-    // Save the reported alert data
+    // Save the alert payload
+    if (alert.payload) {
+      this.reportedAlerts[alert.id] = alert.payload;
+    }
+  }
+
+  public setAlertData(
+    alert: UpdateableAlert<AlertData, LegacyState, LegacyContext, ActionGroupIds>
+  ) {
+    const context = alert.context ? alert.context : ({} as LegacyContext);
+
+    // Allow setting context and payload on known alerts only
+    // Alerts are known if they have been reported in this execution or are recovered
+    const alertToUpdate = this.legacyAlertsClient.getAlert(alert.id);
+
+    if (!alertToUpdate) {
+      throw new Error(
+        `Cannot set alert data for alert ${alert.id} because it has not been reported and it is not recovered.`
+      );
+    }
+
+    // Set the alert context
+    alertToUpdate.setContext(context);
+
+    // Save the alert payload
     if (alert.payload) {
       this.reportedAlerts[alert.id] = alert.payload;
     }
@@ -286,6 +311,7 @@ export class AlertsClient<
                 legacyAlert: recoveredAlerts[id],
                 rule: this.rule,
                 timestamp: currentTime,
+                payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
               })
             : buildUpdatedRecoveredAlert<AlertData>({
@@ -367,14 +393,17 @@ export class AlertsClient<
 
   public client() {
     return {
-      create: (
+      report: (
         alert: ReportedAlert<
           AlertData,
           LegacyState,
           LegacyContext,
           WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
         >
-      ) => this.create(alert),
+      ) => this.report(alert),
+      setAlertData: (
+        alert: UpdateableAlert<AlertData, LegacyState, LegacyContext, RecoveryActionGroupId>
+      ) => this.setAlertData(alert),
       getAlertLimitValue: (): number => this.factory().alertLimit.getValue(),
       setAlertLimitReached: (reached: boolean) =>
         this.factory().alertLimit.setLimitReached(reached),

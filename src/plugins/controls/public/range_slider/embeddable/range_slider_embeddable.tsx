@@ -13,7 +13,7 @@ import { batch } from 'react-redux';
 import { get, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { Subscription, lastValueFrom } from 'rxjs';
-import { debounceTime, distinctUntilChanged, skip, map } from 'rxjs/operators';
+import { distinctUntilChanged, skip, map } from 'rxjs/operators';
 
 import {
   compareFilters,
@@ -21,7 +21,6 @@ import {
   COMPARE_ALL_OPTIONS,
   RangeFilterParams,
   Filter,
-  Query,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { IContainer } from '@kbn/embeddable-plugin/public';
@@ -64,7 +63,12 @@ interface RangeSliderDataFetchProps {
 }
 
 const fieldMissingError = (fieldName: string) =>
-  new Error(`field ${fieldName} not found in index pattern`);
+  new Error(
+    i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
+      defaultMessage: 'Could not locate field: {fieldName}',
+      values: { fieldName },
+    })
+  );
 
 export const RangeSliderControlContext = createContext<RangeSliderEmbeddable | null>(null);
 export const useRangeSlider = (): RangeSliderEmbeddable => {
@@ -94,6 +98,7 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
   // Internal data fetching state for this input control.
   private dataView?: DataView;
   private field?: DataViewField;
+  private filters: Filter[] = [];
 
   // state management
   public select: RangeSliderReduxEmbeddableTools['select'];
@@ -127,7 +132,6 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
-
     this.initialize();
   }
 
@@ -137,19 +141,19 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
       this.setInitializationFinished();
     }
 
-    this.runRangeSliderQuery()
-      .catch((e) => {
-        batch(() => {
-          this.dispatch.setLoading(false);
-          this.dispatch.setErrorMessage(e.message);
-        });
-      })
-      .then(async () => {
-        if (initialValue) {
-          this.setInitializationFinished();
-        }
-        this.setupSubscriptions();
+    try {
+      await this.runRangeSliderQuery();
+      await this.buildFilter();
+      if (initialValue) {
+        this.setInitializationFinished();
+      }
+    } catch (e) {
+      batch(() => {
+        this.dispatch.setLoading(false);
+        this.dispatch.setErrorMessage(e.message);
       });
+    }
+    this.setupSubscriptions();
   };
 
   private setupSubscriptions = () => {
@@ -170,19 +174,21 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
 
     // fetch available min/max when input changes
     this.subscriptions.add(
-      dataFetchPipe.subscribe(async () =>
-        this.runRangeSliderQuery().catch((e) => {
+      dataFetchPipe.subscribe(async (changes) => {
+        try {
+          await this.runRangeSliderQuery();
+          await this.buildFilter();
+        } catch (e) {
           this.dispatch.setErrorMessage(e.message);
-        })
-      )
+        }
+      })
     );
 
-    // build filters when value change
+    // build filters when value changes
     this.subscriptions.add(
       this.getInput$()
         .pipe(
-          debounceTime(400),
-          distinctUntilChanged((a, b) => isEqual(a.value, b.value)),
+          distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', ''])),
           skip(1) // skip the first input update because initial filters will be built by initialize.
         )
         .subscribe(this.buildFilter)
@@ -218,12 +224,7 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
       try {
         this.field = this.dataView.getFieldByName(fieldName);
         if (this.field === undefined) {
-          throw new Error(
-            i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
-              defaultMessage: 'Could not locate field: {fieldName}',
-              values: { fieldName },
-            })
-          );
+          throw fieldMissingError(fieldName);
         }
 
         this.dispatch.setField(this.field?.toSpec());
@@ -241,15 +242,7 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
-    const embeddableInput = this.getInput();
-    const {
-      ignoreParentSettings,
-      fieldName,
-      query,
-      timeRange: globalTimeRange,
-      timeslice,
-    } = embeddableInput;
-    let { filters = [] } = embeddableInput;
+    const { fieldName } = this.getInput();
 
     if (!field) {
       batch(() => {
@@ -259,9 +252,9 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
       throw fieldMissingError(fieldName);
     }
 
-    if (ignoreParentSettings?.ignoreFilters) {
-      filters = [];
-    }
+    const embeddableInput = this.getInput();
+    const { ignoreParentSettings, timeRange: globalTimeRange, timeslice } = embeddableInput;
+    let { filters = [] } = embeddableInput;
 
     const timeRange =
       timeslice !== undefined
@@ -278,41 +271,36 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
       }
     }
 
+    this.filters = filters;
     const { min, max } = await this.fetchMinMax({
       dataView,
       field,
-      filters,
-      query,
     }).catch((e) => {
       throw e;
     });
 
     this.dispatch.setMinMax({
-      min: `${min ?? ''}`,
-      max: `${max ?? ''}`,
-    });
-    // build filter with new min/max
-    await this.buildFilter().catch((e) => {
-      throw e;
+      min: `${min ?? '-Infinity'}`,
+      max: `${max ?? 'Infinity'}`,
     });
   };
 
   private fetchMinMax = async ({
     dataView,
     field,
-    filters,
-    query,
   }: {
     dataView: DataView;
     field: DataViewField;
-    filters: Filter[];
-    query?: Query;
-  }) => {
+  }): Promise<{ min?: number; max?: number }> => {
     const searchSource = await this.dataService.searchSource.create();
     searchSource.setField('size', 0);
     searchSource.setField('index', dataView);
 
-    searchSource.setField('filter', filters);
+    const { ignoreParentSettings, query } = this.getInput();
+
+    if (!ignoreParentSettings?.ignoreFilters) {
+      searchSource.setField('filter', this.filters);
+    }
 
     if (query) {
       searchSource.setField('query', query);
@@ -344,8 +332,8 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
     const resp = await lastValueFrom(searchSource.fetch$()).catch((e) => {
       throw e;
     });
-    const min = get(resp, 'rawResponse.aggregations.minAgg.value', '');
-    const max = get(resp, 'rawResponse.aggregations.maxAgg.value', '');
+    const min = get(resp, 'rawResponse.aggregations.minAgg.value');
+    const max = get(resp, 'rawResponse.aggregations.maxAgg.value');
 
     return { min, max };
   };
@@ -353,15 +341,13 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
   private buildFilter = async () => {
     const {
       componentState: { min: availableMin, max: availableMax },
-      explicitInput: {
-        query,
-        timeRange,
-        filters = [],
-        ignoreParentSettings,
-        value: [selectedMin, selectedMax] = ['', ''],
-      },
+      explicitInput: { value },
     } = this.getState();
-    const hasData = !isEmpty(availableMin) && !isEmpty(availableMax);
+
+    const { ignoreParentSettings, query } = this.getInput();
+
+    const [selectedMin, selectedMax] = value ?? ['', ''];
+    const hasData = availableMin !== undefined && availableMax !== undefined;
     const hasLowerSelection = !isEmpty(selectedMin);
     const hasUpperSelection = !isEmpty(selectedMax);
     const hasEitherSelection = hasLowerSelection || hasUpperSelection;
@@ -383,15 +369,14 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
     const params = {} as RangeFilterParams;
 
     if (selectedMin) {
-      params.gte = Math.max(parseFloat(selectedMin), parseFloat(availableMin));
+      params.gte = Math.max(parseFloat(selectedMin), availableMin);
     }
 
     if (selectedMax) {
-      params.lte = Math.min(parseFloat(selectedMax), parseFloat(availableMax));
+      params.lte = Math.min(parseFloat(selectedMax), availableMax);
     }
 
     const rangeFilter = buildRangeFilter(field, params, dataView);
-
     rangeFilter.meta.key = field?.name;
     rangeFilter.meta.type = 'range';
     rangeFilter.meta.params = params;
@@ -400,19 +385,11 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
     if (!ignoreParentSettings?.ignoreValidations) {
       const searchSource = await this.dataService.searchSource.create();
 
-      filters.push(rangeFilter);
-
-      const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
-
-      if (timeFilter) {
-        filters.push(timeFilter);
-      }
+      const filters = [...this.filters, rangeFilter];
 
       searchSource.setField('size', 0);
       searchSource.setField('index', dataView);
-
       searchSource.setField('filter', filters);
-
       if (query) {
         searchSource.setField('query', query);
       }
@@ -424,7 +401,6 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
       } = await lastValueFrom(searchSource.fetch$());
 
       const docCount = typeof total === 'number' ? total : total?.value;
-
       if (!docCount) {
         batch(() => {
           this.dispatch.setLoading(false);
@@ -446,14 +422,13 @@ export class RangeSliderEmbeddable extends ClearableControlEmbeddable<RangeSlide
     });
   };
 
-  public clearSelections() {
-    this.dispatch.setSelectedRange(['', '']);
-  }
-
-  public reload = () => {
-    this.runRangeSliderQuery().catch((e) => {
+  public reload = async () => {
+    try {
+      await this.runRangeSliderQuery();
+      await this.buildFilter();
+    } catch (e) {
       this.dispatch.setErrorMessage(e.message);
-    });
+    }
   };
 
   public destroy = () => {
