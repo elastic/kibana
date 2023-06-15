@@ -25,9 +25,11 @@ import styled from 'styled-components';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { getMessageFromRawResponse } from './helpers';
 
-import { SettingsPopover } from './settings_popover';
+import { ConversationSettingsPopover } from './conversation_settings_popover/conversation_settings_popover';
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { PromptTextArea } from './prompt_textarea';
@@ -38,10 +40,8 @@ import { useSendMessages } from './use_send_messages';
 import type { Message } from '../assistant_context/types';
 import { ConversationSelector } from './conversation_selector';
 import { PromptEditor } from './prompt_editor';
-import { getCombinedMessage, getDefaultSystemPrompt, getSuperheroPrompt } from './prompt/helpers';
+import { getCombinedMessage } from './prompt/helpers';
 import * as i18n from './translations';
-import type { Prompt } from './types';
-import { getPromptById } from './prompt_editor/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { ConnectorSetup } from '../connectorland/connector_setup';
@@ -109,6 +109,14 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const { data: connectors, refetch: refetchConnectors } = useLoadConnectors({ http });
+  const defaultConnectorId = useMemo(() => connectors?.[0]?.id, [connectors]);
+  const defaultProvider = useMemo(
+    () =>
+      (connectors?.[0] as ActionConnectorProps<{ apiProvider: OpenAiProviderType }, unknown>)
+        ?.config?.apiProvider,
+    [connectors]
+  );
+
   const isWelcomeSetup = (connectors?.length ?? 0) === 0;
   const currentTitle: { title: string | JSX.Element; titleIcon: string } =
     isWelcomeSetup && welcomeConversation.theme?.title && welcomeConversation.theme?.titleIcon
@@ -119,10 +127,6 @@ const AssistantComponent: React.FC<Props> = ({
   const lastCommentRef = useRef<HTMLDivElement | null>(null);
 
   const [promptTextPreview, setPromptTextPreview] = useState<string>('');
-  const [systemPrompts] = useState<Prompt[]>([getDefaultSystemPrompt(), getSuperheroPrompt()]);
-  const [selectedSystemPromptId, setSelectedSystemPromptId] = useState<string | null>(
-    getDefaultSystemPrompt().id
-  );
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
   const [suggestedUserPrompt, setSuggestedUserPrompt] = useState<string | null>(null);
 
@@ -186,10 +190,7 @@ const AssistantComponent: React.FC<Props> = ({
         promptContexts,
         promptText,
         selectedPromptContextIds,
-        selectedSystemPrompt: getPromptById({
-          id: selectedSystemPromptId ?? '',
-          prompts: systemPrompts,
-        }),
+        selectedSystemPrompt: currentConversation.apiConfig.defaultSystemPrompt,
       });
 
       const updatedMessages = appendMessage({
@@ -217,9 +218,7 @@ const AssistantComponent: React.FC<Props> = ({
       promptContexts,
       selectedConversationId,
       selectedPromptContextIds,
-      selectedSystemPromptId,
       sendMessages,
-      systemPrompts,
     ]
   );
 
@@ -306,9 +305,16 @@ const AssistantComponent: React.FC<Props> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  width: 335px;
+                `}
+              >
                 <ConversationSelector
                   conversationId={selectedConversationId}
+                  defaultConnectorId={defaultConnectorId}
+                  defaultProvider={defaultProvider}
                   onSelectionChange={(id) => setSelectedConversationId(id)}
                   shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
                   isDisabled={isWelcomeSetup}
@@ -380,10 +386,8 @@ const AssistantComponent: React.FC<Props> = ({
                   promptContexts={promptContexts}
                   promptTextPreview={promptTextPreview}
                   selectedPromptContextIds={selectedPromptContextIds}
-                  selectedSystemPromptId={selectedSystemPromptId}
+                  conversation={currentConversation}
                   setSelectedPromptContextIds={setSelectedPromptContextIds}
-                  setSelectedSystemPromptId={setSelectedSystemPromptId}
-                  systemPrompts={systemPrompts}
                 />
               )}
             </>
@@ -422,7 +426,6 @@ const AssistantComponent: React.FC<Props> = ({
                     onClick={() => {
                       setPromptTextPreview('');
                       clearConversation(selectedConversationId);
-                      setSelectedSystemPromptId(getDefaultSystemPrompt().id);
                       setSelectedPromptContextIds([]);
                       setSuggestedUserPrompt('');
                     }}
@@ -443,7 +446,7 @@ const AssistantComponent: React.FC<Props> = ({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
-                <SettingsPopover
+                <ConversationSettingsPopover
                   actionTypeRegistry={actionTypeRegistry}
                   conversation={currentConversation}
                   isDisabled={isWelcomeSetup}

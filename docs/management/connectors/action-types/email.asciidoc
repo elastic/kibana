@@ -3,6 +3,10 @@
 ++++
 <titleabbrev>Email</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can send email from your server.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 The email connector uses the SMTP protocol to send mail messages, using an 
 integration of https://nodemailer.com/[Nodemailer]. An exception is Microsoft 
@@ -13,7 +17,7 @@ message text is sent as both plain text and html text.
 [NOTE]
 ====
 * For emails to have a footer with a link back to {kib}, set the 
-<<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
+<<server-publicBaseUrl,`server.publicBaseUrl`>> configuration setting.
 * When the 
 <<action-config-email-domain-allowlist,`xpack.actions.email.domain_allowlist`>> 
 configuration setting is used, the email addresses used for all of the Sender 
@@ -50,8 +54,7 @@ https://nodemailer.com/message/addresses/[Nodemailer address documentation] for
 more information.
 
 Service::
-The name of the email service. If `service` is one of Nodemailer's 
-https://nodemailer.com/smtp/well-known/[well-known email service providers], the 
+The name of the email service. If `service` is one of Nodemailer's well-known email service providers, the 
 `host`, `port`, and `secure` properties are defined with the default values and 
 disabled for modification. If `service` is `MS Exchange Server`, the `host`, 
 `port`, and `secure` properties are ignored and `tenantId`, `clientId`, 
@@ -60,7 +63,7 @@ disabled for modification. If `service` is `MS Exchange Server`, the `host`,
 
 Host::
 Host name of the service provider. If you are using the 
-<<action-settings, `xpack.actions.allowedHosts`>> setting, make sure this 
+<<action-settings,`xpack.actions.allowedHosts`>> setting, make sure this 
 hostname is added to the allowed hosts.
 
 Port::
@@ -126,9 +129,8 @@ Config defines information for the connector type.
 
 `service`::
 The name of the email service. If `service` is `elastic_cloud` (for Elastic 
-Cloud notifications) or one of Nodemailer's 
-https://nodemailer.com/smtp/well-known/[well-known email service providers], the 
-`host`, `port`, and `secure` properties are ignored. If `service` is `other`,  
+Cloud notifications) or one of Nodemailer's well-known email service providers,
+the `host`, `port`, and `secure` properties are ignored. If `service` is `other`,  
 the `host` and `port` properties must be defined. For more information on the 
 `gmail` service value, refer to 
 https://nodemailer.com/usage/using-gmail/[Nodemailer Gmail documentation]. If 
@@ -167,11 +169,11 @@ A string that corresponds to *Username*. Required if `hasAuth` is set to `true`.
 
 `password`::
 A string that corresponds to *Password*. Should be stored in the 
-<<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
+<<creating-keystore,{kib} keystore>>. Required if `hasAuth` is set to `true`.
 
 `clientSecret`::
 A string that corresponds to *Client Secret*. Should be stored in the 
-<<creating-keystore, {kib} keystore>>. Required if `service` is set to 
+<<creating-keystore,{kib} keystore>>. Required if `service` is set to 
 `exchange_server`, which uses OAuth 2.0 Client Credentials Authentication.
 
 [float]
@@ -203,7 +205,7 @@ The message text of the email. Markdown format is supported.
 [[email-connector-networking-configuration]]
 === Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize 
+Use the <<action-settings,Action configuration settings>> to customize 
 connector networking configurations, such as proxies, certificates, or TLS 
 settings. You can set configurations that apply to all your connectors or use 
 `xpack.actions.customHostSettings` to set per-host configurations.
@@ -225,7 +227,7 @@ different email systems, refer to:
 * <<exchange>>
 
 For other email servers, you can check the list of well-known services that 
-Nodemailer supports in the JSON file 
+Nodemailer supports in the JSON file
 https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json[well-known/services.json]. 
 The properties of the objects in those files &mdash; `host`, `port`, and 
 `secure` &mdash; correspond to the same email connector configuration 
@@ -434,4 +436,3 @@ secrets:
 <1> This application information is on the https://go.microsoft.com/fwlink/?linkid=2083908[Azure portal – App registrations].
 <2> Some organizations configure Exchange to validate that the `from` field is a
     valid local email account.
-

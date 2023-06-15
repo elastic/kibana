@@ -35,6 +35,9 @@ export function useFetchIndexPatternFields(
             query: {
               pattern: indexPattern,
             },
+            headers: {
+              'Elastic-Api-Version': 1,
+            },
             signal,
           }
         );

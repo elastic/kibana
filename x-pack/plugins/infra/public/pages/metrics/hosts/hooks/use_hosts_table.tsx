@@ -116,36 +116,37 @@ const titleLabel = i18n.translate('xpack.infra.hostsViewPage.table.nameColumnHea
   defaultMessage: 'Name',
 });
 
-const averageCpuUsageLabel = i18n.translate(
-  'xpack.infra.hostsViewPage.table.averageCpuUsageColumnHeader',
+const cpuUsageLabel = i18n.translate('xpack.infra.hostsViewPage.table.cpuUsageColumnHeader', {
+  defaultMessage: 'CPU usage (avg.)',
+});
+
+const diskSpaceUsageLabel = i18n.translate(
+  'xpack.infra.hostsViewPage.table.diskSpaceUsageColumnHeader',
   {
-    defaultMessage: 'CPU usage (avg.)',
+    defaultMessage: 'Disk Space Usage (avg.)',
   }
 );
 
-const diskLatencyLabel = i18n.translate('xpack.infra.hostsViewPage.table.diskLatencyColumnHeader', {
-  defaultMessage: 'Disk Latency (avg.)',
-});
-
-const averageTXLabel = i18n.translate('xpack.infra.hostsViewPage.table.averageTxColumnHeader', {
+const txLabel = i18n.translate('xpack.infra.hostsViewPage.table.txColumnHeader', {
   defaultMessage: 'TX (avg.)',
 });
 
-const averageRXLabel = i18n.translate('xpack.infra.hostsViewPage.table.averageRxColumnHeader', {
+const rxLabel = i18n.translate('xpack.infra.hostsViewPage.table.rxColumnHeader', {
   defaultMessage: 'RX (avg.)',
 });
 
-const averageTotalMemoryLabel = i18n.translate(
-  'xpack.infra.hostsViewPage.table.averageMemoryTotalColumnHeader',
-  {
-    defaultMessage: 'Memory total (avg.)',
-  }
-);
+const memoryFreeLabel = i18n.translate('xpack.infra.hostsViewPage.table.memoryFreeColumnHeader', {
+  defaultMessage: 'Memory Free (avg.)',
+});
 
-const averageMemoryUsageLabel = i18n.translate(
-  'xpack.infra.hostsViewPage.table.averageMemoryUsageColumnHeader',
+const memoryUsageLabel = i18n.translate('xpack.infra.hostsViewPage.table.memoryUsageColumnHeader', {
+  defaultMessage: 'Memory Usage (avg.)',
+});
+
+const normalizedLoad1mLabel = i18n.translate(
+  'xpack.infra.hostsViewPage.table.normalizedLoad1mColumnHeader',
   {
-    defaultMessage: 'Memory usage (avg.)',
+    defaultMessage: 'Normalized Load (avg.)',
   }
 );
 
@@ -255,9 +256,10 @@ export const useHostsTable = () => {
             onClick={() => reportHostEntryClick(title)}
           />
         ),
+        width: '20%',
       },
       {
-        name: averageCpuUsageLabel,
+        name: cpuUsageLabel,
         field: 'cpu',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-cpuUsage',
@@ -265,44 +267,54 @@ export const useHostsTable = () => {
         align: 'right',
       },
       {
-        name: diskLatencyLabel,
-        field: 'diskLatency',
+        name: normalizedLoad1mLabel,
+        field: 'normalizedLoad1m',
         sortable: true,
-        'data-test-subj': 'hostsView-tableRow-diskLatency',
-        render: (avg: number) => formatMetric('diskLatency', avg),
+        'data-test-subj': 'hostsView-tableRow-normalizedLoad1m',
+        render: (avg: number) => formatMetric('normalizedLoad1m', avg),
         align: 'right',
       },
       {
-        name: averageRXLabel,
+        name: memoryUsageLabel,
+        field: 'memory',
+        sortable: true,
+        'data-test-subj': 'hostsView-tableRow-memoryTotal',
+        render: (avg: number) => formatMetric('memory', avg),
+        align: 'right',
+      },
+      {
+        name: memoryFreeLabel,
+        field: 'memoryFree',
+        sortable: true,
+        'data-test-subj': 'hostsView-tableRow-memoryFree',
+        render: (avg: number) => formatMetric('memoryFree', avg),
+        align: 'right',
+      },
+      {
+        name: diskSpaceUsageLabel,
+        field: 'diskSpaceUsage',
+        sortable: true,
+        'data-test-subj': 'hostsView-tableRow-diskSpaceUsage',
+        render: (avg: number) => formatMetric('diskSpaceUsage', avg),
+        align: 'right',
+      },
+      {
+        name: rxLabel,
         field: 'rx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
         render: (avg: number) => formatMetric('rx', avg),
         align: 'right',
+        width: '120px',
       },
       {
-        name: averageTXLabel,
+        name: txLabel,
         field: 'tx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',
         render: (avg: number) => formatMetric('tx', avg),
         align: 'right',
-      },
-      {
-        name: averageTotalMemoryLabel,
-        field: 'memoryTotal',
-        sortable: true,
-        'data-test-subj': 'hostsView-tableRow-memoryTotal',
-        render: (avg: number) => formatMetric('memoryTotal', avg),
-        align: 'right',
-      },
-      {
-        name: averageMemoryUsageLabel,
-        field: 'memory',
-        sortable: true,
-        'data-test-subj': 'hostsView-tableRow-memory',
-        render: (avg: number) => formatMetric('memory', avg),
-        align: 'right',
+        width: '120px',
       },
     ],
     [
