@@ -8,7 +8,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route } from '@kbn/shared-ux-router';
+import { Router, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
