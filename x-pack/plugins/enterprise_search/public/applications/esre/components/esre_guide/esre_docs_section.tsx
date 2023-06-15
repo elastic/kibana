@@ -20,7 +20,7 @@ export const EsreDocsSection: React.FC = () => (
             <EuiTitle>
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.esreDocsSection.learn.title"
+                  id="xpack.enterpriseSearch.esre.esreDocsSection.title"
                   defaultMessage="Dive deeper with the ESRE docs"
                 />
               </p>
@@ -30,7 +30,7 @@ export const EsreDocsSection: React.FC = () => (
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.esreDocsSection.learn.description"
+                  id="xpack.enterpriseSearch.esre.esreDocsSection.description"
                   defaultMessage="To learn more about how to get started with ESRE, and test these tools with concrete examples, visit the ESRE documentation."
                 />
               </p>
