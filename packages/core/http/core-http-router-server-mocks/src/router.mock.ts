@@ -22,11 +22,8 @@ import type {
 } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { createVersionedRouterMock, type MockedVersionedRouter } from './versioned_router.mock';
-import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 
-export type RouterMock<Ctx extends RequestHandlerContext = any> = jest.Mocked<IRouter<Ctx>> & {
-  versioned: MockedVersionedRouter;
-};
+export type RouterMock = jest.Mocked<IRouter<any>> & { versioned: MockedVersionedRouter };
 
 function createRouterMock({ routerPath = '' }: { routerPath?: string } = {}): RouterMock {
   return {
