@@ -35,6 +35,21 @@ export interface BurnRateWindowParams {
   isLoading?: boolean;
 }
 
+const SUBDUED = 'subdued';
+const DANGER = 'danger';
+const SUCCESS = 'success';
+const WARNING = 'warning';
+
+function getColorBasedOnBurnRate(target: number, burnRate: number | null) {
+  if (burnRate === null || burnRate === 0) {
+    return SUBDUED;
+  }
+  if (burnRate > target) {
+    return DANGER;
+  }
+  return SUCCESS;
+}
+
 export function BurnRateWindow({
   title,
   target,
@@ -42,23 +57,17 @@ export function BurnRateWindow({
   shortWindow,
   isLoading,
 }: BurnRateWindowParams) {
-  const longWindowColor =
-    longWindow.burnRate === null ? 'subdued' : longWindow.burnRate > target ? 'danger' : 'success';
-  const shortWindowColor =
-    shortWindow.burnRate === null
-      ? 'subdued'
-      : shortWindow.burnRate > target
-      ? 'danger'
-      : 'success';
+  const longWindowColor = getColorBasedOnBurnRate(target, longWindow.burnRate);
+  const shortWindowColor = getColorBasedOnBurnRate(target, shortWindow.burnRate);
 
   const overallColor =
-    longWindowColor === 'danger' && shortWindowColor === 'danger'
-      ? 'danger'
+    longWindowColor === DANGER && shortWindowColor === DANGER
+      ? DANGER
       : longWindowColor !== shortWindowColor
-      ? 'warning'
-      : longWindowColor === 'subdued' && shortWindowColor === 'subdued'
-      ? 'subdued'
-      : 'success';
+      ? WARNING
+      : longWindowColor === SUBDUED && shortWindowColor === SUBDUED
+      ? SUBDUED
+      : SUCCESS;
   return (
     <EuiPanel color={overallColor}>
       <EuiText color={overallColor}>
