@@ -516,7 +516,13 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "`);
+              "value": "${expectedStatus}",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
     });
 
     it.each([
@@ -536,7 +542,13 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "`);
+              "value": "${expectedSeverity}",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+        `);
     });
 
     it('creates a filter for the time range', () => {
@@ -866,7 +878,9 @@ describe('utils', () => {
           "rootSearchFields": Array [
             "_id",
           ],
-          "search": "\\"`);
+          "search": "\\"${uuid}\\" \\"cases:${uuid}\\"",
+        }
+      `);
     });
 
     it('search value not changed and no rootSearchFields when search is non-uuid', () => {
