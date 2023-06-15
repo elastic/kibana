@@ -683,9 +683,9 @@ describe('Textbased Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = TextBasedDatasource.initialize();
-      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange)).toEqual(
-        null
-      );
+      expect(
+        TextBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange, new Date())
+      ).toEqual(null);
     });
 
     it('should generate an expression for an SQL query', async () => {
@@ -735,8 +735,9 @@ describe('Textbased Data Source', () => {
         ],
       } as unknown as TextBasedPrivateState;
 
-      expect(TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange))
-        .toMatchInlineSnapshot(`
+      expect(
+        TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange, new Date())
+      ).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {

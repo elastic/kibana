@@ -77,10 +77,6 @@ const StyledDatePicker = styled.div`
   .euiFormControlLayout--group {
     background-color: rgba(0, 119, 204, 0.2);
   }
-
-  .euiDatePickerRange--readOnly {
-    background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
-  }
 `;
 const EndpointListNavLink = memo<{
   name: string;

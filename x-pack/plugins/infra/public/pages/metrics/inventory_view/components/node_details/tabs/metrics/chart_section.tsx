@@ -13,7 +13,7 @@ import {
   Position,
   Settings,
   TickFormatter,
-  TooltipValue,
+  TooltipProps,
 } from '@elastic/charts';
 import moment from 'moment';
 import React from 'react';
@@ -59,9 +59,8 @@ export const ChartSection = ({
 }: Props) => {
   const isDarkMode = useIsDarkMode();
   const metrics = series.map((chartSeries) => chartSeries.metric);
-  const tooltipProps = {
-    headerFormatter: (tooltipValue: TooltipValue) =>
-      moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
   };
 
   return (
