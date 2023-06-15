@@ -106,6 +106,7 @@ export const useInitNavNode = <
 >(
   node: NodePropsEnhanced<LinkId, Id, ChildrenId>
 ) => {
+  const { isActive: isActiveControlled } = node;
   /**
    * Map of children nodes
    */
@@ -142,7 +143,8 @@ export const useInitNavNode = <
    * the list of active routes based on current URL location (passed by the Chrome service)
    */
   const [nodePath, setNodePath] = useState<string[] | null>(null);
-  const [isActive, setIsActive] = useState(false);
+  const [isActiveState, setIsActive] = useState(false);
+  const isActive = isActiveControlled ?? isActiveState;
 
   /**
    * Whenever a child node is registered, we need to re-register the current node
