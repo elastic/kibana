@@ -2537,4 +2537,5 @@ describe('Lens migrations', () => {
       );
     });
   });
+  // For 8.8.0 tests are already executed at unit level in common_migrations
 });
