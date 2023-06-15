@@ -23,6 +23,11 @@ import {
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerJobGenerationRoutes } from '../generate_from_jobparams';
+import {
+  PdfExportType,
+  PdfExportTypeSetupDeps,
+  PdfExportTypeStartDeps,
+} from '../../../export_types/printable_pdf_v2';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -39,6 +44,30 @@ describe('POST /api/reporting/generate', () => {
   });
 
   const mockLogger = loggingSystemMock.createLogger();
+
+  const mockPdfExportType: Partial<PdfExportType> = {
+    id: 'printablePdf',
+    name: 'not sure why this field exists',
+    jobType: 'printable_pdf',
+    jobContentEncoding: 'base64',
+    jobContentExtension: 'pdf',
+    validLicenses: ['basic', 'gold'],
+    setup(setupDeps: PdfExportTypeSetupDeps): void {
+      throw new Error('Function not implemented.');
+    },
+    start(startDeps: PdfExportTypeStartDeps): void {
+      throw new Error('Function not implemented.');
+    },
+    getSpaceId: jest.fn(),
+    getSavedObjectsClient: jest.fn(),
+    getUiSettingsServiceFactory: jest.fn(),
+    getUiSettingsClient: jest.fn(),
+    getFakeRequest: jest.fn(),
+    getServerInfo: jest.fn(),
+    getScreenshots: jest.fn(),
+    createJob: jest.fn(),
+    runTask: jest.fn(),
+  };
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
@@ -77,17 +106,7 @@ describe('POST /api/reporting/generate', () => {
     );
 
     mockExportTypesRegistry = new ExportTypesRegistry();
-    mockExportTypesRegistry.register({
-      id: 'printablePdf',
-      name: 'not sure why this field exists',
-      jobType: 'printable_pdf',
-      jobContentEncoding: 'base64',
-      jobContentExtension: 'pdf',
-      validLicenses: ['basic', 'gold'],
-      createJobFnFactory: () => async () => ({ createJobTest: { test1: 'yes' } } as any),
-      runTaskFnFactory: () => async () => ({ runParamsTest: { test2: 'yes' } } as any),
-    });
-    mockReportingCore.getExportTypesRegistry = () => mockExportTypesRegistry;
+    mockExportTypesRegistry.register(mockPdfExportType);
 
     store = await mockReportingCore.getStore();
     store.addReport = jest.fn().mockImplementation(async (opts) => {

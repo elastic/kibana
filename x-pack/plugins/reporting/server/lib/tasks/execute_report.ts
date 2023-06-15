@@ -249,7 +249,6 @@ export class ExecuteReportTask implements ReportingTask {
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
     }
-
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);

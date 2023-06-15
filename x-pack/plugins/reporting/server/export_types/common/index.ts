@@ -22,10 +22,8 @@ export interface TimeRangeParams {
 }
 
 export interface ExportType<
-  // SetupDeps extends object = any,
-  // StartDeps extends object = any,
-  SetupDeps = object,
-  StartDeps = object,
+  SetupDeps = any,
+  StartDeps = any,
   JobParamsType extends object = any,
   TaskPayloadType extends object = any
 > {

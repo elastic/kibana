@@ -115,7 +115,6 @@ export class ReportingCore {
     this.config = config;
 
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
-    // @ts-ignore
     this.exportTypesRegistry.register(this.pdfExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;

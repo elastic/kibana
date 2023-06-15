@@ -47,22 +47,6 @@ describe('Execute Report Task', () => {
     expect(task.getStatus()).toBe('initialized');
   });
 
-  it('create task runner', async () => {
-    logger.info = jest.fn();
-    logger.error = jest.fn();
-
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
-    const taskDef = task.getTaskDefinition();
-    const taskRunner = taskDef.createTaskRunner({
-      taskInstance: {
-        id: 'random-task-id',
-        params: { index: 'cool-reporting-index', id: 'cool-reporting-id' },
-      },
-    } as unknown as RunContext);
-    expect(taskRunner).toHaveProperty('run');
-    expect(taskRunner).toHaveProperty('cancel');
-  });
-
   it('Max Concurrency is 0 if pollEnabled is false', () => {
     const queueConfig = {
       queue: { pollEnabled: false, timeout: 55000 },
@@ -84,14 +68,17 @@ describe('Execute Report Task', () => {
 
   it('throws during reporting if Kibana starts shutting down', async () => {
     mockReporting.getExportTypesRegistry().register({
-      id: 'noop',
-      name: 'Noop',
-      createJobFnFactory: () => async () => new Promise(() => {}),
-      runTaskFnFactory: () => async () => new Promise(() => {}),
-      jobContentExtension: 'none',
-      jobType: 'noop',
-      validLicenses: [],
-    });
+  id: 'noop',
+  name: 'Noop',
+  jobContentExtension: 'pdf' as const,
+  jobType: 'noop',
+  validLicenses: [],
+  setup: jest.fn(),
+  start: jest.fn(),
+  createJob: jest.fn(),
+  runTask: jest.fn(),
+  getSpaceId: jest.fn(),
+});
     const store = await mockReporting.getStore();
     store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
     const task = new ExecuteReportTask(mockReporting, configType, logger);

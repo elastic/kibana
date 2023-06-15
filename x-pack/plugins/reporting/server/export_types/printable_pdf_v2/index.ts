@@ -93,7 +93,7 @@ export class PdfExportType
   startDeps!: PdfExportTypeStartDeps;
 
   constructor(
-    private core: CoreSetup,
+    core: CoreSetup,
     private config: ReportingConfigType,
     private logger: Logger,
     private context: PluginInitializerContext<ReportingConfigType>
@@ -216,7 +216,7 @@ export class PdfExportType
    * @param cancellationToken
    * @param stream
    */
-  async runTask(
+  public async runTask(
     payload: TaskPayloadPDFV2,
     jobId: string,
     cancellationToken: CancellationToken,
