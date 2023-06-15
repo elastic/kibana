@@ -18,7 +18,7 @@ export const cpuLineChart: LensLineChartConfig = {
   },
 };
 
-export const cpu: LensChartConfig = {
+export const cpuUsage: LensChartConfig = {
   title: 'CPU Usage',
   formula: {
     formula:
