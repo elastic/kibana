@@ -19,11 +19,11 @@
 
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
-orig_archive="test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects"
+orig_archive="x-pack/test/functional/es_archives/logstash_functional"
 new_archive="x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects"
-testFiles=("test/plugin_functional/test_suites/saved_objects_management/scroll_count.ts")
+testFiles=("test/api_integration/apis/is_es_archiver_slow/local_and_ess_big_loop.ts")
 
-test_config="test/plugin_functional/config.ts"
+test_config="test/api_integration/apis/local_and_ess_is_es_archiver_slow/config.ts"
 
 list_stragglers() {
 
