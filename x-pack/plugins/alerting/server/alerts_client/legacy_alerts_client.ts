@@ -127,6 +127,10 @@ export class LegacyAlertsClient<
     return this.trackedAlerts;
   }
 
+  public getAlert(id: string) {
+    return this.alertFactory?.get(id);
+  }
+
   public processAndLogAlerts({
     eventLogger,
     ruleRunMetricsStore,
