@@ -25,7 +25,7 @@ export function DataPreviewChart() {
 
   const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
-  const dateFormat = 'HH:mm';
+  const dateFormat = uiSettings.get('dateFormat');
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
   if (getFieldState('indicator').invalid) {
@@ -54,27 +54,7 @@ export function DataPreviewChart() {
                 <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
               }
             />
-            <Axis
-              id="x-axis"
-              title={i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.xTitle', {
-                defaultMessage: 'Last hour',
-              })}
-              position={Position.Bottom}
-              style={{
-                tickLabel: {
-                  visible: true,
-                  padding: 4,
-                  rotation: 0,
-                },
-                tickLine: {
-                  visible: true,
-                  padding: 4,
-                  size: 0.001,
-                },
-              }}
-              gridLine={{ visible: false }}
-              tickFormat={(d) => moment(d).format(dateFormat)}
-            />
+
             <Axis
               id="y-axis"
               title={i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.yTitle', {
@@ -84,18 +64,38 @@ export function DataPreviewChart() {
               position={Position.Left}
               tickFormat={(d) => numeral(d).format(percentFormat)}
             />
+
+            <Axis
+              id="time"
+              title={i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.xTitle', {
+                defaultMessage: 'Last hour',
+              })}
+              tickFormat={(d) => moment(d).format(dateFormat)}
+              position={Position.Bottom}
+              timeAxisLayerCount={2}
+              gridLine={{ visible: true }}
+              style={{
+                tickLine: { size: 0.0001, padding: 4, visible: true },
+                tickLabel: {
+                  alignment: {
+                    horizontal: Position.Left,
+                    vertical: Position.Bottom,
+                  },
+                  padding: 0,
+                  offset: { x: 0, y: 0 },
+                },
+              }}
+            />
             <LineSeries
               id="SLI"
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="date"
               yAccessors={['value']}
-              data={previewData.map((datum, i) => ({
-                date: datum.date,
+              data={previewData.map((datum) => ({
+                date: new Date(datum.date).getTime(),
                 value: datum.sliValue >= 0 ? datum.sliValue : null,
               }))}
-              yNice
-              timeZone="local"
             />
           </Chart>
         </EuiPanel>
