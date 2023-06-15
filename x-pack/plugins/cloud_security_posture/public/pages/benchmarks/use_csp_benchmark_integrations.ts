@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { ListResult } from '@kbn/fleet-plugin/common';
-import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
+import { BENCHMARKS_API_CURRENT_VERSION, BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
 import type { BenchmarksQueryParams } from '../../../common/schemas/benchmark';
 import { useKibana } from '../../common/hooks/use_kibana';
 import type { Benchmark } from '../../../common/types';
@@ -40,7 +40,11 @@ export const useCspBenchmarkIntegrations = ({
 
   return useQuery(
     [QUERY_KEY, query],
-    () => http.get<ListResult<Benchmark>>(BENCHMARKS_ROUTE_PATH, { query, version: '1' }),
+    () =>
+      http.get<ListResult<Benchmark>>(BENCHMARKS_ROUTE_PATH, {
+        query,
+        version: BENCHMARKS_API_CURRENT_VERSION,
+      }),
     { keepPreviousData: true }
   );
 };
