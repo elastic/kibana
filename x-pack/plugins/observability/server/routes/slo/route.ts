@@ -306,9 +306,9 @@ const getSloDiagnosisRoute = createObservabilityServerRoute({
 });
 
 const getSloBurnRates = createObservabilityServerRoute({
-  endpoint: 'POST /internal/observability/slos/{id}/_burn_rates 2023-06-14',
+  endpoint: 'POST /internal/observability/slos/{id}/_burn_rates',
   options: {
-    tags: [],
+    tags: ['access:slo_read'],
   },
   params: getSLOBurnRatesParamsSchema,
   handler: async ({ context, params }) => {
