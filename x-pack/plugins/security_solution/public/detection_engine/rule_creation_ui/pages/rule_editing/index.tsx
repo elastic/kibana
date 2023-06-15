@@ -24,6 +24,7 @@ import { noop } from 'lodash';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
+import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
 import type { RuleUpdateProps } from '../../../../../common/detection_engine/rule_schema';
 import type { Rule } from '../../../rule_management/logic';
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
@@ -89,9 +90,10 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   );
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
-  const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
+  const [isQueryBarValid, setIsQueryBarValid] = useState(false);
+  const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -141,6 +143,20 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
     aboutStepDefault: aboutRuleData,
     scheduleStepDefault: scheduleRuleData,
     actionsStepDefault: ruleActionsData,
+  });
+
+  const isPreviewDisabled = getIsRulePreviewDisabled({
+    ruleType: defineStepData.ruleType,
+    isQueryBarValid,
+    isThreatQueryBarValid,
+    index: defineStepData.index,
+    dataViewId: defineStepData.dataViewId,
+    dataSourceType: defineStepData.dataSourceType,
+    threatIndex: defineStepData.threatIndex,
+    threatMapping: defineStepData.threatMapping,
+    machineLearningJobId: defineStepData.machineLearningJobId,
+    queryBar: defineStepData.queryBar,
+    newTermsFields: defineStepData.newTermsFields,
   });
 
   const loading = userInfoLoading || listsConfigLoading;
@@ -210,15 +226,24 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   kibanaDataViews={dataViewOptions}
                   indicesConfig={indicesConfig}
                   threatIndicesConfig={threatIndicesConfig}
-                  onPreviewDisabledStateChange={setIsPreviewDisabled}
                   defaultSavedQuery={savedQuery}
                   form={defineStepForm}
                   optionsSelected={eqlOptionsSelected}
                   setOptionsSelected={setEqlOptionsSelected}
-                  key="defineStep"
                   indexPattern={indexPattern}
                   isIndexPatternLoading={isIndexPatternLoading}
                   browserFields={browserFields}
+                  isQueryBarValid={isQueryBarValid}
+                  setIsQueryBarValid={setIsQueryBarValid}
+                  setIsThreatQueryBarValid={setIsThreatQueryBarValid}
+                  ruleType={defineStepData.ruleType}
+                  index={defineStepData.index}
+                  threatIndex={defineStepData.threatIndex}
+                  groupByFields={defineStepData.groupByFields}
+                  dataSourceType={defineStepData.dataSourceType}
+                  shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
+                  queryBarTitle={defineStepData.queryBar.title}
+                  queryBarSavedId={defineStepData.queryBar.saved_id}
                 />
               )}
               <EuiSpacer />
@@ -331,8 +356,9 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
       indexPattern,
       isIndexPatternLoading,
       browserFields,
-      aboutStepData,
+      isQueryBarValid,
       defineStepData,
+      aboutStepData,
       aboutStepForm,
       scheduleStepData,
       scheduleStepForm,

@@ -79,6 +79,7 @@ import {
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
+import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { NextStep } from '../../../../detections/components/rules/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
@@ -199,10 +200,25 @@ const CreateRulePageComponent: React.FC = () => {
   const ruleType = defineStepData.ruleType;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
-  const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
   const [prevRuleType, setPrevRuleType] = useState<string>();
+  const [isQueryBarValid, setIsQueryBarValid] = useState(false);
+  const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
+
+  const isPreviewDisabled = getIsRulePreviewDisabled({
+    ruleType,
+    isQueryBarValid,
+    isThreatQueryBarValid,
+    index: defineStepData.index,
+    dataViewId: defineStepData.dataViewId,
+    dataSourceType: defineStepData.dataSourceType,
+    threatIndex: defineStepData.threatIndex,
+    threatMapping: defineStepData.threatMapping,
+    machineLearningJobId: defineStepData.machineLearningJobId,
+    queryBar: defineStepData.queryBar,
+    newTermsFields: defineStepData.newTermsFields,
+  });
 
   useEffect(() => {
     if (prevRuleType !== ruleType) {
@@ -442,6 +458,18 @@ const CreateRulePageComponent: React.FC = () => {
     submitRule(RuleStep.ruleActions, true);
   }, [submitRule]);
 
+  const memoDefineStepReadOnly = useMemo(
+    () =>
+      activeStep !== RuleStep.defineRule && (
+        <StepDefineRuleReadOnly
+          addPadding
+          defaultValues={defineStepData}
+          descriptionColumns="singleSplit"
+          indexPattern={indexPattern}
+        />
+      ),
+    [activeStep, defineStepData, indexPattern]
+  );
   const memoStepDefineRule = useMemo(
     () => (
       <>
@@ -456,13 +484,23 @@ const CreateRulePageComponent: React.FC = () => {
             kibanaDataViews={dataViewOptions}
             indicesConfig={indicesConfig}
             threatIndicesConfig={threatIndicesConfig}
-            onPreviewDisabledStateChange={setIsPreviewDisabled}
             form={defineStepForm}
             optionsSelected={eqlOptionsSelected}
             setOptionsSelected={setEqlOptionsSelected}
             indexPattern={indexPattern}
             isIndexPatternLoading={isIndexPatternLoading}
             browserFields={browserFields}
+            isQueryBarValid={isQueryBarValid}
+            setIsQueryBarValid={setIsQueryBarValid}
+            setIsThreatQueryBarValid={setIsThreatQueryBarValid}
+            ruleType={defineStepData.ruleType}
+            index={defineStepData.index}
+            threatIndex={defineStepData.threatIndex}
+            groupByFields={defineStepData.groupByFields}
+            dataSourceType={defineStepData.dataSourceType}
+            shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
+            queryBarTitle={defineStepData.queryBar.title}
+            queryBarSavedId={defineStepData.queryBar.saved_id}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -470,18 +508,7 @@ const CreateRulePageComponent: React.FC = () => {
             isDisabled={isCreateRuleLoading}
           />
         </div>
-        <div
-          style={{
-            display: activeStep === RuleStep.defineRule ? 'none' : undefined,
-          }}
-        >
-          <StepDefineRuleReadOnly
-            addPadding
-            defaultValues={defineStepData}
-            descriptionColumns="singleSplit"
-            indexPattern={indexPattern}
-          />
-        </div>
+        {memoDefineStepReadOnly}
       </>
     ),
     [
@@ -489,14 +516,23 @@ const CreateRulePageComponent: React.FC = () => {
       browserFields,
       dataViewOptions,
       defineRuleNextStep,
-      defineStepData,
+      defineStepData.dataSourceType,
+      defineStepData.groupByFields,
+      defineStepData.index,
+      defineStepData.queryBar.saved_id,
+      defineStepData.queryBar.title,
+      defineStepData.ruleType,
+      defineStepData.shouldLoadQueryDynamically,
+      defineStepData.threatIndex,
       defineStepForm,
       eqlOptionsSelected,
       indexPattern,
       indicesConfig,
       isCreateRuleLoading,
       isIndexPatternLoading,
+      isQueryBarValid,
       loading,
+      memoDefineStepReadOnly,
       setEqlOptionsSelected,
       threatIndicesConfig,
     ]
@@ -516,6 +552,17 @@ const CreateRulePageComponent: React.FC = () => {
     [defineStepForm.isValid, editStep]
   );
 
+  const memoAboutStepReadOnly = useMemo(
+    () =>
+      activeStep !== RuleStep.aboutRule && (
+        <StepAboutRuleReadOnly
+          addPadding
+          defaultValues={aboutStepData}
+          descriptionColumns="singleSplit"
+        />
+      ),
+    [aboutStepData, activeStep]
+  );
   const memoStepAboutRule = useMemo(
     () => (
       <>
@@ -541,22 +588,12 @@ const CreateRulePageComponent: React.FC = () => {
             isDisabled={isCreateRuleLoading}
           />
         </div>
-        <div
-          style={{
-            display: activeStep === RuleStep.aboutRule ? 'none' : undefined,
-          }}
-        >
-          <StepAboutRuleReadOnly
-            addPadding
-            defaultValues={aboutStepData}
-            descriptionColumns="singleSplit"
-          />
-        </div>
+        {memoAboutStepReadOnly}
       </>
     ),
     [
       aboutRuleNextStep,
-      aboutStepData,
+      aboutStepData.timestampOverride,
       aboutStepForm,
       activeStep,
       defineStepData.dataViewId,
@@ -565,6 +602,7 @@ const CreateRulePageComponent: React.FC = () => {
       defineStepData.ruleType,
       isCreateRuleLoading,
       loading,
+      memoAboutStepReadOnly,
     ]
   );
   const memoAboutStepExtraAction = useMemo(
