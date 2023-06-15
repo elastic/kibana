@@ -116,6 +116,11 @@ export const allowedExperimentalValues = Object.freeze({
    * The flag doesn't have to be documented and has to be removed after the feature is ready to release.
    */
   detectionsCoverageOverview: false,
+
+  /**
+   * Enables experimental Entity Analytics HTTP endpoints
+   */
+  riskScoringRoutesEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
