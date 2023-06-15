@@ -29,7 +29,6 @@ const DATA_VIEW = 'auditbeat-*';
 
 describe('Inspect Explore pages', () => {
   before(() => {
-    esArchiverLoad('auditbeat');
     esArchiverLoad('risk_users');
     esArchiverLoad('risk_hosts');
 
@@ -39,7 +38,6 @@ describe('Inspect Explore pages', () => {
   });
 
   after(() => {
-    esArchiverUnload('auditbeat');
     esArchiverUnload('risk_users');
     esArchiverUnload('risk_hosts');
   });
