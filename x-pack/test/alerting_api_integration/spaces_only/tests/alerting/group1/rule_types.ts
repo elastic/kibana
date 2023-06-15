@@ -134,6 +134,7 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           enabledInLicense: true,
+          hasFieldsForAAD: false,
           hasGetSummarizedAlerts: false,
           ruleTaskTimeout: '5m',
         });
