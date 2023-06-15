@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { DataView } from '@kbn/data-plugin/common';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { getTermsFields } from '../../../index_pattern_util';
+import { getTermsFields, getIsTimeseries } from '../../../index_pattern_util';
 
 interface Props {
   indexPattern: DataView;
+  groupByTimeseries: boolean;
+  onGroupByTimeseriesChange: (groupByTimeseries: boolean) => void;
   onSortFieldChange: (fieldName: string) => void;
   onSplitFieldChange: (fieldName: string) => void;
   sortField: string;
@@ -23,6 +25,10 @@ interface Props {
 }
 
 export function GeoLineForm(props: Props) {
+  const isTimeseries = useMemo(() => {
+    return getIsTimeseries(props.indexPattern);
+  }, [props.indexPattern]);
+  
   function onSortFieldChange(fieldName: string | undefined) {
     if (fieldName !== undefined) {
       props.onSortFieldChange(fieldName);
