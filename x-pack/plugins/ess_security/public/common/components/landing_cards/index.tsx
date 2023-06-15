@@ -36,6 +36,12 @@ const headerCardStyles = css`
   }
 `;
 
+const pageHeaderStyles = css`
+  h1 {
+    font-size: 18px;
+  }
+`;
+
 const getFlexItemStyles = (background: string) => css`
   background: ${background};
   padding: 20px;
@@ -93,11 +99,7 @@ export const LandingCards = memo(() => {
             <EuiPageHeader
               pageTitle={i18n.SIEM_HEADER}
               iconType="logoSecurity"
-              css={css`
-                h1 {
-                  font-size: 18px;
-                }
-              `}
+              css={pageHeaderStyles}
             />
             <EuiCard
               display="plain"

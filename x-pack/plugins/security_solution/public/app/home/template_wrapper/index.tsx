@@ -39,7 +39,7 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   }
 >`
   ${({ $isShowingTimelineOverlay }) =>
-    $isShowingTimelineOverlay
+    $isShowingTimelineOverlay // When the timeline is open, the content underneath should have a fixed height to hide the scroll bar Y
       ? `overflow: hidden; height: calc(100vh - ${HeaderHeight}px - ${TimelineBarHeight}px);`
       : ''}
   .${BOTTOM_BAR_CLASSNAME} {
