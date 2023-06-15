@@ -95,6 +95,17 @@ export class TaskRunnerFactory {
     const actionExecutionId = uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
+    const shouldSkip = ({ status, message }: ActionTypeExecutorResult<unknown>) => {
+      const { enabled, max_attempts: maxAttempts } = requeueInvalidTasksConfig;
+      const attempts = taskInstance.requeueInvalidTask?.attempts || 0;
+      return !!(
+        enabled &&
+        status === 'error' &&
+        attempts < maxAttempts &&
+        message?.includes(validationErrorPrefix)
+      );
+    };
+
     return {
       async run() {
         const { spaceId } = actionTaskExecutorParams;
@@ -144,14 +155,12 @@ export class TaskRunnerFactory {
           throw e;
         }
 
-        if (
-          requeueInvalidTasksConfig.enabled &&
-          executorResult.status === 'error' &&
-          (taskInstance.requeueInvalidTask?.attempts || 0) <
-            requeueInvalidTasksConfig.max_attempts &&
-          executorResult.message?.includes(validationErrorPrefix)
-        ) {
-          return { state: taskInstance.state, skip: true };
+        if (shouldSkip(executorResult)) {
+          return {
+            skip: true,
+            state: taskInstance.state,
+            error: new Error(executorResult.message),
+          };
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);

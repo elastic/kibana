@@ -45,6 +45,7 @@ export type RuleTaskRunResult = {
     }
   | {
       skip?: boolean;
+      error?: Error;
       runAt?: never;
       schedule?: never;
     }

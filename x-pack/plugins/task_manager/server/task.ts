@@ -58,7 +58,6 @@ export type SuccessfulRunResult = {
        * treated as a single-run task, and will not be rescheduled after
        * completion.
        */
-      skip?: never;
       runAt?: Date;
       schedule?: never;
     }
@@ -68,14 +67,8 @@ export type SuccessfulRunResult = {
        * continue to use which ever schedule it already has, and if no there is
        * no previous schedule then it will be treated as a single-run task.
        */
-      skip?: never;
       schedule?: IntervalSchedule;
       runAt?: never;
-    }
-  | {
-      skip?: boolean;
-      runAt?: never;
-      schedule?: never;
     }
 );
 
@@ -85,6 +78,7 @@ export type FailedRunResult = SuccessfulRunResult & {
    * logged out as a warning, and the task will be reattempted after a delay.
    */
   error: Error;
+  skip?: boolean;
 };
 
 export type RunResult = FailedRunResult | SuccessfulRunResult;

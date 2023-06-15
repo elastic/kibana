@@ -1552,8 +1552,8 @@ describe('TaskManagerRunner', () => {
         expect(instance.attempts).toBe(0);
         expect(instance.requeueInvalidTask?.attempts).toBe(1);
         expect(result).toEqual(
-          asOk({
-            hasError: true,
+          asErr({
+            error: new Error('[nonExisting]: expected value of type [string] but got [undefined]'),
             skip: true,
             state: {
               existingStatePAram: 'foo',
@@ -1582,7 +1582,7 @@ describe('TaskManagerRunner', () => {
               title: 'Bar!',
               createTaskRunner: () => ({
                 async run() {
-                  return { state: {}, skip: true };
+                  return { state: {}, skip: true, error: new Error('test') };
                 },
               }),
             },
@@ -1604,7 +1604,7 @@ describe('TaskManagerRunner', () => {
         expect(logger.warn).toHaveBeenCalledWith(
           'Task Manager has skipped executing the Task (bar/foo) as it has invalid params.'
         );
-        expect(result).toEqual(asOk({ state: {}, skip: true }));
+        expect(result).toEqual(asErr({ state: {}, skip: true, error: new Error('test') }));
       });
 
       test('resets skip attempts on the first successful run', async () => {

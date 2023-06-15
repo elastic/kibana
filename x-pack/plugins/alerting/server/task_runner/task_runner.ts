@@ -825,7 +825,7 @@ export class TaskRunner<
       schedule = asOk(attributes.rule.schedule);
     } catch (err) {
       if (this.shouldSkipRun(err)) {
-        return { state: originalState, skip: true };
+        return { state: originalState, skip: true, error: err };
       }
       stateWithMetrics = asErr(err);
       schedule = asErr(err);

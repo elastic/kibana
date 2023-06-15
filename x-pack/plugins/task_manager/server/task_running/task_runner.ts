@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { identity, defaults, flow, omit } from 'lodash';
+import { identity, defaults, flow, omit, isUndefined } from 'lodash';
 import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import moment from 'moment';
@@ -318,10 +318,10 @@ export class TaskManagerRunner implements TaskRunner {
         description: 'run task',
       };
 
-      const { skip, hasError } = this.shouldSkip();
+      const validatedTaskResult = this.validateTaskParams();
 
-      const result = skip
-        ? { state: this.instance.task.state, skip: true, hasError }
+      const result = validatedTaskResult.error
+        ? validatedTaskResult
         : await this.executionContext.withContext(ctx, () =>
             withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
           );
@@ -352,28 +352,34 @@ export class TaskManagerRunner implements TaskRunner {
     }
   }
 
-  private shouldSkip() {
+  private validateTaskParams() {
+    let error;
     let skip = false;
-    let hasError = false;
+    const {
+      state,
+      taskType,
+      params,
+      id,
+      requeueInvalidTask: { attempts = 0 } = {},
+    } = this.instance.task;
+    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
 
     if (this.requeueInvalidTasksConfig.enabled) {
       try {
-        const def = this.definitions.get(this.instance.task.taskType);
+        const def = this.definitions.get(taskType);
         if (def.paramsSchema) {
-          def.paramsSchema.validate(this.instance.task.params);
+          def.paramsSchema.validate(params);
         }
-      } catch (e) {
-        if (
-          (this.instance.task.requeueInvalidTask?.attempts || 0) <
-          this.requeueInvalidTasksConfig.max_attempts
-        ) {
+      } catch (err) {
+        this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
+        if (attempts < maxAttempts) {
           skip = true;
         }
-        hasError = true;
+        error = err;
       }
     }
 
-    return { skip, hasError };
+    return { skip, error, state };
   }
 
   public async removeTask(): Promise<void> {
@@ -540,10 +546,26 @@ export class TaskManagerRunner implements TaskRunner {
   private rescheduleFailedRun = (
     failureResult: FailedRunResult
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
-    const { state, error } = failureResult;
+    const { state, error, skip } = failureResult;
+    const { schedule, attempts } = this.instance.task;
+    const skipAttempts = this.instance.task.requeueInvalidTask?.attempts ?? 0;
+
+    if (skip) {
+      const { taskType, id } = this.instance.task;
+      this.logger.warn(
+        `Task Manager has skipped executing the Task (${taskType}/${id}) as it has invalid params.`
+      );
+      return asOk({
+        state: this.instance.task.state,
+        runAt: moment().add(this.requeueInvalidTasksConfig.delay, 'millisecond').toDate(),
+        attempts: 0,
+        skipAttempts: skipAttempts + 1,
+      });
+    }
+
     if (this.shouldTryToScheduleRetry() && !isUnrecoverableError(error)) {
       // if we're retrying, keep the number of attempts
-      const { schedule, attempts } = this.instance.task;
+
       const reschedule = failureResult.runAt
         ? { runAt: failureResult.runAt }
         : failureResult.schedule
@@ -562,7 +584,7 @@ export class TaskManagerRunner implements TaskRunner {
         return asOk({
           state,
           attempts,
-          hasError: true,
+          skipAttempts,
           ...reschedule,
         });
       }
@@ -581,41 +603,31 @@ export class TaskManagerRunner implements TaskRunner {
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
       mapOk(
         ({
-          runAt: originalRunAt,
+          runAt,
           schedule: reschedule,
-          state: originalState,
+          state,
           attempts = 0,
-          hasError: hasErrorFailedRun,
-        }: SuccessfulRunResult & { attempts: number }) => {
-          const { startedAt, schedule, state: taskState, taskType, id } = this.instance.task;
-          const { skip, hasError: hasErrorResult } = unwrap(result);
-          const interval = reschedule?.interval ?? schedule?.interval;
-          const hasError = hasErrorFailedRun || hasErrorResult;
+          skipAttempts,
+        }: SuccessfulRunResult & { attempts: number; skipAttempts: number }) => {
+          const { startedAt, schedule, requeueInvalidTask } = this.instance.task;
+          const { hasError } = unwrap(result);
+          let requeueInvalidTaskAttempts = skipAttempts || requeueInvalidTask?.attempts || 0;
 
-          let runAt = originalRunAt || intervalFromDate(startedAt!, interval)!;
-          let state = originalState;
-          let skipAttempts = this.instance.task.requeueInvalidTask?.attempts ?? 0;
-
-          if (skip) {
-            this.logger.warn(
-              `Task Manager has skipped executing the Task (${taskType}/${id}) as it has invalid params.`
-            );
-            runAt = moment().add(this.requeueInvalidTasksConfig.delay, 'millisecond').toDate();
-            state = taskState;
-            skipAttempts = skipAttempts + 1;
-          }
-          if (!skip && !hasError) {
-            skipAttempts = 0;
+          // Alerting TaskRunner returns SuccessResult even though there is an error
+          // therefore we use "hasError" to be sure that there was not an error
+          if (isUndefined(skipAttempts) && !hasError) {
+            requeueInvalidTaskAttempts = 0;
           }
 
           return asOk({
-            runAt,
+            runAt:
+              runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
             state,
             schedule: reschedule ?? schedule,
             attempts,
             status: TaskStatus.Idle,
             requeueInvalidTask: {
-              attempts: skipAttempts,
+              attempts: requeueInvalidTaskAttempts,
             },
           });
         }
@@ -661,34 +673,9 @@ export class TaskManagerRunner implements TaskRunner {
     result: Result<SuccessfulRunResult, FailedRunResult>
   ): Promise<TaskRunResult> {
     // not a recurring task: clean up by removing the task instance from store
-
-    const { skip } = unwrap(result);
-    const { taskType, id } = this.instance.task;
-
     try {
-      if (skip) {
-        const skipAttempts = (this.instance.task.requeueInvalidTask?.attempts ?? 0) + 1;
-        this.instance = asRan(
-          await this.bufferedTaskStore.update(
-            defaults(
-              {
-                retryAt: moment().add(this.requeueInvalidTasksConfig.delay, 'millisecond').toDate(),
-                attempts: 0,
-                requeueInvalidTask: {
-                  attempts: skipAttempts,
-                },
-              },
-              taskWithoutEnabled(this.instance.task)
-            )
-          )
-        );
-        this.logger.warn(
-          `Task Manager has skipped executing the Task (${taskType}/${id}) as it has invalid params.`
-        );
-      } else {
-        this.instance = asRan(this.instance.task);
-        await this.removeTask();
-      }
+      this.instance = asRan(this.instance.task);
+      await this.removeTask();
     } catch (err) {
       if (err.statusCode === 404) {
         this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);

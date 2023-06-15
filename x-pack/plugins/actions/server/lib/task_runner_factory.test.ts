@@ -576,7 +576,11 @@ test('returns the existing state and delayed schedule to retry the task when ret
 
   const result = await taskRunner.run();
 
-  expect(result).toEqual({ skip: true, state: mockTaskInstance.state });
+  expect(result).toEqual({
+    skip: true,
+    state: mockTaskInstance.state,
+    error: new Error('error validating action'),
+  });
 });
 
 test('throws error after trying to skip a task {requeueInvalidTasksConfig.max_attempts} times', async () => {

@@ -3123,6 +3123,7 @@ describe('Task Runner', () => {
 
     const result = await taskRunner.run();
     expect(result).toEqual({
+      error: new Error('[name]: expected value of type [string] but got [undefined]'),
       skip: true,
       state: mockTask.state,
     });
