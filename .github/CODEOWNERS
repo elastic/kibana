@@ -325,6 +325,7 @@ packages/kbn-dev-proc-runner @elastic/kibana-operations
 src/plugins/dev_tools @elastic/platform-deployment-management
 packages/kbn-dev-utils @elastic/kibana-operations
 examples/developer_examples @elastic/appex-sharedux
+examples/discover_customization_examples @elastic/kibana-data-discovery
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/kibana-docs
@@ -947,7 +948,7 @@ x-pack/test/observability_functional @elastic/actionable-observability
 /packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 
 # Core
-/config/kibana.yml @elastic/kibana-core
+/config/ @elastic/kibana-core
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
@@ -1050,15 +1051,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-explore
 
-/x-pack/plugins/security_solution/cypress/e2e/cases @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/dashboards @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/filters @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/host_details @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/hosts @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/network @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/overview @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/pagination @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/users @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/explore @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/screens/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/screens/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/tasks/hosts @elastic/security-threat-hunting-explore
@@ -1162,6 +1155,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-detection-engine
+/x-pack/plugins/security_solution/cypress/e2e/overview @elastic/security-detection-engine
+
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
@@ -1233,7 +1228,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/security-threat-hunting-explore
 
 # Kibana design
 # scss overrides should be below this line for specificity
