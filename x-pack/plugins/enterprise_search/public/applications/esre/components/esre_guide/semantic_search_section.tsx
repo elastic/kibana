@@ -53,14 +53,13 @@ export const SemanticSearchSection: React.FC = () => (
             title={i18n.translate('xpack.enterpriseSearch.esre.elserAccordion.title', {
               defaultMessage: 'Elastic Learned Sparse Encoder',
             })}
-            description={i18n.translate(
-              'xpack.enterpriseSearch.esre.elserAccordion.description',
-              {
-                defaultMessage: 'Instant semantic search capabilities',
-              }
-            )}
+            description={i18n.translate('xpack.enterpriseSearch.esre.elserAccordion.description', {
+              defaultMessage: 'Instant semantic search capabilities',
+            })}
           >
-            <><p>Placeholder</p></>
+            <>
+              <p>Placeholder</p>
+            </>
           </EsreGuideAccordion>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -77,7 +76,9 @@ export const SemanticSearchSection: React.FC = () => (
               }
             )}
           >
-            <><p>Placeholder</p></>
+            <>
+              <p>Placeholder</p>
+            </>
           </EsreGuideAccordion>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -94,7 +95,9 @@ export const SemanticSearchSection: React.FC = () => (
               }
             )}
           >
-            <><p>Placeholder</p></>
+            <>
+              <p>Placeholder</p>
+            </>
           </EsreGuideAccordion>
         </EuiFlexItem>
       </EuiFlexGroup>

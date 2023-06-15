@@ -58,19 +58,18 @@ export const RankAggregationSection: React.FC = () => (
               }
             )}
           >
-            <><p>Placeholder</p></>
+            <>
+              <p>Placeholder</p>
+            </>
           </EsreGuideAccordion>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EsreGuideAccordion
             id="linearCombinationAccordion"
             icon={linearCombinationIllustration}
-            title={i18n.translate(
-              'xpack.enterpriseSearch.esre.linearCombinationAccordion.title',
-              {
-                defaultMessage: 'Linear combination',
-              }
-            )}
+            title={i18n.translate('xpack.enterpriseSearch.esre.linearCombinationAccordion.title', {
+              defaultMessage: 'Linear combination',
+            })}
             description={i18n.translate(
               'xpack.enterpriseSearch.esre.linearCombinationAccordion.description',
               {
@@ -78,7 +77,9 @@ export const RankAggregationSection: React.FC = () => (
               }
             )}
           >
-            <><p>Placeholder</p></>
+            <>
+              <p>Placeholder</p>
+            </>
           </EsreGuideAccordion>
         </EuiFlexItem>
       </EuiFlexGroup>
