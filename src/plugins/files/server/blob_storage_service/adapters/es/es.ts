@@ -74,7 +74,16 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
    * created.
    */
   private static createIndexIfNotExists = once(
-    async (index: string, esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+    async (
+      index: string,
+      esClient: ElasticsearchClient,
+      logger: Logger,
+      indexIsAlias: boolean
+    ): Promise<void> => {
+      if (indexIsAlias) {
+        return;
+      }
+
       try {
         if (await esClient.indices.exists({ index })) {
           logger.debug(`${index} already exists.`);
@@ -109,7 +118,8 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     await ElasticsearchBlobStorageClient.createIndexIfNotExists(
       this.index,
       this.esClient,
-      this.logger
+      this.logger,
+      this.indexIsAlias
     );
 
     const processUpload = async () => {

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { FileMetadata } from '../../common';
 
 export function createDefaultFileAttributes(): Pick<
@@ -19,3 +20,23 @@ export function createDefaultFileAttributes(): Pick<
     Updated: dateString,
   };
 }
+
+class FilesPluginError extends Error {
+  constructor(message: string, public readonly meta: any) {
+    super(message);
+  }
+}
+
+export const catchErrorWrapAndThrow = (e: Error, messagePrefix: string = ''): never => {
+  if (e instanceof FilesPluginError) {
+    throw e;
+  }
+
+  let details: string = '';
+
+  if (e instanceof errors.ResponseError) {
+    details = `\nRequest: ${e.meta.meta.request.params.method} ${e.meta.meta.request.params.path}`;
+  }
+
+  throw new FilesPluginError(messagePrefix + e.message + details, e);
+};

@@ -14,6 +14,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { MappingProperty, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import pLimit from 'p-limit';
 
+import { catchErrorWrapAndThrow } from '../../utils';
 import type { FilesMetrics, FileMetadata, Pagination } from '../../../../common';
 import type { FindFileArgs } from '../../../file_service';
 import type {
@@ -52,32 +53,78 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   ) {}
 
   private createIfNotExists = once(async () => {
+    if (this.indexIsAlias) {
+      return;
+    }
+
     try {
       if (await this.esClient.indices.exists({ index: this.index })) {
         return;
       }
-      await this.esClient.indices.create({
-        index: this.index,
-        mappings: {
-          dynamic: false,
-          properties: {
-            file: fileMappings,
+
+      await this.esClient.indices
+        .create({
+          index: this.index,
+          mappings: {
+            dynamic: false,
+            properties: {
+              file: fileMappings,
+            },
           },
-        },
-      });
+        })
+        .catch(catchErrorWrapAndThrow);
+
+      this.logger.info(`index [${this.index}] created.`);
     } catch (e) {
+      this.logger.error(`Failed to create index [${this.index}]: ${e.message}`);
+      this.logger.debug(e);
       // best effort
     }
   });
 
+  private async getBackingIndex(id: string): Promise<string> {
+    if (!this.indexIsAlias) {
+      return this.index;
+    }
+
+    const doc = await this.esClient.search({
+      index: this.index,
+      body: {
+        size: 1,
+        query: {
+          term: {
+            _id: id,
+          },
+        },
+        _source: false, // suppress the document content
+      },
+    });
+
+    const docIndex = doc.hits.hits?.[0]?._index;
+
+    if (!docIndex) {
+      const err = new Error(
+        `Unable to determine backing index for file id [${id}] in index (alias) [${this.index}]`
+      );
+
+      this.logger.error(err);
+      throw err;
+    }
+
+    return docIndex;
+  }
+
   async create({ id, metadata }: FileDescriptor<M>): Promise<FileDescriptor<M>> {
     await this.createIfNotExists();
-    const result = await this.esClient.index<FileDocument>({
-      index: this.index,
-      id,
-      document: { file: metadata },
-      refresh: true,
-    });
+    const result = await this.esClient
+      .index<FileDocument>({
+        index: this.index,
+        id,
+        document: { file: metadata, '@timestamp': new Date().toISOString() },
+        op_type: 'create',
+        refresh: true,
+      })
+      .catch(catchErrorWrapAndThrow);
     return {
       id: result._id,
       metadata,
@@ -90,17 +137,19 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
 
     if (indexIsAlias) {
       doc = (
-        await esClient.search<FileDocument<M>>({
-          index,
-          body: {
-            size: 1,
-            query: {
-              term: {
-                _id: id,
+        await esClient
+          .search<FileDocument<M>>({
+            index,
+            body: {
+              size: 1,
+              query: {
+                term: {
+                  _id: id,
+                },
               },
             },
-          },
-        })
+          })
+          .catch(catchErrorWrapAndThrow)
       ).hits.hits?.[0]?._source;
     } else {
       doc = (
@@ -145,7 +194,12 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   }
 
   async update({ id, metadata }: UpdateArgs<M>): Promise<FileDescriptor<M>> {
-    await this.esClient.update({ index: this.index, id, doc: { file: metadata }, refresh: true });
+    const index = await this.getBackingIndex(id);
+
+    await this.esClient
+      .update({ index, id, doc: { file: metadata }, refresh: true })
+      .catch(catchErrorWrapAndThrow);
+
     return this.get({ id });
   }
 

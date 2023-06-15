@@ -130,6 +130,8 @@ export class File<M = unknown> implements IFile {
         }),
         catchError(async (e) => {
           try {
+            // FIXME:PT code below would need to use 'update by query'
+
             await this.updateFileState({ action: 'uploadError' });
           } catch (updateError) {
             this.logger.error(
