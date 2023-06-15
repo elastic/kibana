@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.closeDimensionEditor();
 
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
-          'Top values of geo.src + 1 other'
+          'Top 3 values of geo.src + 1 other'
         );
 
         await PageObjects.lens.openDimensionEditor('lnsXY_xDimensionPanel');
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.closeDimensionEditor();
 
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
-          'Top values of geo.src + 2 others'
+          'Top 3 values of geo.src + 2 others'
         );
 
         const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');

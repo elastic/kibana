@@ -180,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           xyChartContainer
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-          'Top values of clientip + 1 other'
+          'Top 3 values of clientip + 1 other'
         );
       });
 
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           xyChartContainer
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-          'Top values of clientip + 1 other'
+          'Top 3 values of clientip + 1 other'
         );
       });
 
@@ -228,7 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-          'Top values of clientip + 2 others'
+          'Top 3 values of clientip + 2 others'
         );
       });
     });
@@ -379,7 +379,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-0')).to.eql([
           '@timestamp',
           'Average of bytes',
-          'Top values of ip',
+          'Top 3 values of ip',
         ]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-1')).to.eql([
           '@timestamp [1]',
@@ -477,7 +477,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Median of bytes',
         ]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-1')).to.eql([
-          'Top values of ip + 1 other',
+          'Top 3 values of ip + 1 other',
         ]);
       });
     });
