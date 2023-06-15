@@ -7,6 +7,8 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useEffect, useMemo, useReducer } from 'react';
+import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
 import { useFetchRelatedAlertsBySameSourceEvent } from './use_fetch_related_alerts_by_same_source_event';
 import { useShowRelatedCases } from './use_show_related_cases';
 import { useFetchRelatedCases } from './use_fetch_related_cases';
@@ -19,14 +21,14 @@ import {
   CORRELATIONS_SAME_SESSION_ALERTS,
   CORRELATIONS_SAME_SOURCE_EVENT_ALERT,
   CORRELATIONS_SAME_SOURCE_EVENT_ALERTS,
-} from '../components/translations';
+} from '../translations';
 import { useShowRelatedAlertsByAncestry } from './use_show_related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from './use_fetch_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from './use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from './use_show_related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from './use_fetch_related_alerts_by_session';
 
-interface InsightsSummaryData {
+export interface InsightsSummaryPanelData {
   icon: string;
   value: number;
   text: string;
@@ -62,11 +64,27 @@ export interface UseCorrelationsResult {
   /**
    * Data ready to be consumed by the InsightsSummaryPanel component
    */
-  data: InsightsSummaryData[];
+  data: InsightsSummaryPanelData[];
   /**
    * Data length
    */
   dataCount: number;
+  /**
+   * Ids of specific alerts correlated by session, can be used to fetch specific alert documents
+   */
+  alertsBySessionIds: string[];
+  /**
+   * Ids of specific alerts correlated by source, can be used to fetch specific alert documents
+   */
+  sameSourceAlertsIds: string[];
+  /**
+   * Ids of specific alerts correlated by ancestry, can be used to fetch specific alert documents
+   */
+  ancestryAlertsIds: string[];
+  /**
+   * Cases data, can be used to render correlated cases table
+   */
+  cases: CasesByAlertId;
 }
 
 /**
@@ -78,7 +96,15 @@ export const useCorrelations = ({
   dataFormattedForFieldBrowser,
   scopeId,
 }: UseCorrelationsParams): UseCorrelationsResult => {
-  const data: InsightsSummaryData[] = [];
+  const [data, updateInsightsSummaryPanel] = useReducer(
+    (
+      currentEntries: InsightsSummaryPanelData[],
+      newEntry: { icon: string; value: number; text: string }
+    ) => {
+      return [...currentEntries, newEntry];
+    },
+    []
+  );
 
   // cases
   const showCases = useShowRelatedCases();
@@ -86,14 +112,18 @@ export const useCorrelations = ({
     loading: casesLoading,
     error: casesError,
     dataCount: casesCount,
+    data: cases,
   } = useFetchRelatedCases({ eventId });
-  if (showCases && !casesLoading && !casesError) {
-    data.push({
-      icon: 'warning',
-      value: casesCount,
-      text: casesCount <= 1 ? CORRELATIONS_RELATED_CASE : CORRELATIONS_RELATED_CASES,
-    });
-  }
+
+  useEffect(() => {
+    if (showCases && !casesLoading && !casesError) {
+      updateInsightsSummaryPanel({
+        icon: 'warning',
+        value: casesCount,
+        text: casesCount <= 1 ? CORRELATIONS_RELATED_CASE : CORRELATIONS_RELATED_CASES,
+      });
+    }
+  }, [casesCount, casesError, casesLoading, showCases]);
 
   // alerts by ancestry
   const showAlertsByAncestry = useShowRelatedAlertsByAncestry({
@@ -104,17 +134,21 @@ export const useCorrelations = ({
     loading: ancestryAlertsLoading,
     error: ancestryAlertsError,
     dataCount: ancestryAlertsCount,
+    data: ancestryAlertsIds,
   } = useFetchRelatedAlertsByAncestry({
     dataFormattedForFieldBrowser,
     scopeId,
   });
-  if (showAlertsByAncestry && !ancestryAlertsLoading && !ancestryAlertsError) {
-    data.push({
-      icon: 'warning',
-      value: ancestryAlertsCount,
-      text: ancestryAlertsCount <= 1 ? CORRELATIONS_ANCESTRY_ALERT : CORRELATIONS_ANCESTRY_ALERTS,
-    });
-  }
+
+  useEffect(() => {
+    if (showAlertsByAncestry && !ancestryAlertsLoading && !ancestryAlertsError) {
+      updateInsightsSummaryPanel({
+        icon: 'warning',
+        value: ancestryAlertsCount,
+        text: ancestryAlertsCount <= 1 ? CORRELATIONS_ANCESTRY_ALERT : CORRELATIONS_ANCESTRY_ALERTS,
+      });
+    }
+  }, [ancestryAlertsCount, ancestryAlertsError, ancestryAlertsLoading, showAlertsByAncestry]);
 
   // alerts related to same source event
   const showSameSourceAlerts = useShowRelatedAlertsBySameSourceEvent({
@@ -124,20 +158,24 @@ export const useCorrelations = ({
     loading: sameSourceAlertsLoading,
     error: sameSourceAlertsError,
     dataCount: sameSourceAlertsCount,
+    data: sameSourceAlertsIds,
   } = useFetchRelatedAlertsBySameSourceEvent({
     dataFormattedForFieldBrowser,
     scopeId,
   });
-  if (showSameSourceAlerts && !sameSourceAlertsLoading && !sameSourceAlertsError) {
-    data.push({
-      icon: 'warning',
-      value: sameSourceAlertsCount,
-      text:
-        sameSourceAlertsCount <= 1
-          ? CORRELATIONS_SAME_SOURCE_EVENT_ALERT
-          : CORRELATIONS_SAME_SOURCE_EVENT_ALERTS,
-    });
-  }
+
+  useEffect(() => {
+    if (showSameSourceAlerts && !sameSourceAlertsLoading && !sameSourceAlertsError) {
+      updateInsightsSummaryPanel({
+        icon: 'warning',
+        value: sameSourceAlertsCount,
+        text:
+          sameSourceAlertsCount <= 1
+            ? CORRELATIONS_SAME_SOURCE_EVENT_ALERT
+            : CORRELATIONS_SAME_SOURCE_EVENT_ALERTS,
+      });
+    }
+  }, [sameSourceAlertsCount, sameSourceAlertsError, sameSourceAlertsLoading, showSameSourceAlerts]);
 
   // alerts related by session
   const showAlertsBySession = useShowRelatedAlertsBySession({ dataFormattedForFieldBrowser });
@@ -145,26 +183,47 @@ export const useCorrelations = ({
     loading: alertsBySessionLoading,
     error: alertsBySessionError,
     dataCount: alertsBySessionCount,
+    data: alertsBySessionIds,
   } = useFetchRelatedAlertsBySession({
     dataFormattedForFieldBrowser,
     scopeId,
   });
-  if (showAlertsBySession && !alertsBySessionLoading && !alertsBySessionError) {
-    data.push({
-      icon: 'warning',
-      value: alertsBySessionCount,
-      text:
-        alertsBySessionCount <= 1
-          ? CORRELATIONS_SAME_SESSION_ALERT
-          : CORRELATIONS_SAME_SESSION_ALERTS,
-    });
-  }
 
-  return {
-    loading:
-      casesLoading || ancestryAlertsLoading || alertsBySessionLoading || sameSourceAlertsLoading,
-    error: data.length === 0,
-    data,
-    dataCount: data.length,
-  };
+  useEffect(() => {
+    if (showAlertsBySession && !alertsBySessionLoading && !alertsBySessionError) {
+      updateInsightsSummaryPanel({
+        icon: 'warning',
+        value: alertsBySessionCount,
+        text:
+          alertsBySessionCount <= 1
+            ? CORRELATIONS_SAME_SESSION_ALERT
+            : CORRELATIONS_SAME_SESSION_ALERTS,
+      });
+    }
+  }, [alertsBySessionCount, alertsBySessionError, alertsBySessionLoading, showAlertsBySession]);
+
+  return useMemo(
+    () => ({
+      loading:
+        casesLoading || ancestryAlertsLoading || alertsBySessionLoading || sameSourceAlertsLoading,
+      error: data.length === 0,
+      data,
+      dataCount: data.length || 0,
+      alertsBySessionIds,
+      sameSourceAlertsIds,
+      ancestryAlertsIds: ancestryAlertsIds || [],
+      cases,
+    }),
+    [
+      alertsBySessionIds,
+      alertsBySessionLoading,
+      ancestryAlertsIds,
+      ancestryAlertsLoading,
+      cases,
+      casesLoading,
+      data,
+      sameSourceAlertsIds,
+      sameSourceAlertsLoading,
+    ]
+  );
 };

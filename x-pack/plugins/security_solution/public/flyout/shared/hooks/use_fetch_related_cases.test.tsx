@@ -30,7 +30,7 @@ describe('useFetchRelatedCases', () => {
 
     expect(hookResult.result.current.loading).toEqual(true);
     expect(hookResult.result.current.error).toEqual(false);
-    expect(hookResult.result.current.data).toEqual(undefined);
+    expect(hookResult.result.current.data).toEqual([]);
     expect(hookResult.result.current.dataCount).toEqual(0);
   });
 });

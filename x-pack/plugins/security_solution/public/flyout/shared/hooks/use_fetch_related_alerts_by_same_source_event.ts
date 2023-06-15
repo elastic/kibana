@@ -7,10 +7,11 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find } from 'lodash/fp';
+import { useMemo } from 'react';
 import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_prevalence';
 import { isActiveTimeline } from '../../../helpers';
 
-export interface UseFetchRelatedAlertsBySessionParams {
+export interface UseFetchRelatedAlertsBySameSourceEventParams {
   /**
    * An array of field objects with category and value
    */
@@ -20,7 +21,7 @@ export interface UseFetchRelatedAlertsBySessionParams {
    */
   scopeId: string;
 }
-export interface UseFetchRelatedAlertsBySessionResult {
+export interface UseFetchRelatedAlertsBySameSourceEventResult {
   /**
    * Returns true while data is loading
    */
@@ -30,40 +31,46 @@ export interface UseFetchRelatedAlertsBySessionResult {
    */
   error: boolean;
   /**
-   * Related alerts by session retrieved
+   * Related alerts for the source event retrieved
    */
   data: string[];
   /**
-   * Number of alerts by session received
+   * Number of alerts the source event received
    */
   dataCount: number;
 }
 
 /**
- * Returns the number of alerts by session for the document (and the loading, error statuses as well as the alerts count)
+ * Returns the number of alerts for the same source event (and the loading, error statuses as well as the alerts count)
  */
-export const useFetchRelatedAlertsBySession = ({
+export const useFetchRelatedAlertsBySameSourceEvent = ({
   dataFormattedForFieldBrowser,
   scopeId,
-}: UseFetchRelatedAlertsBySessionParams): UseFetchRelatedAlertsBySessionResult => {
-  const processSessionField = find(
-    { category: 'process', field: 'process.entry_leader.entity_id' },
-    dataFormattedForFieldBrowser
+}: UseFetchRelatedAlertsBySameSourceEventParams): UseFetchRelatedAlertsBySameSourceEventResult => {
+  const { field, values } = useMemo(
+    () =>
+      find(
+        { category: 'kibana', field: 'kibana.alert.original_event.id' },
+        dataFormattedForFieldBrowser
+      ) || { field: '', values: [] },
+    [dataFormattedForFieldBrowser]
   );
-  const { field, values } = processSessionField || { field: '', values: [] };
+
   const { loading, error, count, alertIds } = useAlertPrevalence({
     field,
     value: values,
     isActiveTimelines: isActiveTimeline(scopeId),
     signalIndexName: null,
     includeAlertIds: true,
-    ignoreTimerange: true,
   });
 
-  return {
-    loading,
-    error,
-    data: alertIds || [],
-    dataCount: count || 0,
-  };
+  return useMemo(
+    () => ({
+      loading,
+      error,
+      data: alertIds || [],
+      dataCount: count || 0,
+    }),
+    [alertIds, count, error, loading]
+  );
 };
