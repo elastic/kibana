@@ -11,10 +11,11 @@ import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 import { hasInput, isLensEmbeddable, getLensCaseAttachment } from './utils';
 
-import type { ActionContext, CasesUIActionProps, DashboardVisualizationEmbeddable } from './types';
+import type { ActionContext, CasesUIActionProps } from './types';
 import { ADD_TO_CASE_SUCCESS, ADD_TO_NEW_CASE_DISPLAYNAME } from './translations';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import { ActionWrapper } from './action_wrapper';
@@ -24,7 +25,7 @@ export const ACTION_ID = 'embeddable_addToNewCase';
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 
 interface Props {
-  embeddable: DashboardVisualizationEmbeddable;
+  embeddable: LensEmbeddable;
   onSuccess: () => void;
   onClose: () => void;
 }

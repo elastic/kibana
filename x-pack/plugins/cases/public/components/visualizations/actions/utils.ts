@@ -5,22 +5,27 @@
  * 2.0.
  */
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { LensEmbeddableInput, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { CommentType } from '../../../../common';
-import type { DashboardVisualizationEmbeddable, EmbeddableInput } from './types';
 
 export const isLensEmbeddable = (embeddable: IEmbeddable): embeddable is LensEmbeddable => {
   return embeddable.type === LENS_EMBEDDABLE_TYPE;
 };
 
-export const hasInput = (embeddable: DashboardVisualizationEmbeddable) => {
+export const hasInput = (embeddable: LensEmbeddable) => {
   const { timeRange } = embeddable.getInput();
   const attributes = embeddable.getFullAttributes();
-  console.log('hasInput----', attributes, timeRange);
   return attributes != null && timeRange != null;
 };
 
-export const getLensCaseAttachment = ({ timeRange, attributes }: Omit<EmbeddableInput, 'id'>) => ({
+export const getLensCaseAttachment = ({
+  timeRange,
+  attributes,
+}: {
+  timeRange: LensEmbeddableInput['timeRange'];
+  attributes: LensSavedObjectAttributes | undefined;
+}) => ({
   comment: `!{lens${JSON.stringify({
     timeRange,
     attributes,

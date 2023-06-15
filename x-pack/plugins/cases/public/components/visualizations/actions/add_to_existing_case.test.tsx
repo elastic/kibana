@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
+import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 
 import { createAddToExistingCaseLensAction } from './add_to_existing_case';
-import type { ActionContext, DashboardVisualizationEmbeddable } from './types';
+import type { ActionContext } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -74,7 +74,7 @@ describe('createAddToExistingCaseLensAction', () => {
     id: 'mockId',
     attributes: mockAttributes,
     timeRange: mockTimeRange,
-  }) as unknown as DashboardVisualizationEmbeddable;
+  }) as unknown as LensEmbeddable;
 
   const context = {
     embeddable: mockEmbeddable,
@@ -125,7 +125,7 @@ describe('createAddToExistingCaseLensAction', () => {
           ...context,
           embeddable: new ErrorEmbeddable('some error', {
             id: '123',
-          }) as unknown as DashboardVisualizationEmbeddable,
+          }) as unknown as LensEmbeddable,
         })
       ).toEqual(false);
     });
@@ -134,7 +134,7 @@ describe('createAddToExistingCaseLensAction', () => {
       expect(
         await action.isCompatible({
           ...context,
-          embeddable: new MockEmbeddable('not_lens') as unknown as DashboardVisualizationEmbeddable,
+          embeddable: new MockEmbeddable('not_lens') as unknown as LensEmbeddable,
         })
       ).toEqual(false);
     });
