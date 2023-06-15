@@ -15,7 +15,8 @@ import styled from 'styled-components';
 
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
-import { TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,

@@ -52,6 +52,11 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Elasticsearch',
           },
           {
+            href: '/app/enterprise_search/esre',
+            id: 'esre',
+            name: 'ESRE',
+          },
+          {
             href: '/app/enterprise_search/search_experiences',
             id: 'searchExperiences',
             name: 'Search Experiences',
@@ -209,6 +214,11 @@ describe('useEnterpriseSearchEngineNav', () => {
             href: '/app/enterprise_search/elasticsearch',
             id: 'elasticsearch',
             name: 'Elasticsearch',
+          },
+          {
+            href: '/app/enterprise_search/esre',
+            id: 'esre',
+            name: 'ESRE',
           },
           {
             href: '/app/enterprise_search/search_experiences',
@@ -396,6 +406,11 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
           href: '/app/enterprise_search/elasticsearch',
           id: 'elasticsearch',
           name: 'Elasticsearch',
+        },
+        {
+          href: '/app/enterprise_search/esre',
+          id: 'esre',
+          name: 'ESRE',
         },
         {
           href: '/app/enterprise_search/search_experiences',
