@@ -653,13 +653,11 @@ export async function getDataViewsAndIndicesWithGeoFields(
 
       if (Array.isArray(sourceIndices)) {
         for (const sourceIndex of sourceIndices) {
-          const cached = dataViewsMap.get(sourceIndex);
-
-          const dataViewId = cached?.id ?? (await getDataViewIdFromName(sourceIndex));
+          const cachedDV = dataViewsMap.get(sourceIndex);
+          const dataViewId = cachedDV?.id ?? (await getDataViewIdFromName(sourceIndex));
 
           if (dataViewId) {
-            const dataView =
-              dataViewsMap.get(sourceIndex) ?? (await dataViewsService.get(dataViewId));
+            const dataView = cachedDV ?? (await dataViewsService.get(dataViewId));
 
             if (!dataView) {
               continue;
