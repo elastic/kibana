@@ -36,10 +36,8 @@ export function useChartConfigPanel({
   query?: Query | AggregateQuery;
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
 }) {
-  const [EditLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
-  const shouldUpdateConfigPanel = useRef<boolean>(true);
+  const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
   const previousSuggestion = useRef<Suggestion | undefined>(undefined);
-  const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const updateSuggestion = useCallback(
     (datasourceState, visualizationState) => {
@@ -52,11 +50,6 @@ export function useChartConfigPanel({
     },
     [currentSuggestion, onSuggestionChange]
   );
-  useEffect(() => {
-    const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
-    const queryHasChanged = !isEqual(query, previousQuery.current);
-    shouldUpdateConfigPanel.current = queryHasChanged || suggestionHasChanged;
-  }, [currentSuggestion, currentSuggestion?.title, query]);
 
   useEffect(() => {
     async function fetchLensConfigComponent() {
@@ -72,14 +65,15 @@ export function useChartConfigPanel({
         />
       );
       setEditLensConfigPanel(panel);
-      shouldUpdateConfigPanel.current = false;
       previousSuggestion.current = currentSuggestion;
-      previousQuery.current = query;
       previousAdapters.current = lensTablesAdapter;
     }
     const dataHasChanged =
       Boolean(lensTablesAdapter) && !isEqual(previousAdapters.current, lensTablesAdapter);
-    if (isPlainRecord && shouldUpdateConfigPanel.current && dataHasChanged) {
+    const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
+    // rerender the component if the data has changed or the suggestion
+    // as I can have different suggestions for the same data
+    if (isPlainRecord && (dataHasChanged || suggestionHasChanged)) {
       fetchLensConfigComponent();
     }
   }, [
@@ -94,5 +88,5 @@ export function useChartConfigPanel({
     setIsFlyoutVisible,
   ]);
 
-  return isPlainRecord ? EditLensConfigPanel : null;
+  return isPlainRecord ? editLensConfigPanel : null;
 }
