@@ -100,7 +100,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
 
   const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
     const routeParams = parse(routeProps.history.location.search);
-    if (routeParams.embed && !globalEmbedSettings) {
+    if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
     return (
