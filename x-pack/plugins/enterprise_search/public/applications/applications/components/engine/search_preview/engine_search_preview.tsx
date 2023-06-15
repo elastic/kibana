@@ -78,14 +78,14 @@ import {
 } from './search_ui_components';
 import '../search_application_layout.scss';
 
-class InternalEngineTransporter implements Transporter {
+class InternalSearchApplicationTransporter implements Transporter {
   constructor(
     private http: HttpSetup,
-    private engineName: string // uncomment and add setLastAPICall to constructor when view this API call is needed // private setLastAPICall?: (apiCallData: APICallData) => void
+    private searchApplicationName: string // uncomment and add setLastAPICall to constructor when view this API call is needed // private setLastAPICall?: (apiCallData: APICallData) => void
   ) {}
 
   async performRequest(request: SearchRequest) {
-    const url = `/internal/enterprise_search/search_applications/${this.engineName}/search`;
+    const url = `/internal/enterprise_search/search_applications/${this.searchApplicationName}/search`;
 
     const response = await this.http.post<SearchResponse>(url, {
       body: JSON.stringify(request),
@@ -115,14 +115,14 @@ class InternalEngineTransporter implements Transporter {
 }
 
 interface ConfigurationPopOverProps {
-  engineName: string;
   hasSchemaConflicts: boolean;
+  searchApplicationName: string;
   setCloseConfiguration: () => void;
   showConfiguration: boolean;
 }
 
 const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
-  engineName,
+  searchApplicationName,
   hasSchemaConflicts,
   setCloseConfiguration,
   showConfiguration,
@@ -230,7 +230,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
                   contentTabId: SearchApplicationContentTabs.INDICES,
-                  searchApplicationName: engineName,
+                  searchApplicationName,
                 })
               )
             }
@@ -249,7 +249,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
                   contentTabId: SearchApplicationContentTabs.SCHEMA,
-                  searchApplicationName: engineName,
+                  searchApplicationName,
                 })
               )
             }
@@ -290,7 +290,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
                   connectTabId: SearchApplicationConnectTabs.SEARCHAPI,
-                  searchApplicationName: engineName,
+                  searchApplicationName,
                 })
               )
             }
@@ -345,7 +345,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
     </>
   );
 };
-export const EngineSearchPreview: React.FC = () => {
+export const SearchApplicationSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
   // const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);    Uncomment when view this API call is needed
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
@@ -355,7 +355,7 @@ export const EngineSearchPreview: React.FC = () => {
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
-    const transporter = new InternalEngineTransporter(http, engineName);
+    const transporter = new InternalSearchApplicationTransporter(http, engineName);
     const connector = new EnginesAPIConnector(transporter);
 
     return {
@@ -383,17 +383,11 @@ export const EngineSearchPreview: React.FC = () => {
       pageHeader={{
         bottomBorder: false,
         className: 'searchApplicationHeaderBackgroundColor',
-        pageTitle: (
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.engine.searchPreview.pageTitle"
-            defaultMessage="{engineName}"
-            values={{ engineName }}
-          />
-        ),
+        pageTitle: engineName,
         rightSideItems: [
           <>
             <ConfigurationPopover
-              engineName={engineName}
+              searchApplicationName={engineName}
               hasSchemaConflicts={hasSchemaConflicts}
               showConfiguration={showConfigurationPopover}
               setCloseConfiguration={() => setShowConfigurationPopover(!showConfigurationPopover)}

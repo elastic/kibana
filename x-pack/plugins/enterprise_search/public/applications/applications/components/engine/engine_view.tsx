@@ -32,7 +32,7 @@ import { EngineError } from './engine_error';
 import { EngineViewLogic } from './engine_view_logic';
 import { EngineHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
-import { EngineSearchPreview } from './search_preview/engine_search_preview';
+import { SearchApplicationSearchPreview } from './search_preview/engine_search_preview';
 
 export const EngineView: React.FC = () => {
   const { fetchEngine, closeDeleteEngineModal } = useActions(EngineViewLogic);
@@ -90,7 +90,7 @@ export const EngineView: React.FC = () => {
         <Route
           exact
           path={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.PREVIEW}`}
-          component={EngineSearchPreview}
+          component={SearchApplicationSearchPreview}
         />
         <Route path={SEARCH_APPLICATION_CONTENT_PATH} component={SearchApplicationContent} />
         <Redirect
