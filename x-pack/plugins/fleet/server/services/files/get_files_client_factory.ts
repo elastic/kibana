@@ -55,8 +55,8 @@ export const getFilesClientFactory = ({
       return new FleetToHostFilesClient(
         esClient,
         logger.get('fleetFiles', packageName),
-        getFileMetadataIndexName(packageName, true),
-        getFileDataIndexName(packageName, true),
+        `.fleet-paul.filedelivery-meta-${packageName}`,
+        `.fleet-paul.filedelivery-data-${packageName}`,
         maxFileBytes
       );
     },
