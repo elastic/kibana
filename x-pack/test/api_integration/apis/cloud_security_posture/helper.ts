@@ -7,6 +7,7 @@
 
 import type { SuperTest, Test } from 'supertest';
 import { Client } from '@elastic/elasticsearch';
+import { SecurityService } from '../../../../../test/common/services/security/security';
 
 export const deleteIndex = (es: Client, indexToBeDeleted: string[]) => {
   Promise.all([
@@ -97,3 +98,46 @@ export async function createPackagePolicy(
 
   return postPackageResponse.item;
 }
+
+export const createUser = async (security: SecurityService, userName: string, roleName: string) => {
+  await security.user.create(userName, {
+    password: 'changeme',
+    roles: [roleName],
+    full_name: 'a reporting user',
+  });
+};
+
+export const createCSPOnlyRole = async (
+  security: SecurityService,
+  roleName: string,
+  indicesName: string
+) => {
+  await security.role.create(roleName, {
+    kibana: [
+      {
+        feature: { siem: ['read'], fleetv2: ['all'], fleet: ['read'] },
+        spaces: ['*'],
+      },
+    ],
+    ...(indicesName.length !== 0
+      ? {
+          elasticsearch: {
+            indices: [
+              {
+                names: [indicesName],
+                privileges: ['read'],
+              },
+            ],
+          },
+        }
+      : {}),
+  });
+};
+
+export const deleteRole = async (security: SecurityService, roleName: string) => {
+  await security.role.delete(roleName);
+};
+
+export const deleteUser = async (security: SecurityService, userName: string) => {
+  await security.user.delete(userName);
+};

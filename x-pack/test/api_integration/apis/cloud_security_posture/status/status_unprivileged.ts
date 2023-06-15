@@ -12,7 +12,13 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy } from '../helper';
+import {
+  createPackagePolicy,
+  createUser,
+  createCSPOnlyRole,
+  deleteRole,
+  deleteUser,
+} from '../helper';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
 const UNPRIVILEGED_USERNAME = 'unprivileged_test_user';
@@ -29,41 +35,14 @@ export default function (providerContext: FtrProviderContext) {
     let agentPolicyId: string;
 
     describe('status = unprivileged test', () => {
-      const createUnprivilegedUser = async () => {
-        await security.user.create(UNPRIVILEGED_USERNAME, {
-          password: 'changeme',
-          roles: [UNPRIVILEGED_ROLE],
-          full_name: 'a reporting user',
-        });
-      };
-
-      const createUnprivilegedRole = async () => {
-        await security.role.create(UNPRIVILEGED_ROLE, {
-          kibana: [
-            {
-              feature: { siem: ['read'], fleetv2: ['all'], fleet: ['read'] },
-              spaces: ['*'],
-            },
-          ],
-        });
-      };
-
-      const deleteUnprivilegedRole = async () => {
-        await security.role.delete(UNPRIVILEGED_ROLE);
-      };
-
-      const deleteUnprivilegedUser = async () => {
-        await security.user.delete(UNPRIVILEGED_USERNAME);
-      };
-
       before(async () => {
-        await createUnprivilegedRole();
-        await createUnprivilegedUser();
+        await createCSPOnlyRole(security, UNPRIVILEGED_ROLE, '');
+        await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
       });
 
       after(async () => {
-        await deleteUnprivilegedUser();
-        await deleteUnprivilegedRole();
+        await deleteUser(security, UNPRIVILEGED_USERNAME);
+        await deleteRole(security, UNPRIVILEGED_ROLE);
       });
 
       beforeEach(async () => {
@@ -109,41 +88,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('status = unprivileged test indices', () => {
-      const createUnprivilegedUser = async () => {
-        await security.user.create(UNPRIVILEGED_USERNAME, {
-          password: 'changeme',
-          roles: [UNPRIVILEGED_ROLE],
-          full_name: 'a reporting user',
-        });
-      };
-
-      const createRoleWithUnprivilegedIndices = async (indicesName: string) => {
-        await security.role.create(UNPRIVILEGED_ROLE, {
-          elasticsearch: {
-            indices: [
-              {
-                names: [indicesName],
-                privileges: ['read'],
-              },
-            ],
-          },
-          kibana: [
-            {
-              feature: { siem: ['read'], fleetv2: ['all'], fleet: ['read'] },
-              spaces: ['*'],
-            },
-          ],
-        });
-      };
-
-      const deleteUnprivilegedRole = async () => {
-        await security.role.delete(UNPRIVILEGED_ROLE);
-      };
-
-      const deleteUnprivilegedUser = async () => {
-        await security.user.delete(UNPRIVILEGED_USERNAME);
-      };
-
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -160,15 +104,15 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await deleteUnprivilegedUser();
-        await deleteUnprivilegedRole();
+        await deleteUser(security, UNPRIVILEGED_USERNAME);
+        await deleteRole(security, UNPRIVILEGED_ROLE);
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
 
       it(`Return unprivileged when missing access to findings_latest index`, async () => {
-        await createRoleWithUnprivilegedIndices(LATEST_FINDINGS_INDEX_DEFAULT_NS);
-        await createUnprivilegedUser();
+        await createCSPOnlyRole(security, UNPRIVILEGED_ROLE, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
         await createPackagePolicy(
           supertest,
@@ -196,8 +140,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return unprivileged when missing access to score index`, async () => {
-        await createRoleWithUnprivilegedIndices(BENCHMARK_SCORE_INDEX_DEFAULT_NS);
-        await createUnprivilegedUser();
+        await createCSPOnlyRole(security, UNPRIVILEGED_ROLE, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+        await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
         await createPackagePolicy(
           supertest,
@@ -225,8 +169,12 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return unprivileged when missing access to vulnerabilities_latest index`, async () => {
-        await createRoleWithUnprivilegedIndices(LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
-        await createUnprivilegedUser();
+        await createCSPOnlyRole(
+          security,
+          UNPRIVILEGED_ROLE,
+          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS
+        );
+        await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
         await createPackagePolicy(
           supertest,
