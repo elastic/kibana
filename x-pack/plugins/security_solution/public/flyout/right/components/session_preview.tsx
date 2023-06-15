@@ -6,93 +6,99 @@
  */
 
 import { EuiButtonEmpty, EuiIcon, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import find from 'lodash/find';
 import React, { useMemo, type FC } from 'react';
 
-import { useRightPanelContext } from '../context';
+import { useProcessData } from '../hooks/use_process_data';
+import { SESSION_PREVIEW_TEST_ID } from './test_ids';
+import { SESSION_PREVIEW_TITLE } from './translations';
 
-const TEST_ID = 'TODO' as const;
+/**
+ * One-off helper to make sure that inline values are rendered consistently
+ */
+const ValueContainer: FC<{ text?: string }> = ({ text, children }) => (
+  <>
+    {text && (
+      <>
+        &nbsp;
+        <span>{text}</span>
+        &nbsp;
+      </>
+    )}{' '}
+    {children}
+  </>
+);
 
-const SESSION_PREVIEW_TITLE = 'Session viewer preview' as const;
-
-const FIELD_USER_NAME = 'process.entry_leader.user.name' as const;
-const FIELD_USER_ID = 'process.entry_leader.user.id' as const;
-const FIELD_PROCESS_NAME = 'process.entry_leader.name' as const;
-const FIELD_START_AT = 'process.entry_leader.start' as const;
-const FIELD_RULE = 'kibana.alert.rule.name' as const;
-const FIELD_WORKING_DIRECTORY = 'process.group_leader.working_directory' as const;
-const FIELD_COMMAND = 'process.command_line' as const;
-
-const getFieldValue = (
-  data: TimelineEventsDetailsItem[] | null,
-  field: string
-): string | undefined => find(data, { field })?.values?.join(' ');
-
-const getUserDisplayName = (data: TimelineEventsDetailsItem[] | null): string => {
-  const userName = getFieldValue(data, FIELD_USER_NAME);
-  const userId = getFieldValue(data, FIELD_USER_ID);
-
-  if (userName) {
-    return userName;
-  }
-
-  if (!userId) {
-    return 'unknown';
-  }
-
-  return userId === '0' ? 'root' : `uid: ${userId}`;
-};
-
-const useProcessData = () => {
-  const { dataFormattedForFieldBrowser: data } = useRightPanelContext();
-
-  return useMemo(
-    () => ({
-      userName: getUserDisplayName(data),
-      processName: getFieldValue(data, FIELD_PROCESS_NAME),
-      startAt: getFieldValue(data, FIELD_START_AT),
-      rule: getFieldValue(data, FIELD_RULE),
-      workdir: getFieldValue(data, FIELD_WORKING_DIRECTORY),
-      command: getFieldValue(data, FIELD_COMMAND),
-    }),
-    [data]
-  );
-};
-
+/**
+ * Renders session preview under visualistions section in the flyout right EuiPanel
+ */
 export const SessionPreview: FC = () => {
   const { processName, userName, startAt, rule, workdir, command } = useProcessData();
   const { euiTheme } = useEuiTheme();
 
+  const emphasisStyles = useMemo(
+    () => ({ fontWeight: euiTheme.font.weight.bold }),
+    [euiTheme.font.weight.bold]
+  );
+
+  const processNameFragment = useMemo(() => {
+    return (
+      processName && (
+        <ValueContainer text={'started'}>
+          <span style={emphasisStyles}>{processName}</span>
+        </ValueContainer>
+      )
+    );
+  }, [emphasisStyles, processName]);
+
+  const timeFragment = useMemo(() => {
+    return (
+      startAt && (
+        <ValueContainer text="at">
+          <span>{startAt}</span>
+        </ValueContainer>
+      )
+    );
+  }, [startAt]);
+
+  const ruleFragment = useMemo(() => {
+    return (
+      rule && (
+        <ValueContainer text={'with alert'}>
+          <EuiLink>{rule}</EuiLink>
+        </ValueContainer>
+      )
+    );
+  }, [rule]);
+
+  const commandFragment = useMemo(() => {
+    return (
+      command && (
+        <ValueContainer text="by">
+          <span style={emphasisStyles}>
+            {workdir} {command}
+          </span>
+        </ValueContainer>
+      )
+    );
+  }, [command, emphasisStyles, workdir]);
+
   return (
-    <EuiPanel hasBorder={true} paddingSize="none" data-test-subj={TEST_ID}>
+    <EuiPanel hasBorder={true} paddingSize="none" data-test-subj={SESSION_PREVIEW_TEST_ID}>
       <EuiPanel color="subdued" paddingSize="s">
         <EuiButtonEmpty color="primary" iconType="sessionViewer">
           {SESSION_PREVIEW_TITLE}
         </EuiButtonEmpty>
 
         <div>
-          <EuiIcon type="user" />
-          &nbsp;
-          <span style={{ fontWeight: euiTheme.font.weight.bold }}>{userName}</span>
-          &nbsp;
-          <span>started</span>
-          &nbsp;
-          <span style={{ fontWeight: euiTheme.font.weight.bold }}>{processName}</span>
-          &nbsp;
-          <span>at</span>
-          &nbsp;
-          <span>{startAt}</span>
-          &nbsp;
-          <span>
-            with alert <EuiLink>{rule}</EuiLink>
-          </span>
-          &nbsp;
-          <span>by</span>
-          &nbsp;
-          <span style={{ fontWeight: euiTheme.font.weight.bold }}>
-            {workdir} {command}
-          </span>
+          <ValueContainer>
+            <EuiIcon type="user" />
+            &nbsp;
+            <span style={emphasisStyles}>{userName}</span>
+          </ValueContainer>
+          {processNameFragment}
+          {timeFragment}
+          {ruleFragment}
+          {commandFragment}
         </div>
       </EuiPanel>
     </EuiPanel>
