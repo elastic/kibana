@@ -21,6 +21,7 @@ import {
   Field,
   useFetchIndexPatternFields,
 } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
 
@@ -31,7 +32,6 @@ interface Option {
 
 export function CustomKqlIndicatorTypeForm() {
   const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
-
   const { isLoading, data: indexFields } = useFetchIndexPatternFields(
     watch('indicator.params.index')
   );
@@ -86,12 +86,7 @@ export function CustomKqlIndicatorTypeForm() {
                     !!watch('indicator.params.index') &&
                     !!field.value &&
                     timestampFields.some((timestampField) => timestampField.name === field.value)
-                      ? [
-                          {
-                            value: field.value,
-                            label: field.value,
-                          },
-                        ]
+                      ? [{ value: field.value, label: field.value }]
                       : []
                   }
                   singleSelection={{ asPlainText: true }}
@@ -187,6 +182,8 @@ export function CustomKqlIndicatorTypeForm() {
           }
         />
       </EuiFlexItem>
+
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
 }
