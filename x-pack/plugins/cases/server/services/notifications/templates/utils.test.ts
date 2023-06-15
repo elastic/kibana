@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import path from 'path';
+import path, { join, resolve } from 'path';
 import { getTemplateFilePath } from './utils';
 
 describe('getTemplateFilePath', () => {
@@ -17,14 +17,16 @@ describe('getTemplateFilePath', () => {
     const resolveSpy = jest.spyOn(path, 'resolve').mockReturnValueOnce('../fake_path');
     const dataPath = getTemplateFilePath('', 'foo.js');
 
-    expect(dataPath).toEqual('../fake_path/foo.js');
+    expect(dataPath).toEqual('../fake_path');
     resolveSpy.mockRestore();
   });
 
   it('resolves path correctly with different directory name', async () => {
     const dataPath = getTemplateFilePath('../sample', 'foo.js');
 
-    expect(dataPath).not.toEqual('../fake_path/foo.js');
+    const expectedPath = resolve(join(__dirname, '..', 'templates', '../sample', 'foo.js'));
+
+    expect(dataPath).toEqual(expectedPath);
   });
 
   it('throws error correctly', async () => {

@@ -574,6 +574,61 @@ describe('execute()', () => {
     `);
   });
 
+  test('ensure parameters are as expected with HTML', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "connectorId": "some-id",
+        "content": Object {
+          "message": "a message to you
+
+      ---
+
+      This message was sent by Elastic.",
+          "messageHTML": "<html><body><span>My HTML message</span></body></html>",
+          "subject": "the subject",
+        },
+        "hasAuth": true,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "password": "supersecret",
+          "service": "__json",
+          "user": "bob",
+        },
+      }
+    `);
+  });
+
   test('parameters are as expected with no auth', async () => {
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,

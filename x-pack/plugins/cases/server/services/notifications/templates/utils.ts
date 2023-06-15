@@ -8,17 +8,12 @@
 import { join, resolve } from 'path';
 
 export const getTemplateFilePath = (filePath: string, fileName: string): string => {
-  const templatesDir = join('..', 'templates');
+  const path = join(__dirname, '..', 'templates', filePath, fileName);
+  const absolutePath = resolve(path);
 
-  const fileDir = join(templatesDir, filePath);
-
-  const dir = resolve(join(__dirname, fileDir));
-
-  const dataPath = join(dir, fileName);
-
-  if (!dataPath) {
+  if (!absolutePath) {
     throw new Error('Error finding the file!');
   }
 
-  return dataPath;
+  return absolutePath;
 };

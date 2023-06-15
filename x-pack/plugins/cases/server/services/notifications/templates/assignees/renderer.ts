@@ -18,7 +18,7 @@ const DESCRIPTION_LIMIT = 300;
 
 export const getStatusColor = (status: CaseStatuses | null | undefined): string => {
   if (!status) {
-    return '#000';
+    return '#FFF';
   }
 
   switch (status) {
@@ -35,7 +35,7 @@ export const getStatusColor = (status: CaseStatuses | null | undefined): string 
 
 export const getSeverityColor = (severity: CaseSeverity | null | undefined): string => {
   if (!severity) {
-    return '#000';
+    return '#FFF';
   }
 
   switch (severity) {
@@ -63,7 +63,6 @@ export const assigneesTemplateRenderer = async (
 
   const content = await fs.promises.readFile(dataPath, 'utf8');
 
-  const tags = caseData.attributes.tags.length ? caseData.attributes.tags : ['-'];
   const hasMoreTags = caseData.attributes.tags.length > TAG_LIMIT;
   const numOfExtraTags = Math.max(caseData.attributes.tags.length - TAG_LIMIT, 0);
 
@@ -74,7 +73,7 @@ export const assigneesTemplateRenderer = async (
     severity: caseData.attributes.severity,
     severityColor: getSeverityColor(caseData.attributes.severity),
     hasMoreTags: hasMoreTags ? numOfExtraTags : null,
-    tags: tags.slice(0, TAG_LIMIT),
+    tags: caseData.attributes.tags.slice(0, TAG_LIMIT),
     description:
       caseData.attributes.description.length > DESCRIPTION_LIMIT
         ? `${caseData.attributes.description.slice(0, DESCRIPTION_LIMIT)}...`
