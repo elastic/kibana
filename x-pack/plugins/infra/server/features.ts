@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -93,7 +94,7 @@ export const LOGS_FEATURE = {
       catalogue: ['infralogging', 'logs'],
       api: ['infra', 'rac'],
       savedObject: {
-        all: [infraSourceConfigurationSavedObjectName],
+        all: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
         read: [],
       },
       alerting: {
@@ -126,7 +127,7 @@ export const LOGS_FEATURE = {
       },
       savedObject: {
         all: [],
-        read: [infraSourceConfigurationSavedObjectName],
+        read: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
       },
       ui: ['show'],
     },

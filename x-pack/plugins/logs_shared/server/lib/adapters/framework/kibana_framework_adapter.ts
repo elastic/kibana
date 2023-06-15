@@ -46,7 +46,7 @@ export class KibanaFramework {
     config: LogsSharedVersionedRouteConfig<Method>
   ) {
     const defaultOptions = {
-      tags: ['access:logs-shared'],
+      tags: ['access:infra'],
     };
     const routeConfig = {
       access: config.access,
