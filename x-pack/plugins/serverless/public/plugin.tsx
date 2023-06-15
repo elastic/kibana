@@ -71,6 +71,8 @@ export class ServerlessPlugin
       setNavigation: (projectNavigation) => project.setNavigation(projectNavigation),
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
+      getActiveNavigationNodes$: () =>
+        (core.chrome as InternalChromeStart).project.getActiveNavigationNodes$(),
     };
   }
 
