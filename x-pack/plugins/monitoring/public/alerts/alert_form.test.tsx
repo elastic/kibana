@@ -252,6 +252,7 @@ describe('alert_form', () => {
                 }
                 actionTypeRegistry={actionTypeRegistry}
                 featureId="alerting"
+                producerId="alerting"
               />
             </KibanaReactContext.Provider>
           </I18nProvider>
