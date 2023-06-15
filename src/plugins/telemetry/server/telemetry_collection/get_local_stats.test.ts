@@ -192,7 +192,7 @@ describe('get_local_stats', () => {
       expect(result.cluster_uuid).toStrictEqual(combinedStatsResult.cluster_uuid);
       expect(result.cluster_name).toStrictEqual(combinedStatsResult.cluster_name);
       expect(result.cluster_stats).toStrictEqual(combinedStatsResult.cluster_stats);
-      expect(result.version).toEqual('2.3.4');
+      expect(result.version).toEqual(version);
       expect(result.collection).toEqual('local');
       expect(Object.keys(result)).not.toContain('license');
       expect(result.stack_stats).toEqual({ kibana: undefined, data: undefined });
@@ -208,7 +208,7 @@ describe('get_local_stats', () => {
         context
       );
 
-      expect(result.version).toEqual('8.0.0');
+      expect(result.version).toEqual(context.version);
     });
 
     it('returns expected object with xpack', () => {
@@ -247,7 +247,7 @@ describe('get_local_stats', () => {
       expect(result.cluster_name).toEqual(combinedStatsResult.cluster_name);
       expect(result.cluster_stats).toEqual(combinedStatsResult.cluster_stats);
       expect(result.cluster_stats.nodes).toEqual(combinedStatsResult.cluster_stats.nodes);
-      expect(result.version).toBe('2.3.4');
+      expect(result.version).toBe(version);
       expect(result.collection).toBe('local');
       expect(Object.keys(result).indexOf('license')).toBeLessThan(0);
       expect(Object.keys(result.stack_stats).indexOf('xpack')).toBeLessThan(0);
