@@ -30,6 +30,7 @@ import {
   APPLICATIONS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
+  ESRE_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
@@ -139,6 +140,27 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
       },
       title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
+    });
+
+    core.application.register({
+      appRoute: ESRE_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: ESRE_PLUGIN.LOGO,
+      id: ESRE_PLUGIN.ID,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ESRE_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchEsre } = await import('./applications/esre');
+
+        return renderApp(EnterpriseSearchEsre, kibanaDeps, pluginData);
+      },
+      title: ESRE_PLUGIN.NAV_TITLE,
     });
 
     core.application.register({

@@ -74,10 +74,13 @@ export const useFetchRelatedAlertsByAncestry = ({
     indices: indices || [],
   });
 
-  return {
-    loading,
-    error,
-    data: alertIds,
-    dataCount: (alertIds || []).length,
-  };
+  return useMemo(
+    () => ({
+      loading,
+      error,
+      data: alertIds,
+      dataCount: alertIds?.length || 0,
+    }),
+    [alertIds, error, loading]
+  );
 };

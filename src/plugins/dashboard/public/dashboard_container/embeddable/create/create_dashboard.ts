@@ -144,6 +144,7 @@ export const initializeDashboard = async ({
     validateLoadedSavedObject &&
     !validateLoadedSavedObject(loadDashboardReturn)
   ) {
+    // throw error to stop the rest of Dashboard loading and make the factory return an ErrorEmbeddable.
     throw new Error('Dashboard failed saved object result validation');
   }
 
