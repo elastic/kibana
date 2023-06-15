@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { EuiFormRow, EuiPanel, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { DisplayType } from '../../../../../../../common/types/connectors';
+import { DisplayType } from '../../../../../../common/types/connectors';
 
-import { ConnectorConfigurationField } from '../connector_configuration_field';
-import { ConfigEntryView } from '../connector_configuration_logic';
+import { ConnectorConfigurationField } from './connector_configuration_field';
+import { ConfigEntryView } from './connector_configuration_logic';
 
 interface ConnectorConfigurationFormItemsProps {
   hasDocumentLevelSecurityEnabled: boolean;
@@ -26,9 +26,8 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
   hasDocumentLevelSecurityEnabled,
 }) => {
   return (
-    <>
-      <EuiSpacer />
-      {items.map((configEntry, index) => {
+    <EuiFlexGroup direction="column">
+      {items.map((configEntry) => {
         const {
           default_value: defaultValue,
           depends_on: dependencies,
@@ -58,55 +57,54 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
         const rowLabel =
           display === DisplayType.TOGGLE || (display === DisplayType.TEXTAREA && sensitive) ? (
             <></>
+          ) : tooltip ? (
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem>
+                <p>{label}</p>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="questionInCircle" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ) : (
-            <EuiToolTip content={tooltip}>
-              <p>{label}</p>
-            </EuiToolTip>
+            <p>{label}</p>
           );
 
         if (dependencies?.length > 0) {
-          // dynamic spacing without CSS
-          const previousField = items[index - 1];
-          const nextField = items[index + 1];
-
-          const topSpacing =
-            !previousField || previousField.depends_on.length <= 0 ? <EuiSpacer size="m" /> : <></>;
-
-          const bottomSpacing =
-            !nextField || nextField.depends_on.length <= 0 ? <EuiSpacer size="m" /> : <></>;
-
           return (
-            <>
-              {topSpacing}
+            <EuiFlexItem key={key}>
               <EuiPanel color="subdued" borderRadius="none">
-                <EuiFormRow
-                  label={rowLabel}
-                  key={key}
-                  helpText={helpText}
-                  error={validationErrors}
-                  isInvalid={!isValid}
-                  data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
-                >
-                  <ConnectorConfigurationField configEntry={configEntry} />
-                </EuiFormRow>
+                <EuiToolTip content={tooltip}>
+                  <EuiFormRow
+                    label={rowLabel}
+                    helpText={helpText}
+                    error={validationErrors}
+                    isInvalid={!isValid}
+                    data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+                  >
+                    <ConnectorConfigurationField configEntry={configEntry} />
+                  </EuiFormRow>
+                </EuiToolTip>
               </EuiPanel>
-              {bottomSpacing}
-            </>
+            </EuiFlexItem>
           );
         }
         return (
-          <EuiFormRow
-            label={rowLabel}
-            key={key}
-            helpText={helpText}
-            error={validationErrors}
-            isInvalid={!isValid}
-            data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
-          >
-            <ConnectorConfigurationField configEntry={configEntry} />
-          </EuiFormRow>
+          <EuiFlexItem key={key}>
+            <EuiToolTip content={tooltip}>
+              <EuiFormRow
+                label={rowLabel}
+                helpText={helpText}
+                error={validationErrors}
+                isInvalid={!isValid}
+                data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+              >
+                <ConnectorConfigurationField configEntry={configEntry} />
+              </EuiFormRow>
+            </EuiToolTip>
+          </EuiFlexItem>
         );
       })}
-    </>
+    </EuiFlexGroup>
   );
 };
