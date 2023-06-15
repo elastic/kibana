@@ -58,7 +58,14 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, core, plugins, endpointAppContextService, ruleMonitoringService, riskEngineDataClient } = options;
+    const {
+      config,
+      core,
+      plugins,
+      endpointAppContextService,
+      ruleMonitoringService,
+      riskEngineDataClient,
+    } = options;
 
     const { lists, ruleRegistry, security } = plugins;
 
