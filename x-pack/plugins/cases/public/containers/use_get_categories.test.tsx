@@ -34,7 +34,7 @@ describe('useGetCategories', () => {
     expect(spyOnGetCategories).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
   });
 
-  it('displays and error toast when an error occurs', async () => {
+  it('displays an error toast when an error occurs', async () => {
     const spyOnGetCategories = jest.spyOn(api, 'getCategories');
     spyOnGetCategories.mockImplementation(() => {
       throw new Error('Something went wrong');

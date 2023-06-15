@@ -165,6 +165,7 @@ export enum SortFieldCase {
   severity = 'severity',
   status = 'status',
   title = 'title',
+  category = 'category',
 }
 
 export type CaseUser = SnakeToCamelCase<User>;

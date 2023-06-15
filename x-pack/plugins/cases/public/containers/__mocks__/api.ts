@@ -26,6 +26,7 @@ import {
   casesStatus,
   pushedCase,
   tags,
+  categories,
   findCaseUserActionsResponse,
   getCaseUserActionsStatsResponse,
   getCaseUsersMockResponse,
@@ -174,3 +175,6 @@ export const deleteFileAttachments = async ({
   fileIds: string[];
   signal: AbortSignal;
 }): Promise<void> => Promise.resolve(undefined);
+
+export const getCategories = async (signal: AbortSignal): Promise<string[]> =>
+  Promise.resolve(categories);

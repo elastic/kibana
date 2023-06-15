@@ -420,7 +420,7 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should render Name, Categor, CreatedOn and Severity columns when isSelectorView=true', async () => {
+  it('should render Name, Category, CreatedOn and Severity columns when isSelectorView=true', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={true} />);
     await waitFor(() => {
       expect(screen.getByTestId('tableHeaderCell_title_0')).toBeInTheDocument();
@@ -484,6 +484,26 @@ describe('AllCasesListGeneric', () => {
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
             sortField: SortFieldCase.updatedAt,
+            sortOrder: 'asc',
+          },
+        })
+      );
+    });
+  });
+
+  it('should sort by category', async () => {
+    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+    userEvent.click(
+      within(screen.getByTestId('tableHeaderCell_category_4')).getByTestId('tableHeaderSortButton')
+    );
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          queryParams: {
+            ...DEFAULT_QUERY_PARAMS,
+            sortField: SortFieldCase.category,
             sortOrder: 'asc',
           },
         })

@@ -17,6 +17,7 @@ import {
   SECURITY_SOLUTION_OWNER,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '../../common/constants';
 
 import {
@@ -610,7 +611,7 @@ describe('Cases API', () => {
 
     it('should be called with the correct check url, method, signal', async () => {
       await getCategories(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/tags`, {
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_GET_CASE_CATEGORIES_URL, {
         method: 'GET',
         signal: abortCtrl.signal,
         query: {

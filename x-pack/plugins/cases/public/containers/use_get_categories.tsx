@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useToasts } from '../common/lib/kibana';
+import { useCasesToast } from '../common/use_cases_toast';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import type { ServerError } from '../types';
 import { getCategories } from './api';
@@ -14,7 +14,7 @@ import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
 
 export const useGetCategories = () => {
-  const toasts = useToasts();
+  const { showErrorToast } = useCasesToast();
   const { owner } = useCasesContext();
   return useQuery(
     casesQueriesKeys.categories(),
@@ -25,12 +25,12 @@ export const useGetCategories = () => {
     {
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: i18n.ERROR_TITLE }
-          );
+          showErrorToast(error.body && error.body.message ? new Error(error.body.message) : error, {
+            title: i18n.CATEGORIES_ERROR_TITLE,
+          });
         }
       },
+      staleTime: 60 * 1000, // one minute
     }
   );
 };
