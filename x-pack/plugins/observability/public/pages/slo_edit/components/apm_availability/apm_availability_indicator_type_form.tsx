@@ -99,7 +99,6 @@ export function ApmAvailabilityIndicatorTypeForm() {
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
           <QueryBuilder
-            control={control}
             dataTestSubj="apmLatencyFilterInput"
             indexPatternString={watch('indicator.params.index')}
             label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {
