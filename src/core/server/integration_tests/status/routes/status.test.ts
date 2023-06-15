@@ -110,25 +110,73 @@ describe('GET /api/status', () => {
   });
 
   describe('allowAnonymous: false', () => {
-    it('rejects requests with no credentials', async () => {
-      await setupServer({ allowAnonymous: false });
-      await supertest(httpSetup.server.listener).get('/api/status').expect(401);
+    describe('http response code', () => {
+      it('respond with a 200 when core.overall.status is available', async () => {
+        await setupServer({
+          allowAnonymous: false,
+          coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status').expect(200);
+      });
+      it('respond with a 200 when core.overall.status is degraded', async () => {
+        await setupServer({
+          allowAnonymous: false,
+          coreOverall: createServiceStatus(ServiceStatusLevels.degraded),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status').expect(200);
+      });
+      it('respond with a 503 when core.overall.status is unavailable', async () => {
+        await setupServer({
+          allowAnonymous: false,
+          coreOverall: createServiceStatus(ServiceStatusLevels.unavailable),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status').expect(503);
+      });
+      it('respond with a 503 when core.overall.status is critical', async () => {
+        await setupServer({
+          allowAnonymous: false,
+          coreOverall: createServiceStatus(ServiceStatusLevels.critical),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status').expect(503);
+      });
     });
 
-    it('rejects requests with bad credentials', async () => {
-      await setupServer({ allowAnonymous: false });
-      await supertest(httpSetup.server.listener)
-        .get('/api/status')
-        .set('Authorization', 'fake creds')
-        .expect(401);
-    });
+    describe('response payload', () => {
+      it('returns redacted body for requests with no credentials', async () => {
+        await setupServer({
+          allowAnonymous: false,
+          coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        });
+        const response = await supertest(httpSetup.server.listener).get('/api/status').expect(200);
+        expect(response.body).toEqual({ status: 'available' });
+      });
 
-    it('accepts authenticated requests', async () => {
-      await setupServer({ allowAnonymous: false });
-      await supertest(httpSetup.server.listener)
-        .get('/api/status')
-        .set('Authorization', 'let me in')
-        .expect(200);
+      it('returns redacted body for requests with bad credentials', async () => {
+        await setupServer({
+          allowAnonymous: false,
+          coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        });
+        const response = await supertest(httpSetup.server.listener)
+          .get('/api/status')
+          .set('Authorization', 'fake creds')
+          .expect(200);
+        expect(response.body).toEqual({ status: 'available' });
+      });
+
+      it('returns full body for authenticated requests', async () => {
+        await setupServer({ allowAnonymous: false });
+        const response = await supertest(httpSetup.server.listener)
+          .get('/api/status')
+          .set('Authorization', 'let me in')
+          .expect(200);
+        expect(response.body).toEqual(
+          expect.objectContaining({
+            name: expect.any(String),
+            status: expect.any(Object),
+            metrics: expect.any(Object),
+          })
+        );
+      });
     });
   });
 
