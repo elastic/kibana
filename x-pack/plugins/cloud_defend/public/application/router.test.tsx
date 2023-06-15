@@ -8,7 +8,6 @@ import CloudDefendRouter from './router';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { CloudDefendPage, CloudDefendPageNavigationItem } from '../common/navigation/types';
 import { CloudDefendSecuritySolutionContext } from '../types';
 import { createMemoryHistory, MemoryHistory } from 'history';
