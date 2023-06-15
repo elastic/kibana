@@ -125,7 +125,7 @@ export function syncUnifiedSearchState(
           return timeRestoreRefreshInterval;
         }
 
-        // otherwise fall back to the time range from the time filter service
+        // otherwise fall back to the refresh interval from the time filter service
         return timefilterService.getRefreshInterval();
       })();
 
