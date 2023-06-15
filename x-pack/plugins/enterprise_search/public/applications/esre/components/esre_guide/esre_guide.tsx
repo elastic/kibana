@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiText,
   EuiHorizontalRule,
+  EuiFlexGrid,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,6 +32,8 @@ import { RankAggregationSection } from './rank_aggregation_section';
 import { SemanticSearchSection } from './semantic_search_section';
 
 export const EsreGuide: React.FC = () => {
+  const isMobile = useIsWithinBreakpoints(['xs']);
+
   return (
     <EnterpriseSearchEsrePageTemplate
       restrictWidth
@@ -45,17 +49,17 @@ export const EsreGuide: React.FC = () => {
         <EuiFlexGroup justifyContent="spaceBetween" direction="column" responsive>
           <EuiFlexItem grow>
             <EuiPanel color="subdued" hasShadow={false}>
-              <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexGrid alignItems="center" responsive={false} columns={isMobile ? 1 : 3}>
                 <EuiFlexItem grow={false}>
-                  <EuiImage size="m" src={simplifyIllustration} alt="Simplify" />
+                  <EuiImage size="m" src={simplifyIllustration} alt="" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiImage size="m" src={analyticsIllustration} alt="Analytics" />
+                  <EuiImage size="m" src={analyticsIllustration} alt="" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiImage size="m" src={scalableIllustration} alt="Scalable" />
+                  <EuiImage size="m" src={scalableIllustration} alt="" />
                 </EuiFlexItem>
-              </EuiFlexGroup>
+              </EuiFlexGrid>
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem grow>
