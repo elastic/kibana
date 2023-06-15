@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('cloud_security_posture', function () {
     this.tags(['cloud_security_posture']);
-    // loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./status/status_not_deployed'));
     loadTestFile(require.resolve('./status/status_indexed'));
     loadTestFile(require.resolve('./status/status_waiting_for_results'));

@@ -35,7 +35,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
-    describe('status = index_timeout test', () => {
+    describe('STATUS = INDEX_TIMEOUT TEST', () => {
       setupFleetAndAgents(providerContext);
 
       beforeEach(async () => {

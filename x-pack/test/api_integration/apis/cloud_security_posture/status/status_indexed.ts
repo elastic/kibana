@@ -91,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
-    describe('status = indexed test', () => {
+    describe('STATUS = INDEXED TEST', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');

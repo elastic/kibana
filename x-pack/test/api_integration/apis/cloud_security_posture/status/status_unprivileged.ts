@@ -34,7 +34,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
-    describe('status = unprivileged test', () => {
+    describe('STATUS = UNPRIVILEGED TEST', () => {
       before(async () => {
         await createCSPOnlyRole(security, UNPRIVILEGED_ROLE, '');
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);

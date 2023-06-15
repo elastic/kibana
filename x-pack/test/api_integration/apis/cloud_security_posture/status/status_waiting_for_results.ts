@@ -20,7 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
-    describe('status = waiting_for_result test', () => {
+    describe('STATUS = WAITING_FOR_RESULT TEST', () => {
       setupFleetAndAgents(providerContext);
 
       beforeEach(async () => {

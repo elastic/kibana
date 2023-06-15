@@ -18,27 +18,26 @@ export default function (providerContext: FtrProviderContext) {
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
-    beforeEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    describe('STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST', () => {
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
-      const { body: agentPolicyResponse } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'Test policy',
-          namespace: 'default',
-        });
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          });
 
-      agentPolicyId = agentPolicyResponse.item.id;
-    });
+        agentPolicyId = agentPolicyResponse.item.id;
+      });
 
-    afterEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-
-    describe('status = not-deployed & status = not-installed test', () => {
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      });
       it(`Should return not-deployed when installed kspm, no findings on either indices and no healthy agents`, async () => {
         await createPackagePolicy(
           supertest,
