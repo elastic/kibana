@@ -89,7 +89,7 @@ export const createArtifact = async (
 };
 
 // Max length in bytes for artifacts batch
-export const BULK_CREATE_MAX_ARTIFACTS_BYTES = 2_000;
+export const BULK_CREATE_MAX_ARTIFACTS_BYTES = 5_000_000;
 
 // Function to split artifacts in batches depending on the encoded_size value.
 const generateArtifactBatches = (
