@@ -30,10 +30,10 @@ export function GeoLineForm(props: Props) {
       isTimeseries,
       dimensionLabels: isTimeseries
         ? props.indexPattern.fields
-            .filter(field => {
+            .filter((field) => {
               return field.timeSeriesDimension;
             })
-            .map(field => {
+            .map((field) => {
               return field.displayName;
             })
         : [],
@@ -53,13 +53,14 @@ export function GeoLineForm(props: Props) {
 
   return (
     <>
-      {isTimeseries && 
+      {isTimeseries && (
         <EuiFormRow>
           <EuiToolTip
             position="top"
             content={i18n.translate('xpack.maps.source.esGeoLine.groupByTimeseriesTooltip', {
-              defaultMessage: 'When enabled, create a track for each unique time series. Dimensions: {dimensionLabels}',
-              values: { dimensionLabels: dimensionLabels.join(',') }
+              defaultMessage:
+                'When enabled, create a track for each unique time series. Dimensions: {dimensionLabels}',
+              values: { dimensionLabels: dimensionLabels.join(',') },
             })}
           >
             <EuiSwitch
@@ -73,8 +74,8 @@ export function GeoLineForm(props: Props) {
             />
           </EuiToolTip>
         </EuiFormRow>
-      }
-      {!props.groupByTimeseries &&
+      )}
+      {!props.groupByTimeseries && (
         <>
           <EuiFormRow
             label={i18n.translate('xpack.maps.source.esGeoLine.splitFieldLabel', {
@@ -116,7 +117,7 @@ export function GeoLineForm(props: Props) {
             />
           </EuiFormRow>
         </>
-      }
+      )}
     </>
   );
 }
