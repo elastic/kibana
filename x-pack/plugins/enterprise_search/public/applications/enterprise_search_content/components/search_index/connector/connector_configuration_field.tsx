@@ -80,7 +80,6 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         />
       ) : (
         <EuiRadioGroup
-          // TODO add stuff
           disabled={status === Status.LOADING}
           idSelected={ensureStringType(value)}
           name="radio group"
