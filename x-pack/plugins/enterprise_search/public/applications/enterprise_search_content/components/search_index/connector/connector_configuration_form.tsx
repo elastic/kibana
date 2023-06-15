@@ -62,6 +62,7 @@ export const ConnectorConfigurationForm = () => {
           />
         </>
       ))}
+      <EuiSpacer />
       <EuiFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>

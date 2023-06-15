@@ -183,7 +183,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       return (
         <EuiSwitch
           checked={ensureBooleanType(value)}
-          disabled={status === Status.LOADING || !hasPlatinumLicense}
+          disabled={status === Status.LOADING}
           label={
             tooltip ? (
               <EuiFlexGroup gutterSize="xs">
