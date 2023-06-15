@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { FormattedMessage } from 'react-intl';
+import { EsreGuideAccordion } from './esre_guide_accordion';
+
+import elserIllustration from '../../../../assets/images/elser.svg';
+import nlpEnrichmentIllustration from '../../../../assets/images/nlp.svg';
+import vectorSearchIllustration from '../../../../assets/images/vector.svg';
+
+export const SemanticSearchSection: React.FC = () => (
+  <>
+    <EuiFlexGroup direction="row" alignItems="center">
+      <EuiFlexItem grow={4}>
+        <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <p>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.esre.semanticSearch.title"
+                  defaultMessage="Set up semantic search"
+                />
+              </p>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.esre.semanticSearch.description"
+                  defaultMessage="ESRE combines your choice of these information retrieval tools."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={6}>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EsreGuideAccordion
+              id="elserAccordion"
+              initialIsOpen={true}
+              icon={elserIllustration}
+              title={i18n.translate('xpack.enterpriseSearch.esre.elserAccordion.title', {
+                defaultMessage: 'Elastic Learned Sparse Encoder',
+              })}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.esre.elserAccordion.description',
+                {
+                  defaultMessage: 'Instant semantic search capabilities',
+                }
+              )}
+              content={<><p>Placeholder</p></>}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EsreGuideAccordion
+              id="vectorSearchAccordion"
+              icon={vectorSearchIllustration}
+              title={i18n.translate('xpack.enterpriseSearch.esre.vectorSearchAccordion.title', {
+                defaultMessage: 'Vector Search',
+              })}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.esre.vectorSearchAccordion.description',
+                {
+                  defaultMessage: 'Powerful similarity searches for unstructured data',
+                }
+              )}
+              content={<><p>Placeholder</p></>}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EsreGuideAccordion
+              id="vectorSearchAccordion"
+              icon={nlpEnrichmentIllustration}
+              title={i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentAccordion.title', {
+                defaultMessage: 'NLP Enrichment',
+              })}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.esre.nlpEnrichmentAccordion.description',
+                {
+                  defaultMessage: 'Insightful data enrichment with trained ML models',
+                }
+              )}
+              content={<><p>Placeholder</p></>}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </>
+);
