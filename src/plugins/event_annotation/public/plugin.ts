@@ -12,7 +12,10 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import {ContentManagementPublicSetup, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
