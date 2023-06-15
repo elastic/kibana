@@ -9,6 +9,8 @@ import moment from 'moment';
 import * as i18n from './translations';
 import { ISO_WEEKDAYS, MaintenanceWindowStatus } from '../../../common';
 
+export { STATUS_DISPLAY } from '../../../common';
+
 // TODO - consolidate enum with backend
 export enum Frequency {
   YEARLY = '0',
@@ -104,13 +106,6 @@ export const ISO_WEEKDAYS_TO_RRULE: Record<number, string> = {
 export const RRULE_WEEKDAYS_TO_ISO_WEEKDAYS = mapValues(invert(ISO_WEEKDAYS_TO_RRULE), (v) =>
   Number(v)
 );
-
-export const STATUS_DISPLAY = {
-  [MaintenanceWindowStatus.Running]: { color: 'primary', label: i18n.TABLE_STATUS_RUNNING },
-  [MaintenanceWindowStatus.Upcoming]: { color: 'warning', label: i18n.TABLE_STATUS_UPCOMING },
-  [MaintenanceWindowStatus.Finished]: { color: 'success', label: i18n.TABLE_STATUS_FINISHED },
-  [MaintenanceWindowStatus.Archived]: { color: 'default', label: i18n.TABLE_STATUS_ARCHIVED },
-};
 
 export const STATUS_SORT = {
   [MaintenanceWindowStatus.Running]: 0,

@@ -20,7 +20,7 @@ const bodySchema = schema.object({
   ids: schema.arrayOf(schema.string()),
 });
 
-const rewriteBodyResponse: RewriteResponseCase<BulkGetResult> = (result: BulkGetResult) => ({
+export const rewriteBodyResponse: RewriteResponseCase<BulkGetResult> = (result: BulkGetResult) => ({
   maintenance_windows: result.maintenanceWindows.map((mw) => rewriteMaintenanceWindowRes(mw)),
   errors: result.errors.map((error) => ({
     id: error.id,

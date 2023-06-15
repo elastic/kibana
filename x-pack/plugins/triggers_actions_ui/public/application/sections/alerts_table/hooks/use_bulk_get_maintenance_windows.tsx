@@ -58,17 +58,16 @@ export const useBulkGetMaintenanceWindows = (props: UseBulkGetMaintenanceWindows
     });
   };
 
-  const { data, isFetching, isLoading } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: triggersActionsUiQueriesKeys.maintenanceWindowsBulkGet(ids),
     enabled: ids.length > 0 && canFetchMaintenanceWindows,
     select: transformMaintenanceWindows,
     queryFn,
     onError,
-    // refetchOnWindowFocus: false,
   });
 
   return {
     data,
-    isLoading: isLoading || isFetching,
+    isFetching,
   };
 };

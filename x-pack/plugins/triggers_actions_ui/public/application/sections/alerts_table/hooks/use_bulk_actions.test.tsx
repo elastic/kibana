@@ -10,7 +10,7 @@ import { useBulkActions, useBulkAddToCaseActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
 
-jest.mock('./api');
+jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
 
 const mockCaseService = createCasesServiceMock();

@@ -8,7 +8,7 @@
 import { bulkGetCases } from './bulk_get_cases';
 import { coreMock } from '@kbn/core/public/mocks';
 
-describe('Alerts table APIs', () => {
+describe('Bulk Get Cases API', () => {
   const abortCtrl = new AbortController();
   const mockCoreSetup = coreMock.createSetup();
   const http = mockCoreSetup.http;
@@ -18,20 +18,17 @@ describe('Alerts table APIs', () => {
     http.post.mockResolvedValue({ cases: [], errors: [] });
   });
 
-  describe('bulkGetCases', () => {
-    it('fetch cases correctly', async () => {
-      const res = await bulkGetCases(http, { ids: ['test-id'] }, abortCtrl.signal);
+  it('fetch cases correctly', async () => {
+    const res = await bulkGetCases(http, { ids: ['test-id'] }, abortCtrl.signal);
+    expect(res).toEqual({ cases: [], errors: [] });
+  });
 
-      expect(res).toEqual({ cases: [], errors: [] });
-    });
+  it('should call http with correct arguments', async () => {
+    await bulkGetCases(http, { ids: ['test-id'] }, abortCtrl.signal);
 
-    it('should call http with correct arguments', async () => {
-      await bulkGetCases(http, { ids: ['test-id'] }, abortCtrl.signal);
-
-      expect(http.post).toHaveBeenCalledWith('/internal/cases/_bulk_get', {
-        body: '{"ids":["test-id"]}',
-        signal: abortCtrl.signal,
-      });
+    expect(http.post).toHaveBeenCalledWith('/internal/cases/_bulk_get', {
+      body: '{"ids":["test-id"]}',
+      signal: abortCtrl.signal,
     });
   });
 });

@@ -9,6 +9,13 @@ import { Moment } from 'moment';
 import { Frequency } from 'rrule';
 import { monthDayDate } from './helpers/month_day_date';
 
+export {
+  TABLE_STATUS_RUNNING,
+  TABLE_STATUS_UPCOMING,
+  TABLE_STATUS_FINISHED,
+  TABLE_STATUS_ARCHIVED,
+} from '../../../common';
+
 export const MAINTENANCE_WINDOWS = i18n.translate('xpack.alerting.maintenanceWindows', {
   defaultMessage: 'Maintenance Windows',
 });
@@ -417,34 +424,6 @@ export const TABLE_ALERTS_TOOLTIP = i18n.translate(
 export const TABLE_STATUS = i18n.translate('xpack.alerting.maintenanceWindows.table.status', {
   defaultMessage: 'Status',
 });
-
-export const TABLE_STATUS_RUNNING = i18n.translate(
-  'xpack.alerting.maintenanceWindows.table.statusRunning',
-  {
-    defaultMessage: 'Running',
-  }
-);
-
-export const TABLE_STATUS_UPCOMING = i18n.translate(
-  'xpack.alerting.maintenanceWindows.table.statusUpcoming',
-  {
-    defaultMessage: 'Upcoming',
-  }
-);
-
-export const TABLE_STATUS_FINISHED = i18n.translate(
-  'xpack.alerting.maintenanceWindows.table.statusFinished',
-  {
-    defaultMessage: 'Finished',
-  }
-);
-
-export const TABLE_STATUS_ARCHIVED = i18n.translate(
-  'xpack.alerting.maintenanceWindows.table.statusArchived',
-  {
-    defaultMessage: 'Archived',
-  }
-);
 
 export const TABLE_START_TIME = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.startTime',

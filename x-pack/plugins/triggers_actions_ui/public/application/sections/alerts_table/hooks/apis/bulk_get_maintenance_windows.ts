@@ -6,9 +6,11 @@
  */
 
 import { HttpStart } from '@kbn/core-http-browser';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import {
+  MaintenanceWindow,
+  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
+} from '@kbn/alerting-plugin/common';
 import { AsApiContract } from '@kbn/actions-plugin/common';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../constants';
 
 export interface BulkGetMaintenanceWindowsParams {
   http: HttpStart;
@@ -76,7 +78,7 @@ export const bulkGetMaintenanceWindows = async ({
   ids,
 }: BulkGetMaintenanceWindowsParams): Promise<BulkGetMaintenanceWindowsResult> => {
   const res = await http.post<BulkGetMaintenanceWindowsResponse>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_get`,
+    `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_bulk_get`,
     {
       body: JSON.stringify({ ids }),
     }

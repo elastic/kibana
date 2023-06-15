@@ -285,7 +285,7 @@ const AlertsTableStateWithQueryProvider = ({
     fetchCases
   );
 
-  const { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows } =
+  const { data: maintenanceWindows, isFetching: isLoadingMaintenanceWindows } =
     useBulkGetMaintenanceWindows({
       ids: Array.from(maintenanceWindowIds.values()),
       canFetchMaintenanceWindows: fetchMaintenanceWindows,
