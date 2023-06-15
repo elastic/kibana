@@ -52,7 +52,17 @@ export function IndexSelection() {
         options: [
           {
             value: searchPattern,
-            label: `${searchPattern} (match ${indices.length} indices)`,
+            label: i18n.translate(
+              'xpack.observability.slo.sloEdit.customKql.indexSelection.indexPatternFoundLabel',
+              {
+                defaultMessage:
+                  '{searchPattern} (match {num, plural, one {# index} other {# indices}})',
+                values: {
+                  searchPattern,
+                  num: indices.length,
+                },
+              }
+            ),
           },
         ],
       });
