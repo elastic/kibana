@@ -61,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Updated snooze settings for 1 rule.');
+        expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
@@ -92,7 +92,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
-      await testSubjects.click('selectAllRulesButton');
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
       await testSubjects.click('bulkUnsnooze');
@@ -101,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Updated snooze settings for 1 rule.');
+        expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
@@ -124,7 +123,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
-      await testSubjects.click('selectAllRulesButton');
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
       await testSubjects.click('bulkSnoozeSchedule');
@@ -133,7 +131,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Updated snooze settings for 1 rule.');
+        expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
@@ -164,7 +162,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
-      await testSubjects.click('selectAllRulesButton');
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
       await testSubjects.click('bulkRemoveSnoozeSchedule');
@@ -173,7 +170,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Updated snooze settings for 1 rule.');
+        expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
