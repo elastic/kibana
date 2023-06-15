@@ -204,11 +204,9 @@ export class CoreVersionedRoute implements VersionedRoute {
       }
     }
 
-    {
-      const message = isValidRouteVersion(this.isPublic, version);
-      if (message) {
-        throw new Error(message);
-      }
+    const message = isValidRouteVersion(this.isPublic, version);
+    if (message) {
+      throw new Error(message);
     }
 
     if (this.handlers.has(version as ApiVersion)) {
