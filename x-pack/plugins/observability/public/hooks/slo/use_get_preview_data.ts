@@ -44,6 +44,7 @@ export function useGetPreviewData(indicator?: Indicator): UseGetPreviewData {
 
         return response;
       },
+      retry: false,
       refetchOnWindowFocus: false,
       enabled: Boolean(indicator),
     }
