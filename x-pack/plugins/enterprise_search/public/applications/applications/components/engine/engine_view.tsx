@@ -24,7 +24,7 @@ import {
   SearchApplicationContentTabs,
 } from '../../routes';
 
-import { EnterpriseSearchEnginesPageTemplate } from '../layout/page_template';
+import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 import { DeleteSearchApplicationModal } from '../search_applications/delete_search_application_modal';
 
 import { EngineConnect } from './engine_connect/engine_connect';
@@ -62,7 +62,7 @@ export const EngineView: React.FC = () => {
 
   if (fetchEngineApiStatus === Status.ERROR) {
     return (
-      <EnterpriseSearchEnginesPageTemplate
+      <EnterpriseSearchApplicationsPageTemplate
         isEmptyState
         pageChrome={[engineName]}
         pageViewTelemetry={tabId}
@@ -71,7 +71,7 @@ export const EngineView: React.FC = () => {
           pageTitle: engineName,
           rightSideItems: [],
         }}
-        engineName={engineName}
+        searchApplicationName={engineName}
         emptyState={<EngineError error={fetchEngineApiError} />}
         hasSchemaConflicts={hasSchemaConflicts}
       />
@@ -103,7 +103,7 @@ export const EngineView: React.FC = () => {
           to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}/${SearchApplicationConnectTabs.SEARCHAPI}`}
         />
         <Route>
-          <EnterpriseSearchEnginesPageTemplate
+          <EnterpriseSearchApplicationsPageTemplate
             isEmptyState
             pageChrome={[engineName]}
             pageViewTelemetry={tabId}
@@ -112,11 +112,11 @@ export const EngineView: React.FC = () => {
               pageTitle: engineName,
               rightSideItems: [],
             }}
-            engineName={engineName}
+            searchApplicationName={engineName}
             hasSchemaConflicts={hasSchemaConflicts}
           >
             <EngineError notFound />
-          </EnterpriseSearchEnginesPageTemplate>
+          </EnterpriseSearchApplicationsPageTemplate>
         </Route>
       </Switch>
     </>

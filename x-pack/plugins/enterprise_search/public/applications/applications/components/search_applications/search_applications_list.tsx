@@ -37,7 +37,7 @@ import {
 } from '../../../shared/licensing_callout/licensing_callout';
 
 import { SEARCH_APPLICATIONS_PATH, SEARCH_APPLICATION_CREATION_PATH } from '../../routes';
-import { EnterpriseSearchEnginesPageTemplate } from '../layout/page_template';
+import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 
 import { EmptySearchApplicationsPrompt } from './components/empty_search_applications_prompt';
 import { SearchApplicationsListTable } from './components/tables/search_applications_table';
@@ -175,7 +175,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
       {createSearchApplicationFlyoutOpen && (
         <CreateSearchApplication onClose={() => navigateToUrl(SEARCH_APPLICATIONS_PATH)} />
       )}
-      <EnterpriseSearchEnginesPageTemplate
+      <EnterpriseSearchApplicationsPageTemplate
         pageChrome={[]}
         pageHeader={{
           description: (
@@ -291,7 +291,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
 
         <EuiSpacer size="xxl" />
         <div />
-      </EnterpriseSearchEnginesPageTemplate>
+      </EnterpriseSearchApplicationsPageTemplate>
     </>
   );
 };

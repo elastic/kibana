@@ -22,7 +22,7 @@ import {
   SearchApplicationViewTabs,
   SearchApplicationContentTabs,
 } from '../../routes';
-import { EnterpriseSearchEnginesPageTemplate } from '../layout/page_template';
+import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineError } from './engine_error';
@@ -74,7 +74,7 @@ export const SearchApplicationContent = () => {
 
   if (!ContentTabs.includes(contentTabId)) {
     return (
-      <EnterpriseSearchEnginesPageTemplate
+      <EnterpriseSearchApplicationsPageTemplate
         pageChrome={[engineName, pageTitle]}
         pageViewTelemetry={SearchApplicationViewTabs.CONTENT}
         isLoading={isLoadingEngine}
@@ -84,11 +84,11 @@ export const SearchApplicationContent = () => {
           pageTitle,
           rightSideItems: [],
         }}
-        engineName={engineName}
+        searchApplicationName={engineName}
         hasSchemaConflicts={hasSchemaConflicts}
       >
         <EngineError notFound />
-      </EnterpriseSearchEnginesPageTemplate>
+      </EnterpriseSearchApplicationsPageTemplate>
     );
   }
 
@@ -102,7 +102,7 @@ export const SearchApplicationContent = () => {
   };
 
   return (
-    <EnterpriseSearchEnginesPageTemplate
+    <EnterpriseSearchApplicationsPageTemplate
       pageChrome={[engineName, pageTitle, getTabBreadCrumb(contentTabId)]}
       pageViewTelemetry={SearchApplicationViewTabs.CONTENT}
       isLoading={isLoadingEngine}
@@ -157,12 +157,12 @@ export const SearchApplicationContent = () => {
           },
         ],
       }}
-      engineName={engineName}
+      searchApplicationName={engineName}
       hasSchemaConflicts={hasSchemaConflicts}
     >
       {contentTabId === SearchApplicationContentTabs.INDICES && <EngineIndices />}
       {contentTabId === SearchApplicationContentTabs.SCHEMA && <EngineSchema />}
       {addIndicesFlyoutOpen && <AddIndicesFlyout onClose={closeAddIndicesFlyout} />}
-    </EnterpriseSearchEnginesPageTemplate>
+    </EnterpriseSearchApplicationsPageTemplate>
   );
 };

@@ -13,23 +13,23 @@ import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../..
 import { useEnterpriseSearchEngineNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-export type EnterpriseSearchEnginesPageTemplateProps = PageTemplateProps & {
-  engineName?: string;
+export type EnterpriseSearchApplicationsPageTemplateProps = PageTemplateProps & {
   hasSchemaConflicts?: boolean;
+  searchApplicationName?: string;
 };
 
-export const EnterpriseSearchEnginesPageTemplate: React.FC<
-  EnterpriseSearchEnginesPageTemplateProps
+export const EnterpriseSearchApplicationsPageTemplate: React.FC<
+  EnterpriseSearchApplicationsPageTemplateProps
 > = ({
   children,
   pageChrome,
   pageViewTelemetry,
-  engineName,
+  searchApplicationName,
   hasSchemaConflicts,
   ...pageTemplateProps
 }) => {
   const navItems = useEnterpriseSearchEngineNav(
-    engineName,
+    searchApplicationName,
     pageTemplateProps.isEmptyState,
     hasSchemaConflicts
   );

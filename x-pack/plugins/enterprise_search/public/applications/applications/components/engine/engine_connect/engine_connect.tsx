@@ -19,7 +19,7 @@ import {
   SearchApplicationConnectTabs,
   SEARCH_APPLICATION_CONNECT_PATH,
 } from '../../../routes';
-import { EnterpriseSearchEnginesPageTemplate } from '../../layout/page_template';
+import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
 import { EngineError } from '../engine_error';
 import { EngineViewLogic } from '../engine_view_logic';
@@ -76,7 +76,7 @@ export const EngineConnect: React.FC = () => {
 
   if (!ConnectTabs.includes(connectTabId)) {
     return (
-      <EnterpriseSearchEnginesPageTemplate
+      <EnterpriseSearchApplicationsPageTemplate
         pageChrome={[engineName, pageTitle]}
         pageViewTelemetry={SearchApplicationViewTabs.CONNECT}
         isLoading={isLoadingEngine}
@@ -86,16 +86,16 @@ export const EngineConnect: React.FC = () => {
           pageTitle,
           rightSideItems: [],
         }}
-        engineName={engineName}
+        searchApplicationName={engineName}
         hasSchemaConflicts={hasSchemaConflicts}
       >
         <EngineError notFound />
-      </EnterpriseSearchEnginesPageTemplate>
+      </EnterpriseSearchApplicationsPageTemplate>
     );
   }
 
   return (
-    <EnterpriseSearchEnginesPageTemplate
+    <EnterpriseSearchApplicationsPageTemplate
       pageChrome={[engineName, pageTitle, getTabBreadCrumb(connectTabId)]}
       pageViewTelemetry={SearchApplicationViewTabs.CONNECT}
       isLoading={isLoadingEngine}
@@ -117,13 +117,13 @@ export const EngineConnect: React.FC = () => {
           },
         ],
       }}
-      engineName={engineName}
+      searchApplicationName={engineName}
       hasSchemaConflicts={hasSchemaConflicts}
     >
       {connectTabId === SearchApplicationConnectTabs.SEARCHAPI && <SearchApplicationAPI />}
       {connectTabId === SearchApplicationConnectTabs.DOCUMENTATION && (
         <SearchApplicationDocumentation />
       )}
-    </EnterpriseSearchEnginesPageTemplate>
+    </EnterpriseSearchApplicationsPageTemplate>
   );
 };

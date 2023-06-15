@@ -184,25 +184,25 @@ export const useEnterpriseSearchNav = () => {
 };
 
 export const useEnterpriseSearchEngineNav = (
-  engineName?: string,
+  searchApplicationName?: string,
   isEmptyState?: boolean,
   hasSchemaConflicts?: boolean
 ) => {
   const navItems = useEnterpriseSearchNav();
   if (!navItems) return undefined;
-  if (!engineName) return navItems;
+  if (!searchApplicationName) return navItems;
   const applicationsItem = navItems.find((item) => item.id === 'applications');
   if (!applicationsItem || !applicationsItem.items) return navItems;
   const enginesItem = applicationsItem.items?.find((item) => item.id === 'searchApplications');
   if (!enginesItem || enginesItem.id !== 'searchApplications') return navItems;
 
-  const enginePath = `${APPLICATIONS_PLUGIN.URL}${SEARCH_APPLICATIONS_PATH}/${engineName}`;
+  const enginePath = `${APPLICATIONS_PLUGIN.URL}${SEARCH_APPLICATIONS_PATH}/${searchApplicationName}`;
 
   enginesItem.items = !isEmptyState
     ? [
         {
           id: 'engineId',
-          name: engineName,
+          name: searchApplicationName,
           ...generateNavLink({
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: false,
@@ -255,7 +255,7 @@ export const useEnterpriseSearchEngineNav = (
     : [
         {
           id: 'engineId',
-          name: engineName,
+          name: searchApplicationName,
           ...generateNavLink({
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,

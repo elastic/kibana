@@ -58,7 +58,7 @@ import {
   SEARCH_APPLICATION_CONNECT_PATH,
   SEARCH_APPLICATION_CONTENT_PATH,
 } from '../../../routes';
-import { EnterpriseSearchEnginesPageTemplate } from '../../layout/page_template';
+import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
 import { EngineIndicesLogic } from '../engine_indices_logic';
 import { EngineViewLogic } from '../engine_view_logic';
@@ -371,7 +371,7 @@ export const EngineSearchPreview: React.FC = () => {
   if (!engineData) return null;
 
   return (
-    <EnterpriseSearchEnginesPageTemplate
+    <EnterpriseSearchApplicationsPageTemplate
       pageChrome={[
         engineName,
         i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageChrome', {
@@ -401,7 +401,7 @@ export const EngineSearchPreview: React.FC = () => {
           </>,
         ],
       }}
-      engineName={engineName}
+      searchApplicationName={engineName}
       hasSchemaConflicts={hasSchemaConflicts}
     >
       <DocumentProvider>
@@ -445,6 +445,6 @@ export const EngineSearchPreview: React.FC = () => {
         )}
         */}
       </DocumentProvider>
-    </EnterpriseSearchEnginesPageTemplate>
+    </EnterpriseSearchApplicationsPageTemplate>
   );
 };
