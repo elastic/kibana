@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { FleetStart, GetBulkAssetsResponse } from '@kbn/fleet-plugin/public';
+import { FleetStart, KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
 
 const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
 
@@ -25,20 +25,17 @@ const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
 export const ingestPipelineTabOnClick = async (
   services: Partial<CoreStart & { dashboard: DashboardStart; fleet: FleetStart }>
 ) => {
-  const response = await services.http!.fetch<GetBulkAssetsResponse>('/api/fleet/epm/bulk_assets', {
-    method: 'POST',
-    body: JSON.stringify({
-      assetIds: [
-        {
-          id: INGEST_PIPELINE_DASHBOARD_ID,
-          type: 'dashboard',
-        },
-      ],
-    }),
+  const response = await services.fleet?.getBulkAssets({
+    assetIds: [
+      {
+        id: INGEST_PIPELINE_DASHBOARD_ID,
+        type: 'dashboard' as KibanaSavedObjectType,
+      },
+    ],
   });
   const dashboardFound =
-    response?.items?.length &&
-    response?.items.some((item) => item.id === INGEST_PIPELINE_DASHBOARD_ID);
+    response?.data?.items?.length &&
+    response.data.items.some((item) => item.id === INGEST_PIPELINE_DASHBOARD_ID);
 
   const navigateToDashboard = () =>
     services.dashboard!.locator!.navigate({
