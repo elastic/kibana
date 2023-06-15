@@ -18,8 +18,8 @@ const memoryLineChart: LensLineChartConfig = {
   },
 };
 
-export const memory: LensChartConfig = {
-  title: 'Memory',
+export const memoryUsage: LensChartConfig = {
+  title: 'Memory Usage',
   formula: {
     formula: 'average(system.memory.actual.used.pct)',
     format: {

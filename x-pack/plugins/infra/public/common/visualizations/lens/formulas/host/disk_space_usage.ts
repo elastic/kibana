@@ -8,14 +8,14 @@
 import type { LensChartConfig } from '../../../types';
 import { getFilters } from './utils';
 
-export const diskIORead: LensChartConfig = {
-  title: 'Disk Read IOPS',
+export const diskSpaceUsage: LensChartConfig = {
+  title: 'Disk Space Usage',
   formula: {
-    formula: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
+    formula: 'average(system.filesystem.used.pct)',
     format: {
-      id: 'bytes',
+      id: 'percent',
       params: {
-        decimals: 1,
+        decimals: 0,
       },
     },
   },

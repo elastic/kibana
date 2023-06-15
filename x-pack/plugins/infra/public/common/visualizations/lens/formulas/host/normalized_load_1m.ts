@@ -60,7 +60,7 @@ export const loadLineChart: LensLineChartConfig = {
   extraReference: REFERENCE_LAYER,
 };
 
-export const load: LensChartConfig = {
+export const normalizedLoad1m: LensChartConfig = {
   title: 'Normalized Load',
   formula: {
     formula: 'average(system.load.1) / max(system.load.cores)',
