@@ -52,6 +52,7 @@ export interface AgentPolicySOAttributes {
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   agents?: number;
+  overrides?: any | null;
 }
 
 export interface AgentSOAttributes {
