@@ -22,6 +22,7 @@ import {
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
+
 import { HttpConfig } from './http_config';
 
 type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
@@ -54,6 +55,10 @@ const forgeRequest = ({
     kibanaRouteOptions,
   });
 };
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('xsrf post-auth handler', () => {
   let toolkit: ToolkitMock;

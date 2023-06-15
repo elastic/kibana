@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { debounce } from 'lodash';
 
 import { useFetchDataViews } from '../../../../hooks/use_fetch_data_views';
 import { useFetchIndices, Index } from '../../../../hooks/use_fetch_indices';
@@ -23,7 +24,10 @@ interface Option {
 export function IndexSelection() {
   const { control, getFieldState } = useFormContext<CreateSLOInput>();
   const { isLoading: isIndicesLoading, indices = [] } = useFetchIndices();
-  const { isLoading: isDataViewsLoading, dataViews = [] } = useFetchDataViews();
+  const [searchValue, setSearchValue] = useState<string>('');
+  const { isLoading: isDataViewsLoading, dataViews = [] } = useFetchDataViews({
+    name: searchValue,
+  });
   const [indexOptions, setIndexOptions] = useState<Option[]>([]);
 
   useEffect(() => {
@@ -31,7 +35,13 @@ export function IndexSelection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indices.length, dataViews.length]);
 
+  const onDataViewSearchChange = useMemo(
+    () => debounce((value: string) => setSearchValue(value), 300),
+    []
+  );
+
   const onSearchChange = (search: string) => {
+    onDataViewSearchChange(search);
     const options: Option[] = [];
     if (!search) {
       return setIndexOptions(createIndexOptions(indices, dataViews));
@@ -39,16 +49,12 @@ export function IndexSelection() {
 
     const searchPattern = search.endsWith('*') ? search.substring(0, search.length - 1) : search;
     const matchingIndices = indices.filter(({ name }) => name.startsWith(searchPattern));
-    const matchingDataViews = dataViews.filter(
-      (view) =>
-        view.getName().startsWith(searchPattern) || view.getIndexPattern().startsWith(searchPattern)
-    );
 
-    if (matchingIndices.length === 0 && matchingDataViews.length === 0) {
+    if (matchingIndices.length === 0 && dataViews.length === 0) {
       return setIndexOptions([]);
     }
 
-    createIndexOptions(matchingIndices, matchingDataViews).map((option) => options.push(option));
+    createIndexOptions(matchingIndices, dataViews).map((option) => options.push(option));
 
     const searchWithStarSuffix = search.endsWith('*') ? search : `${search}*`;
     options.push({

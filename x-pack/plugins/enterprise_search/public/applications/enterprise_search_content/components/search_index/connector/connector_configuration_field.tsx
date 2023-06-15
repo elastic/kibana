@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -18,30 +18,60 @@ import {
   EuiSwitch,
   EuiTextArea,
   EuiToolTip,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
 import { DisplayType } from '../../../../../../common/types/connectors';
+import { LicensingLogic } from '../../../../shared/licensing';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
+import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
+
 import {
   ConnectorConfigurationLogic,
-  ConfigEntry,
+  ConfigEntryView,
   ensureStringType,
   ensureBooleanType,
 } from './connector_configuration_logic';
 import { DocumentLevelSecurityPanel } from './document_level_security/document_level_security_panel';
 
 interface ConnectorConfigurationFieldProps {
-  configEntry: ConfigEntry;
+  configEntry: ConfigEntryView;
 }
 
 export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
   configEntry,
 }) => {
+  return configEntry.tooltip ? (
+    <EuiToolTip content={configEntry.tooltip}>
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem>
+          <ConnectorConfigurationFieldType configEntry={configEntry} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiIcon type="questionInCircle" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  ) : (
+    <ConnectorConfigurationFieldType configEntry={configEntry} />
+  );
+};
+
+export const ConnectorConfigurationFieldType: React.FC<ConnectorConfigurationFieldProps> = ({
+  configEntry,
+}) => {
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const {
     key,
@@ -50,6 +80,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     label,
     options,
     required,
+    placeholder,
     sensitive,
     tooltip,
     value,
@@ -89,6 +120,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.value });
           }}
+          placeholder={placeholder}
         />
       );
 
@@ -96,6 +128,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       const textarea = (
         <EuiTextArea
           disabled={status === Status.LOADING}
+          placeholder={placeholder}
           required={required}
           value={ensureStringType(value)}
           onChange={(event) => {
@@ -120,10 +153,45 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       );
 
     case DisplayType.TOGGLE:
-      const toggleSwitch = (
+      const toggleSwitch = !hasPlatinumLicense ? (
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              checked={ensureBooleanType(value)}
+              disabled={status === Status.LOADING || !hasPlatinumLicense}
+              label={
+                <EuiToolTip content={tooltip}>
+                  <p>{label}</p>
+                </EuiToolTip>
+              }
+              onChange={(event) => {
+                setLocalConfigEntry({ ...configEntry, value: event.target.checked });
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <PlatinumLicensePopover
+              button={
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.selectConnector.openPopoverLabel',
+                    {
+                      defaultMessage: 'Open licensing popover',
+                    }
+                  )}
+                  iconType="questionInCircle"
+                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                />
+              }
+              closePopover={() => setIsPopoverOpen(false)}
+              isPopoverOpen={isPopoverOpen}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
         <EuiSwitch
           checked={ensureBooleanType(value)}
-          disabled={status === Status.LOADING}
+          disabled={status === Status.LOADING || !hasPlatinumLicense}
           label={
             <EuiToolTip content={tooltip}>
               <p>{label}</p>
@@ -155,6 +223,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       ) : (
         <EuiFieldText
           disabled={status === Status.LOADING}
+          placeholder={placeholder}
           required={required}
           value={ensureStringType(value)}
           onChange={(event) => {
