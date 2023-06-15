@@ -22,12 +22,12 @@ export const RankAggregationSection: React.FC = () => (
       <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <p>
+            <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.esre.rankAggregationSection.title"
                 defaultMessage="Use a rank aggregation method"
               />
-            </p>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

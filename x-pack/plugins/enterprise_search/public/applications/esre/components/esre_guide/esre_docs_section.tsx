@@ -17,12 +17,12 @@ export const EsreDocsSection: React.FC = () => (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <p>
+            <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.esre.esreDocsSection.title"
                 defaultMessage="Dive deeper with the ESRE docs"
               />
-            </p>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -44,12 +44,12 @@ export const EsreDocsSection: React.FC = () => (
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
-                  <p>
+                  <h3>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.esre.esreDocsSection.learn.title"
                       defaultMessage="Learn"
                     />
-                  </p>
+                  </h3>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -70,12 +70,12 @@ export const EsreDocsSection: React.FC = () => (
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
-                  <p>
+                  <h3>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.esre.esreDocsSection.faq.title"
                       defaultMessage="FAQ"
                     />
-                  </p>
+                  </h3>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -96,12 +96,12 @@ export const EsreDocsSection: React.FC = () => (
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
-                  <p>
+                  <h3>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.esre.esreDocsSection.help.title"
                       defaultMessage="Help"
                     />
-                  </p>
+                  </h3>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

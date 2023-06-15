@@ -23,12 +23,12 @@ export const SemanticSearchSection: React.FC = () => (
       <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <p>
+            <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.esre.semanticSearch.title"
                 defaultMessage="Set up semantic search"
               />
-            </p>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
