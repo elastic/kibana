@@ -142,6 +142,14 @@ export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS_MANAGEMENT = i18n.translate(
+  'xpack.securitySolution.navigation.entityAnalyticsManagement',
+  {
+    defaultMessage: 'Entity Analytics',
+  }
+);
+
+
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
 });
