@@ -29,12 +29,13 @@ export interface LeftPanelProps extends FlyoutPanel {
   params?: {
     id: string;
     indexName: string;
+    scopeId: string;
   };
 }
 
 export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
   const { openLeftPanel } = useExpandableFlyoutContext();
-  const { eventId, indexName } = useLeftPanelContext();
+  const { eventId, indexName, scopeId } = useLeftPanelContext();
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabs[0].id;
@@ -49,6 +50,7 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
   };

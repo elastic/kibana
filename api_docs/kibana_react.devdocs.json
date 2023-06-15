@@ -1513,7 +1513,7 @@
         "signature": [
           "({ children, component: Component, render, ...rest }: ",
           "RouteProps",
-          ") => JSX.Element"
+          "<string, { [x: string]: string | undefined; }>) => JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/router/router.tsx",
         "deprecated": false,
@@ -1527,7 +1527,8 @@
             "label": "{ children, component: Component, render, ...rest }",
             "description": [],
             "signature": [
-              "RouteProps"
+              "RouteProps",
+              "<string, { [x: string]: string | undefined; }>"
             ],
             "path": "src/plugins/kibana_react/public/router/router.tsx",
             "deprecated": false,
@@ -3386,6 +3387,21 @@
           "\"hjson\""
         ],
         "path": "src/plugins/kibana_react/public/code_editor/languages/hjson/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.LANG",
+        "type": "string",
+        "tags": [],
+        "label": "LANG",
+        "description": [],
+        "signature": [
+          "\"grok\""
+        ],
+        "path": "src/plugins/kibana_react/public/code_editor/languages/grok/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
