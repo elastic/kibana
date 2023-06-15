@@ -11705,7 +11705,6 @@
     "xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.title": "有另外 {totalConflictsHiddenByTypeFilters, number} 个{totalConflictsHiddenByTypeFilters, plural, other {冲突}}未在此处显示",
     "xpack.enterpriseSearch.content.engine.searchPreivew.documentFlyout.fieldCount": "{fieldCount} {fieldCount, plural, other {字段}}",
     "xpack.enterpriseSearch.content.engine.searchPreview.documentFlyout.title": "文档：{id}",
-    "xpack.enterpriseSearch.content.engine.searchPreview.pageTitle": "{engineName}",
     "xpack.enterpriseSearch.content.engine.searchPreview.result.id": "ID：{id}",
     "xpack.enterpriseSearch.content.engine.searchPreview.result.moreFieldsButton": "{count} {count, plural, other {更多字段}}",
     "xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.option.label": "{value} {value, plural, other {结果}}",
