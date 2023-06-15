@@ -14,7 +14,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_CLEAR_CONTROL } from '.';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ClearableControlEmbeddable, ControlEmbeddable, DataControlInput } from '../../types';
+import { ControlEmbeddable, DataControlInput, isClearableControl } from '../../types';
 import { isControlGroup } from '../embeddable/control_group_helpers';
 
 export interface ClearControlActionContext {
@@ -62,18 +62,14 @@ export class ClearControlAction implements Action<ClearControlActionContext> {
   public async isCompatible({ embeddable }: ClearControlActionContext) {
     if (isErrorEmbeddable(embeddable)) return false;
     const controlGroup = embeddable.parent;
-    return Boolean(
-      controlGroup &&
-        isControlGroup(controlGroup) &&
-        embeddable instanceof ClearableControlEmbeddable
-    );
+    return Boolean(controlGroup && isControlGroup(controlGroup)) && isClearableControl(embeddable);
   }
 
   public async execute({ embeddable }: ClearControlActionContext) {
     if (
       !embeddable.parent ||
       !isControlGroup(embeddable.parent) ||
-      !(embeddable instanceof ClearableControlEmbeddable)
+      !isClearableControl(embeddable)
     ) {
       throw new IncompatibleActionError();
     }

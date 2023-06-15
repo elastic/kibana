@@ -24,7 +24,7 @@ import {
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
-import { IContainer } from '@kbn/embeddable-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
@@ -35,7 +35,7 @@ import {
   OptionsListEmbeddableInput,
 } from '../..';
 import { pluginServices } from '../../services';
-import { ClearableControlEmbeddable } from '../../types';
+import { IClearableControl } from '../../types';
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
@@ -77,7 +77,10 @@ type OptionsListReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof optionsListReducers
 >;
 
-export class OptionsListEmbeddable extends ClearableControlEmbeddable<OptionsListEmbeddableInput> {
+export class OptionsListEmbeddable
+  extends Embeddable<OptionsListEmbeddableInput, ControlOutput>
+  implements IClearableControl
+{
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
 

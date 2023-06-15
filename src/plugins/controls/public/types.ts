@@ -47,11 +47,13 @@ export type ControlEmbeddable<
   renderPrepend?: () => ReactNode | undefined;
 };
 
-export abstract class ClearableControlEmbeddable<
-  I extends ControlInput = ControlInput
-> extends Embeddable<I, ControlOutput> {
-  public abstract clearSelections(): void;
+export interface IClearableControl extends ControlEmbeddable {
+  clearSelections: () => void;
 }
+
+export const isClearableControl = (control: ControlEmbeddable): control is IClearableControl => {
+  return Boolean((control as IClearableControl).clearSelections);
+};
 
 /**
  * Control embeddable editor types

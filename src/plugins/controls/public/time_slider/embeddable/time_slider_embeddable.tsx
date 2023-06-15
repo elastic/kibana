@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import { debounceTime, first, map } from 'rxjs/operators';
 import moment from 'moment-timezone';
-import { IContainer } from '@kbn/embeddable-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -21,7 +21,7 @@ import { TimeSliderControlEmbeddableInput } from '../../../common/time_slider/ty
 import { pluginServices } from '../../services';
 import { ControlsSettingsService } from '../../services/settings/types';
 import { ControlsDataService } from '../../services/data/types';
-import { ClearableControlEmbeddable, ControlOutput } from '../../types';
+import { ControlOutput, IClearableControl } from '../../types';
 import { ControlGroupContainer } from '../../control_group/embeddable/control_group_container';
 import { TimeSlider, TimeSliderPrepend } from '../components';
 import { timeSliderReducers } from '../time_slider_reducers';
@@ -51,7 +51,10 @@ type TimeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof timeSliderReducers
 >;
 
-export class TimeSliderControlEmbeddable extends ClearableControlEmbeddable<TimeSliderControlEmbeddableInput> {
+export class TimeSliderControlEmbeddable
+  extends Embeddable<TimeSliderControlEmbeddableInput, ControlOutput>
+  implements IClearableControl
+{
   public readonly type = TIME_SLIDER_CONTROL;
   public deferEmbeddedLoad = true;
 
