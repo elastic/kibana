@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiFlexItem, EuiIcon, EuiLoadingChart, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -86,7 +86,7 @@ export function DataPreviewChart() {
                 },
               }}
             />
-            <LineSeries
+            <AreaSeries
               id="SLI"
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
