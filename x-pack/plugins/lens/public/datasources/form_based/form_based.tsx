@@ -27,7 +27,6 @@ import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
-import { emptyTitleText } from '@kbn/visualization-ui-components/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -72,7 +71,7 @@ import {
   cloneLayer,
   getNotifiableFeatures,
 } from './utils';
-import { isDraggedDataViewField } from '../../utils';
+import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
@@ -110,10 +109,6 @@ function wrapOnDot(str?: string) {
   // the browser to efficiently word-wrap right after the dot
   // without us having to draw a lot of extra DOM elements, etc
   return str ? str.replace(/\./g, '.\u200B') : '';
-}
-
-function getSafeLabel(label: string) {
-  return label.trim().length ? label : emptyTitleText;
 }
 
 export function columnToOperation(
@@ -504,28 +499,15 @@ export function getFormBasedDatasource({
     uniqueLabels(state: FormBasedPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
-      const counts = {} as Record<string, number>;
 
-      const makeUnique = (label: string) => {
-        let uniqueLabel = getSafeLabel(label);
+      const uniqueLabelGenerator = getUniqueLabelGenerator();
 
-        while (counts[uniqueLabel] >= 0) {
-          const num = ++counts[uniqueLabel];
-          uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
-            defaultMessage: '{label} [{num}]',
-            values: { label: getSafeLabel(label), num },
-          });
-        }
-
-        counts[uniqueLabel] = 0;
-        return uniqueLabel;
-      };
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
-          columnLabelMap[columnId] = makeUnique(column.label);
+          columnLabelMap[columnId] = uniqueLabelGenerator(column.label);
         });
       });
 
