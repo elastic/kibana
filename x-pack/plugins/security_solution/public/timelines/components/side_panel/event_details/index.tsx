@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { USER_PROMPTS, useAssistantOverlay } from '@kbn/elastic-assistant';
+import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
@@ -35,6 +35,11 @@ import {
   SUMMARY_VIEW,
   TIMELINE_VIEW,
 } from '../../../../common/components/event_details/translations';
+import {
+  PROMPT_CONTEXT_ALERT_CATEGORY,
+  PROMPT_CONTEXT_EVENT_CATEGORY,
+  PROMPT_CONTEXTS,
+} from '../../../../assistant/content/prompt_contexts';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -108,7 +113,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     isAlert ? ALERT_SUMMARY_CONTEXT_DESCRIPTION(view) : EVENT_SUMMARY_CONTEXT_DESCRIPTION(view),
     getPromptContext,
     null,
-    USER_PROMPTS.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
+    isAlert
+      ? PROMPT_CONTEXTS[PROMPT_CONTEXT_ALERT_CATEGORY].suggestedUserPrompt
+      : PROMPT_CONTEXTS[PROMPT_CONTEXT_EVENT_CATEGORY].suggestedUserPrompt,
     isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP
   );
 
