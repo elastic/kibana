@@ -20,17 +20,18 @@ class AuditLoggingService {
    * value provided as an argument will be overwritten.
    */
   public writeCustomAuditLog(args: AuditEvent) {
-    const securitySetup = appContextService.getSecuritySetup();
+    return;
+    // const securitySetup = appContextService.getSecuritySetup();
 
-    // const request = getRequestStore().getStore();
+    // // const request = getRequestStore().getStore();
 
-    // if (request) {
-    // auditLogger = securitySetup.audit.asScoped(request);
-    // } else {
-    const auditLogger = securitySetup.audit.withoutRequest;
-    // }
+    // // if (request) {
+    // // auditLogger = securitySetup.audit.asScoped(request);
+    // // } else {
+    // const auditLogger = securitySetup.audit.withoutRequest;
+    // // }
 
-    auditLogger.log({ ...args, labels: { ...args.labels, application: 'elastic/fleet' } });
+    // auditLogger.log({ ...args, labels: { ...args.labels, application: 'elastic/fleet' } });
   }
 
   /**
