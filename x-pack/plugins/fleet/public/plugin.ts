@@ -94,9 +94,11 @@ export interface FleetStart {
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
   hooks: {
-    getBulkAssets: (
-      body: GetBulkAssetsRequest['body']
-    ) => Promise<SendRequestResponse<GetBulkAssetsResponse, RequestError>>;
+    epm: {
+      getBulkAssets: (
+        body: GetBulkAssetsRequest['body']
+      ) => Promise<SendRequestResponse<GetBulkAssetsResponse, RequestError>>;
+    };
   };
 }
 
@@ -332,8 +334,10 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       registerExtension,
 
       hooks: {
-        // hook exported to be used in monitoring-ui
-        getBulkAssets: sendGetBulkAssets,
+        epm: {
+          // hook exported to be used in monitoring-ui
+          getBulkAssets: sendGetBulkAssets,
+        },
       },
     };
   }
