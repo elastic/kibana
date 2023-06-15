@@ -569,6 +569,21 @@ describe('Output Service', () => {
       );
     });
 
+    it('should not set default output to false when the output is already the default one', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-monitoring-output',
+      });
+
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-default-monitoring-output', {
+          is_default: false,
+          name: 'Test',
+        })
+      ).rejects.toThrow(
+        `Default output existing-default-monitoring-output cannot be set to is_default=false manually. Make another output the default first.`
+      );
+    });
+
     it('should update existing default monitoring output when updating an output to become the default monitoring output', async () => {
       const soClient = getMockedSoClient({
         defaultOutputMonitoringId: 'existing-default-monitoring-output',

@@ -573,6 +573,16 @@ class OutputService {
       }
     }
 
+    if (
+      !originalOutput.is_preconfigured &&
+      originalOutput.is_default &&
+      data.is_default === false
+    ) {
+      throw new OutputUnauthorizedError(
+        `Default output ${id} cannot be set to is_default=false manually. Make another output the default first.`
+      );
+    }
+
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
