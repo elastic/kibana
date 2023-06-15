@@ -23,47 +23,45 @@ export const EsreGuideAccordion = ({
   icon,
   title,
   description,
-  content,
   initialIsOpen = false,
+  children,
 }: {
   id: string;
   icon: IconType;
   title: string;
   description: string;
-  content: JSX.Element;
   initialIsOpen?: boolean;
+  children?: React.ReactNode;
 }) => {
   return (
-    <>
-      <EuiPanel hasBorder paddingSize="l">
-        <EuiAccordion
-          id={id}
-          initialIsOpen={initialIsOpen}
-          buttonContent={
-            <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={icon} size="xxl" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="s">
-                      <h3>{title}</h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText>
-                      <p>{description}</p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          {content}
-        </EuiAccordion>
-      </EuiPanel>
-    </>
+    <EuiPanel hasBorder paddingSize="l">
+      <EuiAccordion
+        id={id}
+        initialIsOpen={initialIsOpen}
+        buttonContent={
+          <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={icon} size="xxl" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h3>{title}</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    <p>{description}</p>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        {children}
+      </EuiAccordion>
+    </EuiPanel>
   );
 };

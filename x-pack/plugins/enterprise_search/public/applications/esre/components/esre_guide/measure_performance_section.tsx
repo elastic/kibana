@@ -51,37 +51,35 @@ const steps: EuiContainedStepProps[] = [
 ];
 
 export const MeasurePerformanceSection: React.FC = () => (
-  <>
-    <EuiFlexGroup direction="row" alignItems="center">
-      <EuiFlexItem grow={4}>
-        <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <p>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.measurePerformanceSection.title"
-                  defaultMessage="Measure your performance"
-                />
-              </p>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.measurePerformanceSection.description"
-                  defaultMessage="Use Behavioral Analytics dashboards and tools to visualize user behavior and measure the impact of your changes."
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={6}>
-        <EuiPanel hasBorder>
-          <EuiSteps steps={steps} titleSize="xs" />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </>
+  <EuiFlexGroup direction="row" alignItems="center">
+    <EuiFlexItem grow={4}>
+      <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.esre.measurePerformanceSection.title"
+                defaultMessage="Measure your performance"
+              />
+            </p>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.esre.measurePerformanceSection.description"
+                defaultMessage="Use Behavioral Analytics dashboards and tools to visualize user behavior and measure the impact of your changes."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem grow={6}>
+      <EuiPanel hasBorder>
+        <EuiSteps steps={steps} titleSize="xs" />
+      </EuiPanel>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );
