@@ -12,7 +12,7 @@ import { PageTemplateProps } from '../../shared/layout';
 import { NotFoundPrompt } from '../../shared/not_found';
 import { SendEnterpriseSearchTelemetry } from '../../shared/telemetry';
 
-import { EnterpriseSearchEnginesPageTemplate } from './layout/engines_page_template';
+import { EnterpriseSearchEnginesPageTemplate } from './layout/page_template';
 
 export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
   return (

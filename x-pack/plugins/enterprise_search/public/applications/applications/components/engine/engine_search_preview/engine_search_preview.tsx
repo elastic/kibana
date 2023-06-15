@@ -58,7 +58,7 @@ import {
   SEARCH_APPLICATION_CONNECT_PATH,
   SEARCH_APPLICATION_CONTENT_PATH,
 } from '../../../routes';
-import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
+import { EnterpriseSearchEnginesPageTemplate } from '../../layout/page_template';
 
 import { EngineIndicesLogic } from '../engine_indices_logic';
 import { EngineViewLogic } from '../engine_view_logic';

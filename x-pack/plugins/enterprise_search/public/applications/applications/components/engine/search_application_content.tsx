@@ -22,7 +22,7 @@ import {
   SearchApplicationViewTabs,
   SearchApplicationContentTabs,
 } from '../../routes';
-import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
+import { EnterpriseSearchEnginesPageTemplate } from '../layout/page_template';
 
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineError } from './engine_error';

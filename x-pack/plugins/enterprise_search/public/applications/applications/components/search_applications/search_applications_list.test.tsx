@@ -14,7 +14,7 @@ import { mount, shallow } from 'enzyme';
 import { Status } from '../../../../../common/types/api';
 
 import { LicensingCallout } from '../../../shared/licensing_callout/licensing_callout';
-import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
+import { EnterpriseSearchEnginesPageTemplate } from '../layout/page_template';
 
 import { EmptySearchApplicationsPrompt } from './components/empty_search_applications_prompt';
 import { SearchApplicationsListTable } from './components/tables/search_applications_table';

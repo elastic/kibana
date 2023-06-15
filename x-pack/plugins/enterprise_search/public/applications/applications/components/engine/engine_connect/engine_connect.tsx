@@ -19,7 +19,7 @@ import {
   SearchApplicationConnectTabs,
   SEARCH_APPLICATION_CONNECT_PATH,
 } from '../../../routes';
-import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
+import { EnterpriseSearchEnginesPageTemplate } from '../../layout/page_template';
 
 import { EngineError } from '../engine_error';
 import { EngineViewLogic } from '../engine_view_logic';
