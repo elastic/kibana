@@ -56,11 +56,9 @@ describe('AlertingCallout', () => {
             total: 1,
             monitors: [
               {
-                attributes: {
-                  alert: {
-                    status: {
-                      enabled: statusAlertEnabled,
-                    },
+                alert: {
+                  status: {
+                    enabled: statusAlertEnabled,
                   },
                 },
               },
