@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeNavControl, CoreStart, Plugin } from '@kbn/core/public';
+import { ChromeNavControl, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -14,7 +14,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { SearchBar } from './components/search_bar';
-import { TrackUiMetricFn } from './types';
+import { getTracking } from './lib/tracking';
 
 export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
@@ -23,7 +23,20 @@ export interface GlobalSearchBarPluginStartDeps {
 }
 
 export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
-  public setup() {
+  public setup({ analytics }: CoreSetup) {
+    analytics.registerEventType({
+      eventType: 'global_search_bar_blur',
+      schema: {
+        focus_time_ms: {
+          type: 'long',
+          _meta: {
+            description:
+              'The length in milliseconds the user viewed the global search bar before closing without navigating',
+          },
+        },
+      },
+    });
+
     return {};
   }
 
@@ -35,16 +48,6 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
   private getNavControl(deps: { core: CoreStart } & GlobalSearchBarPluginStartDeps) {
     const { core, globalSearch, savedObjectsTagging, usageCollection } = deps;
     const { application, http, theme, uiSettings } = core;
-
-    let trackUiMetric: TrackUiMetricFn = () => {};
-    if (usageCollection) {
-      trackUiMetric = (...args) => {
-        // track UI Counter metrics
-        usageCollection.reportUiCounter('global_search_bar', ...args);
-
-        // TODO track EBT metrics using core.analytics
-      };
-    }
 
     const navControl: ChromeNavControl = {
       order: 1000,
@@ -59,7 +62,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
                 basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
                 darkMode={uiSettings.get('theme:darkMode')}
                 chromeStyle$={core.chrome.getChromeStyle$()}
-                trackUiMetric={trackUiMetric}
+                trackUiMetric={getTracking({ analytics: core.analytics, usageCollection })}
               />
             </I18nProvider>
           </KibanaThemeProvider>,

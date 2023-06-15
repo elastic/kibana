@@ -18,7 +18,6 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -26,11 +25,12 @@ import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
 import { Subscription } from 'rxjs';
-import { blurEvent, CLICK_METRIC, COUNT_METRIC, getClickMetric, isMac, sort } from '.';
+import { blurEvent, isMac, sort } from '.';
 import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
+import { CLICK_METRIC, COUNT_METRIC, METRIC_TYPE } from '../types';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
@@ -48,14 +48,9 @@ const EmptyMessage = () => (
   </EuiFlexGroup>
 );
 
-export const SearchBar: FC<SearchBarProps> = ({
-  globalSearch,
-  taggingApi,
-  navigateToUrl,
-  trackUiMetric,
-  chromeStyle$,
-  ...props
-}) => {
+export const SearchBar: FC<SearchBarProps> = (opts) => {
+  const { globalSearch, taggingApi, navigateToUrl, trackUiMetric, chromeStyle$, ...props } = opts;
+
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
   const chromeStyle = useObservable(chromeStyle$);
@@ -222,15 +217,15 @@ export const SearchBar: FC<SearchBarProps> = ({
         if (type === 'application') {
           const key = selected.key ?? 'unknown';
           const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
-          trackUiMetric(
-            METRIC_TYPE.CLICK,
-            getClickMetric(CLICK_METRIC.USER_NAVIGATED_TO_APPLICATION, application)
-          );
+          trackUiMetric(METRIC_TYPE.CLICK, CLICK_METRIC.USER_NAVIGATED_TO_APPLICATION, {
+            application,
+            searchValue,
+          });
         } else {
-          trackUiMetric(
-            METRIC_TYPE.CLICK,
-            getClickMetric(CLICK_METRIC.USER_NAVIGATED_TO_SAVED_OBJECT, type)
-          );
+          trackUiMetric(METRIC_TYPE.CLICK, CLICK_METRIC.USER_NAVIGATED_TO_SAVED_OBJECT, {
+            type,
+            searchValue,
+          });
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -245,7 +240,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [trackUiMetric, navigateToUrl, searchRef]
+    [trackUiMetric, navigateToUrl, searchRef, searchValue]
   );
 
   const clearField = () => setSearchValue('');
@@ -323,6 +318,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           setShowAppend(false);
         },
         onBlur: () => {
+          trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SEARCH_BLUR);
           setShowAppend(!searchValue.length);
         },
         fullWidth: true,

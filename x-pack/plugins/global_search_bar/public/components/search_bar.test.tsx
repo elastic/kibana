@@ -6,14 +6,16 @@
  */
 
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { GlobalSearchBatchedResults, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { getTracking } from '../lib/tracking';
 import type { TrackUiMetricFn } from '../types';
 import { SearchBar } from './search_bar';
 
@@ -47,9 +49,13 @@ const createBatch = (...results: Result[]): GlobalSearchBatchedResults => ({
 jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('SearchBar', () => {
+  const usageCollection = usageCollectionPluginMock.createSetupContract();
+  const core = coreMock.createStart();
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let trackUiMetric: TrackUiMetricFn;
+  let reportUiCounter: typeof usageCollection.reportUiCounter;
+  let reportEvent: typeof core.analytics.reportEvent;
 
   const basePathUrl = '/plugins/globalSearchBar/assets/';
   const darkMode = false;
@@ -57,7 +63,14 @@ describe('SearchBar', () => {
   beforeEach(() => {
     applications = applicationServiceMock.createStartContract();
     searchService = globalSearchPluginMock.createStartContract();
-    trackUiMetric = jest.fn();
+
+    reportUiCounter = jest.fn();
+    usageCollection.reportUiCounter = reportUiCounter;
+
+    reportEvent = jest.fn();
+    core.analytics.reportEvent = reportEvent;
+
+    trackUiMetric = getTracking({ analytics: core.analytics, usageCollection });
   });
 
   const update = () => {
@@ -128,9 +141,9 @@ describe('SearchBar', () => {
       expect(searchService.find).toHaveBeenCalledTimes(2);
       expect(searchService.find).toHaveBeenLastCalledWith({ term: 'd' }, {});
 
-      expect(trackUiMetric).nthCalledWith(1, 'count', 'search_focus');
-      expect(trackUiMetric).nthCalledWith(2, 'count', 'search_request');
-      expect(trackUiMetric).toHaveBeenCalledTimes(2);
+      expect(reportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'search_focus');
+      expect(reportUiCounter).nthCalledWith(2, 'global_search_bar', 'count', 'search_request');
+      expect(reportUiCounter).toHaveBeenCalledTimes(2);
     });
 
     it('supports keyboard shortcuts', async () => {
@@ -154,9 +167,9 @@ describe('SearchBar', () => {
 
       expect(document.activeElement).toEqual(inputElement);
 
-      expect(trackUiMetric).nthCalledWith(1, 'count', 'shortcut_used');
-      expect(trackUiMetric).nthCalledWith(2, 'count', 'search_focus');
-      expect(trackUiMetric).toHaveBeenCalledTimes(2);
+      expect(reportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'shortcut_used');
+      expect(reportUiCounter).nthCalledWith(2, 'global_search_bar', 'count', 'search_focus');
+      expect(reportUiCounter).toHaveBeenCalledTimes(2);
     });
 
     it('only display results from the last search', async () => {
@@ -229,12 +242,23 @@ describe('SearchBar', () => {
         fireEvent.click(navSearchOptionToClick);
       });
 
-      expect(trackUiMetric).nthCalledWith(1, 'count', 'search_focus');
-      expect(trackUiMetric).nthCalledWith(2, 'click', [
+      expect(reportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'search_focus');
+      expect(reportUiCounter).nthCalledWith(2, 'global_search_bar', 'click', [
         'user_navigated_to_application',
         'user_navigated_to_application_discover',
       ]);
-      expect(trackUiMetric).toHaveBeenCalledTimes(2);
+      expect(reportUiCounter).nthCalledWith(3, 'global_search_bar', 'count', 'search_blur');
+      expect(reportUiCounter).nthCalledWith(4, 'global_search_bar', 'count', 'search_blur'); // FIXME why is blur called twice
+      expect(reportUiCounter).toHaveBeenCalledTimes(4);
+
+      expect(reportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
+        application: 'discover',
+        terms: '',
+      });
+      expect(reportEvent).nthCalledWith(2, 'global_search_bar_blur', {
+        focus_time_ms: expect.any(Number),
+      });
+      expect(reportEvent).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -266,9 +290,9 @@ describe('SearchBar', () => {
       fireEvent.click(await screen.findByTestId('nav-search-conceal'));
       expect(screen.queryAllByTestId('nav-search-input')).toHaveLength(0);
 
-      expect(trackUiMetric).nthCalledWith(1, 'count', 'shortcut_used');
-      expect(trackUiMetric).nthCalledWith(2, 'count', 'search_focus');
-      expect(trackUiMetric).toHaveBeenCalledTimes(2);
+      expect(reportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'shortcut_used');
+      expect(reportUiCounter).nthCalledWith(2, 'global_search_bar', 'count', 'search_focus');
+      expect(reportUiCounter).toHaveBeenCalledTimes(2);
     });
 
     it('supports show/hide', async () => {
@@ -291,7 +315,7 @@ describe('SearchBar', () => {
       fireEvent.click(await screen.findByTestId('nav-search-conceal'));
       expect(screen.queryAllByTestId('nav-search-input')).toHaveLength(0);
 
-      expect(trackUiMetric).nthCalledWith(1, 'count', 'search_focus');
+      expect(reportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'search_focus');
     });
   });
 });
