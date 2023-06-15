@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="index_doc_records_stream.test.ts" type="JavaScriptTestRunnerJest" nameIsGenerated="true">
+    <node-interpreter value="project" />
+    <jest-package value="$PROJECT_DIR$/node_modules/jest" />
+    <working-dir value="$PROJECT_DIR$/packages/kbn-es-archiver" />
+    <envs />
+    <scope-kind value="TEST_FILE" />
+    <test-file value="$PROJECT_DIR$/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.test.ts" />
+    <method v="2" />
+  </configuration>
+</component>
