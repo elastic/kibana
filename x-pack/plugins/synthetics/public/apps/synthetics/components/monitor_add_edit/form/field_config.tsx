@@ -452,19 +452,15 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [ConfigKey.ENABLED]: {
     fieldKey: ConfigKey.ENABLED,
     component: Switch,
-    label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
-      defaultMessage: 'Enable Monitor',
-    }),
     controlled: true,
-    props: ({ isEdit, setValue, field }): EuiSwitchProps => ({
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.edit.enabled.label', {
+      defaultMessage: `When disabled, the monitor doesn't run any tests. You can enable it at any time.`,
+    }),
+    props: ({ setValue, field }): EuiSwitchProps => ({
       id: 'syntheticsMontiorConfigIsEnabled',
-      label: isEdit
-        ? i18n.translate('xpack.synthetics.monitorConfig.edit.enabled.label', {
-            defaultMessage: `When disabled, the monitor doesn't run any tests. You can enable it again at any time.`,
-          })
-        : i18n.translate('xpack.synthetics.monitorConfig.create.enabled.label', {
-            defaultMessage: `When disabled, the monitor doesn't run any tests. You can create a disabled monitor and enable it later.`,
-          }),
+      label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
+        defaultMessage: 'Enable Monitor',
+      }),
       checked: field?.value || false,
       onChange: (event) => {
         setValue(ConfigKey.ENABLED, !!event.target.checked);
