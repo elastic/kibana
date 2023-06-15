@@ -16,7 +16,7 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) =>
     const apiKey = await generateAPIKey({
       request,
       server,
-      uptimePrivileges: true,
+      projectAPIKey: true,
     });
 
     return { apiKey };

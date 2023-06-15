@@ -16,7 +16,8 @@
       "dataViews",
       "unifiedSearch",
       "kibanaUtils",
-      "visualizationUiComponents"
+      "visualizationUiComponents",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "savedObjectsTagging",
