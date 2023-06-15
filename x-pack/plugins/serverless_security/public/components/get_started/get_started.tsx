@@ -60,3 +60,6 @@ export const GetStartedComponent: React.FC = () => {
 
 GetStartedComponent.displayName = 'GetStartedComponent';
 export const GetStarted = React.memo(GetStartedComponent);
+
+// eslint-disable-next-line import/no-default-export
+export default GetStarted;

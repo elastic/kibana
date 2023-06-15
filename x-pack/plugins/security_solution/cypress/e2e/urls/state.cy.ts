@@ -16,7 +16,7 @@ import { HOSTS_NAMES } from '../../screens/hosts/all_hosts';
 import { ANOMALIES_TAB } from '../../screens/hosts/main';
 import {
   BREADCRUMBS,
-  EXPLORE,
+  EXPLORE_PANEL_BTN,
   HOSTS,
   KQL_INPUT,
   NETWORK,
@@ -222,7 +222,7 @@ describe('url state', () => {
     kqlSearch('source.ip: "10.142.0.9" {enter}');
     navigateFromHeaderTo(HOSTS);
 
-    openNavigationPanel(EXPLORE);
+    openNavigationPanel(EXPLORE_PANEL_BTN);
     cy.get(NETWORK).should(
       'have.attr',
       'href',
@@ -236,7 +236,7 @@ describe('url state', () => {
     openAllHosts();
     waitForAllHostsToBeLoaded();
 
-    openNavigationPanel(EXPLORE);
+    openNavigationPanel(EXPLORE_PANEL_BTN);
     cy.get(HOSTS).should(
       'have.attr',
       'href',
