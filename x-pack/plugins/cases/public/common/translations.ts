@@ -227,6 +227,14 @@ export const MARKED_CASE_AS = i18n.translate('xpack.cases.caseView.markedCaseAs'
   defaultMessage: 'marked case as',
 });
 
+export const ADD_CATEGORY = i18n.translate('xpack.cases.caseView.addCategory', {
+  defaultMessage: 'added the category',
+});
+
+export const REMOVE_CATEGORY = i18n.translate('xpack.cases.caseView.removeCategory', {
+  defaultMessage: 'removed the category',
+});
+
 export const SET_SEVERITY_TO = i18n.translate('xpack.cases.caseView.setSeverityTo', {
   defaultMessage: 'set severity to',
 });

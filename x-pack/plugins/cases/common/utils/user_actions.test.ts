@@ -17,6 +17,7 @@ import {
   isPushedUserAction,
   isCreateCaseUserAction,
   isUserActionType,
+  isCategoryUserAction,
 } from './user_actions';
 
 describe('user action utils', () => {
@@ -27,6 +28,7 @@ describe('user action utils', () => {
     [ActionTypes.tags]: isTagsUserAction,
     [ActionTypes.comment]: isCommentUserAction,
     [ActionTypes.description]: isDescriptionUserAction,
+    [ActionTypes.category]: isCategoryUserAction,
   };
 
   const tests = (Object.keys(predicateMap) as Array<keyof typeof predicateMap>).map((key) => [key]);

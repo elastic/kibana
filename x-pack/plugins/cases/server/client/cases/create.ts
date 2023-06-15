@@ -99,6 +99,7 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
         ...query,
         severity: query.severity ?? CaseSeverity.LOW,
         assignees: query.assignees ?? [],
+        category: query.category ?? null,
       },
       owner: newCase.attributes.owner,
     });
