@@ -16,7 +16,7 @@ export type UseAlertsQueryParams = AlertsQueryParams;
 
 export interface UseAlertsQueryResult {
   /**
-   * Was there an console.error
+   * Was there an error
    */
   error: boolean;
   /**
