@@ -29,7 +29,7 @@ jest.mock('../../../common/api/use_cis_kubernetes_integration');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
+  useHistory: () => ({ push: jest.fn(), location: { pathname: '' } }),
   useLocation: jest.fn(),
 }));
 

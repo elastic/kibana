@@ -28,11 +28,18 @@ export const Routes = ({
     <ReactRouterRoutes>
       {Children.map(children, (child) => (
         <Route
-          path={replace(child.props.path, match.url + '/', '')}
+          path={
+            /* @ts-expect-error */
+            replace(child?.props.path, match.url + '/', '')
+          }
           element={
             <>
               <MatchPropagator />
-              {child.props.children}
+
+              {
+                /* @ts-expect-error */
+                child?.props?.children
+              }
             </>
           }
         />
