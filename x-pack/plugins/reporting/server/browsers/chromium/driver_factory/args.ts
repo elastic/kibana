@@ -5,18 +5,29 @@
  * 2.0.
  */
 
+import os from 'os';
 import { CaptureConfig } from '../../../../server/types';
-import { DEFAULT_VIEWPORT } from '../../../../common/constants';
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 
+interface WindowSize {
+  height: number;
+  width: number;
+}
+
 interface LaunchArgs {
   userDataDir: string;
-  disableSandbox: BrowserConfig['disableSandbox'];
+  windowSize?: WindowSize;
+  disableSandbox?: boolean;
   proxy: BrowserConfig['proxy'];
 }
 
-export const args = ({ userDataDir, disableSandbox, proxy: proxyConfig }: LaunchArgs) => {
+export const args = ({
+  userDataDir,
+  disableSandbox,
+  windowSize,
+  proxy: proxyConfig,
+}: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
@@ -38,16 +49,18 @@ export const args = ({ userDataDir, disableSandbox, proxy: proxyConfig }: Launch
     // Skip first run wizards
     '--no-first-run',
     `--user-data-dir=${userDataDir}`,
-    '--disable-gpu',
     '--headless',
     '--hide-scrollbars',
-    // NOTE: setting the window size does NOT set the viewport size: viewport and window size are different.
-    // The viewport may later need to be resized depending on the position of the clip area.
-    // These numbers come from the job parameters, so this is a close guess.
-    `--window-size=${Math.floor(DEFAULT_VIEWPORT.width)},${Math.floor(DEFAULT_VIEWPORT.height)}`,
     // allow screenshot clip region to go outside of the viewport
     `--mainFrameClipsContent=false`,
   ];
+
+  if (windowSize) {
+    // NOTE: setting the window size does NOT set the viewport size: viewport and window size are different.
+    // The viewport may later need to be resized depending on the position of the clip area.
+    // These numbers come from the job parameters, so this is a close guess.
+    flags.push(`--window-size=${Math.floor(windowSize.width)},${Math.floor(windowSize.height)}`);
+  }
 
   if (proxyConfig.enabled) {
     flags.push(`--proxy-server=${proxyConfig.server}`);
@@ -60,7 +73,17 @@ export const args = ({ userDataDir, disableSandbox, proxy: proxyConfig }: Launch
     flags.push('--no-sandbox');
   }
 
-  if (process.platform === 'linux') {
+  // Since chromium v111 headless mode in arm based macs is not working with `--disable-gpu`
+  // This is a known issue: headless uses swiftshader by default and swiftshader's support for WebGL is currently disabled on Arm pending the resolution of https://issuetracker.google.com/issues/165000222.
+  // As a workaround, we force hardware GL drivers on mac: v111 and older versions should work with --use-angle.
+  // The best way to do this when the issue is resolved will be to pass --enable-gpu,
+  if (os.arch() === 'arm64' && process.platform === 'darwin') {
+    flags.push('--use-angle');
+  } else {
+    flags.push('--disable-gpu');
+  }
+
+  if (os.arch() === 'linux') {
     flags.push('--disable-setuid-sandbox');
   }
 
