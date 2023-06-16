@@ -108,7 +108,7 @@
         "label": "NavigationID",
         "description": [],
         "signature": [
-          "\"kibana\" | \"ingest\" | \"data\" | \"root\" | \"rootNav:management\" | \"integration_management\" | \"stack_management\" | \"alerts_and_insights\""
+          "\"ingest\" | \"kibana\" | \"data\" | \"root\" | \"rootNav:management\" | \"integration_management\" | \"stack_management\" | \"alerts_and_insights\""
         ],
         "path": "packages/default-nav/management/default_navigation.ts",
         "deprecated": false,

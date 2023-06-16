@@ -9,9 +9,10 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { createGlobalStyle } from '@kbn/kibana-react-plugin/common';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { useKibana } from '../../../../common/lib/kibana';
-import { LENS_VISUALIZATION_HEIGHT } from './constants';
+import { useKibana } from '../../common/lib/kibana';
+import type { LensProps } from './types';
+
+const LENS_VISUALIZATION_HEIGHT = 200;
 
 const Container = styled.div`
   min-height: ${LENS_VISUALIZATION_HEIGHT}px;
@@ -24,15 +25,7 @@ const LensChartTooltipFix = createGlobalStyle`
   }
 `;
 
-interface LensMarkDownRendererProps {
-  attributes: TypedLensByValueInput['attributes'] | null;
-  timeRange?: TypedLensByValueInput['timeRange'];
-}
-
-const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
-  attributes,
-  timeRange,
-}) => {
+const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange }) => {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
@@ -60,6 +53,7 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
     </Container>
   );
 };
-LensMarkDownRendererComponent.displayName = 'LensMarkDownRenderer';
 
-export const LensMarkDownRenderer = React.memo(LensMarkDownRendererComponent);
+LensRendererComponent.displayName = 'LensRenderer';
+
+export const LensRenderer = React.memo(LensRendererComponent);
