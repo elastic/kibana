@@ -77,10 +77,8 @@ function setup({
 
   const wrapper = mount(
     <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper>
-        <Router history={history}>
-          <UnifiedSearchBar />
-        </Router>
+      <MockApmPluginContextWrapper history={history}>
+        <UnifiedSearchBar />
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>
   );
