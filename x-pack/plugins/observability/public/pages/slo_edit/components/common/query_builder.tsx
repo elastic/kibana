@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { Control, Controller, FieldPath, useFormContext } from 'react-hook-form';
+import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
@@ -14,7 +14,6 @@ import { useKibana } from '../../../../utils/kibana_react';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 
 export interface Props {
-  control: Control<CreateSLOInput>;
   dataTestSubj: string;
   indexPatternString: string | undefined;
   label: string;
@@ -25,7 +24,6 @@ export interface Props {
 }
 
 export function QueryBuilder({
-  control,
   dataTestSubj,
   indexPatternString,
   label,
@@ -37,7 +35,7 @@ export function QueryBuilder({
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
 
-  const { getFieldState } = useFormContext();
+  const { control, getFieldState } = useFormContext<CreateSLOInput>();
 
   const { dataView } = useCreateDataView({ indexPatternString });
 

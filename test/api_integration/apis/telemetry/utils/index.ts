@@ -7,4 +7,3 @@
  */
 
 export { flatKeys } from './flat_keys';
-export { assertTelemetryPayload } from './schema_to_config_schema';

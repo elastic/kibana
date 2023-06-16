@@ -19,7 +19,6 @@ import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
 export interface NavigationServices {
   activeNavItemId?: string;
   basePath: BasePathService;
-  loadingCount$: Observable<number>;
   recentlyAccessed$: Observable<RecentItem[]>;
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   navIsOpen: boolean;
@@ -55,7 +54,7 @@ export interface NavigationKibanaDependencies {
 export type ChromeNavigationLink = string;
 
 /**
- * Chrome navigatioin node definition.
+ * Chrome navigation node definition.
  *
  * @public
  */
@@ -98,14 +97,6 @@ export interface ChromeNavigationNodeViewModel extends Omit<ChromeNavigationNode
  */
 export interface ChromeNavigation {
   /**
-   * Target for the logo icon. Must be an app id or a deeplink id.
-   */
-  homeLink: ChromeNavigationLink;
-  /**
-   * Control of the link that takes the user to their projects or deployments
-   */
-  linkToCloud?: 'projects' | 'deployments';
-  /**
    * The navigation tree definition.
    *
    * NOTE: For now this tree will _only_ contain the solution tree and we will concatenate
@@ -134,11 +125,7 @@ export interface ChromeNavigation {
  * @internal
  */
 export interface ChromeNavigationViewModel
-  extends Pick<ChromeNavigation, 'linkToCloud' | 'platformConfig' | 'recentlyAccessedFilter'> {
-  /**
-   * Target for the logo icon
-   */
-  homeHref: string;
+  extends Pick<ChromeNavigation, 'platformConfig' | 'recentlyAccessedFilter'> {
   /**
    * The navigation tree definition
    */
