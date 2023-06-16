@@ -6,23 +6,39 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   UseField,
   getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { memo } from 'react';
+import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
 import type { CaseUI } from '../../../common/ui';
 import { CategoryComponent } from './category_component';
-import { CATEGORY } from './translations';
+import { CATEGORY, MAX_LENGTH_ERROR } from './translations';
 
 interface Props {
   isLoading: boolean;
   availableCategories: string[];
 }
 
+const { maxLengthField } = fieldValidators;
+
+const getIndexConfig = (): FieldConfig<CaseUI['category']> => ({
+  validations: [
+    {
+      validator: maxLengthField({
+        length: MAX_CATEGORY_LENGTH,
+        message: MAX_LENGTH_ERROR('category', MAX_CATEGORY_LENGTH),
+      }),
+    },
+  ],
+});
+
 const CategoryFormFieldComponent: React.FC<Props> = ({ isLoading, availableCategories }) => {
   return (
-    <UseField<CaseUI['category']> path={'category'}>
+    <UseField<CaseUI['category']> path={'category'} config={getIndexConfig()}>
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
