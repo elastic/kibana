@@ -15,13 +15,16 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiLoadingSpinner,
+  EuiFormRow,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
+import { MAX_CATEGORY_LENGTH } from '../../../../common/constants';
 import { useGetCategories } from '../../../containers/use_get_categories';
 import * as i18n from '../../category/translations';
 import { CategoryViewer } from '../../category/category_viewer_component';
 import { CategoryComponent } from '../../category/category_component';
 import { useCasesContext } from '../../cases_context/use_cases_context';
+import { MAX_LENGTH_ERROR } from '../../category/translations';
 
 export interface EditCategoryProps {
   isLoading: boolean;
@@ -53,20 +56,50 @@ const ColumnFlexGroup = styled(EuiFlexGroup)`
 export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditCategoryProps) => {
   const { permissions } = useCasesContext();
   const [isEditCategory, setIsEditCategory] = useState(false);
+  const [isInvalid, setIsInvalid] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null | undefined>(category);
-  const { data: categories = [] } = useGetCategories();
+  const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
+
+  const errorMessage = MAX_LENGTH_ERROR('category', MAX_CATEGORY_LENGTH);
+
+  const onEdit = () => {
+    setIsInvalid(false);
+    setIsEditCategory(true);
+  };
+
+  const onCancel = () => {
+    setIsInvalid(false);
+    setIsEditCategory(false);
+  };
+
+  const validateCategory = (cat: string) => {
+    if (cat.length > MAX_CATEGORY_LENGTH) {
+      setIsInvalid(true);
+    } else {
+      setIsInvalid(false);
+    }
+  };
 
   const onSubmitCategory = () => {
-    onSubmit(selectedCategory);
+    if (selectedCategory != null) {
+      validateCategory(selectedCategory);
+      return;
+    }
+
+    setIsInvalid(false);
     setIsEditCategory(false);
+    onSubmit(selectedCategory);
   };
 
   const handleOnChange = useCallback(
     (cat: string) => {
+      validateCategory(cat);
       setSelectedCategory(cat);
     },
     [setSelectedCategory]
   );
+
+  const isLoadingAll = isLoading || isLoadingCategories;
 
   return (
     <EuiFlexItem grow={false}>
@@ -80,14 +113,14 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
           <EuiFlexItem grow={false}>
             <h4>{i18n.CATEGORY}</h4>
           </EuiFlexItem>
-          {isLoading && <EuiLoadingSpinner data-test-subj="category-loading" />}
-          {!isLoading && permissions.update && (
+          {isLoadingAll && <EuiLoadingSpinner data-test-subj="category-loading" />}
+          {!isLoadingAll && permissions.update && (
             <EuiFlexItem data-test-subj="category-edit" grow={false}>
               <EuiButtonIcon
                 data-test-subj="category-edit-button"
                 aria-label={i18n.EDIT_CATEGORIES_ARIA}
                 iconType={'pencil'}
-                onClick={setIsEditCategory.bind(null, true)}
+                onClick={onEdit}
               />
             </EuiFlexItem>
           )}
@@ -104,14 +137,14 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
           )}
           {isEditCategory && (
             <ColumnFlexGroup data-test-subj="edit-tags" direction="column">
-              <EuiFlexItem>
+              <EuiFormRow error={errorMessage} isInvalid={isInvalid} fullWidth>
                 <CategoryComponent
                   category={selectedCategory}
                   onChange={handleOnChange}
-                  isLoading={isLoading}
+                  isLoading={isLoadingAll}
                   availableCategories={categories}
                 />
-              </EuiFlexItem>
+              </EuiFormRow>
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
@@ -130,7 +163,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
                     <EuiButtonEmpty
                       data-test-subj="edit-category-cancel"
                       iconType="cross"
-                      onClick={setIsEditCategory.bind(null, false)}
+                      onClick={onCancel}
                       size="s"
                     >
                       {i18n.CANCEL}
