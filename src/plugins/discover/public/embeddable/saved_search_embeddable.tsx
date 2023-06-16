@@ -35,21 +35,21 @@ import type {
 } from '@kbn/saved-search-plugin/public';
 import {
   APPLY_FILTER_TRIGGER,
-  FilterManager,
   generateFilters,
   mapAndFlattenFilters,
 } from '@kbn/data-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ISearchSource } from '@kbn/data-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import { VIEW_MODE } from '../../common/constants';
-import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
+import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
+import type { DiscoverServices } from '../build_services';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -67,9 +67,9 @@ import { DiscoverServices } from '../build_services';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import * as columnActions from '../components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../utils/state_helpers';
-import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
-import { DiscoverGridSettings } from '../components/discover_grid/types';
-import { DocTableProps } from '../components/doc_table/doc_table_wrapper';
+import type { DiscoverGridProps } from '../components/discover_grid/discover_grid';
+import type { DiscoverGridSettings } from '../components/discover_grid/types';
+import type { DocTableProps } from '../components/doc_table/doc_table_wrapper';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
@@ -96,8 +96,8 @@ export type SearchProps = Partial<DiscoverGridProps> &
 
 export interface SearchEmbeddableConfig {
   editable: boolean;
-  filterManager: FilterManager;
   services: DiscoverServices;
+  executeTriggerActions: UiActionsStart['executeTriggerActions'];
 }
 
 export class SavedSearchEmbeddable
@@ -110,16 +110,16 @@ export class SavedSearchEmbeddable
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   public readonly deferEmbeddableLoad = true;
 
+  private readonly services: DiscoverServices;
+  private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'];
+  private readonly attributeService: SavedSearchAttributeService;
+  private readonly inspectorAdapters: Adapters;
+  private readonly subscription?: Subscription;
+
+  private abortController?: AbortController;
   private savedSearch: SavedSearch | undefined;
-  private inspectorAdapters: Adapters;
   private panelTitle: string = '';
   private filtersSearchSource!: ISearchSource;
-  private subscription?: Subscription;
-  private filterManager: FilterManager;
-  private abortController?: AbortController;
-  private services: DiscoverServices;
-  private attributeService: SavedSearchAttributeService;
-
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
@@ -131,23 +131,18 @@ export class SavedSearchEmbeddable
   private node?: HTMLElement;
 
   constructor(
-    { editable, filterManager, services }: SearchEmbeddableConfig,
+    { editable, services, executeTriggerActions }: SearchEmbeddableConfig,
     initialInput: SearchInput,
-    private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
     parent?: Container
   ) {
     super(initialInput, { editApp: 'discover', editable }, parent);
 
     this.services = services;
+    this.executeTriggerActions = executeTriggerActions;
     this.attributeService = services.savedSearch.byValue.attributeService;
-    this.filterManager = filterManager;
     this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
-
-    this.initializeSavedSearch(initialInput).then(() => {
-      this.initializeSearchEmbeddableProps();
-    });
 
     this.subscription = this.getUpdated$().subscribe(() => {
       const titleChanged = this.output.title && this.panelTitle !== this.output.title;
@@ -163,28 +158,36 @@ export class SavedSearchEmbeddable
         this.reload(isFetchRequired);
       }
     });
+
+    this.initializeSavedSearch(initialInput).then(() => {
+      this.initializeSearchEmbeddableProps();
+    });
   }
 
   private async initializeSavedSearch(input: SearchInput) {
-    const unwrapResult = await this.attributeService.unwrapAttributes(input).catch((e: Error) => {
+    try {
+      const unwrapResult = await this.attributeService.unwrapAttributes(input);
+
+      if (this.isDestroyed) {
+        return;
+      }
+
+      this.savedSearch = await this.services.savedSearch.byValue.toSavedSearch(
+        (input as SearchByReferenceInput)?.savedObjectId,
+        unwrapResult
+      );
+
+      this.panelTitle = this.savedSearch.title ?? '';
+
+      await this.initializeOutput();
+
+      // deferred loading of this embeddable is complete
+      this.setInitializationFinished();
+
+      this.isInitialized = true;
+    } catch (e) {
       this.onFatalError(e);
-      return undefined;
-    });
-
-    if (!unwrapResult || this.isDestroyed) {
-      return;
     }
-
-    this.savedSearch = await this.services.savedSearch.byValue.toSavedSearch(
-      (input as SearchByReferenceInput)?.savedObjectId,
-      unwrapResult
-    );
-
-    this.panelTitle = this.savedSearch.title ?? '';
-
-    await this.initializeOutput();
-
-    this.isInitialized = true;
   }
 
   private async initializeOutput() {
@@ -198,21 +201,21 @@ export class SavedSearchEmbeddable
     const indexPatterns = dataView ? [dataView] : [];
     const input = this.getInput();
     const title = input.hidePanelTitles ? '' : input.title ?? savedSearch.title;
-    const savedObjectId = (input as { savedObjectId?: string }).savedObjectId;
+    const description = input.hidePanelTitles ? '' : input.description ?? savedSearch.description;
+    const savedObjectId = (input as SearchByReferenceInput).savedObjectId;
     const editPath = getSavedSearchUrl(savedObjectId);
     const editUrl = this.services.addBasePath(`/app/discover${editPath}`);
 
     this.updateOutput({
       ...this.getOutput(),
       defaultTitle: savedSearch.title,
+      defaultDescription: savedSearch.description,
       title,
+      description,
       editPath,
       editUrl,
       indexPatterns,
     });
-
-    // deferred loading of this embeddable is complete
-    this.setInitializationFinished();
   }
 
   public inputIsRefType(
@@ -243,27 +246,24 @@ export class SavedSearchEmbeddable
 
   private fetch = async () => {
     const savedSearch = this.savedSearch;
+    const searchProps = this.searchProps;
 
-    if (!savedSearch) {
+    if (!savedSearch || !searchProps) {
       return;
     }
 
     const searchSessionId = this.input.searchSessionId;
     const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
-    if (!this.searchProps) return;
-
-    const { searchSource } = savedSearch;
+    const currentAbortController = new AbortController();
 
     // Abort any in-progress requests
-    if (this.abortController) this.abortController.abort();
-
-    const currentAbortController = new AbortController();
+    this.abortController?.abort();
     this.abortController = currentAbortController;
 
     updateSearchSource(
-      searchSource,
-      this.searchProps!.dataView,
-      this.searchProps!.sort,
+      savedSearch.searchSource,
+      searchProps.dataView,
+      searchProps.sort,
       useNewFieldsApi,
       {
         sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
@@ -274,7 +274,7 @@ export class SavedSearchEmbeddable
     // Log request to inspector
     this.inspectorAdapters.requests!.reset();
 
-    this.searchProps!.isLoading = true;
+    searchProps.isLoading = true;
 
     const wasAlreadyRendered = this.getOutput().rendered;
 
@@ -294,7 +294,7 @@ export class SavedSearchEmbeddable
     const child: KibanaExecutionContext = {
       type: this.type,
       name: 'discover',
-      id: savedSearch.id!,
+      id: savedSearch.id,
       description: this.output.title || this.output.defaultTitle || '',
       url: this.output.editUrl,
     };
@@ -321,23 +321,25 @@ export class SavedSearchEmbeddable
           this.input.filters,
           this.input.query
         );
+
         this.updateOutput({
           ...this.getOutput(),
           loading: false,
         });
 
-        this.searchProps!.rows = result.records;
-        this.searchProps!.totalHitCount = result.records.length;
-        this.searchProps!.isLoading = false;
-        this.searchProps!.isPlainRecord = true;
-        this.searchProps!.showTimeCol = false;
-        this.searchProps!.isSortEnabled = true;
+        searchProps.rows = result.records;
+        searchProps.totalHitCount = result.records.length;
+        searchProps.isLoading = false;
+        searchProps.isPlainRecord = true;
+        searchProps.showTimeCol = false;
+        searchProps.isSortEnabled = true;
+
         return;
       }
 
       // Request document data
       const { rawResponse: resp } = await lastValueFrom(
-        searchSource.fetch$({
+        savedSearch.searchSource.fetch$({
           abortSignal: currentAbortController.signal,
           sessionId: searchSessionId,
           inspector: {
@@ -359,13 +361,14 @@ export class SavedSearchEmbeddable
         loading: false,
       });
 
-      this.searchProps!.rows = resp.hits.hits.map((hit) =>
-        buildDataTableRecord(hit as EsHitRecord, this.searchProps!.dataView)
+      searchProps.rows = resp.hits.hits.map((hit) =>
+        buildDataTableRecord(hit as EsHitRecord, searchProps.dataView)
       );
-      this.searchProps!.totalHitCount = resp.hits.total as number;
-      this.searchProps!.isLoading = false;
+      searchProps.totalHitCount = resp.hits.total as number;
+      searchProps.isLoading = false;
     } catch (error) {
       const cancelled = !!currentAbortController?.signal.aborted;
+
       if (!this.destroyed && !cancelled) {
         this.updateOutput({
           ...this.getOutput(),
@@ -373,7 +376,7 @@ export class SavedSearchEmbeddable
           error,
         });
 
-        this.searchProps!.isLoading = false;
+        searchProps.isLoading = false;
       }
     }
   };
@@ -389,14 +392,11 @@ export class SavedSearchEmbeddable
       return;
     }
 
-    const { searchSource } = savedSearch;
-
-    const dataView = searchSource.getField('index');
+    const dataView = savedSearch.searchSource.getField('index');
 
     if (!dataView) {
       return;
     }
-    const sort = this.getSort(savedSearch.sort, dataView);
 
     if (!dataView.isPersisted()) {
       // one used adhoc data view
@@ -409,7 +409,7 @@ export class SavedSearchEmbeddable
       filters: savedSearch.searchSource.getField('filter') as Filter[],
       dataView,
       isLoading: false,
-      sort,
+      sort: this.getSort(savedSearch.sort, dataView),
       rows: [],
       searchDescription: savedSearch.description,
       description: savedSearch.description,
@@ -450,7 +450,7 @@ export class SavedSearchEmbeddable
       sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
       onFilter: async (field, value, operator) => {
         let filters = generateFilters(
-          this.filterManager,
+          this.services.filterManager,
           // @ts-expect-error
           field,
           value,
@@ -481,17 +481,18 @@ export class SavedSearchEmbeddable
       cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
     };
 
-    const timeRangeSearchSource = searchSource.create();
+    const timeRangeSearchSource = savedSearch.searchSource.create();
+
     timeRangeSearchSource.setField('filter', () => {
       const timeRange = this.getTimeRange();
       if (!this.searchProps || !timeRange) return;
       return this.services.timefilter.createFilter(dataView, timeRange);
     });
 
-    this.filtersSearchSource = searchSource.create();
-    this.filtersSearchSource.setParent(timeRangeSearchSource);
+    this.filtersSearchSource = savedSearch.searchSource.create();
 
-    searchSource.setParent(this.filtersSearchSource);
+    this.filtersSearchSource.setParent(timeRangeSearchSource);
+    savedSearch.searchSource.setParent(this.filtersSearchSource);
 
     this.load(props);
 
@@ -547,23 +548,26 @@ export class SavedSearchEmbeddable
 
     const isFetchRequired = this.isFetchRequired(searchProps);
 
-    // If there is column or sort data on the panel, that means the original columns or sort settings have
-    // been overridden in a dashboard.
-    searchProps.columns = handleSourceColumnState(
+    // If there is column or sort data on the panel, that means the original
+    // columns or sort settings have been overridden in a dashboard.
+    const columnState = handleSourceColumnState(
       { columns: this.input.columns || savedSearch.columns },
       this.services.core.uiSettings
-    ).columns;
-    searchProps.sort = this.getSort(this.input.sort || savedSearch.sort, searchProps?.dataView);
+    );
 
+    searchProps.columns = columnState.columns;
+    searchProps.sort = this.getSort(this.input.sort || savedSearch.sort, searchProps?.dataView);
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.searchTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || savedSearch.rowsPerPage;
     searchProps.filters = savedSearch.searchSource.getField('filter') as Filter[];
     searchProps.savedSearchId = savedSearch.id;
+
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
+
       if (this.input.query?.query || this.input.filters?.length) {
         this.filtersSearchSource.setField('highlightAll', true);
       } else {
@@ -576,16 +580,13 @@ export class SavedSearchEmbeddable
       this.prevSearchSessionId = this.input.searchSessionId;
       this.prevSort = this.input.sort;
       this.searchProps = searchProps;
+
       await this.fetch();
     } else if (this.searchProps && this.node) {
       this.searchProps = searchProps;
     }
   }
 
-  /**
-   *
-   * @param {Element} domNode
-   */
   public async render(domNode: HTMLElement) {
     this.node = domNode;
 
@@ -593,7 +594,7 @@ export class SavedSearchEmbeddable
       return;
     }
 
-    super.render(domNode as HTMLElement);
+    super.render(domNode);
     this.renderReactComponent(this.node, this.searchProps!);
   }
 
@@ -635,21 +636,24 @@ export class SavedSearchEmbeddable
         </I18nProvider>,
         domNode
       );
+
       this.updateOutput({
         ...this.getOutput(),
         rendered: true,
       });
+
       return;
     }
+
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
     const query = savedSearch.searchSource.getField('query');
-
     const props = {
       savedSearch,
       searchProps,
       useLegacyTable,
       query,
     };
+
     if (searchProps.services) {
       const { getTriggerCompatibleActions } = searchProps.services.uiActions;
       ReactDOM.render(
@@ -701,6 +705,7 @@ export class SavedSearchEmbeddable
     if (!this.savedSearch) {
       throw new Error('Saved search not defined');
     }
+
     return this.savedSearch;
   }
 
@@ -726,15 +731,18 @@ export class SavedSearchEmbeddable
 
   public destroy() {
     this.isDestroyed = true;
+
     super.destroy();
+
     if (this.searchProps) {
       delete this.searchProps;
     }
+
     if (this.node) {
       unmountComponentAtNode(this.node);
     }
-    this.subscription?.unsubscribe();
 
-    if (this.abortController) this.abortController.abort();
+    this.subscription?.unsubscribe();
+    this.abortController?.abort();
   }
 }

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   EmbeddableFactoryDefinition,
   Container,
@@ -16,8 +16,8 @@ import {
 import type { SearchByReferenceInput } from '@kbn/saved-search-plugin/public';
 import type { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { SavedSearchEmbeddable } from './saved_search_embeddable';
-import { DiscoverServices } from '../build_services';
+import type { SavedSearchEmbeddable } from './saved_search_embeddable';
+import type { DiscoverServices } from '../build_services';
 
 export interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -57,32 +57,31 @@ export class SearchEmbeddableFactory
 
   public createFromSavedObject = async (
     savedObjectId: string,
-    input: SearchInput,
+    input: SearchByReferenceInput,
     parent?: Container
   ): Promise<SavedSearchEmbeddable | ErrorEmbeddable> => {
-    if (!(input as SearchByReferenceInput).savedObjectId) {
-      (input as SearchByReferenceInput).savedObjectId = savedObjectId;
+    if (!input.savedObjectId) {
+      input.savedObjectId = savedObjectId;
     }
+
     return this.create(input, parent);
   };
 
   public async create(input: SearchInput, parent?: Container) {
-    const services = await this.getDiscoverServices();
-    const filterManager = services.filterManager;
-
     try {
+      const services = await this.getDiscoverServices();
       const { executeTriggerActions } = await this.getStartServices();
       const { SavedSearchEmbeddable: SavedSearchEmbeddableClass } = await import(
         './saved_search_embeddable'
       );
+
       return new SavedSearchEmbeddableClass(
         {
-          filterManager,
-          editable: services.capabilities.discover.save as boolean,
+          editable: Boolean(services.capabilities.discover.save),
           services,
+          executeTriggerActions,
         },
         input,
-        executeTriggerActions,
         parent
       );
     } catch (e) {
