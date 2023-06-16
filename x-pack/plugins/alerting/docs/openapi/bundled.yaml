@@ -15,6 +15,52 @@ servers:
   - url: http://localhost:5601
     description: local
 paths:
+  /s/{spaceId}/api/alerting/rule:
+    post:
+      summary: Creates a rule with a randomly generated rule identifier.
+      operationId: createRule
+      description: |
+        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. NOTE: This API supports only token-based authentication. When you create a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If a user with different privileges updates the rule, its behavior might change.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_rule_request'
+            examples:
+              createRuleRequest:
+                $ref: '#/components/examples/create_rule_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rule_response_properties'
+              examples:
+                createRuleResponse:
+                  $ref: '#/components/examples/create_rule_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}:
     get:
       summary: Retrieves a rule by its identifier.
@@ -79,8 +125,8 @@ paths:
       servers:
         - url: https://localhost:5601
     post:
-      summary: Creates a rule.
-      operationId: createRule
+      summary: Creates a rule with a specific rule identifier.
+      operationId: createRuleId
       description: |
         You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.  If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. NOTE: This API supports only token-based authentication. When you create a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If a user with different privileges updates the rule, its behavior might change.
       tags:
@@ -101,55 +147,9 @@ paths:
         content:
           application/json:
             schema:
-              title: Create rule request body properties
-              description: The properties vary depending on the rule type.
-              oneOf:
-                - $ref: '#/components/schemas/create_anomaly_detection_alert_rule_request'
-                - $ref: '#/components/schemas/create_anomaly_detection_jobs_health_rule_request'
-                - $ref: '#/components/schemas/create_apm_anomaly_rule_request'
-                - $ref: '#/components/schemas/create_apm_error_count_rule_request'
-                - $ref: '#/components/schemas/create_apm_transaction_duration_rule_request'
-                - $ref: '#/components/schemas/create_apm_transaction_error_rate_rule_request'
-                - $ref: '#/components/schemas/create_es_query_rule_request'
-                - $ref: '#/components/schemas/create_geo_containment_rule_request'
-                - $ref: '#/components/schemas/create_index_threshold_rule_request'
-                - $ref: '#/components/schemas/create_infra_inventory_rule_request'
-                - $ref: '#/components/schemas/create_infra_metric_anomaly_rule_request'
-                - $ref: '#/components/schemas/create_infra_metric_threshold_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_jvm_memory_usage_rule_request'
-                - $ref: '#/components/schemas/create_log_threshold_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_ccr_exceptions_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_cluster_health_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_cpu_usage_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_disk_usage_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_elasticsearch_version_mismatch_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_license_expiration_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_kibana_version_mismatch_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_logstash_version_mismatch_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_missing_data_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_nodes_changed_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_shard_size_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_thread_pool_search_rejections_rule_request'
-                - $ref: '#/components/schemas/create_monitoring_thread_pool_write_rejections_rule_request'
-                - $ref: '#/components/schemas/create_siem_eql_rule_request'
-                - $ref: '#/components/schemas/create_siem_indicator_rule_request'
-                - $ref: '#/components/schemas/create_siem_ml_rule_request'
-                - $ref: '#/components/schemas/create_siem_new_terms_rule_request'
-                - $ref: '#/components/schemas/create_siem_notifications_rule_request'
-                - $ref: '#/components/schemas/create_siem_query_rule_request'
-                - $ref: '#/components/schemas/create_siem_saved_query_rule_request'
-                - $ref: '#/components/schemas/create_siem_threshold_rule_request'
-                - $ref: '#/components/schemas/create_slo_burn_rate_rule_request'
-                - $ref: '#/components/schemas/create_synthetics_monitor_status_rule_request'
-                - $ref: '#/components/schemas/create_synthetics_uptime_duration_anomaly_rule_request'
-                - $ref: '#/components/schemas/create_synthetics_uptime_tls_rule_request'
-                - $ref: '#/components/schemas/create_synthetics_uptime_tls_certificate_rule_request'
-                - $ref: '#/components/schemas/create_transform_health_rule_request'
-                - $ref: '#/components/schemas/create_uptime_monitor_status_rule_request'
-              discriminator:
-                propertyName: rule_type_id
+              $ref: '#/components/schemas/create_rule_request'
             examples:
-              createCaseRequest:
+              createRuleIdRequest:
                 $ref: '#/components/examples/create_rule_request'
       responses:
         '200':
@@ -159,7 +159,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/rule_response_properties'
               examples:
-                createRuleResponse:
+                createRuleIdResponse:
                   $ref: '#/components/examples/create_rule_response'
         '401':
           description: Authorization information is missing or invalid.
@@ -193,7 +193,7 @@ paths:
             schema:
               $ref: '#/components/schemas/update_rule_request'
             examples:
-              updateCaseRequest:
+              updateRuleRequest:
                 $ref: '#/components/examples/update_rule_request'
       responses:
         '200':
@@ -1561,14 +1561,13 @@ components:
       in: header
       name: ApiKey
   parameters:
-    rule_id:
-      in: path
-      name: ruleId
-      description: An identifier for the rule.
-      required: true
+    kbn_xsrf:
       schema:
         type: string
-        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+      in: header
+      name: kbn-xsrf
+      description: Cross-site request forgery protection
+      required: true
     space_id:
       in: path
       name: spaceId
@@ -1577,13 +1576,14 @@ components:
       schema:
         type: string
         example: default
-    kbn_xsrf:
+    rule_id:
+      in: path
+      name: ruleId
+      description: An identifier for the rule.
+      required: true
       schema:
         type: string
-      in: header
-      name: kbn-xsrf
-      description: Cross-site request forgery protection
-      required: true
+        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
     alert_id:
       in: path
       name: alertId
@@ -1738,6 +1738,17 @@ components:
             type: string
             description: A universally unique identifier (UUID) for the action.
             example: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
+    consumer:
+      type: string
+      description: |
+        The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+    enabled_rule:
+      type: boolean
+      description: Indicates whether you want to run the rule on an interval basis after it is created.
+    name_rule:
+      type: string
+      description: |
+        The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
     schedule:
       type: object
       description: The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.
@@ -1751,226 +1762,6 @@ components:
       items:
         type: string
       default: []
-    rule_response_properties:
-      title: Rule response properties
-      type: object
-      required:
-        - actions
-        - api_key_owner
-        - consumer
-        - created_at
-        - created_by
-        - enabled
-        - execution_status
-        - id
-        - mute_all
-        - muted_alert_ids
-        - name
-        - params
-        - rule_type_id
-        - schedule
-        - tags
-        - throttle
-        - updated_at
-        - updated_by
-      properties:
-        actions:
-          $ref: '#/components/schemas/actions'
-        api_key_created_by_user:
-          type: boolean
-          description: Indicates whether the API key that is associated with the rule was created by the user.
-          example: false
-        api_key_owner:
-          type: string
-          description: |
-            The owner of the API key that is associated with the rule and used to run background tasks.
-          nullable: true
-          example: elastic
-        consumer:
-          type: string
-          description: The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
-          example: alerts
-        created_at:
-          type: string
-          description: The date and time that the rule was created.
-          format: date-time
-          example: '2022-12-05T23:36:58.284Z'
-        created_by:
-          type: string
-          description: The identifier for the user that created the rule.
-          nullable: true
-          example: elastic
-        enabled:
-          type: boolean
-          description: Indicates whether the rule is currently enabled.
-          example: true
-        execution_status:
-          type: object
-          properties:
-            last_duration:
-              type: integer
-              example: 55
-            last_execution_date:
-              type: string
-              format: date-time
-              example: '2022-12-06T00:13:43.890Z'
-            status:
-              type: string
-              example: ok
-        id:
-          type: string
-          description: The identifier for the rule.
-          example: b530fed0-74f5-11ed-9801-35303b735aef
-        last_run:
-          type: object
-          properties:
-            alerts_count:
-              type: object
-              properties:
-                active:
-                  type: integer
-                ignored:
-                  type: integer
-                new:
-                  type: integer
-                recovered:
-                  type: integer
-            outcome:
-              type: string
-              example: succeeded
-            outcome_msg:
-              type: array
-              items:
-                type: string
-              nullable: true
-            outcome_order:
-              type: integer
-            warning:
-              type: string
-              nullable: true
-              example: null
-        muted_alert_ids:
-          type: array
-          nullable: true
-          items:
-            type: string
-        mute_all:
-          type: boolean
-          example: false
-        name:
-          type: string
-          description: The name of the rule.
-          example: cluster_health_rule
-        next_run:
-          type: string
-          format: date-time
-          nullable: true
-          example: '2022-12-06T00:14:43.818Z'
-        notify_when:
-          $ref: '#/components/schemas/notify_when'
-        params:
-          type: object
-          description: The parameters for the rule.
-          additionalProperties: true
-        revision:
-          type: integer
-          description: The rule revision number.
-        rule_type_id:
-          type: string
-          description: |
-            The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
-          example: monitoring_alert_cluster_health
-        running:
-          type: boolean
-          description: Indicates whether the rule is running.
-        schedule:
-          $ref: '#/components/schemas/schedule'
-        scheduled_task_id:
-          type: string
-          example: b530fed0-74f5-11ed-9801-35303b735aef
-        tags:
-          $ref: '#/components/schemas/tags'
-        throttle:
-          $ref: '#/components/schemas/throttle'
-        updated_at:
-          type: string
-          description: The date and time that the rule was updated most recently.
-          example: '2022-12-05T23:36:58.284Z'
-        updated_by:
-          type: string
-          description: The identifier for the user that updated this rule most recently.
-          nullable: true
-          example: elastic
-    401_response:
-      type: object
-      title: Unsuccessful rule API response
-      properties:
-        error:
-          type: string
-          example: Unauthorized
-          enum:
-            - Unauthorized
-        message:
-          type: string
-        statusCode:
-          type: integer
-          example: 401
-          enum:
-            - 401
-    404_response:
-      type: object
-      properties:
-        error:
-          type: string
-          example: Not Found
-          enum:
-            - Not Found
-        message:
-          type: string
-          example: Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
-        statusCode:
-          type: integer
-          example: 404
-          enum:
-            - 404
-    update_rule_request:
-      title: Update rule request
-      description: The update rule API request body varies depending on the type of rule and actions.
-      type: object
-      required:
-        - name
-        - params
-        - schedule
-      properties:
-        actions:
-          $ref: '#/components/schemas/actions'
-        name:
-          type: string
-          description: The name of the rule.
-          example: cluster_health_rule
-        notify_when:
-          $ref: '#/components/schemas/notify_when'
-        params:
-          type: object
-          description: The parameters for the rule.
-          additionalProperties: true
-        schedule:
-          $ref: '#/components/schemas/schedule'
-        tags:
-          $ref: '#/components/schemas/tags'
-        throttle:
-          $ref: '#/components/schemas/throttle'
-    consumer:
-      type: string
-      description: |
-        The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
-    enabled_rule:
-      type: boolean
-      description: Indicates whether you want to run the rule on an interval basis after it is created.
-    name_rule:
-      type: string
-      description: |
-        The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
     create_anomaly_detection_alert_rule_request:
       title: Create anomaly detection rule request
       description: |
@@ -4212,6 +4003,263 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
+    create_rule_request:
+      title: Create rule request body properties
+      description: The properties vary depending on the rule type.
+      oneOf:
+        - $ref: '#/components/schemas/create_anomaly_detection_alert_rule_request'
+        - $ref: '#/components/schemas/create_anomaly_detection_jobs_health_rule_request'
+        - $ref: '#/components/schemas/create_apm_anomaly_rule_request'
+        - $ref: '#/components/schemas/create_apm_error_count_rule_request'
+        - $ref: '#/components/schemas/create_apm_transaction_duration_rule_request'
+        - $ref: '#/components/schemas/create_apm_transaction_error_rate_rule_request'
+        - $ref: '#/components/schemas/create_es_query_rule_request'
+        - $ref: '#/components/schemas/create_geo_containment_rule_request'
+        - $ref: '#/components/schemas/create_index_threshold_rule_request'
+        - $ref: '#/components/schemas/create_infra_inventory_rule_request'
+        - $ref: '#/components/schemas/create_infra_metric_anomaly_rule_request'
+        - $ref: '#/components/schemas/create_infra_metric_threshold_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_jvm_memory_usage_rule_request'
+        - $ref: '#/components/schemas/create_log_threshold_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_ccr_exceptions_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_cluster_health_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_cpu_usage_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_disk_usage_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_elasticsearch_version_mismatch_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_license_expiration_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_kibana_version_mismatch_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_logstash_version_mismatch_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_missing_data_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_nodes_changed_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_shard_size_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_thread_pool_search_rejections_rule_request'
+        - $ref: '#/components/schemas/create_monitoring_thread_pool_write_rejections_rule_request'
+        - $ref: '#/components/schemas/create_siem_eql_rule_request'
+        - $ref: '#/components/schemas/create_siem_indicator_rule_request'
+        - $ref: '#/components/schemas/create_siem_ml_rule_request'
+        - $ref: '#/components/schemas/create_siem_new_terms_rule_request'
+        - $ref: '#/components/schemas/create_siem_notifications_rule_request'
+        - $ref: '#/components/schemas/create_siem_query_rule_request'
+        - $ref: '#/components/schemas/create_siem_saved_query_rule_request'
+        - $ref: '#/components/schemas/create_siem_threshold_rule_request'
+        - $ref: '#/components/schemas/create_slo_burn_rate_rule_request'
+        - $ref: '#/components/schemas/create_synthetics_monitor_status_rule_request'
+        - $ref: '#/components/schemas/create_synthetics_uptime_duration_anomaly_rule_request'
+        - $ref: '#/components/schemas/create_synthetics_uptime_tls_rule_request'
+        - $ref: '#/components/schemas/create_synthetics_uptime_tls_certificate_rule_request'
+        - $ref: '#/components/schemas/create_transform_health_rule_request'
+        - $ref: '#/components/schemas/create_uptime_monitor_status_rule_request'
+      discriminator:
+        propertyName: rule_type_id
+    rule_response_properties:
+      title: Rule response properties
+      type: object
+      required:
+        - actions
+        - api_key_owner
+        - consumer
+        - created_at
+        - created_by
+        - enabled
+        - execution_status
+        - id
+        - mute_all
+        - muted_alert_ids
+        - name
+        - params
+        - rule_type_id
+        - schedule
+        - tags
+        - throttle
+        - updated_at
+        - updated_by
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        api_key_created_by_user:
+          type: boolean
+          description: Indicates whether the API key that is associated with the rule was created by the user.
+          example: false
+        api_key_owner:
+          type: string
+          description: |
+            The owner of the API key that is associated with the rule and used to run background tasks.
+          nullable: true
+          example: elastic
+        consumer:
+          type: string
+          description: The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+          example: alerts
+        created_at:
+          type: string
+          description: The date and time that the rule was created.
+          format: date-time
+          example: '2022-12-05T23:36:58.284Z'
+        created_by:
+          type: string
+          description: The identifier for the user that created the rule.
+          nullable: true
+          example: elastic
+        enabled:
+          type: boolean
+          description: Indicates whether the rule is currently enabled.
+          example: true
+        execution_status:
+          type: object
+          properties:
+            last_duration:
+              type: integer
+              example: 55
+            last_execution_date:
+              type: string
+              format: date-time
+              example: '2022-12-06T00:13:43.890Z'
+            status:
+              type: string
+              example: ok
+        id:
+          type: string
+          description: The identifier for the rule.
+          example: b530fed0-74f5-11ed-9801-35303b735aef
+        last_run:
+          type: object
+          properties:
+            alerts_count:
+              type: object
+              properties:
+                active:
+                  type: integer
+                ignored:
+                  type: integer
+                new:
+                  type: integer
+                recovered:
+                  type: integer
+            outcome:
+              type: string
+              example: succeeded
+            outcome_msg:
+              type: array
+              items:
+                type: string
+              nullable: true
+            outcome_order:
+              type: integer
+            warning:
+              type: string
+              nullable: true
+              example: null
+        muted_alert_ids:
+          type: array
+          nullable: true
+          items:
+            type: string
+        mute_all:
+          type: boolean
+          example: false
+        name:
+          type: string
+          description: The name of the rule.
+          example: cluster_health_rule
+        next_run:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2022-12-06T00:14:43.818Z'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for the rule.
+          additionalProperties: true
+        revision:
+          type: integer
+          description: The rule revision number.
+        rule_type_id:
+          type: string
+          description: |
+            The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
+          example: monitoring_alert_cluster_health
+        running:
+          type: boolean
+          description: Indicates whether the rule is running.
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        scheduled_task_id:
+          type: string
+          example: b530fed0-74f5-11ed-9801-35303b735aef
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+        updated_at:
+          type: string
+          description: The date and time that the rule was updated most recently.
+          example: '2022-12-05T23:36:58.284Z'
+        updated_by:
+          type: string
+          description: The identifier for the user that updated this rule most recently.
+          nullable: true
+          example: elastic
+    401_response:
+      type: object
+      title: Unsuccessful rule API response
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+          enum:
+            - Unauthorized
+        message:
+          type: string
+        statusCode:
+          type: integer
+          example: 401
+          enum:
+            - 401
+    404_response:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Not Found
+          enum:
+            - Not Found
+        message:
+          type: string
+          example: Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
+        statusCode:
+          type: integer
+          example: 404
+          enum:
+            - 404
+    update_rule_request:
+      title: Update rule request
+      description: The update rule API request body varies depending on the type of rule and actions.
+      type: object
+      required:
+        - name
+        - params
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        name:
+          type: string
+          description: The name of the rule.
+          example: cluster_health_rule
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for the rule.
+          additionalProperties: true
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
     alert_response_properties:
       title: Legacy alert response properties
       type: object
@@ -4296,6 +4344,102 @@ components:
           nullable: true
           example: elastic
   examples:
+    create_rule_request:
+      summary: Create an index threshold rule.
+      value:
+        actions:
+          - id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+            frequency:
+              notify_when: onActionGroupChange
+              summary: false
+            group: threshold met
+            params:
+              level: info
+              message: |-
+                alert '{{alertName}}' is active for group '{{context.group}}':
+
+                - Value: {{context.value}}
+                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                - Timestamp: {{context.date}}
+        consumer: alerts
+        name: my rule
+        params:
+          aggType: avg
+          termSize: 6
+          thresholdComparator: '>'
+          timeWindowSize: 5
+          timeWindowUnit: m
+          groupBy: top
+          threshold:
+            - 1000
+          index:
+            - .test-index
+          timeField: '@timestamp'
+          aggField: sheet.version
+          termField: name.keyword
+        rule_type_id: .index-threshold
+        schedule:
+          interval: 1m
+        tags:
+          - cpu
+    create_rule_response:
+      summary: The create rule API returns a JSON object that contains details about the rule.
+      value:
+        actions:
+          - group: threshold met
+            id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+            uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
+            frequency:
+              notify_when: onActionGroupChange
+              summary: false
+              throttle: null
+            params:
+              level: info
+              message: |-
+                alert {{alertName}} is active for group {{context.group} :
+
+                - Value: {{context.value}}
+                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                - Timestamp: {{context.date}}
+        api_key_created_by_user: false
+        api_key_owner: elastic
+        consumer: alerts
+        created_at: '2022-06-08T17:20:31.632Z'
+        created_by: elastic
+        enabled: true
+        execution_status:
+          last_execution_date: '2022-06-08T17:20:31.632Z'
+          status: pending
+        id: 41893910-6bca-11eb-9e0d-85d233e3ee35
+        muted_alert_ids: []
+        mute_all: false
+        name: my rule
+        notify_when: onActionGroupChange
+        params:
+          aggType: avg
+          termSize: 6
+          thresholdComparator: '>'
+          timeWindowSize: 5
+          timeWindowUnit: m
+          groupBy: top
+          threshold:
+            - 1000
+          index:
+            - .test-index
+          timeField: '@timestamp'
+          aggField: sheet.version
+          termField: name.keyword
+        revision: 0
+        rule_type_id: .index-threshold
+        running: false
+        schedule:
+          interval: 1m
+        scheduled_task_id: 425b0800-6bca-11eb-9e0d-85d233e3ee35
+        tags:
+          - cpu
+        throttle: null
+        updated_at: '2022-06-08T17:20:31.632Z'
+        updated_by: elastic
     get_rule_response:
       summary: The get rule API returns a JSON object that contains details about the rule.
       value:
@@ -4465,102 +4609,6 @@ components:
           outcome: succeeded
         next_run: '2023-01-31T23:49:42.432Z'
         api_key_created_by_user: false
-    create_rule_request:
-      summary: Create an index threshold rule.
-      value:
-        actions:
-          - id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
-            frequency:
-              notify_when: onActionGroupChange
-              summary: false
-            group: threshold met
-            params:
-              level: info
-              message: |-
-                alert '{{alertName}}' is active for group '{{context.group}}':
-
-                - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
-                - Timestamp: {{context.date}}
-        consumer: alerts
-        name: my rule
-        params:
-          aggType: avg
-          termSize: 6
-          thresholdComparator: '>'
-          timeWindowSize: 5
-          timeWindowUnit: m
-          groupBy: top
-          threshold:
-            - 1000
-          index:
-            - .test-index
-          timeField: '@timestamp'
-          aggField: sheet.version
-          termField: name.keyword
-        rule_type_id: .index-threshold
-        schedule:
-          interval: 1m
-        tags:
-          - cpu
-    create_rule_response:
-      summary: The create rule API returns a JSON object that contains details about the rule.
-      value:
-        actions:
-          - group: threshold met
-            id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
-            uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
-            frequency:
-              notify_when: onActionGroupChange
-              summary: false
-              throttle: null
-            params:
-              level: info
-              message: |-
-                alert {{alertName}} is active for group {{context.group} :
-
-                - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
-                - Timestamp: {{context.date}}
-        api_key_created_by_user: false
-        api_key_owner: elastic
-        consumer: alerts
-        created_at: '2022-06-08T17:20:31.632Z'
-        created_by: elastic
-        enabled: true
-        execution_status:
-          last_execution_date: '2022-06-08T17:20:31.632Z'
-          status: pending
-        id: 41893910-6bca-11eb-9e0d-85d233e3ee35
-        muted_alert_ids: []
-        mute_all: false
-        name: my rule
-        notify_when: onActionGroupChange
-        params:
-          aggType: avg
-          termSize: 6
-          thresholdComparator: '>'
-          timeWindowSize: 5
-          timeWindowUnit: m
-          groupBy: top
-          threshold:
-            - 1000
-          index:
-            - .test-index
-          timeField: '@timestamp'
-          aggField: sheet.version
-          termField: name.keyword
-        revision: 0
-        rule_type_id: .index-threshold
-        running: false
-        schedule:
-          interval: 1m
-        scheduled_task_id: 425b0800-6bca-11eb-9e0d-85d233e3ee35
-        tags:
-          - cpu
-        throttle: null
-        updated_at: '2022-06-08T17:20:31.632Z'
-        updated_by: elastic
     find_rules_response:
       summary: Retrieve information about a rule.
       value:
