@@ -42,7 +42,11 @@ const alertParamsRt = t.intersection([
   }),
 ]);
 
-export type PreviewChartResponse = PreviewChartResponseItem[];
+export interface PreviewChartResponse {
+  series: PreviewChartResponseItem[];
+  totalGroups: number;
+}
+
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
 
 const transactionErrorRateChartPreview = createApmServerRoute({

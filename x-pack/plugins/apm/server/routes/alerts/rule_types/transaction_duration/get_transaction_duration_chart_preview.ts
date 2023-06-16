@@ -32,6 +32,10 @@ import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import {
+  BarSeriesDataMap,
+  getFilteredBarSeries,
+} from '../utils/get_filtered_series_for_preview_chart';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
@@ -127,7 +131,7 @@ export async function getTransactionDurationChartPreview({
   );
 
   if (!resp.aggregations) {
-    return [];
+    return { series: [], totalGroups: 0 };
   }
 
   const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
@@ -148,11 +152,18 @@ export async function getTransactionDurationChartPreview({
 
       return acc;
     },
-    {} as Record<string, Array<{ x: number; y: number | null }>>
+    {} as BarSeriesDataMap
   );
 
-  return Object.keys(seriesDataMap).map((key) => ({
+  const series = Object.keys(seriesDataMap).map((key) => ({
     name: key,
     data: seriesDataMap[key],
   }));
+
+  const filteredSeries = getFilteredBarSeries(series);
+
+  return {
+    series: filteredSeries,
+    totalGroups: series.length,
+  };
 }

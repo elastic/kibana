@@ -44,6 +44,7 @@ interface ChartPreviewProps {
   series: Array<{ name?: string; data: Coordinate[] }>;
   timeSize?: number;
   timeUnit?: TimeUnitChar;
+  totalGroups: number;
 }
 
 export function ChartPreview({
@@ -53,6 +54,7 @@ export function ChartPreview({
   series,
   timeSize = 5,
   timeUnit = 'm',
+  totalGroups,
 }: ChartPreviewProps) {
   const theme = useTheme();
   const thresholdOpacity = 0.3;
@@ -67,7 +69,6 @@ export function ChartPreview({
     opacity: thresholdOpacity,
   };
 
-  const NUM_SERIES = 5;
   const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
 
   const tooltipProps: TooltipProps = {
@@ -79,17 +80,8 @@ export function ChartPreview({
     },
   };
 
-  const filteredSeries = useMemo(() => {
-    const sortedSeries = series.sort((a, b) => {
-      const aMax = Math.max(...a.data.map((point) => point.y as number));
-      const bMax = Math.max(...b.data.map((point) => point.y as number));
-      return bMax - aMax;
-    });
-    return sortedSeries.slice(0, NUM_SERIES);
-  }, [series]);
-
   const barSeries = useMemo(() => {
-    return filteredSeries.reduce<
+    return series.reduce<
       Array<{ x: number; y: Maybe<number>; groupBy: string | undefined }>
     >((acc, serie) => {
       const barPoints = serie.data.reduce<
@@ -99,26 +91,20 @@ export function ChartPreview({
       }, []);
       return [...acc, ...barPoints];
     }, []);
-  }, [filteredSeries]);
+  }, [series]);
 
   const timeZone = getTimeZone(uiSettings);
 
   const legendSize =
-    filteredSeries.length > 1
-      ? Math.ceil(filteredSeries.length / 2) * 30
-      : filteredSeries.length * 35;
+    series.length > 1 ? Math.ceil(series.length / 2) * 30 : series.length * 35;
 
   const chartSize = 150;
 
-  const { yMin, yMax, xMin, xMax } = getDomain(filteredSeries);
+  const { yMin, yMax, xMin, xMax } = getDomain(series);
   const chartDomain = {
     max: Math.max(yMax, threshold) * 1.1, // Add 10% headroom.
-    min: Math.min(yMin, threshold),
+    min: Math.min(yMin, threshold) * 0.9, // Add 10% headroom.
   };
-
-  if (chartDomain.min === threshold) {
-    chartDomain.min = chartDomain.min * 0.9; // Allow some padding so the threshold annotation has better visibility
-  }
 
   const dateFormatter = useDateFormatter(xMin, xMax);
 
@@ -197,12 +183,12 @@ export function ChartPreview({
           timeZone={timeZone}
         />
       </Chart>
-      {filteredSeries.length > 0 && (
+      {series.length > 0 && (
         <TimeLabelForData
           lookback={lookback}
           timeLabel={timeLabel}
-          displayedGroups={filteredSeries.length}
-          totalGroups={series.length}
+          displayedGroups={series.length}
+          totalGroups={totalGroups}
         />
       )}
     </>

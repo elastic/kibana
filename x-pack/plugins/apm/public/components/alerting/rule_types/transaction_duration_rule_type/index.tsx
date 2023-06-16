@@ -149,16 +149,17 @@ export function TransactionDurationRuleType(props: Props) {
     ]
   );
 
-  const latencyChartPreview = data?.latencyChartPreview ?? [];
+  const latencyChartPreview = data?.latencyChartPreview;
+  const series = latencyChartPreview?.series ?? [];
+  const hasData = series.length > 0;
+  const totalGroups = latencyChartPreview?.totalGroups ?? 0;
 
-  const maxY = getMaxY(latencyChartPreview);
+  const maxY = getMaxY(series);
   const formatter = getDurationFormatter(maxY);
   const yTickFormat = getResponseTimeTickFormatter(formatter);
 
   // The threshold from the form is in ms. Convert to µs.
   const thresholdMs = params.threshold * 1000;
-
-  const hasData = latencyChartPreview.length > 0;
 
   const chartPreview = isPending(status) ? (
     <LoadingState />
@@ -166,12 +167,13 @@ export function TransactionDurationRuleType(props: Props) {
     <NoDataState />
   ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={latencyChartPreview}
+      series={series}
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
       uiSettings={services.uiSettings}
       timeSize={params.windowSize}
       timeUnit={params.windowUnit}
+      totalGroups={totalGroups}
     />
   ) : (
     <ErrorState />

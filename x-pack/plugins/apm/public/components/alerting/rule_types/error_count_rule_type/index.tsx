@@ -170,6 +170,7 @@ export function ErrorCountRuleType(props: Props) {
       threshold={params.threshold}
       yTickFormat={asInteger}
       uiSettings={services.uiSettings}
+      totalGroups={0} // TODO: will be updated in https://github.com/elastic/kibana/pull/159544
     />
   ) : null;
 

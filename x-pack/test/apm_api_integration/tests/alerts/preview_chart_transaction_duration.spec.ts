@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(response.body.latencyChartPreview).to.eql([]);
+      expect(response.body.latencyChartPreview.series).to.eql([]);
     });
   });
 
@@ -68,7 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.latencyChartPreview.some((item: PreviewChartResponseItem) =>
+          response.body.latencyChartPreview.series.some((item: PreviewChartResponseItem) =>
             item.data.some((coordinate) => coordinate.x && coordinate.y)
           )
         ).to.equal(true);
@@ -95,7 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.latencyChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -122,7 +122,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.latencyChartPreview).to.eql([]);
+        expect(response.body.latencyChartPreview.series).to.eql([]);
       });
 
       it('with no group by parameter', async () => {
@@ -133,9 +133,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.latencyChartPreview.length).to.equal(1);
+        expect(response.body.latencyChartPreview.series.length).to.equal(1);
         expect(
-          response.body.latencyChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -158,9 +158,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.latencyChartPreview.length).to.equal(1);
+        expect(response.body.latencyChartPreview.series.length).to.equal(1);
         expect(
-          response.body.latencyChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -183,9 +183,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.latencyChartPreview.length).to.equal(2);
+        expect(response.body.latencyChartPreview.series.length).to.equal(2);
         expect(
-          response.body.latencyChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -212,9 +212,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.latencyChartPreview.length).to.equal(1);
+        expect(response.body.latencyChartPreview.series.length).to.equal(1);
         expect(
-          response.body.latencyChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -242,7 +242,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.latencyChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -273,9 +273,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.latencyChartPreview.length).to.equal(4);
+        expect(response.body.latencyChartPreview.series.length).to.equal(4);
         expect(
-          response.body.latencyChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
