@@ -101,24 +101,31 @@ export class ComboBoxService extends FtrService {
       } else {
         // Try to find alternate title casing
         await this.openOptionsList(comboBoxElement);
-        const alternateTitle = await (await this.find.allByCssSelector(
-          `.euiFilterSelectItem`,
-          this.WAIT_FOR_EXISTS_TIME
-        )).find(async (e) => {
-          return (await e.getAttribute('title')).toLowerCase().trim() === trimmedValue;
-        })?.getAttribute('title');
+        const alternateTitle = await (
+          await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)
+        )
+          .find(async (e) => {
+            return (await e.getAttribute('title')).toLowerCase().trim() === trimmedValue;
+          })
+          ?.getAttribute('title');
 
-        let [alternate] = alternateTitle ? (await this.find.allByCssSelector(
-          `.euiFilterSelectItem[title^="${alternateTitle}"]`,
-          this.WAIT_FOR_EXISTS_TIME
-        )) : [];
+        const [alternate] = alternateTitle
+          ? await this.find.allByCssSelector(
+              `.euiFilterSelectItem[title^="${alternateTitle}"]`,
+              this.WAIT_FOR_EXISTS_TIME
+            )
+          : [];
 
         if (alternate) {
-          this.log.warning(`comboBox.setElement - Found similar option [${alternateTitle}] not [${trimmedValue}]`);
+          this.log.warning(
+            `comboBox.setElement - Found similar option [${alternateTitle}] not [${trimmedValue}]`
+          );
           await this.clickOption(options.clickWithMouse, alternate);
         } else {
           // if it doesn't find the item which text starts with value, it will choose the first option
-          this.log.warning(`comboBox.setElement - Could not find option [${trimmedValue}], using first`);
+          this.log.warning(
+            `comboBox.setElement - Could not find option [${trimmedValue}], using first`
+          );
           const firstOption = await this.find.byCssSelector('.euiFilterSelectItem', 5000);
           await this.clickOption(options.clickWithMouse, firstOption);
         }
