@@ -87,7 +87,7 @@ export class ComboBoxService extends FtrService {
     }
 
     await comboBoxElement.scrollIntoViewIfNecessary();
-    await this.setFilterValue(comboBoxElement, trimmedValue);
+    await this.setFilterValue(comboBoxElement, value);
     await this.openOptionsList(comboBoxElement);
 
     if (trimmedValue !== undefined) {
