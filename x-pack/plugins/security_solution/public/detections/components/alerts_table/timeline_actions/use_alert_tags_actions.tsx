@@ -27,22 +27,21 @@ export const useAlertTagsActions = ({ closePopover, ecsRowData, scopeId, refetch
   const dispatch = useDispatch();
   const { hasIndexWrite } = useAlertsPrivileges();
   const alertId = ecsRowData._id;
-  const alertTagData = useMemo(
-    () => [
+  const alertTagData = useMemo(() => {
+    return [
       {
         _id: alertId,
         _index: ecsRowData._index ?? '',
         data: [
-          { field: ALERT_WORKFLOW_TAGS, value: ecsRowData['kibana.alert.workflow_tags'] ?? [] },
+          { field: ALERT_WORKFLOW_TAGS, value: ecsRowData?.kibana?.alert.workflow_tags ?? [] },
         ],
         ecs: {
           _id: alertId,
           _index: ecsRowData._index ?? '',
         },
       },
-    ],
-    [alertId, ecsRowData]
-  );
+    ];
+  }, [alertId, ecsRowData._index, ecsRowData?.kibana?.alert.workflow_tags]);
 
   const scopedActions = getScopedActions(scopeId);
   const localSetEventsLoading = useCallback(

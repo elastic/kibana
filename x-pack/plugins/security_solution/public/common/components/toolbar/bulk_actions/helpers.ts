@@ -28,13 +28,20 @@ export const createInitialTagsState = (existingTags: string[][], defaultTags: st
   const allTagsUnion = union(existingTagsUnion, defaultTags);
   return allTagsUnion
     .map((tag): EuiSelectableOption => {
+      const checkedStatus = existingTagsIntersection.includes(tag)
+        ? 'on'
+        : existingTagsUnion.includes(tag)
+        ? 'mixed'
+        : undefined;
       return {
         label: tag,
-        checked: existingTagsIntersection.includes(tag)
-          ? 'on'
-          : existingTagsUnion.includes(tag)
-          ? 'mixed'
-          : undefined,
+        checked: checkedStatus,
+        'data-test-subj':
+          checkedStatus === 'on'
+            ? 'selected-alert-tag'
+            : checkedStatus === 'mixed'
+            ? 'mixed-alert-tag'
+            : 'unselected-alert-tag',
       };
     })
     .sort(checkedSortCallback);

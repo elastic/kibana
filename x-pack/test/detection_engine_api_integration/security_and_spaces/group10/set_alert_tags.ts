@@ -209,6 +209,40 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alert._source?.['kibana.alert.workflow_tags']).to.eql(['tag-1']);
           });
         });
+
+        it('should be able to remove tags that do not exist without breaking', async () => {
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccess({ supertest, log, id });
+          await waitForSignalsToBePresent(supertest, log, 10, [id]);
+          const alerts = await getSignalsByIds(supertest, log, [id]);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+
+          await supertest
+            .post(DETECTION_ENGINE_ALERT_TAGS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(
+              setAlertTags({
+                tagsToAdd: [],
+                tagsToRemove: ['tag-1'],
+                query: buildAlertTagsQuery(alertIds),
+              })
+            )
+            .expect(200);
+
+          const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQuerySignalIds(alertIds))
+            .expect(200);
+
+          body.hits.hits.map((alert) => {
+            expect(alert._source?.['kibana.alert.workflow_tags']).to.eql([]);
+          });
+        });
       });
     });
   });

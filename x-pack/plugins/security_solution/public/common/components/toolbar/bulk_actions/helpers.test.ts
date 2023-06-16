@@ -16,14 +16,17 @@ describe('createInitialTagsState', () => {
       Array [
         Object {
           "checked": undefined,
+          "data-test-subj": "unselected-alert-tag",
           "label": "test 1",
         },
         Object {
           "checked": undefined,
+          "data-test-subj": "unselected-alert-tag",
           "label": "test 2",
         },
         Object {
           "checked": undefined,
+          "data-test-subj": "unselected-alert-tag",
           "label": "test 3",
         },
       ]
@@ -37,14 +40,17 @@ describe('createInitialTagsState', () => {
       Array [
         Object {
           "checked": "on",
+          "data-test-subj": "selected-alert-tag",
           "label": "test 1",
         },
         Object {
           "checked": undefined,
+          "data-test-subj": "unselected-alert-tag",
           "label": "test 2",
         },
         Object {
           "checked": undefined,
+          "data-test-subj": "unselected-alert-tag",
           "label": "test 3",
         },
       ]
@@ -59,14 +65,17 @@ describe('createInitialTagsState', () => {
       Array [
         Object {
           "checked": "on",
+          "data-test-subj": "selected-alert-tag",
           "label": "test 1",
         },
         Object {
           "checked": "mixed",
+          "data-test-subj": "mixed-alert-tag",
           "label": "test 2",
         },
         Object {
           "checked": undefined,
+          "data-test-subj": "unselected-alert-tag",
           "label": "test 3",
         },
       ]
@@ -80,18 +89,22 @@ describe('createInitialTagsState', () => {
       Array [
         Object {
           "checked": "on",
+          "data-test-subj": "selected-alert-tag",
           "label": "test 1",
         },
         Object {
           "checked": "on",
+          "data-test-subj": "selected-alert-tag",
           "label": "test 4",
         },
         Object {
           "checked": undefined,
+          "data-test-subj": "unselected-alert-tag",
           "label": "test 2",
         },
         Object {
           "checked": undefined,
+          "data-test-subj": "unselected-alert-tag",
           "label": "test 3",
         },
       ]
