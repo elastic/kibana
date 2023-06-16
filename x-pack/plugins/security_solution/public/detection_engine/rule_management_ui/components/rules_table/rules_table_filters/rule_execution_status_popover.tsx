@@ -12,8 +12,6 @@ import * as i18n from '../../../../../detections/pages/detection_engine/rules/tr
 import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
 import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
 
-const TAGS_POPOVER_WIDTH = 274;
-
 interface RuleExecutionStatusPopoverProps {
   selectedStatus?: RuleExecutionStatus;
   onSelectedStatusChanged: (newStatus?: RuleExecutionStatus) => void;
@@ -75,7 +73,6 @@ const RuleExecutionStatusPopoverComponent = ({
       isSelected={isExecutionStatusPopoverOpen}
       hasActiveFilters={selectedStatus !== undefined}
       numActiveFilters={selectedStatus !== undefined ? 1 : 0}
-      data-test-subj="tags-filter-popover-button"
     >
       {i18n.COLUMN_LAST_RESPONSE}
     </EuiFilterButton>
@@ -91,20 +88,19 @@ const RuleExecutionStatusPopoverComponent = ({
       }}
       panelPaddingSize="none"
       repositionOnScroll
-      panelProps={{
-        'data-test-subj': 'tags-filter-popover',
-      }}
     >
       <EuiSelectable
         aria-label={i18n.RULES_TAG_SEARCH}
         options={selectableOptions}
         onChange={handleSelectableOptionsChange}
-        emptyMessage={i18n.NO_TAGS_AVAILABLE}
-        noMatchesMessage={i18n.NO_TAGS_AVAILABLE}
         singleSelection
       >
         {(list, search) => (
-          <div style={{ width: TAGS_POPOVER_WIDTH }}>
+          <div
+            css={`
+              width: 200px;
+            `}
+          >
             <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
           </div>
