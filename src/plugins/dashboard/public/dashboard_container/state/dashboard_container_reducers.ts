@@ -56,6 +56,10 @@ export const dashboardContainerReducers = {
     }
   },
 
+  setLastSavedId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.lastSavedId = action.payload;
+  },
+
   setStateFromSettingsFlyout: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardStateFromSettingsFlyout>
@@ -217,5 +221,12 @@ export const dashboardContainerReducers = {
 
   setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
     state.componentState.highlightPanelId = action.payload;
+  },
+
+  setAnimatePanelTransforms: (
+    state: DashboardReduxState,
+    action: PayloadAction<boolean | undefined>
+  ) => {
+    state.componentState.animatePanelTransforms = action.payload;
   },
 };
