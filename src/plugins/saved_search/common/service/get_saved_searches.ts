@@ -17,6 +17,8 @@ import type { SavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
+import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type { Reference } from '@kbn/content-management-utils';
 
 export interface GetSavedSearchDependencies {
   searchSourceCreate: ISearchStartSearchSource['create'];
@@ -31,7 +33,7 @@ const getSavedSearchUrlConflictMessage = async (json: string) =>
     values: { json },
   });
 
-export const getSavedSearch = async (
+export const getSavedSearchSavedObject = async (
   savedSearchId: string,
   { searchSourceCreate, spaces, savedObjectsTagging, getSavedSrch }: GetSavedSearchDependencies
 ) => {
@@ -55,32 +57,69 @@ export const getSavedSearch = async (
     );
   }
 
-  const savedSearch = so.item;
+  return so;
+};
 
+export const convertToSavedSearch = async (
+  {
+    savedSearchId,
+    attributes,
+    references,
+    sharingSavedObjectProps,
+  }: {
+    savedSearchId: string | undefined;
+    attributes: SavedSearchAttributes;
+    references: Reference[];
+    sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
+  },
+  { search, savedObjectsTagging }: GetSavedSearchDependencies
+) => {
   const parsedSearchSourceJSON = parseSearchSourceJSON(
-    savedSearch.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
+    attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
 
   const searchSourceValues = injectReferences(
     parsedSearchSourceJSON as Parameters<typeof injectReferences>[0],
-    savedSearch.references
+    references
   );
 
   // front end only
   const tags = savedObjectsTagging
-    ? savedObjectsTagging.ui.getTagIdsFromReferences(savedSearch.references)
+    ? savedObjectsTagging.ui.getTagIdsFromReferences(references)
     : undefined;
 
   const returnVal = fromSavedSearchAttributes(
     savedSearchId,
-    savedSearch.attributes,
+    attributes,
     tags,
-    savedSearch.references,
+    references,
     await searchSourceCreate(searchSourceValues),
-    so.meta
+    sharingSavedObjectProps
   );
 
   return returnVal;
+};
+
+export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearchDependencies) => {
+  const { search, spaces, savedObjectsTagging, contentManagement } = deps;
+  const so = await getSavedSearchSavedObject(savedSearchId, {
+    search,
+    spaces,
+    savedObjectsTagging,
+    contentManagement,
+  });
+
+  const savedSearch = await convertToSavedSearch(
+    {
+      savedSearchId,
+      attributes: so.item.attributes,
+      references: so.item.references,
+      sharingSavedObjectProps: so.meta,
+    },
+    deps
+  );
+
+  return savedSearch;
 };
 
 /**

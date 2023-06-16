@@ -13,11 +13,11 @@ import {
   Container,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { SearchByReferenceInput, SearchInput, SearchOutput } from './types';
+import type { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { DiscoverServices } from '../build_services';
-import { getSavedSearchAttributeService } from './saved_search_attribute_service';
+import type { SearchByReferenceInput } from '@kbn/saved-search-plugin/public';
 
 export interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -68,7 +68,6 @@ export class SearchEmbeddableFactory
 
   public async create(input: SearchInput, parent?: Container) {
     const services = await this.getDiscoverServices();
-    const attributeService = getSavedSearchAttributeService(services);
     const filterManager = services.filterManager;
 
     try {
@@ -81,7 +80,6 @@ export class SearchEmbeddableFactory
           filterManager,
           editable: services.capabilities.discover.save as boolean,
           services,
-          attributeService,
         },
         input,
         executeTriggerActions,

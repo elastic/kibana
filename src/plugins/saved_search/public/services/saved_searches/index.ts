@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { getSavedSearch, getNewSavedSearch } from '../../../common/service/get_saved_searches';
+export { getSavedSearch, getNewSavedSearch, convertToSavedSearch } from '../../../common/service/get_saved_searches';
 export {
   getSavedSearchUrl,
   getSavedSearchFullPathUrl,
@@ -15,4 +15,9 @@ export type { SaveSavedSearchOptions } from './save_saved_searches';
 export { saveSavedSearch } from './save_saved_searches';
 export { checkForDuplicateTitle } from './check_for_duplicate_title';
 export { SAVED_SEARCH_TYPE } from './constants';
-export type { SavedSearch } from './types';
+export type { SavedSearch, SearchByReferenceInput, SearchByValueInput } from './types';
+export {
+  getSavedSearchAttributeService,
+  type SavedSearchAttributeService,
+  type SavedSearchUnwrapResult,
+} from './saved_search_attribute_service';

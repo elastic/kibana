@@ -7,7 +7,13 @@
  */
 
 export type { SortOrder } from '../common/types';
-export type { SavedSearch, SaveSavedSearchOptions } from './services/saved_searches';
+export type {
+  SavedSearch,
+  SaveSavedSearchOptions,
+  SearchByReferenceInput,
+  SearchByValueInput,
+  SavedSearchAttributeService,
+} from './services/saved_searches';
 
 export { getSavedSearchFullPathUrl, getSavedSearchUrl } from './services/saved_searches';
 

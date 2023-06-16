@@ -13,12 +13,46 @@ import { SAVED_SEARCH_TYPE } from './constants';
 import { toSavedSearchAttributes } from '../../../common/service/saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../../../common/content_management';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
+import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type { Reference } from '@kbn/content-management-utils';
 
 export interface SaveSavedSearchOptions {
   onTitleDuplicate?: () => void;
   isTitleDuplicateConfirmed?: boolean;
   copyOnSave?: boolean;
 }
+
+export const saveSavedSearchSavedObject = async (
+  id: string | undefined,
+  attributes: SavedSearchAttributes,
+  references: Reference[] | undefined,
+  contentManagement: ContentManagementPublicStart['client']
+) => {
+  const resp = id
+    ? await contentManagement.update<
+        SavedSearchCrudTypes['UpdateIn'],
+        SavedSearchCrudTypes['UpdateOut']
+      >({
+        contentTypeId: SAVED_SEARCH_TYPE,
+        id,
+        data: attributes,
+        options: {
+          references,
+        },
+      })
+    : await contentManagement.create<
+        SavedSearchCrudTypes['CreateIn'],
+        SavedSearchCrudTypes['CreateOut']
+      >({
+        contentTypeId: SAVED_SEARCH_TYPE,
+        data: attributes,
+        options: {
+          references,
+        },
+      });
+
+  return resp.item.id;
+};
 
 /** @internal **/
 export const saveSavedSearch = async (
@@ -47,28 +81,11 @@ export const saveSavedSearch = async (
   const references = savedObjectsTagging
     ? savedObjectsTagging.ui.updateTagsReferences(originalReferences, savedSearch.tags ?? [])
     : originalReferences;
-  const resp = isNew
-    ? await contentManagement.create<
-        SavedSearchCrudTypes['CreateIn'],
-        SavedSearchCrudTypes['CreateOut']
-      >({
-        contentTypeId: SAVED_SEARCH_TYPE,
-        data: toSavedSearchAttributes(savedSearch, searchSourceJSON),
-        options: {
-          references,
-        },
-      })
-    : await contentManagement.update<
-        SavedSearchCrudTypes['UpdateIn'],
-        SavedSearchCrudTypes['UpdateOut']
-      >({
-        contentTypeId: SAVED_SEARCH_TYPE,
-        id: savedSearch.id!,
-        data: toSavedSearchAttributes(savedSearch, searchSourceJSON),
-        options: {
-          references,
-        },
-      });
 
-  return resp.item.id;
+  return saveSavedSearchSavedObject(
+    isNew ? undefined : savedSearch.id,
+    toSavedSearchAttributes(savedSearch, searchSourceJSON),
+    references,
+    contentManagement
+  );
 };

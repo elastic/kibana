@@ -27,7 +27,12 @@ import {
   ReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import type {
+  SavedSearchAttributeService,
+  SearchByReferenceInput,
+  SearchByValueInput,
+  SortOrder,
+} from '@kbn/saved-search-plugin/public';
 import {
   APPLY_FILTER_TRIGGER,
   FilterManager,
@@ -43,13 +48,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
-import {
-  ISearchEmbeddable,
-  SearchByReferenceInput,
-  SearchByValueInput,
-  SearchInput,
-  SearchOutput,
-} from './types';
+import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -76,11 +75,6 @@ import { isTextBasedQuery } from '../application/main/utils/is_text_based_query'
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
-import {
-  SavedSearchAttributeService,
-  SavedSearchUnwrapResult,
-} from './saved_search_attribute_service';
-import { fromSavedSearchAttributes } from '@kbn/saved-search-plugin/public/services/saved_searches/saved_searches_utils';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -103,7 +97,6 @@ export interface SearchEmbeddableConfig {
   editable: boolean;
   filterManager: FilterManager;
   services: DiscoverServices;
-  attributeService: SavedSearchAttributeService;
 }
 
 export class SavedSearchEmbeddable
@@ -137,7 +130,7 @@ export class SavedSearchEmbeddable
   private node?: HTMLElement;
 
   constructor(
-    { editable, filterManager, services, attributeService }: SearchEmbeddableConfig,
+    { editable, filterManager, services }: SearchEmbeddableConfig,
     initialInput: SearchInput,
     private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
     parent?: Container
@@ -145,7 +138,7 @@ export class SavedSearchEmbeddable
     super(initialInput, { editApp: 'discover', editable }, parent);
 
     this.services = services;
-    this.attributeService = attributeService;
+    this.attributeService = services.savedSearch.embeddable.attributesService;
     this.filterManager = filterManager;
     this.inspectorAdapters = {
       requests: new RequestAdapter(),
@@ -172,26 +165,18 @@ export class SavedSearchEmbeddable
   }
 
   private async initializeSavedSearch(input: SearchInput) {
-    const unwrapResult: SavedSearchUnwrapResult | false = await this.attributeService
-      .unwrapAttributes(input)
-      .catch((e: Error) => {
-        this.onFatalError(e);
-        return false;
-      });
+    const unwrapResult = await this.attributeService.unwrapAttributes(input).catch((e: Error) => {
+      this.onFatalError(e);
+      return undefined;
+    });
 
     if (!unwrapResult || this.isDestroyed) {
       return;
     }
 
-    const { metaInfo, attributes } = unwrapResult;
-
-    this.savedSearch = fromSavedSearchAttributes(
+    this.savedSearch = await this.services.savedSearch.embeddable.toSavedSearch(
       (input as SearchByReferenceInput)?.savedObjectId,
-      attributes,
-      metaInfo?.tags,
-      metaInfo?.references,
-      metaInfo?.searchSource!,
-      metaInfo?.sharingSavedObjectProps
+      unwrapResult
     );
 
     this.panelTitle = this.savedSearch.title ?? '';
