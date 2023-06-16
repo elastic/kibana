@@ -1,6 +1,5 @@
-title: Create Elasticsearch query rule request
-description: > 
-  A rule that runs a user-configured query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.  
+title: Create uptime monitor status rule request
+description: A rule that detects monitor errors and outages.
 type: object
 required:
   - consumer
@@ -20,15 +19,12 @@ properties:
   notify_when:
     $ref: 'notify_when.yaml'
   params:
-    type: object
-    description: The parameters for an Elasticsearch query rule.
-    # TO-DO: Add the parameter details for this rule.
-    additionalProperties: true
+    $ref: '../../../../../synthetics/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_monitor_status.yaml'
   rule_type_id:
     type: string
     description: The ID of the rule type that you want to call when the rule is scheduled to run.
     enum:
-      - .es-query
+      - xpack.uptime.alerts.monitorStatus
   schedule:
     $ref: 'schedule.yaml'
   tags:

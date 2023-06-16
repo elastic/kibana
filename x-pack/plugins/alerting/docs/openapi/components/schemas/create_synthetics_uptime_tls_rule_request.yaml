@@ -1,5 +1,4 @@
 title: Create synthetics uptime TLS rule request
-description: TBD
 type: object
 required:
   - consumer

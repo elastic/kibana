@@ -1,6 +1,6 @@
 title: Create traacking containment rule request
 description: > 
-  The tracking containment rule type runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index.
+  A rule that runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index.
   In the event that an entity is contained within a boundary, an alert may be generated.  
 type: object
 required:
@@ -23,6 +23,7 @@ properties:
   params:
     type: object
     description: The parameters for an tracking containment rule.
+    # TO-DO: Add the parameter details for this rule.
     additionalProperties: true
   rule_type_id:
     type: string

@@ -1,5 +1,5 @@
 title: Create APM error count rule request
-description: TBD
+description: A rule that detects when the number of errors in a service exceeds a defined threshold.
 type: object
 required:
   - consumer

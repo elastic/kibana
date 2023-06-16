@@ -114,12 +114,38 @@ paths:
                 - $ref: '#/components/schemas/create_geo_containment_rule_request'
                 - $ref: '#/components/schemas/create_index_threshold_rule_request'
                 - $ref: '#/components/schemas/create_infra_inventory_rule_request'
+                - $ref: '#/components/schemas/create_infra_metric_anomaly_rule_request'
                 - $ref: '#/components/schemas/create_infra_metric_threshold_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_jvm_memory_usage_rule_request'
                 - $ref: '#/components/schemas/create_log_threshold_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_ccr_exceptions_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_cluster_health_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_cpu_usage_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_disk_usage_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_elasticsearch_version_mismatch_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_license_expiration_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_kibana_version_mismatch_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_logstash_version_mismatch_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_missing_data_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_nodes_changed_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_shard_size_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_thread_pool_search_rejections_rule_request'
+                - $ref: '#/components/schemas/create_monitoring_thread_pool_write_rejections_rule_request'
+                - $ref: '#/components/schemas/create_siem_eql_rule_request'
+                - $ref: '#/components/schemas/create_siem_indicator_rule_request'
+                - $ref: '#/components/schemas/create_siem_ml_rule_request'
+                - $ref: '#/components/schemas/create_siem_new_terms_rule_request'
+                - $ref: '#/components/schemas/create_siem_notifications_rule_request'
+                - $ref: '#/components/schemas/create_siem_query_rule_request'
+                - $ref: '#/components/schemas/create_siem_saved_query_rule_request'
+                - $ref: '#/components/schemas/create_siem_threshold_rule_request'
                 - $ref: '#/components/schemas/create_slo_burn_rate_rule_request'
                 - $ref: '#/components/schemas/create_synthetics_monitor_status_rule_request'
+                - $ref: '#/components/schemas/create_synthetics_uptime_duration_anomaly_rule_request'
                 - $ref: '#/components/schemas/create_synthetics_uptime_tls_rule_request'
+                - $ref: '#/components/schemas/create_synthetics_uptime_tls_certificate_rule_request'
                 - $ref: '#/components/schemas/create_transform_health_rule_request'
+                - $ref: '#/components/schemas/create_uptime_monitor_status_rule_request'
               discriminator:
                 propertyName: rule_type_id
             examples:
@@ -1948,7 +1974,7 @@ components:
     create_anomaly_detection_alert_rule_request:
       title: Create anomaly detection rule request
       description: |
-        An anomaly detection alert rule checks if the anomaly detection job results contain anomalies that match the rule conditions. 
+        A rule that checks if the anomaly detection job results contain anomalies that match the rule conditions. 
       type: object
       required:
         - consumer
@@ -1985,7 +2011,7 @@ components:
     create_anomaly_detection_jobs_health_rule_request:
       title: Create anomaly detection jobs health rule request
       description: |
-        An anomaly detection jobs health rule onitors job health and alerts if an operational issue occurred that may prevent the job from detecting anomalies.
+        An rule that monitors job health and alerts if an operational issue occurred that may prevent the job from detecting anomalies.
       type: object
       required:
         - consumer
@@ -2056,7 +2082,7 @@ components:
             - warning
     create_apm_anomaly_rule_request:
       title: Create APM anomaly rule rule request
-      description: TBD
+      description: A rule that detects when either the latency, throughput, or failed transaction rate of a service is anomalous.
       type: object
       required:
         - consumer
@@ -2132,7 +2158,7 @@ components:
           type: string
     create_apm_error_count_rule_request:
       title: Create APM error count rule request
-      description: TBD
+      description: A rule that detects when the number of errors in a service exceeds a defined threshold.
       type: object
       required:
         - consumer
@@ -2218,8 +2244,8 @@ components:
             - 95th
             - 99th
     create_apm_transaction_duration_rule_request:
-      title: Create transaction duration rule request
-      description: TBD
+      title: Create latency threshold rule request
+      description: A rule that detects when the latency of a specific transaction type in a service exceeds a threshold.
       type: object
       required:
         - consumer
@@ -2300,7 +2326,7 @@ components:
               - transaction.name
     create_apm_transaction_error_rate_rule_request:
       title: Create APM transaction error rate rule request
-      description: TBD
+      description: A rule that sends notifications when the rate of transaction errors in a service exceeds a threshold.
       type: object
       required:
         - consumer
@@ -2335,7 +2361,7 @@ components:
     create_es_query_rule_request:
       title: Create Elasticsearch query rule request
       description: |
-        The Elasticsearch query rule type runs a user-configured query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.  
+        A rule that runs a user-configured query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.  
       type: object
       required:
         - consumer
@@ -2372,7 +2398,7 @@ components:
     create_geo_containment_rule_request:
       title: Create traacking containment rule request
       description: |
-        The tracking containment rule type runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index. In the event that an entity is contained within a boundary, an alert may be generated.  
+        A rule that runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index. In the event that an entity is contained within a boundary, an alert may be generated.  
       type: object
       required:
         - consumer
@@ -2408,7 +2434,7 @@ components:
           $ref: '#/components/schemas/throttle'
     create_index_threshold_rule_request:
       title: Create index threshold rule request
-      description: The index threshold rule type runs an Elasticsearch query. It aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
+      description: A rule that runs an Elasticsearch query, aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
       type: object
       required:
         - consumer
@@ -2555,7 +2581,8 @@ components:
           type: boolean
     create_infra_inventory_rule_request:
       title: Create infra inventory rule request
-      description: TBD
+      description: |
+        A rule that sends notifications when a metric has reached or exceeded a value for a specific resource or a group of resources within your infrastructure.
       type: object
       required:
         - consumer
@@ -2581,6 +2608,41 @@ components:
           description: The ID of the rule type that you want to call when the rule is scheduled to run.
           enum:
             - metrics.alert.inventory.threshold
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_infra_metric_anomaly_rule_request:
+      title: Create infrastructure anomaly rule request
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for an infrastructure anomaly rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - metrics.alert.anomaly
         schedule:
           $ref: '#/components/schemas/schedule'
         tags:
@@ -2763,7 +2825,8 @@ components:
           type: boolean
     create_infra_metric_threshold_rule_request:
       title: Create infra metric threshold rule request
-      description: TBD
+      description: |
+        A rule that sends notifications when a metric has reached or exceeded a value for a specific time period.
       type: object
       required:
         - consumer
@@ -2789,6 +2852,42 @@ components:
           description: The ID of the rule type that you want to call when the rule is scheduled to run.
           enum:
             - metrics.alert.threshold
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_jvm_memory_usage_rule_request:
+      title: Create JVM memory usage rule request
+      description: A rule that detects when a node reports high memory usage.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a JVM memory usage rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_jvm_memory_usage
         schedule:
           $ref: '#/components/schemas/schedule'
         tags:
@@ -2959,7 +3058,7 @@ components:
                 type: string
     create_log_threshold_rule_request:
       title: Create log threshold rule request
-      description: TBD
+      description: A rule that detects when a log aggregation exceeds a threshold.
       type: object
       required:
         - consumer
@@ -2985,6 +3084,767 @@ components:
           description: The ID of the rule type that you want to call when the rule is scheduled to run.
           enum:
             - logs.alert.document.count
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_ccr_exceptions_rule_request:
+      title: Create CCR read exceptions rule request
+      description: A rule that detects cross-cluster replication (CCR) read exceptions.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a CCR read exceptions rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_ccr_read_exceptions
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_cluster_health_rule_request:
+      title: Create cluster health rule request
+      description: A rule that detects when the health of the cluster changes.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a cluster health rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_cluster_health
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_cpu_usage_rule_request:
+      title: Create CPU usage rule request
+      description: A rule that detects when the CPU load for a node is consistently high.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a CPU usage rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_cpu_usage
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_disk_usage_rule_request:
+      title: Create disk usage rule request
+      description: A rule that detects when the disk usage for a node is consistently high.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a disk usage rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_disk_usage
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_elasticsearch_version_mismatch_rule_request:
+      title: Create Elasticsearch version mismatch rule request
+      description: A rule that detects when the cluster has multipe versions of Elasticsearch.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a Elasticsearch version mismatch rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_elasticsearch_version_mismatch
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_license_expiration_rule_request:
+      title: Create license expiration rule request
+      description: A rule that detects when the cluster license is about to expire.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a license expiration rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_license_expiration
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_kibana_version_mismatch_rule_request:
+      title: Create Kibana version mismatch rule request
+      description: A rule that detects when the cluster has multiple versions of Kibana.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a Kibana version mismatch rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_kibana_version_mismatch
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_logstash_version_mismatch_rule_request:
+      title: Create Logstash version mismatch rule request
+      description: A rule that detects when the cluster has multiple versions of Logstash.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a Logstash version mismatch rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_logstash_version_mismatch
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_missing_data_rule_request:
+      title: Create missing monitoring data rule request
+      description: A rule that detects when monitoring data is missing.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a missing monitoring data rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_missing_monitoring_data
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_nodes_changed_rule_request:
+      title: Create nodes changed rule request
+      description: A rule that detects when nodes are added, removed, or restarted.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a nodes changed rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_nodes_changed
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_shard_size_rule_request:
+      title: Create shard size rule request
+      description: A rule that detects when the average shard size is larger than a threshold.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a shard size rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_shard_size
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_thread_pool_search_rejections_rule_request:
+      title: Create thread pool search rejections rule request
+      description: A rule that detects when the number of rejections in the thread pool exceeds a threshold.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a thread pool search rejections rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_thread_pool_search_rejections
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_monitoring_thread_pool_write_rejections_rule_request:
+      title: Create thread pool write rejections rule request
+      description: A rule that detects when the number of rejections in the write thread pool exceeds a threshold.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a thread pool write rejections rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - monitoring_alert_thread_pool_write_rejections
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_siem_eql_rule_request:
+      title: Create event correlation rule request
+      description: |
+        A rule that uses Event Query Language (EQL) to match events, generate sequences, and stack data.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for an event correlation rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - siem.eqlRule
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_siem_indicator_rule_request:
+      title: Create indicator match rule request
+      description: |
+        A rule that uses indicators from intelligence sources to detect matching events and alerts.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for an indicator match rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - siem.indicatorRule
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_siem_ml_rule_request:
+      title: Create machine learning rule request
+      description: |
+        A rule that detects when a machine learning job discovers an anomaly above the defined threshold.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a machine learning rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - siem.mlRule
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_siem_new_terms_rule_request:
+      title: Create new terms rule request
+      description: A rule that finds documents with values that appear for the first time.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a new terms rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - siem.newTermsRule
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_siem_notifications_rule_request:
+      title: Create security solution notification (legacy) rule request
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a notification rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - siem.notifications
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_siem_query_rule_request:
+      title: Create custom query rule request
+      description: |
+        A rule that uses KQL or Lucene to detect issues across indices.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a custom query rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - siem.queryRule
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_siem_saved_query_rule_request:
+      title: Create saved query rule request
+      description: |
+        A rule that searches the defined indices and creates an alert when a document matches the saved search.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a saved query rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - siem.savedQueryRule
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_siem_threshold_rule_request:
+      title: Create threshold rule request
+      description: |
+        A rule that aggregates query results to detect when the number of matches exceeds a threshold.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a threshold rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - siem.thresholdRule
         schedule:
           $ref: '#/components/schemas/schedule'
         tags:
@@ -3031,7 +3891,8 @@ components:
               example: m
     create_slo_burn_rate_rule_request:
       title: Create slo burn rate rule request
-      description: TBD
+      description: |
+        A rule that detects when the burn rate is above a defined threshold for two different lookback periods. The two periods are a long period and a short period that is 1/12th of the long period. For each lookback period, the burn rate is computed as the error rate divided by the error budget. When the burn rates for both periods surpass the threshold, an alert occurs.
       type: object
       required:
         - consumer
@@ -3057,6 +3918,194 @@ components:
           description: The ID of the rule type that you want to call when the rule is scheduled to run.
           enum:
             - slo.rules.burnRate
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_synthetics_monitor_status_rule_request:
+      title: Create synthetics monitor status rule request
+      description: A rule that detects when a monitor is down or an availability threshold is breached.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for the synthetics monitor status rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - xpack.synthetics.alerts.monitorStatus
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_synthetics_uptime_duration_anomaly_rule_request:
+      title: Create synthetics uptime duration anomaly rule request
+      description: |
+        A rule that detects response durations for all of the geographic locations of each monitor. When a monitor runs for an unusual amount of time, at a particular time, an anomaly is recorded.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for the uptime duration anomaly rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - xpack.uptime.alerts.durationAnomaly
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    params_property_synthetics_uptime_tls:
+      properties:
+        search:
+          type: string
+        certExpirationThreshold:
+          type: number
+        certAgeThreshold:
+          type: number
+    create_synthetics_uptime_tls_rule_request:
+      title: Create synthetics uptime TLS rule request
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_synthetics_uptime_tls'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - xpack.uptime.alerts.tls
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_synthetics_uptime_tls_certificate_rule_request:
+      title: Create TLS certificate rule request
+      description: |
+        A rule that detects when a monitor has a TLS certificate expiring or when it exceeds an age limit.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a TLS certificate rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - xpack.uptime.alerts.tlsCertificate
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    create_transform_health_rule_request:
+      title: Create transform health rule request
+      description: |
+        A rule that monitors transforms health and alerts if an operational issue occurred.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          type: object
+          description: The parameters for a transform health rule.
+          additionalProperties: true
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - transform_health
         schedule:
           $ref: '#/components/schemas/schedule'
         tags:
@@ -3129,9 +4178,9 @@ components:
           type: number
         isAutoGenerated:
           type: boolean
-    create_synthetics_monitor_status_rule_request:
-      title: Create synthetics monitor status rule request
-      description: TBD
+    create_uptime_monitor_status_rule_request:
+      title: Create uptime monitor status rule request
+      description: A rule that detects monitor errors and outages.
       type: object
       required:
         - consumer
@@ -3157,85 +4206,6 @@ components:
           description: The ID of the rule type that you want to call when the rule is scheduled to run.
           enum:
             - xpack.uptime.alerts.monitorStatus
-        schedule:
-          $ref: '#/components/schemas/schedule'
-        tags:
-          $ref: '#/components/schemas/tags'
-        throttle:
-          $ref: '#/components/schemas/throttle'
-    params_property_synthetics_uptime_tls:
-      properties:
-        search:
-          type: string
-        certExpirationThreshold:
-          type: number
-        certAgeThreshold:
-          type: number
-    create_synthetics_uptime_tls_rule_request:
-      title: Create synthetics uptime TLS rule request
-      description: TBD
-      type: object
-      required:
-        - consumer
-        - name
-        - params
-        - rule_type_id
-        - schedule
-      properties:
-        actions:
-          $ref: '#/components/schemas/actions'
-        consumer:
-          $ref: '#/components/schemas/consumer'
-        enabled:
-          $ref: '#/components/schemas/enabled_rule'
-        name:
-          $ref: '#/components/schemas/name_rule'
-        notify_when:
-          $ref: '#/components/schemas/notify_when'
-        params:
-          $ref: '#/components/schemas/params_property_synthetics_uptime_tls'
-        rule_type_id:
-          type: string
-          description: The ID of the rule type that you want to call when the rule is scheduled to run.
-          enum:
-            - xpack.uptime.alerts.tls
-        schedule:
-          $ref: '#/components/schemas/schedule'
-        tags:
-          $ref: '#/components/schemas/tags'
-        throttle:
-          $ref: '#/components/schemas/throttle'
-    create_transform_health_rule_request:
-      title: Create transform health rule request
-      description: |
-        A transform health rule monitors transforms health and alerts if an operational issue occurred.
-      type: object
-      required:
-        - consumer
-        - name
-        - params
-        - rule_type_id
-        - schedule
-      properties:
-        actions:
-          $ref: '#/components/schemas/actions'
-        consumer:
-          $ref: '#/components/schemas/consumer'
-        enabled:
-          $ref: '#/components/schemas/enabled_rule'
-        name:
-          $ref: '#/components/schemas/name_rule'
-        notify_when:
-          $ref: '#/components/schemas/notify_when'
-        params:
-          type: object
-          description: The parameters for a transform health rule.
-          additionalProperties: true
-        rule_type_id:
-          type: string
-          description: The ID of the rule type that you want to call when the rule is scheduled to run.
-          enum:
-            - transform_health
         schedule:
           $ref: '#/components/schemas/schedule'
         tags:

@@ -1,5 +1,5 @@
-title: Create transaction duration rule request
-description: TBD
+title: Create latency threshold rule request
+description: A rule that detects when the latency of a specific transaction type in a service exceeds a threshold.
 type: object
 required:
   - consumer

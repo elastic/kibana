@@ -1,5 +1,9 @@
 title: Create slo burn rate rule request
-description: TBD
+description: >
+  A rule that detects when the burn rate is above a defined threshold for two different lookback periods.
+  The two periods are a long period and a short period that is 1/12th of the long period.
+  For each lookback period, the burn rate is computed as the error rate divided by the error budget.
+  When the burn rates for both periods surpass the threshold, an alert occurs.
 type: object
 required:
   - consumer

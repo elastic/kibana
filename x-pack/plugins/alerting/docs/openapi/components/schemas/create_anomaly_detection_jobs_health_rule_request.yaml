@@ -1,6 +1,6 @@
 title: Create anomaly detection jobs health rule request
 description: >
-  An anomaly detection jobs health rule onitors job health and alerts if an operational issue occurred that may prevent the job from detecting anomalies.
+  An rule that monitors job health and alerts if an operational issue occurred that may prevent the job from detecting anomalies.
 type: object
 required:
   - consumer
@@ -22,6 +22,7 @@ properties:
   params:
     type: object
     description: The parameters for an anomaly detection jobs health rule.
+    # TO-DO: Add the parameter details for this rule.
     additionalProperties: true
   rule_type_id:
     type: string

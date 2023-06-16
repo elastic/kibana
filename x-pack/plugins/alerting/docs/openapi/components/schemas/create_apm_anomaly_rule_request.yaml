@@ -1,5 +1,5 @@
 title: Create APM anomaly rule rule request
-description: TBD
+description: A rule that detects when either the latency, throughput, or failed transaction rate of a service is anomalous.
 type: object
 required:
   - consumer

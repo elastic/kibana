@@ -1,7 +1,6 @@
 title: Create index threshold rule request
 description: >-
-  The index threshold rule type runs an Elasticsearch query.
-  It aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
+  A rule that runs an Elasticsearch query, aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
 type: object
 required:
   - consumer
@@ -23,6 +22,7 @@ properties:
   params:
     type: object
     description: The parameters for an index threshold rule.
+    # TO-DO: Add the parameter details for this rule.
     additionalProperties: true
   rule_type_id:
     type: string

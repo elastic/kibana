@@ -1,6 +1,4 @@
-title: Create Elasticsearch query rule request
-description: > 
-  A rule that runs a user-configured query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.  
+title: Create infrastructure anomaly rule request
 type: object
 required:
   - consumer
@@ -21,14 +19,14 @@ properties:
     $ref: 'notify_when.yaml'
   params:
     type: object
-    description: The parameters for an Elasticsearch query rule.
+    description: The parameters for an infrastructure anomaly rule.
     # TO-DO: Add the parameter details for this rule.
     additionalProperties: true
   rule_type_id:
     type: string
     description: The ID of the rule type that you want to call when the rule is scheduled to run.
     enum:
-      - .es-query
+      - metrics.alert.anomaly
   schedule:
     $ref: 'schedule.yaml'
   tags:

@@ -1,6 +1,6 @@
 title: Create transform health rule request
 description: >
-  A transform health rule monitors transforms health and alerts if an operational issue occurred.
+  A rule that monitors transforms health and alerts if an operational issue occurred.
 type: object
 required:
   - consumer
@@ -22,6 +22,7 @@ properties:
   params:
     type: object
     description: The parameters for a transform health rule.
+    # TO-DO: Add the parameter details for this rule.
     additionalProperties: true
   rule_type_id:
     type: string

@@ -1,5 +1,6 @@
 title: Create infra inventory rule request
-description: TBD
+description: >
+  A rule that sends notifications when a metric has reached or exceeded a value for a specific resource or a group of resources within your infrastructure.
 type: object
 required:
   - consumer

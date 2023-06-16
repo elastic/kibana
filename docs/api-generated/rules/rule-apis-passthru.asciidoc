@@ -2625,18 +2625,44 @@ Any modifications made to this file will be overwritten.
     <li><a href="#create_anomaly_detection_jobs_health_rule_request"><code>create_anomaly_detection_jobs_health_rule_request</code> - Create anomaly detection jobs health rule request</a></li>
     <li><a href="#create_apm_anomaly_rule_request"><code>create_apm_anomaly_rule_request</code> - Create APM anomaly rule rule request</a></li>
     <li><a href="#create_apm_error_count_rule_request"><code>create_apm_error_count_rule_request</code> - Create APM error count rule request</a></li>
-    <li><a href="#create_apm_transaction_duration_rule_request"><code>create_apm_transaction_duration_rule_request</code> - Create transaction duration rule request</a></li>
+    <li><a href="#create_apm_transaction_duration_rule_request"><code>create_apm_transaction_duration_rule_request</code> - Create latency threshold rule request</a></li>
     <li><a href="#create_apm_transaction_error_rate_rule_request"><code>create_apm_transaction_error_rate_rule_request</code> - Create APM transaction error rate rule request</a></li>
     <li><a href="#create_es_query_rule_request"><code>create_es_query_rule_request</code> - Create Elasticsearch query rule request</a></li>
     <li><a href="#create_geo_containment_rule_request"><code>create_geo_containment_rule_request</code> - Create traacking containment rule request</a></li>
     <li><a href="#create_index_threshold_rule_request"><code>create_index_threshold_rule_request</code> - Create index threshold rule request</a></li>
     <li><a href="#create_infra_inventory_rule_request"><code>create_infra_inventory_rule_request</code> - Create infra inventory rule request</a></li>
+    <li><a href="#create_infra_metric_anomaly_rule_request"><code>create_infra_metric_anomaly_rule_request</code> - Create infrastructure anomaly rule request</a></li>
     <li><a href="#create_infra_metric_threshold_rule_request"><code>create_infra_metric_threshold_rule_request</code> - Create infra metric threshold rule request</a></li>
     <li><a href="#create_log_threshold_rule_request"><code>create_log_threshold_rule_request</code> - Create log threshold rule request</a></li>
+    <li><a href="#create_monitoring_ccr_exceptions_rule_request"><code>create_monitoring_ccr_exceptions_rule_request</code> - Create CCR read exceptions rule request</a></li>
+    <li><a href="#create_monitoring_cluster_health_rule_request"><code>create_monitoring_cluster_health_rule_request</code> - Create cluster health rule request</a></li>
+    <li><a href="#create_monitoring_cpu_usage_rule_request"><code>create_monitoring_cpu_usage_rule_request</code> - Create CPU usage rule request</a></li>
+    <li><a href="#create_monitoring_disk_usage_rule_request"><code>create_monitoring_disk_usage_rule_request</code> - Create disk usage rule request</a></li>
+    <li><a href="#create_monitoring_elasticsearch_version_mismatch_rule_request"><code>create_monitoring_elasticsearch_version_mismatch_rule_request</code> - Create Elasticsearch version mismatch rule request</a></li>
+    <li><a href="#create_monitoring_jvm_memory_usage_rule_request"><code>create_monitoring_jvm_memory_usage_rule_request</code> - Create JVM memory usage rule request</a></li>
+    <li><a href="#create_monitoring_kibana_version_mismatch_rule_request"><code>create_monitoring_kibana_version_mismatch_rule_request</code> - Create Kibana version mismatch rule request</a></li>
+    <li><a href="#create_monitoring_license_expiration_rule_request"><code>create_monitoring_license_expiration_rule_request</code> - Create license expiration rule request</a></li>
+    <li><a href="#create_monitoring_logstash_version_mismatch_rule_request"><code>create_monitoring_logstash_version_mismatch_rule_request</code> - Create Logstash version mismatch rule request</a></li>
+    <li><a href="#create_monitoring_missing_data_rule_request"><code>create_monitoring_missing_data_rule_request</code> - Create missing monitoring data rule request</a></li>
+    <li><a href="#create_monitoring_nodes_changed_rule_request"><code>create_monitoring_nodes_changed_rule_request</code> - Create nodes changed rule request</a></li>
+    <li><a href="#create_monitoring_shard_size_rule_request"><code>create_monitoring_shard_size_rule_request</code> - Create shard size rule request</a></li>
+    <li><a href="#create_monitoring_thread_pool_search_rejections_rule_request"><code>create_monitoring_thread_pool_search_rejections_rule_request</code> - Create thread pool search rejections rule request</a></li>
+    <li><a href="#create_monitoring_thread_pool_write_rejections_rule_request"><code>create_monitoring_thread_pool_write_rejections_rule_request</code> - Create thread pool write rejections rule request</a></li>
+    <li><a href="#create_siem_eql_rule_request"><code>create_siem_eql_rule_request</code> - Create event correlation rule request</a></li>
+    <li><a href="#create_siem_indicator_rule_request"><code>create_siem_indicator_rule_request</code> - Create indicator match rule request</a></li>
+    <li><a href="#create_siem_ml_rule_request"><code>create_siem_ml_rule_request</code> - Create machine learning rule request</a></li>
+    <li><a href="#create_siem_new_terms_rule_request"><code>create_siem_new_terms_rule_request</code> - Create new terms rule request</a></li>
+    <li><a href="#create_siem_notifications_rule_request"><code>create_siem_notifications_rule_request</code> - Create security solution notification (legacy) rule request</a></li>
+    <li><a href="#create_siem_query_rule_request"><code>create_siem_query_rule_request</code> - Create custom query rule request</a></li>
+    <li><a href="#create_siem_saved_query_rule_request"><code>create_siem_saved_query_rule_request</code> - Create saved query rule request</a></li>
+    <li><a href="#create_siem_threshold_rule_request"><code>create_siem_threshold_rule_request</code> - Create threshold rule request</a></li>
     <li><a href="#create_slo_burn_rate_rule_request"><code>create_slo_burn_rate_rule_request</code> - Create slo burn rate rule request</a></li>
     <li><a href="#create_synthetics_monitor_status_rule_request"><code>create_synthetics_monitor_status_rule_request</code> - Create synthetics monitor status rule request</a></li>
+    <li><a href="#create_synthetics_uptime_duration_anomaly_rule_request"><code>create_synthetics_uptime_duration_anomaly_rule_request</code> - Create synthetics uptime duration anomaly rule request</a></li>
+    <li><a href="#create_synthetics_uptime_tls_certificate_rule_request"><code>create_synthetics_uptime_tls_certificate_rule_request</code> - Create TLS certificate rule request</a></li>
     <li><a href="#create_synthetics_uptime_tls_rule_request"><code>create_synthetics_uptime_tls_rule_request</code> - Create synthetics uptime TLS rule request</a></li>
     <li><a href="#create_transform_health_rule_request"><code>create_transform_health_rule_request</code> - Create transform health rule request</a></li>
+    <li><a href="#create_uptime_monitor_status_rule_request"><code>create_uptime_monitor_status_rule_request</code> - Create uptime monitor status rule request</a></li>
     <li><a href="#custom_criterion"><code>custom_criterion</code> - custom criterion</a></li>
     <li><a href="#custom_criterion_customMetric_inner"><code>custom_criterion_customMetric_inner</code> - </a></li>
     <li><a href="#custom_criterion_customMetric_inner_oneOf"><code>custom_criterion_customMetric_inner_oneOf</code> - </a></li>
@@ -2776,10 +2802,10 @@ Any modifications made to this file will be overwritten.
 <div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
 <div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
-<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a transform health rule. </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#params_property_synthetics_monitor_status">params_property_synthetics_monitor_status</a></span>  </div>
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
         <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">transform_health</div>
+        <div class="param-enum">xpack.uptime.alerts.monitorStatus</div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
 <div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
 <div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
@@ -2999,7 +3025,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_anomaly_detection_alert_rule_request"><code>create_anomaly_detection_alert_rule_request</code> - Create anomaly detection rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>An anomaly detection alert rule checks if the anomaly detection job results contain anomalies that match the rule conditions.</div>
+    <div class='model-description'>A rule that checks if the anomaly detection job results contain anomalies that match the rule conditions.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3017,7 +3043,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_anomaly_detection_jobs_health_rule_request"><code>create_anomaly_detection_jobs_health_rule_request</code> - Create anomaly detection jobs health rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>An anomaly detection jobs health rule onitors job health and alerts if an operational issue occurred that may prevent the job from detecting anomalies.</div>
+    <div class='model-description'>An rule that monitors job health and alerts if an operational issue occurred that may prevent the job from detecting anomalies.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3035,7 +3061,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_apm_anomaly_rule_request"><code>create_apm_anomaly_rule_request</code> - Create APM anomaly rule rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>TBD</div>
+    <div class='model-description'>A rule that detects when either the latency, throughput, or failed transaction rate of a service is anomalous.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3053,7 +3079,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_apm_error_count_rule_request"><code>create_apm_error_count_rule_request</code> - Create APM error count rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>TBD</div>
+    <div class='model-description'>A rule that detects when the number of errors in a service exceeds a defined threshold.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3070,8 +3096,8 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="create_apm_transaction_duration_rule_request"><code>create_apm_transaction_duration_rule_request</code> - Create transaction duration rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>TBD</div>
+    <h3><a name="create_apm_transaction_duration_rule_request"><code>create_apm_transaction_duration_rule_request</code> - Create latency threshold rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the latency of a specific transaction type in a service exceeds a threshold.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3089,7 +3115,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_apm_transaction_error_rate_rule_request"><code>create_apm_transaction_error_rate_rule_request</code> - Create APM transaction error rate rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>TBD</div>
+    <div class='model-description'>A rule that sends notifications when the rate of transaction errors in a service exceeds a threshold.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3107,7 +3133,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_es_query_rule_request"><code>create_es_query_rule_request</code> - Create Elasticsearch query rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The Elasticsearch query rule type runs a user-configured query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.</div>
+    <div class='model-description'>A rule that runs a user-configured query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3125,7 +3151,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_geo_containment_rule_request"><code>create_geo_containment_rule_request</code> - Create traacking containment rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The tracking containment rule type runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index. In the event that an entity is contained within a boundary, an alert may be generated.</div>
+    <div class='model-description'>A rule that runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index. In the event that an entity is contained within a boundary, an alert may be generated.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3143,7 +3169,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_index_threshold_rule_request"><code>create_index_threshold_rule_request</code> - Create index threshold rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The index threshold rule type runs an Elasticsearch query. It aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.</div>
+    <div class='model-description'>A rule that runs an Elasticsearch query, aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3161,7 +3187,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_infra_inventory_rule_request"><code>create_infra_inventory_rule_request</code> - Create infra inventory rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>TBD</div>
+    <div class='model-description'>A rule that sends notifications when a metric has reached or exceeded a value for a specific resource or a group of resources within your infrastructure.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3178,8 +3204,26 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="create_infra_metric_anomaly_rule_request"><code>create_infra_metric_anomaly_rule_request</code> - Create infrastructure anomaly rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for an infrastructure anomaly rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">metrics.alert.anomaly</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="create_infra_metric_threshold_rule_request"><code>create_infra_metric_threshold_rule_request</code> - Create infra metric threshold rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>TBD</div>
+    <div class='model-description'>A rule that sends notifications when a metric has reached or exceeded a value for a specific time period.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3197,7 +3241,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_log_threshold_rule_request"><code>create_log_threshold_rule_request</code> - Create log threshold rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>TBD</div>
+    <div class='model-description'>A rule that detects when a log aggregation exceeds a threshold.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3214,8 +3258,404 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="create_monitoring_ccr_exceptions_rule_request"><code>create_monitoring_ccr_exceptions_rule_request</code> - Create CCR read exceptions rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects cross-cluster replication (CCR) read exceptions.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a CCR read exceptions rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_ccr_read_exceptions</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_cluster_health_rule_request"><code>create_monitoring_cluster_health_rule_request</code> - Create cluster health rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the health of the cluster changes.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a cluster health rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_cluster_health</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_cpu_usage_rule_request"><code>create_monitoring_cpu_usage_rule_request</code> - Create CPU usage rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the CPU load for a node is consistently high.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a CPU usage rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_cpu_usage</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_disk_usage_rule_request"><code>create_monitoring_disk_usage_rule_request</code> - Create disk usage rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the disk usage for a node is consistently high.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a disk usage rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_disk_usage</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_elasticsearch_version_mismatch_rule_request"><code>create_monitoring_elasticsearch_version_mismatch_rule_request</code> - Create Elasticsearch version mismatch rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the cluster has multipe versions of Elasticsearch.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a Elasticsearch version mismatch rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_elasticsearch_version_mismatch</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_jvm_memory_usage_rule_request"><code>create_monitoring_jvm_memory_usage_rule_request</code> - Create JVM memory usage rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when a node reports high memory usage.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a JVM memory usage rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_jvm_memory_usage</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_kibana_version_mismatch_rule_request"><code>create_monitoring_kibana_version_mismatch_rule_request</code> - Create Kibana version mismatch rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the cluster has multiple versions of Kibana.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a Kibana version mismatch rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_kibana_version_mismatch</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_license_expiration_rule_request"><code>create_monitoring_license_expiration_rule_request</code> - Create license expiration rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the cluster license is about to expire.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a license expiration rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_license_expiration</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_logstash_version_mismatch_rule_request"><code>create_monitoring_logstash_version_mismatch_rule_request</code> - Create Logstash version mismatch rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the cluster has multiple versions of Logstash.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a Logstash version mismatch rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_logstash_version_mismatch</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_missing_data_rule_request"><code>create_monitoring_missing_data_rule_request</code> - Create missing monitoring data rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when monitoring data is missing.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a missing monitoring data rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_missing_monitoring_data</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_nodes_changed_rule_request"><code>create_monitoring_nodes_changed_rule_request</code> - Create nodes changed rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when nodes are added, removed, or restarted.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a nodes changed rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_nodes_changed</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_shard_size_rule_request"><code>create_monitoring_shard_size_rule_request</code> - Create shard size rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the average shard size is larger than a threshold.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a shard size rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_shard_size</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_thread_pool_search_rejections_rule_request"><code>create_monitoring_thread_pool_search_rejections_rule_request</code> - Create thread pool search rejections rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the number of rejections in the thread pool exceeds a threshold.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a thread pool search rejections rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_thread_pool_search_rejections</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_monitoring_thread_pool_write_rejections_rule_request"><code>create_monitoring_thread_pool_write_rejections_rule_request</code> - Create thread pool write rejections rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when the number of rejections in the write thread pool exceeds a threshold.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a thread pool write rejections rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">monitoring_alert_thread_pool_write_rejections</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_siem_eql_rule_request"><code>create_siem_eql_rule_request</code> - Create event correlation rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that uses Event Query Language (EQL) to match events, generate sequences, and stack data.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for an event correlation rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">siem.eqlRule</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_siem_indicator_rule_request"><code>create_siem_indicator_rule_request</code> - Create indicator match rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that uses indicators from intelligence sources to detect matching events and alerts.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for an indicator match rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">siem.indicatorRule</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_siem_ml_rule_request"><code>create_siem_ml_rule_request</code> - Create machine learning rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when a machine learning job discovers an anomaly above the defined threshold.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a machine learning rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">siem.mlRule</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_siem_new_terms_rule_request"><code>create_siem_new_terms_rule_request</code> - Create new terms rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that finds documents with values that appear for the first time.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a new terms rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">siem.newTermsRule</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_siem_notifications_rule_request"><code>create_siem_notifications_rule_request</code> - Create security solution notification (legacy) rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a notification rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">siem.notifications</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_siem_query_rule_request"><code>create_siem_query_rule_request</code> - Create custom query rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that uses KQL or Lucene to detect issues across indices.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a custom query rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">siem.queryRule</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_siem_saved_query_rule_request"><code>create_siem_saved_query_rule_request</code> - Create saved query rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that searches the defined indices and creates an alert when a document matches the saved search.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a saved query rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">siem.savedQueryRule</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_siem_threshold_rule_request"><code>create_siem_threshold_rule_request</code> - Create threshold rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that aggregates query results to detect when the number of matches exceeds a threshold.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a threshold rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">siem.thresholdRule</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="create_slo_burn_rate_rule_request"><code>create_slo_burn_rate_rule_request</code> - Create slo burn rate rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>TBD</div>
+    <div class='model-description'>A rule that detects when the burn rate is above a defined threshold for two different lookback periods. The two periods are a long period and a short period that is 1/12th of the long period. For each lookback period, the burn rate is computed as the error rate divided by the error budget. When the burn rates for both periods surpass the threshold, an alert occurs.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3233,17 +3673,53 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_synthetics_monitor_status_rule_request"><code>create_synthetics_monitor_status_rule_request</code> - Create synthetics monitor status rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>TBD</div>
+    <div class='model-description'>A rule that detects when a monitor is down or an availability threshold is breached.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
 <div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
 <div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
-<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#params_property_synthetics_monitor_status">params_property_synthetics_monitor_status</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the synthetics monitor status rule. </div>
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
         <div class="param-enum-header">Enum:</div>
-        <div class="param-enum">xpack.uptime.alerts.monitorStatus</div>
+        <div class="param-enum">xpack.synthetics.alerts.monitorStatus</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_synthetics_uptime_duration_anomaly_rule_request"><code>create_synthetics_uptime_duration_anomaly_rule_request</code> - Create synthetics uptime duration anomaly rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects response durations for all of the geographic locations of each monitor. When a monitor runs for an unusual amount of time, at a particular time, an anomaly is recorded.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the uptime duration anomaly rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">xpack.uptime.alerts.durationAnomaly</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_synthetics_uptime_tls_certificate_rule_request"><code>create_synthetics_uptime_tls_certificate_rule_request</code> - Create TLS certificate rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects when a monitor has a TLS certificate expiring or when it exceeds an age limit.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for a TLS certificate rule. </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">xpack.uptime.alerts.tlsCertificate</div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
 <div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
 <div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
@@ -3251,7 +3727,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_synthetics_uptime_tls_rule_request"><code>create_synthetics_uptime_tls_rule_request</code> - Create synthetics uptime TLS rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>TBD</div>
+    <div class='model-description'></div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3269,7 +3745,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_transform_health_rule_request"><code>create_transform_health_rule_request</code> - Create transform health rule request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>A transform health rule monitors transforms health and alerts if an operational issue occurred.</div>
+    <div class='model-description'>A rule that monitors transforms health and alerts if an operational issue occurred.</div>
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
@@ -3280,6 +3756,24 @@ Any modifications made to this file will be overwritten.
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">transform_health</div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_uptime_monitor_status_rule_request"><code>create_uptime_monitor_status_rule_request</code> - Create uptime monitor status rule request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A rule that detects monitor errors and outages.</div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#params_property_synthetics_monitor_status">params_property_synthetics_monitor_status</a></span>  </div>
+<div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">xpack.uptime.alerts.monitorStatus</div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
 <div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
 <div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>

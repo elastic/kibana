@@ -1,5 +1,5 @@
 title: Create log threshold rule request
-description: TBD
+description:  A rule that detects when a log aggregation exceeds a threshold.
 type: object
 required:
   - consumer
