@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
@@ -11,11 +12,9 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
-import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
-
 import type { CloudSecurityInstallationStats } from './types';
+import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../../common/constants';
-import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
 
 export const getInstallationStats = async (
   esClient: ElasticsearchClient,
