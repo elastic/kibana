@@ -92,7 +92,7 @@ export class ComboBoxService extends FtrService {
 
     if (trimmedValue !== undefined) {
       const selectOptions = await this.find.allByCssSelector(
-        `.euiFilterSelectItem[title^="${trimmedValue}"]`,
+        `.euiFilterSelectItem[title="${trimmedValue}"]`,
         this.WAIT_FOR_EXISTS_TIME
       );
 
@@ -100,21 +100,20 @@ export class ComboBoxService extends FtrService {
         await this.clickOption(options.clickWithMouse, selectOptions[0]);
       } else {
         // Try to find alternate title casing
-        await this.openOptionsList(comboBoxElement);
-        const alternateTitle = await (
-          await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)
-        )
-          .find(async (e) => {
-            return (await e.getAttribute('title')).toLowerCase().trim() === trimmedValue;
-          })
-          ?.getAttribute('title');
+        const alternateTitle = (await Promise.all((await this.find.allByCssSelector(
+          `.euiFilterSelectItem`,
+          this.WAIT_FOR_EXISTS_TIME
+        )).map(async (e) => {
+          const title = (await e.getAttribute('title'));
+          return { title, formattedTitle: title.toLowerCase().trim() };
+        }))).find(({ formattedTitle }) => {
+          return formattedTitle === trimmedValue;
+        })?.title
 
-        const [alternate] = alternateTitle
-          ? await this.find.allByCssSelector(
-              `.euiFilterSelectItem[title^="${alternateTitle}"]`,
-              this.WAIT_FOR_EXISTS_TIME
-            )
-          : [];
+        let [alternate] = alternateTitle ? (await this.find.allByCssSelector(
+          `.euiFilterSelectItem[title="${alternateTitle}"]`,
+          this.WAIT_FOR_EXISTS_TIME
+        )) : [];
 
         if (alternate) {
           this.log.warning(
