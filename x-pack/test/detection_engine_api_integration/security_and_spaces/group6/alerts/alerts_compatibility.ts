@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -481,6 +481,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
           'kibana.alert.status': 'active',
           'kibana.alert.workflow_status': 'open',
+          'kibana.alert.workflow_tags': [],
           'kibana.alert.depth': 2,
           'kibana.alert.reason':
             'event on security-linux-1 created high alert Signal Testing Query.',

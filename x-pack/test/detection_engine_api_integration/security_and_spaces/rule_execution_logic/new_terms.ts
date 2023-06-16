@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { v4 as uuidv4 } from 'uuid';
 
 import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
@@ -166,6 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
         ],
         'kibana.alert.status': 'active',
         'kibana.alert.workflow_status': 'open',
+        'kibana.alert.workflow_tags': [],
         'kibana.alert.depth': 1,
         'kibana.alert.reason':
           'authentication event with source 8.42.77.171 by root on zeek-newyork-sha-aa8df15 created high alert Query with a rule id.',

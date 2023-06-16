@@ -14,24 +14,32 @@ import {
   updateAlertTags,
 } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { MIXED_ALERT_TAG, SELECTED_ALERT_TAG, UNSELECTED_ALERT_TAG } from '../../screens/alerts';
+import { esArchiverLoad, esArchiverResetKibana, esArchiverUnload } from '../../tasks/es_archiver';
 
 describe('Alert tagging', () => {
   before(() => {
     cleanKibana();
+    esArchiverResetKibana();
   });
 
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
+    esArchiverLoad('endpoint');
     createRule(getNewRule({ rule_id: 'new custom rule' }));
     visit(ALERTS_URL);
   });
 
-  it('Add a tag using the alert context menu', function () {
+  after(() => {
+    esArchiverUnload('endpoint');
+  });
+
+  it('Add a tag using the alert context menu', () => {
     openAlertTaggingContextMenu();
     clickAlertTag('Duplicate');
     updateAlertTags();
@@ -40,7 +48,7 @@ describe('Alert tagging', () => {
     cy.get(SELECTED_ALERT_TAG).contains('Duplicate');
   });
 
-  it('Remove a tag using the alert context menu', function () {
+  it('Remove a tag using the alert context menu', () => {
     openAlertTaggingContextMenu();
     clickAlertTag('Duplicate');
     updateAlertTags();
@@ -49,7 +57,7 @@ describe('Alert tagging', () => {
     cy.get(UNSELECTED_ALERT_TAG).first().contains('Duplicate');
   });
 
-  it('Add a tag using the alert bulk action menu', function () {
+  it('Add a tag using the alert bulk action menu', () => {
     selectNumberOfAlerts(1);
     openAlertTaggingBulkActionMenu();
     clickAlertTag('Duplicate');
@@ -60,7 +68,7 @@ describe('Alert tagging', () => {
     cy.get(SELECTED_ALERT_TAG).contains('Duplicate');
   });
 
-  it('Add a tag using the alert bulk action menu with mixed state', function () {
+  it('Add a tag using the alert bulk action menu with mixed state', () => {
     selectNumberOfAlerts(2);
     openAlertTaggingBulkActionMenu();
     cy.get(MIXED_ALERT_TAG).contains('Duplicate');
@@ -72,7 +80,7 @@ describe('Alert tagging', () => {
     cy.get(SELECTED_ALERT_TAG).contains('Duplicate');
   });
 
-  it('Remove a tag using the alert bulk action menu', function () {
+  it('Remove a tag using the alert bulk action menu', () => {
     selectNumberOfAlerts(1);
     openAlertTaggingBulkActionMenu();
     clickAlertTag('Duplicate');
@@ -83,7 +91,7 @@ describe('Alert tagging', () => {
     cy.get(UNSELECTED_ALERT_TAG).first().contains('Duplicate');
   });
 
-  it('Remove a tag using the alert bulk action menu with mixed state', function () {
+  it('Remove a tag using the alert bulk action menu with mixed state', () => {
     selectNumberOfAlerts(2);
     openAlertTaggingBulkActionMenu();
     cy.get(MIXED_ALERT_TAG).contains('Duplicate');
