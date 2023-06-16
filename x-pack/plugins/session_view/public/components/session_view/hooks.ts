@@ -9,12 +9,12 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   AlertStatusEventEntityIdMap,
-  EventAction,
   ProcessEvent,
   ProcessEventResults,
-} from '../../../common/types/process_tree';
+  EventAction,
+} from '../../../common';
 import {
   ALERTS_ROUTE,
   PROCESS_EVENTS_ROUTE,
@@ -25,6 +25,7 @@ import {
   QUERY_KEY_PROCESS_EVENTS,
   QUERY_KEY_ALERTS,
   QUERY_KEY_GET_TOTAL_IO_BYTES,
+  CURRENT_API_VERSION,
 } from '../../../common/constants';
 
 export const useFetchSessionViewProcessEvents = (
@@ -51,6 +52,7 @@ export const useFetchSessionViewProcessEvents = (
       }
 
       const res = await http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
           index,
           sessionEntityId,
@@ -69,12 +71,10 @@ export const useFetchSessionViewProcessEvents = (
         const isRefetch = pages.length === 1 && jumpToCursor;
         if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
           const filtered = lastPage.events.filter((event) => {
-            const action = event.event?.action;
+            const action = event.event?.action as EventAction;
             return (
               action &&
-              (action.includes(EventAction.fork) ||
-                action.includes(EventAction.exec) ||
-                action.includes(EventAction.end))
+              (action.includes('fork') || action.includes('exec') || action.includes('end'))
             );
           });
 
@@ -90,12 +90,9 @@ export const useFetchSessionViewProcessEvents = (
       },
       getPreviousPageParam: (firstPage, pages) => {
         const filtered = firstPage.events.filter((event) => {
-          const action = event.event?.action;
+          const action = event.event?.action as EventAction;
           return (
-            action &&
-            (action.includes(EventAction.fork) ||
-              action.includes(EventAction.exec) ||
-              action.includes(EventAction.end))
+            action && (action.includes('fork') || action.includes('exec') || action.includes('end'))
           );
         });
 
@@ -142,6 +139,7 @@ export const useFetchSessionViewAlerts = (
       const { cursor } = pageParam;
 
       const res = await http.get<ProcessEventResults>(ALERTS_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
           sessionEntityId,
           sessionStartTime,
@@ -189,6 +187,7 @@ export const useFetchAlertStatus = (
       }
 
       const res = await http.get<ProcessEventResults>(ALERT_STATUS_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
           alertUuid,
         },
@@ -227,6 +226,7 @@ export const useFetchGetTotalIOBytes = (
     cachingKeys,
     async () => {
       return http.get<{ total: number }>(GET_TOTAL_IO_BYTES_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
           index,
           sessionEntityId,

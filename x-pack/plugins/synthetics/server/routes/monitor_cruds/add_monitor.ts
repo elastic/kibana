@@ -25,7 +25,7 @@ import {
   PrivateLocation,
 } from '../../../common/runtime_types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   DEFAULT_FIELDS,
   DEFAULT_NAMESPACE_STRING,
@@ -39,7 +39,7 @@ import { StatusAlertService } from '../default_alerts/status_alert_service';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
-  path: API_URLS.SYNTHETICS_MONITORS,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
   validate: {
     body: schema.any(),
     query: schema.object({
@@ -75,13 +75,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     );
 
     try {
-      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       const { errors, newMonitor } = await syncNewMonitor({
         normalizedMonitor,
         routeContext,
         id,
         privateLocations,
-        spaceId,
       });
 
       if (errors && errors.length > 0) {
@@ -149,28 +147,22 @@ export const createNewSavedObjectMonitor = async ({
   );
 };
 
-export const syncNewMonitor = async ({
-  id,
+export const hydrateMonitorFields = ({
+  newMonitorId,
   normalizedMonitor,
-  privateLocations,
-  spaceId,
   routeContext,
 }: {
-  id?: string;
+  newMonitorId: string;
   normalizedMonitor: SyntheticsMonitor;
   routeContext: RouteContext;
-  privateLocations: PrivateLocation[];
-  spaceId: string;
 }) => {
-  const { savedObjectsClient, server, syntheticsMonitorClient, request } = routeContext;
-  const newMonitorId = id ?? uuidV4();
+  const { server, request } = routeContext;
+
   const { preserve_namespace: preserveNamespace } = request.query as Record<
     string,
     { preserve_namespace?: boolean }
   >;
-
-  let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
-  const monitorWithNamespace = {
+  return {
     ...normalizedMonitor,
     [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || newMonitorId,
     [ConfigKey.CONFIG_ID]: newMonitorId,
@@ -178,6 +170,28 @@ export const syncNewMonitor = async ({
       ? normalizedMonitor[ConfigKey.NAMESPACE]
       : getMonitorNamespace(server, request, normalizedMonitor[ConfigKey.NAMESPACE]),
   };
+};
+
+export const syncNewMonitor = async ({
+  id,
+  normalizedMonitor,
+  privateLocations,
+  routeContext,
+}: {
+  id?: string;
+  normalizedMonitor: SyntheticsMonitor;
+  routeContext: RouteContext;
+  privateLocations: PrivateLocation[];
+}) => {
+  const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId } = routeContext;
+  const newMonitorId = id ?? uuidV4();
+
+  let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
+  const monitorWithNamespace = hydrateMonitorFields({
+    normalizedMonitor,
+    routeContext,
+    newMonitorId,
+  });
 
   try {
     const newMonitorPromise = createNewSavedObjectMonitor({
@@ -263,7 +277,7 @@ export const deleteMonitorIfCreated = async ({
   }
 };
 
-const getPrivateLocations = async (
+export const getPrivateLocations = async (
   soClient: SavedObjectsClientContract,
   normalizedMonitor: SyntheticsMonitor
 ) => {
@@ -275,7 +289,7 @@ const getPrivateLocations = async (
   return await getSyntheticsPrivateLocations(soClient);
 };
 
-const getMonitorNamespace = (
+export const getMonitorNamespace = (
   server: UptimeServerSetup,
   request: KibanaRequest,
   configuredNamespace: string

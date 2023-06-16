@@ -52,7 +52,7 @@ test('throws error when provided validation function returns invalid', async () 
 });
 
 test('pulls state from dashboard saved object when given a saved object id', async () => {
-  pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
     .mockResolvedValue({
       dashboardInput: {
@@ -62,13 +62,13 @@ test('pulls state from dashboard saved object when given a saved object id', asy
     });
   const dashboard = await createDashboard({}, 0, 'wow-such-id');
   expect(
-    pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject
+    pluginServices.getServices().dashboardContentManagement.loadDashboardState
   ).toHaveBeenCalledWith({ id: 'wow-such-id' });
   expect(dashboard.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
 });
 
 test('pulls state from session storage which overrides state from saved object', async () => {
-  pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
     .mockResolvedValue({
       dashboardInput: {
@@ -86,7 +86,7 @@ test('pulls state from session storage which overrides state from saved object',
 });
 
 test('pulls state from creation options initial input which overrides all other state sources', async () => {
-  pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
     .mockResolvedValue({
       dashboardInput: {
@@ -146,7 +146,29 @@ test('applies time range and refresh interval from initial input to query servic
   ).toHaveBeenCalledWith(refreshInterval);
 });
 
-test('applied time range from query service to initial input if time restore is off', async () => {
+test('applies time range from query service to initial input if time restore is on but there is an explicit time range in the URL', async () => {
+  const urlTimeRange = { from: new Date().toISOString(), to: new Date().toISOString() };
+  const savedTimeRange = { from: 'now - 7 days', to: 'now' };
+  pluginServices.getServices().data.query.timefilter.timefilter.getTime = jest
+    .fn()
+    .mockReturnValue(urlTimeRange);
+  const kbnUrlStateStorage = createKbnUrlStateStorage();
+  kbnUrlStateStorage.get = jest.fn().mockReturnValue({ time: urlTimeRange });
+
+  const dashboard = await createDashboard({
+    useUnifiedSearchIntegration: true,
+    unifiedSearchSettings: {
+      kbnUrlStateStorage,
+    },
+    getInitialInput: () => ({
+      timeRestore: true,
+      timeRange: savedTimeRange,
+    }),
+  });
+  expect(dashboard.getState().explicitInput.timeRange).toEqual(urlTimeRange);
+});
+
+test('applies time range from query service to initial input if time restore is off', async () => {
   const timeRange = { from: new Date().toISOString(), to: new Date().toISOString() };
   pluginServices.getServices().data.query.timefilter.timefilter.getTime = jest
     .fn()
