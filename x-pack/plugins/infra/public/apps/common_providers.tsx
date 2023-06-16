@@ -9,6 +9,8 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
+import { CoPilotService } from '@kbn/observability-plugin/public/typings/co_pilot';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -22,18 +24,29 @@ export const CommonInfraProviders: React.FC<{
   appName: string;
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
+  observabilityCopilot: CoPilotService;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
-}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
+}> = ({
+  children,
+  triggersActionsUI,
+  observabilityCopilot,
+  setHeaderActionMenu,
+  appName,
+  storage,
+  theme$,
+}) => {
   const darkMode = useIsDarkMode();
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
       <EuiThemeProvider darkMode={darkMode}>
         <DataUIProviders appName={appName} storage={storage}>
-          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-            <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
-          </HeaderActionMenuProvider>
+          <CoPilotContextProvider value={observabilityCopilot}>
+            <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+              <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
+            </HeaderActionMenuProvider>
+          </CoPilotContextProvider>
         </DataUIProviders>
       </EuiThemeProvider>
     </TriggersActionsProvider>

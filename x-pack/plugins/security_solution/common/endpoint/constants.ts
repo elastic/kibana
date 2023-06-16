@@ -102,3 +102,4 @@ export const ENDPOINT_ERROR_CODES: Record<string, number> = {
 };
 
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
+export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';
