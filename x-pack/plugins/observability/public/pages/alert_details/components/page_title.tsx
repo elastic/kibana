@@ -52,7 +52,8 @@ export function PageTitle({ alert }: PageTitleProps) {
 
   const showExperimentalBadge =
     alert.fields[ALERT_RULE_CATEGORY] === 'Log threshold' ||
-    alert.fields[ALERT_RULE_CATEGORY] === 'Metric threshold';
+    alert.fields[ALERT_RULE_CATEGORY] === 'Metric threshold' ||
+    alert.fields[ALERT_RULE_CATEGORY] === 'Inventory';
 
   return (
     <div data-test-subj="page-title-container">
