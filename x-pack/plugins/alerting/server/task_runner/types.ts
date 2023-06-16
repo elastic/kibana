@@ -27,6 +27,7 @@ import { NormalizedRuleType } from '../rule_type_registry';
 import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { ConnectorAdapterRegistry } from '../connector_adapter_registry';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -91,6 +92,7 @@ export interface ExecutionHandlerOptions<
   previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
   maintenanceWindowIds?: string[];
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
 }
 
 export interface Executable<

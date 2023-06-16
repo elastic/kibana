@@ -29,6 +29,7 @@ import {
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
+import { ConnectorAdapterConfig } from '@kbn/alerting-plugin/server';
 
 export type EmailConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -148,13 +149,16 @@ const SecretsSchema = schema.object(SecretsSchemaProps);
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-const ParamsSchemaProps = {
+const ruleActionParamsSchema = {
   to: schema.arrayOf(schema.string(), { defaultValue: [] }),
   cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
   bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
   subject: schema.string(),
   message: schema.string(),
   messageHTML: schema.nullable(schema.string()),
+};
+const fullParamsSchema = {
+  ...ruleActionParamsSchema,
   // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
   // provide a more contextual URL in the footer (ex: URL to the alert details page)
   kibanaFooterLink: schema.object({
@@ -165,9 +169,9 @@ const ParamsSchemaProps = {
       }),
     }),
   }),
-};
-
-const ParamsSchema = schema.object(ParamsSchemaProps);
+}
+export const RuleActionParamsSchema = schema.object(ruleActionParamsSchema);
+const ParamsSchema = schema.object(fullParamsSchema);
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
@@ -272,6 +276,7 @@ async function executor(
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const { actionId, config, secrets, params, configurationUtilities, services, logger } =
     execOptions;
+  console.log('EXECUTOR PARAMS', params);
   const connectorTokenClient = services.connectorTokenClient;
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
@@ -415,4 +420,45 @@ function getFooterMessage({
       link: `${publicBaseUrl}${kibanaFooterLink.path === '/' ? '' : kibanaFooterLink.path}`,
     },
   });
+}
+
+export function getRuleActionAdapter(): ConnectorAdapterConfig {
+  return {
+    connectorTypeId: '.email',
+    limitActionGroups: ['active'],
+    // limitActionGroups: ['active', 'recovered'],
+    limitPerAlertActionFrequency: ['onActionGroupChange'],
+    ruleActionParamsSchema: RuleActionParamsSchema,
+    allowThrottledSummaries: false,
+    augmentActionParams: (params, payload) => {
+      const spacePrefix =
+        payload.spaceId && payload.spaceId.length > 0 && payload.spaceId !== 'default'
+          ? `/s/${payload.spaceId}`
+          : '';
+      return {
+        ...params,
+        kibanaFooterLink: {
+          path: `${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${payload.alertId}`,
+          text: i18n.translate('xpack.stack_connectors.email.kibanaFooterLinkText', {
+            defaultMessage: 'View rule in Kibana',
+          }),
+        },
+      };
+    },
+    augmentSummaryActionParams: (params, payload) => {
+      const spacePrefix =
+        payload.spaceId && payload.spaceId.length > 0 && payload.spaceId !== 'default'
+          ? `/s/${payload.spaceId}`
+          : '';
+      return {
+        ...params,
+        kibanaFooterLink: {
+          path: `${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${payload.rule.id}`,
+          text: i18n.translate('xpack.stack_connectors.email.kibanaFooterLinkText', {
+            defaultMessage: 'View rule in Kibana',
+          }),
+        },
+      };
+    },
+  };
 }

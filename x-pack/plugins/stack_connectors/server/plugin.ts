@@ -7,10 +7,12 @@
 
 import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import { registerConnectorTypes } from './connector_types';
+import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
+import { registerConnectorTypes, registerConnectorAdapters } from './connector_types';
 import { getWellKnownEmailServiceRoute } from './routes';
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
+  alerting: AlertingPluginSetupContract;
 }
 
 export interface ConnectorsPluginsStart {
@@ -30,6 +32,8 @@ export class StackConnectorsPlugin implements Plugin<void, void> {
       actions,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
     });
+
+    registerConnectorAdapters({ alerting: plugins.alerting });
   }
 
   public start() {}

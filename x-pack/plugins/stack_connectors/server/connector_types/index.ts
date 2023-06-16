@@ -6,6 +6,7 @@
  */
 
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
 
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
 import { getConnectorType as getJiraConnectorType } from './jira';
@@ -15,7 +16,10 @@ import { getServiceNowSIRConnectorType } from './servicenow_sir';
 import { getServiceNowITOMConnectorType } from './servicenow_itom';
 import { getTinesConnectorType } from './tines';
 import { getActionType as getTorqConnectorType } from './torq';
-import { getConnectorType as getEmailConnectorType } from './email';
+import {
+  getConnectorType as getEmailConnectorType,
+  getRuleActionAdapter as getEmailRuleActionAdapter,
+} from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
 import { getConnectorType as getGenerativeAiConnectorType } from './gen_ai';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
@@ -102,4 +106,8 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getTinesConnectorType());
   actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
+}
+
+export function registerConnectorAdapters({ alerting }: { alerting: AlertingPluginSetupContract }) {
+  alerting.registerConnectorAdapter(getEmailRuleActionAdapter());
 }

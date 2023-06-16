@@ -96,6 +96,7 @@ import {
 } from './alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
+import { ConnectorAdapterRegistry } from './connector_adapter_registry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -112,6 +113,7 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
+  registerConnectorAdapter: ConnectorAdapterRegistry['register'];
   registerType<
     Params extends RuleTypeParams = RuleTypeParams,
     ExtractedParams extends RuleTypeParams = RuleTypeParams,
@@ -203,6 +205,7 @@ export class AlertingPlugin {
   private inMemoryMetrics: InMemoryMetrics;
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
+  private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -344,9 +347,11 @@ export class AlertingPlugin {
       licenseState: this.licenseState,
       usageCounter: this.usageCounter,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
     });
 
     return {
+      registerConnectorAdapter: (...args) => this.connectorAdapterRegistry.register(...args),
       registerType: <
         Params extends RuleTypeParams = never,
         ExtractedParams extends RuleTypeParams = never,
@@ -532,6 +537,7 @@ export class AlertingPlugin {
       usageCounter: this.usageCounter,
       getRulesSettingsClientWithRequest,
       getMaintenanceWindowClientWithRequest,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

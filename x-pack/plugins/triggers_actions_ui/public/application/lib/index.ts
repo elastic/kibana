@@ -10,3 +10,4 @@ export { hasMustacheTokens } from './has_mustache_tokens';
 export { AlertProvidedActionVariables } from './action_variables';
 export { updateActionConnector } from './action_connector_api';
 export { isRuleSnoozed } from './is_rule_snoozed';
+export { loadConnectorAdapters } from './connector_adapters';

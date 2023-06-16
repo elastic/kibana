@@ -45,6 +45,7 @@ import { cloneRuleRoute } from './clone_rule';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './get_rule_tags';
+import { getAllConnectorAdaptersRoute } from './get_all_connector_adapters';
 
 import { createMaintenanceWindowRoute } from './maintenance_window/create_maintenance_window';
 import { getMaintenanceWindowRoute } from './maintenance_window/get_maintenance_window';
@@ -54,16 +55,18 @@ import { findMaintenanceWindowsRoute } from './maintenance_window/find_maintenan
 import { archiveMaintenanceWindowRoute } from './maintenance_window/archive_maintenance_window';
 import { finishMaintenanceWindowRoute } from './maintenance_window/finish_maintenance_window';
 import { activeMaintenanceWindowsRoute } from './maintenance_window/active_maintenance_windows';
+import { ConnectorAdapterRegistry } from '../connector_adapter_registry';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   usageCounter?: UsageCounter;
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, encryptedSavedObjects, usageCounter } = opts;
+  const { router, licenseState, encryptedSavedObjects, usageCounter, connectorAdapterRegistry } = opts;
 
   defineLegacyRoutes(opts);
   createRuleRoute(opts);
@@ -110,4 +113,5 @@ export function defineRoutes(opts: RouteOptions) {
   archiveMaintenanceWindowRoute(router, licenseState);
   finishMaintenanceWindowRoute(router, licenseState);
   activeMaintenanceWindowsRoute(router, licenseState);
+  getAllConnectorAdaptersRoute(router, licenseState, connectorAdapterRegistry);
 }

@@ -22,7 +22,6 @@ import {
   ThrottledActions,
 } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { injectActionParams } from './inject_action_params';
 import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
 import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
@@ -47,6 +46,7 @@ import {
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
 } from './rule_action_helper';
+import { ConnectorAdapterRegistry } from '../connector_adapter_registry';
 
 enum Reasons {
   MUTED = 'muted',
@@ -96,6 +96,7 @@ export class ExecutionHandler<
   private mutedAlertIdsSet: Set<string> = new Set();
   private previousStartedAt: Date | null;
   private maintenanceWindowIds: string[] = [];
+  private connectorAdapterRegistry: ConnectorAdapterRegistry;
 
   constructor({
     rule,
@@ -112,6 +113,7 @@ export class ExecutionHandler<
     previousStartedAt,
     actionsClient,
     maintenanceWindowIds,
+    connectorAdapterRegistry,
   }: ExecutionHandlerOptions<
     Params,
     ExtractedParams,
@@ -141,6 +143,7 @@ export class ExecutionHandler<
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
     this.maintenanceWindowIds = maintenanceWindowIds ?? [];
+    this.connectorAdapterRegistry = connectorAdapterRegistry;
   }
 
   public async run(
@@ -220,25 +223,26 @@ export class ExecutionHandler<
             this.rule.schedule,
             this.previousStartedAt
           );
+          const transformOptions = {
+            alerts: summarizedAlerts,
+            rule: this.rule,
+            ruleTypeId: this.ruleType.id,
+            actionId: action.id,
+            actionParams: action.params,
+            spaceId,
+            actionsPlugin,
+            actionTypeId,
+            kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+            ruleUrl: this.buildRuleUrl(spaceId, start, end),
+          };
+          const transformedParams = transformSummaryActionParams(transformOptions);
           const actionToRun = {
             ...action,
-            params: injectActionParams({
-              ruleId,
-              spaceId,
-              actionTypeId,
-              actionParams: transformSummaryActionParams({
-                alerts: summarizedAlerts,
-                rule: this.rule,
-                ruleTypeId: this.ruleType.id,
-                actionId: action.id,
-                actionParams: action.params,
-                spaceId,
-                actionsPlugin,
-                actionTypeId,
-                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl: this.buildRuleUrl(spaceId, start, end),
-              }),
-            }),
+            params: this.connectorAdapterRegistry.get(actionTypeId)
+              ? this.connectorAdapterRegistry
+                  .get(actionTypeId)
+                  ?.augmentSummaryActionParams(transformedParams, transformOptions)!
+              : transformedParams,
           };
 
           await this.actionRunOrAddToBulk({
@@ -261,34 +265,36 @@ export class ExecutionHandler<
           });
         } else {
           const executableAlert = alert!;
+          const transformOptions = {
+            actionsPlugin,
+            alertId: ruleId,
+            alertType: this.ruleType.id,
+            actionTypeId,
+            alertName: this.rule.name,
+            spaceId,
+            tags: this.rule.tags,
+            alertInstanceId: executableAlert.getId(),
+            alertUuid: executableAlert.getUuid(),
+            alertActionGroup: actionGroup,
+            alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
+            context: executableAlert.getContext(),
+            actionId: action.id,
+            state: executableAlert.getScheduledActionOptions()?.state || {},
+            kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+            alertParams: this.rule.params,
+            actionParams: action.params,
+            flapping: executableAlert.getFlapping(),
+            ruleUrl: this.buildRuleUrl(spaceId),
+          };
+          const transformedParams = transformActionParams(transformOptions);
+          console.log('GET', actionTypeId, this.connectorAdapterRegistry.get(actionTypeId));
           const actionToRun = {
             ...action,
-            params: injectActionParams({
-              ruleId,
-              spaceId,
-              actionTypeId,
-              actionParams: transformActionParams({
-                actionsPlugin,
-                alertId: ruleId,
-                alertType: this.ruleType.id,
-                actionTypeId,
-                alertName: this.rule.name,
-                spaceId,
-                tags: this.rule.tags,
-                alertInstanceId: executableAlert.getId(),
-                alertUuid: executableAlert.getUuid(),
-                alertActionGroup: actionGroup,
-                alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
-                context: executableAlert.getContext(),
-                actionId: action.id,
-                state: executableAlert.getScheduledActionOptions()?.state || {},
-                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                alertParams: this.rule.params,
-                actionParams: action.params,
-                flapping: executableAlert.getFlapping(),
-                ruleUrl: this.buildRuleUrl(spaceId),
-              }),
-            }),
+            params: this.connectorAdapterRegistry.get(actionTypeId)
+              ? this.connectorAdapterRegistry
+                  .get(actionTypeId)
+                  ?.augmentActionParams(transformedParams, transformOptions)!
+              : transformedParams,
           };
 
           await this.actionRunOrAddToBulk({

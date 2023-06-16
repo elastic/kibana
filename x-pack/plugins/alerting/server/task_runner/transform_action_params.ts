@@ -15,7 +15,7 @@ import {
   SanitizedRule,
 } from '../types';
 
-interface TransformActionParamsOptions {
+export interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;
   alertId: string;
   alertType: string;
@@ -118,6 +118,19 @@ export function transformActionParams({
   );
 }
 
+export interface TransformSummaryActionParamsOpts {
+  alerts: SummarizedAlertsWithAll;
+  rule: SanitizedRule<RuleTypeParams>;
+  ruleTypeId: string;
+  actionsPlugin: ActionsPluginStartContract;
+  actionId: string;
+  actionTypeId: string;
+  spaceId: string;
+  actionParams: RuleActionParams;
+  kibanaBaseUrl?: string;
+  ruleUrl?: string;
+}
+
 export function transformSummaryActionParams({
   alerts,
   rule,
@@ -129,18 +142,7 @@ export function transformSummaryActionParams({
   actionParams,
   ruleUrl,
   kibanaBaseUrl,
-}: {
-  alerts: SummarizedAlertsWithAll;
-  rule: SanitizedRule<RuleTypeParams>;
-  ruleTypeId: string;
-  actionsPlugin: ActionsPluginStartContract;
-  actionId: string;
-  actionTypeId: string;
-  spaceId: string;
-  actionParams: RuleActionParams;
-  kibanaBaseUrl?: string;
-  ruleUrl?: string;
-}): RuleActionParams {
+}: TransformSummaryActionParamsOpts): RuleActionParams {
   const variables = {
     kibanaBaseUrl,
     date: new Date().toISOString(),

@@ -62,6 +62,7 @@ import { ActionNotifyWhen } from './action_notify_when';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
 import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
+import { loadConnectorAdapters, ConnectorAdapterConfig } from '../../lib/connector_adapters';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -138,14 +139,17 @@ export const ActionTypeForm = ({
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
-    http: { basePath },
+    http,
   } = useKibana().services;
+  const [availableActionGroups, setAvailableActionGroups] =
+    useState<ActionAccordionFormProps['actionGroups']>(actionGroups);
+  const [connectorAdapters, setConnectorAdapters] = useState<ConnectorAdapterConfig[]>([]);
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
-  const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
+  const defaultActionGroup = availableActionGroups?.find(({ id }) => id === defaultActionGroupId);
   const selectedActionGroup =
-    actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
+    availableActionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
   const [actionGroup, setActionGroup] = useState<string>();
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
@@ -181,6 +185,34 @@ export const ActionTypeForm = ({
 
     return defaultParams;
   };
+
+  useMemo(() => {
+    (async () => {
+      try {
+        const result = await loadConnectorAdapters({ http });
+        setConnectorAdapters(result);
+      } catch (e) {
+        // TODO
+      }
+    })();
+  }, [http]);
+
+  useEffect(() => {
+    const connectorTypeId = actionConnector.actionTypeId;
+    const connectorAdapter = connectorAdapters.find(
+      (adapter) => adapter.connectorTypeId === connectorTypeId
+    );
+    if (connectorAdapter && connectorAdapter.limitActionGroups) {
+      const filteredResult = actionGroups?.filter(
+        (o) =>
+          (o.id === 'recovered' && connectorAdapter.limitActionGroups?.includes('recovered')) ||
+          (o.id !== 'recovered' && connectorAdapter.limitActionGroups?.includes('active'))
+      );
+      setAvailableActionGroups(filteredResult);
+    } else {
+      setAvailableActionGroups(actionGroups);
+    }
+  }, [connectorAdapters, actionConnector.actionTypeId, actionGroups]);
 
   const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = useMemo(() => {
     try {
@@ -274,6 +306,7 @@ export const ActionTypeForm = ({
 
   const actionNotifyWhen = (
     <ActionNotifyWhen
+      connectorTypeId={actionConnector.actionTypeId}
       frequency={actionItem.frequency}
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
@@ -328,7 +361,7 @@ export const ActionTypeForm = ({
   );
 
   const showSelectActionGroup =
-    actionGroups &&
+    availableActionGroups &&
     selectedActionGroup &&
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
@@ -398,7 +431,7 @@ export const ActionTypeForm = ({
               fullWidth
               id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
               data-test-subj={`addNewActionConnectorActionGroup-${index}`}
-              options={actionGroups.map(({ id: value, name }) => ({
+              options={availableActionGroups.map(({ id: value, name }) => ({
                 value,
                 inputDisplay: actionGroupDisplay(value, name, actionItem.actionTypeId),
                 disabled: isActionGroupDisabled(value, actionItem.actionTypeId),
@@ -439,7 +472,7 @@ export const ActionTypeForm = ({
                   setWarning(
                     validateParamsForWarnings(
                       value,
-                      basePath.publicBaseUrl,
+                      http.basePath.publicBaseUrl,
                       availableActionVariables
                     )
                   );

@@ -133,7 +133,7 @@ export class TaskRunner<
     >,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext,
-    inMemoryMetrics: InMemoryMetrics
+    inMemoryMetrics: InMemoryMetrics,
   ) {
     this.context = context;
     const loggerId = ruleType.id.startsWith('.') ? ruleType.id.substring(1) : ruleType.id;
@@ -535,6 +535,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
       maintenanceWindowIds,
+      connectorAdapterRegistry: this.context.connectorAdapterRegistry,
     });
 
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };

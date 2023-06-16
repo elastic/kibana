@@ -27,8 +27,10 @@ import {
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
+import { useKibana } from '../../../common/lib/kibana';
 import { RuleNotifyWhenType, RuleAction, NotifyWhenSelectOptions } from '../../../types';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
+import { loadConnectorAdapters, ConnectorAdapterConfig } from '../../lib/connector_adapters';
 
 export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -141,6 +143,7 @@ interface ActionNotifyWhenProps {
   showMinimumThrottleUnitWarning?: boolean;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultNotifyWhenValue?: RuleNotifyWhenType;
+  connectorTypeId: string;
 }
 
 export const ActionNotifyWhen = ({
@@ -155,12 +158,27 @@ export const ActionNotifyWhen = ({
   showMinimumThrottleUnitWarning,
   notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
   defaultNotifyWhenValue = DEFAULT_FREQUENCY.notifyWhen,
+  connectorTypeId,
 }: ActionNotifyWhenProps) => {
+  const [connectorAdapters, setConnectorAdapters] = useState<ConnectorAdapterConfig[]>([]);
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] =
     useState<RuleNotifyWhenType>(defaultNotifyWhenValue);
 
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
+
+  const { http } = useKibana().services;
+
+  useMemo(() => {
+    (async () => {
+      try {
+        const result = await loadConnectorAdapters({ http });
+        setConnectorAdapters(result);
+      } catch (e) {
+        // TODO
+      }
+    })();
+  }, [http]);
 
   useEffect(() => {
     if (frequency.notifyWhen) {
@@ -193,15 +211,30 @@ export const ActionNotifyWhen = ({
     [onNotifyWhenChange, onThrottleChange, throttle, throttleUnit]
   );
 
-  const summaryNotifyWhenOptions = useMemo(
-    () => notifyWhenSelectOptions.filter((o) => o.isSummaryOption).map((o) => o.value),
-    [notifyWhenSelectOptions]
-  );
+  const summaryNotifyWhenOptions = useMemo(() => {
+    const result = notifyWhenSelectOptions.filter((o) => o.isSummaryOption).map((o) => o.value);
+    const connectorAdapter = connectorAdapters.find(
+      (adapter) => adapter.connectorTypeId === connectorTypeId
+    );
+    if (connectorAdapter && connectorAdapter.allowThrottledSummaries === false) {
+      return result.filter((o) => o.value === 'onActiveAlert');
+    }
+    return result;
+  }, [notifyWhenSelectOptions, connectorAdapters, connectorTypeId]);
 
-  const forEachAlertNotifyWhenOptions = useMemo(
-    () => notifyWhenSelectOptions.filter((o) => o.isForEachAlertOption).map((o) => o.value),
-    [notifyWhenSelectOptions]
-  );
+  const forEachAlertNotifyWhenOptions = useMemo(() => {
+    const result = notifyWhenSelectOptions
+      .filter((o) => o.isForEachAlertOption)
+      .map((o) => o.value);
+    const connectorAdapter = connectorAdapters.find(
+      (adapter) => adapter.connectorTypeId === connectorTypeId
+    );
+    const limitActionFrequencies = connectorAdapter?.limitPerAlertActionFrequency || [];
+    if (limitActionFrequencies.length > 0) {
+      return result.filter((o) => limitActionFrequencies.includes(o.value));
+    }
+    return result;
+  }, [notifyWhenSelectOptions, connectorAdapters, connectorTypeId]);
 
   const notifyWhenOptions = useMemo(
     () => (frequency.summary ? summaryNotifyWhenOptions : forEachAlertNotifyWhenOptions),
