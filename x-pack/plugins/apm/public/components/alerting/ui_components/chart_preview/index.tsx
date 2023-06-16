@@ -169,7 +169,7 @@ export function ChartPreview({
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          splitSeriesAccessors={['group']}
+          splitSeriesAccessors={['groupBy']}
           data={barSeries}
           barSeriesStyle={{
             rectBorder: {
