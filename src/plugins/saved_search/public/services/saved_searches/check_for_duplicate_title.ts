@@ -7,7 +7,7 @@
  */
 
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { SavedSearchCrudTypes } from '@kbn/saved-search-plugin/common/content_management';
+import type { SavedSearchCrudTypes } from '../../../common/content_management';
 import { SAVED_SEARCH_TYPE } from './constants';
 
 const hasDuplicatedTitle = async (
