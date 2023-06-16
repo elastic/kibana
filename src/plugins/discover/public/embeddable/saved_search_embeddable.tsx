@@ -139,7 +139,7 @@ export class SavedSearchEmbeddable
     super(initialInput, { editApp: 'discover', editable }, parent);
 
     this.services = services;
-    this.attributeService = services.savedSearch.embeddable.attributesService;
+    this.attributeService = services.savedSearch.byValue.attributeService;
     this.filterManager = filterManager;
     this.inspectorAdapters = {
       requests: new RequestAdapter(),
@@ -175,7 +175,7 @@ export class SavedSearchEmbeddable
       return;
     }
 
-    this.savedSearch = await this.services.savedSearch.embeddable.toSavedSearch(
+    this.savedSearch = await this.services.savedSearch.byValue.toSavedSearch(
       (input as SearchByReferenceInput)?.savedObjectId,
       unwrapResult
     );

@@ -23,7 +23,6 @@ import {
   saveSavedSearch,
   SaveSavedSearchOptions,
   getNewSavedSearch,
-  convertToSavedSearch,
   SavedSearchUnwrapResult,
 } from './services/saved_searches';
 import { SavedSearch, SavedSearchAttributes } from '../common/types';
@@ -34,6 +33,7 @@ import { getKibanaContext } from './expressions/kibana_context';
 import {
   type SavedSearchAttributeService,
   getSavedSearchAttributeService,
+  toSavedSearch,
 } from './services/saved_searches';
 
 /**
@@ -53,8 +53,8 @@ export interface SavedSearchPublicPluginStart {
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
   ) => ReturnType<typeof saveSavedSearch>;
-  embeddable: {
-    attributesService: SavedSearchAttributeService;
+  byValue: {
+    attributeService: SavedSearchAttributeService;
     toSavedSearch: (
       id: string | undefined,
       result: SavedSearchUnwrapResult
@@ -138,24 +138,10 @@ export class SavedSearchPublicPlugin
       save: (savedSearch: SavedSearch, options?: SaveSavedSearchOptions) => {
         return service.save(savedSearch, options);
       },
-      embeddable: {
-        attributesService: getSavedSearchAttributeService(deps),
+      byValue: {
+        attributeService: getSavedSearchAttributeService(deps),
         toSavedSearch: async (id: string | undefined, result: SavedSearchUnwrapResult) => {
-          const { references, ...attributes } = result.attributes;
-          const { sharingSavedObjectProps } = result.metaInfo ?? {};
-
-          return await convertToSavedSearch(
-            {
-              savedSearchId: id,
-              attributes: {
-                ...attributes,
-                description: attributes.description ?? '',
-              },
-              references,
-              sharingSavedObjectProps,
-            },
-            deps
-          );
+          return toSavedSearch(id, result, deps);
         },
       },
     };

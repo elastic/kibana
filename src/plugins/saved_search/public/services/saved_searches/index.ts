@@ -18,6 +18,7 @@ export { SAVED_SEARCH_TYPE } from './constants';
 export type { SavedSearch, SearchByReferenceInput, SearchByValueInput } from './types';
 export {
   getSavedSearchAttributeService,
+  toSavedSearch,
   type SavedSearchAttributeService,
   type SavedSearchUnwrapResult,
 } from './saved_search_attribute_service';

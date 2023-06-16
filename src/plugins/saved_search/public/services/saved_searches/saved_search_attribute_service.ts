@@ -8,11 +8,15 @@
 
 import type { AttributeService, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import type { SavedSearch, SavedSearchByValueAttributes } from './types';
-import type { SearchByReferenceInput, SearchByValueInput } from './types';
+import type {
+  SavedSearch,
+  SavedSearchByValueAttributes,
+  SearchByReferenceInput,
+  SearchByValueInput,
+} from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../common';
 import type { SavedSearchesServiceDeps } from './saved_searches_service';
-import { getSavedSearchSavedObject } from './get_saved_searches';
+import { getSavedSearchSavedObject, convertToSavedSearch } from './get_saved_searches';
 import { checkForDuplicateTitle } from '.';
 import { saveSavedSearchSavedObject } from './save_saved_searches';
 
@@ -80,3 +84,25 @@ export function getSavedSearchAttributeService(
     },
   });
 }
+
+export const toSavedSearch = async (
+  id: string | undefined,
+  result: SavedSearchUnwrapResult,
+  services: SavedSearchesServiceDeps
+) => {
+  const { references, ...attributes } = result.attributes;
+  const { sharingSavedObjectProps } = result.metaInfo ?? {};
+
+  return await convertToSavedSearch(
+    {
+      savedSearchId: id,
+      attributes: {
+        ...attributes,
+        description: attributes.description ?? '',
+      },
+      references,
+      sharingSavedObjectProps,
+    },
+    services
+  );
+};
