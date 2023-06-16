@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
-import { PdfExportType, PdfExportTypeSetupDeps } from '..';
+import { createMockReportingCore } from '../../../test_helpers';
+import { PdfExportType } from '..';
 
 export const mockPdfExportType: Partial<PdfExportType> = {};
 
 const mockReportingCore = createMockReportingCore;
-
