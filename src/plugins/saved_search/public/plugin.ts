@@ -17,6 +17,7 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   getSavedSearch,
   saveSavedSearch,
@@ -34,7 +35,6 @@ import {
   type SavedSearchAttributeService,
   getSavedSearchAttributeService,
 } from './services/saved_searches';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
 /**
  * Saved search plugin public Setup contract

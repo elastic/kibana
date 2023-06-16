@@ -13,11 +13,11 @@ import {
   Container,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import type { SearchByReferenceInput } from '@kbn/saved-search-plugin/public';
 import type { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { DiscoverServices } from '../build_services';
-import type { SearchByReferenceInput } from '@kbn/saved-search-plugin/public';
 
 export interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];

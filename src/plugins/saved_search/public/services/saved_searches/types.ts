@@ -8,11 +8,11 @@
 
 import type { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { SavedSearch as SavedSearchCommon } from '../../../common';
 import type { Reference } from '@kbn/content-management-utils';
+import type { SortOrder } from '../..';
+import type { SavedSearchAttributes } from '../../../common';
+import type { SavedSearch as SavedSearchCommon } from '../../../common';
 
 /** @public **/
 export interface SavedSearch extends SavedSearchCommon {

@@ -48,6 +48,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
+import { VIEW_MODE } from '../../common/constants';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,

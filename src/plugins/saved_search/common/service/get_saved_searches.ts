@@ -15,10 +15,10 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import { i18n } from '@kbn/i18n';
 import type { SavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
+import type { Reference } from '@kbn/content-management-utils';
+import type { SavedSearchAttributes } from '../../../common';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import type { Reference } from '@kbn/content-management-utils';
 
 export interface GetSavedSearchDependencies {
   searchSourceCreate: ISearchStartSearchSource['create'];
