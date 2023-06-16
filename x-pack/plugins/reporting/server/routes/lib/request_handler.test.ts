@@ -94,7 +94,7 @@ describe('Handle request to generate', () => {
 
   describe('Enqueue Job', () => {
     test('creates a report object to queue', async () => {
-      const report = await requestHandler.enqueueJob('printablePdf', mockJobParams);
+      const report = await requestHandler.enqueueJob('printablePdfV2', mockJobParams);
 
       const { _id, created_at: _created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
