@@ -56,14 +56,14 @@ export function ConfigureLogs() {
   }
 
   function onContinue() {
-    setState({
-      ...getState(),
+    setState((state) => ({
+      ...state,
       datasetName,
       serviceName,
       logFilePaths: logFilePaths.filter((filepath) => !!filepath),
       namespace,
       customConfigurations,
-    });
+    }));
     goToStep('installElasticAgent');
   }
 

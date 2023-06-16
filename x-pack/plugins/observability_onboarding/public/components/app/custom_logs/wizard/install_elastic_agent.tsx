@@ -56,8 +56,10 @@ export function InstallElasticAgent() {
   }
 
   function onAutoDownloadConfig() {
-    const { autoDownloadConfig, ...state } = getState();
-    setState({ ...state, autoDownloadConfig: !autoDownloadConfig });
+    setState((state) => ({
+      ...state,
+      autoDownloadConfig: !state.autoDownloadConfig,
+    }));
   }
 
   const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
@@ -182,7 +184,8 @@ export function InstallElasticAgent() {
   );
 
   useEffect(() => {
-    setState({ ...getState(), onboardingId, apiKeyEncoded });
+    setState((state) => ({ ...state, onboardingId, apiKeyEncoded }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboardingId, apiKeyEncoded]);
 
   const {
