@@ -132,6 +132,22 @@ export const guideCards: GuideCardConstants[] = [
     order: 11,
   },
   {
+    solution: 'observability',
+    icon: 'uptimeApp',
+    title: i18n.translate(
+      'guidedOnboardingPackage.gettingStarted.cards.syntheticsObservability.title',
+      {
+        defaultMessage: 'Create a Synthetic Monitor',
+      }
+    ),
+    navigateTo: {
+      appId: 'synthetics',
+      path: '/monitors/getting-started',
+    },
+    telemetryId: 'onboarding--observability--synthetics',
+    order: 14,
+  },
+  {
     solution: 'security',
     icon: 'securitySignal',
     title: (
