@@ -11,6 +11,7 @@ import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@el
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
 import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
+
 const TAGS_POPOVER_WIDTH = 274;
 
 interface RuleExecutionStatusPopoverProps {

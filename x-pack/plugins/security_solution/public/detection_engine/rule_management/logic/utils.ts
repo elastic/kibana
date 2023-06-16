@@ -75,7 +75,7 @@ export const convertRulesFilterToKQL = ({
   if (ruleExecutionStatus === RuleExecutionStatus.succeeded) {
     filters.push(`alert.attributes.lastRun.outcome: "succeeded"`);
   } else if (ruleExecutionStatus === RuleExecutionStatus['partial failure']) {
-    filters.push(`alert.attributes.lastRun.outcome: "partial failure"`);
+    filters.push(`alert.attributes.lastRun.outcome: "warning"`);
   } else if (ruleExecutionStatus === RuleExecutionStatus.failed) {
     filters.push(`alert.attributes.lastRun.outcome: "failed"`);
   }
