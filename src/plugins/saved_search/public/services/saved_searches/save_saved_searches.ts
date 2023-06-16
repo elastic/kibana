@@ -22,7 +22,7 @@ export interface SaveSavedSearchOptions {
   copyOnSave?: boolean;
 }
 
-export const saveSavedSearchSavedObject = async (
+export const saveSearchSavedObject = async (
   id: string | undefined,
   attributes: SavedSearchAttributes,
   references: Reference[] | undefined,
@@ -72,7 +72,6 @@ export const saveSavedSearch = async (
         contentManagement,
       });
     } catch {
-      // ignore duplicate title failure, user notified in save modal
       return;
     }
   }
@@ -82,7 +81,7 @@ export const saveSavedSearch = async (
     ? savedObjectsTagging.ui.updateTagsReferences(originalReferences, savedSearch.tags ?? [])
     : originalReferences;
 
-  return saveSavedSearchSavedObject(
+  return saveSearchSavedObject(
     isNew ? undefined : savedSearch.id,
     toSavedSearchAttributes(savedSearch, searchSourceJSON),
     references,

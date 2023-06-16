@@ -16,9 +16,9 @@ import type {
 } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../common';
 import type { SavedSearchesServiceDeps } from './saved_searches_service';
-import { getSavedSearchSavedObject, convertToSavedSearch } from './get_saved_searches';
-import { checkForDuplicateTitle } from '.';
-import { saveSavedSearchSavedObject } from './save_saved_searches';
+import { getSearchSavedObject, convertToSavedSearch } from './get_saved_searches';
+import { checkForDuplicateTitle } from './check_for_duplicate_title';
+import { saveSearchSavedObject } from './save_saved_searches';
 
 export interface SavedSearchUnwrapMetaInfo {
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
@@ -48,13 +48,10 @@ export function getSavedSearchAttributeService(
     SavedSearchUnwrapMetaInfo
   >(SEARCH_EMBEDDABLE_TYPE, {
     saveMethod: async (attributes: SavedSearchByValueAttributes, savedObjectId?: string) => {
-      const { references, ...so } = attributes;
-      const id = await saveSavedSearchSavedObject(
+      const { references, attributes: attrs } = splitReferences(attributes);
+      const id = await saveSearchSavedObject(
         savedObjectId,
-        {
-          ...so,
-          description: so.description ?? '',
-        },
+        attrs,
         references,
         services.contentManagement
       );
@@ -62,7 +59,7 @@ export function getSavedSearchAttributeService(
       return { id };
     },
     unwrapMethod: async (savedObjectId: string): Promise<SavedSearchUnwrapResult> => {
-      const so = await getSavedSearchSavedObject(savedObjectId, services);
+      const so = await getSearchSavedObject(savedObjectId, services);
 
       return {
         attributes: {
@@ -90,19 +87,26 @@ export const toSavedSearch = async (
   result: SavedSearchUnwrapResult,
   services: SavedSearchesServiceDeps
 ) => {
-  const { references, ...attributes } = result.attributes;
   const { sharingSavedObjectProps } = result.metaInfo ?? {};
 
   return await convertToSavedSearch(
     {
+      ...splitReferences(result.attributes),
       savedSearchId: id,
-      attributes: {
-        ...attributes,
-        description: attributes.description ?? '',
-      },
-      references,
       sharingSavedObjectProps,
     },
     services
   );
+};
+
+const splitReferences = (attributes: SavedSearchByValueAttributes) => {
+  const { references, ...attrs } = attributes;
+
+  return {
+    references,
+    attributes: {
+      ...attrs,
+      description: attrs.description ?? '',
+    },
+  };
 };

@@ -33,7 +33,7 @@ const getSavedSearchUrlConflictMessage = async (json: string) =>
     values: { json },
   });
 
-export const getSavedSearchSavedObject = async (
+export const getSearchSavedObject = async (
   savedSearchId: string,
   { searchSourceCreate, spaces, savedObjectsTagging, getSavedSrch }: GetSavedSearchDependencies
 ) => {
@@ -101,14 +101,7 @@ export const convertToSavedSearch = async (
 };
 
 export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearchDependencies) => {
-  const { search, spaces, savedObjectsTagging, contentManagement } = deps;
-  const so = await getSavedSearchSavedObject(savedSearchId, {
-    search,
-    spaces,
-    savedObjectsTagging,
-    contentManagement,
-  });
-
+  const so = await getSearchSavedObject(savedSearchId, deps);
   const savedSearch = await convertToSavedSearch(
     {
       savedSearchId,
