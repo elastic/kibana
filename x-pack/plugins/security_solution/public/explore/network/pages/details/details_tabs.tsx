@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import { Route } from '@kbn/kibana-react-plugin/public';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { AnomaliesNetworkTable } from '../../../../common/components/ml/tables/anomalies_network_table';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';

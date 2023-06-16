@@ -6,7 +6,7 @@
  */
 import type { ComponentType } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 import type { DocLinks } from '@kbn/doc-links';
 import { NoPrivilegesPage } from '../../../common/components/no_privileges';
 

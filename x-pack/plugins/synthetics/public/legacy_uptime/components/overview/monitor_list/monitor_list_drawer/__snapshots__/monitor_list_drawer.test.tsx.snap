@@ -85,99 +85,101 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
       }
     }
   >
-    <MonitorListDrawerComponent
-      loading={false}
-      monitorDetails={
-        Object {
-          "error": Object {
-            "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
-            "type": "io",
-          },
-          "monitorId": "bad-ssl",
+    <CompatRouter>
+      <MonitorListDrawerComponent
+        loading={false}
+        monitorDetails={
+          Object {
+            "error": Object {
+              "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
+              "type": "io",
+            },
+            "monitorId": "bad-ssl",
+          }
         }
-      }
-      summary={
-        Object {
-          "monitor_id": "foo",
-          "state": Object {
-            "monitor": Object {
-              "type": "http",
+        summary={
+          Object {
+            "monitor_id": "foo",
+            "state": Object {
+              "monitor": Object {
+                "type": "http",
+              },
+              "summary": Object {
+                "down": 0,
+                "up": 1,
+              },
+              "summaryPings": Array [
+                Object {
+                  "docId": "foo",
+                  "monitor": Object {
+                    "check_group": "myCheckGroup",
+                    "duration": Object {
+                      "us": 121,
+                    },
+                    "id": "foo",
+                    "ip": "127.0.0.1",
+                    "name": undefined,
+                    "status": "up",
+                    "type": "icmp",
+                  },
+                  "timestamp": "121",
+                },
+                Object {
+                  "docId": "foo-0",
+                  "monitor": Object {
+                    "check_group": "myCheckGroup",
+                    "duration": Object {
+                      "us": 100000,
+                    },
+                    "id": "foo",
+                    "ip": "127.0.0.1",
+                    "name": undefined,
+                    "status": "down",
+                    "type": "icmp",
+                  },
+                  "timestamp": "0",
+                },
+                Object {
+                  "docId": "foo-1",
+                  "monitor": Object {
+                    "check_group": "myCheckGroup",
+                    "duration": Object {
+                      "us": 1,
+                    },
+                    "id": "foo",
+                    "ip": "127.0.0.2",
+                    "name": undefined,
+                    "status": "up",
+                    "type": "icmp",
+                  },
+                  "timestamp": "1",
+                },
+                Object {
+                  "docId": "foo-2",
+                  "monitor": Object {
+                    "check_group": "myCheckGroup",
+                    "duration": Object {
+                      "us": 2,
+                    },
+                    "id": "foo",
+                    "ip": "127.0.0.3",
+                    "name": undefined,
+                    "status": "down",
+                    "type": "icmp",
+                  },
+                  "timestamp": "2",
+                },
+              ],
+              "timestamp": "123",
+              "url": Object {
+                "domain": "expired.badssl.com",
+                "full": "https://expired.badssl.com",
+              },
             },
-            "summary": Object {
-              "down": 0,
-              "up": 1,
-            },
-            "summaryPings": Array [
-              Object {
-                "docId": "foo",
-                "monitor": Object {
-                  "check_group": "myCheckGroup",
-                  "duration": Object {
-                    "us": 121,
-                  },
-                  "id": "foo",
-                  "ip": "127.0.0.1",
-                  "name": undefined,
-                  "status": "up",
-                  "type": "icmp",
-                },
-                "timestamp": "121",
-              },
-              Object {
-                "docId": "foo-0",
-                "monitor": Object {
-                  "check_group": "myCheckGroup",
-                  "duration": Object {
-                    "us": 100000,
-                  },
-                  "id": "foo",
-                  "ip": "127.0.0.1",
-                  "name": undefined,
-                  "status": "down",
-                  "type": "icmp",
-                },
-                "timestamp": "0",
-              },
-              Object {
-                "docId": "foo-1",
-                "monitor": Object {
-                  "check_group": "myCheckGroup",
-                  "duration": Object {
-                    "us": 1,
-                  },
-                  "id": "foo",
-                  "ip": "127.0.0.2",
-                  "name": undefined,
-                  "status": "up",
-                  "type": "icmp",
-                },
-                "timestamp": "1",
-              },
-              Object {
-                "docId": "foo-2",
-                "monitor": Object {
-                  "check_group": "myCheckGroup",
-                  "duration": Object {
-                    "us": 2,
-                  },
-                  "id": "foo",
-                  "ip": "127.0.0.3",
-                  "name": undefined,
-                  "status": "down",
-                  "type": "icmp",
-                },
-                "timestamp": "2",
-              },
-            ],
-            "timestamp": "123",
-            "url": Object {
-              "domain": "expired.badssl.com",
-              "full": "https://expired.badssl.com",
-            },
-          },
+          }
         }
-      }
-    />
+      />
+    </CompatRouter>
   </ContextProvider>
 </ContextProvider>
 `;
@@ -267,54 +269,56 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
       }
     }
   >
-    <MonitorListDrawerComponent
-      loading={false}
-      monitorDetails={
-        Object {
-          "error": Object {
-            "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
-            "type": "io",
-          },
-          "monitorId": "bad-ssl",
+    <CompatRouter>
+      <MonitorListDrawerComponent
+        loading={false}
+        monitorDetails={
+          Object {
+            "error": Object {
+              "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
+              "type": "io",
+            },
+            "monitorId": "bad-ssl",
+          }
         }
-      }
-      summary={
-        Object {
-          "monitor_id": "foo",
-          "state": Object {
-            "monitor": Object {
-              "type": "http",
-            },
-            "summary": Object {
-              "down": 0,
-              "up": 1,
-            },
-            "summaryPings": Array [
-              Object {
-                "docId": "foo",
-                "monitor": Object {
-                  "check_group": "myCheckGroup",
-                  "duration": Object {
-                    "us": 121,
-                  },
-                  "id": "foo",
-                  "ip": "127.0.0.1",
-                  "name": undefined,
-                  "status": "up",
-                  "type": "icmp",
-                },
-                "timestamp": "121",
+        summary={
+          Object {
+            "monitor_id": "foo",
+            "state": Object {
+              "monitor": Object {
+                "type": "http",
               },
-            ],
-            "timestamp": "123",
-            "url": Object {
-              "domain": "expired.badssl.com",
-              "full": "https://expired.badssl.com",
+              "summary": Object {
+                "down": 0,
+                "up": 1,
+              },
+              "summaryPings": Array [
+                Object {
+                  "docId": "foo",
+                  "monitor": Object {
+                    "check_group": "myCheckGroup",
+                    "duration": Object {
+                      "us": 121,
+                    },
+                    "id": "foo",
+                    "ip": "127.0.0.1",
+                    "name": undefined,
+                    "status": "up",
+                    "type": "icmp",
+                  },
+                  "timestamp": "121",
+                },
+              ],
+              "timestamp": "123",
+              "url": Object {
+                "domain": "expired.badssl.com",
+                "full": "https://expired.badssl.com",
+              },
             },
-          },
+          }
         }
-      }
-    />
+      />
+    </CompatRouter>
   </ContextProvider>
 </ContextProvider>
 `;

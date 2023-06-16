@@ -15,9 +15,11 @@ import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
-import { Switch, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
+
+import { Routes } from '@kbn/shared-ux-router';
 
 import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';

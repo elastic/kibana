@@ -117,7 +117,9 @@ exports[`ML Integrations shallow renders without errors 1`] = `
       }
     }
   >
-    <MLIntegrationComponent />
+    <CompatRouter>
+      <MLIntegrationComponent />
+    </CompatRouter>
   </ContextProvider>
 </ContextProvider>
 `;

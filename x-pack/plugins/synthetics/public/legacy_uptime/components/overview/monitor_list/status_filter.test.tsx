@@ -41,7 +41,8 @@ describe('StatusFilterComponent', () => {
 
   it('shallow renders without errors for valid props', () => {
     const wrapper = shallowWithRouter(<StatusFilter />);
-    expect(wrapper).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(wrapper.dive()).toMatchSnapshot();
   });
 
   it('renders without errors for valid props', () => {

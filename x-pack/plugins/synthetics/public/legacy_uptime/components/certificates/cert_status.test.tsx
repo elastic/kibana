@@ -31,7 +31,8 @@ describe('CertStatus', () => {
   };
 
   it('shallow renders expected elements for valid props', () => {
-    expect(shallowWithRouter(<CertStatus cert={cert} />)).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(shallowWithRouter(<CertStatus cert={cert} />).dive()).toMatchSnapshot();
   });
 
   it('renders expected elements for valid props', () => {

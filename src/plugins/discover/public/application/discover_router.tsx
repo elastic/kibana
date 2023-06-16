@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line no-restricted-imports
 import { Redirect, Router, Switch, useParams } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
@@ -34,8 +35,6 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
     (path: string) => (prefix ? `${prefix}/${path}` : `/${path}`),
     [prefix]
   );
-
-  console.error('dupa');
 
   return (
     <Switch>

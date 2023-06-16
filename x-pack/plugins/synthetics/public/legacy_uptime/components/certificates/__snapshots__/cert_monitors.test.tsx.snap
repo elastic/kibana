@@ -134,27 +134,29 @@ exports[`CertMonitors shallow renders expected elements for valid props 1`] = `
       }
     }
   >
-    <CertMonitors
-      monitors={
-        Array [
-          Object {
-            "id": "bad-ssl-dashboard",
-            "name": "",
-            "url": "https://badssl.com/dashboard/",
-          },
-          Object {
-            "id": "elastic-co",
-            "name": "elastic",
-            "url": "https://www.elastic.co/",
-          },
-          Object {
-            "id": "extended-validation",
-            "name": "",
-            "url": "https://extended-validation.badssl.com/",
-          },
-        ]
-      }
-    />
+    <CompatRouter>
+      <CertMonitors
+        monitors={
+          Array [
+            Object {
+              "id": "bad-ssl-dashboard",
+              "name": "",
+              "url": "https://badssl.com/dashboard/",
+            },
+            Object {
+              "id": "elastic-co",
+              "name": "elastic",
+              "url": "https://www.elastic.co/",
+            },
+            Object {
+              "id": "extended-validation",
+              "name": "",
+              "url": "https://extended-validation.badssl.com/",
+            },
+          ]
+        }
+      />
+    </CompatRouter>
   </ContextProvider>
 </ContextProvider>
 `;

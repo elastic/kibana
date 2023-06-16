@@ -162,7 +162,8 @@ describe('MonitorBarSeries component', () => {
 
   it('shallow renders a series when there are down items', () => {
     const component = shallowWithRouter(<MonitorBarSeries {...props} />);
-    expect(component).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(component.dive()).toMatchSnapshot();
   });
 
   it('shallow renders null when there are no down items', () => {

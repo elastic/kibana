@@ -24,7 +24,8 @@ describe('ML Integrations', () => {
 
   it('shallow renders without errors', () => {
     const wrapper = shallowWithRouter(<MLIntegrationComponent />);
-    expect(wrapper).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(wrapper.dive()).toMatchSnapshot();
   });
 
   it('renders without errors', () => {

@@ -8,8 +8,8 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Routes, i18n } from '@kbn/i18n';
-import { Route } from '@kbn/shared-ux-router';
+import { i18n } from '@kbn/i18n';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
