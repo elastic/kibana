@@ -66,7 +66,8 @@ export interface RouteOptions {
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, encryptedSavedObjects, usageCounter, connectorAdapterRegistry } = opts;
+  const { router, licenseState, encryptedSavedObjects, usageCounter, connectorAdapterRegistry } =
+    opts;
 
   defineLegacyRoutes(opts);
   createRuleRoute(opts);

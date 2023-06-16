@@ -26,10 +26,10 @@ import {
   renderMustacheObject,
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { ConnectorAdapterConfig } from '@kbn/alerting-plugin/server';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
-import { ConnectorAdapterConfig } from '@kbn/alerting-plugin/server';
 
 export type EmailConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -169,7 +169,7 @@ const fullParamsSchema = {
       }),
     }),
   }),
-}
+};
 export const RuleActionParamsSchema = schema.object(ruleActionParamsSchema);
 const ParamsSchema = schema.object(fullParamsSchema);
 

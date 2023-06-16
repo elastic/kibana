@@ -14,7 +14,7 @@ import { ConnectorAdapterRegistry } from '../connector_adapter_registry';
 export const getAllConnectorAdaptersRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
-  connectorAdapterRegistry: ConnectorAdapterRegistry,
+  connectorAdapterRegistry: ConnectorAdapterRegistry
 ) => {
   router.get(
     {
