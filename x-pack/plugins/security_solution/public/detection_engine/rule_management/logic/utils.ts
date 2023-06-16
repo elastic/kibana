@@ -7,6 +7,7 @@
 
 import { escapeKuery } from '../../../common/lib/kuery';
 import type { FilterOptions } from './types';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring/model/execution_status';
 
 const SEARCHABLE_RULE_PARAMS = [
   'alert.attributes.name',
@@ -33,6 +34,7 @@ export const convertRulesFilterToKQL = ({
   tags,
   excludeRuleTypes = [],
   enabled,
+  ruleExecutionStatus,
 }: FilterOptions): string => {
   const filters: string[] = [];
 
@@ -68,6 +70,14 @@ export const convertRulesFilterToKQL = ({
         .map((ruleType) => `"${escapeKuery(ruleType)}"`)
         .join(' OR ')})`
     );
+  }
+
+  if (ruleExecutionStatus === RuleExecutionStatus.succeeded) {
+    filters.push(`alert.attributes.lastRun.outcome: "succeeded"`);
+  } else if (ruleExecutionStatus === RuleExecutionStatus['partial failure']) {
+    filters.push(`alert.attributes.lastRun.outcome: "partial failure"`);
+  } else if (ruleExecutionStatus === RuleExecutionStatus.failed) {
+    filters.push(`alert.attributes.lastRun.outcome: "failed"`);
   }
 
   return filters.join(' AND ');
