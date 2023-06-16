@@ -6,7 +6,7 @@
  */
 
 import { get, isEqual, omit } from 'lodash';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import {
   ALERT_REASON,
   ALERT_RULE_UUID,

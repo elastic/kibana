@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
