@@ -8,24 +8,23 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiComboBox, EuiHighlight } from '@elastic/eui';
-import { useGetCategories } from '../../containers/use_get_categories';
 
 export interface CategoryComponentProps {
   isLoading: boolean;
   onChange: (category: string) => void;
-  category: string | null | undefined;
+  availableCategories: string[];
+  category?: string | null;
 }
 
 export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
-  ({ isLoading, onChange, category }) => {
-    const { data: categoriesOptions = [] } = useGetCategories();
+  ({ isLoading, onChange, category, availableCategories }) => {
     const [isInvalid, setIsInvalid] = useState<boolean>(false);
 
     const options = useMemo(() => {
-      return categoriesOptions.map((label: string) => ({
+      return availableCategories.map((label: string) => ({
         label,
       }));
-    }, [categoriesOptions]);
+    }, [availableCategories]);
 
     const [selectedOption, setSelectedOption] = useState<[{ label: string }] | []>(
       category ? [{ label: category }] : []
