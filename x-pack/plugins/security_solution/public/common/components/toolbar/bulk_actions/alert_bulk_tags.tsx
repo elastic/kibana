@@ -51,8 +51,8 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
     [existingTags, defaultAlertTagOptions]
   );
 
-  const tagsToAdd: Record<string, boolean> = useMemo(() => ({}), []);
-  const tagsToRemove: Record<string, boolean> = useMemo(() => ({}), []);
+  const tagsToAdd: Set<string> = useMemo(() => new Set(), []);
+  const tagsToRemove: Set<string> = useMemo(() => new Set(), []);
 
   const onUpdateSuccess = useCallback(
     (updated: number, conflicts: number) => {
@@ -82,8 +82,8 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
     closePopoverMenu();
     const ids = alertItems.map((item) => item._id);
     const query: Record<string, unknown> = getUpdateAlertsQuery(ids).query;
-    const tagsToAddArray = Object.keys(tagsToAdd);
-    const tagsToRemoveArray = Object.keys(tagsToRemove);
+    const tagsToAddArray = Array.from(tagsToAdd);
+    const tagsToRemoveArray = Array.from(tagsToRemove);
     try {
       setIsLoading(true);
 
@@ -125,11 +125,11 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
     changedOption: EuiSelectableOption
   ) => {
     if (changedOption.checked === 'on') {
-      tagsToAdd[changedOption.label] = true;
-      delete tagsToRemove[changedOption.label];
+      tagsToAdd.add(changedOption.label);
+      tagsToRemove.delete(changedOption.label);
     } else if (!changedOption.checked) {
-      tagsToRemove[changedOption.label] = true;
-      delete tagsToAdd[changedOption.label];
+      tagsToRemove.add(changedOption.label);
+      tagsToAdd.delete(changedOption.label);
     }
     setSelectableAlertTags(newOptions);
   };
