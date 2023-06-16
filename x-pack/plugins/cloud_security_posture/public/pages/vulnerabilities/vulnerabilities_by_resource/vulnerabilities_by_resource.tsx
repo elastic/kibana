@@ -9,11 +9,9 @@ import {
   EuiButtonEmpty,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiDataGridColumnCellAction,
   EuiFlexItem,
   EuiProgress,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useMemo } from 'react';
@@ -34,8 +32,7 @@ import {
   defaultLoadingRenderer,
   defaultNoDataRenderer,
 } from '../../../components/cloud_posture_page';
-import { getFilters } from '../utils/get_filters';
-import { FILTER_IN, FILTER_OUT, SEARCH_BAR_PLACEHOLDER, VULNERABILITIES } from '../translations';
+import { SEARCH_BAR_PLACEHOLDER, VULNERABILITIES } from '../translations';
 import { useStyles } from '../hooks/use_styles';
 import { FindingsGroupBySelector } from '../../configurations/layout/findings_group_by_selector';
 import { vulnerabilitiesPathnameHandler } from '../utils/vulnerabilities_pathname_handler';
@@ -43,6 +40,7 @@ import { useLatestVulnerabilitiesByResource } from '../hooks/use_latest_vulnerab
 import { EmptyState } from '../../../components/empty_state';
 import { SeverityMap } from './severity_map';
 import { VULNERABILITY_RESOURCE_COUNT } from './test_subjects';
+import { getVulnerabilitiesGridCellActions } from '../utils/get_vulnerabilities_grid_cell_actions';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -86,114 +84,19 @@ export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) 
   });
 
   const columns = useMemo(() => {
-    const getColumnIdValue = (rowIndex: number, columnId: string) => {
-      const vulnerabilityRow = data?.page[rowIndex];
-      if (!vulnerabilityRow) return null;
-
-      if (columnId === vulnerabilitiesByResourceColumns.resource_id) {
-        return vulnerabilityRow.resource?.id;
-      }
-      if (columnId === vulnerabilitiesByResourceColumns.resource_name) {
-        return vulnerabilityRow.resource?.name;
-      }
-      if (columnId === vulnerabilitiesByResourceColumns.region) {
-        return vulnerabilityRow.cloud.region;
-      }
-    };
-
-    const cellActions: EuiDataGridColumnCellAction[] = [
-      ({ Component, rowIndex, columnId }) => {
-        const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
-
-        const value = getColumnIdValue(rowIndexFromPage, columnId);
-
-        if (!value) return null;
-        return (
-          <EuiToolTip
-            position="top"
-            content={i18n.translate(
-              'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButtonTooltip',
-              {
-                defaultMessage: 'Add {columnId} filter',
-                values: { columnId },
-              }
-            )}
-          >
-            <Component
-              iconType="plusInCircle"
-              aria-label={i18n.translate(
-                'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButton',
-                {
-                  defaultMessage: 'Add {columnId} negated filter',
-                  values: { columnId },
-                }
-              )}
-              onClick={() => {
-                setUrlQuery({
-                  pageIndex: 0,
-                  filters: getFilters({
-                    filters: urlQuery.filters,
-                    dataView,
-                    field: columnId,
-                    value,
-                    negate: false,
-                  }),
-                });
-              }}
-            >
-              {FILTER_IN}
-            </Component>
-          </EuiToolTip>
-        );
-      },
-      ({ Component, rowIndex, columnId }) => {
-        const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
-
-        const value = getColumnIdValue(rowIndexFromPage, columnId);
-
-        if (!value) return null;
-        return (
-          <EuiToolTip
-            position="top"
-            content={i18n.translate(
-              'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegatedFilterButtonTooltip',
-              {
-                defaultMessage: 'Add {columnId} negated filter',
-                values: { columnId },
-              }
-            )}
-          >
-            <Component
-              iconType="minusInCircle"
-              aria-label={i18n.translate(
-                'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegateFilterButton',
-                {
-                  defaultMessage: 'Add {columnId} negated filter',
-                  values: { columnId },
-                }
-              )}
-              onClick={() => {
-                setUrlQuery({
-                  pageIndex: 0,
-                  filters: getFilters({
-                    filters: urlQuery.filters,
-                    dataView,
-                    field: columnId,
-                    value,
-                    negate: true,
-                  }),
-                });
-              }}
-            >
-              {FILTER_OUT}
-            </Component>
-          </EuiToolTip>
-        );
-      },
-    ];
-
-    return getVulnerabilitiesByResourceColumnsGrid(cellActions);
-  }, [data?.page, dataView, pageSize, setUrlQuery, urlQuery.filters]);
+    if (!data?.page) {
+      return [];
+    }
+    return getVulnerabilitiesGridCellActions<typeof data.page>({
+      columnGridFn: getVulnerabilitiesByResourceColumnsGrid,
+      columns: vulnerabilitiesByResourceColumns,
+      dataView,
+      pageSize,
+      data: data.page,
+      setUrlQuery,
+      filters: urlQuery.filters,
+    });
+  }, [data, dataView, pageSize, setUrlQuery, urlQuery.filters]);
 
   const renderCellValue = useMemo(() => {
     const Cell: React.FC<EuiDataGridCellValueElementProps> = ({

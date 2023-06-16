@@ -11,8 +11,8 @@ import { VulnerabilityRecord } from '../types';
 import { getFilters } from './get_filters';
 import { FILTER_IN, FILTER_OUT } from '../translations';
 
-export const getVulnerabilitiesGridCellActions = ({
-  row,
+export const getVulnerabilitiesGridCellActions = <T extends Array<Partial<VulnerabilityRecord>>>({
+  data,
   columns,
   columnGridFn,
   pageSize,
@@ -20,7 +20,7 @@ export const getVulnerabilitiesGridCellActions = ({
   filters,
   dataView,
 }: {
-  row: VulnerabilityRecord[];
+  data: T;
   columns: Record<string, string>;
   columnGridFn: (cellActions: EuiDataGridColumnCellAction[]) => EuiDataGridColumn[];
   pageSize: number;
@@ -29,20 +29,20 @@ export const getVulnerabilitiesGridCellActions = ({
   dataView: any;
 }) => {
   const getColumnIdValue = (rowIndex: number, columnId: string) => {
-    const vulnerabilityRow = row[rowIndex];
+    const vulnerabilityRow = data[rowIndex];
     if (!vulnerabilityRow) return null;
 
     if (columnId === columns.vulnerability) {
-      return vulnerabilityRow.vulnerability.id;
+      return vulnerabilityRow.vulnerability?.id;
     }
     if (columnId === columns.cvss) {
-      return vulnerabilityRow.vulnerability.score.base;
+      return vulnerabilityRow.vulnerability?.score.base;
     }
     if (columnId === columns.resource) {
       return vulnerabilityRow.resource?.name;
     }
     if (columnId === columns.severity) {
-      return vulnerabilityRow.vulnerability.severity;
+      return vulnerabilityRow.vulnerability?.severity;
     }
     if (columnId === columns.package) {
       return vulnerabilityRow.vulnerability?.package?.name;
@@ -51,7 +51,7 @@ export const getVulnerabilitiesGridCellActions = ({
       return vulnerabilityRow.vulnerability?.package?.version;
     }
     if (columnId === columns.fix_version) {
-      return vulnerabilityRow.vulnerability.package?.fixed_version;
+      return vulnerabilityRow.vulnerability?.package?.fixed_version;
     }
     if (columnId === columns.resource_id) {
       return vulnerabilityRow.resource?.id;
@@ -60,7 +60,7 @@ export const getVulnerabilitiesGridCellActions = ({
       return vulnerabilityRow.resource?.name;
     }
     if (columnId === columns.region) {
-      return vulnerabilityRow.cloud.region;
+      return vulnerabilityRow.cloud?.region;
     }
   };
 
