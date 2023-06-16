@@ -36,21 +36,19 @@ describe('Alert tagging', () => {
     waitForAlertsToPopulate();
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('endpoint');
   });
 
-  it('Add a tag using the alert context menu', () => {
+  it('Add and remove tag using the alert context menu', () => {
+    // Add a tag to one alert
     openAlertTaggingContextMenu();
     clickAlertTag('Duplicate');
     updateAlertTags();
     waitForAlertsToPopulate();
     openAlertTaggingContextMenu();
     cy.get(SELECTED_ALERT_TAG).contains('Duplicate');
-  });
-
-  it('Remove a tag using the alert context menu', () => {
-    openAlertTaggingContextMenu();
+    // Remove tag from that alert
     clickAlertTag('Duplicate');
     updateAlertTags();
     waitForAlertsToPopulate();
@@ -58,7 +56,8 @@ describe('Alert tagging', () => {
     cy.get(UNSELECTED_ALERT_TAG).first().contains('Duplicate');
   });
 
-  it('Add a tag using the alert bulk action menu', () => {
+  it('Add and remove a tag using the alert bulk action menu', () => {
+    // Add a tag to one alert
     selectNumberOfAlerts(1);
     openAlertTaggingBulkActionMenu();
     clickAlertTag('Duplicate');
@@ -67,9 +66,23 @@ describe('Alert tagging', () => {
     selectNumberOfAlerts(1);
     openAlertTaggingBulkActionMenu();
     cy.get(SELECTED_ALERT_TAG).contains('Duplicate');
+    // Remove tag from that alert
+    clickAlertTag('Duplicate');
+    updateAlertTags();
+    waitForAlertsToPopulate();
+    selectNumberOfAlerts(1);
+    openAlertTaggingBulkActionMenu();
+    cy.get(UNSELECTED_ALERT_TAG).first().contains('Duplicate');
   });
 
   it('Add a tag using the alert bulk action menu with mixed state', () => {
+    // Add tag to one alert first
+    selectNumberOfAlerts(1);
+    openAlertTaggingBulkActionMenu();
+    clickAlertTag('Duplicate');
+    updateAlertTags();
+    waitForAlertsToPopulate();
+    // Then add tags to both alerts
     selectNumberOfAlerts(2);
     openAlertTaggingBulkActionMenu();
     cy.get(MIXED_ALERT_TAG).contains('Duplicate');
@@ -81,18 +94,14 @@ describe('Alert tagging', () => {
     cy.get(SELECTED_ALERT_TAG).contains('Duplicate');
   });
 
-  it('Remove a tag using the alert bulk action menu', () => {
+  it('Remove a tag using the alert bulk action menu with mixed state', () => {
+    // Add tag to one alert first
     selectNumberOfAlerts(1);
     openAlertTaggingBulkActionMenu();
     clickAlertTag('Duplicate');
     updateAlertTags();
     waitForAlertsToPopulate();
-    selectNumberOfAlerts(1);
-    openAlertTaggingBulkActionMenu();
-    cy.get(UNSELECTED_ALERT_TAG).first().contains('Duplicate');
-  });
-
-  it('Remove a tag using the alert bulk action menu with mixed state', () => {
+    // Then remove tags from both alerts
     selectNumberOfAlerts(2);
     openAlertTaggingBulkActionMenu();
     cy.get(MIXED_ALERT_TAG).contains('Duplicate');
