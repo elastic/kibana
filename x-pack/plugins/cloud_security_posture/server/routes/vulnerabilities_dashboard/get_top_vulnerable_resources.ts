@@ -68,7 +68,7 @@ export const getTopVulnerableResources = async (
       id: resource.key,
       name: resource.resource_name?.buckets?.[0]?.key ?? '',
     },
-    resourceCount: resource.doc_count,
+    vulnerabilityCount: resource.doc_count,
     cloudRegion: resource.top_region?.buckets?.[0]?.key ?? '',
   }));
 };

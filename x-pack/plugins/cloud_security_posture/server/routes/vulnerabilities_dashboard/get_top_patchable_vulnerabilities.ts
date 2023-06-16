@@ -94,7 +94,7 @@ export const getTopPatchableVulnerabilities = async (
           version: vulnerability.version?.buckets?.[0]?.key ?? '',
         },
         packageFixVersion: vulnerability.packageFixVersion?.buckets?.[0]?.key ?? '',
-        resourceCount: vulnerability.doc_count,
+        vulnerabilityCount: vulnerability.doc_count,
       };
     }
   );

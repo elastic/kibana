@@ -142,7 +142,7 @@ export const getTopVulnerabilities = async (
       packageName: vulnerability.packageName?.buckets?.[0]?.key ?? '',
       packageVersion: vulnerability.packageVersion?.buckets?.[0]?.key ?? '',
       severity: vulnerability.severity?.buckets?.[0]?.key ?? '',
-      resourceCount: vulnerability.doc_count,
+      vulnerabilityCount: vulnerability.doc_count,
       cvss: {
         score: vulnerability.score?.value,
         version: vulnerability.cveVersion?.buckets?.[0]?.key ?? '',

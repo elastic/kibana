@@ -149,7 +149,7 @@ export interface CnvmDashboardData {
 export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
 
 export interface VulnerableResourceStat {
-  resourceCount: number | undefined;
+  vulnerabilityCount: number | undefined;
   resource: {
     id: string | undefined;
     name: string | undefined;
@@ -158,7 +158,7 @@ export interface VulnerableResourceStat {
 }
 
 export interface PatchableVulnerabilityStat {
-  resourceCount: number | undefined;
+  vulnerabilityCount: number | undefined;
   packageFixVersion: string | undefined;
   cve: string | undefined;
   cvss: {
@@ -172,7 +172,7 @@ export interface VulnerabilityStat {
   packageName: string | undefined;
   packageVersion: string | undefined;
   severity: string | undefined;
-  resourceCount: number | undefined;
+  vulnerabilityCount: number | undefined;
   cvss: {
     score: number | undefined;
     version: string | undefined;
