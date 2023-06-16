@@ -18,7 +18,9 @@ import {
 import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Link, generatePath } from 'react-router-dom';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
+import { findingsNavigation } from '../../../common/navigation/constants';
 import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
 import { ErrorCallout } from '../../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../../configurations/layout/findings_search_bar';
@@ -89,13 +91,13 @@ export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) 
       if (!vulnerabilityRow) return null;
 
       if (columnId === vulnerabilitiesByResourceColumns.resource_id) {
-        return vulnerabilityRow['resource.id'];
+        return vulnerabilityRow.resource?.id;
       }
       if (columnId === vulnerabilitiesByResourceColumns.resource_name) {
-        return vulnerabilityRow['resource.name'];
+        return vulnerabilityRow.resource?.name;
       }
       if (columnId === vulnerabilitiesByResourceColumns.region) {
-        return vulnerabilityRow['cloud.region'];
+        return vulnerabilityRow.cloud.region;
       }
     };
 
@@ -203,16 +205,26 @@ export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) 
       const resourceVulnerabilityRow = data?.page[rowIndexFromPage];
 
       if (isFetching) return null;
-      if (!resourceVulnerabilityRow?.['resource.id']) return null;
+      if (!resourceVulnerabilityRow?.resource?.id) return null;
 
       if (columnId === vulnerabilitiesByResourceColumns.resource_id) {
-        return <>{resourceVulnerabilityRow['resource.id']}</>;
+        return (
+          <Link
+            to={generatePath(findingsNavigation.resource_vulnerabilities.path, {
+              resourceId: encodeURIComponent(resourceVulnerabilityRow?.resource?.id),
+            })}
+            className="eui-textTruncate"
+            title={resourceVulnerabilityRow?.resource?.id}
+          >
+            {resourceVulnerabilityRow?.resource?.id}
+          </Link>
+        );
       }
       if (columnId === vulnerabilitiesByResourceColumns.resource_name) {
-        return <>{resourceVulnerabilityRow['resource.name']}</>;
+        return <>{resourceVulnerabilityRow?.resource?.name}</>;
       }
       if (columnId === vulnerabilitiesByResourceColumns.region) {
-        return <>{resourceVulnerabilityRow['cloud.region']}</>;
+        return <>{resourceVulnerabilityRow?.cloud?.region}</>;
       }
       if (columnId === vulnerabilitiesByResourceColumns.vulnerabilities_count) {
         return (

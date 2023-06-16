@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { Redirect, Switch, useHistory, useLocation } from 'react-router-dom';
+import { Redirect, Switch, useHistory, useLocation, matchPath } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
@@ -37,7 +37,9 @@ export const Findings = () => {
     return (
       pathname === findingsNavigation.vulnerabilities.path ||
       pathname === findingsNavigation.vulnerabilities_by_resource.path ||
-      pathname === findingsNavigation.resource_vulnerabilities.path
+      matchPath(pathname, {
+        path: findingsNavigation.resource_vulnerabilities.path,
+      })?.isExact
     );
   };
 
