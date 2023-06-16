@@ -27,7 +27,7 @@ export const IntervalTimerangeSelector: FC<IntervalTimerangeSelectorProps> = ({
     <EuiSwitch
       disabled={disabled}
       showLabel={true}
-      label={i18n.translate('xpack.ml.customUrlsEditor.addCustomTimeRangeSwitchLabel', {
+      label={i18n.translate('xpack.ml.customUrlsEditor.addIntervalTimeRangeSwitchLabel', {
         defaultMessage: 'Add interval time range',
       })}
       checked={addIntervalTimerange}
