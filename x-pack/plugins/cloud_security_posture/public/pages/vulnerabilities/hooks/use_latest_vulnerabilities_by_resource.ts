@@ -118,8 +118,8 @@ export const getQuery = ({
 });
 const getFirstKey = (
   buckets: AggregationsMultiBucketAggregateBase<AggregationsStringTermsBucketKeys>['buckets']
-): undefined | string => {
-  if (!!Array.isArray(buckets) && !!buckets.length) return buckets[0].key;
+) => {
+  return !!Array.isArray(buckets) && !!buckets.length ? (buckets[0].key as string) : '';
 };
 const createVulnerabilitiesByResource = (resource: FindingsAggBucket) => ({
   resource: {
