@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-// import { isEqual } from 'lodash';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useBoolState } from '../../../../../common/hooks/use_bool_state';
+import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -18,6 +21,8 @@ import {
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
+
+export type ModalConfirmationUpgradeMethod = 'SINGLE_RULE' | 'SPECIFIC_RULES' | 'ALL_RULES' | null;
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -61,15 +66,40 @@ export interface UpgradePrebuiltRulesTableState {
    * Rule rows selected in EUI InMemory Table
    */
   selectedRules: RuleUpgradeInfoForReview[];
+  /**
+   * Legacy ML Jobs that cause modal to pop up before performing rule ugprades
+   */
+  legacyJobsInstalled: MlSummaryJob[];
+  /**
+   * Upgrade method to execute when the user confirms the modal
+   */
+  modalConfirmationUpdateMethod: ModalConfirmationUpgradeMethod | null;
+  /**
+   * Is true when the modal is visible
+   * */
+  isUpgradeModalVisible: boolean;
+  /**
+   * Rule ID of single rule to upgrade when the ML jobs modal is confirmed
+   * */
+  ruleIdToUpgrade: string;
 }
 
 export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
-  upgradeOneRule: (ruleId: string) => void;
-  upgradeSelectedRules: () => void;
-  upgradeAllRules: () => void;
-  setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
+  upgradeOneRule: (ruleId: string) => Promise<void>;
+  upgradeSelectedRules: () => Promise<void>;
+  upgradeAllRules: () => Promise<void>;
   selectRules: (rules: RuleUpgradeInfoForReview[]) => void;
+  setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
+  setModalConfirmationUpgradeMethod: Dispatch<SetStateAction<ModalConfirmationUpgradeMethod>>;
+  setRuleIdToUpgrade: Dispatch<SetStateAction<string>>;
+  upgradeRulesWrapper: (
+    upgradeMethod: ModalConfirmationUpgradeMethod,
+    upgradeRuleMethod: () => Promise<void>
+  ) => void;
+  upgradeSingleRuleFromRowCTA: (ruleId: string) => void;
+  mlJobUpgradeModalConfirm: () => void;
+  mlJobUpgradeModalCancel: () => void;
 }
 
 export interface UpgradePrebuiltRulesContextType {
@@ -90,6 +120,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 }: UpgradePrebuiltRulesTableContextProviderProps) => {
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleUpgradeInfoForReview[]>([]);
+  const [modalConfirmationUpdateMethod, setModalConfirmationUpgradeMethod] =
+    useState<ModalConfirmationUpgradeMethod>(null);
+  const [ruleIdToUpgrade, setRuleIdToUpgrade] = useState<string>('');
 
   const [filterOptions, setFilterOptions] = useState<UpgradePrebuiltRulesTableFilterOptions>({
     filter: '',
@@ -113,6 +146,12 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 
   const { mutateAsync: upgradeAllRulesRequest } = usePerformUpgradeAllRules();
   const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
+
+  // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
+  // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
+  const [isUpgradeModalVisible, showUpgradeModal, hideUpgradeModal] = useBoolState(false);
+  const { loading: loadingJobs, jobs } = useInstalledSecurityJobs();
+  const legacyJobsInstalled = jobs.filter((job) => affectedJobIds.includes(job.id));
 
   const upgradeOneRule = useCallback(
     async (ruleId: RuleSignatureId) => {
@@ -161,6 +200,63 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     }
   }, [rules, upgradeAllRulesRequest]);
 
+  // Wrapper around upgrade rules methods to display ML Jobs warning modal when necessary
+  const upgradeRulesWrapper = useCallback(
+    (upgradeMethod: ModalConfirmationUpgradeMethod, upgradeRuleMethod: () => Promise<void>) => {
+      if (legacyJobsInstalled.length > 0) {
+        showUpgradeModal();
+        setModalConfirmationUpgradeMethod(upgradeMethod);
+      } else {
+        upgradeRuleMethod();
+      }
+    },
+    [legacyJobsInstalled.length, showUpgradeModal]
+  );
+
+  // Wrapper around upgradeOneRule to display ML Jobs warning modal when necessary
+  // when attempting to upgrade a single rule from each rule row CTA
+  const upgradeSingleRuleFromRowCTA = useCallback(
+    (ruleId: string) => {
+      if (legacyJobsInstalled.length > 0) {
+        showUpgradeModal();
+        setModalConfirmationUpgradeMethod('SINGLE_RULE');
+        setRuleIdToUpgrade(ruleId);
+      } else {
+        upgradeOneRule(ruleId);
+      }
+    },
+    [
+      legacyJobsInstalled,
+      setModalConfirmationUpgradeMethod,
+      setRuleIdToUpgrade,
+      showUpgradeModal,
+      upgradeOneRule,
+    ]
+  );
+
+  const mlJobUpgradeModalConfirm = useCallback(() => {
+    if (modalConfirmationUpdateMethod === 'ALL_RULES') {
+      upgradeAllRules();
+    } else if (modalConfirmationUpdateMethod === 'SPECIFIC_RULES') {
+      upgradeSelectedRules();
+    } else if (modalConfirmationUpdateMethod === 'SINGLE_RULE') {
+      upgradeOneRule(ruleIdToUpgrade);
+    }
+    hideUpgradeModal();
+  }, [
+    hideUpgradeModal,
+    modalConfirmationUpdateMethod,
+    ruleIdToUpgrade,
+    upgradeAllRules,
+    upgradeOneRule,
+    upgradeSelectedRules,
+  ]);
+
+  const mlJobUpgradeModalCancel = useCallback(() => {
+    setModalConfirmationUpgradeMethod(null);
+    hideUpgradeModal();
+  }, [hideUpgradeModal, setModalConfirmationUpgradeMethod]);
+
   const actions = useMemo<UpgradePrebuiltRulesTableActions>(
     () => ({
       reFetchRules: refetch,
@@ -169,8 +265,23 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       upgradeAllRules,
       setFilterOptions,
       selectRules: setSelectedRules,
+      setModalConfirmationUpgradeMethod,
+      setRuleIdToUpgrade,
+      upgradeRulesWrapper,
+      upgradeSingleRuleFromRowCTA,
+      mlJobUpgradeModalConfirm,
+      mlJobUpgradeModalCancel,
     }),
-    [refetch, upgradeAllRules, upgradeOneRule, upgradeSelectedRules]
+    [
+      refetch,
+      upgradeOneRule,
+      upgradeSelectedRules,
+      upgradeAllRules,
+      upgradeRulesWrapper,
+      upgradeSingleRuleFromRowCTA,
+      mlJobUpgradeModalConfirm,
+      mlJobUpgradeModalCancel,
+    ]
   );
 
   const filteredRules = useFilterPrebuiltRulesToUpgrade({ filterOptions, rules });
@@ -183,11 +294,15 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         filterOptions,
         tags,
         isFetched,
-        isLoading,
+        isLoading: isLoading && loadingJobs,
         isRefetching,
         selectedRules,
         loadingRules,
         lastUpdated: dataUpdatedAt,
+        legacyJobsInstalled,
+        isUpgradeModalVisible,
+        ruleIdToUpgrade,
+        modalConfirmationUpdateMethod,
       },
       actions,
     };
@@ -198,10 +313,15 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     tags,
     isFetched,
     isLoading,
+    loadingJobs,
     isRefetching,
     selectedRules,
     loadingRules,
     dataUpdatedAt,
+    legacyJobsInstalled,
+    isUpgradeModalVisible,
+    ruleIdToUpgrade,
+    modalConfirmationUpdateMethod,
     actions,
   ]);
 

@@ -19,7 +19,6 @@ import { SeverityBadge } from '../../../../../detections/components/rules/severi
 import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
-import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeInfoForReview>;
@@ -83,7 +82,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 };
 
 const createUpgradeButtonColumn = (
-  upgradeOneRule: UpgradePrebuiltRulesTableActions['upgradeOneRule'],
+  upgradeSingleRuleFromRowCTA: (ruleId: string) => void,
   loadingRules: RuleSignatureId[]
 ): TableColumn => ({
   field: 'rule_id',
@@ -91,7 +90,11 @@ const createUpgradeButtonColumn = (
   render: (ruleId: RuleUpgradeInfoForReview['rule_id']) => {
     const isRuleUpgrading = loadingRules.includes(ruleId);
     return (
-      <EuiButtonEmpty size="s" disabled={isRuleUpgrading} onClick={() => upgradeOneRule(ruleId)}>
+      <EuiButtonEmpty
+        size="s"
+        disabled={isRuleUpgrading}
+        onClick={() => upgradeSingleRuleFromRowCTA(ruleId)}
+      >
         {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPDATE_RULE_BUTTON}
       </EuiButtonEmpty>
     );
@@ -106,7 +109,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
     state: { loadingRules },
-    actions: { upgradeOneRule },
+    actions: { upgradeSingleRuleFromRowCTA },
   } = useUpgradePrebuiltRulesTableContext();
 
   return useMemo(
@@ -134,8 +137,10 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions ? [createUpgradeButtonColumn(upgradeOneRule, loadingRules)] : []),
+      ...(hasCRUDPermissions
+        ? [createUpgradeButtonColumn(upgradeSingleRuleFromRowCTA, loadingRules)]
+        : []),
     ],
-    [hasCRUDPermissions, loadingRules, showRelatedIntegrations, upgradeOneRule]
+    [hasCRUDPermissions, loadingRules, showRelatedIntegrations, upgradeSingleRuleFromRowCTA]
   );
 };
