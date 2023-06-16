@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
+import { useGetCategories } from '../../../containers/use_get_categories';
 import * as i18n from '../../category/translations';
 import { CategoryViewer } from '../../category/category_viewer_component';
 import { CategoryComponent } from '../../category/category_component';
@@ -53,6 +54,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
   const { permissions } = useCasesContext();
   const [isEditCategory, setIsEditCategory] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null | undefined>(category);
+  const { data: categories = [] } = useGetCategories();
 
   const onSubmitCategory = () => {
     onSubmit(selectedCategory);
@@ -107,6 +109,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
                   category={selectedCategory}
                   onChange={handleOnChange}
                   isLoading={isLoading}
+                  availableCategories={categories}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
