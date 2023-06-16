@@ -302,6 +302,11 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             expires: schema.string(),
           }),
         },
+        response: {
+          200: {
+            body: searchSessionsUpdateSchema,
+          },
+        },
       },
     },
     async (context, request, res) => {
@@ -309,9 +314,14 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
       const { expires } = request.body;
       try {
         const searchContext = await context.search;
-        await searchContext.extendSession(id, new Date(expires));
+        const response: SearchSessionsUpdateRestResponse = await searchContext.extendSession(
+          id,
+          new Date(expires)
+        );
 
-        return res.ok();
+        return res.ok({
+          body: response,
+        });
       } catch (e) {
         const err = e.output?.payload || e;
         logger.error(err);
