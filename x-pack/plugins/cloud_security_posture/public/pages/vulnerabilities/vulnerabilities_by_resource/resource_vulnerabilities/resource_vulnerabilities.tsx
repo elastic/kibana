@@ -9,8 +9,6 @@ import {
   EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiProgress,
   EuiSpacer,
   useEuiTheme,
@@ -21,6 +19,7 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Link, useParams, generatePath } from 'react-router-dom';
+import { css } from '@emotion/react';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../../common/constants';
 import { useCloudPostureTable } from '../../../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from '../../hooks/use_latest_vulnerabilities';
@@ -55,7 +54,9 @@ import { findingsNavigation } from '../../../../common/navigation/constants';
 import { CspInlineDescriptionList } from '../../../../components/csp_inline_description_list';
 import { getVulnerabilitiesGridCellActions } from '../../utils/get_vulnerabilities_grid_cell_actions';
 
-const getDefaultQuery = () => ({
+const getDefaultQuery = ({ query, filters }: any) => ({
+  query,
+  filters,
   sort: [
     { id: vulnerabilitiesColumns.severity, direction: 'desc' },
     { id: vulnerabilitiesColumns.cvss, direction: 'desc' },
@@ -176,7 +177,7 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
       columns: vulnerabilitiesColumns,
       dataView,
       pageSize,
-      row: data.page,
+      data: data.page,
       setUrlQuery,
       filters: urlQuery.filters,
     }).filter((column) => column.id !== vulnerabilitiesColumns.resource);
@@ -318,24 +319,25 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
         loading={isLoading}
         placeholder={SEARCH_BAR_PLACEHOLDER}
       />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <PageTitle>
-            <PageTitleText title={data?.page[0]?.resource?.name || ''} />
-          </PageTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <Link to={generatePath(findingsNavigation.vulnerabilities_by_resource.path)}>
-            <EuiButtonEmpty iconType={'arrowLeft'}>
-              <FormattedMessage
-                id="xpack.csp.vulnerabilities.resourceVulnerabilities.backToResourcesPageButtonLabel"
-                defaultMessage="Back to resources"
-              />
-            </EuiButtonEmpty>
-          </Link>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Link to={generatePath(findingsNavigation.vulnerabilities_by_resource.path)}>
+        <EuiButtonEmpty
+          iconType="arrowLeft"
+          css={css`
+            & .euiButtonEmpty__content {
+              padding: 0;
+            }
+          `}
+        >
+          <FormattedMessage
+            id="xpack.csp.vulnerabilities.resourceVulnerabilities.backToResourcesPageButtonLabel"
+            defaultMessage="Back to resources"
+          />
+        </EuiButtonEmpty>
+      </Link>
+      <EuiSpacer size="xs" />
+      <PageTitle>
+        <PageTitleText title={data?.page[0]?.resource?.name || ''} />
+      </PageTitle>
       <EuiSpacer />
       <CspInlineDescriptionList
         listItems={[
