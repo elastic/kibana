@@ -33,6 +33,7 @@ describe('Alert tagging', () => {
     esArchiverLoad('endpoint');
     createRule(getNewRule({ rule_id: 'new custom rule' }));
     visit(ALERTS_URL);
+    waitForAlertsToPopulate();
   });
 
   after(() => {
