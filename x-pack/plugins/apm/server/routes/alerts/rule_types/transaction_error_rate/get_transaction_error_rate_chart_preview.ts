@@ -28,7 +28,7 @@ import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby
 import {
   BarSeriesDataMap,
   getFilteredBarSeries,
-} from '../utils/get_series_for_preview_chart';
+} from '../utils/get_filtered_series_for_preview_chart';
 
 export async function getTransactionErrorRateChartPreview({
   config,
@@ -130,7 +130,7 @@ export async function getTransactionErrorRateChartPreview({
   );
 
   if (!resp.aggregations) {
-    return { series: [], displayedGroups: 0, totalGroups: 0 };
+    return { series: [], totalGroups: 0 };
   }
 
   const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
@@ -157,7 +157,12 @@ export async function getTransactionErrorRateChartPreview({
     data: seriesDataMap[key],
   }));
 
-  return getFilteredBarSeries(series);
+  const filteredSeries = getFilteredBarSeries(series);
+
+  return {
+    series: filteredSeries,
+    totalGroups: series.length,
+  };
 }
 
 const calculateErrorRate = (

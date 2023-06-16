@@ -20,7 +20,7 @@ import {
   TooltipProps,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -34,16 +34,16 @@ import {
   useDateFormatter,
 } from './chart_preview_helper';
 import { BUCKET_SIZE } from '../../utils/helper';
-import { BarSeriesData } from '../../../../../common/rules/apm_rule_types';
+import { Coordinate } from '../../../../../typings/timeseries';
+import { Maybe } from '../../../../../typings/common';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
   threshold: number;
   uiSettings?: IUiSettingsClient;
-  series: BarSeriesData[];
+  series: Array<{ name?: string; data: Coordinate[] }>;
   timeSize?: number;
   timeUnit?: TimeUnitChar;
-  displayedGroups: number;
   totalGroups: number;
 }
 
@@ -54,7 +54,6 @@ export function ChartPreview({
   series,
   timeSize = 5,
   timeUnit = 'm',
-  displayedGroups,
   totalGroups,
 }: ChartPreviewProps) {
   const theme = useTheme();
@@ -81,19 +80,30 @@ export function ChartPreview({
     },
   };
 
+  const barSeries = useMemo(() => {
+    return series.reduce<
+      Array<{ x: number; y: Maybe<number>; groupBy: string | undefined }>
+    >((acc, serie) => {
+      const barPoints = serie.data.reduce<
+        Array<{ x: number; y: Maybe<number>; groupBy: string | undefined }>
+      >((pointAcc, point) => {
+        return [...pointAcc, { ...point, groupBy: serie.name }];
+      }, []);
+      return [...acc, ...barPoints];
+    }, []);
+  }, [series]);
+
   const timeZone = getTimeZone(uiSettings);
 
   const legendSize =
-    displayedGroups > 1
-      ? Math.ceil(displayedGroups / 2) * 30
-      : displayedGroups * 35;
+    series.length > 1 ? Math.ceil(series.length / 2) * 30 : series.length * 35;
 
   const chartSize = 150;
 
   const { yMin, yMax, xMin, xMax } = getDomain(series);
   const chartDomain = {
     max: Math.max(yMax, threshold) * 1.1, // Add 10% headroom.
-    min: Math.min(yMin, threshold) * 0.9, // Allow some padding so the threshold annotation has better visibility
+    min: Math.min(yMin, threshold) * 0.9, // Add 10% headroom.
   };
 
   const dateFormatter = useDateFormatter(xMin, xMax);
@@ -160,7 +170,7 @@ export function ChartPreview({
           xAccessor="x"
           yAccessors={['y']}
           splitSeriesAccessors={['group']}
-          data={series}
+          data={barSeries}
           barSeriesStyle={{
             rectBorder: {
               strokeWidth: 1,
@@ -177,7 +187,7 @@ export function ChartPreview({
         <TimeLabelForData
           lookback={lookback}
           timeLabel={timeLabel}
-          displayedGroups={displayedGroups}
+          displayedGroups={series.length}
           totalGroups={totalGroups}
         />
       )}

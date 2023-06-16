@@ -21,7 +21,7 @@ import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 import {
   BarSeriesDataMap,
   getFilteredBarSeries,
-} from '../utils/get_series_for_preview_chart';
+} from '../utils/get_filtered_series_for_preview_chart';
 
 export async function getTransactionErrorCountChartPreview({
   apmEventClient,
@@ -94,7 +94,7 @@ export async function getTransactionErrorCountChartPreview({
   );
 
   if (!resp.aggregations) {
-    return { series: [], displayedGroups: 0, totalGroups: 0 };
+    return { series: [], totalGroups: 0 };
   }
 
   const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
@@ -121,5 +121,10 @@ export async function getTransactionErrorCountChartPreview({
     data: seriesDataMap[key],
   }));
 
-  return getFilteredBarSeries(series);
+  const filteredSeries = getFilteredBarSeries(series);
+
+  return {
+    series: filteredSeries,
+    totalGroups: series.length,
+  };
 }

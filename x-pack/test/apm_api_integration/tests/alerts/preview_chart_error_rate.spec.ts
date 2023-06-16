@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(response.body.errorRateChartPreview).to.eql([]);
+      expect(response.body.errorRateChartPreview.series).to.eql([]);
     });
   });
 
@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorRateChartPreview.some((item: PreviewChartResponseItem) =>
+          response.body.errorRateChartPreview.series.some((item: PreviewChartResponseItem) =>
             item.data.some((coordinate) => coordinate.x && coordinate.y)
           )
         ).to.equal(true);
@@ -95,7 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorRateChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -123,7 +123,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview).to.eql([]);
+        expect(response.body.errorRateChartPreview.series).to.eql([]);
       });
 
       it('with no group by parameter', async () => {
@@ -134,9 +134,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview.length).to.equal(1);
+        expect(response.body.errorRateChartPreview.series.length).to.equal(1);
         expect(
-          response.body.errorRateChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -159,9 +159,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview.length).to.equal(1);
+        expect(response.body.errorRateChartPreview.series.length).to.equal(1);
         expect(
-          response.body.errorRateChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -184,20 +184,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview.length).to.equal(2);
+        expect(response.body.errorRateChartPreview.series.length).to.equal(2);
         expect(
-          response.body.errorRateChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_request_GET /apple',
-            y: 25,
-          },
-          {
             name: 'synth-go_production_request_GET /banana',
             y: 50,
+          },
+          {
+            name: 'synth-go_production_request_GET /apple',
+            y: 25,
           },
         ]);
       });
@@ -219,9 +219,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.errorRateChartPreview.length).to.equal(1);
+        expect(response.body.errorRateChartPreview.series.length).to.equal(1);
         expect(
-          response.body.errorRateChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -249,7 +249,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorRateChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -281,26 +281,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorRateChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorRateChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_request_GET /apple',
-            y: 25,
-          },
-          {
             name: 'synth-go_production_request_GET /banana',
             y: 50,
           },
           {
-            name: 'synth-java_production_request_GET /apple',
+            name: 'synth-java_production_request_GET /banana',
+            y: 50,
+          },
+          {
+            name: 'synth-go_production_request_GET /apple',
             y: 25,
           },
           {
-            name: 'synth-java_production_request_GET /banana',
-            y: 50,
+            name: 'synth-java_production_request_GET /apple',
+            y: 25,
           },
         ]);
       });

@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(response.body.errorCountChartPreview).to.eql([]);
+      expect(response.body.errorCountChartPreview.series).to.eql([]);
     });
   });
 
@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorCountChartPreview.some((item: PreviewChartResponseItem) =>
+          response.body.errorCountChartPreview.series.some((item: PreviewChartResponseItem) =>
             item.data.some((coordinate) => coordinate.x && coordinate.y)
           )
         ).to.equal(true);
@@ -94,7 +94,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -109,9 +109,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.errorCountChartPreview.length).to.equal(1);
+        expect(response.body.errorCountChartPreview.series.length).to.equal(1);
         expect(
-          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -134,9 +134,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.errorCountChartPreview.length).to.equal(1);
+        expect(response.body.errorCountChartPreview.series.length).to.equal(1);
         expect(
-          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -159,9 +159,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.errorCountChartPreview.length).to.equal(2);
+        expect(response.body.errorCountChartPreview.series.length).to.equal(2);
         expect(
-          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -194,9 +194,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.be(200);
-        expect(response.body.errorCountChartPreview.length).to.equal(1);
+        expect(response.body.errorCountChartPreview.series.length).to.equal(1);
         expect(
-          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -227,7 +227,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))
@@ -257,7 +257,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(
-          response.body.errorCountChartPreview.map((item: PreviewChartResponseItem) => ({
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
             name: item.name,
             y: item.data[0].y,
           }))

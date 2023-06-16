@@ -183,7 +183,6 @@ export function TransactionErrorRateRuleType(props: Props) {
   const errorRateChartPreview = data?.errorRateChartPreview;
   const series = errorRateChartPreview?.series ?? [];
   const hasData = series.length > 0;
-  const displayedGroups = errorRateChartPreview?.displayedGroups ?? 0;
   const totalGroups = errorRateChartPreview?.totalGroups ?? 0;
 
   const chartPreview = isPending(status) ? (
@@ -198,7 +197,6 @@ export function TransactionErrorRateRuleType(props: Props) {
       uiSettings={services.uiSettings}
       timeSize={params.windowSize}
       timeUnit={params.windowUnit}
-      displayedGroups={displayedGroups}
       totalGroups={totalGroups}
     />
   ) : (

@@ -40,17 +40,9 @@ export enum AggregationType {
   P99 = '99th',
 }
 
-export const BUCKET_SIZE = 5;
-
 export interface PreviewChartResponseItem {
   name: string;
   data: Array<{ x: number; y: number | null }>;
-}
-
-export interface BarSeriesData {
-  x: number;
-  y: number | null;
-  group: string | undefined;
 }
 
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';

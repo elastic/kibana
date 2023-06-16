@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { BarSeriesData } from '../../../../../common/rules/apm_rule_types';
-
 export type BarSeriesDataMap = Record<
   string,
   Array<{ x: number; y: number | null }>
@@ -29,18 +27,5 @@ export const getFilteredBarSeries = (barSeries: BarSeries) => {
     return bMax - aMax;
   });
 
-  const filteredSeries = sortedSeries.slice(0, NUM_SERIES);
-
-  const series = filteredSeries.reduce<BarSeriesData[]>((acc, serie) => {
-    const barPoints = serie.data.reduce<BarSeriesData[]>((pointAcc, point) => {
-      return [...pointAcc, { ...point, group: serie.name }];
-    }, []);
-    return [...acc, ...barPoints];
-  }, []);
-
-  return {
-    series,
-    displayedGroups: filteredSeries.length,
-    totalGroups: barSeries.length,
-  };
+  return sortedSeries.slice(0, NUM_SERIES);
 };

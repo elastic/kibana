@@ -176,7 +176,6 @@ export function ErrorCountRuleType(props: Props) {
   const errorCountChartPreview = data?.errorCountChartPreview;
   const series = errorCountChartPreview?.series ?? [];
   const hasData = series.length > 0;
-  const displayedGroups = errorCountChartPreview?.displayedGroups ?? 0;
   const totalGroups = errorCountChartPreview?.totalGroups ?? 0;
 
   const chartPreview = isPending(status) ? (
@@ -191,7 +190,6 @@ export function ErrorCountRuleType(props: Props) {
       uiSettings={services.uiSettings}
       timeSize={params.windowSize}
       timeUnit={params.windowUnit}
-      displayedGroups={displayedGroups}
       totalGroups={totalGroups}
     />
   ) : (
