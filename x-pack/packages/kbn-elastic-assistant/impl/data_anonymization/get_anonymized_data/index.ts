@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SelectedPromptContext } from '../../assistant/types';
+import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { isAllowed } from '../../data_anonymization_editor/helpers';
-import { AnonymizedData, GetAnonymizedValues } from '../types';
+import type { AnonymizedData, GetAnonymizedValues } from '../types';
 
 export const getAnonymizedData = ({
   allow,

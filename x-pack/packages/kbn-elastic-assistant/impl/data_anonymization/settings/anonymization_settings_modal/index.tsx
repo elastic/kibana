@@ -17,7 +17,6 @@ interface Props {
 const AnonymizationSettingsModalComponent: React.FC<Props> = ({ closeModal }) => (
   <EuiModal onClose={closeModal}>
     <EuiModalHeader />
-
     <EuiModalBody>
       <AnonymizationSettings closeModal={closeModal} />
     </EuiModalBody>

@@ -10,7 +10,7 @@ import { getCombinedMessage, getSystemMessages } from './helpers';
 import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
 import { mockSystemPrompt } from '../../mock/system_prompt';
 import { mockAlertPromptContext } from '../../mock/prompt_context';
-import { SelectedPromptContext } from '../types';
+import type { SelectedPromptContext } from '../prompt_context/types';
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
   allow: [],

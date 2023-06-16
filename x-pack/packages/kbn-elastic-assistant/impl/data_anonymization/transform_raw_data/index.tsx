@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SelectedPromptContext } from '../../assistant/types';
+import { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { getAnonymizedData } from '../get_anonymized_data';
 import { getAnonymizedValues } from '../get_anonymized_values';
 import { getCsvFromData } from '../get_csv_from_data';

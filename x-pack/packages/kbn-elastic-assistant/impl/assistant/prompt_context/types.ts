@@ -64,6 +64,17 @@ export interface PromptContext {
   tooltip: ReactNode;
 }
 
+export interface SelectedPromptContext {
+  /** fields allowed to be included in a conversation */
+  allow: string[];
+  /** fields that will be anonymized */
+  allowReplacement: string[];
+  /** unique id of the selected `PromptContext` */
+  promptContextId: string;
+  /** this data is not anonymized  */
+  rawData: string | Record<string, string[]>;
+}
+
 /**
  * This interface is used to pass a default or base set of contexts to the Elastic AI Assistant when
  * initializing it. This is used to provide 'category' options when users create Quick Prompts.

@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import { AllowedStat } from './allowed_stat';
 import { AnonymizedStat } from './anonymized_stat';
-import { SelectedPromptContext } from '../../assistant/types';
+import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { getStats } from '../get_stats';
 import { AvailableStat } from './available_stat';
 

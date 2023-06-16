@@ -11,7 +11,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useAssistantContext } from '../assistant_context';
-import { SelectedPromptContext } from '../assistant/types';
+import type { SelectedPromptContext } from '../assistant/prompt_context/types';
 import { ContextEditor } from './context_editor';
 import { BatchUpdateListItem } from './context_editor/types';
 import { getIsDataAnonymizable, updateDefaults, updateSelectedPromptContext } from './helpers';

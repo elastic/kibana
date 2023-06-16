@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SelectedPromptContext } from '../../assistant/types';
+import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { Stats, isAllowed, isAnonymized, isDenied } from '../helpers';
 
 export const getStats = ({ allow, allowReplacement, rawData }: SelectedPromptContext): Stats => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SelectedPromptContext } from '../../../assistant/types';
+import { SelectedPromptContext } from '../../../assistant/prompt_context/types';
 import { isAllowed, isAnonymized, isDenied } from '../../helpers';
 import { ContextEditorRow } from '../types';
 

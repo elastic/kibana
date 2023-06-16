@@ -19,8 +19,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { DataAnonymizationEditor } from '../../../data_anonymization_editor';
-import type { PromptContext } from '../../prompt_context/types';
-import { SelectedPromptContext } from '../../types';
+import type { PromptContext, SelectedPromptContext } from '../../prompt_context/types';
 import * as i18n from './translations';
 
 export interface Props {

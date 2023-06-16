@@ -10,7 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 
 import { mockAlertPromptContext, mockEventPromptContext } from '../../mock/prompt_context';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { SelectedPromptContext } from '../types';
+import { SelectedPromptContext } from '../prompt_context/types';
 import { PromptEditor, Props } from '.';
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {

@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 
 import { mockAlertPromptContext, mockEventPromptContext } from '../../../mock/prompt_context';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
-import { SelectedPromptContext } from '../../types';
+import type { SelectedPromptContext } from '../../prompt_context/types';
 import { Props, SelectedPromptContexts } from '.';
 
 const defaultProps: Props = {

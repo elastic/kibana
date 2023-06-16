@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SelectedPromptContext } from '../../assistant/types';
-import { BatchUpdateListItem } from '../context_editor/types';
+import { SelectedPromptContext } from '../../assistant/prompt_context/types';
+import type { BatchUpdateListItem } from '../context_editor/types';
 
 export const getIsDataAnonymizable = (rawData: string | Record<string, string[]>): boolean =>
   typeof rawData !== 'string';

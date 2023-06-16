@@ -11,9 +11,8 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { Conversation } from '../../..';
-import type { PromptContext } from '../prompt_context/types';
+import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 import { SystemPrompt } from './system_prompt';
-import type { SelectedPromptContext } from '../types';
 
 import * as i18n from './translations';
 import { SelectedPromptContexts } from './selected_prompt_contexts';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { PromptContext } from '../../assistant/prompt_context/types';
-import { SelectedPromptContext } from '../../assistant/types';
+import type { PromptContext, SelectedPromptContext } from '../../assistant/prompt_context/types';
 
 export async function getNewSelectedPromptContext({
   defaultAllow,

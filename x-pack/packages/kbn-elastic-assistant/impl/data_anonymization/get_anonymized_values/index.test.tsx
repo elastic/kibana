@@ -61,4 +61,38 @@ describe('getAnonymizedValues', () => {
       '2tset': 'test2',
     });
   });
+
+  it('returns non-anonymized values when the field is not a member of the `allowReplacementSet`', () => {
+    const rawData = {
+      'test.field': ['test1', 'test2'],
+    };
+
+    const result = getAnonymizedValues({
+      allowReplacementSet: new Set(), // does NOT include `test.field`
+      allowSet: new Set(['test.field']),
+      currentReplacements: {},
+      field: 'test.field',
+      getAnonymizedValue: mockGetAnonymizedValue,
+      rawData,
+    });
+
+    expect(result.anonymizedValues).toEqual(['test1', 'test2']); // no anonymization
+  });
+
+  it('does NOT allow a field to be included in `anonymizedValues` when the field is not a member of the `allowSet`', () => {
+    const rawData = {
+      'test.field': ['test1', 'test2'],
+    };
+
+    const result = getAnonymizedValues({
+      allowReplacementSet: new Set(['test.field']),
+      allowSet: new Set(), // does NOT include `test.field`
+      currentReplacements: {},
+      field: 'test.field',
+      getAnonymizedValue: mockGetAnonymizedValue,
+      rawData,
+    });
+
+    expect(result.anonymizedValues).toEqual([]);
+  });
 });

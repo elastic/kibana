@@ -10,7 +10,8 @@ import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/tra
 
 import { transformRawData } from '../../data_anonymization/transform_raw_data';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
-import type { Prompt, SelectedPromptContext } from '../types';
+import type { SelectedPromptContext } from '../prompt_context/types';
+import type { Prompt } from '../types';
 
 export const getSystemMessages = ({
   isNewChat,

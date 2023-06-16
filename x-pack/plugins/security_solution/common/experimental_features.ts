@@ -84,7 +84,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Elastic AI Assistant
    */
-  assistantEnabled: true,
+  assistantEnabled: false,
 
   /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.

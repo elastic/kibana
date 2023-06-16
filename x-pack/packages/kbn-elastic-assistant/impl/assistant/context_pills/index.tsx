@@ -12,8 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { getNewSelectedPromptContext } from '../../data_anonymization/get_new_selected_prompt_context';
-import type { PromptContext } from '../prompt_context/types';
-import { SelectedPromptContext } from '../types';
+import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 
 const PillButton = styled(EuiButton)`
   margin-right: ${({ theme }) => theme.eui.euiSizeXS};

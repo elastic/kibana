@@ -10,8 +10,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import type { PromptContext } from '../prompt_context/types';
-import { SelectedPromptContext } from '../types';
+import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 import { ContextPills } from '.';
 
 const mockPromptContexts: Record<string, PromptContext> = {
