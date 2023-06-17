@@ -335,7 +335,7 @@ export class ComboBoxService extends FtrService {
     const selectedOptions = $('.euiComboBoxPill')
       .toArray()
       .map((option) => $(option).text());
-    return selectedOptions.length === 1 && selectedOptions[0] === value;
+    return selectedOptions.length === 1 && selectedOptions[0].toLowerCase().trim() === value.toLowerCase().trim();
   }
 
   /**
