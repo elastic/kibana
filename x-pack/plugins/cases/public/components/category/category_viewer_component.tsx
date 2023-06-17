@@ -6,31 +6,18 @@
  */
 
 import React, { memo } from 'react';
-import type { EuiBadgeGroupProps } from '@elastic/eui';
-import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiText } from '@elastic/eui';
 
 interface CategoryViewerProps {
   category: string;
-  color?: string;
-  gutterSize?: EuiBadgeGroupProps['gutterSize'];
 }
 
-const MyEuiBadge = styled(EuiBadge)`
-  max-width: 200px;
-`;
-
-const CategoryViewerComponent: React.FC<CategoryViewerProps> = ({
-  category,
-  color = 'default',
-  gutterSize,
-}) => (
-  <EuiBadgeGroup gutterSize={gutterSize}>
-    <MyEuiBadge data-test-subj={`category-${category}`} color={color} key={category}>
-      {category}
-    </MyEuiBadge>
-  </EuiBadgeGroup>
+const CategoryViewerComponent: React.FC<CategoryViewerProps> = ({ category }) => (
+  <EuiText data-test-subj="category-viewer" key={category} size="s">
+    {category}
+  </EuiText>
 );
+
 CategoryViewerComponent.displayName = 'CategoryViewer';
 
 export const CategoryViewer = memo(CategoryViewerComponent);

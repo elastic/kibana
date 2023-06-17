@@ -132,7 +132,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
           )}
           {!isEditCategory && category && (
             <EuiFlexItem>
-              <CategoryViewer category={category} color="hollow" />
+              <CategoryViewer category={category} />
             </EuiFlexItem>
           )}
           {isEditCategory && (
