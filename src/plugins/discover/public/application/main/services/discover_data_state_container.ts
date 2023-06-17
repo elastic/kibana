@@ -62,6 +62,8 @@ export interface DataMsg {
   recordRawType?: RecordRawType;
   query?: AggregateQuery | Query | undefined;
   dataView?: DataView;
+
+  fetchAppState?: DiscoverAppState;
 }
 
 export interface DataMainMsg extends DataMsg {

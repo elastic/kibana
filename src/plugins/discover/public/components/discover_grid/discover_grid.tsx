@@ -29,6 +29,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { EuiDataGridInMemory } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -93,7 +94,7 @@ export interface DiscoverGridProps {
   /**
    * Function to add a filter in the grid cell or document flyout
    */
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   /**
    * Function used in the grid header and flyout to remove a column
    * @param column
@@ -215,7 +216,6 @@ export interface DiscoverGridProps {
     toastNotifications: ToastsStart;
   };
 }
-
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
@@ -552,6 +552,9 @@ export const DiscoverGrid = ({
     rowHeightState,
     onUpdateRowHeight,
   });
+  const inMemory = useMemo(() => {
+    return isPlainRecord ? ({ level: 'sorting' } as EuiDataGridInMemory) : undefined;
+  }, [isPlainRecord]);
 
   if (!rowCount && isLoading) {
     return (
@@ -629,7 +632,7 @@ export const DiscoverGrid = ({
             sorting={sorting as EuiDataGridSorting}
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
-            inMemory={isPlainRecord ? { level: 'sorting' } : undefined}
+            inMemory={inMemory}
             gridStyle={GRID_STYLE}
           />
         </div>

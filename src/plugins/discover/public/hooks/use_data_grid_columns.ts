@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
@@ -18,12 +18,13 @@ import { getStateColumnActions } from '../components/doc_table/actions/columns';
 interface UseColumnsProps {
   capabilities: Capabilities;
   config: IUiSettingsClient;
-  dataView: DataView;
+  dataView?: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: DiscoverAppStateContainer['update'] | ContextGetStateReturn['setAppState'];
   columns?: string[];
   sort?: string[][];
+  isTextBasedQueryLanguage?: boolean;
 }
 
 export const useColumns = ({
@@ -35,15 +36,21 @@ export const useColumns = ({
   useNewFieldsApi,
   columns,
   sort,
+  isTextBasedQueryLanguage,
 }: UseColumnsProps) => {
-  const [usedColumns, setUsedColumns] = useState(getColumns(columns, useNewFieldsApi));
-  useEffect(() => {
-    const nextColumns = getColumns(columns, useNewFieldsApi);
-    if (isEqual(usedColumns, nextColumns)) {
-      return;
+  const usedColumns = useRef(getColumns(columns, useNewFieldsApi));
+
+  const actualColumns = useMemo(() => {
+    if (isTextBasedQueryLanguage) {
+      return columns;
     }
-    setUsedColumns(nextColumns);
-  }, [columns, useNewFieldsApi, usedColumns]);
+    const nextColumns = getColumns(columns, useNewFieldsApi);
+    if (isEqual(usedColumns.current, nextColumns)) {
+      return usedColumns.current;
+    }
+    usedColumns.current = nextColumns;
+    return nextColumns;
+  }, [columns, isTextBasedQueryLanguage, useNewFieldsApi]);
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
@@ -53,14 +60,14 @@ export const useColumns = ({
         dataViews,
         setAppState,
         useNewFieldsApi,
-        columns: usedColumns,
+        columns: actualColumns,
         sort,
       }),
-    [capabilities, config, dataView, dataViews, setAppState, sort, useNewFieldsApi, usedColumns]
+    [capabilities, config, dataView, dataViews, setAppState, sort, useNewFieldsApi, actualColumns]
   );
 
   return {
-    columns: usedColumns,
+    columns: actualColumns ?? [],
     onAddColumn,
     onRemoveColumn,
     onMoveColumn,

@@ -95,7 +95,8 @@ export function fetchAll(
         }
 
         dataSubjects.documents$.next({
-          fetchStatus: FetchStatus.COMPLETE,
+          fetchStatus:
+            recordRawType === RecordRawType.DOCUMENT ? FetchStatus.COMPLETE : FetchStatus.LOADING,
           result: records,
           textBasedQueryColumns,
           recordRawType,

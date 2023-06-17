@@ -29,7 +29,7 @@ export type DocTableRow = EsHitRecord & {
 
 export interface TableRowProps {
   columns: string[];
-  filter: DocViewFilterFn;
+  filter?: DocViewFilterFn;
   filters?: Filter[];
   isPlainRecord?: boolean;
   savedSearchId?: string;
@@ -103,8 +103,10 @@ export const TableRow = ({
   };
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
-      const field = dataView.fields.getByName(column);
-      filter(field!, row.flattened[column], type);
+      if (filter) {
+        const field = dataView.fields.getByName(column);
+        filter(field!, row.flattened[column], type);
+      }
     },
     [filter, dataView.fields, row.flattened]
   );

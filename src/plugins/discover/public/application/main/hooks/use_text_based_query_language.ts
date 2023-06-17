@@ -15,6 +15,7 @@ import {
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { DiscoverAppState } from '../services/discover_app_state_container';
 import { useSavedSearchInitial } from '../services/discover_state_provider';
 import type { DiscoverStateContainer } from '../services/discover_state';
 import { getValidViewMode } from '../utils/get_valid_view_mode';
@@ -53,14 +54,25 @@ export function useTextBasedQueryLanguage({
   useEffect(() => {
     const subscription = stateContainer.dataState.data$.documents$.subscribe(async (next) => {
       const { query, recordRawType } = next;
-      if (!query || next.fetchStatus === FetchStatus.ERROR) {
+      if (
+        !query ||
+        next.fetchStatus === FetchStatus.ERROR ||
+        next.fetchStatus === FetchStatus.COMPLETE
+      ) {
         return;
       }
+      const sendComplete = (nextState?: DiscoverAppState) => {
+        stateContainer.dataState.data$.documents$.next({
+          ...next,
+          fetchStatus: FetchStatus.COMPLETE,
+          fetchAppState: nextState,
+        });
+      };
       const { columns: stateColumns, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
-      const hasResults = next.result?.length && next.fetchStatus === FetchStatus.COMPLETE;
+      const hasResults = next.result?.length && next.fetchStatus === FetchStatus.LOADING;
       const initialFetch = !prev.current.columns.length;
 
       if (isTextBasedQueryLang) {
@@ -89,6 +101,7 @@ export function useTextBasedQueryLanguage({
         // no need to reset index to state if it hasn't changed
         const queryChanged = indexPatternFromQuery !== indexTitle.current;
         if (!addColumnsToState && !queryChanged) {
+          sendComplete();
           return;
         }
 
@@ -104,6 +117,9 @@ export function useTextBasedQueryLanguage({
           }),
         };
         stateContainer.appState.replaceUrlState(nextState);
+        const nextMergedState = { ...stateContainer.appState.getState(), ...nextState };
+        stateContainer.savedSearchState.update({ nextState: nextMergedState });
+        sendComplete(nextMergedState);
       } else {
         // cleanup for a "regular" query
         cleanup();

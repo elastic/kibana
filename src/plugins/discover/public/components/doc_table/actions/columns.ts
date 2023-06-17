@@ -67,7 +67,7 @@ export function getStateColumnActions({
 }: {
   capabilities: Capabilities;
   config: IUiSettingsClient;
-  dataView: DataView;
+  dataView?: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: DiscoverAppStateContainer['update'] | ContextGetStateReturn['setAppState'];
@@ -75,7 +75,9 @@ export function getStateColumnActions({
   sort: string[][] | undefined;
 }) {
   function onAddColumn(columnName: string) {
-    popularizeField(dataView, columnName, dataViews, capabilities);
+    if (dataView) {
+      popularizeField(dataView, columnName, dataViews, capabilities);
+    }
     const nextColumns = addColumn(columns || [], columnName, useNewFieldsApi);
     const defaultOrder = config.get(SORT_DEFAULT_ORDER_SETTING);
     const nextSort = columnName === '_score' && !sort?.length ? [['_score', defaultOrder]] : sort;
@@ -83,7 +85,9 @@ export function getStateColumnActions({
   }
 
   function onRemoveColumn(columnName: string) {
-    popularizeField(dataView, columnName, dataViews, capabilities);
+    if (dataView) {
+      popularizeField(dataView, columnName, dataViews, capabilities);
+    }
     const nextColumns = removeColumn(columns || [], columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const nextSort = sort && sort.length ? sort.filter((subArr) => subArr[0] !== columnName) : [];
@@ -98,7 +102,7 @@ export function getStateColumnActions({
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
     // The next line should be gone when classic table will be removed
     const actualColumns =
-      !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
+      !hideTimeColumn && dataView?.timeFieldName && dataView?.timeFieldName === nextColumns[0]
         ? (nextColumns || []).slice(1)
         : nextColumns;
 

@@ -41,7 +41,7 @@ export interface DiscoverMainContentProps {
   isPlainRecord: boolean;
   stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
-  onAddFilter: DocViewFilterFn | undefined;
+  onAddFilter: DocViewFilterFn;
   onFieldEdited: () => Promise<void>;
   onDropFieldToTable?: () => void;
   columns: string[];
@@ -115,10 +115,9 @@ export const DiscoverMainContent = ({
 
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
-              dataView={dataView}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              onAddFilter={onAddFilter}
               stateContainer={stateContainer}
-              onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+              onFieldEdited={onFieldEdited}
             />
           ) : (
             <FieldStatisticsTab
