@@ -11,8 +11,10 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { getColor, getTooltipContent } from './helpers';
-import { ANONYMIZATION_ICON, TITLE_SIZE } from '../helpers';
+import { TITLE_SIZE } from '../constants';
 import * as i18n from './translations';
+
+const ANONYMIZATION_ICON = 'eyeClosed';
 
 const AnonymizationIconFlexItem = styled(EuiFlexItem)`
   margin-right: ${({ theme }) => theme.eui.euiSizeS};

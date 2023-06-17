@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const ANONYMIZATION_ICON = 'eyeClosed';
-
 export const TITLE_SIZE = 'xs';

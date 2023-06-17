@@ -40,10 +40,13 @@ export const updateList = ({
   field: string;
   list: string[];
   operation: 'add' | 'remove';
-}): string[] =>
-  operation === 'add'
-    ? [...list.filter((x) => x !== field), field]
-    : list.filter((x) => x !== field);
+}): string[] => {
+  if (operation === 'add') {
+    return list.includes(field) ? list : [...list, field];
+  } else {
+    return list.filter((x) => x !== field);
+  }
+};
 
 export const updateSelectedPromptContext = ({
   field,
@@ -94,7 +97,7 @@ export const updateDefaultList = ({
   const filteredUpdates = updates.filter((x) => x.update === update);
 
   if (filteredUpdates.length > 0) {
-    const updatedList = updates.reduce(
+    const updatedList = filteredUpdates.reduce(
       (acc, { field, operation }) => updateList({ field, list: acc, operation }),
       currentList
     );
