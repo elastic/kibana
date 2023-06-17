@@ -129,6 +129,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ]);
     });
 
+    after(() => synthtraceEsClient.clean());
+
     describe('Transaction groups with avg transaction duration alerts', () => {
       let ruleId: string;
 
@@ -155,6 +157,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
+        await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
       });
 
       it('returns the correct number of alert counts', async () => {
@@ -204,6 +207,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
+        await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
       });
 
       it('returns the correct number of alert counts', async () => {
@@ -252,6 +256,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
+        await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
       });
 
       it('returns the correct number of alert counts', async () => {
@@ -290,11 +295,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(expected).to.eql([{ name: 'GET /api/task/avg', alertsCount: 0 }]);
       });
-    });
-
-    after(async () => {
-      synthtraceEsClient.clean();
-      await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
     });
   });
 }
