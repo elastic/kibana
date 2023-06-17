@@ -178,7 +178,7 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
   if (message) {
     try {
       // We should call `format` even for messages without any value references
-      // to let it handle escaped curly braces `\\{` that are the part of the text itself
+      // to let it handle escaped curly braces `'{` that are the part of the text itself
       // and not value reference boundaries.
       const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
 

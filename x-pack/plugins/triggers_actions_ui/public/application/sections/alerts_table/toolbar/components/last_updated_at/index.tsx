@@ -7,6 +7,7 @@
 
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 
 import * as i18n from './translations';
 
@@ -21,7 +22,7 @@ const Updated = React.memo<{ date: number; prefix: string; updatedAt: number }>(
     <>
       {prefix}
       {
-        <FormattedRelative
+        <FormattedRelativeTime
           data-test-subj="last-updated-at-date"
           key={`formatedRelative-${date}`}
           value={new Date(updatedAt)}

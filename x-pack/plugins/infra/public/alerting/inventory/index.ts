@@ -35,10 +35,10 @@ export function createInventoryMetricRuleType(): ObservabilityRuleTypeModel<Inve
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',
       {
-        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
+        defaultMessage: `'{'{alertName}'}' - '{'{context.group}'}' is in a state of '{'{context.alertState}'}'
 
 Reason:
-\\{\\{context.reason\\}\\}
+'{'{context.reason}'}'
 `,
       }
     ),

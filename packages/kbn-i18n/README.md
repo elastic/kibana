@@ -318,14 +318,10 @@ React component as a class:
 
 ```js
 import React from 'react';
-import { injectI18n, intlShape } from '@kbn/i18n-react';
+import { injectI18n } from '@kbn/i18n-react';
 
 export const MyComponent = injectI18n(
   class MyComponent extends React.Component {
-    static propTypes = {
-      intl: intlShape.isRequired,
-    };
-
     render() {
       const { intl } = this.props;
 

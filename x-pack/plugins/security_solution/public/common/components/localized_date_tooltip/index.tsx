@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
 
@@ -26,7 +27,7 @@ export const LocalizedDateTooltip = React.memo<{
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>
-          <FormattedRelative
+          <FormattedRelativeTime
             data-test-subj="humanized-relative-date"
             value={moment.utc(date).toDate()}
           />

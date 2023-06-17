@@ -40,7 +40,7 @@ export function createLogThresholdRuleType(
     defaultActionMessage: i18n.translate(
       'xpack.infra.logs.alerting.threshold.defaultActionMessage',
       {
-        defaultMessage: `\\{\\{^context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\}\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}\\{\\{/context.isRatio\\}\\}\\{\\{#context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\} Ratio of the count of log entries matching \\{\\{context.numeratorConditions\\}\\} to the count of log entries matching \\{\\{context.denominatorConditions\\}\\} was \\{\\{context.ratio\\}\\}\\{\\{/context.isRatio\\}\\}`,
+        defaultMessage: `'{'{^context.isRatio}'}''{'{#context.group}'}''{'{context.group}'}' - '{'{/context.group}'}''{'{context.matchingDocuments}'}' log entries have matched the following conditions: '{'{context.conditions}'}''{'{/context.isRatio}'}''{'{#context.isRatio}'}''{'{#context.group}'}''{'{context.group}'}' - '{'{/context.group}'}' Ratio of the count of log entries matching '{'{context.numeratorConditions}'}' to the count of log entries matching '{'{context.denominatorConditions}'}' was '{'{context.ratio}'}''{'{/context.isRatio}'}'`,
       }
     ),
     requiresAppContext: false,

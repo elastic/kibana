@@ -31,12 +31,12 @@ export function createMetricAnomalyRuleType(): RuleTypeModel<MetricAnomalyRuleTy
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.anomaly.defaultActionMessage',
       {
-        defaultMessage: `\\{\\{alertName\\}\\} is in a state of \\{\\{context.alertState\\}\\}
+        defaultMessage: `'{'{alertName}'}' is in a state of '{'{context.alertState}'}'
 
-\\{\\{context.metric\\}\\} was \\{\\{context.summary\\}\\} than normal at \\{\\{context.timestamp\\}\\}
+'{'{context.metric}'}' was '{'{context.summary}'}' than normal at '{'{context.timestamp}'}'
 
-Typical value: \\{\\{context.typical\\}\\}
-Actual value: \\{\\{context.actual\\}\\}
+Typical value: '{'{context.typical}'}'
+Actual value: '{'{context.actual}'}'
 `,
       }
     ),
