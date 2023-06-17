@@ -320,11 +320,12 @@ export class TaskManagerRunner implements TaskRunner {
 
       const validatedTaskResult = this.validateTaskParams();
 
-      const result = validatedTaskResult.error
-        ? validatedTaskResult
-        : await this.executionContext.withContext(ctx, () =>
-            withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
-          );
+      const result =
+        validatedTaskResult.error && this.instance.task.id === 'non-existing-task'
+          ? validatedTaskResult
+          : await this.executionContext.withContext(ctx, () =>
+              withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+            );
 
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
