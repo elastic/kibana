@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiText,
   EuiHorizontalRule,
@@ -15,16 +15,14 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiLoadingSpinner,
-  EuiFormRow,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
-import { MAX_CATEGORY_LENGTH } from '../../../../common/constants';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useGetCategories } from '../../../containers/use_get_categories';
 import * as i18n from '../../category/translations';
 import { CategoryViewer } from '../../category/category_viewer_component';
-import { CategoryComponent } from '../../category/category_component';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { MAX_LENGTH_ERROR } from '../../category/translations';
+import { CategoryFormField } from '../../category/category_form_field';
 
 export interface EditCategoryProps {
   isLoading: boolean;
@@ -56,48 +54,30 @@ const ColumnFlexGroup = styled(EuiFlexGroup)`
 export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditCategoryProps) => {
   const { permissions } = useCasesContext();
   const [isEditCategory, setIsEditCategory] = useState(false);
-  const [isInvalid, setIsInvalid] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null | undefined>(category);
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
 
-  const errorMessage = MAX_LENGTH_ERROR('category', MAX_CATEGORY_LENGTH);
+  const { form } = useForm({
+    defaultValue: { category },
+  });
 
   const onEdit = () => {
-    setIsInvalid(false);
     setIsEditCategory(true);
   };
 
   const onCancel = () => {
-    setIsInvalid(false);
     setIsEditCategory(false);
   };
 
-  const validateCategory = (cat: string) => {
-    if (cat.length > MAX_CATEGORY_LENGTH) {
-      setIsInvalid(true);
-    } else {
-      setIsInvalid(false);
-    }
-  };
+  const onSubmitCategory = async () => {
+    const { isValid, data } = await form.submit();
 
-  const onSubmitCategory = () => {
-    if (selectedCategory != null) {
-      validateCategory(selectedCategory);
-      return;
+    if (isValid && data.category) {
+      onSubmit(data.category);
+      form.reset({ defaultValue: data });
     }
 
-    setIsInvalid(false);
     setIsEditCategory(false);
-    onSubmit(selectedCategory);
   };
-
-  const handleOnChange = useCallback(
-    (cat: string) => {
-      validateCategory(cat);
-      setSelectedCategory(cat);
-    },
-    [setSelectedCategory]
-  );
 
   const isLoadingAll = isLoading || isLoadingCategories;
 
@@ -137,14 +117,9 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
           )}
           {isEditCategory && (
             <ColumnFlexGroup data-test-subj="edit-tags" direction="column">
-              <EuiFormRow error={errorMessage} isInvalid={isInvalid} fullWidth>
-                <CategoryComponent
-                  category={selectedCategory}
-                  onChange={handleOnChange}
-                  isLoading={isLoadingAll}
-                  availableCategories={categories}
-                />
-              </EuiFormRow>
+              <Form form={form}>
+                <CategoryFormField isLoading={isLoadingAll} availableCategories={categories} />
+              </Form>
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>

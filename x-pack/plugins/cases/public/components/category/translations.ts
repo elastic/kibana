@@ -12,3 +12,10 @@ export * from '../../common/translations';
 export const EDIT_CATEGORIES_ARIA = i18n.translate('xpack.cases.caseView.editCategoriesLinkAria', {
   defaultMessage: 'click to edit categories',
 });
+
+export const EMPTY_CATEGORY_VALIDATION_MSG = i18n.translate(
+  'xpack.cases.caseView.emptyCategoryValidationMsg',
+  {
+    defaultMessage: 'Empty category is not allowed',
+  }
+);

@@ -7,19 +7,19 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiComboBox, EuiHighlight } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import { ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX } from './translations';
 
 export interface CategoryComponentProps {
   isLoading: boolean;
   onChange: (category: string) => void;
   availableCategories: string[];
   category?: string | null;
+  isInvalid?: boolean;
 }
 
 export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
-  ({ isLoading, onChange, category, availableCategories }) => {
-    const [isInvalid, setIsInvalid] = useState<boolean>(false);
-
+  ({ isLoading, onChange, category, availableCategories, isInvalid = false }) => {
     const options = useMemo(() => {
       return availableCategories.map((label: string) => ({
         label,
@@ -32,69 +32,37 @@ export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
 
     const onComboChange = useCallback(
       (currentOptions: EuiComboBoxOptionOption[]) => {
-        setSelectedOption(currentOptions[0] ? [currentOptions[0]] : []);
+        setSelectedOption(currentOptions.length > 0 ? [currentOptions[0]] : []);
         onChange(currentOptions[0]?.label ?? '');
       },
       [onChange]
     );
 
-    const renderOption = useCallback(
-      (option: EuiComboBoxOptionOption, searchValue: string, contentClassName: string) => {
-        return (
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexStart"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              gutterSize="none"
-              responsive={false}
-            >
-              <EuiFlexItem>
-                <EuiHighlight search={searchValue} className={contentClassName}>
-                  {option.label}
-                </EuiHighlight>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexGroup>
-        );
-      },
-      []
-    );
-
-    const onCreateOption = (searchValue = '') => {
-      const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-      if (!normalizedSearchValue) {
-        setIsInvalid(true);
-      }
+    const onCreateOption = (searchValue: string) => {
+      const normalizedSearchValue = searchValue.trim();
 
       const newOption = {
         label: normalizedSearchValue,
       };
 
-      onChange(normalizedSearchValue);
-      setSelectedOption([newOption]);
+      onComboChange([newOption]);
     };
 
     return (
       <EuiComboBox
         fullWidth
-        singleSelection
-        async
+        singleSelection={{ asPlainText: true }}
         isLoading={isLoading}
+        isDisabled={isLoading}
         isInvalid={isInvalid}
         options={options}
         data-test-subj="categories-list"
         selectedOptions={selectedOption}
         onChange={onComboChange}
-        renderOption={renderOption}
         onCreateOption={onCreateOption}
         aria-label="categories-list"
         isClearable
+        customOptionText={ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX}
       />
     );
   }
