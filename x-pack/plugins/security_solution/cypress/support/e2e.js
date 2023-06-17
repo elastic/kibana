@@ -28,5 +28,9 @@ Cypress.on('uncaught:exception', () => {
   return false;
 });
 
+before(() => {
+  Cypress.config('baseUrl', 'http://localhost:5622');
+});
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
