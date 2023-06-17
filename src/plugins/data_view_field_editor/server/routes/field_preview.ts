@@ -52,6 +52,7 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
                 schema.arrayOf(valueSchema),
               ]),
               error: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+              status: schema.maybe(schema.number()),
             }),
           },
         },
@@ -81,7 +82,7 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
         // Return 200 with error object
         const handleCustomError = () => {
           return res.ok({
-            body: { values: [], error: error.body },
+            body: { values: [], error: error.body?.error, status: error.statusCode },
           });
         };
 
