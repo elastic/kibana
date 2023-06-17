@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ISavedObjectsImporter, Logger } from '@kbn/core/server';
+import pRetry from 'p-retry';
+import { Readable } from 'stream';
+
+import kibanaEventLogDataView from './kibana_event_log_data_view.json';
+import ruleMonitoringDashboard from './rule_monitoring_dashboard.json';
+
+const MAX_RETRIES = 2;
+
+/**
+ * Installs managed assets for monitoring rules and health of Detection Engine.
+ */
+export const installAssetsForRuleMonitoring = async (
+  savedObjectsImporter: ISavedObjectsImporter,
+  logger: Logger
+): Promise<void> => {
+  const operation = async (attemptCount: number) => {
+    logger.debug(`Installing assets for rule monitoring (attempt ${attemptCount})...`);
+
+    const readStream = Readable.from([kibanaEventLogDataView, ruleMonitoringDashboard]);
+
+    // The assets are marked as "managed: true" at the saved object level, which in the future
+    // should be reflected in the UI for the user. Ticket to track:
+    // https://github.com/elastic/kibana/issues/140364
+    const importResult = await savedObjectsImporter.import({
+      readStream,
+      managed: true,
+      overwrite: true,
+      createNewCopies: false,
+      refresh: false,
+    });
+
+    importResult.warnings.forEach((w) => {
+      logger.warn(w.message);
+    });
+
+    if (!importResult.success) {
+      const errors = (importResult.errors ?? []).map(
+        (e) => `Couldn't import "${e.type}:${e.id}": ${JSON.stringify(e.error)}`
+      );
+
+      errors.forEach((e) => {
+        logger.error(e);
+      });
+
+      // This will retry the operation
+      throw new Error(errors.length > 0 ? errors[0] : `Unknown error (attempt ${attemptCount})`);
+    }
+
+    logger.debug('Assets for rule monitoring installed');
+  };
+
+  await pRetry(operation, { retries: MAX_RETRIES });
+};
