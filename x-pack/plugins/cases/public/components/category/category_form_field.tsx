@@ -6,44 +6,56 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   UseField,
   getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { isEmpty } from 'lodash';
 import React, { memo } from 'react';
 import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
 import type { CaseUI } from '../../../common/ui';
 import { CategoryComponent } from './category_component';
-import { CATEGORY, MAX_LENGTH_ERROR } from './translations';
+import { CATEGORY, EMPTY_CATEGORY_VALIDATION_MSG, MAX_LENGTH_ERROR } from './translations';
 
 interface Props {
   isLoading: boolean;
   availableCategories: string[];
 }
 
-const { maxLengthField } = fieldValidators;
+type CategoryField = CaseUI['category'] | undefined;
 
-const getIndexConfig = (): FieldConfig<CaseUI['category']> => ({
+const getIndexConfig = (): FieldConfig<CategoryField> => ({
   validations: [
     {
-      validator: maxLengthField({
-        length: MAX_CATEGORY_LENGTH,
-        message: MAX_LENGTH_ERROR('category', MAX_CATEGORY_LENGTH),
-      }),
+      validator: ({ value }) => {
+        if (value != null && isEmpty(value.trim())) {
+          return {
+            message: EMPTY_CATEGORY_VALIDATION_MSG,
+          };
+        }
+      },
+    },
+    {
+      validator: ({ value }) => {
+        if (value != null && value.length > MAX_CATEGORY_LENGTH) {
+          return {
+            message: MAX_LENGTH_ERROR('category', MAX_CATEGORY_LENGTH),
+          };
+        }
+      },
     },
   ],
 });
 
 const CategoryFormFieldComponent: React.FC<Props> = ({ isLoading, availableCategories }) => {
   return (
-    <UseField<CaseUI['category']> path={'category'} config={getIndexConfig()}>
+    <UseField<CategoryField> path={'category'} config={getIndexConfig()}>
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-        const onChange = (category: string) => {
-          // TODO check empty string
+        const onChange = (value: string) => {
+          const category = value.trim().length === 0 ? undefined : value;
           field.setValue(category);
         };
 
