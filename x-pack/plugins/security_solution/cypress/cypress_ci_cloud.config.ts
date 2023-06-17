@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { cloudPlugin } from 'cypress-cloud';
 import { defineCypressConfig } from '@kbn/cypress-config';
+const { cloudPlugin } = require('cypress-cloud/plugin');
 const path = require('path');
 const fork = require('child_process').fork;
 
