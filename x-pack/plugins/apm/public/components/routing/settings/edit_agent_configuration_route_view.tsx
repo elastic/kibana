@@ -22,7 +22,7 @@ export function EditAgentConfigurationRouteView() {
   const res = useFetcher(
     (callApmApi) => {
       return callApmApi(
-        'GET /api/apm/settings/agent-configuration/view 2023-05-22',
+        'GET /api/apm/settings/agent-configuration/view 2023-10-31',
         {
           params: { query: { name, environment } },
         }
