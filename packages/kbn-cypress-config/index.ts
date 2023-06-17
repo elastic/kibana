@@ -19,7 +19,7 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
         on('file:preprocessor', (file) => {
           const id = uuid();
           // Fix an issue with running Cypress parallel
-          // file.outputPath = file.outputPath.replace(/^(.*\/)(.*?)(\..*)$/, `$1$2.${id}$3`);
+          file.outputPath = file.outputPath.replace(/^(.*\/)(.*?)(\..*)$/, `$1$2.${id}$3`);
 
           return wp({
             webpackOptions: {

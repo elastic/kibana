@@ -83,7 +83,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
     visit(TIMELINES_URL);
   });
 
-  it.only('navigates to the Dashboards landing page', () => {
+  it('navigates to the Dashboards landing page', () => {
     navigateFromHeaderTo(DASHBOARDS);
     cy.url().should('include', DASHBOARDS_URL);
   });
