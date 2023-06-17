@@ -337,8 +337,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
         <FormattedRelativeTime
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          value={new Date(updated!)}
+          value={updated}
         />
       </EuiTextColor>
     </EuiText>

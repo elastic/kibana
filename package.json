@@ -114,6 +114,7 @@
     "@emotion/server": "^11.10.0",
     "@emotion/styled": "^11.10.5",
     "@formatjs/intl-relativetimeformat": "^11.2.2",
+    "@formatjs/intl-utils": "^3.8.4",
     "@grpc/grpc-js": "^1.6.7",
     "@hapi/accept": "^5.0.2",
     "@hapi/boom": "^9.1.4",

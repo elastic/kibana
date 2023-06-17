@@ -8,6 +8,7 @@
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedRelativeTime } from '@kbn/i18n-react';
+import { selectUnit } from '@formatjs/intl-utils';
 
 import * as i18n from './translations';
 
@@ -18,18 +19,22 @@ export interface LastUpdatedAtProps {
 }
 
 export const Updated = React.memo<{ date: number; prefix: string; updatedAt: number }>(
-  ({ date, prefix, updatedAt }) => (
-    <>
-      {prefix}
-      {
-        <FormattedRelativeTime
-          data-test-subj="last-updated-at-date"
-          key={`formatedRelative-${date}`}
-          value={new Date(updatedAt)}
-        />
-      }
-    </>
-  )
+  ({ date, prefix, updatedAt }) => {
+    const { value, unit } = selectUnit(new Date(updatedAt));
+    return (
+      <>
+        {prefix}
+        {
+          <FormattedRelativeTime
+            data-test-subj="last-updated-at-date"
+            key={`formatedRelative-${date}`}
+            value={value}
+            unit={unit}
+          />
+        }
+      </>
+    );
+  }
 );
 
 Updated.displayName = 'Updated';

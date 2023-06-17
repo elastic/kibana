@@ -110,7 +110,7 @@ type ProgressMessageProps = Pick<
 const ProgressMessage: React.FC<ProgressMessageProps> = ({ timestamp, position, isStreaming }) => {
   const formattedTimestamp =
     isStreaming && position === 'end' ? (
-      <FormattedRelativeTime units="second" value={timestamp} updateInterval={1} />
+      <FormattedRelativeTime unit="second" value={timestamp} updateIntervalInSeconds={1} />
     ) : (
       <FormattedTime value={timestamp} {...TIMESTAMP_FORMAT} />
     );

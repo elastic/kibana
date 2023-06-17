@@ -44,7 +44,7 @@ export const SessionExpirationToast: FunctionComponent<SessionExpirationToastPro
         timeout: (
           <FormattedRelativeTime
             value={Math.max(state.expiresInMs - SESSION_GRACE_PERIOD_MS, 0) + Date.now()}
-            updateInterval={1000}
+            updateIntervalInSeconds={1000}
           />
         ),
       }}
