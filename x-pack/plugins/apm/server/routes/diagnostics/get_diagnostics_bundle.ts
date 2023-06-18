@@ -17,11 +17,21 @@ import { getExistingApmIndexTemplates } from './bundle/get_existing_index_templa
 import { getFieldCaps } from './bundle/get_field_caps';
 import { getIndicesAndIngestPipelines } from './bundle/get_indices';
 import { getIndicesStates } from './bundle/get_indices_states';
+import { getApmEvents } from './bundle/get_apm_events';
 
-export async function getDiagnosticsBundle(
-  esClient: ElasticsearchClient,
-  apmIndices: ApmIndicesConfig
-) {
+export async function getDiagnosticsBundle({
+  esClient,
+  apmIndices,
+  start = Date.now() - 60 * 1 * 1000,
+  end = Date.now(),
+  kuery,
+}: {
+  esClient: ElasticsearchClient;
+  apmIndices: ApmIndicesConfig;
+  start?: number;
+  end?: number;
+  kuery?: string;
+}) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
 
   const { indices, ingestPipelines } = await getIndicesAndIngestPipelines({
@@ -52,6 +62,14 @@ export async function getDiagnosticsBundle(
     ingestPipelines,
   });
 
+  const apmEvents = await getApmEvents({
+    esClient,
+    apmIndices,
+    start,
+    end,
+    kuery,
+  });
+
   return {
     created_at: new Date().toISOString(),
     elasticsearchVersion: await getElasticsearchVersion(esClient),
@@ -70,6 +88,7 @@ export async function getDiagnosticsBundle(
     indexTemplatesByIndexPattern,
     dataStreams,
     nonDataStreamIndices,
+    apmEvents,
   };
 }
 

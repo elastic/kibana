@@ -34,7 +34,7 @@ export async function initDiagnosticsBundle({
     auth: { username, password },
   });
   const apmIndices = await getApmIndices(kibanaClient);
-  const bundle = await getDiagnosticsBundle(esClient, apmIndices);
+  const bundle = await getDiagnosticsBundle({ esClient, apmIndices });
   const fleetPackageInfo = await getFleetPackageInfo(kibanaClient);
   const kibanaVersion = await getKibanaVersion(kibanaClient);
 

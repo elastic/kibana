@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
+import * as t from 'io-ts';
 import { EuiButton, EuiCallOut, EuiIcon } from '@elastic/eui';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
@@ -26,6 +27,7 @@ import { useDiagnosticsContext } from './context/use_diagnostics';
 import { getIndexTemplateStatus } from './summary_tab/index_templates_status';
 import { getDataStreamTabStatus } from './summary_tab/data_streams_status';
 import { getIndicesTabStatus } from './summary_tab/indicies_status';
+import { DiagnosticsApmEvents } from './apm_events_tab';
 
 export const diagnosticsRoute = {
   '/diagnostics': {
@@ -51,6 +53,18 @@ export const diagnosticsRoute = {
       },
       '/diagnostics/indices': {
         element: <DiagnosticsIndices />,
+      },
+      '/diagnostics/events': {
+        element: <DiagnosticsApmEvents />,
+        params: t.type({
+          query: t.partial({
+            rangeFrom: t.string,
+            rangeTo: t.string,
+            refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+            refreshInterval: t.string,
+            kuery: t.string,
+          }),
+        }),
       },
       '/diagnostics/import-export': {
         element: <DiagnosticsImportExport />,
@@ -124,6 +138,13 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
               defaultMessage: 'Indices',
             }),
             isSelected: routePath === '/diagnostics/indices',
+          },
+          {
+            href: router.link('/diagnostics/events', { query: {} }),
+            label: i18n.translate('xpack.apm.diagnostics.tab.apmEvents', {
+              defaultMessage: 'Documents',
+            }),
+            isSelected: routePath === '/diagnostics/events',
           },
           {
             href: router.link('/diagnostics/import-export'),
