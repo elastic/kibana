@@ -54,7 +54,8 @@ export function fetchAll(
 
   try {
     const dataView = searchSource.getField('index')!;
-    const query = getAppState().query;
+    const appState = getAppState();
+    const { query } = appState;
     const recordRawType = getRawRecordType(query);
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus, recordRawType);
@@ -102,6 +103,7 @@ export function fetchAll(
           recordRawType,
           query,
           dataView,
+          fetchAppState: appState,
         });
 
         checkHitCount(dataSubjects.main$, records.length);
