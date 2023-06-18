@@ -32,5 +32,20 @@ export const benchmarkScoreMapping: MappingTypeMapping = {
     'rule.benchmark.name': {
       type: 'keyword',
     },
+    policy_template: {
+      type: 'keyword',
+    },
+    critical: {
+      type: 'keyword',
+    },
+    high: {
+      type: 'keyword',
+    },
+    medium: {
+      type: 'keyword',
+    },
+    low: {
+      type: 'keyword',
+    },
   },
 };
