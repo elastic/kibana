@@ -93,7 +93,7 @@ export const addCluster = (cluster) => async (dispatch) => {
     // A toast is only needed if we're leaving the app.
     toasts.addSuccess(
       i18n.translate('xpack.remoteClusters.addAction.successTitle', {
-        defaultMessage: `Added remote cluster '{name}'`,
+        defaultMessage: `Added remote cluster ''{name}''`,
         values: { name: cluster.name },
       })
     );

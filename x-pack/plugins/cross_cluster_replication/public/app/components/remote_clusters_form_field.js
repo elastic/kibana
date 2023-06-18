@@ -252,7 +252,7 @@ export class RemoteClustersFormField extends PureComponent {
     const title = i18n.translate(
       'xpack.crossClusterReplication.remoteClustersFormField.remoteClusterNotFoundTitle',
       {
-        defaultMessage: `Couldn't find remote cluster '{name}'`,
+        defaultMessage: `Couldn't find remote cluster ''{name}''`,
         values: { name },
       }
     );

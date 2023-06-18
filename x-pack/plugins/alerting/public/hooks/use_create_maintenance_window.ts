@@ -26,7 +26,7 @@ export function useCreateMaintenanceWindow() {
     onSuccess: (data) => {
       toasts.addSuccess(
         i18n.translate('xpack.alerting.maintenanceWindowsCreateSuccess', {
-          defaultMessage: "Created maintenance window '{title}'",
+          defaultMessage: "Created maintenance window ''{title}''",
           values: {
             title: data.title,
           },
