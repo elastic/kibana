@@ -31,7 +31,14 @@ const SettingsPopoverComponent: React.FC = () => {
 
   const onButtonClick = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const button = useMemo(
-    () => <EuiButtonIcon iconType="gear" onClick={onButtonClick} />,
+    () => (
+      <EuiButtonIcon
+        aria-label={i18n.SETTINGS}
+        data-test-subj="settings"
+        iconType="gear"
+        onClick={onButtonClick}
+      />
+    ),
     [onButtonClick]
   );
 

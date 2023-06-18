@@ -22,7 +22,7 @@ export const getRows = ({
   const allowSet = new Set(allow);
 
   if (rawData !== null && typeof rawData === 'object') {
-    const rawFields = Object.keys(rawData);
+    const rawFields = Object.keys(rawData).sort();
 
     return rawFields.reduce<ContextEditorRow[]>(
       (acc, field) => [
@@ -38,7 +38,7 @@ export const getRows = ({
       []
     );
   } else {
-    return allow.reduce<ContextEditorRow[]>(
+    return allow.sort().reduce<ContextEditorRow[]>(
       (acc, field) => [
         ...acc,
         {

@@ -64,6 +64,9 @@ export interface PromptContext {
   tooltip: ReactNode;
 }
 
+/**
+ * A prompt context that was added from the pills to the current conversation, but not yet sent
+ */
 export interface SelectedPromptContext {
   /** fields allowed to be included in a conversation */
   allow: string[];

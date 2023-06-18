@@ -42,6 +42,7 @@ export const getContextMenuPanels = ({
           name: i18n.ALLOW_BY_DEFAULT,
           onClick: () => {
             closePopover();
+
             const updateAllow = selected.map<BatchUpdateListItem>(({ field }) => ({
               field,
               operation: 'add',
@@ -147,6 +148,7 @@ export const getContextMenuPanels = ({
           name: i18n.ALLOW,
           onClick: () => {
             closePopover();
+
             const updates = selected.map<BatchUpdateListItem>(({ field }) => ({
               field,
               operation: 'add',
@@ -162,6 +164,7 @@ export const getContextMenuPanels = ({
           name: i18n.DENY,
           onClick: () => {
             closePopover();
+
             const updates = selected.map<BatchUpdateListItem>(({ field }) => ({
               field,
               operation: 'remove',
@@ -177,6 +180,7 @@ export const getContextMenuPanels = ({
           name: i18n.ANONYMIZE,
           onClick: () => {
             closePopover();
+
             const updates = selected.map<BatchUpdateListItem>(({ field }) => ({
               field,
               operation: 'add',
@@ -192,6 +196,7 @@ export const getContextMenuPanels = ({
           name: i18n.UNANONYMIZE,
           onClick: () => {
             closePopover();
+
             const updates = selected.map<BatchUpdateListItem>(({ field }) => ({
               field,
               operation: 'remove',

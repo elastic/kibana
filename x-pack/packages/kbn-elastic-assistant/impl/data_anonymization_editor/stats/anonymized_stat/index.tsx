@@ -43,7 +43,12 @@ const AnonymizedStatComponent: React.FC<Props> = ({
       <EuiFlexGroup alignItems="center" gutterSize="none">
         {showIcon && (
           <AnonymizationIconFlexItem grow={false}>
-            <EuiIcon color={color} size="m" type={ANONYMIZATION_ICON} />
+            <EuiIcon
+              color={color}
+              data-test-subj="anonymizationIcon"
+              size="m"
+              type={ANONYMIZATION_ICON}
+            />
           </AnonymizationIconFlexItem>
         )}
 

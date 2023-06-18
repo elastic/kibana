@@ -108,6 +108,7 @@ const ContextEditorComponent: React.FC<Props> = ({
       childrenBetween={toolbar}
       columns={columns}
       compressed={true}
+      data-test-subj="contextEditor"
       isSelectable={true}
       itemId={FIELDS.FIELD}
       items={rows}

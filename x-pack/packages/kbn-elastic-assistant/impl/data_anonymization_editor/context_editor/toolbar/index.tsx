@@ -29,13 +29,18 @@ const ToolbarComponent: React.FC<Props> = ({
 }) => (
   <EuiFlexGroup alignItems="center" data-test-subj="toolbar" gutterSize="none">
     <EuiFlexItem grow={false}>
-      <EuiText color="subdued" size="xs">
+      <EuiText color="subdued" data-test-subj="selectedFields" size="xs">
         {i18n.SELECTED_FIELDS(selected.length)}
       </EuiText>
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty onClick={onSelectAll} iconType="pagesSelect" size="xs">
+      <EuiButtonEmpty
+        data-test-subj="selectAllFields"
+        iconType="pagesSelect"
+        onClick={onSelectAll}
+        size="xs"
+      >
         {i18n.SELECT_ALL_FIELDS(totalFields)}
       </EuiButtonEmpty>
     </EuiFlexItem>

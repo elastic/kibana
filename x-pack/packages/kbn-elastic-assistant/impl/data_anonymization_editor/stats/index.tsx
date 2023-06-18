@@ -32,7 +32,7 @@ const StatsComponent: React.FC<Props> = ({ isDataAnonymizable, selectedPromptCon
   );
 
   return (
-    <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
+    <EuiFlexGroup alignItems="center" data-test-subj="stats" gutterSize="none">
       {isDataAnonymizable && (
         <StatFlexItem grow={false}>
           <AllowedStat allowed={allowed} total={total} />

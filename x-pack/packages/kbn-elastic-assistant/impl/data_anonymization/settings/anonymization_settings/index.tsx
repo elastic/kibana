@@ -90,9 +90,14 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal }) => {
 
   return (
     <>
-      <EuiCallOut iconType="eyeClosed" size="s" title={i18n.CALLOUT_TITLE}>
+      <EuiCallOut
+        data-test-subj="anonymizationSettingsCallout"
+        iconType="eyeClosed"
+        size="s"
+        title={i18n.CALLOUT_TITLE}
+      >
         <p>{i18n.CALLOUT_PARAGRAPH1}</p>
-        <EuiButton onClick={onReset} size="s">
+        <EuiButton data-test-subj="reset" onClick={onReset} size="s">
           {i18n.RESET}
         </EuiButton>
       </EuiCallOut>
@@ -121,12 +126,14 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal }) => {
       <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
         {closeModal != null && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeModal}>{CANCEL}</EuiButtonEmpty>
+            <EuiButtonEmpty data-test-subj="cancel" onClick={closeModal}>
+              {CANCEL}
+            </EuiButtonEmpty>
           </EuiFlexItem>
         )}
 
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" onClick={onSave} fill>
+          <EuiButton fill data-test-subj="save" onClick={onSave} size="s">
             {SAVE}
           </EuiButton>
         </EuiFlexItem>
@@ -136,4 +143,5 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal }) => {
 };
 
 AnonymizationSettingsComponent.displayName = 'AnonymizationSettingsComponent';
+
 export const AnonymizationSettings = React.memo(AnonymizationSettingsComponent);

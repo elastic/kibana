@@ -56,6 +56,7 @@ const BulkActionsComponent: React.FC<Props> = ({
     () => (
       <EuiToolTip content={appliesTo === 'multipleRows' ? undefined : i18n.ALL_ACTIONS}>
         <EuiButtonEmpty
+          data-test-subj="bulkActionsButton"
           disabled={disabled}
           iconType={appliesTo === 'multipleRows' ? 'arrowDown' : 'boxesVertical'}
           iconSide={appliesTo === 'multipleRows' ? 'right' : undefined}
@@ -95,12 +96,13 @@ const BulkActionsComponent: React.FC<Props> = ({
 
   return (
     <EuiPopover
-      id={contextMenuPopoverId}
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
       anchorPosition="downLeft"
+      button={button}
+      closePopover={closePopover}
+      data-test-subj="bulkActions"
+      id={contextMenuPopoverId}
+      isOpen={isPopoverOpen}
+      panelPaddingSize="none"
     >
       <EuiContextMenu initialPanelId={PRIMARY_PANEL_ID} panels={panels} size="s" />
     </EuiPopover>

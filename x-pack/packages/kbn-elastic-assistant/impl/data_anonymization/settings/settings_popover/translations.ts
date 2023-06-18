@@ -13,3 +13,10 @@ export const ANONYMIZATION = i18n.translate(
     defaultMessage: 'Anonymization',
   }
 );
+
+export const SETTINGS = i18n.translate(
+  'xpack.elasticAssistant.dataAnonymization.settings.settingsPopover.settingsAriaLabel',
+  {
+    defaultMessage: 'Settings',
+  }
+);
