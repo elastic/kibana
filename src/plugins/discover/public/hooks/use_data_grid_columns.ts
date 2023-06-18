@@ -27,6 +27,8 @@ interface UseColumnsProps {
   isTextBasedQueryLanguage?: boolean;
 }
 
+const emptyColumns: string[] = [];
+
 export const useColumns = ({
   capabilities,
   config,
@@ -67,7 +69,7 @@ export const useColumns = ({
   );
 
   return {
-    columns: actualColumns ?? [],
+    columns: actualColumns ?? emptyColumns,
     onAddColumn,
     onRemoveColumn,
     onMoveColumn,
@@ -76,8 +78,8 @@ export const useColumns = ({
 };
 
 function getColumns(columns: string[] | undefined, useNewFieldsApi: boolean) {
-  if (!columns) {
-    return [];
+  if (!columns || columns.length === 0) {
+    return emptyColumns;
   }
   return useNewFieldsApi ? columns.filter((col) => col !== '_source') : columns;
 }
