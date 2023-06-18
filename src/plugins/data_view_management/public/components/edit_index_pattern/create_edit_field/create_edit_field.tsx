@@ -13,7 +13,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternManagmentContext } from '../../../types';
+import { IndexPatternManagementContext } from '../../../types';
 import { IndexHeader } from '../index_header';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS } from '../constants';
 
@@ -35,7 +35,7 @@ const newFieldPlaceholder = i18n.translate(
 export const CreateEditField = withRouter(
   ({ indexPattern, mode, fieldName, history }: CreateEditFieldProps) => {
     const { uiSettings, chrome, notifications, dataViews } =
-      useKibana<IndexPatternManagmentContext>().services;
+      useKibana<IndexPatternManagementContext>().services;
     const spec =
       mode === 'edit' && fieldName
         ? indexPattern.fields.getByName(fieldName)?.spec

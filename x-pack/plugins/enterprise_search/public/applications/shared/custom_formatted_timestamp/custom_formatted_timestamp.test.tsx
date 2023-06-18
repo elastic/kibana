@@ -9,6 +9,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { FormattedRelativeTime } from '@kbn/i18n-react';
+
 import { FormattedDateTime } from '../formatted_date_time';
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
@@ -23,7 +25,7 @@ describe('CustomFormattedTimestamp', () => {
   it('uses a relative time format (x minutes ago) if the timestamp is from today', () => {
     const wrapper = shallow(<CustomFormattedTimestamp timestamp="1970-01-02" />);
 
-    expect(wrapper.find(FormattedRelative).prop('value')).toEqual(new Date('1970-01-02'));
+    expect(wrapper.find(FormattedRelativeTime).prop('value')).toEqual(new Date('1970-01-02'));
   });
 
   it('uses a date if the timestamp is before today', () => {

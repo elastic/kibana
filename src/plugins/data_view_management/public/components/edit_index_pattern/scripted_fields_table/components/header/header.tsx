@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternManagmentContext } from '../../../../../types';
+import { IndexPatternManagementContext } from '../../../../../types';
 
 interface HeaderProps extends RouteComponentProps {
   indexPatternId: string;
@@ -22,7 +22,7 @@ interface HeaderProps extends RouteComponentProps {
 }
 
 export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
-  const { dataViews, docLinks } = useKibana<IndexPatternManagmentContext>().services;
+  const { dataViews, docLinks } = useKibana<IndexPatternManagementContext>().services;
   const links = docLinks?.links;
   const userEditPermission = dataViews.getCanSaveSync();
   return (

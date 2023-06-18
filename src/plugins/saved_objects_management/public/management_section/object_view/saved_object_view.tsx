@@ -145,7 +145,7 @@ export class SavedObjectEdition extends Component<
           }
         ),
         title: i18n.translate('savedObjectsManagement.deleteConfirm.modalTitle', {
-          defaultMessage: `Delete '{title}'?`,
+          defaultMessage: `Delete ''{title}''?`,
           values: {
             title: object?.meta?.title || 'saved Kibana object',
           },

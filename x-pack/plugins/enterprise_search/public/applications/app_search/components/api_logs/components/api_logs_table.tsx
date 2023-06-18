@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { selectUnit } from '@formatjs/intl-utils';
 import { useValues, useActions } from 'kea';
 
 import {
@@ -53,7 +54,9 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
         defaultMessage: 'Time',
       }),
       width: '20%',
-      render: (dateString: string) => <FormattedRelativeTime value={new Date(dateString)} />,
+      render: (dateString: string) => (
+        <FormattedRelativeTime {...selectUnit(new Date(dateString))} />
+      ),
     },
     {
       field: 'full_request_path',

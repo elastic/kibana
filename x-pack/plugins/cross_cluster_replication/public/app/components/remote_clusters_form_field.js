@@ -32,7 +32,7 @@ const errorMessages = {
     title: (
       <FormattedMessage
         id="xpack.crossClusterReplication.remoteClustersFormField.currentRemoteClusterNotConnectedCallOutTitle"
-        defaultMessage="Remote cluster '{name}' is not connected"
+        defaultMessage="Remote cluster ''{name}'' is not connected"
         values={{ name }}
       />
     ),

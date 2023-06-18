@@ -12,13 +12,13 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadcrumbs';
-import { IndexPatternManagmentContext } from '../../../types';
+import { IndexPatternManagementContext } from '../../../types';
 import { CreateEditField } from './create_edit_field';
 
 export type CreateEditFieldContainerProps = RouteComponentProps<{ id: string; fieldName?: string }>;
 
 const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props }) => {
-  const { setBreadcrumbs, dataViews } = useKibana<IndexPatternManagmentContext>().services;
+  const { setBreadcrumbs, dataViews } = useKibana<IndexPatternManagementContext>().services;
   const [indexPattern, setIndexPattern] = useState<DataView>();
   const fieldName =
     props.match.params.fieldName && decodeURIComponent(props.match.params.fieldName);

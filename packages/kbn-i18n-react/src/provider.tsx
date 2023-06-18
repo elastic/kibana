@@ -12,7 +12,7 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 
 import { i18n } from '@kbn/i18n';
-import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
+// import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
 
 /**
  * The library uses the provider pattern to scope an i18n context to a tree
@@ -26,8 +26,10 @@ export const I18nProvider: React.FC = ({ children }) => (
     messages={i18n.getTranslation().messages}
     defaultLocale={i18n.getDefaultLocale()}
     formats={i18n.getFormats()}
-    textComponent={React.Fragment}
+    textComponent={'span'}
   >
-    <PseudoLocaleWrapper>{children}</PseudoLocaleWrapper>
+    {/* <PseudoLocaleWrapper> */}
+    {children}
+    {/* </PseudoLocaleWrapper> */}
   </IntlProvider>
 );

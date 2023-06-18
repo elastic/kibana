@@ -51,7 +51,7 @@ describe('mustache_renderer', () => {
         if (escape === 'json') {
           expect(renderMustacheString('{{f}}', variables, escape)).toBe('{\\"g\\":3,\\"h\\":null}');
         } else if (escape === 'markdown') {
-          expect(renderMustacheString('{{f}}', variables, escape)).toBe(`'{"g":3,"h":null}'`);
+          expect(renderMustacheString('{{f}}', variables, escape)).toBe('\\{"g":3,"h":null\\}');
         } else {
           expect(renderMustacheString('{{f}}', variables, escape)).toBe('{"g":3,"h":null}');
         }

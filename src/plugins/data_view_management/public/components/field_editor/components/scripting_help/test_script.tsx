@@ -26,7 +26,7 @@ import { Query, buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { context as contextType } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternManagmentContextValue } from '../../../../types';
+import { IndexPatternManagementContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';
 
 interface TestScriptProps {
@@ -51,7 +51,7 @@ interface TestScriptState {
 export class TestScript extends Component<TestScriptProps, TestScriptState> {
   static contextType = contextType;
 
-  public declare readonly context: IndexPatternManagmentContextValue;
+  public declare readonly context: IndexPatternManagementContextValue;
 
   defaultProps = {
     name: 'myScriptedField',
