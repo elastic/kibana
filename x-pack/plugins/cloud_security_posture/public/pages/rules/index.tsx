@@ -29,6 +29,7 @@ import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useSecuritySolutionContext } from '../../application/security_solution_context';
 import * as TEST_SUBJECTS from './test_subjects';
 import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
+import { QuickNav } from '../../components/quick_nav';
 
 const getRulesSharedValues = (
   packageInfo?: PackagePolicy
@@ -111,6 +112,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
           )
         }
         rightSideItems={[
+          <QuickNav />,
           <EuiButtonEmpty
             iconType="gear"
             size="xs"
