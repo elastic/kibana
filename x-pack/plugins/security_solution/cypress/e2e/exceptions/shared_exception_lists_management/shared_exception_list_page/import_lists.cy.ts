@@ -19,7 +19,6 @@ import {
 } from '../../../../tasks/exceptions_table';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 
 describe('Import Lists', () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';

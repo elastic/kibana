@@ -18,11 +18,7 @@ import {
   editExceptionFlyoutItemName,
   submitEditedExceptionItem,
 } from '../../../tasks/exceptions';
-import {
-  esArchiverLoad,
-  esArchiverUnload,
-  esArchiverResetKibana,
-} from '../../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   addFirstExceptionFromRuleDetails,

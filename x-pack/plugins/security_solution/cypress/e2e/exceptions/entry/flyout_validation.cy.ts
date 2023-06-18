@@ -11,11 +11,7 @@ import { RULE_STATUS } from '../../../screens/create_new_rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,

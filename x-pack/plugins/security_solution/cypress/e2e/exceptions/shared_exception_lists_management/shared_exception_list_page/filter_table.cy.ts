@@ -12,7 +12,6 @@ import {
 } from '../../../../screens/exceptions';
 import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import {
   waitForExceptionsTableToBeLoaded,
   searchForExceptionList,

@@ -25,7 +25,6 @@ import {
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../../screens/exceptions';
 import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
 

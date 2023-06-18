@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import { ROLES } from '../../../../../common/test';
 import { getExceptionList } from '../../../../objects/exception';
 import {

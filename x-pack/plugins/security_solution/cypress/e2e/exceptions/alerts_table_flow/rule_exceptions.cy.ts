@@ -27,11 +27,7 @@ import {
   validateExceptionConditionField,
   validateExceptionCommentCountAndText,
 } from '../../../tasks/exceptions';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   goToAlertsTab,
