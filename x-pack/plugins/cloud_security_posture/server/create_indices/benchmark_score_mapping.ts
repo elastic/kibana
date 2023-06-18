@@ -36,16 +36,16 @@ export const benchmarkScoreMapping: MappingTypeMapping = {
       type: 'keyword',
     },
     critical: {
-      type: 'keyword',
+      type: 'long',
     },
     high: {
-      type: 'keyword',
+      type: 'long',
     },
     medium: {
-      type: 'keyword',
+      type: 'long',
     },
     low: {
-      type: 'keyword',
+      type: 'long',
     },
   },
 };
