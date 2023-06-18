@@ -55,6 +55,7 @@ const externals = {
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
+  'io-ts': '__kbnSharedDeps__.IoTs',
 
   /**
    * big deps which are locked to a single version
