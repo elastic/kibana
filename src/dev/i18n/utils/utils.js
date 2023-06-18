@@ -209,7 +209,7 @@ export function extractValueReferencesFromMessage(message, messageId) {
 
   let messageAST;
   try {
-    messageAST = parser.parse(message);
+    messageAST = parser(message);
   } catch (error) {
     if (error.name === 'SyntaxError') {
       const errorWithContext = createParserErrorMessage(message, {

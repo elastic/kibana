@@ -181,7 +181,7 @@ export const getFieldSuggestions = (
       label: name,
       kind: 'field',
       documentation: i18n.translate('monaco.painlessLanguage.autocomplete.fieldValueDescription', {
-        defaultMessage: `Retrieve the value for field '{fieldName}'`,
+        defaultMessage: `Retrieve the value for field ''{fieldName}''`,
         values: {
           fieldName: name,
         },

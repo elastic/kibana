@@ -39,9 +39,6 @@ function getOptions(context = {}, childContextTypes = {}, props = {}) {
       intl: PropTypes.object.isRequired,
     },
     wrappingComponent: I18nProvider,
-    wrappingComponentProps: {
-      textComponent: 'span',
-    },
     ...props,
   };
 }
