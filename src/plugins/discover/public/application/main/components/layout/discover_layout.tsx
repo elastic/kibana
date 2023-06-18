@@ -23,10 +23,10 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DragContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { useMergedDiscoverState } from './discover_documents';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useInspector } from '../../hooks/use_inspector';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -75,17 +75,12 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
     inspector,
   } = useDiscoverServices();
   const { main$ } = stateContainer.dataState.data$;
-  const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
-    state.query,
-    state.savedQuery,
-    state.columns,
-    state.sort,
-  ]);
+  const { appState, dataView } = useMergedDiscoverState(stateContainer);
+  const { query, savedQuery, columns, sort } = appState;
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
-  const dataView = useInternalStateSelector((state) => state.dataView!);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
 
@@ -150,15 +145,18 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
 
   const onFieldEdited = useCallback(
     async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
-      if (removedFieldName && currentColumns.includes(removedFieldName)) {
+      if (
+        removedFieldName &&
+        stateContainer.appState.getState().columns?.includes(removedFieldName)
+      ) {
         onRemoveColumn(removedFieldName);
       }
-      if (!dataView.isPersisted()) {
+      if (!stateContainer.internalState.getState().dataView?.isPersisted()) {
         await stateContainer.actions.updateAdHocDataViewId();
       }
       stateContainer.dataState.refetch$.next('reset');
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn]
+    [stateContainer, onRemoveColumn]
   );
 
   const onDisableFilters = useCallback(() => {

@@ -249,7 +249,7 @@ export function getDiscoverStateContainer({
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
-    getAppState: appStateContainer.getState,
+    appStateContainer,
     getSavedSearch: savedSearchContainer.getState,
   });
 

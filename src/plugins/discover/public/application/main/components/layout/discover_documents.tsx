@@ -72,6 +72,87 @@ export const onResize = (
   stateContainer.appState.update({ grid: newGrid });
 };
 
+function isSavedSearch(arg: SavedSearch | DataDocumentsMsg): arg is SavedSearch {
+  return Boolean('searchSource' in arg);
+}
+export function useMergedDiscoverState(stateContainer: DiscoverStateContainer) {
+  const documents$ = stateContainer.dataState.data$.documents$;
+  const state$ = useSingleton(
+    () =>
+      new BehaviorSubject({
+        dataView: stateContainer.savedSearchState.getState().searchSource.getField('index')!,
+        appState: stateContainer.appState.getState(),
+        isDataLoading: documents$.getValue().fetchStatus === FetchStatus.LOADING,
+        rows: documents$.getValue().result,
+      })
+  );
+  useEffect(() => {
+    const subscribe = merge(stateContainer.savedSearchState.getCurrent$(), documents$).subscribe(
+      (next) => {
+        const currentState = state$.getValue();
+        if (!isSavedSearch(next)) {
+          if (
+            next.fetchStatus === FetchStatus.LOADING &&
+            !currentState.isDataLoading &&
+            !next.result
+          ) {
+            state$.next({ ...state$.getValue(), isDataLoading: true });
+          }
+
+          if (next.fetchStatus === FetchStatus.COMPLETE) {
+            const nextMsg = {
+              ...state$.getValue(),
+              isDataLoading: false,
+              rows: next.result,
+            };
+            if (next.fetchAppState) {
+              nextMsg.appState = next.fetchAppState;
+            }
+            if (next.dataView) {
+              nextMsg.dataView = next.dataView;
+            }
+            state$.next(nextMsg);
+          }
+        } else if (!currentState.isDataLoading) {
+          const nextSavedSearch = next;
+          const nextAppState = { ...currentState.appState };
+          let setNextAppState = false;
+
+          if (next.columns && !isEqual(next.columns, currentState.appState?.columns)) {
+            nextAppState.columns = nextSavedSearch.columns;
+            setNextAppState = true;
+          }
+          if (next.rowHeight && !isEqual(next.rowHeight, currentState.appState?.rowHeight)) {
+            nextAppState.rowHeight = nextSavedSearch.rowHeight;
+            setNextAppState = true;
+          }
+          if (next.rowsPerPage && !isEqual(next.rowsPerPage, currentState.appState?.rowsPerPage)) {
+            nextAppState.rowsPerPage = nextSavedSearch.rowsPerPage;
+            setNextAppState = true;
+          }
+          if (next.grid && !isEqual(next.grid, currentState.appState?.grid)) {
+            nextAppState.grid = nextSavedSearch.grid;
+            setNextAppState = true;
+          }
+
+          if (next.sort && !isEqual(next.grid, currentState.appState?.sort)) {
+            nextAppState.sort = nextSavedSearch.sort;
+            setNextAppState = true;
+          }
+
+          if (setNextAppState && nextAppState && !isEqual(nextAppState, currentState?.appState)) {
+            state$.next({ ...state$.getValue(), appState: nextAppState });
+          }
+        }
+      }
+    );
+    return () => {
+      subscribe.unsubscribe();
+    };
+  }, [stateContainer, state$, documents$]);
+  return useObservable(state$, state$.getValue());
+}
+
 function DiscoverDocumentsComponent({
   onAddFilter,
   stateContainer,
@@ -83,17 +164,7 @@ function DiscoverDocumentsComponent({
 }) {
   const services = useDiscoverServices();
   const { dataViews, capabilities, uiSettings } = services;
-  const { documents$ } = stateContainer.dataState.data$;
-  const state$ = useSingleton(
-    () =>
-      new BehaviorSubject({
-        dataView: stateContainer.savedSearchState.getState().searchSource.getField('index')!,
-        appState: stateContainer.appState.getState(),
-        isDataLoading: documents$.getValue().fetchStatus === FetchStatus.LOADING,
-        rows: documents$.getValue().result,
-      })
-  );
-  const { dataView, appState, isDataLoading, rows } = useObservable(state$, state$.getValue());
+  const { dataView, appState, isDataLoading, rows } = useMergedDiscoverState(stateContainer);
   const savedSearchInital = useSavedSearchInitial();
 
   const { rowHeight, rowsPerPage, grid, query, sort, columns } = appState;
@@ -110,69 +181,6 @@ function DiscoverDocumentsComponent({
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
-  function isSavedSearch(arg: SavedSearch | DataDocumentsMsg): arg is SavedSearch {
-    return Boolean('searchSource' in arg);
-  }
-
-  useEffect(() => {
-    const subscribe = merge(stateContainer.savedSearchState.getCurrent$(), documents$).subscribe(
-      (next) => {
-        const currentState = state$.getValue();
-        if (!isSavedSearch(next)) {
-          if (
-            next.fetchStatus === FetchStatus.LOADING &&
-            !currentState.isDataLoading &&
-            !next.result
-          ) {
-            state$.next({ ...state$.getValue(), isDataLoading: true });
-          }
-
-          if (next.fetchStatus === FetchStatus.COMPLETE) {
-            state$.next({
-              ...state$.getValue(),
-              isDataLoading: false,
-              appState: next.fetchAppState!,
-              dataView: next.dataView!,
-              rows: next.result,
-            });
-          }
-        } else if (!currentState.isDataLoading) {
-          const nextSavedSearch = next;
-          const nextAppState = { ...currentState.appState };
-          let setNextAppState = false;
-
-          if (next.columns && !isEqual(next.columns, currentState.appState.columns)) {
-            nextAppState.columns = nextSavedSearch.columns;
-            setNextAppState = true;
-          }
-          if (next.rowHeight && !isEqual(next.rowHeight, currentState.appState.rowHeight)) {
-            nextAppState.rowHeight = nextSavedSearch.rowHeight;
-            setNextAppState = true;
-          }
-          if (next.rowsPerPage && !isEqual(next.rowsPerPage, currentState.appState.rowsPerPage)) {
-            nextAppState.rowsPerPage = nextSavedSearch.rowsPerPage;
-            setNextAppState = true;
-          }
-          if (next.grid && !isEqual(next.grid, currentState.appState.grid)) {
-            nextAppState.grid = nextSavedSearch.grid;
-            setNextAppState = true;
-          }
-
-          if (next.sort && !isEqual(next.grid, currentState.appState.sort)) {
-            nextAppState.sort = nextSavedSearch.sort;
-            setNextAppState = true;
-          }
-
-          if (setNextAppState && !isEqual(nextAppState, currentState.appState)) {
-            state$.next({ ...state$.getValue(), appState: nextAppState });
-          }
-        }
-      }
-    );
-    return () => {
-      subscribe.unsubscribe();
-    };
-  }, [stateContainer, documents$, state$]);
 
   // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
   // 1. When switching the data view, the sorting in the URL is reset to the default sorting of the selected data view.

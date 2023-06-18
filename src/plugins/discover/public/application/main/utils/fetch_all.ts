@@ -8,7 +8,10 @@
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
-import { DiscoverAppState } from '../services/discover_app_state_container';
+import {
+  DiscoverAppState,
+  DiscoverAppStateContainer,
+} from '../services/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
 import {
@@ -21,19 +24,25 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
-import { DataMsg, RecordRawType, SavedSearchData } from '../services/discover_data_state_container';
+import {
+  DataDocumentsMsg,
+  DataMsg,
+  RecordRawType,
+  SavedSearchData,
+} from '../services/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
 
 export interface FetchDeps {
   abortController: AbortController;
-  getAppState: () => DiscoverAppState;
+  appStateContainer: DiscoverAppStateContainer;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
   searchSessionId: string;
   services: DiscoverServices;
   useNewFieldsApi: boolean;
+  onResults: (msg: DataDocumentsMsg, appState: DiscoverAppState) => DiscoverAppState | undefined;
 }
 
 /**
@@ -48,13 +57,20 @@ export function fetchAll(
   reset = false,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { initialFetchStatus, getAppState, services, inspectorAdapters, savedSearch } = fetchDeps;
+  const {
+    initialFetchStatus,
+    appStateContainer,
+    services,
+    inspectorAdapters,
+    savedSearch,
+    onResults,
+  } = fetchDeps;
   const { data } = services;
   const searchSource = savedSearch.searchSource.createChild();
 
   try {
     const dataView = searchSource.getField('index')!;
-    const appState = getAppState();
+    const appState = appStateContainer.getState();
     const { query } = appState;
     const recordRawType = getRawRecordType(query);
     if (reset) {
@@ -67,7 +83,7 @@ export function fetchAll(
       updateVolatileSearchSource(searchSource, {
         dataView,
         services,
-        sort: getAppState().sort as SortOrder[],
+        sort: appState.sort as SortOrder[],
       });
     }
 
@@ -94,17 +110,23 @@ export function fetchAll(
             recordRawType,
           });
         }
-
-        dataSubjects.documents$.next({
-          fetchStatus:
-            recordRawType === RecordRawType.DOCUMENT ? FetchStatus.COMPLETE : FetchStatus.LOADING,
+        const nextDocMsg: DataDocumentsMsg = {
+          fetchStatus: FetchStatus.COMPLETE,
           result: records,
           textBasedQueryColumns,
           recordRawType,
           query,
           dataView,
           fetchAppState: appState,
-        });
+        };
+        const nextAppState = onResults(nextDocMsg, appStateContainer.getState());
+        if (nextAppState) {
+          nextDocMsg.fetchAppState = nextAppState;
+        }
+        dataSubjects.documents$.next(nextDocMsg);
+        if (nextAppState) {
+          appStateContainer.replaceUrlState(nextAppState);
+        }
 
         checkHitCount(dataSubjects.main$, records.length);
       })

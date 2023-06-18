@@ -1,0 +1,100 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import { isEqual } from 'lodash';
+import {
+  isOfAggregateQueryType,
+  getIndexPatternFromSQLQuery,
+  AggregateQuery,
+  Query,
+} from '@kbn/es-query';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { DataDocumentsMsg } from '../services/discover_data_state_container';
+import { getValidViewMode } from '../utils/get_valid_view_mode';
+import { DiscoverAppState } from '../services/discover_app_state_container';
+
+const MAX_NUM_OF_COLUMNS = 50;
+
+/**
+ * Hook to take care of text based query language state transformations when a new result is returned
+ * If necessary this is setting displayed columns and selected data view
+ */
+export function onTextBasedQueryLangResults() {
+  let prev: { query: AggregateQuery | Query | undefined; columns: string[] } = {
+    columns: [],
+    query: undefined,
+  };
+  let indexTitle = '';
+
+  const cleanup = () => {
+    if (prev.query) {
+      // cleanup when it's not a text based query lang
+      prev = {
+        columns: [],
+        query: undefined,
+      };
+    }
+  };
+
+  return (next: DataDocumentsMsg, appState: DiscoverAppState) => {
+    const { query, recordRawType } = next;
+    if (!query) {
+      return;
+    }
+
+    const { columns: stateColumns, viewMode } = appState;
+    let nextColumns: string[] = [];
+    const isTextBasedQueryLang =
+      recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
+    const hasResults = next.result?.length;
+    const initialFetch = !prev.columns.length;
+
+    if (isTextBasedQueryLang) {
+      if (hasResults) {
+        // check if state needs to contain column transformation due to a different columns in the resultset
+        const firstRow = next.result![0];
+        const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+        if (!isEqual(firstRowColumns, prev.columns) && !isEqual(query, prev.query)) {
+          prev = { columns: firstRowColumns, query };
+          nextColumns = firstRowColumns;
+        }
+
+        if (firstRowColumns && initialFetch) {
+          prev = { columns: firstRowColumns, query };
+        }
+      }
+      const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
+
+      // don't set the columns on initial fetch, to prevent overwriting existing state
+      const addColumnsToState = Boolean(
+        nextColumns.length && (!initialFetch || !stateColumns?.length)
+      );
+      // no need to reset index to state if it hasn't changed
+      const queryChanged = indexPatternFromQuery !== indexTitle;
+      if (!addColumnsToState && !queryChanged) {
+        return;
+      }
+
+      if (queryChanged) {
+        indexTitle = indexPatternFromQuery;
+      }
+
+      const nextState = {
+        ...{ index: undefined },
+        ...(addColumnsToState && { columns: nextColumns }),
+        ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
+          viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
+        }),
+      };
+      return { ...appState, ...nextState };
+    } else {
+      // cleanup for a "regular" query
+      cleanup();
+      return;
+    }
+  };
+}
