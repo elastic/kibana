@@ -29,48 +29,46 @@ interface VulnScoreTrendResponse {
 export const getVulnTrendsQuery = () => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   size: 0,
-  body: {
-    query: {
-      bool: {
-        must: [
-          {
-            term: {
-              policy_template: 'vuln_mgmt',
-            },
-          },
-          {
-            range: {
-              '@timestamp': {
-                gte: 'now-30d/d',
-                lte: 'now/d',
-                format: 'strict_date_optional_time',
-              },
-            },
-          },
-        ],
-      },
-    },
-    aggs: {
-      vuln_severity_per_day: {
-        date_histogram: {
-          field: '@timestamp',
-          calendar_interval: '1d',
-          order: {
-            _key: 'asc',
+  query: {
+    bool: {
+      must: [
+        {
+          term: {
+            policy_template: 'vuln_mgmt',
           },
         },
-        aggs: {
-          last_doc: {
-            top_hits: {
-              size: 1,
-              sort: [
-                {
-                  '@timestamp': {
-                    order: 'desc',
-                  },
-                },
-              ],
+        {
+          range: {
+            '@timestamp': {
+              gte: 'now-30d',
+              lte: 'now',
+              format: 'strict_date_optional_time',
             },
+          },
+        },
+      ],
+    },
+  },
+  aggs: {
+    vuln_severity_per_day: {
+      date_histogram: {
+        field: '@timestamp',
+        calendar_interval: '1d',
+        order: {
+          _key: 'asc',
+        },
+      },
+      aggs: {
+        last_doc: {
+          top_hits: {
+            size: 1,
+            sort: [
+              {
+                '@timestamp': {
+                  order: 'desc',
+                },
+              },
+            ],
           },
         },
       },
