@@ -54,7 +54,6 @@ const containerStyles = css`
 const progressStyle = css`
   z-index: 2;
 `;
-
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
 
@@ -129,27 +128,13 @@ function DiscoverDocumentsComponent({
           }
 
           if (next.fetchStatus === FetchStatus.COMPLETE) {
-            const fetchDataView = stateContainer.savedSearchState
-              .getState()
-              .searchSource.getField('index')!;
-            if (next.fetchAppState) {
-              state$.next({
-                ...state$.getValue(),
-                isDataLoading: false,
-                appState: next.fetchAppState,
-                dataView: fetchDataView,
-                rows: next.result,
-              });
-            } else {
-              const nextAppState = stateContainer.appState.getState();
-              state$.next({
-                ...state$.getValue(),
-                isDataLoading: false,
-                appState: nextAppState,
-                dataView: fetchDataView,
-                rows: next.result,
-              });
-            }
+            state$.next({
+              ...state$.getValue(),
+              isDataLoading: false,
+              appState: next.fetchAppState!,
+              dataView: next.dataView!,
+              rows: next.result,
+            });
           }
         } else if (!currentState.isDataLoading) {
           const nextSavedSearch = next;
@@ -170,6 +155,11 @@ function DiscoverDocumentsComponent({
           }
           if (next.grid && !isEqual(next.grid, currentState.appState.grid)) {
             nextAppState.grid = nextSavedSearch.grid;
+            setNextAppState = true;
+          }
+
+          if (next.sort && !isEqual(next.grid, currentState.appState.sort)) {
+            nextAppState.sort = nextSavedSearch.sort;
             setNextAppState = true;
           }
 
