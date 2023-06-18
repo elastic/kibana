@@ -31,6 +31,7 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
     specPattern: './cypress/e2e/**/*.cy.ts',
+    supportFile: './cypress/support/e2e_cloud.js',
     env: {
       FORCE_COLOR: '1',
       CYPRESS_BASE_URL: 'http://elastic:changeme@localhost:5622',
@@ -46,39 +47,39 @@ export default defineCypressConfig({
     setupNodeEvents(on, config) {
       let processes = [];
 
-      on('before:run', async (spec) => {
-        console.error('before:run', spec);
-        const program = path.resolve('../scripts/start_cypress_setup_env.js');
-        const parameters = [
-          `run --config-file ../security_solution/cypress/cypress_ci.config.ts --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
-        ];
-        const options = {
-          env: {
-            NODE_TLS_REJECT_UNAUTHORIZED: '0',
-            NODE_OPTIONS: '--no-warnings',
-            PATH: process.env.PATH,
-          },
-          stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
-        };
+      // on('before:run', async (spec) => {
+      //   console.error('before:run', spec);
+      //   const program = path.resolve('../scripts/start_cypress_setup_env.js');
+      //   const parameters = [
+      //     `run --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
+      //   ];
+      //   const options = {
+      //     env: {
+      //       NODE_TLS_REJECT_UNAUTHORIZED: '0',
+      //       NODE_OPTIONS: '--no-warnings',
+      //       PATH: process.env.PATH,
+      //     },
+      //     stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+      //   };
 
-        const child = fork(program, parameters, options);
+      //   const child = fork(program, parameters, options);
 
-        processes.push(child);
+      //   processes.push(child);
 
-        config.baseUrl = 'http://localhost:5622';
-        return new Promise((resolve) => {
-          child.on('message', (message) => {
-            console.log('message from child:', message);
-            // console.log('config', config);
-            // config.baseUrl = message.customEnv.baseUrl;
-            // process.exit(0);
-            resolve(message);
-            // child.send('Hi');
-            // return config;
-            return config;
-          });
-        });
-      });
+      //   config.baseUrl = 'http://localhost:5622';
+      //   return new Promise((resolve) => {
+      //     child.on('message', (message) => {
+      //       console.log('message from child:', message);
+      //       // console.log('config', config);
+      //       // config.baseUrl = message.customEnv.baseUrl;
+      //       // process.exit(0);
+      //       resolve(message);
+      //       // child.send('Hi');
+      //       // return config;
+      //       // return config;
+      //     });
+      //   });
+      // });
 
       on('before:spec', (spec) => {
         console.error('processes', processes.length, processes);
@@ -87,7 +88,7 @@ export default defineCypressConfig({
         if (!processes.length) {
           const program = path.resolve('../scripts/start_cypress_setup_env.js');
           const parameters = [
-            `run --config-file ../security_solution/cypress/cypress_ci.config.ts --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
+            `run --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
           ];
           const options = {
             env: {
@@ -111,7 +112,7 @@ export default defineCypressConfig({
               resolve(message);
               // child.send('Hi');
               // return config;
-              return config;
+              // return config;
             });
           });
         }

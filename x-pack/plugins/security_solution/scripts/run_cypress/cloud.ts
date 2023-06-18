@@ -32,6 +32,7 @@ export const cli = () => {
         record: true,
         headless: false,
         headed: true,
+        spec: argv.spec as string,
         ciBuildId:
           process.env.BUILDKITE_STEP_ID ??
           `hello-currents-${Math.random().toString(36).substring(2)}`,

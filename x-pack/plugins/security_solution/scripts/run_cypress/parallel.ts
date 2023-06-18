@@ -181,7 +181,6 @@ export const cli = () => {
                 });
               }
               if (key && value) {
-                // @ts-expect-error
                 acc[key] = value;
               }
               return acc;
