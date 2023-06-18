@@ -10,7 +10,11 @@ import { omit } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
-import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  throwUnrecoverableError,
+  createSkipError,
+} from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { RequeueInvalidTasksConfig } from '@kbn/task-manager-plugin/server/config';
@@ -825,7 +829,7 @@ export class TaskRunner<
       schedule = asOk(attributes.rule.schedule);
     } catch (err) {
       if (this.shouldSkipRun(err)) {
-        return { state: originalState, skip: true, error: err };
+        return { state: originalState, error: createSkipError(err) };
       }
       stateWithMetrics = asErr(err);
       schedule = asErr(err);

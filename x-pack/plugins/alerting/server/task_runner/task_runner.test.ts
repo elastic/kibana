@@ -18,7 +18,11 @@ import {
   RuleAction,
   MaintenanceWindow,
 } from '../types';
-import { ConcreteTaskInstance, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  createSkipError,
+  isUnrecoverableError,
+} from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -3123,8 +3127,9 @@ describe('Task Runner', () => {
 
     const result = await taskRunner.run();
     expect(result).toEqual({
-      error: new Error('[name]: expected value of type [string] but got [undefined]'),
-      skip: true,
+      error: createSkipError(
+        new Error('[name]: expected value of type [string] but got [undefined]')
+      ),
       state: mockTask.state,
     });
     expect(alertsService.createAlertsClient).not.toHaveBeenCalledWith({});

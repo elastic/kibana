@@ -18,12 +18,13 @@ import {
   SavedObjectReference,
   ISavedObjectsRepository,
 } from '@kbn/core/server';
-import { RunContext } from '@kbn/task-manager-plugin/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
-  throwRetryableError,
+  RunContext,
+  createSkipError,
   throwUnrecoverableError,
-} from '@kbn/task-manager-plugin/server/task_running';
+  throwRetryableError,
+} from '@kbn/task-manager-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { validationErrorPrefix } from './validate_with_schema';
 import { ActionExecutorContract } from './action_executor';
 import {
@@ -157,9 +158,8 @@ export class TaskRunnerFactory {
 
         if (shouldSkip(executorResult)) {
           return {
-            skip: true,
             state: taskInstance.state,
-            error: new Error(executorResult.message),
+            error: createSkipError(new Error(executorResult.message)),
           };
         }
 

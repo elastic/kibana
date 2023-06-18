@@ -25,6 +25,7 @@ import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { pick } from 'lodash';
 import {
+  createSkipError,
   isRetryableError,
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
@@ -577,9 +578,8 @@ test('returns the existing state and delayed schedule to retry the task when ret
   const result = await taskRunner.run();
 
   expect(result).toEqual({
-    skip: true,
     state: mockTaskInstance.state,
-    error: new Error('error validating action'),
+    error: createSkipError(new Error('error validating action')),
   });
 });
 

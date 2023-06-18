@@ -78,7 +78,6 @@ export type FailedRunResult = SuccessfulRunResult & {
    * logged out as a warning, and the task will be reattempted after a delay.
    */
   error: Error;
-  skip?: boolean;
 };
 
 export type RunResult = FailedRunResult | SuccessfulRunResult;
@@ -87,7 +86,7 @@ export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);
 
 export interface FailedTaskResult {
-  status: TaskStatus.Failed;
+  status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
 export type RunFunction = () => Promise<RunResult | undefined | void>;
@@ -173,6 +172,7 @@ export enum TaskStatus {
   Running = 'running',
   Failed = 'failed',
   Unrecognized = 'unrecognized',
+  DeadLetter = 'dead_letter',
 }
 
 export enum TaskLifecycleResult {

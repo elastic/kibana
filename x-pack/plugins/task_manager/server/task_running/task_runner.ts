@@ -52,7 +52,7 @@ import {
   TaskStatus,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { isRetryableError, isUnrecoverableError } from './errors';
+import { createSkipError, isRetryableError, isSkipError, isUnrecoverableError } from './errors';
 import type { EventLoopDelayConfig, RequeueInvalidTasksConfig } from '../config';
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -320,12 +320,11 @@ export class TaskManagerRunner implements TaskRunner {
 
       const validatedTaskResult = this.validateTaskParams();
 
-      const result =
-        validatedTaskResult.error && this.instance.task.id === 'non-existing-task'
-          ? validatedTaskResult
-          : await this.executionContext.withContext(ctx, () =>
-              withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
-            );
+      const result = validatedTaskResult.error
+        ? validatedTaskResult
+        : await this.executionContext.withContext(ctx, () =>
+            withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+          );
 
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
@@ -355,7 +354,6 @@ export class TaskManagerRunner implements TaskRunner {
 
   private validateTaskParams() {
     let error;
-    let skip = false;
     const {
       state,
       taskType,
@@ -374,13 +372,13 @@ export class TaskManagerRunner implements TaskRunner {
       } catch (err) {
         this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
         if (attempts < maxAttempts) {
-          skip = true;
+          error = createSkipError(err);
         }
         error = err;
       }
     }
 
-    return { skip, error, state };
+    return { error, state };
   }
 
   public async removeTask(): Promise<void> {
@@ -547,20 +545,21 @@ export class TaskManagerRunner implements TaskRunner {
   private rescheduleFailedRun = (
     failureResult: FailedRunResult
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
-    const { state, error, skip } = failureResult;
+    const { state, error } = failureResult;
     const { schedule, attempts } = this.instance.task;
-    const skipAttempts = this.instance.task.requeueInvalidTask?.attempts ?? 0;
+    let skipAttempts = this.instance.task.requeueInvalidTask?.attempts ?? 0;
 
-    if (skip) {
+    if (isSkipError(error)) {
+      skipAttempts = skipAttempts + 1;
       const { taskType, id } = this.instance.task;
       this.logger.warn(
-        `Task Manager has skipped executing the Task (${taskType}/${id}) as it has invalid params.`
+        `Task Manager has skipped executing the Task (${taskType}/${id}) ${skipAttempts} times as it has invalid params.`
       );
       return asOk({
         state: this.instance.task.state,
         runAt: moment().add(this.requeueInvalidTasksConfig.delay, 'millisecond').toDate(),
         attempts: 0,
-        skipAttempts: skipAttempts + 1,
+        skipAttempts,
       });
     }
 
@@ -590,6 +589,11 @@ export class TaskManagerRunner implements TaskRunner {
         });
       }
     }
+
+    if (skipAttempts >= this.requeueInvalidTasksConfig.max_attempts) {
+      return asErr({ status: TaskStatus.DeadLetter });
+    }
+
     // scheduling a retry isn't possible,mark task as failed
     return asErr({ status: TaskStatus.Failed });
   };
