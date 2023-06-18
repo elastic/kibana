@@ -38,6 +38,7 @@ import {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
+  DEFAULT_INDEX_TYPES_MAP,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsClient,
@@ -57,6 +58,7 @@ import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+import { applyTypeDefaults } from './apply_type_defaults';
 
 /**
  * @internal
@@ -194,7 +196,7 @@ export class SavedObjectsService
         if (this.started) {
           throw new Error('cannot call `registerType` after service startup.');
         }
-        this.typeRegistry.registerType(type);
+        this.typeRegistry.registerType(applyTypeDefaults(type));
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
@@ -375,6 +377,7 @@ export class SavedObjectsService
       kibanaVersion: this.kibanaVersion,
       soMigrationsConfig,
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
+      defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
       client,
       docLinks,
       waitForMigrationCompletion,

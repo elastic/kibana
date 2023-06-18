@@ -14,30 +14,50 @@ import {
 } from '../common/types';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 
+import type { DataViewCrudTypes } from '../common/content_management';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
+
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SavedObjectsClientContract;
   constructor(savedObjectClient: SavedObjectsClientContract) {
     this.savedObjectClient = savedObjectClient;
   }
   async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
-    const result = await this.savedObjectClient.find<T>(options);
+    const result = await this.savedObjectClient.find<T>({
+      ...options,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+    });
     return result.saved_objects;
   }
 
-  async get<T = unknown>(type: string, id: string) {
-    const response = await this.savedObjectClient.resolve<T>(type, id);
+  async get<T = unknown>(id: string) {
+    const response = await this.savedObjectClient.resolve<T>('index-pattern', id);
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
     return response.saved_object;
   }
-  async update(type: string, id: string, attributes: DataViewAttributes, options: {}) {
-    return (await this.savedObjectClient.update(type, id, attributes, options)) as SavedObject;
+
+  async getSavedSearch<T = unknown>(id: string) {
+    const response = await this.savedObjectClient.resolve<T>('search', id);
+    if (response.outcome === 'conflict') {
+      throw new DataViewSavedObjectConflictError(id);
+    }
+    return response.saved_object;
   }
-  async create(type: string, attributes: DataViewAttributes, options: {}) {
-    return await this.savedObjectClient.create(type, attributes, options);
+
+  async update(id: string, attributes: DataViewAttributes, options: {}) {
+    return (await this.savedObjectClient.update(
+      DATA_VIEW_SAVED_OBJECT_TYPE,
+      id,
+      attributes,
+      options
+    )) as SavedObject;
   }
-  delete(type: string, id: string) {
-    return this.savedObjectClient.delete(type, id, { force: true });
+  async create(attributes: DataViewAttributes, options: DataViewCrudTypes['CreateOptions']) {
+    return await this.savedObjectClient.create(DATA_VIEW_SAVED_OBJECT_TYPE, attributes, options);
+  }
+  async delete(id: string) {
+    await this.savedObjectClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, id, { force: true });
   }
 }

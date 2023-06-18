@@ -16,7 +16,7 @@
 import PropTypes from 'prop-types';
 import { I18nProvider, IntlShape, createIntl, createIntlCache } from '@kbn/i18n-react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
-import React, { ReactElement, ValidationMap } from 'react';
+import React, { ComponentType, ReactElement, ValidationMap } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 
 const intlCache = createIntlCache();
@@ -92,6 +92,8 @@ export function mountWithIntl<T>(
     attachTo?: HTMLElement;
     context?: any;
     childContextTypes?: ValidationMap<any>;
+    wrappingComponent?: ComponentType<any> | undefined;
+    wrappingComponentProps?: {} | undefined;
   } = {}
 ) {
   const options = getOptions(context, childContextTypes, props);

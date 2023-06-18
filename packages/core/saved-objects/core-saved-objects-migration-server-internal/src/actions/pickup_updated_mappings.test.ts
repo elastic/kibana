@@ -29,7 +29,7 @@ describe('pickupUpdatedMappings', () => {
     elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
   );
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-    const task = pickupUpdatedMappings(client, 'my_index');
+    const task = pickupUpdatedMappings(client, 'my_index', 1000);
     try {
       await task();
     } catch (e) {

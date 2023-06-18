@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 
+import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
+
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { Rule } from '../../rule_management/logic/types';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 import { useKibana } from '../../../common/lib/kibana';
 import { useFetchIndex } from '../../../common/containers/source';
 
+import * as i18n from '../../../common/containers/source/translations';
+
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
   indexPatterns: DataViewBase;
+  getExtendedFields: (fields: string[]) => Promise<FieldSpec[]>;
 }
 
 /**
@@ -25,6 +31,7 @@ export interface ReturnUseFetchExceptionFlyoutData {
  */
 export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExceptionFlyoutData => {
   const { data, spaces } = useKibana().services;
+  const { addWarning } = useAppToasts();
   const [dataViewLoading, setDataViewLoading] = useState(false);
   const [activeSpaceId, setActiveSpaceId] = useState('');
   const isSingleRule = useMemo(() => rules != null && rules.length === 1, [rules]);
@@ -80,15 +87,14 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     }
   }, [jobs, isMLRule, memoDataViewId, memoNonDataViewIndexPatterns]);
 
-  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] = useFetchIndex(
-    memoRuleIndices,
-    false,
-    'indexFields',
-    true
-  );
+  const [
+    isIndexPatternLoading,
+    { indexPatterns: indexIndexPatterns, dataView: indexDataViewSpec },
+  ] = useFetchIndex(memoRuleIndices, false, 'indexFields');
 
   // Data view logic
   const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
+  const [dataViewSpec, setDataViewSpec] = useState<DataViewSpec | null>(null);
   useEffect(() => {
     const fetchSingleDataView = async () => {
       // ensure the memoized data view includes a space id, otherwise
@@ -97,20 +103,36 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
       if (activeSpaceId !== '' && memoDataViewId) {
         setDataViewLoading(true);
         const dv = await data.dataViews.get(memoDataViewId);
-        const fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(dv, {
-          pattern: '',
-          includeUnmapped: true,
-        });
         setDataViewLoading(false);
-        setDataViewIndexPatterns({
-          ...dv,
-          fields: fieldsWithUnmappedInfo,
-        });
+        setDataViewIndexPatterns(dv);
+        setDataViewSpec(dv.toSpec());
       }
     };
 
     fetchSingleDataView();
   }, [memoDataViewId, data.dataViews, setDataViewIndexPatterns, activeSpaceId]);
+
+  // Fetch extended fields information
+  const getExtendedFields = useCallback(
+    async (fields: string[]) => {
+      let extendedFields: FieldSpec[] = [];
+      const dv = dataViewSpec ?? indexDataViewSpec;
+      if (!dv) {
+        return extendedFields;
+      }
+      try {
+        extendedFields = await data.dataViews.getFieldsForIndexPattern(dv, {
+          pattern: '',
+          includeUnmapped: true,
+          fields,
+        });
+      } catch (error) {
+        addWarning(error, { title: i18n.FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR });
+      }
+      return extendedFields;
+    },
+    [addWarning, data.dataViews, dataViewSpec, indexDataViewSpec]
+  );
 
   // Determine whether to use index patterns or data views
   const indexPatternsToUse = useMemo(
@@ -122,5 +144,6 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
   return {
     isLoading: isIndexPatternLoading || mlJobLoading || dataViewLoading,
     indexPatterns: indexPatternsToUse,
+    getExtendedFields,
   };
 };

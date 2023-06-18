@@ -66,7 +66,6 @@ const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
-
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
 const mockKibana = () => {
@@ -165,7 +164,6 @@ describe('AllCasesListGeneric', () => {
 
   it('should render AllCasesList', async () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-
     appMockRenderer.render(<AllCasesList />);
 
     await waitFor(() => {
@@ -260,6 +258,21 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should not call onCreateCasePressed if onRowClick is not provided when create case from case page', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        cases: [],
+      },
+    });
+    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+    userEvent.click(screen.getByTestId('cases-table-add-case'));
+    await waitFor(() => {
+      expect(onRowClick).not.toHaveBeenCalled();
+    });
+  });
+
   it('should tableHeaderSortButton AllCasesList', async () => {
     appMockRenderer.render(<AllCasesList />);
 
@@ -347,9 +360,10 @@ describe('AllCasesListGeneric', () => {
   it('should call onRowClick with no cases and isSelectorView=true when create case is clicked', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />);
     userEvent.click(screen.getByTestId('cases-table-add-case-filter-bar'));
-
+    const isCreateCase = true;
     await waitFor(() => {
       expect(onRowClick).toHaveBeenCalled();
+      expect(onRowClick).toBeCalledWith(undefined, isCreateCase);
     });
   });
 

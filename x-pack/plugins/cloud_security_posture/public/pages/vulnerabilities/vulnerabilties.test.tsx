@@ -128,6 +128,29 @@ describe('<Vulnerabilities />', () => {
     });
   });
 
+  it('No vulnerabilities  state: index-timeout - shows IndexTimeout instead of vulnerabilities ', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          [VULN_MGMT_POLICY_TEMPLATE]: { status: 'index-timeout' },
+          indicesDetails: [{ index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' }],
+        },
+      })
+    );
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    renderVulnerabilitiesPage();
+
+    expectIdsInDoc({
+      be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
+      notToBe: [
+        VULNERABILITIES_CONTAINER_TEST_SUBJ,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
   it('No vulnerabilities  state: unprivileged - shows Unprivileged instead of vulnerabilities ', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({

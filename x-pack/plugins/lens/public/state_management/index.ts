@@ -45,6 +45,8 @@ export const {
   addLayer,
   setLayerDefaultDimension,
   removeDimension,
+  setIsLoadLibraryVisible,
+  registerLibraryAnnotationGroup,
 } = lensActions;
 
 export const makeConfigureStore = (

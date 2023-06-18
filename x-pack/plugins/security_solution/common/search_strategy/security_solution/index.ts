@@ -103,6 +103,15 @@ import type {
   ManagedUserDetailsRequestOptions,
   ManagedUserDetailsStrategyResponse,
 } from './users/managed_details';
+import type { RelatedEntitiesQueries } from './related_entities';
+import type {
+  UsersRelatedHostsRequestOptions,
+  UsersRelatedHostsStrategyResponse,
+} from './related_entities/related_hosts';
+import type {
+  HostsRelatedUsersRequestOptions,
+  HostsRelatedUsersStrategyResponse,
+} from './related_entities/related_users';
 
 export * from './cti';
 export * from './hosts';
@@ -111,6 +120,7 @@ export * from './matrix_histogram';
 export * from './network';
 export * from './users';
 export * from './first_last_seen';
+export * from './related_entities';
 
 export type FactoryQueryTypes =
   | HostsQueries
@@ -121,7 +131,8 @@ export type FactoryQueryTypes =
   | RiskQueries
   | CtiQueries
   | typeof MatrixHistogramQuery
-  | typeof FirstLastSeenQuery;
+  | typeof FirstLastSeenQuery
+  | RelatedEntitiesQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -201,6 +212,10 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UsersRiskScoreStrategyResponse
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreStrategyResponse
+  : T extends RelatedEntitiesQueries.relatedUsers
+  ? HostsRelatedUsersStrategyResponse
+  : T extends RelatedEntitiesQueries.relatedHosts
+  ? UsersRelatedHostsStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -267,6 +282,10 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? RiskScoreRequestOptions
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreRequestOptions
+  : T extends RelatedEntitiesQueries.relatedHosts
+  ? UsersRelatedHostsRequestOptions
+  : T extends RelatedEntitiesQueries.relatedUsers
+  ? HostsRelatedUsersRequestOptions
   : never;
 
 export interface CommonFields {

@@ -21,6 +21,7 @@ describe('AppWrapper', () => {
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper"
+        data-test-subj="kbnAppWrapper visibleChrome"
       >
         app-content
       </div>
@@ -31,6 +32,7 @@ describe('AppWrapper', () => {
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
+        data-test-subj="kbnAppWrapper hiddenChrome"
       >
         app-content
       </div>
@@ -41,6 +43,7 @@ describe('AppWrapper', () => {
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper"
+        data-test-subj="kbnAppWrapper visibleChrome"
       >
         app-content
       </div>

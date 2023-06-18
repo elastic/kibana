@@ -16,6 +16,7 @@ export const getCaseConnector = (): CaseConnector<SwimlaneFieldsType> => {
   return {
     id: ConnectorTypes.swimlane,
     fieldsComponent: lazy(() => import('./case_fields')),
+    previewComponent: lazy(() => import('./case_fields_preview')),
   };
 };
 

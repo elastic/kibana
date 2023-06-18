@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useMlContext } from '../../../contexts/ml';
+import type { DataFrameAnalyticsId } from '@kbn/ml-data-frame-analytics-utils';
+import { useDataSource } from '../../../contexts/ml/data_source_context';
 import { ml } from '../../../services/ml_api_service';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
@@ -29,7 +30,6 @@ import {
   DetailsStep,
   ValidationStepWrapper,
 } from './components';
-import { DataFrameAnalyticsId } from '../../../../../common/types/data_frame_analytics';
 import { MlPageHeader } from '../../../components/page_header';
 
 export enum ANALYTICS_STEPS {
@@ -54,8 +54,7 @@ export const Page: FC<Props> = ({ jobId }) => {
     false,
   ]);
 
-  const mlContext = useMlContext();
-  const { currentDataView } = mlContext;
+  const { currentDataView } = useDataSource();
 
   const createAnalyticsForm = useCreateAnalyticsForm();
   const { state } = createAnalyticsForm;

@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiResizableContainer,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
@@ -35,30 +36,36 @@ import { SecuritySolutionPageWrapper } from '../../../../common/components/page_
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { AccordionTitle } from '../../../../detections/components/rules/accordion_title';
-import { StepDefineRule } from '../../../../detections/components/rules/step_define_rule';
-import { StepAboutRule } from '../../../../detections/components/rules/step_about_rule';
-import { StepScheduleRule } from '../../../../detections/components/rules/step_schedule_rule';
-import { StepRuleActions } from '../../../../detections/components/rules/step_rule_actions';
+import {
+  StepDefineRule,
+  StepDefineRuleReadOnly,
+} from '../../../../detections/components/rules/step_define_rule';
+import {
+  StepAboutRule,
+  StepAboutRuleReadOnly,
+} from '../../../../detections/components/rules/step_about_rule';
+import {
+  StepScheduleRule,
+  StepScheduleRuleReadOnly,
+} from '../../../../detections/components/rules/step_schedule_rule';
+import {
+  stepActionsDefaultValue,
+  StepRuleActions,
+  StepRuleActionsReadOnly,
+} from '../../../../detections/components/rules/step_rule_actions';
 import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 import {
   redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
-import type {
-  AboutStepRule,
-  DefineStepRule,
-  ScheduleStepRule,
-  RuleStepsFormData,
-  RuleStepsFormHooks,
-  RuleStepsData,
-} from '../../../../detections/pages/detection_engine/rules/types';
 import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
-import { formatRule, stepIsValid } from './helpers';
+import { formatRule } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import {
-  getStepScheduleDefaultValue,
+  defaultSchedule,
+  defaultThreatMatchSchedule,
   ruleStepsOrder,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
@@ -73,8 +80,8 @@ import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
-
-const formHookNoop = async (): Promise<undefined> => undefined;
+import { NextStep } from '../../../../detections/components/rules/next_step';
+import { useRuleForms, useRuleIndexPattern } from '../form';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -101,9 +108,6 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const isShouldRerenderStep = (step: RuleStep, activeStep: RuleStep) =>
-  activeStep !== step ? '0' : '1';
-
 const CreateRulePageComponent: React.FC = () => {
   const [
     {
@@ -119,6 +123,7 @@ const CreateRulePageComponent: React.FC = () => {
   const { addSuccess } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
   const {
+    application,
     data: { dataViews },
   } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
@@ -137,79 +142,78 @@ const CreateRulePageComponent: React.FC = () => {
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
-  const formHooks = useRef<RuleStepsFormHooks>({
-    [RuleStep.defineRule]: formHookNoop,
-    [RuleStep.aboutRule]: formHookNoop,
-    [RuleStep.scheduleRule]: formHookNoop,
-    [RuleStep.ruleActions]: formHookNoop,
-  });
-  const setFormHook = useCallback(
-    <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => {
-      formHooks.current[step] = hook;
-    },
-    []
+  const defineStepDefault = useMemo(
+    () => ({
+      ...stepDefineDefaultValue,
+      index: indicesConfig,
+      threatIndex: threatIndicesConfig,
+    }),
+    [indicesConfig, threatIndicesConfig]
   );
-  const stepsData = useRef<RuleStepsFormData>({
-    [RuleStep.defineRule]: { isValid: false, data: undefined },
-    [RuleStep.aboutRule]: { isValid: false, data: undefined },
-    [RuleStep.scheduleRule]: { isValid: false, data: undefined },
-    [RuleStep.ruleActions]: { isValid: false, data: undefined },
+  const kibanaAbsoluteUrl = useMemo(
+    () =>
+      application.getUrlForApp(`${APP_UI_ID}`, {
+        absolute: true,
+      }),
+    [application]
+  );
+  const actionsStepDefault = useMemo(
+    () => ({
+      ...stepActionsDefaultValue,
+      kibanaSiemAppUrl: kibanaAbsoluteUrl,
+    }),
+    [kibanaAbsoluteUrl]
+  );
+
+  const {
+    defineStepForm,
+    defineStepData,
+    aboutStepForm,
+    aboutStepData,
+    scheduleStepForm,
+    scheduleStepData,
+    actionsStepForm,
+    actionsStepData,
+    eqlOptionsSelected,
+    setEqlOptionsSelected,
+  } = useRuleForms({
+    defineStepDefault,
+    aboutStepDefault: stepAboutDefaultValue,
+    scheduleStepDefault: defaultSchedule,
+    actionsStepDefault,
   });
-  const setStepData = <K extends keyof RuleStepsFormData>(
-    step: K,
-    data: RuleStepsFormData[K]
-  ): void => {
-    stepsData.current[step] = data;
-  };
+
+  const isThreatMatchRuleValue = useMemo(
+    () => isThreatMatchRule(defineStepData.ruleType),
+    [defineStepData.ruleType]
+  );
+
   const [openSteps, setOpenSteps] = useState({
     [RuleStep.defineRule]: false,
     [RuleStep.aboutRule]: false,
     [RuleStep.scheduleRule]: false,
     [RuleStep.ruleActions]: false,
   });
-  const { mutateAsync: createRule, isLoading } = useCreateRule();
-  const ruleType = stepsData.current[RuleStep.defineRule].data?.ruleType;
+  const { mutateAsync: createRule, isLoading: isCreateRuleLoading } = useCreateRule();
+  const ruleType = defineStepData.ruleType;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
-
-  const [defineRuleData, setDefineRuleData] = useState<DefineStepRule>({
-    ...stepDefineDefaultValue,
-    index: indicesConfig,
-    threatIndex: threatIndicesConfig,
-  });
-  const [aboutRuleData, setAboutRuleData] = useState<AboutStepRule>(stepAboutDefaultValue);
-  const [scheduleRuleData, setScheduleRuleData] = useState<ScheduleStepRule>(
-    getStepScheduleDefaultValue(defineRuleData.ruleType)
-  );
+  const [prevRuleType, setPrevRuleType] = useState<string>();
 
   useEffect(() => {
-    const isThreatMatchRuleValue = isThreatMatchRule(defineRuleData.ruleType);
-    if (isThreatMatchRuleValue) {
-      setAboutRuleData({
-        ...stepAboutDefaultValue,
-        threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
+    if (prevRuleType !== ruleType) {
+      aboutStepForm.updateFieldValues({
+        threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
       });
-    } else {
-      setAboutRuleData(stepAboutDefaultValue);
+      scheduleStepForm.updateFieldValues(
+        isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
+      );
+      setPrevRuleType(ruleType);
     }
-    setScheduleRuleData(getStepScheduleDefaultValue(defineRuleData.ruleType));
-  }, [defineRuleData.ruleType]);
-
-  const updateCurrentDataState = useCallback(
-    <K extends keyof RuleStepsData>(data: RuleStepsData[K]) => {
-      if (activeStep === RuleStep.defineRule) {
-        setDefineRuleData(data as DefineStepRule);
-      } else if (activeStep === RuleStep.aboutRule) {
-        setAboutRuleData(data as AboutStepRule);
-      } else if (activeStep === RuleStep.scheduleRule) {
-        setScheduleRuleData(data as ScheduleStepRule);
-      }
-    },
-    [activeStep]
-  );
+  }, [aboutStepForm, scheduleStepForm, isThreatMatchRuleValue, prevRuleType, ruleType]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
@@ -227,6 +231,11 @@ const CreateRulePageComponent: React.FC = () => {
     };
     fetchDV();
   }, [dataViews]);
+  const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
+    dataSourceType: defineStepData.dataSourceType,
+    index: defineStepData.index,
+    dataViewId: defineStepData.dataViewId,
+  });
 
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
@@ -258,110 +267,116 @@ const CreateRulePageComponent: React.FC = () => {
     }
   };
 
+  const validateStep = useCallback(
+    async (step: RuleStep) => {
+      switch (step) {
+        case RuleStep.defineRule:
+          return defineStepForm.validate();
+        case RuleStep.aboutRule:
+          return aboutStepForm.validate();
+        case RuleStep.scheduleRule:
+          return scheduleStepForm.validate();
+        case RuleStep.ruleActions:
+          return actionsStepForm.validate();
+      }
+    },
+    [aboutStepForm, actionsStepForm, defineStepForm, scheduleStepForm]
+  );
+
   const editStep = useCallback(
     async (step: RuleStep) => {
-      const activeStepData = await formHooks.current[activeStep]();
+      const valid = await validateStep(activeStep);
 
-      if (activeStepData?.isValid) {
-        setStepData(activeStep, activeStepData);
+      if (valid) {
         goToStep(step);
       }
     },
-    [activeStep, goToStep]
+    [activeStep, validateStep, goToStep]
   );
   const submitStep = useCallback(
     async (step: RuleStep) => {
-      const stepData = await formHooks.current[step]();
+      const valid = await validateStep(step);
 
-      if (stepData?.isValid && stepData.data) {
-        updateCurrentDataState(stepData.data);
-        setStepData(step, stepData);
+      if (valid) {
         const nextStep = getNextStep(step);
 
         if (nextStep != null) {
           goToStep(nextStep);
-        } else {
-          const defineStep = stepsData.current[RuleStep.defineRule];
-          const aboutStep = stepsData.current[RuleStep.aboutRule];
-          const scheduleStep = stepsData.current[RuleStep.scheduleRule];
-          const actionsStep = stepsData.current[RuleStep.ruleActions];
-
-          if (
-            stepIsValid(defineStep) &&
-            stepIsValid(aboutStep) &&
-            stepIsValid(scheduleStep) &&
-            stepIsValid(actionsStep)
-          ) {
-            const startMlJobsIfNeeded = async () => {
-              if (!isMlRule(defineStep.data.ruleType) || !actionsStep.data.enabled) {
-                return;
-              }
-              await startMlJobs(defineStep.data.machineLearningJobId);
-            };
-            const [, createdRule] = await Promise.all([
-              startMlJobsIfNeeded(),
-              createRule(
-                formatRule<RuleCreateProps>(
-                  defineStep.data,
-                  aboutStep.data,
-                  scheduleStep.data,
-                  actionsStep.data
-                )
-              ),
-            ]);
-
-            addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
-
-            navigateToApp(APP_UI_ID, {
-              deepLinkId: SecurityPageName.rules,
-              path: getRuleDetailsUrl(createdRule.id),
-            });
-          }
         }
       }
     },
-    [updateCurrentDataState, goToStep, createRule, navigateToApp, startMlJobs, addSuccess]
+    [validateStep, goToStep]
   );
 
-  const getAccordionType = useCallback(
-    (step: RuleStep) => {
-      if (step === activeStep) {
-        return 'active';
-      } else if (stepsData.current[step].isValid) {
-        return 'valid';
+  const submitRule = useCallback(
+    async (step: RuleStep, enabled: boolean) => {
+      const valid = await validateStep(step);
+
+      if (valid) {
+        const startMlJobsIfNeeded = async () => {
+          if (!isMlRule(ruleType) || !enabled) {
+            return;
+          }
+          await startMlJobs(defineStepData.machineLearningJobId);
+        };
+        const [, createdRule] = await Promise.all([
+          startMlJobsIfNeeded(),
+          createRule(
+            formatRule<RuleCreateProps>(defineStepData, aboutStepData, scheduleStepData, {
+              ...actionsStepData,
+              enabled,
+            })
+          ),
+        ]);
+
+        addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
+
+        navigateToApp(APP_UI_ID, {
+          deepLinkId: SecurityPageName.rules,
+          path: getRuleDetailsUrl(createdRule.id),
+        });
       }
-      return 'passive';
     },
-    [activeStep]
+    [
+      validateStep,
+      createRule,
+      defineStepData,
+      aboutStepData,
+      scheduleStepData,
+      actionsStepData,
+      addSuccess,
+      navigateToApp,
+      ruleType,
+      startMlJobs,
+    ]
   );
 
+  const defineRuleButtonType =
+    activeStep === RuleStep.defineRule ? 'active' : defineStepForm.isValid ? 'valid' : 'passive';
   const defineRuleButton = (
-    <AccordionTitle
-      name="1"
-      title={RuleI18n.DEFINE_RULE}
-      type={getAccordionType(RuleStep.defineRule)}
-    />
+    <AccordionTitle name="1" title={RuleI18n.DEFINE_RULE} type={defineRuleButtonType} />
   );
+
+  const aboutRuleButtonType =
+    activeStep === RuleStep.aboutRule ? 'active' : aboutStepForm.isValid ? 'valid' : 'passive';
   const aboutRuleButton = (
-    <AccordionTitle
-      name="2"
-      title={RuleI18n.ABOUT_RULE}
-      type={getAccordionType(RuleStep.aboutRule)}
-    />
+    <AccordionTitle name="2" title={RuleI18n.ABOUT_RULE} type={aboutRuleButtonType} />
   );
+
+  const scheduleRuleButtonType =
+    activeStep === RuleStep.scheduleRule
+      ? 'active'
+      : scheduleStepForm.isValid
+      ? 'valid'
+      : 'passive';
   const scheduleRuleButton = (
-    <AccordionTitle
-      name="3"
-      title={RuleI18n.SCHEDULE_RULE}
-      type={getAccordionType(RuleStep.scheduleRule)}
-    />
+    <AccordionTitle name="3" title={RuleI18n.SCHEDULE_RULE} type={scheduleRuleButtonType} />
   );
+
+  const actionsRuleButtonType =
+    activeStep === RuleStep.ruleActions ? 'active' : actionsStepForm.isValid ? 'valid' : 'passive';
   const ruleActionsButton = (
-    <AccordionTitle
-      name="4"
-      title={RuleI18n.RULE_ACTIONS}
-      type={getAccordionType(RuleStep.ruleActions)}
-    />
+    <AccordionTitle name="4" title={RuleI18n.RULE_ACTIONS} type={actionsRuleButtonType} />
   );
 
   if (
@@ -402,7 +417,7 @@ const CreateRulePageComponent: React.FC = () => {
                           text: i18n.BACK_TO_RULES,
                           pageId: SecurityPageName.rules,
                         }}
-                        isLoading={isLoading || loading}
+                        isLoading={isCreateRuleLoading || loading}
                         title={i18n.PAGE_TITLE}
                       >
                         <EuiButton
@@ -427,7 +442,7 @@ const CreateRulePageComponent: React.FC = () => {
                           ref={defineRuleRef}
                           onToggle={handleAccordionToggle.bind(null, RuleStep.defineRule)}
                           extraAction={
-                            stepsData.current[RuleStep.defineRule].isValid && (
+                            defineStepForm.isValid && (
                               <EuiButtonEmpty
                                 data-test-subj="edit-define-rule"
                                 iconType="pencil"
@@ -440,23 +455,42 @@ const CreateRulePageComponent: React.FC = () => {
                           }
                         >
                           <EuiHorizontalRule margin="m" />
-                          <StepDefineRule
-                            addPadding={true}
-                            defaultValues={defineRuleData}
-                            isReadOnlyView={activeStep !== RuleStep.defineRule}
-                            isLoading={isLoading || loading}
-                            setForm={setFormHook}
-                            onSubmit={() => submitStep(RuleStep.defineRule)}
-                            kibanaDataViews={dataViewOptions}
-                            descriptionColumns="singleSplit"
-                            // We need a key to make this component remount when edit/view mode is toggled
-                            // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
-                            key={isShouldRerenderStep(RuleStep.defineRule, activeStep)}
-                            indicesConfig={indicesConfig}
-                            threatIndicesConfig={threatIndicesConfig}
-                            onRuleDataChange={updateCurrentDataState}
-                            onPreviewDisabledStateChange={setIsPreviewDisabled}
-                          />
+                          <div
+                            style={{
+                              display: activeStep === RuleStep.defineRule ? undefined : 'none',
+                            }}
+                          >
+                            <StepDefineRule
+                              isLoading={isCreateRuleLoading || loading}
+                              kibanaDataViews={dataViewOptions}
+                              indicesConfig={indicesConfig}
+                              threatIndicesConfig={threatIndicesConfig}
+                              onPreviewDisabledStateChange={setIsPreviewDisabled}
+                              form={defineStepForm}
+                              optionsSelected={eqlOptionsSelected}
+                              setOptionsSelected={setEqlOptionsSelected}
+                              indexPattern={indexPattern}
+                              isIndexPatternLoading={isIndexPatternLoading}
+                              browserFields={browserFields}
+                            />
+                            <NextStep
+                              dataTestSubj="define-continue"
+                              onClick={() => submitStep(RuleStep.defineRule)}
+                              isDisabled={isCreateRuleLoading}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: activeStep === RuleStep.defineRule ? 'none' : undefined,
+                            }}
+                          >
+                            <StepDefineRuleReadOnly
+                              addPadding
+                              defaultValues={defineStepData}
+                              descriptionColumns="singleSplit"
+                              indexPattern={indexPattern}
+                            />
+                          </div>
                         </EuiAccordion>
                       </MyEuiPanel>
                       <EuiSpacer size="l" />
@@ -469,7 +503,7 @@ const CreateRulePageComponent: React.FC = () => {
                           ref={aboutRuleRef}
                           onToggle={handleAccordionToggle.bind(null, RuleStep.aboutRule)}
                           extraAction={
-                            stepsData.current[RuleStep.aboutRule].isValid && (
+                            aboutStepForm.isValid && (
                               <EuiButtonEmpty
                                 data-test-subj="edit-about-rule"
                                 iconType="pencil"
@@ -482,20 +516,35 @@ const CreateRulePageComponent: React.FC = () => {
                           }
                         >
                           <EuiHorizontalRule margin="m" />
-                          <StepAboutRule
-                            addPadding={true}
-                            defaultValues={aboutRuleData}
-                            defineRuleData={defineRuleData}
-                            descriptionColumns="singleSplit"
-                            isReadOnlyView={activeStep !== RuleStep.aboutRule}
-                            isLoading={isLoading || loading}
-                            setForm={setFormHook}
-                            onSubmit={() => submitStep(RuleStep.aboutRule)}
-                            // We need a key to make this component remount when edit/view mode is toggled
-                            // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
-                            key={isShouldRerenderStep(RuleStep.aboutRule, activeStep)}
-                            onRuleDataChange={updateCurrentDataState}
-                          />
+                          <div
+                            style={{
+                              display: activeStep === RuleStep.aboutRule ? undefined : 'none',
+                            }}
+                          >
+                            <StepAboutRule
+                              defaultValues={aboutStepData}
+                              defineRuleData={defineStepData}
+                              isLoading={isCreateRuleLoading || loading}
+                              form={aboutStepForm}
+                            />
+
+                            <NextStep
+                              dataTestSubj="about-continue"
+                              onClick={() => submitStep(RuleStep.aboutRule)}
+                              isDisabled={isCreateRuleLoading}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: activeStep === RuleStep.aboutRule ? 'none' : undefined,
+                            }}
+                          >
+                            <StepAboutRuleReadOnly
+                              addPadding
+                              defaultValues={aboutStepData}
+                              descriptionColumns="singleSplit"
+                            />
+                          </div>
                         </EuiAccordion>
                       </MyEuiPanel>
                       <EuiSpacer size="l" />
@@ -508,7 +557,7 @@ const CreateRulePageComponent: React.FC = () => {
                           ref={scheduleRuleRef}
                           onToggle={handleAccordionToggle.bind(null, RuleStep.scheduleRule)}
                           extraAction={
-                            stepsData.current[RuleStep.scheduleRule].isValid && (
+                            scheduleStepForm.isValid && (
                               <EuiButtonEmpty
                                 iconType="pencil"
                                 size="xs"
@@ -520,19 +569,32 @@ const CreateRulePageComponent: React.FC = () => {
                           }
                         >
                           <EuiHorizontalRule margin="m" />
-                          <StepScheduleRule
-                            addPadding={true}
-                            defaultValues={scheduleRuleData}
-                            descriptionColumns="singleSplit"
-                            isReadOnlyView={activeStep !== RuleStep.scheduleRule}
-                            isLoading={isLoading || loading}
-                            setForm={setFormHook}
-                            onSubmit={() => submitStep(RuleStep.scheduleRule)}
-                            // We need a key to make this component remount when edit/view mode is toggled
-                            // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
-                            key={isShouldRerenderStep(RuleStep.scheduleRule, activeStep)}
-                            onRuleDataChange={updateCurrentDataState}
-                          />
+                          <div
+                            style={{
+                              display: activeStep === RuleStep.scheduleRule ? undefined : 'none',
+                            }}
+                          >
+                            <StepScheduleRule
+                              isLoading={isCreateRuleLoading || loading}
+                              form={scheduleStepForm}
+                            />
+                            <NextStep
+                              dataTestSubj="schedule-continue"
+                              onClick={() => submitStep(RuleStep.scheduleRule)}
+                              isDisabled={isCreateRuleLoading}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: activeStep === RuleStep.scheduleRule ? 'none' : undefined,
+                            }}
+                          >
+                            <StepScheduleRuleReadOnly
+                              addPadding
+                              descriptionColumns="singleSplit"
+                              defaultValues={scheduleStepData}
+                            />
+                          </div>
                         </EuiAccordion>
                       </MyEuiPanel>
                       <EuiSpacer size="l" />
@@ -545,7 +607,7 @@ const CreateRulePageComponent: React.FC = () => {
                           ref={ruleActionsRef}
                           onToggle={handleAccordionToggle.bind(null, RuleStep.ruleActions)}
                           extraAction={
-                            stepsData.current[RuleStep.ruleActions].isValid && (
+                            actionsStepForm.isValid && (
                               <EuiButtonEmpty
                                 iconType="pencil"
                                 size="xs"
@@ -557,20 +619,57 @@ const CreateRulePageComponent: React.FC = () => {
                           }
                         >
                           <EuiHorizontalRule margin="m" />
-                          <StepRuleActions
-                            addPadding={true}
-                            defaultValues={stepsData.current[RuleStep.ruleActions].data}
-                            isReadOnlyView={activeStep !== RuleStep.ruleActions}
-                            isLoading={isLoading || loading || isStartingJobs}
-                            setForm={setFormHook}
-                            onSubmit={() => submitStep(RuleStep.ruleActions)}
-                            actionMessageParams={actionMessageParams}
-                            summaryActionMessageParams={actionMessageParams}
-                            // We need a key to make this component remount when edit/view mode is toggled
-                            // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
-                            key={isShouldRerenderStep(RuleStep.ruleActions, activeStep)}
-                            ruleType={ruleType}
-                          />
+                          <div
+                            style={{
+                              display: activeStep === RuleStep.ruleActions ? undefined : 'none',
+                            }}
+                          >
+                            <StepRuleActions
+                              isLoading={isCreateRuleLoading || loading || isStartingJobs}
+                              actionMessageParams={actionMessageParams}
+                              summaryActionMessageParams={actionMessageParams}
+                              ruleType={ruleType}
+                              form={actionsStepForm}
+                            />
+
+                            <EuiHorizontalRule margin="m" />
+                            <EuiFlexGroup
+                              alignItems="center"
+                              justifyContent="flexEnd"
+                              gutterSize="xs"
+                              responsive={false}
+                            >
+                              <EuiFlexItem grow={false}>
+                                <EuiButton
+                                  fill={false}
+                                  isDisabled={isCreateRuleLoading}
+                                  isLoading={isCreateRuleLoading}
+                                  onClick={() => submitRule(RuleStep.ruleActions, false)}
+                                  data-test-subj="create-enabled-false"
+                                >
+                                  {i18n.COMPLETE_WITHOUT_ENABLING}
+                                </EuiButton>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiButton
+                                  fill
+                                  isDisabled={isCreateRuleLoading}
+                                  isLoading={isCreateRuleLoading}
+                                  onClick={() => submitRule(RuleStep.ruleActions, true)}
+                                  data-test-subj="create-enable"
+                                >
+                                  {i18n.COMPLETE_WITH_ENABLING}
+                                </EuiButton>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </div>
+                          <div
+                            style={{
+                              display: activeStep === RuleStep.ruleActions ? 'none' : undefined,
+                            }}
+                          >
+                            <StepRuleActionsReadOnly addPadding defaultValues={actionsStepData} />
+                          </div>
                         </EuiAccordion>
                       </MyEuiPanel>
                     </MaxWidthEuiFlexItem>
@@ -588,9 +687,9 @@ const CreateRulePageComponent: React.FC = () => {
                 >
                   <RulePreview
                     isDisabled={isPreviewDisabled && activeStep === RuleStep.defineRule}
-                    defineRuleData={defineRuleData}
-                    aboutRuleData={aboutRuleData}
-                    scheduleRuleData={scheduleRuleData}
+                    defineRuleData={defineStepData}
+                    aboutRuleData={aboutStepData}
+                    scheduleRuleData={scheduleStepData}
                   />
                 </EuiResizablePanel>
               </>

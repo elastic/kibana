@@ -6,10 +6,8 @@
  */
 import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiSpacer } from '@elastic/eui';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
-import { useCanManagePrivateLocation, useFleetPermissions } from '../../../hooks';
 import { ManageEmptyState } from './manage_empty_state';
 import { AddLocationFlyout } from './add_location_flyout';
 import { usePrivateLocationsAPI } from './hooks/use_locations_api';
@@ -20,7 +18,6 @@ import {
 } from '../../../state/private_locations';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { getServiceLocations } from '../../../state';
-import { FleetPermissionsCallout } from '../../common/components/permissions';
 
 export const ManagePrivateLocations = () => {
   const dispatch = useDispatch();
@@ -33,20 +30,15 @@ export const ManagePrivateLocations = () => {
 
   const { onSubmit, loading, privateLocations, onDelete, deleteLoading } = usePrivateLocationsAPI();
 
-  const { canReadAgentPolicies } = useFleetPermissions();
-  const canManagePrivateLocation = useCanManagePrivateLocation();
-
   // make sure flyout is closed when first visiting the page
   useEffect(() => {
     setIsAddingNew(false);
   }, [setIsAddingNew]);
 
   useEffect(() => {
-    if (canReadAgentPolicies) {
-      dispatch(getAgentPoliciesAction.get());
-    }
+    dispatch(getAgentPoliciesAction.get());
     dispatch(getServiceLocations());
-  }, [dispatch, canReadAgentPolicies]);
+  }, [dispatch]);
 
   const handleSubmit = (formData: PrivateLocation) => {
     onSubmit(formData);
@@ -54,21 +46,10 @@ export const ManagePrivateLocations = () => {
 
   return (
     <>
-      {!canManagePrivateLocation && (
-        <>
-          <FleetPermissionsCallout />
-          <EuiSpacer />
-        </>
-      )}
-
       {loading ? (
         <LoadingState />
       ) : (
-        <ManageEmptyState
-          privateLocations={privateLocations}
-          setIsAddingNew={setIsAddingNew}
-          hasFleetPermissions={canManagePrivateLocation}
-        >
+        <ManageEmptyState privateLocations={privateLocations} setIsAddingNew={setIsAddingNew}>
           <PrivateLocationsTable
             privateLocations={privateLocations}
             onDelete={onDelete}

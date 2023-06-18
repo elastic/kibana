@@ -14,16 +14,17 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => 
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.PARAMS,
   validate: {
-    body: schema.object({
-      ids: schema.arrayOf(schema.string()),
+    query: schema.object({
+      ids: schema.string(),
     }),
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
-    const { ids } = request.body as { ids: string[] };
+  handler: async ({ savedObjectsClient, request }): Promise<any> => {
+    const { ids } = request.query as { ids: string };
+    const parsedIds = JSON.parse(ids) as string[];
 
     const result = await savedObjectsClient.bulkDelete(
-      ids.map((id) => ({ type: syntheticsParamType, id })),
+      parsedIds.map((id) => ({ type: syntheticsParamType, id })),
       { force: true }
     );
 

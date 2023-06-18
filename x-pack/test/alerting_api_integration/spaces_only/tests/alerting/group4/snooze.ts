@@ -35,7 +35,8 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('snooze', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/159076
+  describe.skip('snooze', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -313,6 +314,83 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       });
       expect(response.statusCode).to.eql(400);
       expect(response.body.message).to.eql('Rule cannot have more than 5 snooze schedules');
+    });
+
+    it('should clear the snooze after it expires', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            name: 'should not trigger actions when snoozed',
+            rule_type_id: 'test.patternFiring',
+            schedule: { interval: '1s' },
+            throttle: null,
+            notify_when: 'onActiveAlert',
+            params: {
+              pattern: { instance: arrayOfTrues(100) },
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        snooze_schedule: {
+          ...SNOOZE_SCHEDULE,
+          duration: 3000,
+        },
+      });
+
+      expect(response.statusCode).to.eql(204);
+      expect(response.body).to.eql('');
+
+      await retry.try(async () => {
+        const { body: updatedAlert } = await supertestWithoutAuth
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        expect(updatedAlert.snooze_schedule).to.eql([
+          {
+            ...SNOOZE_SCHEDULE,
+            duration: 3000,
+          },
+        ]);
+      });
+      log.info('wait for snoozing to end');
+      await retry.try(async () => {
+        const { body: alertWithExpiredSnooze } = await supertestWithoutAuth
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        expect(alertWithExpiredSnooze.snooze_schedule).to.eql([]);
+      });
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdRule.id,
+      });
     });
   });
 

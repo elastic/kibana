@@ -8,6 +8,7 @@
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import moment from 'moment';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createApmRule,
@@ -33,6 +34,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('transaction error rate alert', { config: 'basic', archives: [] }, () => {
     let ruleId: string;
+    let alertId: string;
+    let startedAt: string;
     let actionId: string | undefined;
 
     const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
@@ -114,7 +117,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               group: 'threshold_met',
               id: actionId,
               params: {
-                documents: [{ message: 'Transaction Name: {{context.transactionName}}' }],
+                documents: [
+                  {
+                    message: `Transaction Name: {{context.transactionName}}
+- Alert URL: {{context.alertDetailsUrl}}`,
+                  },
+                ],
               },
               frequency: {
                 notify_when: 'onActionGroupChange',
@@ -137,26 +145,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(executionStatus.status).to.be('active');
       });
 
-      it('returns correct message', async () => {
-        const resp = await waitForDocumentInIndex<{ message: string }>({
-          es,
-          indexName: ALERT_ACTION_INDEX_NAME,
-        });
-
-        expect(resp.hits.hits[0]._source?.message).eql(`Transaction Name: tx-java`);
-      });
-
       it('indexes alert document with all group-by fields', async () => {
         const resp = await waitForAlertInIndex({
           es,
           indexName: APM_ALERTS_INDEX,
           ruleId,
         });
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
+        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
         expect(resp.hits.hits[0]._source).property('service.environment', 'production');
         expect(resp.hits.hits[0]._source).property('transaction.type', 'request');
         expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
+      });
+
+      it('returns correct message', async () => {
+        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
+        const resp = await waitForDocumentInIndex<{ message: string }>({
+          es,
+          indexName: ALERT_ACTION_INDEX_NAME,
+        });
+
+        expect(resp.hits.hits[0]._source?.message).eql(`Transaction Name: tx-java
+- Alert URL: http://mockedpublicbaseurl/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`);
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {

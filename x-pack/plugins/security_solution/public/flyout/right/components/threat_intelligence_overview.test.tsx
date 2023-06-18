@@ -112,9 +112,9 @@ describe('<ThreatIntelligenceOverview />', () => {
       loading: true,
     });
 
-    const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
+    const { getAllByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID)).toBeInTheDocument();
+    expect(getAllByTestId(INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID)).toHaveLength(2);
   });
 
   it('should render null when eventId is null', () => {
@@ -139,22 +139,6 @@ describe('<ThreatIntelligenceOverview />', () => {
     const contextValue = {
       ...panelContextValue,
       dataFormattedForFieldBrowser: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = render(renderThreatIntelligenceOverview(contextValue));
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should render null when no enrichment found is null', () => {
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
-      loading: false,
-      threatMatchesCount: 0,
-      threatEnrichmentsCount: 0,
-    });
-    const contextValue = {
-      ...panelContextValue,
-      dataFormattedForFieldBrowser: [],
     } as unknown as RightPanelContext;
 
     const { container } = render(renderThreatIntelligenceOverview(contextValue));

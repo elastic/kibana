@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  getLogViewRequestParamsRT,
-  getLogViewResponsePayloadRT,
-  LOG_VIEW_URL,
-} from '../../../common/http_api/log_views';
+import { logViewsV1 } from '../../../common/http_api';
+import { LOG_VIEW_URL } from '../../../common/http_api/log_views';
 import { createValidationFunction } from '../../../common/runtime_types';
 import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import type { InfraPluginStartServicesAccessor } from '../../types';
@@ -21,35 +18,42 @@ export const initGetLogViewRoute = ({
   framework: KibanaFramework;
   getStartServices: InfraPluginStartServicesAccessor;
 }) => {
-  framework.registerRoute(
-    {
+  framework
+    .registerVersionedRoute({
+      access: 'internal',
       method: 'get',
       path: LOG_VIEW_URL,
-      validate: {
-        params: createValidationFunction(getLogViewRequestParamsRT),
-      },
-    },
-    async (_requestContext, request, response) => {
-      const { logViewId } = request.params;
-      const { logViews } = (await getStartServices())[2];
-      const logViewsClient = logViews.getScopedClient(request);
-
-      try {
-        const logView = await logViewsClient.getLogView(logViewId);
-
-        return response.ok({
-          body: getLogViewResponsePayloadRT.encode({
-            data: logView,
-          }),
-        });
-      } catch (error) {
-        return response.customError({
-          statusCode: error.statusCode ?? 500,
-          body: {
-            message: error.message ?? 'An unexpected error occurred',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: createValidationFunction(logViewsV1.getLogViewRequestParamsRT),
           },
-        });
+        },
+      },
+      async (_requestContext, request, response) => {
+        const { logViewId } = request.params;
+        const { logViews } = (await getStartServices())[2];
+        const logViewsClient = logViews.getScopedClient(request);
+
+        try {
+          const logView = await logViewsClient.getLogView(logViewId);
+
+          return response.ok({
+            body: logViewsV1.getLogViewResponsePayloadRT.encode({
+              data: logView,
+            }),
+          });
+        } catch (error) {
+          return response.customError({
+            statusCode: error.statusCode ?? 500,
+            body: {
+              message: error.message ?? 'An unexpected error occurred',
+            },
+          });
+        }
       }
-    }
-  );
+    );
 };

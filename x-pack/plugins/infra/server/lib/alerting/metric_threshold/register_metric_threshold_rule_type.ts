@@ -31,11 +31,7 @@ import {
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from '../common/messages';
-import {
-  getAlertDetailsPageEnabledForApp,
-  oneOfLiterals,
-  validateIsStringElasticsearchJSONFilter,
-} from '../common/utils';
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -43,6 +39,7 @@ import {
   NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
@@ -55,8 +52,6 @@ export async function registerMetricThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {
-  const config = libs.getAlertDetailsConfig();
-
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),
@@ -121,6 +116,7 @@ export async function registerMetricThresholdRuleType(
     name: i18n.translate('xpack.infra.metrics.alertName', {
       defaultMessage: 'Metric threshold',
     }),
+    fieldsForAAD: O11Y_AAD_FIELDS,
     validate: {
       params: schema.object(
         {
@@ -150,15 +146,11 @@ export async function registerMetricThresholdRuleType(
       context: [
         { name: 'group', description: groupActionVariableDescription },
         { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
-        ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
-          ? [
-              {
-                name: 'alertDetailsUrl',
-                description: alertDetailUrlActionVariableDescription,
-                usesPublicBaseUrl: true,
-              },
-            ]
-          : []),
+        {
+          name: 'alertDetailsUrl',
+          description: alertDetailUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },

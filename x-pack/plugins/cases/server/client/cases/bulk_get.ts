@@ -6,9 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 import { partition } from 'lodash';
 
 import { MAX_BULK_GET_CASES } from '../../../common/constants';
@@ -19,8 +16,7 @@ import type {
 } from '../../../common/api';
 import {
   CasesBulkGetRequestRt,
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
   CasesBulkGetResponseRt,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
@@ -29,6 +25,7 @@ import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { SOWithErrors } from '../../common/types';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 type CaseSavedObjectWithErrors = Array<SOWithErrors<CaseAttributes>>;
 
@@ -46,10 +43,7 @@ export const bulkGet = async (
   } = clientArgs;
 
   try {
-    const request = pipe(
-      excess(CasesBulkGetRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const request = decodeWithExcessOrThrow(CasesBulkGetRequestRt)(params);
 
     throwErrorIfCaseIdsReachTheLimit(request.ids);
 
@@ -84,8 +78,9 @@ export const bulkGet = async (
     });
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
+    const res = { cases: flattenedCases, errors };
 
-    return CasesBulkGetResponseRt.encode({ cases: flattenedCases, errors });
+    return decodeOrThrow(CasesBulkGetResponseRt)(res);
   } catch (error) {
     const ids = params.ids ?? [];
     throw createCaseError({

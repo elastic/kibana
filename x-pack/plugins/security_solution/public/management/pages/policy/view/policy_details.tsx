@@ -21,13 +21,11 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import type { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
-import { getEndpointListPath, getPoliciesPath } from '../../../common/routing';
+import { getPoliciesPath } from '../../../common/routing';
 import { useAppUrl } from '../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const PolicyDetails = React.memo(() => {
-  const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
   const { getAppUrl } = useAppUrl();
 
@@ -49,38 +47,20 @@ export const PolicyDetails = React.memo(() => {
       };
     }
 
-    if (isPolicyListEnabled) {
-      // default is to go back to the policy list
-      const policyListPath = getPoliciesPath();
-      return {
-        backButtonLabel: i18n.translate('xpack.securitySolution.policyDetails.backToPolicyButton', {
-          defaultMessage: 'Back to policy list',
-        }),
-        backButtonUrl: getAppUrl({ path: policyListPath }),
-        onBackButtonNavigateTo: [
-          APP_UI_ID,
-          {
-            path: policyListPath,
-          },
-        ],
-      };
-    } else {
-      // remove else block once policy list is not hidden behind feature flag
-      const endpointListPath = getEndpointListPath({ name: 'endpointList' });
-      return {
-        backButtonLabel: i18n.translate('xpack.securitySolution.policyDetails.backToEndpointList', {
-          defaultMessage: 'View all endpoints',
-        }),
-        backButtonUrl: getAppUrl({ path: endpointListPath }),
-        onBackButtonNavigateTo: [
-          APP_UI_ID,
-          {
-            path: endpointListPath,
-          },
-        ],
-      };
-    }
-  }, [getAppUrl, routeState?.backLink, isPolicyListEnabled]);
+    const policyListPath = getPoliciesPath();
+    return {
+      backButtonLabel: i18n.translate('xpack.securitySolution.policyDetails.backToPolicyButton', {
+        defaultMessage: 'Back to policy list',
+      }),
+      backButtonUrl: getAppUrl({ path: policyListPath }),
+      onBackButtonNavigateTo: [
+        APP_UI_ID,
+        {
+          path: policyListPath,
+        },
+      ],
+    };
+  }, [getAppUrl, routeState.backLink]);
 
   const headerRightContent = (
     <AgentsSummary

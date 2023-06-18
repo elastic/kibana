@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewFieldBase } from '@kbn/es-query';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import type { SecuritySolutionDataViewBase } from '../../types';
+
 /** Uniquely identifies a Sourcerer Scope */
 export enum SourcererScopeName {
   default = 'default',
@@ -52,6 +52,10 @@ export interface KibanaDataView {
   title: string;
 }
 
+export type RunTimeMappings =
+  | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>
+  | undefined;
+
 /**
  * DataView from Kibana + timelines/index_fields enhanced field data
  */
@@ -68,7 +72,7 @@ export interface SourcererDataView extends KibanaDataView {
    * @deprecated use sourcererDataView.fields
    * comes from dataView.fields.toSpec() */
   indexFields: SecuritySolutionDataViewBase['fields'];
-  fields: DataViewFieldBase[];
+  fields: DataViewSpec['fields'] | undefined;
   /** set when data view fields are fetched */
   loading: boolean;
   /**
@@ -76,11 +80,11 @@ export interface SourcererDataView extends KibanaDataView {
    * Needed to pass to search strategy
    * Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
    */
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   /**
    * @type DataView @kbn/data-views-plugin/common
    */
-  dataView: DataView | undefined;
+  dataView: DataViewSpec | undefined;
 }
 
 /**
@@ -125,7 +129,7 @@ export interface SelectedDataView {
    * Easier to add this additional data rather than
    * try to extend the SelectedDataView type from DataView.
    */
-  sourcererDataView: DataView | undefined;
+  sourcererDataView: DataViewSpec | undefined;
 }
 
 /**
@@ -155,11 +159,12 @@ export const initSourcererScope: Omit<SourcererScope, 'id'> = {
   selectedPatterns: [],
   missingPatterns: [],
 };
+
 export const initDataView: SourcererDataView & { id: string; error?: unknown } = {
   browserFields: EMPTY_BROWSER_FIELDS,
   id: '',
   indexFields: EMPTY_INDEX_FIELDS,
-  fields: EMPTY_INDEX_FIELDS,
+  fields: undefined,
   loading: false,
   patternList: [],
   runtimeMappings: {},

@@ -26,5 +26,6 @@
     "@kbn/serverless",
     "@kbn/security-plugin",
     "@kbn/cloud-plugin",
+    "@kbn/share-plugin",
   ]
 }

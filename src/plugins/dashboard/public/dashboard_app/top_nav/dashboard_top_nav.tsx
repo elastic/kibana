@@ -82,8 +82,9 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const title = dashboard.select((state) => state.explicitInput.title);
 
   // store data views in state & subscribe to dashboard data view changes.
-  const [allDataViews, setAllDataViews] = useState<DataView[]>(dashboard.getAllDataViews());
+  const [allDataViews, setAllDataViews] = useState<DataView[]>([]);
   useEffect(() => {
+    setAllDataViews(dashboard.getAllDataViews());
     const subscription = dashboard.onDataViewsUpdate$.subscribe((dataViews) =>
       setAllDataViews(dataViews)
     );

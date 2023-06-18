@@ -8,6 +8,7 @@
 import { EuiComment, EuiSpacer } from '@elastic/eui';
 import React, { useLayoutEffect, useState } from 'react';
 import { FormattedRelativeTime } from '@kbn/i18n-react';
+import { selectUnit } from '@formatjs/intl-utils';
 
 import type { OsqueryActionResultsProps } from './types';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
@@ -37,7 +38,7 @@ export const OsqueryResult = React.memo<OsqueryResultProps>(
       <AlertAttachmentContext.Provider value={ecsData}>
         <EuiSpacer size="s" />
         <EuiComment
-          username={ruleName && ruleName[0]}
+          username={ruleName}
           timestamp={<FormattedRelativeTime value={startDate} />}
           event={ATTACHED_QUERY}
           data-test-subj={'osquery-results-comment'}

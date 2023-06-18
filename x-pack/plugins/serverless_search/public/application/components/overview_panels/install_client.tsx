@@ -11,10 +11,15 @@ import React from 'react';
 import { CodeBox } from '../code_box';
 import { languageDefinitions } from '../languages/languages';
 import { OverviewPanel } from './overview_panel';
-import { LanguageDefinition, Languages } from '../languages/types';
+import {
+  LanguageDefinition,
+  Languages,
+  LanguageDefinitionSnippetArguments,
+} from '../languages/types';
 import { GithubLink } from '../shared/github_link';
 
 interface InstallClientProps {
+  codeArguments: LanguageDefinitionSnippetArguments;
   language: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
 }
@@ -53,6 +58,7 @@ const Link: React.FC<{ language: Languages }> = ({ language }) => {
 };
 
 export const InstallClientPanel: React.FC<InstallClientProps> = ({
+  codeArguments,
   language,
   setSelectedLanguage,
 }) => {
@@ -78,6 +84,7 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
         <>
           <CodeBox
             code="installClient"
+            codeArgs={codeArguments}
             languageType="shell"
             languages={languageDefinitions}
             selectedLanguage={language}

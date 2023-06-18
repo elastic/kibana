@@ -14,7 +14,8 @@ import { toExpressionAst } from './to_ast';
 import { InputControlVisParams } from './types';
 
 export function createInputControlVisTypeDefinition(
-  deps: InputControlVisDependencies
+  deps: InputControlVisDependencies,
+  readOnly: boolean
 ): VisTypeDefinition<InputControlVisParams> {
   const ControlsTab = getControlsTab(deps);
 
@@ -29,7 +30,8 @@ export function createInputControlVisTypeDefinition(
       defaultMessage: 'Input controls are deprecated and will be removed in a future version.',
     }),
     stage: 'experimental',
-    hidden: true,
+    disableCreate: true, // input controls are deprecated and input control creation has been permanently disabled
+    disableEdit: readOnly,
     isDeprecated: true,
     visConfig: {
       defaults: {

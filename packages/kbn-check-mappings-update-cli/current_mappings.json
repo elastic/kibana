@@ -874,17 +874,6 @@
       }
     }
   },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      }
-    }
-  },
   "tag": {
     "properties": {
       "name": {
@@ -894,6 +883,17 @@
         "type": "text"
       },
       "color": {
+        "type": "text"
+      }
+    }
+  },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
         "type": "text"
       }
     }
@@ -928,6 +928,17 @@
       "legacyIndexPatternRef": {
         "type": "text",
         "index": false
+      }
+    }
+  },
+  "event-annotation-group": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
       }
     }
   },
@@ -1330,6 +1341,9 @@
       },
       "total_comments": {
         "type": "integer"
+      },
+      "category": {
+        "type": "keyword"
       }
     }
   },
@@ -1558,6 +1572,10 @@
       },
       "is_protected": {
         "type": "boolean"
+      },
+      "overrides": {
+        "type": "flattened",
+        "index": false
       }
     }
   },
@@ -2052,10 +2070,36 @@
               }
             }
           },
+          "id": {
+            "type": "keyword"
+          },
+          "section": {
+            "type": "keyword",
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            }
+          },
+          "version": {
+            "type": "keyword"
+          },
           "benchmark": {
             "type": "object",
             "properties": {
               "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "rule_number": {
                 "type": "keyword"
               }
             }
@@ -2094,6 +2138,22 @@
       },
       "tags": {
         "type": "keyword"
+      }
+    }
+  },
+  "threshold-explorer-view": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "observability-onboarding-state": {
+    "properties": {
+      "state": {
+        "type": "object",
+        "dynamic": false
+      },
+      "progress": {
+        "type": "object",
+        "dynamic": false
       }
     }
   },

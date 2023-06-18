@@ -11,6 +11,7 @@ const creatAlertsServiceMock = () => {
       register: jest.fn(),
       isInitialized: jest.fn(),
       getContextInitializationPromise: jest.fn(),
+      createAlertsClient: jest.fn(),
     };
   });
 };

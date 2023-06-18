@@ -52,6 +52,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-metadata-remove-filter');
     },
 
+    async getBetaBadgeExists() {
+      return testSubjects.exists('infra-beta-badge');
+    },
+
     async getHostsLandingPageDisabled() {
       const container = await testSubjects.find('hostView-no-enable-access');
       const containerText = await container.getVisibleText();
@@ -65,12 +69,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getHostsLandingPageEnableButton() {
-      const container = await testSubjects.find('hostsView-enable-feature-button');
-      return container;
+      return testSubjects.find('hostsView-enable-feature-button');
     },
 
     async clickEnableHostViewButton() {
-      return await testSubjects.click('hostsView-enable-feature-button');
+      return testSubjects.click('hostsView-enable-feature-button');
     },
 
     async getHostsTable() {
@@ -91,11 +94,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const cells = await row.findAllByCssSelector('[data-test-subj*="hostsView-tableRow-"]');
 
       // Retrieve content for each cell
-      const [title, os, cpuUsage, diskLatency, rx, tx, memoryTotal, memory] = await Promise.all(
-        cells.map((cell) => this.getHostsCellContent(cell))
-      );
+      const [title, cpuUsage, normalizedLoad, memoryUsage, memoryFree, diskSpaceUsage, rx, tx] =
+        await Promise.all(cells.map((cell) => this.getHostsCellContent(cell)));
 
-      return { title, os, cpuUsage, diskLatency, rx, tx, memoryTotal, memory };
+      return { title, cpuUsage, normalizedLoad, memoryUsage, memoryFree, diskSpaceUsage, rx, tx };
     },
 
     async getHostsCellContent(cell: WebElementWrapper) {
@@ -127,7 +129,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickAndValidateMetriChartActionOptions() {
-      const element = await testSubjects.find('hostsView-metricChart-diskIOWrite');
+      const element = await testSubjects.find('hostsView-metricChart-tx');
       await element.moveMouseTo();
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
       await button.click();
@@ -285,16 +287,16 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     // Sorting
-    getDiskLatencyHeader() {
-      return testSubjects.find('tableHeaderCell_diskLatency_4');
+    getCpuUsageHeader() {
+      return testSubjects.find('tableHeaderCell_cpu_2');
     },
 
     getTitleHeader() {
       return testSubjects.find('tableHeaderCell_title_1');
     },
 
-    async sortByDiskLatency() {
-      const diskLatency = await this.getDiskLatencyHeader();
+    async sortByCpuUsage() {
+      const diskLatency = await this.getCpuUsageHeader();
       const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
       await button.click();
     },

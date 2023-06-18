@@ -8,25 +8,26 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
-import { parse, stringify } from 'query-string';
 import { APP_ID, CASES_CONFIGURE_PATH, CASES_CREATE_PATH } from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
 import type { ICasesDeepLinkId } from './deep_links';
 import type { CaseViewPathParams, CaseViewPathSearchParams } from './paths';
 import { generateCaseViewPath } from './paths';
+import { stringifyToURL, parseURL } from '../../components/utils';
 
 export const useCaseViewParams = () => useParams<CaseViewPathParams>();
 
 export function useUrlParams() {
   const { search } = useLocation();
-  const [urlParams, setUrlParams] = useState<CaseViewPathSearchParams>(() => parse(search));
+  const [urlParams, setUrlParams] = useState<CaseViewPathSearchParams>(() => parseURL(search));
   const toUrlParams = useCallback(
-    (params: CaseViewPathSearchParams = urlParams) => stringify(params),
+    (params: CaseViewPathSearchParams = urlParams) =>
+      stringifyToURL(params as Record<string, string>),
     [urlParams]
   );
   useEffect(() => {
-    setUrlParams(parse(search));
+    setUrlParams(parseURL(search));
   }, [search]);
   return {
     urlParams,

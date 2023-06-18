@@ -6,6 +6,7 @@
  */
 
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
+import { addInternalBasePath } from '../../../common/constants';
 
 import { dataViewTitleSchema, DataViewTitleSchema } from '../../../common/api_schemas/common';
 import {
@@ -14,40 +15,45 @@ import {
 } from '../../../common/api_schemas/field_histograms';
 import { RouteDependencies } from '../../types';
 
-import { addBasePath } from '..';
-
 import { wrapError, wrapEsError } from './error_utils';
 
 export function registerFieldHistogramsRoutes({ router, license }: RouteDependencies) {
-  router.post<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
-    {
-      path: addBasePath('field_histograms/{dataViewTitle}'),
-      validate: {
-        params: dataViewTitleSchema,
-        body: fieldHistogramsRequestSchema,
+  router.versioned
+    .post({
+      path: addInternalBasePath('field_histograms/{dataViewTitle}'),
+      access: 'internal',
+    })
+    .addVersion<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: dataViewTitleSchema,
+            body: fieldHistogramsRequestSchema,
+          },
+        },
       },
-    },
-    license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
-      async (ctx, req, res) => {
-        const { dataViewTitle } = req.params;
-        const { query, fields, runtimeMappings, samplerShardSize } = req.body;
+      license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
+        async (ctx, req, res) => {
+          const { dataViewTitle } = req.params;
+          const { query, fields, runtimeMappings, samplerShardSize } = req.body;
 
-        try {
-          const esClient = (await ctx.core).elasticsearch.client;
-          const resp = await fetchHistogramsForFields(
-            esClient.asCurrentUser,
-            dataViewTitle,
-            query,
-            fields,
-            samplerShardSize,
-            runtimeMappings
-          );
+          try {
+            const esClient = (await ctx.core).elasticsearch.client;
+            const resp = await fetchHistogramsForFields(
+              esClient.asCurrentUser,
+              dataViewTitle,
+              query,
+              fields,
+              samplerShardSize,
+              runtimeMappings
+            );
 
-          return res.ok({ body: resp });
-        } catch (e) {
-          return res.customError(wrapError(wrapEsError(e)));
+            return res.ok({ body: resp });
+          } catch (e) {
+            return res.customError(wrapError(wrapEsError(e)));
+          }
         }
-      }
-    )
-  );
+      )
+    );
 }

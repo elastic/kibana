@@ -66,6 +66,12 @@ const mockKibana = () => {
       application: {
         navigateToUrl: mockNavigate,
       },
+      charts: {
+        theme: {
+          useChartsTheme: () => {},
+          useChartsBaseTheme: () => {},
+        },
+      },
       data: {
         dataViews: {
           find: jest.fn().mockReturnValue([]),
@@ -338,7 +344,7 @@ describe('SLO Edit Page', () => {
                   },
                   "timeWindow": Object {
                     "duration": "7d",
-                    "isRolling": true,
+                    "type": "rolling",
                   },
                 },
               ],
@@ -451,7 +457,6 @@ describe('SLO Edit Page', () => {
         expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
         expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
 
-        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(slo.indicator.type);
         expect(screen.queryByTestId('indexSelectionSelectedValue')).toHaveTextContent(
           slo.indicator.params.index!
         );
@@ -563,7 +568,6 @@ describe('SLO Edit Page', () => {
         expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
         expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
 
-        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(slo.indicator.type);
         expect(screen.queryByTestId('indexSelectionSelectedValue')).toHaveTextContent(
           slo.indicator.params.index!
         );

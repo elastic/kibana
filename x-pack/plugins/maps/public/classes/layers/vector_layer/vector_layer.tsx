@@ -76,7 +76,7 @@ export function isVectorLayer(layer: ILayer) {
 export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
-  layerDescriptor: VectorLayerDescriptor;
+  layerDescriptor: Partial<VectorLayerDescriptor>;
   customIcons: CustomIcon[];
   chartsPaletteServiceGetColor?: (value: string) => string | null;
 }
@@ -159,7 +159,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     this._joins = joins;
     this._descriptor = AbstractVectorLayer.createDescriptor(layerDescriptor);
     this._style = new VectorStyle(
-      layerDescriptor.style,
+      this._descriptor.style,
       source,
       this,
       customIcons,
@@ -259,8 +259,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getValidJoins().length > 0;
   }
 
-  isLayerLoading() {
-    const isSourceLoading = super.isLayerLoading();
+  isLayerLoading(zoom: number) {
+    const isSourceLoading = super.isLayerLoading(zoom);
     if (isSourceLoading) {
       return true;
     }
@@ -1051,8 +1051,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
   async addFeature(geometry: Geometry | Position[]) {
     const layerSource = this.getSource();
-    const defaultFields = await layerSource.getDefaultFields();
-    await layerSource.addFeature(geometry, defaultFields);
+    await layerSource.addFeature(geometry);
   }
 
   async deleteFeature(featureId: string) {

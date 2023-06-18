@@ -12,6 +12,9 @@ import { INSIGHTS_HEADER_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../common/mock';
 import { mockGetFieldsData } from '../mocks/mock_context';
 import { InsightsSection } from './insights_section';
+import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_prevalence';
+
+jest.mock('../../../common/containers/alerts/use_alert_prevalence');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -21,6 +24,20 @@ jest.mock('react-redux', () => {
     ...original,
     useDispatch: () => mockDispatch,
   };
+});
+
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: () => jest.fn().mockReturnValue({ pathname: '/overview' }),
+  };
+});
+(useAlertPrevalence as jest.Mock).mockReturnValue({
+  loading: false,
+  error: false,
+  count: 0,
+  alertIds: [],
 });
 
 describe('<InsightsSection />', () => {

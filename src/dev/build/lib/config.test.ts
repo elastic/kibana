@@ -18,6 +18,7 @@ jest.mock('./version_info', () => ({
     buildSha: 'abc1234',
     buildVersion: '8.0.0',
     buildNumber: 1234,
+    buildDate: '2023-05-15T23:12:09+0000',
   }),
 }));
 
@@ -192,6 +193,13 @@ describe('#getBuildSha()', () => {
   it('returns the sha from the build info', async () => {
     const config = await setup();
     expect(config.getBuildSha()).toBe(versionInfo.buildSha);
+  });
+});
+
+describe('#getBuildDate()', () => {
+  it('returns the date from the build info', async () => {
+    const config = await setup();
+    expect(config.getBuildDate()).toBe(versionInfo.buildDate);
   });
 });
 
