@@ -93,7 +93,9 @@ export const getTableColumns: GetTableColumns = ({
     field: 'last_alert_at',
     name: i18n.RULE_ALERTS_COLUMN_LAST_ALERT,
     'data-test-subj': 'severityRuleAlertsTable-lastAlertAt',
-    render: (lastAlertAt: string) => <FormattedRelativeTime numeric="auto" {...selectUnit(new Date(lastAlertAt))} />,
+    render: (lastAlertAt: string) => (
+      <FormattedRelativeTime numeric="auto" {...selectUnit(new Date(lastAlertAt))} />
+    ),
   },
   {
     field: 'alert_count',
