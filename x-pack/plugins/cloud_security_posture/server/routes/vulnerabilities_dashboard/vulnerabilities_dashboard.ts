@@ -38,9 +38,13 @@ export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void 
 
         const query = getSafeVulnerabilitiesQueryFilter();
 
-        const [cnvmStatistics, vulnTrends, topVulnerableResources,
+        const [
+          cnvmStatistics,
+          vulnTrends,
+          topVulnerableResources,
           topPatchableVulnerabilities,
-          topVulnerabilities] = await Promise.all([
+          topVulnerabilities,
+        ] = await Promise.all([
           getVulnerabilitiesStatistics(esClient, query),
           getVulnerabilitiesTrends(esClient),
           getTopVulnerableResources(esClient, query),
