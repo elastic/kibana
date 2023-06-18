@@ -68,7 +68,7 @@ const DataViewFlyoutContentContainer = ({
 
         if (persist) {
           const message = i18n.translate('indexPatternEditor.saved', {
-            defaultMessage: "Saved '{indexPatternName}'",
+            defaultMessage: "Saved ''{indexPatternName}''",
             values: { indexPatternName: saveResponse.getName() },
           });
           notifications.toasts.addSuccess(message);

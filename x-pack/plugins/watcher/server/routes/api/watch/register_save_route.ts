@@ -49,7 +49,7 @@ export function registerSaveRoute({ router, license, lib: { handleEsError } }: R
             return response.conflict({
               body: {
                 message: i18n.translate('xpack.watcher.saveRoute.duplicateWatchIdErrorMessage', {
-                  defaultMessage: "There is already a watch with ID '{watchId}'.",
+                  defaultMessage: "There is already a watch with ID ''{watchId}''.",
                   values: {
                     watchId: id,
                   },

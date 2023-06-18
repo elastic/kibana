@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import { selectUnit } from '@formatjs/intl-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedRelativeTime } from '@kbn/i18n-react';
 import { UPDATED, UPDATING } from './translations';
@@ -26,7 +26,7 @@ export const UpdateStatus: React.FC<UpdateStatusProps> = ({ isUpdating, updatedA
           <>
             {UPDATED}
             &nbsp;
-            <FormattedRelativeTime value={updatedAt} />
+            <FormattedRelativeTime numeric="auto" {...selectUnit(updatedAt)} />
           </>
         )}
       </EuiText>

@@ -67,20 +67,20 @@ export class AdvancedSettingsVoiceAnnouncement extends Component<Props> {
             {this.props.queryText ? (
               <FormattedMessage
                 id="advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
-                defaultMessage="You searched for {query}. There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
+                defaultMessage="You searched for {query}. There {optionLength, plural, one {is # option} other {are # options}} in {sectionLength, plural, one {# section} other {# sections}}"
                 values={{
                   query: this.props.queryText,
-                  sectionLenght: filteredSections.length,
-                  optionLenght: filteredOptions.length,
+                  sectionLength: filteredSections.length,
+                  optionLength: filteredOptions.length,
                 }}
               />
             ) : (
               <FormattedMessage
                 id="advancedSettings.voiceAnnouncement.noSearchResultScreenReaderMessage"
-                defaultMessage="There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
+                defaultMessage="There {optionLength, plural, one {is # option} other {are # options}} in {sectionLength, plural, one {# section} other {# sections}}"
                 values={{
-                  sectionLenght: filteredSections.length,
-                  optionLenght: filteredOptions.length,
+                  sectionLength: filteredSections.length,
+                  optionLength: filteredOptions.length,
                 }}
               />
             )}

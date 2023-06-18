@@ -19,6 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedRelativeTime } from '@kbn/i18n-react';
+import { selectUnit } from '@formatjs/intl-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { CellActionsMode } from '@kbn/cell-actions';
@@ -92,7 +93,7 @@ export const getTableColumns: GetTableColumns = ({
     field: 'last_alert_at',
     name: i18n.RULE_ALERTS_COLUMN_LAST_ALERT,
     'data-test-subj': 'severityRuleAlertsTable-lastAlertAt',
-    render: (lastAlertAt: string) => <FormattedRelativeTime value={new Date(lastAlertAt)} />,
+    render: (lastAlertAt: string) => <FormattedRelativeTime numeric="auto" {...selectUnit(new Date(lastAlertAt))} />,
   },
   {
     field: 'alert_count',

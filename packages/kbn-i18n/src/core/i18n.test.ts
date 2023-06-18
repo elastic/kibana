@@ -264,7 +264,7 @@ describe('I18n engine', () => {
 
     test('should set "en" locale as default for IntlMessageFormat and IntlRelativeFormat', () => {
       const IntlMessageFormat = require('intl-messageformat');
-      const IntlRelativeFormat = require('intl-relativeformat');
+      const IntlRelativeFormat = require('@formatjs/intl-relativetimeformat');
 
       expect(IntlMessageFormat.defaultLocale).toBe('en');
       expect(IntlRelativeFormat.defaultLocale).toBe('en');
@@ -272,7 +272,7 @@ describe('I18n engine', () => {
 
     test('should update defaultLocale for IntlMessageFormat and IntlRelativeFormat', () => {
       const IntlMessageFormat = require('intl-messageformat');
-      const IntlRelativeFormat = require('intl-relativeformat');
+      const IntlRelativeFormat = require('@formatjs/intl-relativetimeformat');
 
       i18n.setDefaultLocale('foo');
 

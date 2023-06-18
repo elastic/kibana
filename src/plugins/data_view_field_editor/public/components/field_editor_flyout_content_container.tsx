@@ -212,7 +212,7 @@ export const FieldEditorFlyoutContentContainer = ({
 
         const afterSave = () => {
           const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
-            defaultMessage: "Saved '{fieldName}'",
+            defaultMessage: "Saved ''{fieldName}''",
             values: { fieldName: updatedField.name },
           });
           notifications.toasts.addSuccess(message);

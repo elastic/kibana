@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 
@@ -54,9 +54,9 @@ const mockKibana = (permissionType: unknown = defaultPermissions) => {
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(
-    <IntlProvider locale={'en'}>
+    <I18nProvider>
       <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
-    </IntlProvider>
+    </I18nProvider>
   );
 
 describe('Osquery Results', () => {

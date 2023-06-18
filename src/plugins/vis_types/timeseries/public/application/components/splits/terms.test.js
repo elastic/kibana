@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { SplitByTermsUI } from './terms';
 
 jest.mock('@elastic/eui', () => ({
@@ -25,9 +25,6 @@ describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js
 
   beforeEach(() => {
     props = {
-      intl: {
-        formatMessage: jest.fn(),
-      },
       model: {
         id: 123,
         terms_field: 'OriginCityName',
@@ -54,7 +51,7 @@ describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js
 
   describe('<SplitByTermsUI />', () => {
     test('should render and match a snapshot', () => {
-      const wrapper = shallow(<SplitByTermsUI {...props} />);
+      const wrapper = shallowWithIntl(<SplitByTermsUI {...props} />);
 
       expect(wrapper).toMatchSnapshot();
     });
