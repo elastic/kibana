@@ -80,7 +80,7 @@ export const useOsqueryTab = ({
 
   const actionItems = actionsData?.data.items || [];
 
-  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
+  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name?.[0];
 
   const content = (
     <TabContentWrapper data-test-subj="osqueryViewWrapper">

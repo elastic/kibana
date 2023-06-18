@@ -28,6 +28,7 @@ import {
   enableCriticalPath,
   enableInfrastructureHostsView,
   syntheticsThrottlingEnabled,
+  enableLegacyUptimeApp,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -214,7 +215,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
       defaultMessage: 'Infrastructure Hosts view',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
       defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
       values: {
@@ -343,6 +344,19 @@ export const uiSettings: Record<string, UiSettings> = {
         },
       }
     ),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [enableLegacyUptimeApp]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableLegacyUptimeApp', {
+      defaultMessage: 'Always show legacy Uptime app',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableLegacyUptimeAppDescription', {
+      defaultMessage:
+        "By default, the legacy Uptime app is hidden from the interface when it doesn't have any data for more than a week. Enable this option to always show it.",
+    }),
     schema: schema.boolean(),
     requiresPageReload: true,
   },
