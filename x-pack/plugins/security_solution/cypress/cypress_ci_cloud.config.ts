@@ -30,7 +30,7 @@ export default defineCypressConfig({
     baseUrl: 'http://google.com',
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
-    specPattern: './cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts',
+    specPattern: '../**/cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts',
     supportFile: './cypress/support/e2e_cloud.js',
     env: {
       FORCE_COLOR: '1',
