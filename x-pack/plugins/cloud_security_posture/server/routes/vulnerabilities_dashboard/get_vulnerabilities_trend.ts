@@ -21,10 +21,8 @@ interface LastDocBucket {
 }
 
 interface VulnScoreTrendResponse {
-  aggregations?: {
-    vuln_severity_per_day: {
-      buckets: LastDocBucket[];
-    };
+  vuln_severity_per_day: {
+    buckets: LastDocBucket[];
   };
 }
 
@@ -58,7 +56,7 @@ export const getVulnTrendsQuery = () => ({
           field: '@timestamp',
           calendar_interval: '1d',
           order: {
-            _key: 'desc',
+            _key: 'asc',
           },
         },
         aggs: {
@@ -83,7 +81,9 @@ export const getVulnTrendsQuery = () => ({
 export const getVulnerabilitiesTrends = async (
   esClient: ElasticsearchClient
 ): Promise<VulnScoreTrend[]> => {
-  const vulnTrendsQueryResult = await esClient.search<VulnScoreTrendResponse>(getVulnTrendsQuery());
+  const vulnTrendsQueryResult = await esClient.search<LastDocBucket, VulnScoreTrendResponse>(
+    getVulnTrendsQuery()
+  );
   if (!vulnTrendsQueryResult.hits.hits) {
     throw new Error('Missing trend results from score index');
   }
