@@ -117,12 +117,6 @@ export const SELECTED_FIELDS = (selected: number) =>
     defaultMessage: 'Selected {selected} fields',
   });
 
-export const SHOWING_FIELDS = ({ showing, total }: { showing: number; total: number }) =>
-  i18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.contextEditor.showingFields', {
-    values: { showing, total },
-    defaultMessage: 'Showing {showing} of {total} fields',
-  });
-
 export const UNANONYMIZE = i18n.translate(
   'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.unanonymizeAction',
   {
