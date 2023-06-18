@@ -76,6 +76,10 @@ export function updateSavedSearch(
       savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
     }
 
+    if (state.rowsPerPage) {
+      savedSearch.rowsPerPage = state.rowsPerPage;
+    }
+
     // add a flag here to identify text based language queries
     // these should be filtered out from the visualize editor
     const isTextBasedQueryResult = isTextBasedQuery(state.query);
