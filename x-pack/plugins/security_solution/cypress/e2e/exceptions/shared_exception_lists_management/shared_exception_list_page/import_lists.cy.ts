@@ -24,7 +24,7 @@ import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 describe('Import Lists', () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
   });
   beforeEach(() => {
     login();

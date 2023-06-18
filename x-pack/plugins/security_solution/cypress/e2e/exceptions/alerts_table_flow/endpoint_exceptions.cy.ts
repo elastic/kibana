@@ -42,7 +42,7 @@ import {
 describe('Endpoint Exceptions workflows from Alert', () => {
   const expectedNumberOfAlerts = 1;
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
   });
   beforeEach(() => {
     login();

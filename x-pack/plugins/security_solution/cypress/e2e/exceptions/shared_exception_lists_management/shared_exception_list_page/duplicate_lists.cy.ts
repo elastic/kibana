@@ -43,7 +43,7 @@ const getExceptionList2 = () => ({
 
 describe('Duplicate List', () => {
   beforeEach(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     login();
 
     createRule(getNewRule({ name: 'Another rule' }));

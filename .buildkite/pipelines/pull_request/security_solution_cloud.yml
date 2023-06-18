@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_solution_cloud.sh
-    label: 'Security Solution Tests'
+    label: 'Security Solution SorryCypress Tests'
     agents:
       queue: n2-4-spot
     depends_on: build

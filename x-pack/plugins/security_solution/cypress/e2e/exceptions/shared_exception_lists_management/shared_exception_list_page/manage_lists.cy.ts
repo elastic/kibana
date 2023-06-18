@@ -47,7 +47,7 @@ const getExceptionList2 = () => ({
 describe('Manage lists from "Shared Exception Lists" page', () => {
   describe('Create/Export/Delete List', () => {
     before(() => {
-      esArchiverResetKibana();
+      cy.task('esArchiverResetKibana');
 
       createRule(getNewRule({ name: 'Another rule' }));
 

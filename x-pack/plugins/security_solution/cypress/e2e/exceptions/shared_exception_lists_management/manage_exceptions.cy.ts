@@ -44,7 +44,7 @@ import {
 
 describe('Add, edit and delete exception', () => {
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     esArchiverLoad('exceptions');
 
     createRule(getNewRule());

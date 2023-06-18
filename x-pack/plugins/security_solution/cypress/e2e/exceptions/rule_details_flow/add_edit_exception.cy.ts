@@ -70,7 +70,7 @@ describe('Add/edit exception from rule details', () => {
   const ITEM_FIELD = 'unique_value.test';
 
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     esArchiverLoad('exceptions');
     login();
   });

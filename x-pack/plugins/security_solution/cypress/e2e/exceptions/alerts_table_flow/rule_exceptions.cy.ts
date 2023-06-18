@@ -51,7 +51,7 @@ describe('Rule Exceptions workflows from Alert', () => {
   const newRule = getNewRule();
 
   beforeEach(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     deleteAlertsAndRules();
   });
   after(() => {

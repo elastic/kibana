@@ -37,7 +37,7 @@ const getExceptionList2 = () => ({
 });
 describe('Filter Lists', () => {
   beforeEach(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     login();
 
     // Create exception list associated with a rule

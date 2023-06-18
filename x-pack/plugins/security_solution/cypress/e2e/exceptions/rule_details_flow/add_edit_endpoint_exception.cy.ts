@@ -53,7 +53,7 @@ describe('Add endpoint exception from rule details', () => {
   const ITEM_NAME = 'Sample Exception List Item';
 
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     esArchiverLoad('auditbeat');
     login();
     deleteAlertsAndRules();

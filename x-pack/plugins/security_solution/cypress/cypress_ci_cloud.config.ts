@@ -6,6 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { esArchiver } from './support/es_archiver';
 const { cloudPlugin } = require('cypress-cloud/plugin');
 const path = require('path');
 const fork = require('child_process').fork;
@@ -25,12 +26,11 @@ export default defineCypressConfig({
   videosFolder: '../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 946,
   viewportWidth: 1680,
-  supportFolder: './cypress/support_cloud',
   e2e: {
     baseUrl: 'http://google.com',
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
-    specPattern: '../security_solution/cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts',
+    specPattern: './cypress/e2e/investigations/**/*.cy.ts',
     supportFile: './cypress/support/e2e_cloud.js',
     env: {
       FORCE_COLOR: '1',
@@ -45,41 +45,8 @@ export default defineCypressConfig({
       ELASTICSEARCH_PASSWORD: 'changeme',
     },
     setupNodeEvents(on, config) {
+      cloudPlugin(on, config);
       let processes = [];
-
-      // on('before:run', async (spec) => {
-      //   console.error('before:run', spec);
-      //   const program = path.resolve('../scripts/start_cypress_setup_env.js');
-      //   const parameters = [
-      //     `run --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
-      //   ];
-      //   const options = {
-      //     env: {
-      //       NODE_TLS_REJECT_UNAUTHORIZED: '0',
-      //       NODE_OPTIONS: '--no-warnings',
-      //       PATH: process.env.PATH,
-      //     },
-      //     stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
-      //   };
-
-      //   const child = fork(program, parameters, options);
-
-      //   processes.push(child);
-
-      //   config.baseUrl = 'http://localhost:5622';
-      //   return new Promise((resolve) => {
-      //     child.on('message', (message) => {
-      //       console.log('message from child:', message);
-      //       // console.log('config', config);
-      //       // config.baseUrl = message.customEnv.baseUrl;
-      //       // process.exit(0);
-      //       resolve(message);
-      //       // child.send('Hi');
-      //       // return config;
-      //       // return config;
-      //     });
-      //   });
-      // });
 
       on('before:spec', (spec) => {
         console.error('processes', processes.length, processes);
@@ -127,7 +94,7 @@ export default defineCypressConfig({
         processes = [];
       });
 
-      return cloudPlugin(on, config);
+      return esArchiver(on, config);
     },
   },
 });

@@ -34,7 +34,7 @@ describe(
   { testIsolation: false },
   () => {
     beforeEach(() => {
-      esArchiverResetKibana();
+      cy.task('esArchiverResetKibana');
       login();
       // At least create Rule with exceptions_list to be able to view created exceptions
       createRule({

@@ -25,7 +25,7 @@ const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
 describe('Shared exception lists - read only', () => {
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
   });
 
   beforeEach(() => {

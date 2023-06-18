@@ -24,8 +24,6 @@ import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../t
 
 import { getNewRule } from '../../objects/rule';
 
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
-
 import { createRuleExceptionItem } from '../../tasks/api_calls/exceptions';
 import { EXCEPTION_CARD_ITEM_NAME } from '../../screens/exceptions';
 import {
@@ -60,7 +58,7 @@ describe('Detection rules, bulk duplicate', () => {
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' })).then(
       (response) => {
         createRuleExceptionItem(response.body.id, [

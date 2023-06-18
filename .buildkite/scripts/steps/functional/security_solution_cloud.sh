@@ -13,4 +13,4 @@ export DISPLAY=:99
 
 echo "--- Security Solution tests (Chrome)"
 
-yarn --cwd x-pack/plugins/security_solution cypress:run-cloud
+DEBUG=currents:* TZ=UTC npx cypress-cloud --parallel --record --ci-build-id=22132313 --config-file ./cypress/cypress_ci_cloud.config.ts --browser chrome
