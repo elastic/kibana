@@ -28,7 +28,7 @@ export const DeleteScritpedFieldConfirmationModal = ({
   const title = i18n.translate(
     'indexPatternManagement.editIndexPattern.scripted.deleteFieldLabel',
     {
-      defaultMessage: "Delete scripted field '{fieldName}'?",
+      defaultMessage: "Delete scripted field ''{fieldName}''?",
       values: { fieldName: field.name },
     }
   );

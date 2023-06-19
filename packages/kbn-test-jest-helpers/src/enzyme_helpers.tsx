@@ -22,8 +22,8 @@ import { act as reactAct } from 'react-dom/test-utils';
 const intlCache = createIntlCache();
 const intl = createIntl(
   {
-    locale: 'en-US',
-    defaultLocale: 'en-US',
+    locale: 'en',
+    defaultLocale: 'en',
   },
   intlCache
 );

@@ -17,7 +17,10 @@
  * described in `options` section of [DateTimeFormat constructor].
  * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat}
  */
-export const formats: Formats = {
+// eslint-disable-next-line @kbn/eslint/module_migration
+import { CustomFormats } from 'react-intl';
+
+export const formats: CustomFormats = {
   number: {
     currency: {
       style: 'currency',
@@ -72,26 +75,26 @@ export const formats: Formats = {
       timeZoneName: 'short',
     },
   },
-  relative: {
-    years: {
-      units: 'year',
-    },
-    months: {
-      units: 'month',
-    },
-    days: {
-      units: 'day',
-    },
-    hours: {
-      units: 'hour',
-    },
-    minutes: {
-      units: 'minute',
-    },
-    seconds: {
-      units: 'second',
-    },
-  },
+  // relative: {
+  //   years: {
+  //     units: 'year',
+  //   },
+  //   months: {
+  //     units: 'month',
+  //   },
+  //   days: {
+  //     units: 'day',
+  //   },
+  //   hours: {
+  //     units: 'hour',
+  //   },
+  //   minutes: {
+  //     units: 'minute',
+  //   },
+  //   seconds: {
+  //     units: 'second',
+  //   },
+  // },
 };
 
 interface NumberFormatOptions<TStyle extends string> extends Intl.NumberFormatOptions {

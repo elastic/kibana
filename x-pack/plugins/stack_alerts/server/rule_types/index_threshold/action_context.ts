@@ -43,7 +43,7 @@ const RECOVERY_TITLE = (name: string, group: string) =>
 
 const DEFAULT_MESSAGE = (name: string, context: BaseActionContext, window: string) =>
   i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription', {
-    defaultMessage: `alert '{name}' is active for group '{group}':
+    defaultMessage: `alert ''{name}'' is active for group ''{group}'':
 
 - Value: {value}
 - Conditions Met: {conditions} over {window}
@@ -60,7 +60,7 @@ const DEFAULT_MESSAGE = (name: string, context: BaseActionContext, window: strin
 
 const RECOVERY_MESSAGE = (name: string, context: BaseActionContext, window: string) =>
   i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeRecoveryContextMessageDescription', {
-    defaultMessage: `alert '{name}' is recovered for group '{group}':
+    defaultMessage: `alert ''{name}'' is recovered for group ''{group}'':
 
 - Value: {value}
 - Conditions Met: {conditions} over {window}

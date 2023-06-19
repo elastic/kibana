@@ -31,7 +31,7 @@ export const errors = {
   invalidDataSet: (arg: string | null) =>
     new Error(
       i18n.translate('xpack.canvas.functions.demodata.invalidDataSetErrorMessage', {
-        defaultMessage: "Invalid data set: '{arg}', use '{ci}' or '{shirts}'.",
+        defaultMessage: "Invalid data set: ''{arg}'', use ''{ci}'' or ''{shirts}''.",
         values: {
           arg,
           ci: DemoRows.CI,

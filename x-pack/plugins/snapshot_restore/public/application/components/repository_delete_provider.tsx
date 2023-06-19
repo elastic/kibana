@@ -114,7 +114,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
           isSingle ? (
             <FormattedMessage
               id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteSingleTitle"
-              defaultMessage="Remove repository ''{name}''?"
+              defaultMessage="Remove repository ''''{name}''''?"
               values={{ name: repositoryNames[0] }}
             />
           ) : (

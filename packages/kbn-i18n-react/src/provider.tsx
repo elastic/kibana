@@ -25,8 +25,8 @@ export const I18nProvider: React.FC = ({ children }) => (
     locale={i18n.getLocale()}
     messages={i18n.getTranslation().messages}
     defaultLocale={i18n.getDefaultLocale()}
-    formats={i18n.getFormats()}
-    textComponent={React.Fragment}
+    // formats={i18n.getFormats()}
+    textComponent="span"
   >
     {/* <PseudoLocaleWrapper> */}
     {children}

@@ -16,7 +16,9 @@ exports[`Inspector Data View component should render empty state 1`] = `
         <h2
           class="euiTitle emotion-euiTitle-m"
         >
-          No data available
+          <span>
+            No data available
+          </span>
         </h2>
         <div
           class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -25,7 +27,9 @@ exports[`Inspector Data View component should render empty state 1`] = `
           class="euiText emotion-euiText-m-euiTextColor-subdued"
         >
           <p>
-            The element did not provide any data.
+            <span>
+              The element did not provide any data.
+            </span>
           </p>
         </div>
       </div>
@@ -46,101 +50,32 @@ exports[`Inspector Data View component should render loading state 1`] = `
       "defaultFormats": Object {},
       "defaultLocale": "en",
       "formatDate": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
       "formatHTMLMessage": [Function],
+      "formatList": [Function],
       "formatMessage": [Function],
       "formatNumber": [Function],
+      "formatNumberToParts": [Function],
       "formatPlural": [Function],
-      "formatRelative": [Function],
+      "formatRelativeTime": [Function],
       "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
       "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "timeZone": undefined,
     }
   }
 >
@@ -189,7 +124,9 @@ Array [
             <span
               class="emotion-euiButtonDisplayContent"
             >
-              Download CSV
+              <span>
+                Download CSV
+              </span>
               <span
                 color="inherit"
                 data-euiicon-type="arrowDown"
@@ -463,7 +400,9 @@ Array [
           aria-live="polite"
           role="status"
         >
-          There are 2 tables in total
+          <span>
+            There are 2 tables in total
+          </span>
         </p>
       </div>
       <div
@@ -476,7 +415,9 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <strong>
-            Selected:
+            <span>
+              Selected:
+            </span>
           </strong>
         </div>
         <div
@@ -505,7 +446,9 @@ Array [
                   <span
                     class="euiButtonEmpty__text"
                   >
-                    Table 1
+                    <span>
+                      Table 1
+                    </span>
                   </span>
                 </span>
               </button>
@@ -531,7 +474,9 @@ Array [
             <span
               class="emotion-euiButtonDisplayContent"
             >
-              Download CSV
+              <span>
+                Download CSV
+              </span>
               <span
                 color="inherit"
                 data-euiicon-type="arrowDown"
