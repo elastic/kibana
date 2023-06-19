@@ -35,7 +35,7 @@ describe('utils', () => {
           searchableFields
         )
       ).toBe(
-      "(exception-list-agnostic.attributes.name:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.description:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*))"
+        "(exception-list-agnostic.attributes.name:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.description:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*))"
       );
     });
   });
