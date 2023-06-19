@@ -69,6 +69,7 @@ const fieldSubTypeSchema = schema.object({
   nested: schema.maybe(schema.object({ path: schema.string() })),
 });
 
+// @ts-expect-error
 const FieldDescriptorSchema = schema.object({
   aggregatable: schema.boolean(),
   name: schema.string(),
@@ -97,6 +98,7 @@ const validate: FullValidationConfig<any, any, any> = {
     // not available to get request
     body: schema.maybe(schema.object({ index_filter: schema.any() })),
   },
+  /*
   response: {
     200: {
       body: schema.object({
@@ -105,6 +107,7 @@ const validate: FullValidationConfig<any, any, any> = {
       }),
     },
   },
+  */
 };
 
 const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, response) => {

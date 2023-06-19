@@ -3489,14 +3489,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/query/routes.ts"
               },
               {
@@ -6535,22 +6527,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/query/routes.ts"
               },
               {
@@ -7400,6 +7376,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/dashboards/routes/get_dashboards_by_tags.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_preview_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8885,10 +8865,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/query/routes.ts"
               },
               {
@@ -10062,10 +10038,6 @@
               {
                 "plugin": "bfetch",
                 "path": "src/plugins/bfetch/server/plugin.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
@@ -14163,6 +14135,14 @@
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/has_data_views.ts"
               },
               {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/json_schema.ts"
               },
@@ -14532,6 +14512,14 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
@@ -14641,6 +14629,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "ml",
@@ -14801,6 +14793,22 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
@@ -15361,6 +15369,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/delete_data_view.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
