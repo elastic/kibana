@@ -133,7 +133,7 @@ export const ExceptionBuilderComponent = ({
     disableOr: isOrDisabled,
   });
   const [currentExceptionListItems, setCurrentExceptionListItems] = useState<
-    typeof exceptionListItems
+    ExceptionsBuilderExceptionItem[]
   >([]);
 
   const {
