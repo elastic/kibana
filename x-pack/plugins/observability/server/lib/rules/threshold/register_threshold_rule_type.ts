@@ -160,7 +160,6 @@ export function thresholdRuleType(
               validate: validateIsStringElasticsearchJSONFilter,
             })
           ),
-          sourceId: schema.string(),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
         },

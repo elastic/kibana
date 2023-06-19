@@ -33,7 +33,12 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
-import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/threshold_rule/types';
+import {
+  Aggregators,
+  Comparator,
+  QUERY_INVALID,
+  SourceConfiguration,
+} from '../../../../common/threshold_rule/types';
 import { TimeUnitChar } from '../../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
@@ -41,7 +46,6 @@ import { ExpressionRow } from './expression_row';
 import { MetricsExplorerKueryBar } from './kuery_bar';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 import { convertKueryToElasticSearchQuery } from '../helpers/kuery';
-import { useSourceContext, withSourceProvider } from '../helpers/source';
 import { MetricsExplorerGroupBy } from './group_by';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -58,14 +62,17 @@ export const defaultExpression = {
   timeUnit: 'm',
 } as MetricExpression;
 
-export function Expressions(props: Props) {
+// eslint-disable-next-line import/no-default-export
+export default function Expressions(props: Props) {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
   const { data, dataViews, dataViewEditor, docLinks } = useKibana().services;
-  const { source } = useSourceContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
+  const [source, setSource] = useState<SourceConfiguration>({
+    configuration: { metricAlias: 'unknown-index' },
+  });
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({
@@ -86,6 +93,7 @@ export function Expressions(props: Props) {
         if (defaultDataView) {
           newSearchSource.setField('index', defaultDataView);
           setDataView(defaultDataView);
+          setSource({ configuration: { metricAlias: defaultDataView.getIndexPattern() } });
         }
         initialSearchConfiguration = newSearchSource.getSerializedFields();
       }
@@ -97,6 +105,9 @@ export function Expressions(props: Props) {
         setRuleParams('searchConfiguration', initialSearchConfiguration);
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
+        setSource({
+          configuration: { metricAlias: createdSearchSource.getField('index')?.getIndexPattern() },
+        });
       } catch (error) {
         // TODO Handle error
         console.log('error:', error);
@@ -120,38 +131,48 @@ export function Expressions(props: Props) {
 
   const onSelectDataView = useCallback(
     (newDataView: DataView) => {
-      setDataView(newDataView);
+      const ruleCriteria = (ruleParams.criteria ? ruleParams.criteria.slice() : []).map(
+        (criterion) => {
+          criterion.customMetrics?.forEach((metric) => {
+            metric.field = undefined;
+          });
+          return criterion;
+        }
+      );
+      setRuleParams('criteria', ruleCriteria);
+      setSource({ configuration: { metricAlias: newDataView.getIndexPattern() } });
       searchSource?.setParent(undefined).setField('index', newDataView);
       setRuleParams('searchConfiguration', searchSource?.getSerializedFields());
+      setDataView(newDataView);
     },
-    [setRuleParams, searchSource]
+    [ruleParams.criteria, searchSource, setRuleParams]
   );
 
   const updateParams = useCallback(
     (id, e: MetricExpression) => {
-      const exp = ruleParams.criteria ? ruleParams.criteria.slice() : [];
-      exp[id] = e;
-      setRuleParams('criteria', exp);
+      const ruleCriteria = ruleParams.criteria ? ruleParams.criteria.slice() : [];
+      ruleCriteria[id] = e;
+      setRuleParams('criteria', ruleCriteria);
     },
     [setRuleParams, ruleParams.criteria]
   );
 
   const addExpression = useCallback(() => {
-    const exp = ruleParams.criteria?.slice() || [];
-    exp.push({
+    const ruleCriteria = ruleParams.criteria?.slice() || [];
+    ruleCriteria.push({
       ...defaultExpression,
       timeSize: timeSize ?? defaultExpression.timeSize,
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
-    setRuleParams('criteria', exp);
+    setRuleParams('criteria', ruleCriteria);
   }, [setRuleParams, ruleParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
-      const exp = ruleParams.criteria?.slice() || [];
-      if (exp.length > 1) {
-        exp.splice(id, 1);
-        setRuleParams('criteria', exp);
+      const ruleCriteria = ruleParams.criteria?.slice() || [];
+      if (ruleCriteria.length > 1) {
+        ruleCriteria.splice(id, 1);
+        setRuleParams('criteria', ruleCriteria);
       }
     },
     [setRuleParams, ruleParams.criteria]
@@ -194,26 +215,25 @@ export function Expressions(props: Props) {
 
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
-      const criteria =
+      const ruleCriteria =
         ruleParams.criteria?.map((c) => ({
           ...c,
           timeSize: ts,
         })) || [];
       setTimeSize(ts || undefined);
-      setRuleParams('criteria', criteria);
+      setRuleParams('criteria', ruleCriteria);
     },
     [ruleParams.criteria, setRuleParams]
   );
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
-      const criteria =
-        ruleParams.criteria?.map((c) => ({
-          ...c,
-          timeUnit: tu,
-        })) || [];
+      const ruleCriteria = (ruleParams.criteria?.map((c) => ({
+        ...c,
+        timeUnit: tu,
+      })) || []) as AlertParams['criteria'];
       setTimeUnit(tu as TimeUnitChar);
-      setRuleParams('criteria', criteria as AlertParams['criteria']);
+      setRuleParams('criteria', ruleCriteria);
     },
     [ruleParams.criteria, setRuleParams]
   );
@@ -279,10 +299,6 @@ export function Expressions(props: Props) {
 
     if (!ruleParams.groupBy) {
       preFillAlertGroupBy();
-    }
-
-    if (!ruleParams.sourceId) {
-      setRuleParams('sourceId', source?.id || 'default');
     }
 
     if (typeof ruleParams.alertOnNoData === 'undefined') {
@@ -367,10 +383,10 @@ export function Expressions(props: Props) {
               expression={e || {}}
               dataView={derivedIndexPattern}
             >
+              {/* Preview */}
               <ExpressionChart
                 expression={e}
                 derivedIndexPattern={derivedIndexPattern}
-                source={source}
                 filterQuery={ruleParams.filterQueryText}
                 groupBy={ruleParams.groupBy}
               />
@@ -562,7 +578,3 @@ const docCountNoDataDisabledHelpText = i18n.translate(
     defaultMessage: '[This setting is not applicable to the Document Count aggregator.]',
   }
 );
-
-// required for dynamic import
-// eslint-disable-next-line import/no-default-export
-export default withSourceProvider<Props>(Expressions)('default');

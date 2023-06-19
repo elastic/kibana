@@ -38,7 +38,6 @@ export interface MetricAnomalyParams {
   nodeType: rt.TypeOf<typeof metricAnomalyNodeTypeRT>;
   metric: rt.TypeOf<typeof metricAnomalyMetricRT>;
   alertInterval?: string;
-  sourceId?: string;
   spaceId?: string;
   threshold: Exclude<ML_ANOMALY_THRESHOLD, ML_ANOMALY_THRESHOLD.LOW>;
   influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
@@ -49,7 +48,6 @@ export interface MetricAnomalyParams {
 interface BaseMetricExpressionParams {
   timeSize: number;
   timeUnit: TimeUnitChar;
-  sourceId?: string;
   threshold: number[];
   comparator: Comparator;
   warningComparator?: Comparator;

@@ -140,9 +140,8 @@ export const createMetricThresholdExecutor = ({
           ...flattenAdditionalContext(additionalContext),
         },
       });
-    // TODO: check if we need to use "sourceId"
+
     const { alertOnNoData, alertOnGroupDisappear: _alertOnGroupDisappear } = params as {
-      sourceId?: string;
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
     };
