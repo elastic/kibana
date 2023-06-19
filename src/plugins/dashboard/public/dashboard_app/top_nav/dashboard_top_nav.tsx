@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
