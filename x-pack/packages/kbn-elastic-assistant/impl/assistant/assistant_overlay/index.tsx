@@ -24,7 +24,7 @@ const StyledEuiModal = styled(EuiModal)`
 `;
 
 /**
- * Modal container for Security Assistant conversations, receiving the page contents as context, plus whatever
+ * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
 export const AssistantOverlay: React.FC = React.memo(() => {
