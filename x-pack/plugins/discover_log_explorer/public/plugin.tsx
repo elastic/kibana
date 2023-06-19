@@ -51,9 +51,9 @@ export class DiscoverLogExplorerPlugin implements DiscoverLogExplorerClientPlugi
         customizations.set({
           id: 'top_nav',
           defaultMenu: {
-            new: { disabled: true },
-            open: { disabled: true },
-            save: { disabled: true },
+            newItem: { disabled: true },
+            openItem: { disabled: true },
+            saveItem: { disabled: true },
           },
         });
       }

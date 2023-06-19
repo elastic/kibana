@@ -17,7 +17,7 @@ import {
   noIntegrationsLabel,
 } from '../constants';
 
-interface IntegrationsListStatus {
+interface IntegrationsListStatusProps {
   integrations: Integration[] | null;
   error: Error | null;
   onRetry: ReloadIntegrations;
@@ -27,7 +27,7 @@ export const IntegrationsListStatus = ({
   integrations,
   error,
   onRetry,
-}: IntegrationsListStatus) => {
+}: IntegrationsListStatusProps) => {
   const isEmpty = integrations == null || integrations.length <= 0;
   const hasError = error !== null;
 

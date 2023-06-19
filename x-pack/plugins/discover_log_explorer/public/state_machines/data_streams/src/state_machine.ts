@@ -9,7 +9,7 @@ import { assign, createMachine } from 'xstate';
 import { FindDataStreamsResponse } from '../../../../common';
 import { IDataStreamsClient } from '../../../services/data_streams';
 import { DEFAULT_CONTEXT } from './defaults';
-import {
+import type {
   DataStreamsContext,
   DataStreamsEvent,
   DefaultDataStreamsContext,
