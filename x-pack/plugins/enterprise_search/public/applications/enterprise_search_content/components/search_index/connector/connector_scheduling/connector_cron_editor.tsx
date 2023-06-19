@@ -21,6 +21,7 @@ import { UpdateConnectorSchedulingApiLogic } from '../../../../api/connector/upd
 import { ConnectorSchedulingLogic } from '../connector_scheduling_logic';
 
 interface ConnectorCronEditorProps {
+  disabled?: boolean;
   onReset?(): void;
   onSave?(interval: ConnectorScheduling['interval']): void;
   scheduling: ConnectorScheduling;
@@ -28,6 +29,7 @@ interface ConnectorCronEditorProps {
 }
 
 export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
+  disabled = false,
   scheduling,
   onSave,
   onReset,
@@ -58,7 +60,7 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
       <EuiFlexItem>
         <CronEditor
           data-telemetry-id="entSearchContent-connector-scheduling-editSchedule"
-          disabled={!scheduling.enabled}
+          disabled={!scheduling.enabled || disabled}
           fieldToPreferredValueMap={fieldToPreferredValueMap}
           cronExpression={simpleCron.expression}
           frequency={simpleCron.frequency}
@@ -83,7 +85,7 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-telemetry-id="entSearchContent-connector-scheduling-resetSchedule"
-              disabled={!hasChanges || status === Status.LOADING}
+              disabled={!hasChanges || status === Status.LOADING || disabled}
               onClick={() => {
                 setNewInterval(scheduling.interval);
                 setSimpleCron({
@@ -105,7 +107,7 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-telemetry-id="entSearchContent-connector-scheduling-saveSchedule"
-              disabled={!hasChanges || status === Status.LOADING}
+              disabled={!hasChanges || status === Status.LOADING || disabled}
               onClick={() => onSave && onSave(newInterval)}
             >
               {i18n.translate(

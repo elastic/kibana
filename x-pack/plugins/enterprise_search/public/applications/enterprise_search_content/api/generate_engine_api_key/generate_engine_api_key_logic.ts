@@ -24,7 +24,7 @@ export const generateEngineApiKey = async ({
   engineName: string;
   keyName: string;
 }) => {
-  const route = `/internal/enterprise_search/engines/${engineName}/api_key`;
+  const route = `/internal/enterprise_search/search_applications/${engineName}/api_key`;
 
   return await HttpLogic.values.http.post<APIKeyResponse>(route, {
     body: JSON.stringify({

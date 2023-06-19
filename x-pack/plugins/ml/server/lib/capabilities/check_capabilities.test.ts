@@ -47,7 +47,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(38);
+      expect(count).toBe(39);
     });
   });
 
@@ -67,6 +67,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -121,6 +122,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -175,6 +177,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -229,6 +232,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -283,6 +287,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(false);
       expect(capabilities.canGetMlInfo).toBe(false);
+      expect(capabilities.canUseAiops).toBe(false);
       expect(capabilities.canGetJobs).toBe(false);
       expect(capabilities.canGetDatafeeds).toBe(false);
       expect(capabilities.canGetCalendars).toBe(false);

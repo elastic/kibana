@@ -71,6 +71,15 @@ const mockConfig: ConfigSchema = {
   latestAgentVersionsUrl: '',
   serverlessOnboarding: false,
   managedServiceUrl: '',
+  featureFlags: {
+    agentConfigurationAvailable: true,
+    configurableIndicesAvailable: true,
+    infrastructureTabAvailable: true,
+    infraUiAvailable: true,
+    migrationToFleetAvailable: true,
+    sourcemapApiAvailable: true,
+    storageExplorerAvailable: true,
+  },
 };
 
 const urlService = new UrlService({

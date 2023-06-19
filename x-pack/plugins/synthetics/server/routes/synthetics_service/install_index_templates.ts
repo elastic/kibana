@@ -6,12 +6,12 @@
  */
 
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
 export const installIndexTemplatesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.INDEX_TEMPLATES,
+  path: SYNTHETICS_API_URLS.INDEX_TEMPLATES,
   validate: {},
   handler: async ({ server }): Promise<any> => {
     return installSyntheticsIndexTemplates(server);
