@@ -7,7 +7,7 @@
 
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { inferTimeField, renewIDs } from './utils';
+import { getUniqueLabelGenerator, inferTimeField, renewIDs } from './utils';
 
 const datatableUtilities = createDatatableUtilitiesMock();
 
@@ -155,6 +155,21 @@ describe('utils', () => {
           "r2_test": "r3_test",
         }
       `);
+    });
+  });
+  describe('getUniqueLabelGenerator', () => {
+    it('should handle empty labels', () => {
+      expect(getUniqueLabelGenerator()(' ')).toBe('[Untitled]');
+    });
+
+    it('should add a counter for multiple hits of the same label', () => {
+      const labelGenerator = getUniqueLabelGenerator();
+      expect(['myLabel', 'myLabel'].map(labelGenerator)).toEqual(['myLabel', 'myLabel [1]']);
+    });
+
+    it('should add a counter for multiple empty labels', () => {
+      const labelGenerator = getUniqueLabelGenerator();
+      expect([' ', ' '].map(labelGenerator)).toEqual(['[Untitled]', '[Untitled] [1]']);
     });
   });
 });
