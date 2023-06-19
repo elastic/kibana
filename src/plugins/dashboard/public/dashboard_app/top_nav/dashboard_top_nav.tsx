@@ -208,12 +208,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   });
 
   return (
-    <div
-      className={classNames('dashboardTopNav', {
-        'dashboardTopNav-fullscreenMode': fullScreenMode,
-        'dashboardTopNav-embedMode': Boolean(embedSettings),
-      })}
-    >
+    <div className="dashboardTopNav">
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"
