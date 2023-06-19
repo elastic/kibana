@@ -10,6 +10,7 @@ import type { CasesFeaturesAllRequired } from '../ui/types';
 export * from './owners';
 export * from './files';
 export * from './application';
+export { LENS_ATTACHMENT_TYPE } from './visualizations';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
