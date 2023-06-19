@@ -25,6 +25,21 @@ export interface ScoreByPolicyTemplateBucket {
   };
 }
 
+export interface VulnSeverityAggs {
+  critical: {
+    doc_count: number;
+  };
+  high: {
+    doc_count: number;
+  };
+  medium: {
+    doc_count: number;
+  };
+  low: {
+    doc_count: number;
+  };
+}
+
 export type TaskHealthStatus = 'ok' | 'warning' | 'error';
 
 export interface FindingsStatsTaskResult {

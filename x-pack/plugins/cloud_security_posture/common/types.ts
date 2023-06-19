@@ -131,6 +131,15 @@ export interface GetCspRuleTemplateResponse {
 
 // CNVM DASHBOARD
 
+export interface VulnScoreTrend {
+  '@timestamp': string;
+  policy_template: 'vuln_mgmt';
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+}
+
 export interface CnvmStatistics {
   criticalCount: number | undefined;
   highCount: number | undefined;
@@ -141,6 +150,7 @@ export interface CnvmStatistics {
 
 export interface CnvmDashboardData {
   cnvmStatistics: CnvmStatistics;
+  vulnTrends: VulnScoreTrend[];
   topVulnerableResources: VulnerableResourceStat[];
   topPatchableVulnerabilities: PatchableVulnerabilityStat[];
   topVulnerabilities: VulnerabilityStat[];

@@ -10,6 +10,7 @@ import { EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageHeader, EuiSpacer } from '@ela
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { QuickNav } from '../../components/quick_nav';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import type {
@@ -343,6 +344,7 @@ export const ComplianceDashboard = () => {
           />
         }
         tabs={tabs.map(({ content, ...rest }) => rest)}
+        rightSideItems={[<QuickNav />]}
       />
       <EuiSpacer />
       <div
