@@ -60,3 +60,55 @@ export async function generateLatencyData({
 
   await synthtraceEsClient.index(documents);
 }
+
+export async function generateErrorData({
+  synthtraceEsClient,
+  serviceName,
+  start,
+  end,
+}: {
+  synthtraceEsClient: ApmSynthtraceEsClient;
+  serviceName: string;
+  start: number;
+  end: number;
+}) {
+  const serviceInstance = apm
+    .service({ name: serviceName, environment: 'production', agentName: 'go' })
+    .instance('instance-a');
+
+  const interval = '1m';
+
+  const { bananaTransaction, appleTransaction } = config;
+
+  const documents = [appleTransaction, bananaTransaction].flatMap((transaction, index) => {
+    return [
+      timerange(start, end)
+        .interval(interval)
+        .rate(transaction.successRate)
+        .generator((timestamp) =>
+          serviceInstance
+            .transaction({ transactionName: transaction.name })
+            .timestamp(timestamp)
+            .duration(10)
+            .success()
+        ),
+      timerange(start, end)
+        .interval(interval)
+        .rate(transaction.failureRate)
+        .generator((timestamp) =>
+          serviceInstance
+            .transaction({ transactionName: transaction.name })
+            .errors(
+              serviceInstance
+                .error({ message: `Error ${index}`, type: transaction.name })
+                .timestamp(timestamp)
+            )
+            .duration(10)
+            .timestamp(timestamp)
+            .failure()
+        ),
+    ];
+  });
+
+  await synthtraceEsClient.index(documents);
+}
