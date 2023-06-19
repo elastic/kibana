@@ -17,7 +17,7 @@ export const goHighlightLang = 'go';
 
 export const goLineNumbers = () => ({
   start: 1,
-  highlight: '4, 7',
+  highlight: '4, 7, 10, 13',
 });
 
 export const go = `# ${i18n.translate(
@@ -26,6 +26,14 @@ export const go = `# ${i18n.translate(
     defaultMessage: 'Initialize using environment variables:',
   }
 )}
+
+# {{serviceNameHint}} ${i18n.translate(
+  'xpack.apm.onboarding.goClient.configure.commands.usedExecutableNameComment',
+  {
+    defaultMessage: 'If not specified, the executable name will be used.',
+  }
+)}
+export ELASTIC_APM_SERVICE_NAME=<your-service-name>
 
 {{^secretToken}}
 # {{apiKeyHint}}
@@ -38,4 +46,7 @@ export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
 
 # {{{serverUrlHint}}}
 export ELASTIC_APM_SERVER_URL={{{apmServerUrl}}}
+
+# {{{serviceEnvironmentHint}}}
+export ELASTIC_APM_ENVIRONMENT=<your-environment>
 `;

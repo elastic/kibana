@@ -17,7 +17,7 @@ export const djangoHighlightLang = 'py';
 
 export const djangoLineNumbers = () => ({
   start: 1,
-  highlight: '1, 3, 5, 7, 9, 12-13, 15, 17, 19',
+  highlight: '1, 3, 5, 7, 9, 12, 15, 18-19, 21, 23, 25',
 });
 
 export const django = `INSTALLED_APPS = (
@@ -32,6 +32,9 @@ export const django = `INSTALLED_APPS = (
 )
 
 ELASTIC_APM = {
+  # {{serviceNameHint}}
+  'SERVICE_NAME': '<your-service-name>',
+
   {{^secretToken}}
   # {{apiKeyHint}}
   'API_KEY': '{{{apiKey}}}',
@@ -43,6 +46,9 @@ ELASTIC_APM = {
 
   # {{{serverUrlHint}}}
   'SERVER_URL': '{{{apmServerUrl}}}',
+
+  # {{{serviceEnvironmentHint}}}
+  'ENVIRONMENT': '<your-environment>',
 }
 
 MIDDLEWARE = (

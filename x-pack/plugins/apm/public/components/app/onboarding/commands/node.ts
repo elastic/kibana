@@ -16,7 +16,7 @@ export const nodeHighlightLang = 'js';
 
 export const nodeLineNumbers = () => ({
   start: 1,
-  highlight: '2, 4, 7-8',
+  highlight: '2, 4, 7, 10, 13-14',
 });
 
 export const node = `// ${i18n.translate(
@@ -27,6 +27,14 @@ export const node = `// ${i18n.translate(
   }
 )}
 var apm = require('elastic-apm-node').start({
+  // {{serviceNameHint}} ${i18n.translate(
+    'xpack.apm.onboarding.nodeClient.createConfig.commands.serviceName',
+    {
+      defaultMessage: 'Overrides the service name in package.json.',
+    }
+  )}
+  serviceName: '<your-service-name>',
+
   {{^secretToken}}
   // {{apiKeyHint}}
   apiKey: '{{{apiKey}}}',
@@ -38,4 +46,7 @@ var apm = require('elastic-apm-node').start({
 
   // {{{serverUrlHint}}}
   serverUrl: '{{{apmServerUrl}}}',
+
+  // {{{serviceEnvironmentHint}}}
+  environment: '<your-environment>'
 })`;

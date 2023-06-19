@@ -14,10 +14,12 @@ export const phpHighlightLang = 'php';
 
 export const phpLineNumbers = () => ({
   start: 1,
-  highlight: '3, 6',
+  highlight: '2, 5, 8, 11',
 });
 
-export const php = `
+export const php = `# {{serviceNameHint}}
+elastic_apm.service_name="<your-service-name>"
+
 {{^secretToken}}
 # {{apiKeyHint}}
 elastic_apm.api_key="{{{apiKey}}}"
@@ -28,4 +30,7 @@ elastic_apm.secret_token="{{{secretToken}}}"
 {{/secretToken}}
 
 # {{serverUrlHint}}
-elastic_apm.server_url="{{{apmServerUrl}}}"`;
+elastic_apm.server_url="{{{apmServerUrl}}}"
+
+# {{{serviceEnvironmentHint}}}
+elastic_apm.environment="<your-environment>"`;

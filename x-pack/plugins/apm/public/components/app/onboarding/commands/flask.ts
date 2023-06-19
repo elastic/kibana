@@ -17,7 +17,7 @@ export const flaskHighlightLang = 'py';
 
 export const flaskLineNumbers = () => ({
   start: 1,
-  highlight: '2-4, 7-8, 10, 13-14, 16',
+  highlight: '2-4, 7-8, 10, 12, 15, 18-21',
 });
 
 export const flask = `# ${i18n.translate(
@@ -38,6 +38,8 @@ apm = ElasticAPM(app)
 )}
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {
+  # {{serviceNameHint}}
+  'SERVICE_NAME': '<your-service-name>',
   {{^secretToken}}
   # {{apiKeyHint}}
   'API_KEY': '{{{apiKey}}}',
@@ -49,6 +51,9 @@ app.config['ELASTIC_APM'] = {
 
   # {{{serverUrlHint}}}
   'SERVER_URL': '{{{apmServerUrl}}}',
+
+  # {{{serviceEnvironmentHint}}}
+  'ENVIRONMENT': '<your-environment>',
 }
 
 apm = ElasticAPM(app)`;
