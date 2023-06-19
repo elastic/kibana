@@ -40,3 +40,10 @@ export const EDIT_DASHBOARD_BUTTON_TITLE = i18n.translate(
     defaultMessage: `Edit`,
   }
 );
+
+export const SAVE_DASHBOARD_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.dashboards.dashboard.saveDashboardButtonTitle',
+  {
+    defaultMessage: `Save`,
+  }
+);

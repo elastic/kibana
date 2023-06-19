@@ -5,61 +5,35 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import type { Query, Filter } from '@kbn/es-query';
+import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { EDIT_DASHBOARD_BUTTON_TITLE } from '../pages/details/translations';
-import { useKibana, useNavigation } from '../../common/lib/kibana';
+import {
+  EDIT_DASHBOARD_BUTTON_TITLE,
+  SAVE_DASHBOARD_BUTTON_TITLE,
+} from '../pages/details/translations';
 
 export interface EditDashboardButtonComponentProps {
-  filters?: Filter[];
-  query?: Query;
-  savedObjectId: string | undefined;
-  timeRange: {
-    from: string;
-    to: string;
-    fromStr?: string | undefined;
-    toStr?: string | undefined;
-  };
+  onClick?: () => void;
+  viewMode?: ViewMode;
+  isSaveInProgress?: boolean;
 }
 
 const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> = ({
-  filters,
-  query,
-  savedObjectId,
-  timeRange,
+  onClick,
+  viewMode = ViewMode.VIEW,
+  isSaveInProgress,
 }) => {
-  const {
-    services: { dashboard },
-  } = useKibana();
-  const { navigateTo } = useNavigation();
-
-  const onClick = useCallback(
-    (e) => {
-      e.preventDefault();
-      const url = dashboard?.locator?.getRedirectUrl({
-        query,
-        filters,
-        timeRange,
-        dashboardId: savedObjectId,
-        viewMode: ViewMode.EDIT,
-      });
-      if (url) {
-        navigateTo({ url });
-      }
-    },
-    [dashboard?.locator, query, filters, timeRange, savedObjectId, navigateTo]
-  );
   return (
     <EuiButton
       color="primary"
       data-test-subj="dashboardEditButton"
       fill
-      iconType="pencil"
+      iconType={viewMode === ViewMode.EDIT ? 'save' : 'pencil'}
       onClick={onClick}
+      isLoading={isSaveInProgress}
     >
-      {EDIT_DASHBOARD_BUTTON_TITLE}
+      {viewMode === ViewMode.EDIT ? SAVE_DASHBOARD_BUTTON_TITLE : EDIT_DASHBOARD_BUTTON_TITLE}
     </EuiButton>
   );
 };

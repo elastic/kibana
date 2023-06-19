@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -16,6 +16,7 @@ import { inputsActions } from '../../common/store/inputs';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
+  dashboardContainer,
   filters,
   id,
   inputId = InputsModelId.global,
@@ -23,8 +24,10 @@ const DashboardRendererComponent = ({
   query,
   savedObjectId,
   timeRange,
+  viewMode = ViewMode.VIEW,
 }: {
   canReadDashboard: boolean;
+  dashboardContainer?: DashboardAPI;
   filters?: Filter[];
   id: string;
   inputId?: InputsModelId.global | InputsModelId.timeline;
@@ -37,16 +40,15 @@ const DashboardRendererComponent = ({
     to: string;
     toStr?: string | undefined;
   };
+  viewMode?: ViewMode;
 }) => {
   const dispatch = useDispatch();
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
-
   const getCreationOptions = useCallback(
     () =>
       Promise.resolve({
-        getInitialInput: () => ({ timeRange, viewMode: ViewMode.VIEW, query, filters }),
+        getInitialInput: () => ({ timeRange, viewMode, query, filters }),
       }),
-    [filters, query, timeRange]
+    [filters, query, timeRange, viewMode]
   );
 
   const refetchByForceRefresh = useCallback(() => {
@@ -72,16 +74,9 @@ const DashboardRendererComponent = ({
     dashboardContainer?.updateInput({ timeRange, query, filters });
   }, [dashboardContainer, filters, query, timeRange]);
 
-  const handleDashboardLoaded = useCallback(
-    (container: DashboardAPI) => {
-      setDashboardContainer(container);
-      onDashboardContainerLoaded?.(container);
-    },
-    [onDashboardContainerLoaded]
-  );
   return savedObjectId && canReadDashboard ? (
     <DashboardContainerRenderer
-      ref={handleDashboardLoaded}
+      ref={onDashboardContainerLoaded}
       savedObjectId={savedObjectId}
       getCreationOptions={getCreationOptions}
     />

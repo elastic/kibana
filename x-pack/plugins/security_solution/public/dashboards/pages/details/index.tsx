@@ -13,7 +13,7 @@ import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 
 import { pick } from 'lodash/fp';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
@@ -29,7 +29,7 @@ import { HeaderPage } from '../../../common/components/header_page';
 import { DASHBOARD_NOT_FOUND_TITLE } from './translations';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { EditDashboardButton } from '../../components/edit_dashboard_button';
+import { useDashboardActions } from '../../hooks/use_dashboard_actions';
 
 type DashboardDetails = Record<string, string>;
 
@@ -48,6 +48,16 @@ const DashboardViewComponent: React.FC = () => {
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const { indexPattern, indicesExist } = useSourcererDataView();
+  const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
+  const {
+    triggerViewMode,
+    isSaveInProgress,
+    viewMode,
+    iconType,
+    title: actionTitle,
+  } = useDashboardActions({
+    dashboardContainer,
+  });
 
   const { show: canReadDashboard, showWriteControls } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
@@ -56,6 +66,7 @@ const DashboardViewComponent: React.FC = () => {
     [canReadDashboard]
   );
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
+
   const onDashboardContainerLoaded = useCallback((dashboard: DashboardAPI) => {
     if (dashboard) {
       const title = dashboard.getTitle().trim();
@@ -66,6 +77,14 @@ const DashboardViewComponent: React.FC = () => {
       }
     }
   }, []);
+
+  const handleDashboardLoaded = useCallback(
+    (container: DashboardAPI) => {
+      setDashboardContainer(container);
+      onDashboardContainerLoaded(container);
+    },
+    [onDashboardContainerLoaded]
+  );
 
   const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
@@ -87,12 +106,16 @@ const DashboardViewComponent: React.FC = () => {
           <EuiFlexItem grow={false}>
             <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
               {showWriteControls && dashboardExists && (
-                <EditDashboardButton
-                  filters={filters}
-                  query={query}
-                  savedObjectId={savedObjectId}
-                  timeRange={timeRange}
-                />
+                <EuiButton
+                  color="primary"
+                  data-test-subj="dashboardEditButton"
+                  fill
+                  iconType={iconType}
+                  onClick={triggerViewMode}
+                  isLoading={isSaveInProgress}
+                >
+                  {actionTitle}
+                </EuiButton>
               )}
             </HeaderPage>
           </EuiFlexItem>
@@ -102,10 +125,12 @@ const DashboardViewComponent: React.FC = () => {
                 query={query}
                 filters={filters}
                 canReadDashboard={canReadDashboard}
+                dashboardContainer={dashboardContainer}
                 id={`dashboard-view-${savedObjectId}`}
-                onDashboardContainerLoaded={onDashboardContainerLoaded}
+                onDashboardContainerLoaded={handleDashboardLoaded}
                 savedObjectId={savedObjectId}
                 timeRange={timeRange}
+                viewMode={viewMode}
               />
             </EuiFlexItem>
           )}
