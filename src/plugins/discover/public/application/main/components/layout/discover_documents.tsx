@@ -142,6 +142,14 @@ export function useMergedDiscoverState(stateContainer: DiscoverStateContainer) {
             setNextAppState = true;
           }
 
+          if (
+            next.searchSource.getField('query') &&
+            !isEqual(next.searchSource.getField('query'), currentState.appState?.query)
+          ) {
+            nextAppState.query = next.searchSource.getField('query');
+            setNextAppState = true;
+          }
+
           if (setNextAppState && nextAppState && !isEqual(nextAppState, currentState?.appState)) {
             state$.next({ ...state$.getValue(), appState: nextAppState });
           }
