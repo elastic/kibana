@@ -60,7 +60,8 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
     <EuiConfirmModal
       role="dialog"
       title={i18n.translate('xpack.security.management.users.confirmDisableUsers.title', {
-        defaultMessage: "Deactivate {count, plural, one{user ''{username}''} other{{count} users}}?",
+        defaultMessage:
+          "Deactivate {count, plural, one{user ''{username}''} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
       onCancel={onCancel}
