@@ -79,6 +79,9 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'null',
         'boolean_value',
         'comparison_operator',
+        'enrich',
+        'on',
+        'with',
       ],
       euiThemeVars.euiColorPrimaryText
     ),

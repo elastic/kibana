@@ -12,6 +12,8 @@ import { SingleStatementContext } from "./esql_parser";
 import { QueryContext } from "./esql_parser";
 import { SourceCommandContext } from "./esql_parser";
 import { ProcessingCommandContext } from "./esql_parser";
+import { EnrichCommandContext } from "./esql_parser";
+import { EnrichWithClauseContext } from "./esql_parser";
 import { MvExpandCommandContext } from "./esql_parser";
 import { WhereCommandContext } from "./esql_parser";
 import { WhereBooleanExpressionContext } from "./esql_parser";
@@ -26,11 +28,13 @@ import { PrimaryExpressionContext } from "./esql_parser";
 import { RowCommandContext } from "./esql_parser";
 import { FieldsContext } from "./esql_parser";
 import { FieldContext } from "./esql_parser";
+import { EnrichFieldIdentifierContext } from "./esql_parser";
 import { UserVariableContext } from "./esql_parser";
 import { FromCommandContext } from "./esql_parser";
 import { EvalCommandContext } from "./esql_parser";
 import { StatsCommandContext } from "./esql_parser";
 import { SourceIdentifierContext } from "./esql_parser";
+import { ProjectIdentifierContext } from "./esql_parser";
 import { FunctionExpressionArgumentContext } from "./esql_parser";
 import { MathFunctionExpressionArgumentContext } from "./esql_parser";
 import { QualifiedNameContext } from "./esql_parser";
@@ -163,6 +167,28 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitProcessingCommand?: (ctx: ProcessingCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.enrichCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterEnrichCommand?: (ctx: EnrichCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.enrichCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitEnrichCommand?: (ctx: EnrichCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.enrichWithClause`.
+	 * @param ctx the parse tree
+	 */
+	enterEnrichWithClause?: (ctx: EnrichWithClauseContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.enrichWithClause`.
+	 * @param ctx the parse tree
+	 */
+	exitEnrichWithClause?: (ctx: EnrichWithClauseContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.mvExpandCommand`.
@@ -319,6 +345,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	exitField?: (ctx: FieldContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `esql_parser.enrichFieldIdentifier`.
+	 * @param ctx the parse tree
+	 */
+	enterEnrichFieldIdentifier?: (ctx: EnrichFieldIdentifierContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.enrichFieldIdentifier`.
+	 * @param ctx the parse tree
+	 */
+	exitEnrichFieldIdentifier?: (ctx: EnrichFieldIdentifierContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `esql_parser.userVariable`.
 	 * @param ctx the parse tree
 	 */
@@ -372,6 +409,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitSourceIdentifier?: (ctx: SourceIdentifierContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.projectIdentifier`.
+	 * @param ctx the parse tree
+	 */
+	enterProjectIdentifier?: (ctx: ProjectIdentifierContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.projectIdentifier`.
+	 * @param ctx the parse tree
+	 */
+	exitProjectIdentifier?: (ctx: ProjectIdentifierContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.functionExpressionArgument`.

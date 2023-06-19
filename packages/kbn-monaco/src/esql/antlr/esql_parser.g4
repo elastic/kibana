@@ -38,6 +38,15 @@ processingCommand
     | statsCommand
     | whereCommand
     | mvExpandCommand
+    | enrichCommand
+    ;
+
+enrichCommand
+    : ENRICH policyName=projectIdentifier (ON matchField=enrichFieldIdentifier)? (WITH enrichWithClause (COMMA enrichWithClause)*)?
+    ;
+
+enrichWithClause
+    : (newName=enrichFieldIdentifier ASSIGN)? enrichField=enrichFieldIdentifier
     ;
 
 mvExpandCommand
@@ -116,6 +125,11 @@ field
     | userVariable ASSIGN booleanExpression
     ;
 
+enrichFieldIdentifier
+    : PRJ_UNQUOTED_IDENTIFIER
+    | PRJ_QUOTED_IDENTIFIER
+    ;
+
 userVariable
    :  identifier
    ;
@@ -135,6 +149,11 @@ statsCommand
 sourceIdentifier
     : SRC_UNQUOTED_IDENTIFIER
     | SRC_QUOTED_IDENTIFIER
+    ;
+
+projectIdentifier
+    : PRJ_UNQUOTED_IDENTIFIER
+    | PRJ_QUOTED_IDENTIFIER
     ;
 
 functionExpressionArgument
