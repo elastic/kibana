@@ -90,6 +90,38 @@ describe('ApplicationService', () => {
 
         expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
       });
+
+      it('updates the page_url analytics context', async () => {
+        const { register } = service.setup(setupDeps);
+
+        const context$ = setupDeps.analytics.registerContextProvider.mock.calls[0][0]
+          .context$ as Observable<{
+          page_url: string;
+        }>;
+        const locations: string[] = [];
+        context$.subscribe((context) => locations.push(context.page_url));
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          mount: async () => () => undefined,
+        });
+        register(Symbol(), {
+          id: 'app2',
+          title: 'App2',
+          mount: async () => () => undefined,
+        });
+
+        const { getComponent } = await service.start(startDeps);
+        update = createRenderer(getComponent());
+
+        await navigate('/app/app1/bar?hello=dolly');
+        await flushPromises();
+        await navigate('/app/app2#/foo');
+        await flushPromises();
+
+        expect(locations).toEqual(['/', '/app/app1/bar', '/app/app2#/foo']);
+      });
     });
 
     describe('using navigateToApp', () => {
@@ -128,6 +160,42 @@ describe('ApplicationService', () => {
         resolveMount!();
 
         expect(currentAppIds).toEqual(['app1']);
+      });
+
+      it('updates the page_url analytics context', async () => {
+        const { register } = service.setup(setupDeps);
+
+        const context$ = setupDeps.analytics.registerContextProvider.mock.calls[0][0]
+          .context$ as Observable<{
+          page_url: string;
+        }>;
+        const locations: string[] = [];
+        context$.subscribe((context) => locations.push(context.page_url));
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          mount: async () => () => undefined,
+        });
+        register(Symbol(), {
+          id: 'app2',
+          title: 'App2',
+          mount: async () => () => undefined,
+        });
+
+        const { navigateToApp, getComponent } = await service.start(startDeps);
+        update = createRenderer(getComponent());
+
+        await act(async () => {
+          await navigateToApp('app1');
+          update();
+        });
+        await act(async () => {
+          await navigateToApp('app2', { path: '/nested' });
+          update();
+        });
+
+        expect(locations).toEqual(['/', '/app/app1', '/app/app2/nested']);
       });
 
       it('replaces the current history entry when the `replace` option is true', async () => {
