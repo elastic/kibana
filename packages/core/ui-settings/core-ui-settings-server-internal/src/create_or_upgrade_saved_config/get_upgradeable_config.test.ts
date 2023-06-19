@@ -99,7 +99,6 @@ describe('getUpgradeableConfig', () => {
     expect(result!.id).toBe('7.3.0');
   });
 
-
   it('finds saved config with RC version === Kibana version', async () => {
     const savedConfig = { id: '7.5.0-rc1', attributes: 'foo' };
     const savedObjectsClient = savedObjectsClientMock.create();
