@@ -217,7 +217,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   );
 
   const router = useApmRouter();
-
   const isInfraTabAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.InfrastructureTabAvailable
   );
