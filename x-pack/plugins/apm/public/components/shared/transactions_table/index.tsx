@@ -33,7 +33,6 @@ import {
 } from '../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { txGroupsDroppedBucketName } from '../links/apm/transaction_detail_link';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { OverviewTableContainer } from '../overview_table_container';
@@ -179,12 +178,8 @@ export function TransactionsTable({
       ).then((response) => {
         const currentPageTransactionGroups = orderBy(
           response.transactionGroups,
-          [
-            (transactionItem) =>
-              transactionItem.name === txGroupsDroppedBucketName ? -1 : 0,
-            field,
-          ],
-          ['asc', direction]
+          [field],
+          [direction]
         ).slice(index * size, (index + 1) * size);
 
         return {
