@@ -551,6 +551,8 @@ class OutputService {
     data: Partial<Output>,
     {
       fromPreconfiguration = false,
+      // asHelper indicates that this update is being done by a helper function, and not by a user.
+      // This is used to prevent user from setting is_default or is_default_monitoring to false manually, leaving no default output.
       asHelper = false,
     }: { fromPreconfiguration: boolean; asHelper?: boolean } = {
       fromPreconfiguration: false,
