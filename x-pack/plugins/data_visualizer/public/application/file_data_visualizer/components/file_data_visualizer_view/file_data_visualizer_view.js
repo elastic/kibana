@@ -317,7 +317,6 @@ export class FileDataVisualizerView extends Component {
                 showEditFlyout={this.showEditFlyout}
                 showExplanationFlyout={this.showExplanationFlyout}
                 disableButtons={isEditFlyoutVisible || isExplanationFlyoutVisible}
-                mode={MODE.READ}
                 onChangeMode={this.changeMode}
                 onCancel={this.onCancel}
                 disableImport={hasPermissionToImport === false}

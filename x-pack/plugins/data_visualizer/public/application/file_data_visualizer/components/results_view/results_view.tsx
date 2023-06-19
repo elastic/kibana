@@ -32,7 +32,6 @@ interface Props {
   showEditFlyout(): void;
   showExplanationFlyout(): void;
   disableButtons: boolean;
-  mode: DATAVISUALIZER_MODE;
   onChangeMode: (mode: DATAVISUALIZER_MODE) => void;
   onCancel: () => void;
   disableImport?: boolean;
@@ -45,7 +44,6 @@ export const ResultsView: FC<Props> = ({
   showEditFlyout,
   showExplanationFlyout,
   disableButtons,
-  mode,
   onChangeMode,
   onCancel,
   disableImport,
