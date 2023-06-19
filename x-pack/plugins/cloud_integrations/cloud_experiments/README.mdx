@@ -168,7 +168,7 @@ xpack.cloud_integrations.experiments.flag_overrides:
 
 ### How is my user identified?
 
-The user is automatically identified during the `setup` phase. It currently uses a hash of the deployment ID, meaning all users accessing the same deployment will get the same values for the `getVariation` requests unless the A/B provider is explicitly configured to randomize it.
+The user is automatically identified during the `setup` phase. It currently uses the ESS deployment ID, meaning all users accessing the same deployment will get the same values for the `getVariation` requests unless the A/B provider is explicitly configured to randomize it.
 
 If you are curious of the data provided to the `identify` call, you can see that in the [`cloud` plugin](../../cloud).
 

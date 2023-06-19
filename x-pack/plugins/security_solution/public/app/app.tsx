@@ -34,8 +34,11 @@ import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
+import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from '../assistant/content/anonymization';
 import { PROMPT_CONTEXTS } from '../assistant/content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from '../assistant/content/quick_prompts';
+import { BASE_SECURITY_SYSTEM_PROMPTS } from '../assistant/content/prompts/system';
+import { useAnonymizationStore } from '../assistant/use_anonymization_store';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -63,6 +66,9 @@ const StartAppComponent: FC<StartAppComponent> = ({
   } = useKibana().services;
 
   const { conversations, setConversations } = useConversationStore();
+  const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
+    useAnonymizationStore();
+
   const getInitialConversation = useCallback(() => {
     return conversations;
   }, [conversations]);
@@ -80,13 +86,20 @@ const StartAppComponent: FC<StartAppComponent> = ({
                 <AssistantProvider
                   actionTypeRegistry={actionTypeRegistry}
                   augmentMessageCodeBlocks={augmentMessageCodeBlocks}
+                  defaultAllow={defaultAllow}
+                  defaultAllowReplacement={defaultAllowReplacement}
+                  baseAllow={DEFAULT_ALLOW}
+                  baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT}
                   basePromptContexts={Object.values(PROMPT_CONTEXTS)}
                   baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS}
+                  baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS}
                   getInitialConversations={getInitialConversation}
                   getComments={getComments}
                   http={http}
                   nameSpace={nameSpace}
                   setConversations={setConversations}
+                  setDefaultAllow={setDefaultAllow}
+                  setDefaultAllowReplacement={setDefaultAllowReplacement}
                   title={ASSISTANT_TITLE}
                 >
                   <MlCapabilitiesProvider>

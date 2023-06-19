@@ -17,6 +17,7 @@ import network_drive from '../../../assets/source_icons/network_drive.svg';
 import oracle from '../../../assets/source_icons/oracle.svg';
 import postgresql from '../../../assets/source_icons/postgresql.svg';
 import amazon_s3 from '../../../assets/source_icons/s3.svg';
+import sharepoint from '../../../assets/source_icons/sharepoint.svg';
 import sharepoint_online from '../../../assets/source_icons/sharepoint_online.svg';
 
 export const CONNECTOR_ICONS = {
@@ -32,5 +33,6 @@ export const CONNECTOR_ICONS = {
   network_drive,
   oracle,
   postgresql,
+  sharepoint,
   sharepoint_online,
 };
