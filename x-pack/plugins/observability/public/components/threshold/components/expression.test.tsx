@@ -11,18 +11,10 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { Expressions } from './expression';
+import Expressions from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { MetricsExplorerMetric } from '../../../../common/threshold_rule/metrics_explorer';
 import { Comparator } from '../../../../common/threshold_rule/types';
-
-jest.mock('../helpers/source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
-  }),
-}));
 
 jest.mock('../../../utils/kibana_react');
 

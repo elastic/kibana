@@ -33,12 +33,7 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
-import {
-  Aggregators,
-  Comparator,
-  QUERY_INVALID,
-  SourceConfiguration,
-} from '../../../../common/threshold_rule/types';
+import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/threshold_rule/types';
 import { TimeUnitChar } from '../../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
@@ -70,9 +65,6 @@ export default function Expressions(props: Props) {
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
-  const [source, setSource] = useState<SourceConfiguration>({
-    configuration: { metricAlias: 'unknown-index' },
-  });
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({
@@ -93,7 +85,6 @@ export default function Expressions(props: Props) {
         if (defaultDataView) {
           newSearchSource.setField('index', defaultDataView);
           setDataView(defaultDataView);
-          setSource({ configuration: { metricAlias: defaultDataView.getIndexPattern() } });
         }
         initialSearchConfiguration = newSearchSource.getSerializedFields();
       }
@@ -105,9 +96,6 @@ export default function Expressions(props: Props) {
         setRuleParams('searchConfiguration', initialSearchConfiguration);
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
-        setSource({
-          configuration: { metricAlias: createdSearchSource.getField('index')?.getIndexPattern() },
-        });
       } catch (error) {
         // TODO Handle error
         console.log('error:', error);
@@ -140,7 +128,6 @@ export default function Expressions(props: Props) {
         }
       );
       setRuleParams('criteria', ruleCriteria);
-      setSource({ configuration: { metricAlias: newDataView.getIndexPattern() } });
       searchSource?.setParent(undefined).setField('index', newDataView);
       setRuleParams('searchConfiguration', searchSource?.getSerializedFields());
       setDataView(newDataView);
@@ -307,7 +294,7 @@ export default function Expressions(props: Props) {
     if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
       setRuleParams('alertOnGroupDisappear', true);
     }
-  }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
