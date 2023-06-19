@@ -82,7 +82,7 @@ export const SemanticSearchSection: React.FC = () => (
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EsreGuideAccordion
-            id="vectorSearchAccordion"
+            id="nlpEnrichmentAccordion"
             icon={nlpEnrichmentIllustration}
             title={i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentAccordion.title', {
               defaultMessage: 'NLP Enrichment',
