@@ -35,20 +35,17 @@ disabled:
   - x-pack/test/osquery_cypress/cli_config.ts
   - x-pack/test/osquery_cypress/config.ts
   - x-pack/test/osquery_cypress/visual_config.ts
-  - x-pack/test/security_solution_cypress/cases_cli_config.ts
   - x-pack/test/security_solution_cypress/ccs_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
-  - x-pack/test/security_solution_cypress/cli_config_parallel.ts
   - x-pack/test/security_solution_cypress/config.firefox.ts
   - x-pack/test/security_solution_cypress/config.ts
-  - x-pack/test/security_solution_cypress/response_ops_cli_config.ts
   - x-pack/test/security_solution_cypress/upgrade_config.ts
-  - x-pack/test/security_solution_cypress/visual_config.ts
-  - x-pack/test/threat_intelligence_cypress/visual_config.ts
   - x-pack/test/threat_intelligence_cypress/cli_config_parallel.ts
   - x-pack/test/threat_intelligence_cypress/config.ts
   - x-pack/test/functional_enterprise_search/visual_config.ts
   - x-pack/test/functional_enterprise_search/cli_config.ts
+  - x-pack/test_serverless/functional/test_suites/security/cypress/config_headless.ts
+  - x-pack/test_serverless/functional/test_suites/security/cypress/config_visual.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
@@ -58,7 +55,8 @@ disabled:
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
-  - x-pack/plugins/synthetics/e2e/synthetics_run.ts
+  - x-pack/plugins/synthetics/e2e/uptime/synthetics_run.ts
+  - x-pack/plugins/synthetics/e2e/synthetics/synthetics_run.ts
   - x-pack/plugins/ux/e2e/synthetics_run.ts
   - x-pack/plugins/exploratory_view/e2e/synthetics_run.ts
 
@@ -169,6 +167,7 @@ enabled:
   - x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
+  - x-pack/test/alerting_api_integration/observability/config.ts
   - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/config_security_basic.ts
   - x-pack/test/api_integration/config_security_trial.ts
@@ -325,6 +324,7 @@ enabled:
   - x-pack/test/monitoring_api_integration/config.ts
   - x-pack/test/observability_api_integration/basic/config.ts
   - x-pack/test/observability_api_integration/trial/config.ts
+  - x-pack/test/observability_api_integration/apis/config.ts
   - x-pack/test/observability_functional/with_rac_write.config.ts
   - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts
@@ -372,7 +372,8 @@ enabled:
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
-  - x-pack/test/security_solution_endpoint/config.ts
+  - x-pack/test/security_solution_endpoint/endpoint.config.ts
+  - x-pack/test/security_solution_endpoint/integrations.config.ts
   - x-pack/test/session_view/basic/config.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_basic.ts

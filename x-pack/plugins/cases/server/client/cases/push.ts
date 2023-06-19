@@ -30,12 +30,13 @@ import {
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
-import type { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
 import type { ICaseResponse } from '../typedoc_interfaces';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
@@ -95,8 +96,7 @@ export interface PushParams {
 export const push = async (
   { connectorId, caseId }: PushParams,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient,
-  casesClientInternal: CasesClientInternal
+  casesClient: CasesClient
 ): Promise<Case> => {
   const {
     unsecuredSavedObjectsClient,
@@ -275,30 +275,29 @@ export const push = async (
     });
 
     /* End of update case with push information */
+    const res = flattenCaseSavedObject({
+      savedObject: {
+        ...myCase,
+        ...updatedCase,
+        attributes: { ...myCase.attributes, ...updatedCase?.attributes },
+        references: myCase.references,
+      },
+      comments: comments.saved_objects.map((origComment) => {
+        const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+        return {
+          ...origComment,
+          ...updatedComment,
+          attributes: {
+            ...origComment.attributes,
+            ...updatedComment?.attributes,
+          } as CommentAttributes,
+          version: updatedComment?.version ?? origComment.version,
+          references: origComment?.references ?? [],
+        };
+      }),
+    });
 
-    return CaseRt.encode(
-      flattenCaseSavedObject({
-        savedObject: {
-          ...myCase,
-          ...updatedCase,
-          attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-          references: myCase.references,
-        },
-        comments: comments.saved_objects.map((origComment) => {
-          const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
-          return {
-            ...origComment,
-            ...updatedComment,
-            attributes: {
-              ...origComment.attributes,
-              ...updatedComment?.attributes,
-            } as CommentAttributes,
-            version: updatedComment?.version ?? origComment.version,
-            references: origComment?.references ?? [],
-          };
-        }),
-      })
-    );
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }

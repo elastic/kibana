@@ -10,7 +10,6 @@ import type {
   CasesMetricsRequest,
   CasesStatusRequest,
   CasesStatusResponse,
-  SingleCaseMetricsRequest,
   CasesMetricsResponse,
 } from '../../../common/api';
 import type { CasesClient } from '../client';
@@ -19,12 +18,13 @@ import type { CasesClientArgs } from '../types';
 import { getStatusTotalsByType } from './get_status_totals';
 import { getCaseMetrics } from './get_case_metrics';
 import { getCasesMetrics } from './get_cases_metrics';
+import type { GetCaseMetricsParams } from './types';
 
 /**
  * API for interacting with the metrics.
  */
 export interface MetricsSubClient {
-  getCaseMetrics(params: SingleCaseMetricsRequest): Promise<SingleCaseMetricsResponse>;
+  getCaseMetrics(params: GetCaseMetricsParams): Promise<SingleCaseMetricsResponse>;
   getCasesMetrics(params: CasesMetricsRequest): Promise<CasesMetricsResponse>;
   /**
    * Retrieves the total number of open, closed, and in-progress cases.
@@ -42,7 +42,7 @@ export const createMetricsSubClient = (
   casesClient: CasesClient
 ): MetricsSubClient => {
   const casesSubClient: MetricsSubClient = {
-    getCaseMetrics: (params: SingleCaseMetricsRequest) =>
+    getCaseMetrics: (params: GetCaseMetricsParams) =>
       getCaseMetrics(params, casesClient, clientArgs),
     getCasesMetrics: (params: CasesMetricsRequest) =>
       getCasesMetrics(params, casesClient, clientArgs),

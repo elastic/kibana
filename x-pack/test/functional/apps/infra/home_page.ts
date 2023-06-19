@@ -22,6 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // Failing: See https://github.com/elastic/kibana/issues/157713
+  // Fails on both Chrome and Firefox
   describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {

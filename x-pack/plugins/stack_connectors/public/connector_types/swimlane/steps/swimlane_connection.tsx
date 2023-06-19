@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PasswordField, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from '../translations';
 
 interface Props {
@@ -62,22 +62,34 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({ readOnly 
           },
         }}
       />
-      <PasswordField
+      <UseField
         path="secrets.apiToken"
-        label={i18n.SW_API_TOKEN_TEXT_FIELD_LABEL}
-        readOnly={readOnly}
-        helpText={
-          <EuiLink
-            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/swimlane-action-type.html`}
-            target="_blank"
-          >
-            <FormattedMessage
-              id="xpack.stackConnectors.components.swimlane.apiTokenNameHelpLabel"
-              defaultMessage="Provide a Swimlane API Token"
-            />
-          </EuiLink>
-        }
-        data-test-subj="swimlaneApiTokenInput"
+        config={{
+          label: i18n.SW_API_TOKEN_TEXT_FIELD_LABEL,
+          validations: [
+            {
+              validator: emptyField(i18n.SW_REQUIRED_API_TOKEN),
+            },
+          ],
+          helpText: (
+            <EuiLink
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/swimlane-action-type.html`}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.stackConnectors.components.swimlane.apiTokenNameHelpLabel"
+                defaultMessage="Provide a Swimlane API Token"
+              />
+            </EuiLink>
+          ),
+        }}
+        component={PasswordField}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'swimlaneApiTokenInput',
+            readOnly,
+          },
+        }}
       />
     </>
   );

@@ -13,6 +13,7 @@ import { Env, RawPackageInfo } from './env';
 import { getEnvOptions } from './internal_mocks';
 
 const REPO_ROOT = '/test/kibanaRoot';
+const BUILD_DATE = '2023-05-15T23:12:09+0000';
 
 const packageInfos: RawPackageInfo = {
   branch: 'master',
@@ -20,11 +21,21 @@ const packageInfos: RawPackageInfo = {
   build: {
     number: 42,
     sha: 'one',
+    date: new Date(BUILD_DATE).toISOString(),
   },
 };
 
+beforeAll(() => {
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date(BUILD_DATE));
+});
+
 beforeEach(() => {
   mockPackage.raw = {};
+});
+
+afterAll(() => {
+  jest.useRealTimers();
 });
 
 test('correctly creates default environment in dev mode.', () => {
@@ -51,6 +62,7 @@ test('correctly creates default environment in prod distributable mode.', () => 
       distributable: true,
       number: 100,
       sha: 'feature-v1-build-sha',
+      date: BUILD_DATE,
     },
   };
 
@@ -73,6 +85,7 @@ test('correctly creates default environment in prod non-distributable mode.', ()
       distributable: false,
       number: 100,
       sha: 'feature-v1-build-sha',
+      date: BUILD_DATE,
     },
   };
 
@@ -95,6 +108,7 @@ test('correctly creates default environment if `--env.name` is supplied.', () =>
       distributable: false,
       number: 100,
       sha: 'feature-v1-build-sha',
+      date: BUILD_DATE,
     },
   };
 
@@ -128,6 +142,7 @@ test('correctly creates environment with constructor.', () => {
         distributable: true,
         number: 100,
         sha: 'feature-v1-build-sha',
+        date: BUILD_DATE,
       },
     },
     getEnvOptions({

@@ -9,7 +9,7 @@ import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
@@ -1580,7 +1580,8 @@ export function getErrorMessages(
           columnId,
           indexPattern,
           { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
-          operationDefinitionMap
+          operationDefinitionMap,
+          core.uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
         );
       }
     })

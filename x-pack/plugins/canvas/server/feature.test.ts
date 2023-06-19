@@ -12,6 +12,7 @@ let mockReportingPlugin: ReportingStart;
 beforeEach(() => {
   mockReportingPlugin = {
     usesUiCapabilities: () => false,
+    registerExportTypes: () => {},
   };
 });
 
@@ -87,6 +88,7 @@ it('Provides a feature declaration ', () => {
 it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => {
   mockReportingPlugin = {
     usesUiCapabilities: () => true,
+    registerExportTypes: () => {},
   };
   expect(getCanvasFeature({ reporting: mockReportingPlugin })).toMatchInlineSnapshot(`
     Object {

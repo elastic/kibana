@@ -32,7 +32,7 @@ export const incrementCounterInternal = async <T>(
   { type, id, counterFields, options }: PerformIncrementCounterInternalParams<T>,
   { registry, helpers, client, serializer, migrator }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
-  const { common: commonHelper, preflight: preflightHelper } = helpers;
+  const { common: commonHelper, preflight: preflightHelper, migration: migrationHelper } = helpers;
 
   const {
     migrationVersion,
@@ -97,7 +97,7 @@ export const incrementCounterInternal = async <T>(
   }
 
   // attributes: { [counterFieldName]: incrementBy },
-  const migrated = migrator.migrateDocument({
+  const migrated = migrationHelper.migrateInputDocument({
     id,
     type,
     ...(savedObjectNamespace && { namespace: savedObjectNamespace }),

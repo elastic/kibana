@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -13,8 +14,9 @@ export default function ({ getService }) {
   describe('get matching index patterns', () => {
     it('should return an array containing indexes matching pattern', async () => {
       const resp = await supertest
-        .get(`/api/maps/getMatchingIndexes?indexPattern=geo_shapes`)
+        .get(`/internal/maps/getMatchingIndexes?indexPattern=geo_shapes`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send()
         .expect(200);
 
@@ -24,8 +26,9 @@ export default function ({ getService }) {
 
     it('should return an empty array when no indexes match pattern', async () => {
       const resp = await supertest
-        .get(`/api/maps/getMatchingIndexes?indexPattern=notAnIndex`)
+        .get(`/internal/maps/getMatchingIndexes?indexPattern=notAnIndex`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send()
         .expect(200);
 

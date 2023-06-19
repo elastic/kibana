@@ -14,23 +14,23 @@ import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { asyncForEach } from '@kbn/std';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   getEntityFieldList,
   type MlEntityField,
   type MlInfluencer,
   type MlRecordForInfluencer,
+  ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { getDataViewIdFromName } from '../util/index_utils';
-import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -51,7 +51,6 @@ import {
 } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { MlResultsService } from '../services/results_service';
-import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 
@@ -141,7 +140,7 @@ export interface SourceIndicesWithGeoFields {
 // create new job objects based on standard job config objects
 export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
   return jobs.map((job) => {
-    const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+    const bucketSpan = parseInterval(job.analysis_config.bucket_span!);
     return {
       id: job.job_id,
       selected: false,
@@ -632,14 +631,16 @@ export function removeFilterFromQueryString(
 }
 
 // Returns an object mapping job ids to source indices which map to geo fields for that index
-export async function getSourceIndicesWithGeoFields(
+export async function getDataViewsAndIndicesWithGeoFields(
   selectedJobs: Array<CombinedJob | ExplorerJob>,
   dataViewsService: DataViewsContract
-): Promise<SourceIndicesWithGeoFields> {
+): Promise<{ sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields; dataViews: DataView[] }> {
   const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
+  // Avoid searching for data view again if previous job already has same source index
+  const dataViewsMap = new Map<string, DataView>();
   // Go through selected jobs
   if (Array.isArray(selectedJobs)) {
-    await asyncForEach(selectedJobs, async (job) => {
+    for (const job of selectedJobs) {
       let sourceIndices;
       let jobId: string;
       if (isExplorerJob(job)) {
@@ -651,12 +652,18 @@ export async function getSourceIndicesWithGeoFields(
       }
 
       if (Array.isArray(sourceIndices)) {
-        // Check fields for each source index to see if it has geo fields
-        await asyncForEach(sourceIndices, async (sourceIndex) => {
-          const dataViewId = await getDataViewIdFromName(sourceIndex);
+        for (const sourceIndex of sourceIndices) {
+          const cachedDV = dataViewsMap.get(sourceIndex);
+          const dataViewId = cachedDV?.id ?? (await getDataViewIdFromName(sourceIndex));
 
           if (dataViewId) {
-            const dataView = await dataViewsService.get(dataViewId);
+            const dataView = cachedDV ?? (await dataViewsService.get(dataViewId));
+
+            if (!dataView) {
+              continue;
+            }
+            dataViewsMap.set(sourceIndex, dataView);
+
             const geoFields = [
               ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
               ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE),
@@ -672,9 +679,9 @@ export async function getSourceIndicesWithGeoFields(
               );
             }
           }
-        });
+        }
       }
-    });
+    }
   }
-  return sourceIndicesWithGeoFieldsMap;
+  return { sourceIndicesWithGeoFieldsMap, dataViews: [...dataViewsMap.values()] };
 }

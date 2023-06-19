@@ -2,19 +2,25 @@ openapi: 3.0.1
 info:
   title: SLOs
   description: OpenAPI schema for SLOs endpoints
-  version: '0.1'
+  version: '1.0'
   contact:
     name: Actionable Observability Team
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 tags:
-  - name: slos
+  - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
+  - name: composite slo
+    description: Composite SLO APIs enable you to define, manage and track a group of SLOs.
 servers:
   - url: 'http://localhost:5601'
     description: local
 paths:
+  '/s/{spaceId}/api/observability/composite_slos':
+    $ref: 'paths/s@{spaceid}@api@composite_slos.yaml'
+  '/s/{spaceId}/api/observability/composite_slos/{compositeSloId}':
+    $ref: 'paths/s@{spaceid}@api@composite_slos@{compositesloid}.yaml'
   '/s/{spaceId}/api/observability/slos':
     $ref: 'paths/s@{spaceid}@api@slos.yaml'
   '/s/{spaceId}/api/observability/slos/{sloId}':

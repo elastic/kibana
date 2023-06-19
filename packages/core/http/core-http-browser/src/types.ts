@@ -281,6 +281,12 @@ export interface HttpFetchOptions extends HttpRequestInit {
    */
   asResponse?: boolean;
 
+  /**
+   * When true, the response from the `fetch` call will be returned as is, without being awaited or processed.
+   * Defaults to `false`.
+   */
+  rawResponse?: boolean;
+
   context?: KibanaExecutionContext;
 
   /** @experimental */

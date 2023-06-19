@@ -8,17 +8,15 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityAppServices } from '../../../../application/types';
+import { useKibana } from '../../../../utils/kibana_react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import HeaderMenuPortal from './header_menu_portal';
 
 export function HeaderMenu(): React.ReactElement | null {
+  const { http, theme } = useKibana().services;
   const {
     appMountParameters: { setHeaderActionMenu },
   } = usePluginContext();
-
-  const { http, theme } = useKibana<ObservabilityAppServices>().services;
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>

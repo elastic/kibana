@@ -34,7 +34,7 @@ describe('ZDT with v2 compat - running on a fresh cluster', () => {
     const legacyType = getLegacyType();
 
     const { runMigrations, client } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams(),
+      ...getBaseMigratorParams({ kibanaVersion: '8.8.0' }),
       logFilePath,
       types: [fooType, legacyType],
     });

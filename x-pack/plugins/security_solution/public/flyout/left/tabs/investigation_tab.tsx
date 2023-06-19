@@ -5,16 +5,30 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiText } from '@elastic/eui';
-import { INVESTIGATIONS_TAB_CONTENT_TEST_ID } from './test_ids';
+import { EuiPanel } from '@elastic/eui';
+import { INVESTIGATION_TAB_CONTENT_TEST_ID } from './test_ids';
+import { InvestigationGuideView } from '../../../common/components/event_details/investigation_guide_view';
+import { useLeftPanelContext } from '../context';
 
 /**
  * Investigations view displayed in the document details expandable flyout left section
  */
-export const InvestigationTab: FC = memo(() => {
-  return <EuiText data-test-subj={INVESTIGATIONS_TAB_CONTENT_TEST_ID}>{'Investigation'}</EuiText>;
+export const InvestigationTab: React.FC = memo(() => {
+  const { dataFormattedForFieldBrowser } = useLeftPanelContext();
+  if (dataFormattedForFieldBrowser === null) {
+    return null;
+  }
+
+  return (
+    <EuiPanel data-test-subj={INVESTIGATION_TAB_CONTENT_TEST_ID} hasShadow={false}>
+      <InvestigationGuideView
+        data={dataFormattedForFieldBrowser}
+        showTitle={false}
+        showFullView={true}
+      />
+    </EuiPanel>
+  );
 });
 
 InvestigationTab.displayName = 'InvestigationTab';

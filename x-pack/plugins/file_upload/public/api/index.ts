@@ -54,8 +54,9 @@ export async function analyzeFile(
   const { getHttp } = await lazyLoadModules();
   const body = JSON.stringify(file);
   return await getHttp().fetch<FindFileStructureResponse>({
-    path: `/internal/file_data_visualizer/analyze_file`,
+    path: `/internal/file_upload/analyze_file`,
     method: 'POST',
+    version: '1',
     body,
     query: params,
   });
@@ -67,6 +68,7 @@ export async function hasImportPermission(params: HasImportPermissionParams): Pr
     const resp = await fileUploadModules.getHttp().fetch<HasImportPermission>({
       path: `/internal/file_upload/has_import_permission`,
       method: 'GET',
+      version: '1',
       query: { ...params },
     });
     return resp.hasImportPermission;
@@ -85,6 +87,7 @@ export async function checkIndexExists(
     const { exists } = await fileUploadModules.getHttp().fetch<{ exists: boolean }>({
       path: `/internal/file_upload/index_exists`,
       method: 'POST',
+      version: '1',
       body,
       query: params,
     });
@@ -101,6 +104,7 @@ export async function getTimeFieldRange(index: string, query: unknown, timeField
   return await fileUploadModules.getHttp().fetch<GetTimeFieldRangeResponse>({
     path: `/internal/file_upload/time_field_range`,
     method: 'POST',
+    version: '1',
     body,
   });
 }
