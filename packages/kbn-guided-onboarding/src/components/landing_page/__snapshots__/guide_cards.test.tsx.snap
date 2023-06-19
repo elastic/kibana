@@ -219,6 +219,33 @@ exports[`guide cards snapshots should render all cards 1`] = `
           size="m"
         />
       </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        key="4"
+      >
+        <GuideCard
+          activateGuide={[MockFunction]}
+          activeFilter="all"
+          card={
+            Object {
+              "icon": "videoPlayer",
+              "navigateTo": Object {
+                "appId": "synthetics",
+                "path": "/monitors/getting-started",
+              },
+              "order": 14,
+              "solution": "observability",
+              "telemetryId": "onboarding--observability--synthetics",
+              "title": "Create a Synthetic Monitor",
+            }
+          }
+          guidesState={Array []}
+          navigateToApp={[MockFunction]}
+        />
+        <EuiSpacer
+          size="m"
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlexItem>
   <EuiFlexItem
