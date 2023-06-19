@@ -60,6 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('with percentiles aggregation', async () => {
         const data = (await renderTableForAggregation('Percentiles')) as string[][];
         expect(data[0]).to.have.property('length', 7);
+        // Percentile values are not deterministic, so we can't check for the exact values here,
+        // but just check they are all within the given range
         expect(data[0].every((p: string) => Number(p) >= 0.3 && Number(p) <= 5)).to.be(true);
       });
 
@@ -76,7 +78,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('with median aggregation', async () => {
         const data = await renderTableForAggregation('Median');
         const value = Number(data[0][0]);
-        expect(value).to.be.eql(3.0);
+        // Percentile values are not deterministic, so we can't check for the exact values here,
+        // but just check they are all within the given range
+        expect(value).to.be.above(2.9);
+        expect(value).to.be.below(3.1);
       });
 
       it('with sum aggregation', async () => {
