@@ -22,6 +22,7 @@ export type LogsSharedPluginStartServicesAccessor = LogsSharedPluginCoreSetup['g
 
 export interface LogsSharedPluginSetup extends LogsSharedDomainLibs {
   logViews: LogViewsServiceSetup;
+  registerUsageCollectorActions: (usageCollector: UsageCollector) => void;
 }
 
 export interface LogsSharedPluginStart {
@@ -35,6 +36,10 @@ export interface LogsSharedServerPluginSetupDeps {
 export interface LogsSharedServerPluginStartDeps {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
+}
+
+export interface UsageCollector {
+  countLogs?: () => void;
 }
 
 /**

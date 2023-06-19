@@ -13,6 +13,7 @@ import {
   LogsSharedPluginStart,
   LogsSharedServerPluginSetupDeps,
   LogsSharedServerPluginStartDeps,
+  UsageCollector,
 } from './types';
 import { logViewSavedObjectType } from './saved_objects';
 import { initLogsSharedServer } from './logs_shared_server';
@@ -35,9 +36,11 @@ export class LogsSharedPlugin
   private readonly logger: Logger;
   private libs!: LogsSharedBackendLibs;
   private logViews: LogViewsService;
+  private usageCollector: UsageCollector;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
+    this.usageCollector = {};
 
     this.logViews = new LogViewsService(this.logger.get('logViews'));
   }
@@ -63,6 +66,7 @@ export class LogsSharedPlugin
       framework,
       getStartServices: () => core.getStartServices(),
       logger: this.logger,
+      getUsageCollector: () => this.usageCollector,
     };
 
     // Register server side APIs
@@ -74,6 +78,9 @@ export class LogsSharedPlugin
     return {
       ...domainLibs,
       logViews,
+      registerUsageCollectorActions: (usageCollector: UsageCollector) => {
+        this.usageCollector = usageCollector;
+      },
     };
   }
 

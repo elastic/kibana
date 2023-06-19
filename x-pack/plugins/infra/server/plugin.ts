@@ -210,6 +210,10 @@ export class InfraServerPlugin
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
+    plugins.logsShared.registerUsageCollectorActions({
+      countLogs: () => UsageCollector.countLogs(),
+    });
+
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
         sampleObject: null, // indicates that there is no sample object associated with this app link's path

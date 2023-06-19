@@ -18,11 +18,14 @@ import { throwErrors } from '../../../common/runtime_types';
 import { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
 
 import { parseFilterQuery } from '../../utils/serialized_query';
-// import { UsageCollector } from '../../usage/usage_collector';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
-export const initLogEntriesSummaryRoute = ({ framework, logEntries }: LogsSharedBackendLibs) => {
+export const initLogEntriesSummaryRoute = ({
+  framework,
+  logEntries,
+  getUsageCollector,
+}: LogsSharedBackendLibs) => {
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -41,6 +44,8 @@ export const initLogEntriesSummaryRoute = ({ framework, logEntries }: LogsShared
         );
         const { logView, startTimestamp, endTimestamp, bucketSize, query } = payload;
 
+        const usageCollector = getUsageCollector();
+
         const buckets = await logEntries.getLogSummaryBucketsBetween(
           requestContext,
           logView,
@@ -50,7 +55,9 @@ export const initLogEntriesSummaryRoute = ({ framework, logEntries }: LogsShared
           parseFilterQuery(query)
         );
 
-        // UsageCollector.countLogs();
+        if (typeof usageCollector.countLogs === 'function') {
+          usageCollector.countLogs();
+        }
 
         return response.ok({
           body: logEntriesV1.logEntriesSummaryResponseRT.encode({
