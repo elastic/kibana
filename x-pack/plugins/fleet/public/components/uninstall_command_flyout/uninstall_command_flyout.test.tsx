@@ -9,11 +9,11 @@ import React from 'react';
 
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
-import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
+import type { GetUninstallTokensForOnePolicyResponse } from '../../../common/types/rest_spec/uninstall_token';
 
 import { createFleetTestRendererMock } from '../../mock';
 
-import { useGetUninstallTokens } from '../../hooks/use_request/uninstall_tokens';
+import { useGetUninstallTokensForOnePolicy } from '../../hooks/use_request/uninstall_tokens';
 
 import type { RequestError } from '../../hooks';
 
@@ -21,13 +21,15 @@ import type { UninstallCommandFlyoutProps } from './uninstall_command_flyout';
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
 
 jest.mock('../../hooks/use_request/uninstall_tokens', () => ({
-  useGetUninstallTokens: jest.fn(),
+  useGetUninstallTokensForOnePolicy: jest.fn(),
 }));
 
-type MockReturnType = Partial<UseRequestResponse<GetUninstallTokensResponse, RequestError>>;
+type MockReturnType = Partial<
+  UseRequestResponse<GetUninstallTokensForOnePolicyResponse, RequestError>
+>;
 
 describe('UninstallCommandFlyout', () => {
-  const useGetUninstallTokensMock = useGetUninstallTokens as jest.Mock;
+  const useGetUninstallTokensForOnePolicyMock = useGetUninstallTokensForOnePolicy as jest.Mock;
 
   const render = (props: Partial<UninstallCommandFlyoutProps> = {}) => {
     const renderer = createFleetTestRendererMock();
@@ -38,11 +40,9 @@ describe('UninstallCommandFlyout', () => {
   };
 
   beforeEach(() => {
-    const response: GetUninstallTokensResponse = {
+    const response: GetUninstallTokensForOnePolicyResponse = {
       items: [{ policy_id: 'policy_id', token: '123456789' }],
       total: 1,
-      page: 1,
-      perPage: 20,
     };
 
     const mockReturn: MockReturnType = {
@@ -51,7 +51,7 @@ describe('UninstallCommandFlyout', () => {
       data: response,
     };
 
-    useGetUninstallTokensMock.mockReturnValue(mockReturn);
+    useGetUninstallTokensForOnePolicyMock.mockReturnValue(mockReturn);
   });
 
   describe('uninstall command targets', () => {
@@ -79,7 +79,7 @@ describe('UninstallCommandFlyout', () => {
         error: null,
         data: null,
       };
-      useGetUninstallTokensMock.mockReturnValue(mockReturn);
+      useGetUninstallTokensForOnePolicyMock.mockReturnValue(mockReturn);
 
       const renderResult = render();
 
@@ -139,7 +139,7 @@ describe('UninstallCommandFlyout', () => {
         error: new Error('received error message'),
         data: null,
       };
-      useGetUninstallTokensMock.mockReturnValue(mockReturn);
+      useGetUninstallTokensForOnePolicyMock.mockReturnValue(mockReturn);
 
       const renderResult = render();
 
@@ -155,7 +155,7 @@ describe('UninstallCommandFlyout', () => {
         error: null,
         data: null,
       };
-      useGetUninstallTokensMock.mockReturnValue(mockReturn);
+      useGetUninstallTokensForOnePolicyMock.mockReturnValue(mockReturn);
 
       const renderResult = render();
 
