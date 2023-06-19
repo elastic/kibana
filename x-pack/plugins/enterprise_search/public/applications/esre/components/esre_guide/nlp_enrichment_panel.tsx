@@ -97,14 +97,14 @@ const steps: EuiContainedStepProps[] = [
             values={{
               pipelinesName: (
                 <strong>
-                  "
+                  &quot;
                   {i18n.translate(
                     'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step3.description.pipelinesName',
                     {
                       defaultMessage: 'Pipelines',
                     }
                   )}
-                  "
+                  &quot;
                 </strong>
               ),
             }}
