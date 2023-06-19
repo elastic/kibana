@@ -4,33 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
-
 export const dotnetVariables = (secretToken?: string) => ({
-  apmServiceName: 'ServiceName',
   ...(secretToken && { secretToken: 'SecretToken' }),
   ...(!secretToken && { apiKey: 'ApiKey' }),
   apmServerUrl: 'ServerUrl',
-  apmEnvironment: 'Environment',
 });
 
 export const dotnetHighlightLang = 'dotnet';
 
 export const dotnetLineNumbers = () => ({
   start: 1,
-  highlight: '1-2, 4, 6, 8, 10-12',
+  highlight: '1-2, 4, 6-8',
 });
 
 export const dotnet = `{
   "ElasticApm": {
-    /// {{serviceNameHint}} ${i18n.translate(
-      'xpack.apm.onboarding.dotnetClient.createConfig.commands.defaultServiceName',
-      {
-        defaultMessage: 'Default is the entry assembly of the application.',
-      }
-    )}
-    "ServiceName": "my-service-name",
     {{^secretToken}}
     /// {{apiKeyHint}}
     "ApiKey": "{{{apiKey}}}",
@@ -41,7 +29,5 @@ export const dotnet = `{
     {{/secretToken}}
     /// {{{serverUrlHint}}}
     "ServerUrl": "{{{apmServerUrl}}}",
-    /// {{{serviceEnvironmentHint}}}
-    "Environment": "my-environment",
   }
 }`;

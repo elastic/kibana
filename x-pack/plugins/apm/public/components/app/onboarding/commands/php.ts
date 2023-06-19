@@ -5,23 +5,19 @@
  * 2.0.
  */
 export const phpVariables = (secretToken?: string) => ({
-  apmServiceName: 'elastic_apm.service_name',
   ...(secretToken && { secretToken: 'elastic_apm.secret_token' }),
   ...(!secretToken && { apiKey: 'elastic_apm.api_key' }),
   apmServerUrl: 'elastic_apm.server_url',
-  apmEnvironment: 'elastic_apm.environment',
 });
 
 export const phpHighlightLang = 'php';
 
 export const phpLineNumbers = () => ({
   start: 1,
-  highlight: '2, 5, 8, 11',
+  highlight: '3, 6',
 });
 
-export const php = `# {{serviceNameHint}}
-elastic_apm.service_name="my-service-name"
-
+export const php = `
 {{^secretToken}}
 # {{apiKeyHint}}
 elastic_apm.api_key="{{{apiKey}}}"
@@ -32,7 +28,4 @@ elastic_apm.secret_token="{{{secretToken}}}"
 {{/secretToken}}
 
 # {{serverUrlHint}}
-elastic_apm.server_url="{{{apmServerUrl}}}"
-
-# {{{serviceEnvironmentHint}}}
-elastic_apm.environment="my-environment"`;
+elastic_apm.server_url="{{{apmServerUrl}}}"`;

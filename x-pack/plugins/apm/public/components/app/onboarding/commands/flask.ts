@@ -8,18 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const flaskVariables = (secretToken?: string) => ({
-  apmServiceName: 'SERVICE_NAME',
   ...(secretToken && { secretToken: 'SECRET_TOKEN' }),
   ...(!secretToken && { apiKey: 'API_KEY' }),
   apmServerUrl: 'SERVER_URL',
-  apmEnvironment: 'ENVIRONMENT',
 });
 
 export const flaskHighlightLang = 'py';
 
 export const flaskLineNumbers = () => ({
   start: 1,
-  highlight: '2-4, 7-8, 10, 13, 16, 19-22',
+  highlight: '2-4, 7-8, 10, 13-14, 16',
 });
 
 export const flask = `# ${i18n.translate(
@@ -40,9 +38,6 @@ apm = ElasticAPM(app)
 )}
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {
-  # {{serviceNameHint}}
-  'SERVICE_NAME': 'my-service-name',
-
   {{^secretToken}}
   # {{apiKeyHint}}
   'API_KEY': '{{{apiKey}}}',
@@ -54,9 +49,6 @@ app.config['ELASTIC_APM'] = {
 
   # {{{serverUrlHint}}}
   'SERVER_URL': '{{{apmServerUrl}}}',
-
-  {{{serviceEnvironmentHint}}}
-  'ENVIRONMENT': 'my-environment',
 }
 
 apm = ElasticAPM(app)`;

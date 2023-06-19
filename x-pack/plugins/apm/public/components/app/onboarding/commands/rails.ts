@@ -5,33 +5,20 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 export const railsVariables = (secretToken?: string) => ({
-  apmServiceName: 'service_name',
   ...(secretToken && { secretToken: 'secret_token' }),
   ...(!secretToken && { apiKey: 'api_key' }),
   apmServerUrl: 'server_url',
-  apmEnvironment: 'environment',
 });
 
 export const railsHighlightLang = 'rb';
 
 export const railsLineNumbers = () => ({
   start: 1,
-  highlight: '4, 7, 10, 13',
+  highlight: '3, 6',
 });
 
 export const rails = `# config/elastic_apm.yml:
-
-# {{serviceNameHint}} ${i18n.translate(
-  'xpack.apm.onboarding.railsClient.createConfig.commands.defaultServiceName',
-  {
-    defaultMessage: 'Defaults to the name of your Rails app.',
-  }
-)}
-service_name: 'my-service-name'
-
 {{^secretToken}}
 # {{apiKeyHint}}
 api_key: '{{{apiKey}}}'
@@ -42,7 +29,4 @@ secret_token: '{{{secretToken}}}'
 {{/secretToken}}
 
 # {{{serverUrlHint}}}
-server_url: '{{{apmServerUrl}}}'
-
-# {{{serviceEnvironmentHint}}}
-environment: 'my-environment'`;
+server_url: '{{{apmServerUrl}}}'`;

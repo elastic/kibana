@@ -8,18 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const goVariables = (secretToken?: string) => ({
-  apmServiceName: 'ELASTIC_APM_SERVICE_NAME',
   ...(secretToken && { secretToken: 'ELASTIC_APM_SECRET_TOKEN' }),
   ...(!secretToken && { apiKey: 'ELASTIC_APM_API_KEY' }),
   apmServerUrl: 'ELASTIC_APM_SERVER_URL',
-  apmEnvironment: 'ELASTIC_APM_ENVIRONMENT',
 });
 
 export const goHighlightLang = 'go';
 
 export const goLineNumbers = () => ({
   start: 1,
-  highlight: '4, 7, 10, 13',
+  highlight: '4, 7',
 });
 
 export const go = `# ${i18n.translate(
@@ -28,14 +26,6 @@ export const go = `# ${i18n.translate(
     defaultMessage: 'Initialize using environment variables:',
   }
 )}
-
-# {{serviceNameHint}} ${i18n.translate(
-  'xpack.apm.onboarding.goClient.configure.commands.usedExecutableNameComment',
-  {
-    defaultMessage: 'If not specified, the executable name will be used.',
-  }
-)}
-export ELASTIC_APM_SERVICE_NAME=my-service-name
 
 {{^secretToken}}
 # {{apiKeyHint}}
@@ -48,7 +38,4 @@ export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
 
 # {{{serverUrlHint}}}
 export ELASTIC_APM_SERVER_URL={{{apmServerUrl}}}
-
-# {{{serviceEnvironmentHint}}}
-export ELASTIC_APM_ENVIRONMENT=my-environment
 `;

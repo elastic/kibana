@@ -8,18 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const djangoVariables = (secretToken?: string) => ({
-  apmServiceName: 'SERVICE_NAME',
   ...(secretToken && { secretToken: 'SECRET_TOKEN' }),
   ...(!secretToken && { apiKey: 'API_KEY' }),
   apmServerUrl: 'SERVER_URL',
-  apmEnvironment: 'ENVIRONMENT',
 });
 
 export const djangoHighlightLang = 'py';
 
 export const djangoLineNumbers = () => ({
   start: 1,
-  highlight: '1, 3, 5, 7, 9, 12, 15, 18-19,  21, 23, 25',
+  highlight: '1, 3, 5, 7, 9, 12-13, 15, 17, 19',
 });
 
 export const django = `INSTALLED_APPS = (
@@ -34,9 +32,6 @@ export const django = `INSTALLED_APPS = (
 )
 
 ELASTIC_APM = {
-  # {{serviceNameHint}}
-  'SERVICE_NAME': 'my-service-name',
-
   {{^secretToken}}
   # {{apiKeyHint}}
   'API_KEY': '{{{apiKey}}}',
@@ -48,9 +43,6 @@ ELASTIC_APM = {
 
   # {{{serverUrlHint}}}
   'SERVER_URL': '{{{apmServerUrl}}}',
-
-  # {{{serviceEnvironmentHint}}}
-  'ENVIRONMENT': 'my-environment',
 }
 
 MIDDLEWARE = (
