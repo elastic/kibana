@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { SuperTest, Test } from 'supertest';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { ApmDocumentType, ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
@@ -15,7 +14,7 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createApmRule } from '../alerts/alerting_api_helper';
-import { waitForActiveAlert } from '../../common/utils/wait_for_active_alert';
+import { waitForRuleStatus } from '../alerts/wait_for_rule_status';
 
 type TransactionsGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -26,7 +25,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtraceEsClient = getService('synthtraceEsClient');
   const supertest = getService('supertest');
   const esClient = getService('es');
-  const log = getService('log');
   const serviceName = 'synth-go';
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
@@ -67,13 +65,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
     expect(response.status).to.be(200);
     return response.body as TransactionsGroupsMainStatistics;
-  }
-
-  async function runRuleSoon(ruleId: string, supertest: SuperTest<Test>) {
-    if (!ruleId) return;
-    return await supertest
-      .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
-      .set('kbn-xsrf', 'foo');
   }
 
   registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
@@ -161,13 +152,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           ruleId = createdRule.id;
-          await runRuleSoon(ruleId, supertest);
-          await waitForActiveAlert({ ruleId, esClient, log });
         });
 
         after(async () => {
           await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
           await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+        });
+
+        it('checks if rule is active', async () => {
+          const executionStatus = await waitForRuleStatus({
+            id: ruleId,
+            expectedStatus: 'active',
+            supertest,
+          });
+          expect(executionStatus.status).to.be('active');
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -214,13 +212,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           ruleId = createdRule.id;
-          await runRuleSoon(ruleId, supertest);
-          await waitForActiveAlert({ ruleId, esClient, log });
         });
 
         after(async () => {
           await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
           await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+        });
+
+        it('checks if rule is active', async () => {
+          const executionStatus = await waitForRuleStatus({
+            id: ruleId,
+            expectedStatus: 'active',
+            supertest,
+          });
+          expect(executionStatus.status).to.be('active');
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -267,13 +272,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           ruleId = createdRule.id;
-          await runRuleSoon(ruleId, supertest);
-          await waitForActiveAlert({ ruleId, esClient, log });
         });
 
         after(async () => {
           await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
           await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+        });
+
+        it('checks if rule is active', async () => {
+          const executionStatus = await waitForRuleStatus({
+            id: ruleId,
+            expectedStatus: 'active',
+            supertest,
+          });
+          expect(executionStatus.status).to.be('active');
         });
 
         it('returns the correct number of alert counts', async () => {
