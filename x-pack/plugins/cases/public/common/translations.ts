@@ -184,6 +184,10 @@ export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
   defaultMessage: 'No tags are added',
 });
 
+export const NO_CATEGORIES = i18n.translate('xpack.cases.caseView.noCategories', {
+  defaultMessage: 'No category is added',
+});
+
 export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldRequiredError', {
   defaultMessage: 'A name is required.',
 });
@@ -346,6 +350,12 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
     values: { searchValue },
   });
 
+export const ADD_CATEGORY_CUSTOM_OPTION_LABEL = (searchValue: string) =>
+  i18n.translate('xpack.cases.configure.addCategoryCustomOptionLabel', {
+    defaultMessage: 'Add {searchValue} as a category',
+    values: { searchValue },
+  });
+
 export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
   i18n.translate('xpack.cases.configure.commentVersionConflictWarning', {
     defaultMessage:
@@ -360,3 +370,6 @@ export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
  * with i18n.
  */
 export const ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX = ADD_TAG_CUSTOM_OPTION_LABEL('{searchValue}');
+
+export const ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX =
+  ADD_CATEGORY_CUSTOM_OPTION_LABEL('{searchValue}');

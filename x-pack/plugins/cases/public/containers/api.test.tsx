@@ -71,7 +71,7 @@ import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { getCasesStatus } from '../api';
 import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import type { CaseUserActionTypeWithAll } from './types';
 
 const abortCtrl = new AbortController();
@@ -766,6 +766,7 @@ describe('Cases API', () => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(basicCaseSnake);
     });
+
     const data = {
       description: 'description',
       tags: ['tag'],
@@ -780,10 +781,12 @@ describe('Cases API', () => {
         syncAlerts: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
+      category: 'test',
     };
 
     it('should be called with correct check url, method, signal', async () => {
       await postCase(data, abortCtrl.signal);
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'POST',
         body: JSON.stringify(data),
@@ -800,6 +803,17 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await postCase(data, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
+
+    it('should default category to null if it is undefined', async () => {
+      const dataWithoutCategory = omit(data, 'category');
+      await postCase(dataWithoutCategory, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
+        method: 'POST',
+        body: JSON.stringify({ ...dataWithoutCategory, category: null }),
+        signal: abortCtrl.signal,
+      });
     });
   });
 
