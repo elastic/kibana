@@ -15,8 +15,6 @@ export const cli = () => {
     async () => {
       const { argv } = yargs(process.argv.slice(2));
 
-      // await Promise.allSettled(
-      //   _.times(2).map(() =>
       await cypressRun({
         reporter: argv.reporter as string,
         reporterOptions: argv.reporterOptions,
@@ -30,9 +28,11 @@ export const cli = () => {
         browser: 'chrome',
         ciBuildId:
           process.env.BUILDKITE_STEP_ID ??
-          `hello-currents-${Math.random().toString(36).substring(2)}`,
+          `security_solution-${Math.random().toString(36).substring(2)}`,
       }).then((results) => {
-        console.log('results', JSON.stringify(results, null, 2));
+        if (results?.status === 'failed' || (results?.totalFailed && results?.totalFailed > 0)) {
+          throw new Error('Cypress tests failed');
+        }
       });
     },
     {
