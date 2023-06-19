@@ -58,11 +58,13 @@ export function populateAlertActions({
       id: aId.id,
       group: groupId,
       params: {},
-      frequency: {
-        notifyWhen: 'onActionGroupChange',
-        throttle: null,
-        summary: false,
-      },
+      frequency: !isLegacy
+        ? {
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+            summary: false,
+          }
+        : undefined,
     };
 
     const recoveredAction: RuleAction = {
@@ -71,11 +73,13 @@ export function populateAlertActions({
       params: {
         message: translations.defaultRecoveryMessage,
       },
-      frequency: {
-        notifyWhen: 'onActionGroupChange',
-        throttle: null,
-        summary: false,
-      },
+      frequency: !isLegacy
+        ? {
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+            summary: false,
+          }
+        : undefined,
     };
 
     switch (aId.actionTypeId) {
