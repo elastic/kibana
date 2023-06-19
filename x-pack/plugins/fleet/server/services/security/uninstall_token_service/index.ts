@@ -27,7 +27,7 @@ import { asyncForEach } from '@kbn/std';
 
 import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { FleetError } from '../../../../common/errors';
+import { UninstallTokenError } from '../../../../common/errors';
 
 import type {
   GetUninstallTokensForOnePolicyResponse,
@@ -549,19 +549,19 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   private assertCreatedAt(createdAt: string | undefined): asserts createdAt is string {
     if (!createdAt) {
-      throw new FleetError('Uninstall Token is missing creation date!');
+      throw new UninstallTokenError('Uninstall Token is missing creation date.');
     }
   }
 
   private assertToken(attributes: UninstallTokenSOAttributes | undefined) {
     if (!attributes?.token && !attributes?.token_plain) {
-      throw new FleetError('Uninstall Token is missing token! ');
+      throw new UninstallTokenError('Uninstall Token is missing the token.');
     }
   }
 
   private assertPolicyId(attributes: UninstallTokenSOAttributes | undefined) {
     if (!attributes?.policy_id) {
-      throw new FleetError('Uninstall Token is missing policy ID!');
+      throw new UninstallTokenError('Uninstall Token is missing policy ID.');
     }
   }
 }
