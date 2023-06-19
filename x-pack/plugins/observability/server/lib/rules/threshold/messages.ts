@@ -29,12 +29,6 @@ export const stateToAlertMessage = {
   [AlertStates.ALERT]: i18n.translate('xpack.observability.threshold.rule.threshold.alertState', {
     defaultMessage: 'ALERT',
   }),
-  [AlertStates.WARNING]: i18n.translate(
-    'xpack.observability.threshold.rule.threshold.warningState',
-    {
-      defaultMessage: 'WARNING',
-    }
-  ),
   [AlertStates.NO_DATA]: i18n.translate(
     'xpack.observability.threshold.rule.threshold.noDataState',
     {
@@ -184,7 +178,7 @@ export const alertDetailUrlActionVariableDescription = i18n.translate(
   'xpack.observability.threshold.rule.alertDetailUrlActionVariableDescription',
   {
     defaultMessage:
-      'Link to the view within Elastic that shows further details and context surrounding this alert',
+      'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
   }
 );
 
@@ -229,8 +223,7 @@ export const thresholdActionVariableDescription = i18n.translate(
 export const viewInAppUrlActionVariableDescription = i18n.translate(
   'xpack.observability.threshold.rule.viewInAppUrlActionVariableDescription',
   {
-    defaultMessage:
-      'Link to the view or feature within Elastic that can assist with further investigation',
+    defaultMessage: 'Link to the alert source',
   }
 );
 
