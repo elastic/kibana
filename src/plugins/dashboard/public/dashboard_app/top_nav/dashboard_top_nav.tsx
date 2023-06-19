@@ -62,7 +62,6 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       getIsVisible$: getChromeIsVisible$,
       recentlyAccessed: chromeRecentlyAccessed,
     },
-    chrome: { hasHeaderBanner$ },
     settings: { uiSettings },
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },

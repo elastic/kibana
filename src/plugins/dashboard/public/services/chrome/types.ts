@@ -16,5 +16,4 @@ export interface DashboardChromeService {
   setBreadcrumbs: CoreStart['chrome']['setBreadcrumbs'];
   setHelpExtension: CoreStart['chrome']['setHelpExtension'];
   setIsVisible: CoreStart['chrome']['setIsVisible'];
-  hasHeaderBanner$: CoreStart['chrome']['hasHeaderBanner$'];
 }

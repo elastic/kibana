@@ -25,7 +25,6 @@ export const chromeServiceFactory: ChromeServiceFactory = ({ coreStart }) => {
       setBreadcrumbs,
       setHelpExtension,
       setIsVisible,
-      hasHeaderBanner$,
     },
   } = coreStart;
 
@@ -37,6 +36,5 @@ export const chromeServiceFactory: ChromeServiceFactory = ({ coreStart }) => {
     setBreadcrumbs,
     setHelpExtension,
     setIsVisible,
-    hasHeaderBanner$,
   };
 };

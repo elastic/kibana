@@ -23,6 +23,5 @@ export const chromeServiceFactory: ChromeServiceFactory = () => {
     setBreadcrumbs: pluginMock.setBreadcrumbs,
     setHelpExtension: pluginMock.setHelpExtension,
     setIsVisible: pluginMock.setIsVisible,
-    hasHeaderBanner$: pluginMock.hasHeaderBanner$,
   };
 };
