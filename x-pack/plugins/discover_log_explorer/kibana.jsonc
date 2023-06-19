@@ -5,7 +5,7 @@
   "description": "This plugin exposes and registers Logs+ features.",
   "plugin": {
     "id": "discoverLogExplorer",
-    "server": true,
+    "server": false,
     "browser": true,
     "configPath": ["xpack", "discover_log_explorer"],
     "requiredPlugins": ["discover", "fleet", "kibanaReact", "kibanaUtils"],

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["../../../typings/**/*", "common/**/*", "public/**/*", ".storybook/**/*.tsx"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/discover-plugin",
