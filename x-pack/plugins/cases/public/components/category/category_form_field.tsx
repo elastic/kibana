@@ -27,7 +27,7 @@ interface Props {
 
 type CategoryField = CaseUI['category'] | undefined;
 
-const getIndexConfig = (): FieldConfig<CategoryField> => ({
+const getCategoryConfig = (): FieldConfig<CategoryField> => ({
   defaultValue: null,
   validations: [
     {
@@ -65,7 +65,7 @@ const CategoryFormFieldComponent: React.FC<Props> = ({
   formRowProps,
 }) => {
   return (
-    <UseField<CategoryField> path={'category'} config={getIndexConfig()}>
+    <UseField<CategoryField> path={'category'} config={getCategoryConfig()}>
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 

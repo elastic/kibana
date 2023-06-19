@@ -16,9 +16,9 @@ describe('Category viewer ', () => {
     jest.resetAllMocks();
   });
 
-  it('Renders category', () => {
+  it('renders category', () => {
     render(<CategoryViewer category={sampleCategory} />);
 
-    expect(screen.getByTestId('category-viewer')).toHaveTextContent(sampleCategory);
+    expect(screen.getByText(sampleCategory)).toBeInTheDocument();
   });
 });

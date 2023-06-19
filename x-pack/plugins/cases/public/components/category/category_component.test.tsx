@@ -9,7 +9,7 @@ import React from 'react';
 
 import type { CategoryComponentProps } from './category_component';
 import { CategoryComponent } from './category_component';
-import { waitFor, render, screen, fireEvent } from '@testing-library/react';
+import { waitFor, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 const onChange = jest.fn();
@@ -40,7 +40,7 @@ describe('Category ', () => {
   it('is disabled when loading', () => {
     render(<CategoryComponent {...defaultProps} isLoading={true} />);
 
-    expect(screen.getByTestId('comboBoxSearchInput')).toHaveAttribute('disabled');
+    expect(screen.getByRole('combobox')).toBeDisabled();
   });
 
   it('renders category correctly', () => {
@@ -52,13 +52,10 @@ describe('Category ', () => {
   it('renders allow to add new category option', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
-    userEvent.type(screen.getByTestId('comboBoxSearchInput'), 'new');
+    userEvent.type(screen.getByRole('combobox'), 'new{enter}');
 
-    await waitFor(() => {
-      expect(
-        screen.getByTestId('comboBoxOptionsList categories-list-optionsList')
-      ).toBeInTheDocument();
-    });
+    expect(onChange).toBeCalledWith('new');
+    expect(screen.getByText('new')).toBeInTheDocument();
   });
 
   it('renders current option list', async () => {
@@ -66,36 +63,24 @@ describe('Category ', () => {
 
     userEvent.click(screen.getByTestId('comboBoxToggleListButton'));
 
-    await waitFor(() => {
-      expect(
-        screen.getByTestId('comboBoxOptionsList categories-list-optionsList')
-      ).toBeInTheDocument();
-      expect(screen.getByText('foo')).toBeInTheDocument();
-      expect(screen.getByText('bar')).toBeInTheDocument();
-    });
+    expect(screen.getByText('foo')).toBeInTheDocument();
+    expect(screen.getByText('bar')).toBeInTheDocument();
   });
 
   it('should call onChange when changing an option', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
     userEvent.click(screen.getByTestId('comboBoxToggleListButton'));
+    userEvent.click(screen.getByText('foo'));
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByText('foo'));
-    });
-
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith('foo');
-      expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('foo');
-    });
+    expect(onChange).toHaveBeenCalledWith('foo');
+    expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('foo');
   });
 
   it('should call onChange when adding new category', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
-    const list = screen.getByTestId('comboBoxSearchInput');
-
-    userEvent.type(list, 'hi{enter}');
+    userEvent.type(screen.getByRole('combobox'), 'hi{enter}');
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith('hi');
