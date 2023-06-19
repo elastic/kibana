@@ -169,7 +169,7 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
     const esPort: number = getEsPort();
     const kibanaPort: number = getKibanaPort();
     const fleetServerPort: number = getFleetServerPort();
-    const configFromTestFile = {}; // parseTestFileConfig(filePath);
+    const configFromTestFile = parseTestFileConfig(filePath);
 
     const config = await readConfigFile(
       log,

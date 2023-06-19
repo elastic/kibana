@@ -22,7 +22,7 @@ export const esArchiver = (on: Cypress.PluginEvents, config: Cypress.PluginConfi
 
   const kbnClient = new KbnClient({
     log,
-    url: config.env.BASE_URL,
+    url: config.env.CYPRESS_BASE_URL as string,
   });
 
   const esArchiverInstance = new EsArchiver({
