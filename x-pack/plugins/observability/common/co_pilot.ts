@@ -72,16 +72,14 @@ const logEntryRt = t.type({
   ),
 });
 
-const significantFieldValuesRt = t.type({
-  fields: t.array(
-    t.type({
-      field: t.string,
-      value: t.union([t.string, t.number]),
-      docCount: t.number,
-      pValue: t.number,
-    })
-  ),
-});
+const significantFieldValuesRt = t.array(
+  t.type({
+    field: t.string,
+    value: t.union([t.string, t.number]),
+    docCount: t.number,
+    pValue: t.number,
+  })
+);
 
 export const coPilotPrompts = {
   [CoPilotPromptId.ProfilingOptimizeFunction]: prompt({
@@ -313,9 +311,7 @@ export const coPilotPrompts = {
     }),
     messages: ({ significantFieldValues }) => {
       const header = 'Field name,Field value,Doc count,p-value';
-      const rows = significantFieldValues.fields
-        .map((item) => Object.values(item).join(','))
-        .join('\n');
+      const rows = significantFieldValues.map((item) => Object.values(item).join(',')).join('\n');
 
       const content = `You are an observability expert being consulted about an alert raised on elastic observability suite.
 

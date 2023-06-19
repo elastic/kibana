@@ -42,6 +42,11 @@ export interface AlertDetailsExplainLogRateSpikesSectionProps {
   alert: TopAlert<Record<string, any>>;
 }
 
+interface FieldValuePair {
+  field: string;
+  value: string | number;
+}
+
 export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionProps> = ({
   rule,
   alert,
@@ -50,8 +55,8 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const { dataViews, logViews } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
-  const [analysisResults, setAnalysisResults] = useState<
-    ExplainLogRateSpikesAnalysisResults | undefined
+  const [logSpikeParams, setLogSpikeParams] = useState<
+    { significantFieldValues: FieldValuePair[] } | undefined
   >();
 
   useEffect(() => {
@@ -107,28 +112,29 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
       : alertStart.clone().add(10, 'minutes').valueOf(),
   };
 
-  const coPilotService = useCoPilot();
-
-  const explainLogSpikeParams =
-    analysisResults !== undefined && analysisResults?.significantTerms.length > 0
-      ? {
-          significantFieldValues: {
-            fields: analysisResults.significantTerms.map((item) => ({
-              field: item.fieldName,
-              value: item.fieldValue,
-              docCount: item.doc_count,
-              pValue: item.pValue,
-            })),
-          },
-        }
-      : undefined;
-
   const explainLogSpikeTitle = i18n.translate(
     'xpack.infra.logs.alertDetails.explainLogSpikeTitle',
     {
       defaultMessage: 'Possible causes and remediations',
     }
   );
+
+  const onAnalysisCompleted = (
+    analysisResults: ExplainLogRateSpikesAnalysisResults | undefined
+  ) => {
+    const fieldValuePairs = analysisResults?.significantTerms?.map((item) => ({
+      field: item.fieldName,
+      value: item.fieldValue,
+      docCount: item.doc_count,
+      pValue: item.pValue,
+    }));
+    setLogSpikeParams(
+      fieldValuePairs ? { significantFieldValues: fieldValuePairs?.slice(0, 2) } : undefined
+    );
+  };
+
+  const coPilotService = useCoPilot();
+  const hasLogSpikeParams = logSpikeParams && logSpikeParams.significantFieldValues?.length > 0;
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -153,7 +159,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
             initialAnalysisStart={initialAnalysisStart}
             annotations={alert}
             barColorOverride={colorTransformer(Color.color0)}
-            onAnalysisCompleted={setAnalysisResults}
+            onAnalysisCompleted={onAnalysisCompleted}
             appDependencies={pick(services, [
               'application',
               'data',
@@ -173,12 +179,12 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {coPilotService?.isEnabled() && explainLogSpikeParams ? (
+        {coPilotService?.isEnabled() && hasLogSpikeParams ? (
           <EuiFlexItem grow={false}>
             <CoPilotPrompt
               coPilot={coPilotService}
               title={explainLogSpikeTitle}
-              params={explainLogSpikeParams}
+              params={logSpikeParams}
               promptId={CoPilotPromptId.ExplainLogSpike}
             />
           </EuiFlexItem>
