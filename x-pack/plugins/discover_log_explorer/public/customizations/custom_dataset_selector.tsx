@@ -43,6 +43,10 @@ export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
     sortDatasets,
   } = useDatasetsContext();
 
+  /**
+   * TODO: this action will be abstracted into a method of a class adapter in a follow-up PR
+   * since we'll need to handle more actions from the stateContainer
+   */
   const handleStreamSelection: DatasetSelectionHandler = (dataset) => {
     return stateContainer.actions.onCreateDefaultAdHocDataView({
       // Invert the property because the API returns the index pattern as `name`
