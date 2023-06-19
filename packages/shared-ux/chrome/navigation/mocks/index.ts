@@ -12,11 +12,4 @@ export {
 } from './src/jest';
 export { StorybookMock as NavigationStorybookMock } from './src/storybook';
 export type { Params as NavigationStorybookParams } from './src/storybook';
-export {
-  defaultNavigationTree,
-  defaultAnalyticsNavGroup,
-  defaultDevtoolsNavGroup,
-  defaultManagementNavGroup,
-  defaultMlNavGroup,
-} from './src/default_navigation.test.helpers';
 export { navLinksMock } from './src/navlinks';
