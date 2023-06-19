@@ -88,12 +88,11 @@ export const TlsTranslations = {
     },
   }),
   defaultRecoveryMessage: i18n.translate('xpack.synthetics.rules.tls.defaultRecoveryMessage', {
-    defaultMessage: `Alert for TLS certificate {commonName} from issuer {issuer} has recovered.`,
+    defaultMessage: `Alert for TLS certificate {commonName} from issuer {issuer} has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- Common name: {commonName}\n- Issuer: {issuer}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
     values: {
       commonName: '{{context.commonName}}',
       issuer: '{{context.issuer}}',
       summary: '{{context.summary}}',
-      status: '{{context.status}}',
       monitorName: '{{context.monitorName}}',
       monitorUrl: '{{{context.monitorUrl}}}',
       monitorType: '{{context.monitorType}}',
