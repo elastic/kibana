@@ -12,7 +12,7 @@ import { ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX } from './translations';
 
 export interface CategoryComponentProps {
   isLoading: boolean;
-  onChange: (category: string) => void;
+  onChange: (category: string | null) => void;
   availableCategories: string[];
   category?: string | null;
   isInvalid?: boolean;
@@ -26,14 +26,16 @@ export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
       }));
     }, [availableCategories]);
 
-    const [selectedOption, setSelectedOption] = useState<[{ label: string }] | []>(
-      category ? [{ label: category }] : []
+    const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+      category != null ? [{ label: category }] : []
     );
 
     const onComboChange = useCallback(
-      (currentOptions: EuiComboBoxOptionOption[]) => {
-        setSelectedOption(currentOptions.length > 0 ? [currentOptions[0]] : []);
-        onChange(currentOptions[0]?.label ?? '');
+      (currentOptions: Array<EuiComboBoxOptionOption<string>>) => {
+        const value = currentOptions[0]?.label;
+
+        setSelectedOptions(currentOptions);
+        onChange(value);
       },
       [onChange]
     );
@@ -57,7 +59,7 @@ export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
         isInvalid={isInvalid}
         options={options}
         data-test-subj="categories-list"
-        selectedOptions={selectedOption}
+        selectedOptions={selectedOptions}
         onChange={onComboChange}
         onCreateOption={onCreateOption}
         aria-label="categories-list"

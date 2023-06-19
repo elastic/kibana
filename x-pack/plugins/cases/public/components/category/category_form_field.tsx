@@ -26,10 +26,15 @@ interface Props {
 type CategoryField = CaseUI['category'] | undefined;
 
 const getIndexConfig = (): FieldConfig<CategoryField> => ({
+  defaultValue: null,
   validations: [
     {
       validator: ({ value }) => {
-        if (value != null && isEmpty(value.trim())) {
+        if (value == null) {
+          return;
+        }
+
+        if (isEmpty(value.trim())) {
           return {
             message: EMPTY_CATEGORY_VALIDATION_MSG,
           };
@@ -38,7 +43,11 @@ const getIndexConfig = (): FieldConfig<CategoryField> => ({
     },
     {
       validator: ({ value }) => {
-        if (value != null && value.length > MAX_CATEGORY_LENGTH) {
+        if (value == null) {
+          return;
+        }
+
+        if (value.length > MAX_CATEGORY_LENGTH) {
           return {
             message: MAX_LENGTH_ERROR('category', MAX_CATEGORY_LENGTH),
           };
@@ -54,8 +63,7 @@ const CategoryFormFieldComponent: React.FC<Props> = ({ isLoading, availableCateg
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-        const onChange = (value: string) => {
-          const category = value.trim().length === 0 ? undefined : value;
+        const onChange = (category: string | null) => {
           field.setValue(category);
         };
 
@@ -66,6 +74,7 @@ const CategoryFormFieldComponent: React.FC<Props> = ({ isLoading, availableCateg
               onChange={onChange}
               category={field.value}
               availableCategories={availableCategories}
+              isInvalid={isInvalid}
             />
           </EuiFormRow>
         );

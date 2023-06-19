@@ -14,9 +14,14 @@ interface Props {
 }
 
 const CategoryComponent: React.FC<Props> = ({ isLoading }) => {
-  const { data: categories = [] } = useGetCategories();
+  const { isLoading: isLoadingCategories, data: categories = [] } = useGetCategories();
 
-  return <CategoryFormField isLoading={isLoading} availableCategories={categories} />;
+  return (
+    <CategoryFormField
+      isLoading={isLoading || isLoadingCategories}
+      availableCategories={categories}
+    />
+  );
 };
 
 CategoryComponent.displayName = 'CategoryComponent';

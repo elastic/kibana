@@ -262,9 +262,13 @@ export const getCases = async ({
 };
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<CaseUI> => {
+  const theCase = {
+    ...newCase,
+    ...(newCase.category != null ? { category: newCase.category } : { category: null }),
+  };
   const response = await KibanaServices.get().http.fetch<Case>(CASES_URL, {
     method: 'POST',
-    body: JSON.stringify(newCase),
+    body: JSON.stringify(theCase),
     signal,
   });
   return convertCaseToCamelCase(decodeCaseResponse(response));
