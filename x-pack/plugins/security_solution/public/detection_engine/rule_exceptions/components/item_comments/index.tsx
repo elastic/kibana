@@ -26,6 +26,7 @@ interface ExceptionItemCommentsProps {
   exceptionItemComments?: Comment[];
   newCommentValue: string;
   accordionTitle?: JSX.Element;
+  initialIsOpen?: boolean;
   newCommentOnChange: (value: string) => void;
 }
 
@@ -50,6 +51,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
   exceptionItemComments,
   newCommentValue,
   accordionTitle,
+  initialIsOpen = false,
   newCommentOnChange,
 }: ExceptionItemCommentsProps) {
   const [shouldShowComments, setShouldShowComments] = useState(false);
@@ -107,6 +109,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
   return (
     <div>
       <CommentAccordion
+        initialIsOpen={initialIsOpen}
         id={'add-exception-comments-accordion'}
         buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
         buttonContent={accordionTitle ?? commentsAccordionTitle}
