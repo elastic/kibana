@@ -356,7 +356,7 @@ class OutputService {
           esClient,
           defaultDataOutputId,
           { is_default: false },
-          { fromPreconfiguration: options?.fromPreconfiguration ?? false }
+          { fromPreconfiguration: options?.fromPreconfiguration ?? false, asHelper: true }
         );
       }
     }
@@ -368,7 +368,7 @@ class OutputService {
           esClient,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
-          { fromPreconfiguration: options?.fromPreconfiguration ?? false }
+          { fromPreconfiguration: options?.fromPreconfiguration ?? false, asHelper: true }
         );
       }
     }
@@ -549,8 +549,12 @@ class OutputService {
     esClient: ElasticsearchClient,
     id: string,
     data: Partial<Output>,
-    { fromPreconfiguration = false }: { fromPreconfiguration: boolean } = {
+    {
+      fromPreconfiguration = false,
+      asHelper = false,
+    }: { fromPreconfiguration: boolean; asHelper?: boolean } = {
       fromPreconfiguration: false,
+      asHelper: false,
     }
   ) {
     const originalOutput = await this.get(soClient, id);
@@ -573,14 +577,15 @@ class OutputService {
       }
     }
 
-    if (
-      !originalOutput.is_preconfigured &&
-      originalOutput.is_default &&
-      data.is_default === false
-    ) {
-      throw new OutputUnauthorizedError(
-        `Default output ${id} cannot be set to is_default=false manually. Make another output the default first.`
-      );
+    if (!asHelper) {
+      if (
+        (originalOutput.is_default && data.is_default === false) ||
+        (originalOutput.is_default_monitoring && data.is_default_monitoring === false)
+      ) {
+        throw new OutputUnauthorizedError(
+          `Default output ${id} cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
+        );
+      }
     }
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
@@ -624,7 +629,7 @@ class OutputService {
           esClient,
           defaultDataOutputId,
           { is_default: false },
-          { fromPreconfiguration }
+          { fromPreconfiguration, asHelper: true }
         );
       }
     }
@@ -637,7 +642,7 @@ class OutputService {
           esClient,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
-          { fromPreconfiguration }
+          { fromPreconfiguration, asHelper: true }
         );
       }
     }
