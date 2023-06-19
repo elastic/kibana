@@ -44,6 +44,11 @@
     "@kbn/content-management-tabbed-table-list-view",
     "@kbn/core-notifications-browser",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-saved-objects-server",
+    "@kbn/object-versioning",
+    "@kbn/config-schema",
+    "@kbn/content-management-plugin",
+    "@kbn/core-saved-objects-api-server"
   ],
   "exclude": [
     "target/**/*",

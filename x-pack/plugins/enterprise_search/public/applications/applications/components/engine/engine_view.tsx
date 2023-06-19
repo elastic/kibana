@@ -97,7 +97,7 @@ export const EngineView: React.FC = () => {
         <Route path={SEARCH_APPLICATION_CONNECT_PATH} component={EngineConnect} />
         <Redirect
           from={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}`}
-          to={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}/${SearchApplicationConnectTabs.API}`}
+          to={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}/${SearchApplicationConnectTabs.SAFESEARCHAPI}`}
         />
         <Route>
           <EnterpriseSearchEnginesPageTemplate

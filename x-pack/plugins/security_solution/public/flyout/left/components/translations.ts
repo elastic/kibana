@@ -141,3 +141,69 @@ export const RESPONSE_TITLE = i18n.translate('xpack.securitySolution.flyout.resp
 export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
   defaultMessage: 'There are no response actions defined for this event.',
 });
+
+export const CORRELATIONS_TIMESTAMP_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.timestampColumnTitle',
+  {
+    defaultMessage: 'Timestamp',
+  }
+);
+
+export const CORRELATIONS_RULE_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.ruleColumnTitle',
+  {
+    defaultMessage: 'Rule',
+  }
+);
+
+export const CORRELATIONS_REASON_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.reasonColumnTitle',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
+export const CORRELATIONS_SEVERITY_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.severityColumnTitle',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const CORRELATIONS_CASE_STATUS_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.statusColumnTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const CORRELATIONS_CASE_NAME_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.correlations.caseNameColumnTitle',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
+export const ANCESTRY_ALERTS_HEADING = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.correlations.ancestryAlertsHeading', {
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}} related by ancestry',
+    values: { count },
+  });
+
+export const SOURCE_ALERTS_HEADING = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.correlations.sourceAlertsHeading', {
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}} related by source event',
+    values: { count },
+  });
+
+export const SESSION_ALERTS_HEADING = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.correlations.sessionAlertsHeading', {
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}} related by session',
+    values: { count },
+  });
+
+export const RELATED_CASES_HEADING = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.correlations.relatedCasesHeading', {
+    defaultMessage: '{count} related {count, plural, one {case} other {cases}}',
+    values: { count },
+  });
