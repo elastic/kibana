@@ -33,7 +33,7 @@ export const esArchiver = (on: Cypress.PluginEvents, config: Cypress.PluginConfi
   });
 
   on('task', {
-    esArchiverLoad: async (archiveName) => esArchiverInstance.loadIfNeeded(archiveName),
+    esArchiverLoad: async (archiveName) => esArchiverInstance.load(archiveName),
     esArchiverUnload: async (archiveName) => esArchiverInstance.unload(archiveName),
     esArchiverResetKibana: async () => esArchiverInstance.emptyKibanaIndex(),
     esArchiverCCSLoad: async (archiveName) => {
@@ -50,7 +50,7 @@ export const esArchiver = (on: Cypress.PluginEvents, config: Cypress.PluginConfi
         baseDir: '../../../test/security_solution_cypress/es_archives',
       });
 
-      return ccsEsArchiverInstance.loadIfNeeded(archiveName);
+      return ccsEsArchiverInstance.load(archiveName);
     },
   });
 };
