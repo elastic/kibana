@@ -14,10 +14,7 @@ import {
 } from './rule_types/transaction_error_rate/get_transaction_error_rate_chart_preview';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, rangeRt } from '../default_api_types';
-import {
-  AggregationType,
-  PreviewChartResponseItem,
-} from '../../../common/rules/apm_rule_types';
+import { AggregationType } from '../../../common/rules/apm_rule_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const alertParamsRt = t.intersection([
@@ -41,6 +38,11 @@ const alertParamsRt = t.intersection([
     groupBy: t.array(t.string),
   }),
 ]);
+
+export interface PreviewChartResponseItem {
+  name: string;
+  data: Array<{ x: number; y: number | null }>;
+}
 
 export interface PreviewChartResponse {
   series: PreviewChartResponseItem[];
