@@ -6,7 +6,9 @@
  */
 
 import { render } from '@testing-library/react';
+import { createBrowserHistory } from 'history';
 import React from 'react';
+import { Router } from 'react-router-dom';
 
 import { LandingPage } from './landing';
 
@@ -16,10 +18,14 @@ jest.mock('../../common/components/page_wrapper', () => ({
     .fn()
     .mockImplementation(({ children }) => <div>{children}</div>),
 }));
-
+const history = createBrowserHistory();
 describe('LandingPage', () => {
   it('renders page properly', () => {
-    const { queryByTestId } = render(<LandingPage />);
+    const { queryByTestId } = render(
+      <Router history={history}>
+        <LandingPage />
+      </Router>
+    );
     expect(queryByTestId('siem-landing-page')).toBeInTheDocument();
   });
 });
