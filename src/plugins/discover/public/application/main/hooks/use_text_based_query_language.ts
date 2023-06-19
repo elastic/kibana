@@ -71,7 +71,10 @@ export function useTextBasedQueryLanguage({
         (next.fetchStatus === FetchStatus.COMPLETE || next.fetchStatus === FetchStatus.PARTIAL);
       const initialFetch = !prev.current.columns.length;
 
-      if (isTextBasedQueryLang && next.fetchStatus === FetchStatus.PARTIAL) {
+      if (isTextBasedQueryLang) {
+        if (next.fetchStatus !== FetchStatus.PARTIAL) {
+          return;
+        }
         if (hasResults) {
           // check if state needs to contain column transformation due to a different columns in the resultset
           const firstRow = next.result![0];
@@ -107,7 +110,6 @@ export function useTextBasedQueryLanguage({
         if (queryChanged) {
           indexTitle.current = indexPatternFromQuery;
         }
-
         const nextState = {
           ...(addDataViewToState && { index: dataViewObj.id }),
           ...(addColumnsToState && { columns: nextColumns }),
