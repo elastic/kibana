@@ -36,16 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('cloud-chat');
     });
 
-    it('chat widget is present on management page', async () => {
-      await PageObjects.common.navigateToApp('management');
-      await testSubjects.existOrFail('cloud-chat');
-    });
-
-    it('chat widget is present on management page', async () => {
-      PageObjects.common.navigateToApp('management');
-      await testSubjects.existOrFail('cloud-chat');
-    });
-
     it('chat widget is present on observability/overview page', async () => {
       await PageObjects.common.navigateToUrl('observability', '/overview', {
         useActualUrl: true,
