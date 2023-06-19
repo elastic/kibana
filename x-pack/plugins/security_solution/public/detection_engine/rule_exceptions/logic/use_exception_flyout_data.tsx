@@ -12,11 +12,11 @@ import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { Rule } from '../../rule_management/logic/types';
-import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 import { useKibana } from '../../../common/lib/kibana';
 import { useFetchIndex } from '../../../common/containers/source';
 
 import * as i18n from '../../../common/containers/source/translations';
+import { useRuleIndices } from '../../rule_management/logic/use_rule_indices';
 
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
@@ -72,20 +72,20 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     () => (isMLRule && isSingleRule && rules != null ? rules[0].machine_learning_job_id ?? [] : []),
     [isMLRule, isSingleRule, rules]
   );
-  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
+  const { mlJobLoading, ruleIndices: mlRuleIndices } = useRuleIndices(memoMlJobIds);
 
   // We only want to provide a non empty array if it's an ML rule and we were able to fetch
   // the index patterns, or if it's a rule not using data views. Otherwise, return an empty
   // empty array to avoid making the `useFetchIndex` call
   const memoRuleIndices = useMemo(() => {
-    if (isMLRule && jobs.length > 0) {
-      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+    if (isMLRule && mlRuleIndices.length > 0) {
+      return mlRuleIndices;
     } else if (memoDataViewId != null) {
       return [];
     } else {
       return memoNonDataViewIndexPatterns;
     }
-  }, [jobs, isMLRule, memoDataViewId, memoNonDataViewIndexPatterns]);
+  }, [isMLRule, memoDataViewId, memoNonDataViewIndexPatterns, mlRuleIndices]);
 
   const [
     isIndexPatternLoading,
