@@ -809,6 +809,7 @@ describe('suggestions', () => {
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
+                allowMultipleMetrics: true,
               },
             ],
           },
