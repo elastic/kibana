@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { stripVersionQualifier } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function enterSpaceFunctionalTests({
@@ -32,7 +33,7 @@ export default function enterSpaceFunctionalTests({
         { space: 'another-space' }
       );
       const config = await kibanaServer.savedObjects.get({
-        id: await kibanaServer.version.get(),
+        id: stripVersionQualifier(await kibanaServer.version.get()),
         type: 'config',
       });
       await kibanaServer.savedObjects.update({
