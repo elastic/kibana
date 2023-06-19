@@ -26,7 +26,6 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
-import { Maybe } from '../../../../../typings/common';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
@@ -81,16 +80,9 @@ export function ChartPreview({
   };
 
   const barSeries = useMemo(() => {
-    return series.reduce<
-      Array<{ x: number; y: Maybe<number>; groupBy: string | undefined }>
-    >((acc, serie) => {
-      const barPoints = serie.data.reduce<
-        Array<{ x: number; y: Maybe<number>; groupBy: string | undefined }>
-      >((pointAcc, point) => {
-        return [...pointAcc, { ...point, groupBy: serie.name }];
-      }, []);
-      return [...acc, ...barPoints];
-    }, []);
+    return series.flatMap((serie) =>
+      serie.data.map((point) => ({ ...point, groupBy: serie.name }))
+    );
   }, [series]);
 
   const timeZone = getTimeZone(uiSettings);
