@@ -12,7 +12,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { RiskEngineDataClient } from './risk_engine_data_client';
-import { createConcreteWriteIndex } from './utils/create_ds';
+import { createDataStream } from './utils/create_datastream';
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
@@ -21,7 +21,7 @@ jest.mock('@kbn/alerting-plugin/server', () => ({
 }));
 
 jest.mock('./utils/create_ds', () => ({
-  createConcreteWriteIndex: jest.fn(),
+  createDataStream: jest.fn(),
 }));
 
 describe('RiskEngineDataClient', () => {
@@ -191,7 +191,7 @@ describe('RiskEngineDataClient', () => {
         },
       });
 
-      expect(createConcreteWriteIndex).toHaveBeenCalledWith({
+      expect(createDataStream).toHaveBeenCalledWith({
         logger,
         esClient,
         totalFieldsLimit,

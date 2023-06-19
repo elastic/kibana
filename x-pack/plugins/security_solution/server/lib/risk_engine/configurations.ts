@@ -4,8 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import { IIndexPatternString } from './utils/create_datastream';
 
-export const riskFieldMap = {
+export const ilmPolicy = {
+  _meta: {
+    managed: true,
+  },
+  phases: {
+    hot: {
+      actions: {
+        rollover: {
+          max_age: '30d',
+          max_primary_shard_size: '50gb',
+        },
+      },
+    },
+  },
+};
+
+export const riskFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
     array: false,
@@ -73,10 +91,7 @@ export const totalFieldsLimit = 1000;
 
 const riskScoreBaseIndexName = 'risk-score';
 
-export const getIndexPattern = (namespace: string) => ({
+export const getIndexPattern = (namespace: string): IIndexPatternString => ({
   template: `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}-index-template`,
   alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
-  pattern: '',
-  basePattern: '',
-  name: '',
 });

@@ -12,15 +12,11 @@
 import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { retryTransientEsErrors } from './retry_es';
+import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 export interface IIndexPatternString {
   template: string;
-  pattern: string;
   alias: string;
-  name: string;
-  basePattern: string;
-  secondaryAlias?: string;
 }
 
 interface ConcreteIndexInfo {
@@ -144,12 +140,9 @@ interface CreateConcreteWriteIndexOpts {
   indexPatterns: IIndexPatternString;
 }
 /**
- * Installs index template that uses installed component template
- * Prior to installation, simulates the installation to check for possible
- * conflicts. Simulate should return an empty mapping if a template
- * conflicts with an already installed template.
+ * Create a data stream
  */
-export const createConcreteWriteIndex = async ({
+export const createDataStream = async ({
   logger,
   esClient,
   indexPatterns,
@@ -157,8 +150,8 @@ export const createConcreteWriteIndex = async ({
 }: CreateConcreteWriteIndexOpts) => {
   logger.info(`Creating data stream - ${indexPatterns.alias}`);
 
-  // check if a concrete write index already exists
-  let concreteIndices: ConcreteIndexInfo[] = [];
+  // check if a ds already exists
+  let dataStreams: ConcreteIndexInfo[] = [];
   try {
     // Specify both the index pattern for the backing indices and their aliases
     // The alias prevents the request from finding other namespaces that could match the -* pattern
@@ -167,19 +160,19 @@ export const createConcreteWriteIndex = async ({
       { logger }
     );
 
-    concreteIndices = response.data_streams.map((dataStream) => ({
+    dataStreams = response.data_streams.map((dataStream) => ({
       index: dataStream.name,
       alias: dataStream.name,
       isWriteIndex: true,
     }));
 
     logger.debug(
-      `Found ${concreteIndices.length} concrete indices for ${
+      `Found ${dataStreams.length} concrete indices for ${
         indexPatterns.alias
-      } - ${JSON.stringify(concreteIndices)}`
+      } - ${JSON.stringify(dataStreams)}`
     );
   } catch (error) {
-    // 404 is expected if no concrete write indices have been created
+    // 404 is expected if no ds have been created
     if (error.statusCode !== 404) {
       logger.error(
         `Error fetching concrete indices for ${indexPatterns.alias} pattern - ${error.message}`
@@ -188,16 +181,15 @@ export const createConcreteWriteIndex = async ({
     }
   }
 
-  // let concreteWriteIndicesExist = false;
-  const concreteWriteIndicesExist = concreteIndices.length > 0;
+  const isDataStreamsExist = dataStreams.length > 0;
 
   // if a concrete write ds already exists, update the underlying mapping
-  if (concreteIndices.length > 0) {
-    await updateIndexMappings({ logger, esClient, totalFieldsLimit, concreteIndices });
+  if (dataStreams.length > 0) {
+    await updateIndexMappings({ logger, esClient, totalFieldsLimit, concreteIndices: dataStreams });
   }
 
   // check if a concrete write ds already exists
-  if (!concreteWriteIndicesExist) {
+  if (!isDataStreamsExist) {
     try {
       await retryTransientEsErrors(
         () =>
@@ -207,7 +199,7 @@ export const createConcreteWriteIndex = async ({
         { logger }
       );
     } catch (error) {
-      logger.error(`Error creating concrete write index - ${error.message}`);
+      logger.error(`Error creating ds - ${error.message}`);
       throw error;
     }
   }

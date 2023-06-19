@@ -20,8 +20,9 @@ import {
   totalFieldsLimit,
   mappingComponentName,
   ilmPolicyName,
+  ilmPolicy
 } from './configurations';
-import { createConcreteWriteIndex } from './utils/create_ds';
+import { createDataStream } from './utils/create_datastream';
 
 interface InitializeRiskEngineResourcesOpts {
   namespace?: string;
@@ -50,12 +51,12 @@ export class RiskEngineDataClient {
     return this.writerCache.get(namespace);
   }
 
-  private async initialiseWriter(namespace: string) {
+  private async initializeWriter(namespace: string) {
     const writer: Writer = {
       bulk: async () => {},
     };
     this.writerCache.set(namespace, writer);
-    return this.writerCache.get(namespace);
+    return writer;
   }
 
   public async initializeResources({
@@ -74,42 +75,31 @@ export class RiskEngineDataClient {
         namespace,
       };
 
-      await createOrUpdateIlmPolicy({
-        logger: this.options.logger,
-        esClient,
-        name: ilmPolicyName,
-        policy: {
-          _meta: {
-            managed: true,
-          },
-          phases: {
-            hot: {
-              actions: {
-                rollover: {
-                  max_age: '30d',
-                  max_primary_shard_size: '50gb',
-                },
-              },
-            },
-          },
-        },
-      });
-
-      await createOrUpdateComponentTemplate({
-        logger: this.options.logger,
-        esClient,
-        template: {
-          name: mappingComponentName,
-          _meta: {
-            managed: true,
-          },
+      await Promise.all([
+        createOrUpdateIlmPolicy({
+          logger: this.options.logger,
+          esClient,
+          name: ilmPolicyName,
+          policy: ilmPolicy,
+        }),
+        createOrUpdateComponentTemplate({
+          logger: this.options.logger,
+          esClient,
           template: {
-            settings: {},
-            mappings: mappingFromFieldMap(riskFieldMap, 'strict'),
-          },
-        } as ClusterPutComponentTemplateRequest,
-        totalFieldsLimit,
-      });
+            name: mappingComponentName,
+            _meta: {
+              managed: true,
+            },
+            template: {
+              settings: {},
+              mappings: mappingFromFieldMap(riskFieldMap, 'strict'),
+            },
+          } as ClusterPutComponentTemplateRequest,
+          totalFieldsLimit,
+        })
+      ])
+
+
 
       await createOrUpdateIndexTemplate({
         logger: this.options.logger,
@@ -139,14 +129,14 @@ export class RiskEngineDataClient {
         },
       });
 
-      await createConcreteWriteIndex({
+      await createDataStream({
         logger: this.options.logger,
         esClient,
         totalFieldsLimit,
         indexPatterns,
       });
 
-      this.initialiseWriter(namespace);
+      this.initializeWriter(namespace);
     } catch (error) {
       this.options.logger.error(`Error initializing risk engine resources: ${error}`);
     }
