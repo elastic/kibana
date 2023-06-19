@@ -41,41 +41,6 @@ export function SloEditFormObjectiveSection() {
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormRow
-            label={
-              <span>
-                {i18n.translate('xpack.observability.slo.sloEdit.timeWindow.label', {
-                  defaultMessage: 'Time window',
-                })}{' '}
-                <EuiIconTip
-                  content={i18n.translate('xpack.observability.slo.sloEdit.timeWindow.tooltip', {
-                    defaultMessage:
-                      'The rolling time window duration used to compute the SLO over.',
-                  })}
-                  position="top"
-                />
-              </span>
-            }
-          >
-            <Controller
-              name="timeWindow.duration"
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { ref, ...field } }) => (
-                <EuiSelect
-                  {...field}
-                  required
-                  id={timeWindowSelect}
-                  data-test-subj="sloFormTimeWindowDurationSelect"
-                  options={TIMEWINDOW_OPTIONS}
-                  value={String(field.value)}
-                />
-              )}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiFormRow
             isInvalid={getFieldState('objective.target').invalid}
             label={
               <span>
@@ -110,6 +75,45 @@ export function SloEditFormObjectiveSection() {
                   max={99.999}
                   step={0.001}
                   onChange={(event) => field.onChange(Number(event.target.value))}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGrid columns={3}>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.timeWindow.label', {
+                  defaultMessage: 'Time window',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.observability.slo.sloEdit.timeWindow.tooltip', {
+                    defaultMessage:
+                      'The rolling time window duration used to compute the SLO over.',
+                  })}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="timeWindow.duration"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect
+                  {...field}
+                  required
+                  id={timeWindowSelect}
+                  data-test-subj="sloFormTimeWindowDurationSelect"
+                  options={TIMEWINDOW_OPTIONS}
+                  value={String(field.value)}
                 />
               )}
             />
