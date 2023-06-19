@@ -61,6 +61,8 @@ export default defineCypressConfig({
             env: {
               NODE_OPTIONS: '--no-warnings',
               PATH: process.env.PATH,
+              KIBANA_INSTALL_DIR: process.env.KIBANA_INSTALL_DIR,
+              CI: process.env.CI,
             },
             stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
           };
