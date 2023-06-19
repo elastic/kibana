@@ -24,7 +24,7 @@ export default function ({
   const screenshot = getService('screenshots');
   const log = getService('log');
 
-  describe.only('embed mode', () => {
+  describe('embed mode', () => {
     const urlParamExtensions = [
       'show-top-menu=true',
       'show-query-input=true',
@@ -71,9 +71,11 @@ export default function ({
         await testSubjects.existOrFail('globalQueryBar');
       });
 
-      // skipping all render tests for now - there is a problem with how the screenshots are being generated
-      // locally does not align with the CI screenshots, but this fix is super important to get in, so we will
-      // have to resolve this after FF for 8.9/8.8.2
+      /**
+       * Skipping all render tests for now - there is a problem where the locally generated screenshots do not align with the
+       * CI screenshots due to (possibly) pixel density or something similar. This fix is super important to get in so we will
+       * have to resolve the issue with these new tests *after* FF for 8.9/8.8.2
+       */
       it.skip('renders as expected', async () => {
         await PageObjects.dashboard.waitForRenderComplete();
         const percentDifference = await screenshot.compareAgainstBaseline(
