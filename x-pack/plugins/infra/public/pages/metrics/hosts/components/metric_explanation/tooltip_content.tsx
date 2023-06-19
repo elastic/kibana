@@ -9,15 +9,15 @@ import React, { HTMLAttributes } from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HOST_METRIC_FORMULA_DOC_HREF } from '../../constants';
+import { HOST_METRICS_DOC_HREF } from '../../constants';
 
 interface Props extends Pick<HTMLAttributes<HTMLDivElement>, 'style'> {
   description: string;
-  formula: string;
+  formula?: string;
   showDocumentationLink?: boolean;
 }
 
-export const MetricExplanation = ({
+export const TooltipContent = ({
   description,
   formula,
   showDocumentationLink = false,
@@ -34,25 +34,29 @@ export const MetricExplanation = ({
             defaultMessage="Formula Calculation:"
           />
         </strong>
-        <br />
-        <code
-          css={css`
-            word-break: break-word;
-          `}
-        >
-          {formula}
-        </code>
+        {formula && (
+          <>
+            <br />
+            <code
+              css={css`
+                word-break: break-word;
+              `}
+            >
+              {formula}
+            </code>
+          </>
+        )}
       </p>
       {showDocumentationLink && (
         <p>
           <FormattedMessage
-            id="xpack.infra.hostsViewPage.table.tooltip.seeDocumentation"
+            id="xpack.infra.hostsViewPage.table.tooltip.documentationLink"
             defaultMessage="See {documentation} for more information"
             values={{
               documentation: (
                 <EuiLink
-                  data-test-subj="infraDocumentationLink"
-                  href={HOST_METRIC_FORMULA_DOC_HREF}
+                  data-test-subj="hostsViewTooltipDocumentationLink"
+                  href={HOST_METRICS_DOC_HREF}
                   target="_blank"
                 >
                   <FormattedMessage

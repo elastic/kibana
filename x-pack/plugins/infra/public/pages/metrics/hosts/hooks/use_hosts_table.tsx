@@ -7,13 +7,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import createContainer from 'constate';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
+import createContainer from 'constate';
+import { hostLensFormulas } from '../../../../common/visualizations';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
-import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
+import { EntryTitle } from '../components/table/entry_title';
 import {
   InfraAssetMetadataType,
   InfraAssetMetricsItem,
@@ -23,8 +23,8 @@ import { useHostFlyoutUrlState } from './use_host_flyout_url_state';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
-import { ColumnHeader } from '../components/column_header';
-import { TOOLTIP } from '../translations';
+import { ColumnHeader } from '../components/table/column_header';
+import { TOOLTIP, TABLE_COLUMN_LABEL } from '../translations';
 
 /**
  * Columns and items types
@@ -113,50 +113,6 @@ const sortTableData =
 /**
  * Columns translations
  */
-const titleLabel = i18n.translate('xpack.infra.hostsViewPage.table.nameColumnHeader', {
-  defaultMessage: 'Name',
-});
-
-const cpuUsageLabel = i18n.translate('xpack.infra.hostsViewPage.table.cpuUsageColumnHeader', {
-  defaultMessage: 'CPU usage (avg.)',
-});
-
-const diskSpaceUsageLabel = i18n.translate(
-  'xpack.infra.hostsViewPage.table.diskSpaceUsageColumnHeader',
-  {
-    defaultMessage: 'Disk Space Usage (avg.)',
-  }
-);
-
-const txLabel = i18n.translate('xpack.infra.hostsViewPage.table.txColumnHeader', {
-  defaultMessage: 'TX (avg.)',
-});
-
-const rxLabel = i18n.translate('xpack.infra.hostsViewPage.table.rxColumnHeader', {
-  defaultMessage: 'RX (avg.)',
-});
-
-const memoryFreeLabel = i18n.translate('xpack.infra.hostsViewPage.table.memoryFreeColumnHeader', {
-  defaultMessage: 'Memory Free (avg.)',
-});
-
-const memoryUsageLabel = i18n.translate('xpack.infra.hostsViewPage.table.memoryUsageColumnHeader', {
-  defaultMessage: 'Memory Usage (avg.)',
-});
-
-const normalizedLoad1mLabel = i18n.translate(
-  'xpack.infra.hostsViewPage.table.normalizedLoad1mColumnHeader',
-  {
-    defaultMessage: 'Normalized Load (avg.)',
-  }
-);
-
-const toggleDialogActionLabel = i18n.translate(
-  'xpack.infra.hostsViewPage.table.toggleDialogWithDetails',
-  {
-    defaultMessage: 'Toggle dialog with details',
-  }
-);
 
 /**
  * Build a table columns and items starting from the snapshot nodes.
@@ -168,11 +124,10 @@ export const useHostsTable = () => {
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
-
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
+  const popoverContainerRef = React.createRef<HTMLDivElement>();
 
   const closeFlyout = useCallback(() => setHostFlyoutState(null), [setHostFlyoutState]);
-
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
       telemetry.reportHostEntryClicked({
@@ -223,8 +178,8 @@ export const useHostsTable = () => {
         field: 'id',
         actions: [
           {
-            name: toggleDialogActionLabel,
-            description: toggleDialogActionLabel,
+            name: TABLE_COLUMN_LABEL.toggleDialogAction,
+            description: TABLE_COLUMN_LABEL.toggleDialogAction,
             icon: ({ id }) =>
               hostFlyoutState?.clickedItemId && id === hostFlyoutState?.clickedItemId
                 ? 'minimize'
@@ -245,13 +200,13 @@ export const useHostsTable = () => {
         ],
       },
       {
-        name: titleLabel,
+        name: TABLE_COLUMN_LABEL.title,
         field: 'title',
         sortable: true,
         truncateText: true,
         'data-test-subj': 'hostsView-tableRow-title',
         render: (title: HostNodeRow['title']) => (
-          <HostsTableEntryTitle
+          <EntryTitle
             title={title}
             time={searchCriteria.dateRange}
             onClick={() => reportHostEntryClick(title)}
@@ -262,9 +217,10 @@ export const useHostsTable = () => {
       {
         name: (
           <ColumnHeader
-            text={cpuUsageLabel}
+            label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={TOOLTIP.cpuUsage}
-            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+            formula={hostLensFormulas.cpuUsage.formula.formula}
+            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'cpu',
@@ -276,9 +232,10 @@ export const useHostsTable = () => {
       {
         name: (
           <ColumnHeader
-            text={normalizedLoad1mLabel}
+            label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={TOOLTIP.normalizedLoad1m}
-            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+            formula={hostLensFormulas.normalizedLoad1m.formula.formula}
+            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'normalizedLoad1m',
@@ -290,9 +247,10 @@ export const useHostsTable = () => {
       {
         name: (
           <ColumnHeader
-            text={memoryUsageLabel}
+            label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={TOOLTIP.memoryUsage}
-            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+            formula={hostLensFormulas.memoryUsage.formula.formula}
+            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'memory',
@@ -304,9 +262,10 @@ export const useHostsTable = () => {
       {
         name: (
           <ColumnHeader
-            text={memoryFreeLabel}
+            label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={TOOLTIP.memoryFree}
-            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+            formula={hostLensFormulas.memoryFree.formula.formula}
+            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'memoryFree',
@@ -318,9 +277,10 @@ export const useHostsTable = () => {
       {
         name: (
           <ColumnHeader
-            text={diskSpaceUsageLabel}
-            toolTip={TOOLTIP.rx}
-            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+            label={TABLE_COLUMN_LABEL.diskSpaceUsage}
+            toolTip={TOOLTIP.diskSpaceUsage}
+            formula={hostLensFormulas.diskSpaceUsage.formula.formula}
+            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'diskSpaceUsage',
@@ -332,9 +292,10 @@ export const useHostsTable = () => {
       {
         name: (
           <ColumnHeader
-            text={rxLabel}
+            label={TABLE_COLUMN_LABEL.rx}
             toolTip={TOOLTIP.rx}
-            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+            formula={hostLensFormulas.rx.formula.formula}
+            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'rx',
@@ -347,9 +308,10 @@ export const useHostsTable = () => {
       {
         name: (
           <ColumnHeader
-            text={txLabel}
+            label={TABLE_COLUMN_LABEL.tx}
             toolTip={TOOLTIP.tx}
-            formula="(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)"
+            formula={hostLensFormulas.tx.formula.formula}
+            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'tx',
@@ -365,6 +327,7 @@ export const useHostsTable = () => {
       reportHostEntryClick,
       searchCriteria.dateRange,
       setHostFlyoutState,
+      popoverContainerRef,
     ]
   );
 
@@ -378,6 +341,9 @@ export const useHostsTable = () => {
     onTableChange,
     pagination,
     sorting,
+    refs: {
+      popoverContainerRef,
+    },
   };
 };
 

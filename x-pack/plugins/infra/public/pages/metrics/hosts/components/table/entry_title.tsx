@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip, IconType } fro
 import { TimeRange } from '@kbn/es-query';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
-import type { CloudProvider, HostNodeRow } from '../hooks/use_hosts_table';
+import type { CloudProvider, HostNodeRow } from '../../hooks/use_hosts_table';
 
 const cloudIcons: Record<CloudProvider, IconType> = {
   gcp: 'logoGCP',
@@ -18,13 +18,13 @@ const cloudIcons: Record<CloudProvider, IconType> = {
   unknownProvider: 'cloudSunny',
 };
 
-interface HostsTableEntryTitleProps {
+interface EntryTitleProps {
   onClick: () => void;
   time: TimeRange;
   title: HostNodeRow['title'];
 }
 
-export const HostsTableEntryTitle = ({ onClick, time, title }: HostsTableEntryTitleProps) => {
+export const EntryTitle = ({ onClick, time, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
 
   const link = useLinkProps({
@@ -53,7 +53,7 @@ export const HostsTableEntryTitle = ({ onClick, time, title }: HostsTableEntryTi
       <EuiFlexItem grow={false} className="eui-textTruncate" onClick={onClick}>
         <EuiToolTip delay="long" content={name}>
           <EuiLink
-            data-test-subj="infraHostsTableEntryTitleLink"
+            data-test-subj="hostsViewTableEntryTitleLink"
             className="eui-displayBlock eui-textTruncate"
             {...link}
           >

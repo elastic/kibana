@@ -27,7 +27,7 @@ import { LensWrapper } from '../chart/lens_wrapper';
 import { createHostsFilter } from '../../utils';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-import { MetricExplanation } from '../metric_explanation';
+import { TooltipContent } from '../metric_explanation/tooltip_content';
 
 export interface KPIChartProps {
   title: string;
@@ -143,9 +143,8 @@ export const Tile = ({
         </EuiFlexGroup>
       ) : (
         <EuiToolTip
-          className="eui-fullWidth"
           delay="regular"
-          content={<MetricExplanation formula={formula} description={toolTip} />}
+          content={<TooltipContent formula={formula} description={toolTip} />}
           anchorClassName="eui-fullWidth"
         >
           <LensWrapper

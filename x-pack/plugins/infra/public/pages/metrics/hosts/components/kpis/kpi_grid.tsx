@@ -8,10 +8,12 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { KPIChartProps, Tile } from './tile';
 import { HostCountProvider } from '../../hooks/use_host_count';
-import { HostsTile } from './hosts_tile';
 import { TOOLTIP } from '../../translations';
+import { HostsTile } from './hosts_tile';
+import { HostMetricsDocsLink } from '../metric_explanation/host_metrics_docs_link';
 
 const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
   {
@@ -57,6 +59,8 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
 export const KPIGrid = () => {
   return (
     <HostCountProvider>
+      <HostMetricsDocsLink />
+      <EuiSpacer size="s" />
       <EuiFlexGroup
         direction="row"
         gutterSize="s"

@@ -19,7 +19,6 @@ import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
 import { MetricsDataViewProvider } from './hooks/use_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
-import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostContainer } from './components/hosts_container';
 import { ExperimentalBadge } from '../../../components/experimental_badge';
 import { NoRemoteCluster } from '../../../components/empty_states';
@@ -97,9 +96,7 @@ export const HostsPage = () => {
         >
           {source && (
             <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
-              <UnifiedSearchProvider>
-                <HostContainer />
-              </UnifiedSearchProvider>
+              <HostContainer />
             </MetricsDataViewProvider>
           )}
         </MetricsPageTemplate>
