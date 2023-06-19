@@ -68,13 +68,12 @@ export interface ShipperOutput {
 export interface KafkaOutput extends NewBaseOutput {
   type: OutputType['Kafka'];
   hosts?: string[];
-  client_id?: string; // defaults to 'Elastic Agent'
-  version?: string; // defaults to 1.0.0 by beats/agents if not set
+  client_id?: string;
+  version?: string;
   key?: string;
-  compression?: ValueOf<KafkaCompressionType>; // defaults to 'gzip'
-  compression_level?: number; // defaults to 4, only for gzip
+  compression?: ValueOf<KafkaCompressionType>;
+  compression_level?: number;
   auth_type?: ValueOf<KafkaAuthType>;
-  // user_pass auth
   username?: string;
   password?: string;
   sasl?: {
