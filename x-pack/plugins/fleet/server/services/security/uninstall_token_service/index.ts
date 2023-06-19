@@ -59,31 +59,95 @@ interface UninstallTokenSOAggregation {
 }
 
 export interface UninstallTokenServiceInterface {
+  /**
+   * Get all uninstall tokens for given policy id
+   *
+   * @param policyId agent policy id
+   * @returns uninstall tokens for policyID
+   */
   getTokenHistoryForPolicy(policyId: string): Promise<GetUninstallTokensForOnePolicyResponse>;
 
+  /**
+   * Search for uninstall token metadata using partial policyID, paginated
+   *
+   * @param searchString a string for partial matching the policyId
+   * @param page
+   * @param perPage
+   * @returns Uninstall Tokens Metadata Response
+   */
   searchTokenMetadata(
     searchString: string,
     page?: number,
     perPage?: number
   ): Promise<GetUninstallTokensMetadataResponse>;
 
+  /**
+   * Get uninstall token metadata for all policies, optionally paginated, returns all by default
+   *
+   * @param page
+   * @param perPage
+   * @returns Uninstall Tokens Metadata Response
+   */
   getTokenMetadataForAllPolicies(
     page?: number,
     perPage?: number
   ): Promise<GetUninstallTokensMetadataResponse>;
 
+  /**
+   * Get hashed uninstall token for given policy id
+   *
+   * @param policyId agent policy id
+   * @returns hashedToken
+   */
   getHashedTokenForPolicyId(policyId: string): Promise<string>;
 
+  /**
+   * Get hashed uninstall tokens for given policy ids
+   *
+   * @param policyIds agent policy ids
+   * @returns Record<policyId, hashedToken>
+   */
   getHashedTokensForPolicyIds(policyIds?: string[]): Promise<Record<string, string>>;
 
+  /**
+   * Get hashed uninstall token for all policies
+   *
+   * @returns Record<policyId, hashedToken>
+   */
   getAllHashedTokens(): Promise<Record<string, string>>;
 
+  /**
+   * Generate uninstall token for given policy id
+   * Will not create a new token if one already exists for a given policy unless force: true is used
+   *
+   * @param policyId agent policy id
+   * @param force generate a new token even if one already exists
+   * @returns hashedToken
+   */
   generateTokenForPolicyId(policyId: string, force?: boolean): Promise<string>;
 
+  /**
+   * Generate uninstall tokens for given policy ids
+   * Will not create a new token if one already exists for a given policy unless force: true is used
+   *
+   * @param policyIds agent policy ids
+   * @param force generate a new token even if one already exists
+   * @returns Record<policyId, hashedToken>
+   */
   generateTokensForPolicyIds(policyIds: string[], force?: boolean): Promise<Record<string, string>>;
 
+  /**
+   * Generate uninstall tokens all policies
+   * Will not create a new token if one already exists for a given policy unless force: true is used
+   *
+   * @param force generate a new token even if one already exists
+   * @returns Record<policyId, hashedToken>
+   */
   generateTokensForAllPolicies(force?: boolean): Promise<Record<string, string>>;
 
+  /**
+   * If encryption is available, checks for any plain text uninstall tokens and encrypts them
+   */
   encryptTokens(): Promise<void>;
 }
 
@@ -92,12 +156,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
 
-  /**
-   * gets all uninstall tokens for given policy id
-   *
-   * @param policyId agent policy id
-   * @returns uninstall tokens for policyID
-   */
   public async getTokenHistoryForPolicy(
     policyId: string
   ): Promise<GetUninstallTokensForOnePolicyResponse> {
@@ -136,14 +194,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     };
   }
 
-  /**
-   * searches for uninstall token metadata using partial policyID, paginated
-   *
-   * @param searchString a string for partial matching the policyId
-   * @param page
-   * @param perPage
-   * @returns Uninstall Tokens Metadata Response
-   */
   public async searchTokenMetadata(
     searchString: string,
     page: number = 1,
@@ -156,13 +206,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     });
   }
 
-  /**
-   * gets uninstall token metadata for all policies, optionally paginated, returns all by default
-   *
-   * @param page
-   * @param perPage
-   * @returns Uninstall Tokens Metadata Response
-   */
   public async getTokenMetadataForAllPolicies(
     page?: number,
     perPage?: number
@@ -299,22 +342,10 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     return aggResults.map((bucket) => bucket.latest.hits.hits[0]);
   }
 
-  /**
-   * get hashed uninstall token for given policy id
-   *
-   * @param policyId agent policy id
-   * @returns hashedToken
-   */
   public async getHashedTokenForPolicyId(policyId: string): Promise<string> {
     return (await this.getHashedTokensForPolicyIds([policyId]))[policyId];
   }
 
-  /**
-   * get hashed uninstall tokens for given policy ids
-   *
-   * @param policyIds agent policy ids
-   * @returns Record<policyId, hashedToken>
-   */
   public async getHashedTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
     const tokens = await this.getDecryptedTokensForPolicyIds(policyIds);
     return tokens.reduce((acc, { policy_id: policyId, token }) => {
@@ -325,36 +356,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     }, {} as Record<string, string>);
   }
 
-  /**
-   * get hashed uninstall token for all policies
-   *
-   * @returns Record<policyId, hashedToken>
-   */
   public async getAllHashedTokens(): Promise<Record<string, string>> {
     const policyIds = await this.getAllPolicyIds();
     return this.getHashedTokensForPolicyIds(policyIds);
   }
 
-  /**
-   * generate uninstall token for given policy id
-   * will not create a new token if one already exists for a given policy unless force: true is used
-   *
-   * @param policyId agent policy id
-   * @param force generate a new token even if one already exists
-   * @returns hashedToken
-   */
   public async generateTokenForPolicyId(policyId: string, force: boolean = false): Promise<string> {
     return (await this.generateTokensForPolicyIds([policyId], force))[policyId];
   }
 
-  /**
-   * generate uninstall tokens for given policy ids
-   * will not create a new token if one already exists for a given policy unless force: true is used
-   *
-   * @param policyIds agent policy ids
-   * @param force generate a new token even if one already exists
-   * @returns Record<policyId, hashedToken>
-   */
   public async generateTokensForPolicyIds(
     policyIds: string[],
     force: boolean = false
@@ -408,13 +418,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     }, {} as Record<string, string>);
   }
 
-  /**
-   * generate uninstall tokens all policies
-   * will not create a new token if one already exists for a given policy unless force: true is used
-   *
-   * @param force generate a new token even if one already exists
-   * @returns Record<policyId, hashedToken>
-   */
   public async generateTokensForAllPolicies(
     force: boolean = false
   ): Promise<Record<string, string>> {
@@ -422,9 +425,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     return this.generateTokensForPolicyIds(policyIds, force);
   }
 
-  /**
-   * if encryption is available, checks for any plain text uninstall tokens and encrypts them
-   */
   public async encryptTokens(): Promise<void> {
     if (!this.isEncryptionAvailable) {
       return;
