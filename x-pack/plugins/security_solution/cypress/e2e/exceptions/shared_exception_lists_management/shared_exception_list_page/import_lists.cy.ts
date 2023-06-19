@@ -22,15 +22,14 @@ import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 describe('Import Lists', () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
-  before(() => {
-    cy.task('esArchiverResetKibana');
-  });
+
   beforeEach(() => {
     login();
     visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
     cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
   });
+
   it('Should import exception list successfully if the list does not exist', () => {
     importExceptionLists(LIST_TO_IMPORT_FILENAME);
 

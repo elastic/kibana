@@ -43,7 +43,6 @@ const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kib
 
 describe('Sourcerer', () => {
   before(() => {
-    cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
   describe('permissions', () => {

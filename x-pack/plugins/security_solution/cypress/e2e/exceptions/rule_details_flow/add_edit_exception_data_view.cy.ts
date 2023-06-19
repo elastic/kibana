@@ -46,7 +46,6 @@ describe('Add exception using data views from rule details', () => {
   const ITEM_NAME = 'Sample Exception List Item';
 
   before(() => {
-    cy.task('esArchiverResetKibana');
     cy.task('esArchiverLoad', 'exceptions');
     login();
     postDataView('exceptions-*');
