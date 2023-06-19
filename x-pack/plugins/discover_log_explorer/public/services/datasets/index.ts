@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './datasets/v1';
+export * from './datasets_client';
+export * from './datasets_service';
+export * from './types';

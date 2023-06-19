@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { dynamic } from '../../common/dynamic';
-import { CustomDataStreamSelectorBuilderProps } from './custom_data_stream_selector';
+import { CustomDatasetSelectorBuilderProps } from './custom_dataset_selector';
 
-const LazyCustomDataStreamSelector = dynamic(() => import('./custom_data_stream_selector'));
+const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 
-export const createLazyCustomDataStreamSelector =
-  (props: CustomDataStreamSelectorBuilderProps) => () =>
-    <LazyCustomDataStreamSelector {...props} />;
+export const createLazyCustomDatasetSelector =
+  (props: CustomDatasetSelectorBuilderProps) => () =>
+    <LazyCustomDatasetSelector {...props} />;

@@ -7,9 +7,9 @@
 
 import { assign, createMachine } from 'xstate';
 import { EntityList } from '../../../../common/entity_list';
-import { DataStream, Integration } from '../../../../common/data_streams';
+import { Dataset, Integration } from '../../../../common/datasets';
 import { FindIntegrationsResponse, getIntegrationId } from '../../../../common';
-import { IDataStreamsClient } from '../../../services/data_streams';
+import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   DefaultIntegrationsContext,
@@ -166,12 +166,12 @@ export const createPureIntegrationsStateMachine = (
 
 export interface IntegrationsStateMachineDependencies {
   initialContext?: DefaultIntegrationsContext;
-  dataStreamsClient: IDataStreamsClient;
+  datasetsClient: IDatasetsClient;
 }
 
 export const createIntegrationStateMachine = ({
   initialContext,
-  dataStreamsClient,
+  datasetsClient,
 }: IntegrationsStateMachineDependencies) =>
   createPureIntegrationsStateMachine(initialContext).withConfig({
     services: {
@@ -180,7 +180,7 @@ export const createIntegrationStateMachine = ({
 
         return context.cache.has(searchParams)
           ? Promise.resolve(context.cache.get(searchParams) as FindIntegrationsResponse)
-          : dataStreamsClient.findIntegrations(searchParams);
+          : datasetsClient.findIntegrations(searchParams);
       },
     },
   });
@@ -200,8 +200,8 @@ const searchIntegrationStreams = (
 
     return {
       ...integration,
-      // Filter and sort the dataStreams by the search criteria
-      dataStreams: new EntityList<DataStream>(integration.dataStreams)
+      // Filter and sort the datasets by the search criteria
+      datasets: new EntityList<Dataset>(integration.datasets)
         .filterBy((stream) => Boolean(stream.title?.includes(nameQuery ?? '')))
         .sortBy('name', sortOrder)
         .build(),

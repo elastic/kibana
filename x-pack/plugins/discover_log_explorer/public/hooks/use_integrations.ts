@@ -9,11 +9,11 @@ import { useCallback } from 'react';
 import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
 import { FindIntegrationsRequestQuery, SortOrder } from '../../common';
-import { IDataStreamsClient } from '../services/data_streams';
+import { IDatasetsClient } from '../services/datasets';
 import { createIntegrationStateMachine } from '../state_machines/integrations';
 
 interface IntegrationsContextDeps {
-  dataStreamsClient: IDataStreamsClient;
+  datasetsClient: IDatasetsClient;
 }
 
 export interface SearchIntegrationsParams {
@@ -26,10 +26,10 @@ export type SearchIntegrations = (params: SearchIntegrationsParams) => void;
 export type ReloadIntegrations = () => void;
 export type LoadMoreIntegrations = () => void;
 
-const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
+const useIntegrations = ({ datasetsClient }: IntegrationsContextDeps) => {
   const integrationsStateService = useInterpret(() =>
     createIntegrationStateMachine({
-      dataStreamsClient,
+      datasetsClient,
     })
   );
 

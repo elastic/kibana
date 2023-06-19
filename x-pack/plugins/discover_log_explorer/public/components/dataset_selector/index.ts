@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './datasets/v1';
+export * from './dataset_selector';
+export * from './types';

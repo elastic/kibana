@@ -13,4 +13,4 @@ export const DISCOVER_LOG_EXPLORER_PROFILE_ID = 'discover-log-explorer';
  * Exporting versioned APIs types
  */
 export * from './latest';
-export * as dataStreamsV1 from './data_streams/v1';
+export * as datasetsV1 from './datasets/v1';

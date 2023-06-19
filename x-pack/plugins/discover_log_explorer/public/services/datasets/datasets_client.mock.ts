@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './datasets/v1';
+import { IDatasetsClient } from './types';
+
+export const createDatasetsClientMock = (): jest.Mocked<IDatasetsClient> => ({
+  findDatasets: jest.fn(),
+  findIntegrations: jest.fn(),
+});

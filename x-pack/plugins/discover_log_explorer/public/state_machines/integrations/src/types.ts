@@ -7,7 +7,7 @@
 import { DoneInvokeEvent } from 'xstate';
 import type { IImmutableCache } from '../../../../common/immutable_cache';
 import { FindIntegrationsResponse, SortOrder, SearchAfter } from '../../../../common/latest';
-import { Integration } from '../../../../common/data_streams';
+import { Integration } from '../../../../common/datasets';
 
 export interface IntegrationsSearchParams {
   nameQuery?: string;

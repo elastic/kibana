@@ -7,15 +7,15 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { DISCOVER_LOG_EXPLORER_PROFILE_ID } from '../common';
-import { createLazyCustomDataStreamSelector } from './customizations';
-import { DataStreamsService } from './services/data_streams';
+import { createLazyCustomDatasetSelector } from './customizations';
+import { DatasetsService } from './services/datasets';
 import { DiscoverLogExplorerClientPluginClass, DiscoverLogExplorerStartDeps } from './types';
 
 export class DiscoverLogExplorerPlugin implements DiscoverLogExplorerClientPluginClass {
-  private dataStreamsService: DataStreamsService;
+  private datasetsService: DatasetsService;
 
   constructor() {
-    this.dataStreamsService = new DataStreamsService();
+    this.datasetsService = new DatasetsService();
   }
 
   public setup() {}
@@ -23,24 +23,24 @@ export class DiscoverLogExplorerPlugin implements DiscoverLogExplorerClientPlugi
   public start(core: CoreStart, plugins: DiscoverLogExplorerStartDeps) {
     const { discover } = plugins;
 
-    const dataStreamsService = this.dataStreamsService.start({
+    const datasetsService = this.datasetsService.start({
       http: core.http,
     });
 
     const pluginStart = {
-      dataStreamsService,
+      datasetsService,
     };
 
     discover.customize(
       DISCOVER_LOG_EXPLORER_PROFILE_ID,
       async ({ customizations, stateContainer }) => {
         /**
-         * Replace the DataViewPicker with a custom `DataStreamSelector` to pick integrations streams
+         * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
          */
         customizations.set({
           id: 'search_bar',
-          CustomDataViewPicker: createLazyCustomDataStreamSelector({
-            dataStreamsClient: dataStreamsService.client,
+          CustomDataViewPicker: createLazyCustomDatasetSelector({
+            datasetsClient: datasetsService.client,
             stateContainer,
           }),
         });
