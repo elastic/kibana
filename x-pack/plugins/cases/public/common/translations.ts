@@ -176,27 +176,16 @@ export const TAGS_HELP = i18n.translate('xpack.cases.createCase.fieldTagsHelpTex
   defaultMessage: 'Separate tags with a line break.',
 });
 
-export const CATEGORIES_HELP = i18n.translate('xpack.cases.createCase.fieldCategoriesHelpText', {
-  defaultMessage: 'Separate categories with a line break.',
-});
-
 export const TAGS_EMPTY_ERROR = i18n.translate('xpack.cases.createCase.fieldTagsEmptyError', {
   defaultMessage: 'A tag must contain at least one non-space character.',
 });
-
-export const CATEGORIES_EMPTY_ERROR = i18n.translate(
-  'xpack.cases.createCase.fieldCategoriesEmptyError',
-  {
-    defaultMessage: 'A category must contain at least one non-space character.',
-  }
-);
 
 export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
   defaultMessage: 'No tags are added',
 });
 
 export const NO_CATEGORIES = i18n.translate('xpack.cases.caseView.noCategories', {
-  defaultMessage: 'No categories are added',
+  defaultMessage: 'No category is added',
 });
 
 export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldRequiredError', {

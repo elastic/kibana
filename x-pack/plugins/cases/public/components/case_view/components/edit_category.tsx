@@ -71,8 +71,10 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
   const onSubmitCategory = async () => {
     const { isValid, data } = await form.submit();
 
-    if (isValid && data.category) {
-      onSubmit(data.category);
+    if (isValid) {
+      const newCategory = data.category != null ? data.category : null;
+
+      onSubmit(newCategory);
       form.reset({ defaultValue: data });
     }
 
@@ -95,7 +97,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
           </EuiFlexItem>
           {isLoadingAll && <EuiLoadingSpinner data-test-subj="category-loading" />}
           {!isLoadingAll && permissions.update && (
-            <EuiFlexItem data-test-subj="category-edit" grow={false}>
+            <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 data-test-subj="category-edit-button"
                 aria-label={i18n.EDIT_CATEGORIES_ARIA}

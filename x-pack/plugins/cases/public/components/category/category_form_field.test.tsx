@@ -202,7 +202,6 @@ describe('Category', () => {
     });
 
     userEvent.click(screen.getByTestId('comboBoxClearButton'));
-
     userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
