@@ -111,10 +111,11 @@ class DocLinks {
   public pluginsIngestAttachment: string;
   public queryDsl: string;
   public rrf: string;
+  public searchApplications: string;
+  public searchApplicationsTemplates: string;
+  public searchTemplates: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
-  public searchApplications: string;
-  public searchTemplates: string;
   public start: string;
   public supportedNlpModels: string;
   public syncRules: string;
@@ -261,6 +262,7 @@ class DocLinks {
     this.rrf = '';
     this.searchUIAppSearch = '';
     this.searchUIElasticsearch = '';
+    this.searchApplicationsTemplates = '';
     this.searchApplications = '';
     this.searchTemplates = '';
     this.start = '';
@@ -411,6 +413,7 @@ class DocLinks {
     this.rrf = docLinks.links.elasticsearch.rrf;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
+    this.searchApplicationsTemplates = docLinks.links.enterpriseSearch.searchApplicationsTemplates;
     this.searchApplications = docLinks.links.enterpriseSearch.searchApplications;
     this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
     this.start = docLinks.links.enterpriseSearch.start;
