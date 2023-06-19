@@ -16,7 +16,7 @@ import * as i18n from '../../../../../detections/pages/detection_engine/rules/tr
 import type { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
-import { RuleExecutionStatusPopover } from './rule_execution_status_popover';
+import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
 
 const FilterWrapper = styled(EuiFlexGroup)`
@@ -110,7 +110,7 @@ const RulesTableFiltersComponent = () => {
 
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <RuleExecutionStatusPopover
+          <RuleExecutionStatusSelector
             onSelectedStatusChanged={handleSelectedExecutionStatus}
             selectedStatus={selectedRuleExecutionStatus}
           />

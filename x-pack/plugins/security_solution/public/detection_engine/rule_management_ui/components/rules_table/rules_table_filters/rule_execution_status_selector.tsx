@@ -7,52 +7,51 @@
 
 import React, { useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
 import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
 
-interface RuleExecutionStatusPopoverProps {
+interface RuleExecutionStatusSelectorProps {
   selectedStatus?: RuleExecutionStatus;
   onSelectedStatusChanged: (newStatus?: RuleExecutionStatus) => void;
 }
 
 /**
- * Popover for selecting last rule execution status to filter on
+ * Selector for selecting last rule execution status to filter on
  *
  * @param selectedStatus Selected rule execution status
  * @param onSelectedStatusChanged change listener to be notified when rule execution status selection changes
  */
-const RuleExecutionStatusPopoverComponent = ({
+const RuleExecutionStatusSelectorComponent = ({
   selectedStatus,
   onSelectedStatusChanged,
-}: RuleExecutionStatusPopoverProps) => {
+}: RuleExecutionStatusSelectorProps) => {
   const [isExecutionStatusPopoverOpen, setIsExecutionStatusPopoverOpen] = useState(false);
 
-  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>(() => [
+  const selectableOptions = [
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus.succeeded) as string,
+      label: getCapitalizedStatusText(RuleExecutionStatus.succeeded),
       data: { status: RuleExecutionStatus.succeeded },
       checked: selectedStatus === RuleExecutionStatus.succeeded ? 'on' : undefined,
     },
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus['partial failure']) as string,
+      label: getCapitalizedStatusText(RuleExecutionStatus['partial failure']),
       data: { status: RuleExecutionStatus['partial failure'] },
       checked: selectedStatus === RuleExecutionStatus['partial failure'] ? 'on' : undefined,
     },
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus.failed) as string,
+      label: getCapitalizedStatusText(RuleExecutionStatus.failed),
       data: { status: RuleExecutionStatus.failed },
       checked: selectedStatus === RuleExecutionStatus.failed ? 'on' : undefined,
     },
-  ]);
+  ] as EuiSelectableOption[];
 
   const handleSelectableOptionsChange = (
     newOptions: EuiSelectableOption[],
     _: unknown,
     changedOption: EuiSelectableOption
   ) => {
-    setSelectableOptions(newOptions);
     setIsExecutionStatusPopoverOpen(false);
 
     if (changedOption.checked && changedOption?.data?.status) {
@@ -79,7 +78,7 @@ const RuleExecutionStatusPopoverComponent = ({
   );
 
   return (
-    <EuiPopover
+    <EuiPopover // has position: absolute
       ownFocus
       button={triggerButton}
       isOpen={isExecutionStatusPopoverOpen}
@@ -90,18 +89,18 @@ const RuleExecutionStatusPopoverComponent = ({
       repositionOnScroll
     >
       <EuiSelectable
-        aria-label={i18n.RULES_TAG_SEARCH}
+        aria-label={i18n.RULE_EXECTION_STATUS_FILTER}
         options={selectableOptions}
         onChange={handleSelectableOptionsChange}
         singleSelection
+        listProps={{ isVirtualized: false }}
       >
-        {(list, search) => (
+        {(list) => (
           <div
             css={`
               width: 200px;
             `}
           >
-            <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
           </div>
         )}
@@ -110,8 +109,8 @@ const RuleExecutionStatusPopoverComponent = ({
   );
 };
 
-RuleExecutionStatusPopoverComponent.displayName = 'RuleExecutionStatusPopoverComponent';
+RuleExecutionStatusSelectorComponent.displayName = 'RuleExecutionStatusSelectorComponent';
 
-export const RuleExecutionStatusPopover = React.memo(RuleExecutionStatusPopoverComponent);
+export const RuleExecutionStatusSelector = React.memo(RuleExecutionStatusSelectorComponent);
 
-RuleExecutionStatusPopover.displayName = 'RuleExecutionStatusPopover';
+RuleExecutionStatusSelector.displayName = 'RuleExecutionStatusSelector';
