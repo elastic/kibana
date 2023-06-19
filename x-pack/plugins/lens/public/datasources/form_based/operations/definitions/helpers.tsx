@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEqual } from 'lodash';
+import { LastValueColumn } from '@kbn/visualizations-plugin/common';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -190,11 +192,24 @@ export function getFormatFromPreviousColumn(
     : undefined;
 }
 
+export function getExistsFilter(field: string) {
+  return {
+    query: `${field}: *`,
+    language: 'kuery',
+  };
+}
+
 export function getFilter(
   previousColumn: GenericIndexPatternColumn | undefined,
   columnParams: { kql?: string | undefined; lucene?: string | undefined } | undefined
 ) {
   let filter = previousColumn?.filter;
+  if (
+    previousColumn?.operationType === 'last_value' &&
+    isEqual(filter, getExistsFilter((previousColumn as LastValueColumn)?.sourceField))
+  ) {
+    return;
+  }
   if (columnParams) {
     if ('kql' in columnParams) {
       filter = { query: columnParams.kql ?? '', language: 'kuery' };
