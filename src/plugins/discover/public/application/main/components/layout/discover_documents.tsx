@@ -91,10 +91,12 @@ export function useMergedDiscoverState(stateContainer: DiscoverStateContainer) {
       (next) => {
         const currentState = state$.getValue();
         if (!isSavedSearch(next)) {
+          const dataViewLoading = currentState.dataView !== next.dataView;
           if (
-            next.fetchStatus === FetchStatus.LOADING &&
-            !currentState.isDataLoading &&
-            !next.result
+            dataViewLoading ||
+            (next.fetchStatus === FetchStatus.LOADING &&
+              !currentState.isDataLoading &&
+              !next.result)
           ) {
             state$.next({ ...state$.getValue(), isDataLoading: true });
           }
@@ -106,7 +108,7 @@ export function useMergedDiscoverState(stateContainer: DiscoverStateContainer) {
               rows: next.result,
             };
             if (next.fetchAppState) {
-              nextMsg.appState = next.fetchAppState;
+              nextMsg.appState = { ...currentState.appState, ...next.fetchAppState };
             }
             if (next.dataView) {
               nextMsg.dataView = next.dataView;
@@ -135,7 +137,7 @@ export function useMergedDiscoverState(stateContainer: DiscoverStateContainer) {
             setNextAppState = true;
           }
 
-          if (next.sort && !isEqual(next.grid, currentState.appState?.sort)) {
+          if (next.sort && !isEqual(next.sort, currentState.appState?.sort)) {
             nextAppState.sort = nextSavedSearch.sort;
             setNextAppState = true;
           }
@@ -255,7 +257,6 @@ function DiscoverDocumentsComponent({
       </div>
     );
   }
-
   return (
     <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
       <EuiScreenReaderOnly>

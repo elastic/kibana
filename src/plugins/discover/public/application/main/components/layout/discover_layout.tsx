@@ -286,6 +286,7 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               onRemoveField={onRemoveColumn}
               onChangeDataView={stateContainer.actions.onChangeDataView}
+              selectedDataView={dataView}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}

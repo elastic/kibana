@@ -83,14 +83,13 @@ export function onTextBasedQueryLangResults() {
         indexTitle = indexPatternFromQuery;
       }
 
-      const nextState = {
+      return {
         ...{ index: undefined },
         ...(addColumnsToState && { columns: nextColumns }),
         ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
           viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
         }),
       };
-      return { ...appState, ...nextState };
     } else {
       // cleanup for a "regular" query
       cleanup();
