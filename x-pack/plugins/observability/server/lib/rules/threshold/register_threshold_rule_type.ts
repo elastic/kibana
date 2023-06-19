@@ -7,8 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { IRuleTypeAlerts, RuleType } from '@kbn/alerting-plugin/server';
+import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import {
@@ -49,7 +48,6 @@ import {
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
-  WARNING_ACTIONS,
   NO_DATA_ACTIONS,
 } from './threshold_executor';
 import { ObservabilityConfig } from '../../..';
@@ -62,12 +60,6 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   useLegacyAlerts: false,
 };
 
-type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
->;
-export type MetricThresholdAlertType = Omit<RuleType, 'ActionGroupIdsOf'> & {
-  ActionGroupIdsOf: MetricThresholdAllowedActionGroups;
-};
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
 
 export function thresholdRuleType(
@@ -82,7 +74,6 @@ export function thresholdRuleType(
     comparator: oneOfLiterals(Object.values(Comparator)),
     timeUnit: schema.string(),
     timeSize: schema.number(),
-    warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
     warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
   };
 
@@ -166,7 +157,7 @@ export function thresholdRuleType(
       ),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
-    actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS, NO_DATA_ACTIONS],
+    actionGroups: [FIRED_ACTIONS, NO_DATA_ACTIONS],
     minimumLicenseRequired: 'basic' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(
