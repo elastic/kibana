@@ -27,3 +27,6 @@ xpack.apm.serverlessOnboarding: true
 xpack.fleet.packages:
   - name: apm
     version: latest
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: observability

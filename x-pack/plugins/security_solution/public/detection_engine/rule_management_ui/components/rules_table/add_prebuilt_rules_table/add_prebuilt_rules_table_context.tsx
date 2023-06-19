@@ -99,13 +99,11 @@ export const AddPrebuiltRulesTableContextProvider = ({
       invariant(rule, `Rule with id ${ruleId} not found`);
 
       setLoadingRules((prev) => [...prev, ruleId]);
-      await installSpecificRulesRequest([
-        {
-          rule_id: ruleId,
-          version: rule.version,
-        },
-      ]);
-      setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
+      try {
+        await installSpecificRulesRequest([{ rule_id: ruleId, version: rule.version }]);
+      } finally {
+        setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
+      }
     },
     [installSpecificRulesRequest, rules]
   );
@@ -116,17 +114,23 @@ export const AddPrebuiltRulesTableContextProvider = ({
       version: rule.version,
     }));
     setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
-    await installSpecificRulesRequest(rulesToUpgrade);
-    setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
-    setSelectedRules([]);
+    try {
+      await installSpecificRulesRequest(rulesToUpgrade);
+    } finally {
+      setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
+      setSelectedRules([]);
+    }
   }, [installSpecificRulesRequest, selectedRules]);
 
   const installAllRules = useCallback(async () => {
     // Unselect all rules so that the table doesn't show the "bulk actions" bar
     setLoadingRules((prev) => [...prev, ...rules.map((r) => r.rule_id)]);
-    await installAllRulesRequest();
-    setLoadingRules((prev) => prev.filter((id) => !rules.some((r) => r.rule_id === id)));
-    setSelectedRules([]);
+    try {
+      await installAllRulesRequest();
+    } finally {
+      setLoadingRules([]);
+      setSelectedRules([]);
+    }
   }, [installAllRulesRequest, rules]);
 
   const actions = useMemo(

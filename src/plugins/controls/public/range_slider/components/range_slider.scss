@@ -17,42 +17,36 @@
 }
 
 .rangeSliderAnchor__button {
-  display: flex;
-  align-items: center;
   width: 100%;
   height: 100%;
-  justify-content: space-between;
   background-color: $euiFormBackgroundColor;
-  @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
+  padding: 0;
+
+  .euiFormControlLayout__childrenWrapper {
+    border-radius: 0 $euiFormControlBorderRadius $euiFormControlBorderRadius 0 !important;
+  }
 
   .euiToolTipAnchor {
     width: 100%;
   }
 
-  .rangeSliderAnchor__delimiter {
-    background-color: unset;
-    padding: $euiSizeS*1.5 0;
-  }
   .rangeSliderAnchor__fieldNumber {
     font-weight: $euiFontWeightBold;
     box-shadow: none;
     text-align: center;
     background-color: unset;
 
+    &:invalid {
+      color: $euiTextSubduedColor;
+      text-decoration: line-through;
+      font-weight: $euiFontWeightRegular;
+      background-image: none; // hide the red bottom border
+    }
+
     &::placeholder {
       font-weight: $euiFontWeightRegular;
       color: $euiColorMediumShade;
       text-decoration: none;
     }
-  }
-
-  .rangeSliderAnchor__fieldNumber--invalid {
-    text-decoration: line-through;
-    font-weight: $euiFontWeightRegular;
-    color: $euiColorMediumShade;
-  }
-
-  .rangeSliderAnchor__spinner {
-    padding-right: $euiSizeS;
   }
 }
