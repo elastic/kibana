@@ -21,6 +21,8 @@ import { isEqual } from 'lodash';
 import { BehaviorSubject, merge } from 'rxjs';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { updateAppStateBySavedSearch } from '../../utils/get_state_defaults';
+import { DiscoverServices } from '../../../../build_services';
 import { useSingleton } from '../../hooks/use_singleton';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -75,7 +77,18 @@ export const onResize = (
 function isSavedSearch(arg: SavedSearch | DataDocumentsMsg): arg is SavedSearch {
   return Boolean('searchSource' in arg);
 }
-export function useMergedDiscoverState(stateContainer: DiscoverStateContainer) {
+
+/**
+ * This hook manages a local cache of the DiscoverStateContainer for saved search data.
+ * It subscribes to changes in the saved search state and document data, updates the state accordingly,
+ * and returns the current state value.
+ * @param stateContainer
+ * @param discoverServices
+ */
+export function useSavedSearchDataState(
+  stateContainer: DiscoverStateContainer,
+  discoverServices: DiscoverServices
+) {
   const documents$ = stateContainer.dataState.data$.documents$;
   const state$ = useSingleton(
     () =>
@@ -115,42 +128,20 @@ export function useMergedDiscoverState(stateContainer: DiscoverStateContainer) {
             }
             state$.next(nextMsg);
           }
-        } else if (currentState.appState.index === next.searchSource.getField('index')?.id!) {
-          const nextSavedSearch = next;
-          const nextAppState = { ...currentState.appState };
-          let setNextAppState = false;
+        } else {
+          if (currentState.dataView.id !== next.searchSource.getField('index')?.id) {
+            return;
+          }
+          // update appState by savedSearch unless the data view change is ongoing ... too much updates else
 
-          if (next.columns && !isEqual(next.columns, currentState.appState?.columns)) {
-            nextAppState.columns = nextSavedSearch.columns;
-            setNextAppState = true;
-          }
-          if (next.rowHeight && !isEqual(next.rowHeight, currentState.appState?.rowHeight)) {
-            nextAppState.rowHeight = nextSavedSearch.rowHeight;
-            setNextAppState = true;
-          }
-          if (next.rowsPerPage && !isEqual(next.rowsPerPage, currentState.appState?.rowsPerPage)) {
-            nextAppState.rowsPerPage = nextSavedSearch.rowsPerPage;
-            setNextAppState = true;
-          }
-          if (next.grid && !isEqual(next.grid, currentState.appState?.grid)) {
-            nextAppState.grid = nextSavedSearch.grid;
-            setNextAppState = true;
-          }
+          const nextAppState = updateAppStateBySavedSearch({
+            savedSearch: next,
+            appState: currentState.appState,
+            uiSettings: discoverServices.uiSettings,
+            updateDataView: false,
+          });
 
-          if (next.sort && !isEqual(next.sort, currentState.appState?.sort)) {
-            nextAppState.sort = nextSavedSearch.sort;
-            setNextAppState = true;
-          }
-
-          if (
-            next.searchSource.getField('query') &&
-            !isEqual(next.searchSource.getField('query'), currentState.appState?.query)
-          ) {
-            nextAppState.query = next.searchSource.getField('query');
-            setNextAppState = true;
-          }
-
-          if (setNextAppState && nextAppState && !isEqual(nextAppState, currentState?.appState)) {
+          if (!isEqual(nextAppState, currentState?.appState)) {
             state$.next({ ...state$.getValue(), appState: nextAppState });
           }
         }
@@ -159,7 +150,7 @@ export function useMergedDiscoverState(stateContainer: DiscoverStateContainer) {
     return () => {
       subscribe.unsubscribe();
     };
-  }, [stateContainer, state$, documents$]);
+  }, [stateContainer, state$, documents$, discoverServices.uiSettings]);
   return useObservable(state$, state$.getValue());
 }
 
@@ -174,7 +165,10 @@ function DiscoverDocumentsComponent({
 }) {
   const services = useDiscoverServices();
   const { dataViews, capabilities, uiSettings } = services;
-  const { dataView, appState, isDataLoading, rows } = useMergedDiscoverState(stateContainer);
+  const { dataView, appState, isDataLoading, rows } = useSavedSearchDataState(
+    stateContainer,
+    services
+  );
   const savedSearchInital = useSavedSearchInitial();
 
   const { rowHeight, rowsPerPage, grid, query, sort, columns } = appState;

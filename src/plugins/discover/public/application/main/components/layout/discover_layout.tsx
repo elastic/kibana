@@ -23,7 +23,7 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DragContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import { useMergedDiscoverState } from './discover_documents';
+import { useSavedSearchDataState } from './discover_documents';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -61,6 +61,7 @@ export interface DiscoverLayoutProps {
 }
 
 export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
+  const services = useDiscoverServices();
   const {
     trackUiMetric,
     capabilities,
@@ -72,9 +73,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     history,
     spaces,
     inspector,
-  } = useDiscoverServices();
+  } = services;
   const { main$ } = stateContainer.dataState.data$;
-  const { appState, dataView } = useMergedDiscoverState(stateContainer);
+  const { appState, dataView } = useSavedSearchDataState(stateContainer, services);
   const { query, savedQuery, columns, sort } = appState;
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;

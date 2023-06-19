@@ -45,22 +45,16 @@ export function getStateDefaults({
   const { searchSource } = savedSearch;
   const { data, uiSettings, storage } = services;
   const dataView = searchSource.getField('index');
-
-  const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-  const sort = getSortArray(savedSearch.sort ?? [], dataView!);
-  const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
 
   const defaultState: DiscoverAppState = {
-    query,
-    sort: !sort.length
-      ? getDefaultSort(
-          dataView,
-          uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
-          uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
-        )
-      : sort,
-    columns,
+    query: data.query.queryString.getDefaultQuery(),
+    sort: getDefaultSort(
+      dataView,
+      uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+      uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
+    ),
+    columns: [],
     index: dataView?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')) as DiscoverAppState['filters'],
@@ -73,31 +67,64 @@ export function getStateDefaults({
     grid: undefined,
     breakdownField: undefined,
   };
-  if (savedSearch.grid) {
-    defaultState.grid = savedSearch.grid;
+  return updateAppStateBySavedSearch({ savedSearch, appState: defaultState, uiSettings });
+}
+
+export function updateAppStateBySavedSearch({
+  savedSearch,
+  appState,
+  uiSettings,
+  updateDataView = true,
+}: {
+  savedSearch: SavedSearch;
+  appState: DiscoverAppState;
+  uiSettings: IUiSettingsClient;
+  updateDataView?: boolean;
+}) {
+  const searchSource = savedSearch.searchSource;
+  const dataView = searchSource.getField('index');
+  const nextAppState = { ...appState };
+  if (updateDataView && dataView) {
+    nextAppState.index = dataView.id;
+  }
+
+  const columns = getDefaultColumns(savedSearch, uiSettings);
+  if (columns.length && !isEqual(columns, appState.columns)) {
+    nextAppState.columns = columns;
+  }
+  const query = searchSource.getField('query');
+  if (query && !isEqual(query, appState.query)) {
+    nextAppState.query = query;
+  }
+  const sort = getSortArray(savedSearch.sort ?? [], dataView!);
+  if (sort.length && !isEqual(sort, appState.sort)) {
+    nextAppState.sort = sort;
+  }
+
+  if (savedSearch.grid && !isEqual(savedSearch.grid, appState.grid)) {
+    nextAppState.grid = savedSearch.grid;
   }
   if (savedSearch.hideChart !== undefined) {
-    defaultState.hideChart = savedSearch.hideChart;
+    nextAppState.hideChart = savedSearch.hideChart;
   }
   if (savedSearch.rowHeight !== undefined) {
-    defaultState.rowHeight = savedSearch.rowHeight;
+    nextAppState.rowHeight = savedSearch.rowHeight;
   }
   if (savedSearch.viewMode) {
-    defaultState.viewMode = getValidViewMode({
+    nextAppState.viewMode = getValidViewMode({
       viewMode: savedSearch.viewMode,
       isTextBasedQueryMode: isTextBasedQuery(query),
     });
   }
   if (savedSearch.hideAggregatedPreview) {
-    defaultState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;
+    nextAppState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;
   }
   if (savedSearch.rowsPerPage) {
-    defaultState.rowsPerPage = savedSearch.rowsPerPage;
+    nextAppState.rowsPerPage = savedSearch.rowsPerPage;
   }
 
   if (savedSearch.breakdownField) {
-    defaultState.breakdownField = savedSearch.breakdownField;
+    nextAppState.breakdownField = savedSearch.breakdownField;
   }
-
-  return defaultState;
+  return nextAppState;
 }
