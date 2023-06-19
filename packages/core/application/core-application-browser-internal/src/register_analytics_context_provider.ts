@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { type Observable, map } from 'rxjs';
 
 export function registerAnalyticsContextProvider({
