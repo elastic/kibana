@@ -31,10 +31,6 @@ function ConfigurationValueColumn({
   const shouldRenderCreateApiKeyButton =
     columnKey === 'apiKey' && value === null;
 
-  const onCopyClick = (text: string) => {
-    copyToClipboard(text);
-  };
-
   if (shouldRenderCreateApiKeyButton) {
     return (
       <EuiButton
@@ -60,7 +56,7 @@ function ConfigurationValueColumn({
           aria-label="Copy to clipboard"
           color="text"
           iconType="copy"
-          onClick={() => onCopyClick(value)}
+          onClick={() => copyToClipboard(value)}
         />
       )}
     </>
