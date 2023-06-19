@@ -28,8 +28,8 @@ import { KibanaLogic } from '../../../../shared/kibana';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
+import { ConnectorConfigurationFormItems } from './connector_configuration_form_items';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
-import { ConnectorConfigurationFormItems } from './sync_rules/connector_configuration_form_items';
 
 export const ConnectorConfigurationForm = () => {
   const { productFeatures } = useValues(KibanaLogic);
@@ -62,6 +62,7 @@ export const ConnectorConfigurationForm = () => {
           />
         </>
       ))}
+      <EuiSpacer />
       <EuiFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>

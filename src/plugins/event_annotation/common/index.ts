@@ -44,4 +44,5 @@ export type {
   EventAnnotationGroupAttributes,
 } from './types';
 
+export type { EventAnnotationGroupSavedObjectAttributes } from './content_management';
 export { EVENT_ANNOTATION_GROUP_TYPE, ANNOTATIONS_LISTING_VIEW_ID } from './constants';
