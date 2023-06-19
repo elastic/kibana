@@ -88,22 +88,23 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
       }
       const packagePolicyPath = getPath('policy_details', { policyId: packagePolicy.policy_id });
 
-      const onSaveNavigateTo: Parameters<ApplicationStart['navigateToApp']> =
-        routeState?.onSaveNavigateTo
-          ? routeState?.onSaveNavigateTo
-          : [
+      const [onSaveNavigateTo, onSaveQueryParams]: [
+        Parameters<ApplicationStart['navigateToApp']>,
+        CreatePackagePolicyRouteState['onSaveQueryParams']
+      ] = routeState?.onSaveNavigateTo
+        ? [routeState?.onSaveNavigateTo, routeState?.onSaveQueryParams]
+        : [
+            [
               PLUGIN_ID,
               {
                 path: packagePolicyPath,
               },
-            ];
-
-      const onSaveQueryParams = routeState?.onSaveQueryParams
-        ? routeState.onSaveQueryParams
-        : {
-            showAddAgentHelp: true,
-            openEnrollmentFlyout: true,
-          };
+            ],
+            {
+              showAddAgentHelp: true,
+              openEnrollmentFlyout: true,
+            },
+          ];
 
       const [appId, options] = onSaveNavigateTo;
       if (options?.path) {
