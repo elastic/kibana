@@ -50,7 +50,7 @@ import {
   RegexBooleanExpressionContext,
   LimitCommandContext,
   ValueExpressionContext,
-  ProjectCommandContext,
+  KeepCommandContext,
   DropCommandContext,
   RenameCommandContext,
   DissectCommandContext,
@@ -172,7 +172,7 @@ export class AutocompleteListener implements ESQLParserListener {
     }
   }
 
-  exitProjectCommand?(ctx: ProjectCommandContext) {
+  exitKeepCommand?(ctx: KeepCommandContext) {
     const qn = ctx.qualifiedNames();
     if (qn && qn.text) {
       if (qn.text.slice(-1) !== ',') {

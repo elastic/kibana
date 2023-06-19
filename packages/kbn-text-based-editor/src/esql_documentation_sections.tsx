@@ -212,7 +212,7 @@ FROM employees
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL height_feet = height * 3.281, height_cm = height * 100
 \`\`\`
 
@@ -220,7 +220,7 @@ If the specified column already exists, the existing column will be dropped, and
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL height = height * 3.281
 \`\`\`
 
@@ -311,39 +311,36 @@ ROW a=[1,2,3], b="b", j=["a","b"]
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.project',
-        {
-          defaultMessage: 'PROJECT',
-        }
-      ),
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.keep', {
+        defaultMessage: 'KEEP',
+      }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.project.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.keep.markdown',
             {
-              defaultMessage: `### PROJECT
-The \`PROJECT\` command enables you to specify what columns are returned and the order in which they are returned.
+              defaultMessage: `### KEEP
+The \`KEEP\` command enables you to specify what columns are returned and the order in which they are returned.
 
 To limit the columns that are returned, use a comma-separated list of column names. The columns are returned in the specified order:
               
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 \`\`\`
 
 Rather than specify each column by name, you can use wildcards to return all columns with a name that matches a pattern:
 
 \`\`\`
 FROM employees
-| PROJECT h*
+| KEEP h*
 \`\`\`
 
 The asterisk wildcard (\`*\`) by itself translates to all columns that do not match the other arguments. This query will first return all columns with a name that starts with an h, followed by all other columns:
 
 \`\`\`
 FROM employees
-| PROJECT h*, *
+| KEEP h*, *
 \`\`\`
             `,
               description:
@@ -367,7 +364,7 @@ Use \`RENAME\` to rename a column. If a column with the new name already exists,
               
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, still_hired
+| KEEP first_name, last_name, still_hired
 | RENAME employed = still_hired
 \`\`\`
 
@@ -375,7 +372,7 @@ Multiple columns can be renamed with a single \`RENAME\` command:
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name
+| KEEP first_name, last_name
 | RENAME fn = first_name, ln = last_name
 \`\`\`
             `,
@@ -400,7 +397,7 @@ Use the \`SORT\` command to sort rows on one or more fields:
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | SORT height
 \`\`\`
 
@@ -408,7 +405,7 @@ The default sort order is ascending. Set an explicit sort order using \`ASC\` or
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | SORT height DESC
 \`\`\`
 
@@ -416,7 +413,7 @@ If two rows have the same sort key, the original order will be preserved. You ca
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | SORT height DESC, first_name ASC
 \`\`\`
 
@@ -425,7 +422,7 @@ By default, \`null\` values are treated as being larger than any other value. Wi
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | SORT first_name ASC NULLS FIRST
 \`\`\`
             `,
@@ -512,7 +509,7 @@ Use \`WHERE\` to produce a table that contains all the rows from the input table
               
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, still_hired
+| KEEP first_name, last_name, still_hired
 | WHERE still_hired == true
 \`\`\`
 
@@ -542,7 +539,7 @@ For string comparison using wildcards or regular expressions, use \`LIKE\` or \`
   \`\`\`
   FROM employees 
   | WHERE first_name LIKE "?b*" 
-  | PROJECT first_name, last_name
+  | KEEP first_name, last_name
   \`\`\`
 
 * Use \`RLIKE\` to match strings using [regular expressions](https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html):
@@ -550,7 +547,7 @@ For string comparison using wildcards or regular expressions, use \`LIKE\` or \`
   \`\`\`
   FROM employees 
   | WHERE first_name RLIKE ".leja.*" 
-  | PROJECT first_name, last_name
+  | KEEP first_name, last_name
   \`\`\`
 
 You can use the following boolean operators:
@@ -561,7 +558,7 @@ You can use the following boolean operators:
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height, still_hired
+| KEEP first_name, last_name, height, still_hired
 | WHERE height > 2 AND NOT still_hired
 \`\`\`
 
@@ -606,7 +603,7 @@ Returns the absolute value.
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL abs_height = ABS(0.0 - height)
 \`\`\`
               `,
@@ -713,7 +710,7 @@ FROM employees
     languages <= 1, "monolingual",
     languages <= 2, "bilingual",
      "polyglot")
-| PROJECT first_name, last_name, type
+| KEEP first_name, last_name, type
 \`\`\`
               `,
               description:
@@ -769,7 +766,7 @@ Concatenates two or more strings.
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL fullname = CONCAT(first_name, " ", last_name)
 \`\`\`
               `,
@@ -797,7 +794,7 @@ Returns a string representation of a date in the provided format. If no format i
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, hire_date
+| KEEP first_name, last_name, hire_date
 | EVAL hired = DATE_FORMAT(hire_date, "YYYY-MM-dd")
 \`\`\`
               `,
@@ -986,7 +983,7 @@ Returns the character length of a string.
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL fn_length = LENGTH(first_name)
 \`\`\`
               `,
@@ -1329,7 +1326,7 @@ Rounds a number to the closest number with the specified number of digits. Defau
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL height = ROUND(height * 3.281, 1)
 \`\`\`
               `,
@@ -1392,7 +1389,7 @@ Returns a boolean that indicates whether a keyword string starts with another st
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL ln_S = STARTS_WITH(last_name, "S")
 \`\`\`
               `,
@@ -1420,7 +1417,7 @@ Returns a substring of a string, specified by a start position and an optional l
 
 \`\`\`
 FROM employees
-| PROJECT last_name
+| KEEP last_name
 | EVAL ln_sub = SUBSTRING(last_name, 1, 3)
 \`\`\`
 
@@ -1428,7 +1425,7 @@ A negative start position is interpreted as being relative to the end of the str
 
 \`\`\`
 FROM employees
-| PROJECT last_name
+| KEEP last_name
 | EVAL ln_sub = SUBSTRING(last_name, -3, 3)
 \`\`\`
 
@@ -1436,7 +1433,7 @@ If length is omitted, substring returns the remainder of the string. This exampl
 
 \`\`\`
 FROM employees
-| PROJECT last_name
+| KEEP last_name
 | EVAL ln_sub = SUBSTRING(last_name, 2)
 \`\`\`
               `,

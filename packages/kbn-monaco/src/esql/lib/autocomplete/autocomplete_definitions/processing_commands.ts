@@ -67,16 +67,15 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     sortText: 'B',
   },
   {
-    label: 'project',
-    insertText: 'project',
+    label: 'keep',
+    insertText: 'keep',
     kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.projectDoc', {
-      defaultMessage:
-        'Rearranges fields in the input table by applying the project clauses in fields',
+    detail: i18n.translate('monaco.esql.autocomplete.keepDoc', {
+      defaultMessage: 'Rearranges fields in the input table by applying the keep clauses in fields',
     }),
     documentation: {
-      value: buildDocumentation('project fieldSpecification `,` fieldSpecification *', [
-        '… | project a,b',
+      value: buildDocumentation('keep fieldSpecification `,` fieldSpecification *', [
+        '… | keep a,b',
       ]),
     },
     sortText: 'B',

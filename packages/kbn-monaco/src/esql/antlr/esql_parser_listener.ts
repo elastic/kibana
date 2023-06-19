@@ -34,7 +34,7 @@ import { FromCommandContext } from "./esql_parser";
 import { EvalCommandContext } from "./esql_parser";
 import { StatsCommandContext } from "./esql_parser";
 import { SourceIdentifierContext } from "./esql_parser";
-import { ProjectIdentifierContext } from "./esql_parser";
+import { EnrichIdentifierContext } from "./esql_parser";
 import { FunctionExpressionArgumentContext } from "./esql_parser";
 import { MathFunctionExpressionArgumentContext } from "./esql_parser";
 import { QualifiedNameContext } from "./esql_parser";
@@ -48,6 +48,7 @@ import { LimitCommandContext } from "./esql_parser";
 import { SortCommandContext } from "./esql_parser";
 import { OrderExpressionContext } from "./esql_parser";
 import { ProjectCommandContext } from "./esql_parser";
+import { KeepCommandContext } from "./esql_parser";
 import { DropCommandContext } from "./esql_parser";
 import { RenameVariableContext } from "./esql_parser";
 import { RenameCommandContext } from "./esql_parser";
@@ -411,15 +412,15 @@ export interface esql_parserListener extends ParseTreeListener {
 	exitSourceIdentifier?: (ctx: SourceIdentifierContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `esql_parser.projectIdentifier`.
+	 * Enter a parse tree produced by `esql_parser.enrichIdentifier`.
 	 * @param ctx the parse tree
 	 */
-	enterProjectIdentifier?: (ctx: ProjectIdentifierContext) => void;
+	enterEnrichIdentifier?: (ctx: EnrichIdentifierContext) => void;
 	/**
-	 * Exit a parse tree produced by `esql_parser.projectIdentifier`.
+	 * Exit a parse tree produced by `esql_parser.enrichIdentifier`.
 	 * @param ctx the parse tree
 	 */
-	exitProjectIdentifier?: (ctx: ProjectIdentifierContext) => void;
+	exitEnrichIdentifier?: (ctx: EnrichIdentifierContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.functionExpressionArgument`.
@@ -563,6 +564,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitProjectCommand?: (ctx: ProjectCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.keepCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterKeepCommand?: (ctx: KeepCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.keepCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitKeepCommand?: (ctx: KeepCommandContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.dropCommand`.
