@@ -28,7 +28,13 @@ const createFilter = (key: string, filterValue: FilterValue): Filter => {
     negate = filterValue.negate;
     value = filterValue.value;
   }
-
+  // If the value is '*', we want to create an exists filter
+  if (value === '*') {
+    return {
+      query: { exists: { field: key } },
+      meta: { type: 'exists' },
+    };
+  }
   return {
     meta: {
       alias: null,
@@ -40,7 +46,6 @@ const createFilter = (key: string, filterValue: FilterValue): Filter => {
     query: { match_phrase: { [key]: value } },
   };
 };
-
 const useNavigate = (pathname: string) => {
   const history = useHistory();
   const { services } = useKibana();
@@ -68,3 +73,9 @@ export const useNavigateFindings = () => useNavigate(findingsNavigation.findings
 
 export const useNavigateFindingsByResource = () =>
   useNavigate(findingsNavigation.findings_by_resource.path);
+
+export const useNavigateVulnerabilities = () =>
+  useNavigate(findingsNavigation.vulnerabilities.path);
+
+export const useNavigateVulnerabilitiesByResource = () =>
+  useNavigate(findingsNavigation.vulnerabilities_by_resource.path);

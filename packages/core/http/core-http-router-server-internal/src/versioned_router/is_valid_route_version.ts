@@ -5,11 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import moment from 'moment';
 
 const PUBLIC_VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
-const INTERNAL_VERSION_REGEX = /^[0-9]+$/;
+const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
+
+/**
+ * To bring all of Kibana's first public API versions in-sync with an initial
+ * release date we only allow one public version temporarily.
+ * @internal
+ */
+const ALLOWED_PUBLIC_VERSION = '2023-10-31';
+
+export function isAllowedPublicVersion(version: string): undefined | string {
+  if (ALLOWED_PUBLIC_VERSION !== version) {
+    return `Invalid public version, for now please use "${ALLOWED_PUBLIC_VERSION}" as the version for all public routes. Received "${version}".}"`;
+  }
+}
 
 /**
  * For public routes we must check that the version is a string that is YYYY-MM-DD.
