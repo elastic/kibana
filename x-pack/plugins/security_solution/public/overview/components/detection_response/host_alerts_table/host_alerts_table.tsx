@@ -39,6 +39,7 @@ import {
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 interface HostAlertsTableProps {
   signalIndexName: string | null;
@@ -158,6 +159,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
         }}
         mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        sourcererScopeId={SourcererScopeName.detections}
         metadata={{
           andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
         }}
@@ -185,6 +187,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'critical' },
@@ -218,6 +221,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'high' },
@@ -248,6 +252,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'medium' },
@@ -278,6 +283,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'low' },

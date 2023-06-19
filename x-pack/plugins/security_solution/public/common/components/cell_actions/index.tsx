@@ -24,7 +24,8 @@ export { SecurityCellActionsTrigger, SecurityCellActionType };
 
 export interface SecurityCellActionsData {
   /**
-   * The field name
+   * The field name is necessary to fetch the FieldSpec from the Dataview.
+   * Ex: `event.category`
    */
   field: string;
 
@@ -33,7 +34,7 @@ export interface SecurityCellActionsData {
 
 export interface SecurityCellActionsProps
   extends Omit<CellActionsProps, 'data' | 'metadata' | 'disabledActionTypes' | 'triggerId'> {
-  scopeId?: SourcererScopeName;
+  sourcererScopeId?: SourcererScopeName;
   data: SecurityCellActionsData | SecurityCellActionsData[];
   triggerId: SecurityCellActionsTrigger;
   disabledActionTypes?: SecurityCellActionType[];
@@ -51,11 +52,12 @@ export const useDataGridColumnsSecurityCellActions: UseDataGridColumnsCellAction
   useDataGridColumnsCellActions;
 
 export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
-  scopeId = SourcererScopeName.default,
+  sourcererScopeId = SourcererScopeName.default,
   data,
+  children,
   ...props
 }) => {
-  const getFieldSpec = useGetFieldSpec(scopeId);
+  const getFieldSpec = useGetFieldSpec(sourcererScopeId);
   // Make a dependency key to prevent unnecessary re-renders when data object is defined inline
   // It is necessary because the data object is an array or an object and useMemo would always re-render
   const dependencyKey = JSON.stringify(data);
@@ -72,5 +74,11 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
     [dependencyKey, getFieldSpec]
   );
 
-  return fieldData.length > 0 ? <CellActions data={fieldData} {...props} /> : <>{props.children}</>;
+  return fieldData.length > 0 ? (
+    <CellActions data={fieldData} {...props}>
+      {children}
+    </CellActions>
+  ) : (
+    <>{children}</>
+  );
 };

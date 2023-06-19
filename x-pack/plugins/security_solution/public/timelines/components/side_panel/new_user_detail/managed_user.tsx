@@ -34,10 +34,12 @@ import { useAppUrl } from '../../../../common/lib/kibana';
 export const ManagedUser = ({
   managedUser,
   contextID,
+  scopeId,
   isDraggable,
 }: {
   managedUser: ManagedUserData;
   contextID: string;
+  scopeId: string;
   isDraggable: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -47,8 +49,8 @@ export const ManagedUser = ({
     setManagedDataToggleOpen((isOpen) => !isOpen);
   }, [setManagedDataToggleOpen]);
   const managedUserTableColumns = useMemo(
-    () => getManagedUserTableColumns(contextID, isDraggable),
-    [isDraggable, contextID]
+    () => getManagedUserTableColumns(contextID, scopeId, isDraggable),
+    [isDraggable, contextID, scopeId]
   );
   const { getAppUrl } = useAppUrl();
 

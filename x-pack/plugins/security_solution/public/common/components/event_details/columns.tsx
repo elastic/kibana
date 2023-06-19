@@ -17,6 +17,7 @@ import type { EventFieldsData } from './types';
 import type { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
+import { getSourcererScopeId } from '../../../helpers';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -77,6 +78,7 @@ export const getColumns = ({
                 triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
                 mode={CellActionsMode.INLINE}
                 visibleCellActions={3}
+                sourcererScopeId={getSourcererScopeId(scopeId)}
                 metadata={{ scopeId, isObjectArray: data.isObjectArray }}
               />
             );

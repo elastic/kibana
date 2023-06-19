@@ -16,6 +16,7 @@ import * as i18n from './translations';
 
 const UserDetailsPanelComponent = ({
   contextID,
+  scopeId,
   userName,
   handleOnClose,
   isFlyoutView,
@@ -25,7 +26,12 @@ const UserDetailsPanelComponent = ({
   if (isNewUserDetailsFlyoutEnable) {
     return isFlyoutView ? (
       <EuiFlyoutBody>
-        <UserDetailsContent userName={userName} contextID={contextID} isDraggable={isDraggable} />
+        <UserDetailsContent
+          userName={userName}
+          contextID={contextID}
+          scopeId={scopeId}
+          isDraggable={isDraggable}
+        />
       </EuiFlyoutBody>
     ) : (
       <div className="eui-yScroll">
@@ -39,19 +45,25 @@ const UserDetailsPanelComponent = ({
           `}
         />
 
-        <UserDetailsContent userName={userName} contextID={contextID} isDraggable={isDraggable} />
+        <UserDetailsContent
+          userName={userName}
+          contextID={contextID}
+          scopeId={scopeId}
+          isDraggable={isDraggable}
+        />
       </div>
     );
   }
 
   return isFlyoutView ? (
-    <UserDetailsFlyout userName={userName} contextID={contextID} />
+    <UserDetailsFlyout userName={userName} contextID={contextID} scopeId={scopeId} />
   ) : (
     <UserDetailsSidePanel
       userName={userName}
       contextID={contextID}
       isDraggable={isDraggable}
       handleOnClose={handleOnClose}
+      scopeId={scopeId}
     />
   );
 };

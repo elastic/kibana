@@ -21,6 +21,7 @@ import {
 import { DefaultFieldRenderer } from '../../../../../../timelines/components/field_renderers/field_renderers';
 import { NetworkDetailsLink, UserDetailsLink } from '../../../../../../common/components/links';
 import type { SelectedDataView } from '../../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import {
   IP_ADDRESSES_TITLE,
@@ -135,6 +136,7 @@ export const UserPanel = React.memo(
                   attrName={'source.ip'}
                   idPrefix="alert-details-page-user"
                   render={renderSourceIp}
+                  sourcererScopeId={SourcererScopeName.detections}
                 />
               </UserPanelSection>
             </EuiFlexGroup>

@@ -27,6 +27,7 @@ import type {
 } from '../../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
+import { getSourcererScopeId } from '../../../../helpers';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;
@@ -109,6 +110,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
             }}
             triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
             mode={CellActionsMode.INLINE}
+            sourcererScopeId={getSourcererScopeId(scopeId)}
             metadata={metadata}
             visibleCellActions={3}
           />

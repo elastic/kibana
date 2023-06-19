@@ -40,6 +40,7 @@ import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { SecurityCellActions } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;
@@ -106,6 +107,7 @@ export const getTableColumns: GetTableColumns = ({
         }}
         mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        sourcererScopeId={SourcererScopeName.detections}
         metadata={{
           andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
         }}
