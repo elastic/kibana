@@ -215,7 +215,10 @@ export const useInitNavNode = <
         };
       });
 
+      if (orderChildrenRef.current[childNode.id] === undefined) {
       orderChildrenRef.current[childNode.id] = idx.current++;
+      }
+
       setChildrenNodesUpdated((prev) => [...prev, childNode.id]);
 
       return {

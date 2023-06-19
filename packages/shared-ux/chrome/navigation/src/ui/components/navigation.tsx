@@ -81,7 +81,9 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
 
   const register = useCallback(
     (navNode: ChromeProjectNavigationNode) => {
-      orderChildrenRef.current[navNode.id] = idx.current++;
+      if (orderChildrenRef.current[navNode.id] === undefined) {
+        orderChildrenRef.current[navNode.id] = idx.current++;
+      }
 
       setNavigationItems((prevItems) => {
         return {
@@ -110,9 +112,9 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
 
   useEffect(() => {
     const navigationTree = Object.values(navigationItems).sort((a, b) => {
-        const aOrder = orderChildrenRef.current[a.id];
-        const bOrder = orderChildrenRef.current[b.id];
-        return aOrder - bOrder;
+      const aOrder = orderChildrenRef.current[a.id];
+      const bOrder = orderChildrenRef.current[b.id];
+      return aOrder - bOrder;
     });
 
     // We only want to notify the Chrome service if the navigation tree has changed
