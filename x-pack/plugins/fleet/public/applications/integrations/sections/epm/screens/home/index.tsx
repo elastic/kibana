@@ -9,12 +9,19 @@ import React, { useState } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
-import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+import type {
+  CustomIntegration,
+  CustomIntegrationIcon,
+} from '@kbn/custom-integrations-plugin/common';
 
 import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
 import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
+import type {
+  PackageSpecIcon,
+  IntegrationCardReleaseLabel,
+} from '../../../../../../../common/types';
 
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
@@ -22,11 +29,6 @@ import { DefaultLayout } from '../../../../layouts';
 import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
-
-import type {
-  IntegrationCardItem,
-  IntegrationCardReleaseLabel,
-} from '../../../../../../../common/types/models';
 
 import { useGetPackagesQuery } from '../../../../hooks';
 
@@ -38,6 +40,24 @@ import { AvailablePackages } from './available_packages';
 export interface CategoryParams {
   category?: ExtendedIntegrationCategory;
   subcategory?: string;
+}
+
+export interface IntegrationCardItem {
+  url: string;
+  release?: IntegrationCardReleaseLabel;
+  description: string;
+  name: string;
+  title: string;
+  version: string;
+  icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
+  integration: string;
+  id: string;
+  categories: string[];
+  fromIntegrations?: string;
+  isReauthorizationRequired?: boolean;
+  isUnverified?: boolean;
+  isUpdateAvailable?: boolean;
+  showLabels?: boolean;
 }
 
 export const getParams = (params: CategoryParams, search: string) => {
@@ -81,8 +101,8 @@ export const mapToCard = ({
       : item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
     let urlVersion = item.version;
-    if ('savedObject' in item) {
-      urlVersion = item.savedObject.attributes.version || item.version;
+    if (item?.installationInfo?.version) {
+      urlVersion = item.installationInfo.version || item.version;
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
       isUpdateAvailable = isPackageUpdatable(item);
 
@@ -130,7 +150,9 @@ export const EPMHomePage: React.FC = () => {
   );
 
   const unverifiedPackageCount = installedPackages.filter(
-    (pkg) => 'savedObject' in pkg && pkg.savedObject.attributes.verification_status === 'unverified'
+    (pkg) =>
+      pkg.installationInfo?.verification_status &&
+      pkg.installationInfo.verification_status === 'unverified'
   ).length;
 
   const upgradeablePackageCount = installedPackages.filter(isPackageUpdatable).length;

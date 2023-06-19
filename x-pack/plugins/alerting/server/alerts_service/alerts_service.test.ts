@@ -10,9 +10,14 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
 import { AlertsService } from './alerts_service';
-import { IRuleTypeAlerts } from '../types';
+import { IRuleTypeAlerts, RecoveredActionGroup } from '../types';
 import { retryUntil } from './test_utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { AlertsClient } from '../alerts_client';
+import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+
+jest.mock('../alerts_client');
 
 let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -141,6 +146,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
 const TestRegistrationContext: IRuleTypeAlerts = {
   context: 'test',
   mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+  shouldWrite: true,
 };
 
 const getContextInitialized = async (
@@ -150,6 +156,30 @@ const getContextInitialized = async (
 ) => {
   const { result } = await alertsService.getContextInitializationPromise(context, namespace);
   return result;
+};
+
+const alertsClient = alertsClientMock.create();
+const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+  id: 'test.rule-type',
+  name: 'My test rule',
+  actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
+  defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
+  isExportable: true,
+  recoveryActionGroup: RecoveredActionGroup,
+  executor: jest.fn(),
+  producer: 'alerts',
+  cancelAlertsOnRuleTimeout: true,
+  ruleTaskTimeout: '5m',
+  autoRecoverAlerts: true,
+  validate: {
+    params: { validate: (params) => params },
+  },
+};
+
+const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {
+  ...ruleType,
+  alerts: TestRegistrationContext,
 };
 
 describe('Alerts Service', () => {
@@ -1097,6 +1127,166 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.putMapping).toHaveBeenCalled();
       expect(clusterClient.indices.get).toHaveBeenCalled();
       expect(clusterClient.indices.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('createAlertsClient()', () => {
+    let alertsService: AlertsService;
+    beforeEach(async () => {
+      (AlertsClient as jest.Mock).mockImplementation(() => alertsClient);
+      alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+        kibanaVersion: '8.8.0',
+      });
+
+      await retryUntil(
+        'alert service initialized',
+        async () => alertsService.isInitialized() === true
+      );
+    });
+
+    test('should create new AlertsClient', async () => {
+      alertsService.register(TestRegistrationContext);
+      await retryUntil(
+        'context initialized',
+        async () => (await getContextInitialized(alertsService)) === true
+      );
+
+      await alertsService.createAlertsClient({
+        logger,
+        ruleType: ruleTypeWithAlertDefinition,
+        namespace: 'default',
+        rule: {
+          consumer: 'bar',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          id: '1',
+          name: 'rule-name',
+          parameters: {
+            bar: true,
+          },
+          revision: 0,
+          spaceId: 'default',
+          tags: ['rule-', '-tags'],
+        },
+      });
+
+      expect(AlertsClient).toHaveBeenCalledWith({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType: ruleTypeWithAlertDefinition,
+        namespace: 'default',
+        rule: {
+          consumer: 'bar',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          id: '1',
+          name: 'rule-name',
+          parameters: {
+            bar: true,
+          },
+          revision: 0,
+          spaceId: 'default',
+          tags: ['rule-', '-tags'],
+        },
+      });
+    });
+
+    test('should return null if rule type has no alert definition', async () => {
+      const result = await alertsService.createAlertsClient({
+        logger,
+        ruleType,
+        namespace: 'default',
+        rule: {
+          consumer: 'bar',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          id: '1',
+          name: 'rule-name',
+          parameters: {
+            bar: true,
+          },
+          revision: 0,
+          spaceId: 'default',
+          tags: ['rule-', '-tags'],
+        },
+      });
+
+      expect(result).toBe(null);
+      expect(AlertsClient).not.toHaveBeenCalled();
+    });
+
+    test('should return null if context initialization has errored', async () => {
+      clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
+        ...SimulateTemplateResponse,
+        template: {
+          ...SimulateTemplateResponse.template,
+          mappings: {},
+        },
+      }));
+
+      alertsService.register(TestRegistrationContext);
+      await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+      const result = await alertsService.createAlertsClient({
+        logger,
+        ruleType: ruleTypeWithAlertDefinition,
+        namespace: 'default',
+        rule: {
+          consumer: 'bar',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          id: '1',
+          name: 'rule-name',
+          parameters: {
+            bar: true,
+          },
+          revision: 0,
+          spaceId: 'default',
+          tags: ['rule-', '-tags'],
+        },
+      });
+
+      expect(result).toBe(null);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `There was an error in the framework installing namespace-level resources and creating concrete indices for - Failure during installation. No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping`
+      );
+      expect(AlertsClient).not.toHaveBeenCalled();
+    });
+
+    test('should return null if shouldWrite is false', async () => {
+      alertsService.register(TestRegistrationContext);
+      await retryUntil(
+        'context initialized',
+        async () => (await getContextInitialized(alertsService)) === true
+      );
+      const result = await alertsService.createAlertsClient({
+        logger,
+        ruleType: {
+          ...ruleType,
+          alerts: {
+            context: 'test',
+            mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+            shouldWrite: false,
+          },
+        },
+        namespace: 'default',
+        rule: {
+          consumer: 'bar',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          id: '1',
+          name: 'rule-name',
+          parameters: {
+            bar: true,
+          },
+          revision: 0,
+          spaceId: 'default',
+          tags: ['rule-', '-tags'],
+        },
+      });
+
+      expect(result).toBe(null);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Resources registered and installed for test context but "shouldWrite" is set to false.`
+      );
+      expect(AlertsClient).not.toHaveBeenCalled();
     });
   });
 

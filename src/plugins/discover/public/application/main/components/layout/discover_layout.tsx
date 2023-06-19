@@ -22,7 +22,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DragContext } from '@kbn/dom-drag-drop';
-import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -57,16 +57,10 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export interface DiscoverLayoutProps {
-  navigateTo: (url: string) => void;
   stateContainer: DiscoverStateContainer;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }
 
-export function DiscoverLayout({
-  navigateTo,
-  stateContainer,
-  persistDataView,
-}: DiscoverLayoutProps) {
+export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
@@ -180,11 +174,6 @@ export function DiscoverLayout({
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
 
-  const savedSearchTitle = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    savedSearchTitle.current?.focus();
-  }, []);
-
   const textBasedLanguageModeErrors = useMemo(() => {
     if (isPlainRecord) {
       return dataState.error;
@@ -260,8 +249,6 @@ export function DiscoverLayout({
         id="savedSearchTitle"
         className="euiScreenReaderOnly"
         data-test-subj="discoverSavedSearchTitle"
-        tabIndex={-1}
-        ref={savedSearchTitle}
       >
         {savedSearch.title
           ? i18n.translate('discover.pageTitleWithSavedSearch', {
@@ -277,14 +264,12 @@ export function DiscoverLayout({
       <TopNavMemoized
         onOpenInspector={onOpenInspector}
         query={query}
-        navigateTo={navigateTo}
         savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={stateContainer.actions.onUpdateQuery}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
-        persistDataView={persistDataView}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout

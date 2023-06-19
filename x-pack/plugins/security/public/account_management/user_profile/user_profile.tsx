@@ -29,7 +29,7 @@ import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type { CoreStart, ToastInput, ToastOptions } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient, ToastInput, ToastOptions } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -142,9 +142,27 @@ function UserDetailsEditor({ user }: { user: AuthenticatedUser }) {
   );
 }
 
-function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfileForm> }) {
+function UserSettingsEditor({
+  formik,
+  isThemeOverridden,
+  isOverriddenThemeDarkMode,
+}: {
+  formik: ReturnType<typeof useUserProfileForm>;
+  isThemeOverridden: boolean;
+  isOverriddenThemeDarkMode: boolean;
+}) {
   if (!formik.values.data) {
     return null;
+  }
+
+  let idSelected = formik.values.data.userSettings.darkMode;
+
+  if (isThemeOverridden) {
+    if (isOverriddenThemeDarkMode) {
+      idSelected = 'dark';
+    } else {
+      idSelected = 'light';
+    }
   }
 
   return (
@@ -168,6 +186,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
     >
       <FormRow
         name="data.userSettings.darkMode"
+        helpText={renderHelpText(isThemeOverridden)}
         label={
           <FormLabel for="data.userSettings.darkMode">
             <FormattedMessage
@@ -187,7 +206,8 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
           )}
           buttonSize="m"
           data-test-subj="darkModeButton"
-          idSelected={formik.values.data.userSettings.darkMode}
+          idSelected={idSelected}
+          isDisabled={isThemeOverridden}
           options={[
             {
               id: '',
@@ -532,6 +552,10 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
   const isCloudUser = user.elastic_cloud_user;
 
+  const { isThemeOverridden, isOverriddenThemeDarkMode } = determineIfThemeOverridden(
+    services.settings.client
+  );
+
   const rightSideItems = [
     {
       title: (
@@ -658,7 +682,13 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   user={user}
                   onShowPasswordForm={() => setShowChangePasswordForm(true)}
                 />
-                {isCloudUser ? null : <UserSettingsEditor formik={formik} />}
+                {isCloudUser ? null : (
+                  <UserSettingsEditor
+                    formik={formik}
+                    isThemeOverridden={isThemeOverridden}
+                    isOverriddenThemeDarkMode={isOverriddenThemeDarkMode}
+                  />
+                )}
               </Form>
             </EuiPageTemplate>
           </Breadcrumb>
@@ -878,3 +908,26 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
     </EuiFlexGroup>
   );
 };
+
+function renderHelpText(isOverridden: boolean) {
+  if (isOverridden) {
+    return (
+      <EuiText size="xs">
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.overriddenMessage"
+          defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+        />
+      </EuiText>
+    );
+  }
+}
+
+function determineIfThemeOverridden(settingsClient: IUiSettingsClient): {
+  isThemeOverridden: boolean;
+  isOverriddenThemeDarkMode: boolean;
+} {
+  return {
+    isThemeOverridden: settingsClient.isOverridden('theme:darkMode'),
+    isOverriddenThemeDarkMode: settingsClient.get<boolean>('theme:darkMode'),
+  };
+}

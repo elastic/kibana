@@ -12,7 +12,7 @@ import { getModules } from '../api';
 import type { GetModulesProps, Module } from '../types';
 
 const ONE_MINUTE = 60000;
-export const GET_MODULES_QUERY_KEY = ['GET', '/api/ml/modules/get_module/:moduleId'];
+export const GET_MODULES_QUERY_KEY = ['GET', '/internal/ml/modules/get_module/:moduleId'];
 
 export const useFetchModulesQuery = (
   queryArgs: Omit<GetModulesProps, 'signal'>,

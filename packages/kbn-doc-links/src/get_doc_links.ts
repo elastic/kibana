@@ -145,6 +145,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsPostgreSQL: `${ENTERPRISE_SEARCH_DOCS}connectors-postgresql.html`,
       connectorsS3: `${ENTERPRISE_SEARCH_DOCS}connectors-s3.html`,
       connectorsSharepoint: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint.html`,
+      connectorsSharepointOnline: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint-online.html`,
       connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-workplace-search`,
       crawlerExtractionRules: `${ENTERPRISE_SEARCH_DOCS}crawler-extraction-rules.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
@@ -162,6 +163,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       machineLearningStart: `${ENTERPRISE_SEARCH_DOCS}machine-learning-start.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       mlDocumentEnrichment: `${ENTERPRISE_SEARCH_DOCS}document-enrichment.html`,
+      searchApplicationsTemplates: `${ENTERPRISE_SEARCH_DOCS}search-applications-templates.html`,
       searchApplications: `${ENTERPRISE_SEARCH_DOCS}search-applications.html`,
       searchTemplates: `${ELASTICSEARCH_DOCS}search-template.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
@@ -382,7 +384,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       gettingStarted: `${SECURITY_SOLUTION_DOCS}index.html`,
       privileges: `${SECURITY_SOLUTION_DOCS}sec-requirements.html`,
       ml: `${SECURITY_SOLUTION_DOCS}machine-learning.html`,
-      ruleChangeLog: `${SECURITY_SOLUTION_DOCS}prebuilt-rules-changelog.html`,
+      ruleChangeLog: `${SECURITY_SOLUTION_DOCS}prebuilt-rules-downloadable-updates.html`,
       detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
@@ -511,6 +513,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       indexAction: `${KIBANA_DOCS}index-action-type.html`,
       esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
       indexThreshold: `${KIBANA_DOCS}rule-type-index-threshold.html`,
+      maintenanceWindows: `${KIBANA_DOCS}maintenance-windows.html`,
       pagerDutyAction: `${KIBANA_DOCS}pagerduty-action-type.html`,
       preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
       preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}index-action-type.html#preconfigured-connector-alert-history`,
@@ -765,6 +768,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
+    },
+    telemetry: {
+      settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
     },
   });
 };

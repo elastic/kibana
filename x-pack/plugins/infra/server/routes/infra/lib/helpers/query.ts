@@ -91,10 +91,7 @@ export const getInventoryModelAggregations = (
 ): Record<string, estypes.AggregationsAggregationContainer> => {
   const inventoryModel = findInventoryModel(INVENTORY_MODEL_NODE_TYPE);
   return metrics.reduce(
-    (acc, metric) => ({
-      ...acc,
-      ...inventoryModel.metrics.snapshot?.[metric],
-    }),
+    (acc, metric) => Object.assign(acc, inventoryModel.metrics.snapshot?.[metric]),
     {}
   );
 };

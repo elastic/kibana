@@ -89,7 +89,7 @@ describe('Action List Handler', () => {
   });
 
   describe('Internals', () => {
-    const defaultParams = { pageSize: 10, page: 1, withAutomatedActions: true };
+    const defaultParams = { pageSize: 10, page: 1 };
     it('should return `notFound` when actions index does not exist', async () => {
       mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
       await actionListHandler(defaultParams);
@@ -117,7 +117,6 @@ describe('Action List Handler', () => {
         commands: 'running-processes',
         statuses: 'failed',
         userIds: 'userX',
-        withAutomatedActions: true,
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({

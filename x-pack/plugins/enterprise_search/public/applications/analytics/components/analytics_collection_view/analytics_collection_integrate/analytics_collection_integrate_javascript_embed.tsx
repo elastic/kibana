@@ -7,12 +7,10 @@
 
 import React from 'react';
 
-import { EuiCodeBlock, EuiLink, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { docLinks } from '../../../../shared/doc_links';
 
 import { AnalyticsConfig } from './analytics_collection_integrate_view';
 
@@ -90,25 +88,7 @@ window.elasticAnalytics.createTracker({
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptEmbed.stepThree.description"
-              defaultMessage="Track individual search events, like result clicks and searches, by using the trackSearch or trackSearchClick methods. {link}"
-              values={{
-                link: (
-                  <EuiLink
-                    href={docLinks.behavioralAnalyticsEvents}
-                    target="_blank"
-                    data-telemetry-id={
-                      'entSearch-analytics-integrate-javascriptEmbed-trackEventDocumentationLink'
-                    }
-                  >
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptEmbed.stepThree.link',
-                      {
-                        defaultMessage: 'Learn more about tracking events',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
+              defaultMessage="Track individual search events, like result clicks and searches, by using the trackSearch or trackSearchClick methods."
             />
           </p>
           <EuiCodeBlock language="javascript" isCopyable>

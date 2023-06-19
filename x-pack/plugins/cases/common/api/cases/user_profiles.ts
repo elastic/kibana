@@ -8,16 +8,16 @@
 import * as rt from 'io-ts';
 
 export const SuggestUserProfilesRequestRt = rt.intersection([
-  rt.type({
+  rt.strict({
     name: rt.string,
     owners: rt.array(rt.string),
   }),
-  rt.partial({ size: rt.number }),
+  rt.exact(rt.partial({ size: rt.number })),
 ]);
 
 export type SuggestUserProfilesRequest = rt.TypeOf<typeof SuggestUserProfilesRequestRt>;
 
-export const CaseUserProfileRt = rt.type({
+export const CaseUserProfileRt = rt.strict({
   uid: rt.string,
 });
 

@@ -79,8 +79,9 @@ export const createDataProviders = ({
 
   const arrayValues = Array.isArray(values) ? (values.length > 0 ? values : [null]) : [values];
 
-  return arrayValues.reduce<DataProvider[]>((dataProviders, value, index) => {
+  return arrayValues.reduce<DataProvider[]>((dataProviders, rawValue, index) => {
     let id: string = '';
+    const value = rawValue != null ? rawValue.toString() : rawValue;
     const appendedUniqueId = `${contextId}${eventId ? `-${eventId}` : ''}-${field}-${index}${
       value ? `-${value}` : ''
     }`;

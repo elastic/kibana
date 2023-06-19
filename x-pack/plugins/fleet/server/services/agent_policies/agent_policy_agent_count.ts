@@ -28,6 +28,7 @@ export const getAgentCountForAgentPolicies = async (
     Record<'agent_counts', { buckets: Array<{ key: string; doc_count: number }> }>
   >({
     index: AGENTS_INDEX,
+    ignore_unavailable: true,
     body: {
       query: {
         bool: {

@@ -22,6 +22,8 @@ import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
+
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
@@ -370,6 +372,8 @@ class AgentPolicyService {
     options: ListWithKuery & {
       withPackagePolicies?: boolean;
       fields?: string[];
+      esClient?: ElasticsearchClient;
+      withAgentCount?: boolean;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -385,6 +389,8 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
+      esClient,
+      withAgentCount = false,
     } = options;
 
     const baseFindParams = {
@@ -398,7 +404,10 @@ class AgentPolicyService {
     const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
     let agentPoliciesSO;
     try {
-      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({ ...baseFindParams, filter });
+      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+        ...baseFindParams,
+        filter,
+      });
     } catch (e) {
       const isBadRequest = e.output?.statusCode === 400;
       const isKQLSyntaxError = e.message?.startsWith('KQLSyntaxError');
@@ -421,14 +430,8 @@ class AgentPolicyService {
           ...agentPolicySO.attributes,
         };
         if (withPackagePolicies) {
-          const agentPolicyWithPackagePolicies = await this.get(
-            soClient,
-            agentPolicySO.id,
-            withPackagePolicies
-          );
-          if (agentPolicyWithPackagePolicies) {
-            agentPolicy.package_policies = agentPolicyWithPackagePolicies.package_policies;
-          }
+          agentPolicy.package_policies =
+            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
         return agentPolicy;
       },
@@ -441,6 +444,11 @@ class AgentPolicyService {
         id: agentPolicy.id,
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
+    }
+    if (esClient && withAgentCount) {
+      await populateAssignedAgentsCount(esClient, soClient, agentPolicies);
+    } else {
+      agentPolicies.forEach((item) => (item.agents = 0));
     }
 
     return {
@@ -847,7 +855,8 @@ class AgentPolicyService {
         fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
       }
 
-      return [...acc, fleetServerPolicy];
+      acc.push(fleetServerPolicy);
+      return acc;
     }, [] as FleetServerPolicy[]);
 
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
@@ -876,7 +885,8 @@ class AgentPolicyService {
           return acc;
         }
 
-        return [...acc, value];
+        acc.push(value);
+        return acc;
       }, [] as BulkResponseItem[]);
 
       logger.debug(

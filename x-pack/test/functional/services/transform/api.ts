@@ -272,10 +272,13 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async startTransform(transformId: string) {
+    async startTransform(transformId: string, assertSuccess = true) {
       log.debug(`Starting transform '${transformId}' ...`);
       const { body, status } = await esSupertest.post(`/_transform/${transformId}/_start`);
-      this.assertResponseStatusCode(200, status, body);
+
+      if (assertSuccess) {
+        this.assertResponseStatusCode(200, status, body);
+      }
     },
 
     async stopTransform(transformId: string) {

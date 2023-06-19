@@ -47,6 +47,7 @@ export interface FleetConfigType {
   };
   internal?: {
     disableILMPolicies: boolean;
+    fleetServerStandalone: boolean;
   };
 }
 

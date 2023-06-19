@@ -10,22 +10,13 @@ import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
 import { createStackFrameMetadata, getCalleeLabel } from './profiling';
 
-export enum FlameGraphComparisonMode {
-  Absolute = 'absolute',
-  Relative = 'relative',
-}
-
-export enum FlameGraphNormalizationMode {
-  Scale = 'scale',
-  Time = 'time',
-}
-
 export interface BaseFlameGraph {
   Size: number;
   Edges: number[][];
 
   FileID: string[];
   FrameType: number[];
+  Inline: boolean[];
   ExeFilename: string[];
   AddressOrLine: number[];
   FunctionName: string[];
@@ -37,16 +28,23 @@ export interface BaseFlameGraph {
   CountExclusive: number[];
 
   TotalSeconds: number;
+  SamplingRate: number;
 }
 
 // createBaseFlameGraph encapsulates the tree representation into a serialized form.
-export function createBaseFlameGraph(tree: CalleeTree, totalSeconds: number): BaseFlameGraph {
+export function createBaseFlameGraph(
+  tree: CalleeTree,
+  samplingRate: number,
+  totalSeconds: number
+): BaseFlameGraph {
   const graph: BaseFlameGraph = {
     Size: tree.Size,
+    SamplingRate: samplingRate,
     Edges: new Array<number[]>(tree.Size),
 
     FileID: tree.FileID.slice(0, tree.Size),
     FrameType: tree.FrameType.slice(0, tree.Size),
+    Inline: tree.Inline.slice(0, tree.Size),
     ExeFilename: tree.ExeFilename.slice(0, tree.Size),
     AddressOrLine: tree.AddressOrLine.slice(0, tree.Size),
     FunctionName: tree.FunctionName.slice(0, tree.Size),
@@ -84,10 +82,12 @@ export interface ElasticFlameGraph extends BaseFlameGraph {
 export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
   const graph: ElasticFlameGraph = {
     Size: base.Size,
+    SamplingRate: base.SamplingRate,
     Edges: base.Edges,
 
     FileID: base.FileID,
     FrameType: base.FrameType,
+    Inline: base.Inline,
     ExeFilename: base.ExeFilename,
     AddressOrLine: base.AddressOrLine,
     FunctionName: base.FunctionName,
@@ -137,12 +137,14 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
     const metadata = createStackFrameMetadata({
       FileID: graph.FileID[i],
       FrameType: graph.FrameType[i],
+      Inline: graph.Inline[i],
       ExeFileName: graph.ExeFilename[i],
       AddressOrLine: graph.AddressOrLine[i],
       FunctionName: graph.FunctionName[i],
       FunctionOffset: graph.FunctionOffset[i],
       SourceFilename: graph.SourceFilename[i],
       SourceLine: graph.SourceLine[i],
+      SamplingRate: graph.SamplingRate,
     });
     graph.Label[i] = getCalleeLabel(metadata);
   }

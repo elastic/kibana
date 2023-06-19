@@ -15,6 +15,7 @@ import { Plugin } from '@kbn/core/public';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
@@ -51,6 +52,7 @@ export interface DataVisualizerStartDependencies {
   fieldFormats: FieldFormatsStart;
   uiActions?: UiActionsStart;
   cloud?: CloudStart;
+  savedSearch: SavedSearchPublicPluginStart;
 }
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;

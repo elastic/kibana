@@ -10,7 +10,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 
-import { OsqueryActionResults } from '.';
+import { OsqueryActionResults } from './osquery_results';
 import { queryClient } from '../../query_client';
 import { useKibana } from '../../common/lib/kibana';
 import * as useLiveQueryDetails from '../../actions/use_live_query_details';
@@ -32,7 +32,7 @@ const enablePrivileges = () => {
 };
 
 const defaultProps: OsqueryActionResultsProps = {
-  ruleName: ['Test-rule'],
+  ruleName: 'Test-rule',
   actionItems: [
     {
       _id: 'test',
@@ -47,11 +47,13 @@ const defaultProps: OsqueryActionResultsProps = {
   ],
   ecsData: {
     _id: 'test',
+    _index: 'test',
   },
 };
 
 const defaultPermissions = {
   osquery: {
+    read: true,
     runSavedQueries: false,
     readSavedQueries: false,
   },

@@ -7,6 +7,7 @@
 
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObjectError } from '@kbn/core/types';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   CommentAttributes,
@@ -49,3 +50,5 @@ export type FileAttachmentRequest = Omit<
 };
 
 export type AttachmentSavedObject = SavedObject<CommentAttributes>;
+
+export type SOWithErrors<T> = Omit<SavedObject<T>, 'attributes'> & { error: SavedObjectError };

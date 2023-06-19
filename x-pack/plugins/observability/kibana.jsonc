@@ -25,11 +25,12 @@
       "triggersActionsUi",
       "security",
       "share",
+      "spaces",
       "unifiedSearch",
       "visualizations"
     ],
-    "optionalPlugins": ["discover", "home", "licensing", "spaces", "usageCollection"],
-    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch"],
+    "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud"],
+    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "cloudChat"],
     "extraPublicDirs": ["common"]
   }
 }

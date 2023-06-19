@@ -1,23 +1,30 @@
-# Query Debugging
+# Elasticsearch query debugging (AKA Inspector)
 
-When debugging an issue with the APM UI it can be very helpful to see the exact Elasticsearch queries and responses that was made for a given API request.
-To enable debugging of Elasticsearch queries in APM UI do the following:
+When debugging an issue within APM UI it can be very helpful to see the exact Elasticsearch queries and responses that was made for a specific page. This can be achieved by enabling the Inspector:
 
-1. Go to "Stack Management"
-2. Under "Kibana" on the left-hand side, select "Advanced Settings"
-3. Search for "Observability"
-4. Enable "Inspect ES queries" setting
-5. Click "Save"
+1. Open APM UI
+2. Click "Settings" (top right corner)
+3. Click "General Settings" tab
+4. Enable "Inspect ES queries" and click "Save"
 
-When you navigate back to APM UI you can now inspect Elasticsearch queries by opening your browser's Developer Tools and selecting an api request to APM's api.
-There will be an `_inspect` key containing every Elasticsearch query made during that request including both requests and responses to and from Elasticsearch.
+You will now be able to navigate to any page in APM UI, and see a new button in the top-right corner called "Inspect". Clicking this will open a fly-out listing all the requests made to Elasticsearch.
+
+![apm-inspect2](https://github.com/elastic/kibana/assets/209966/ba5ebad9-cecc-4ed8-b6c6-9ffc0ce14c6d)
+
+## Inspecting specific http endpoints
+
+It is also possible to see the Elasticsearch queries made for a specific http endpoint. Again, navigate to the page making the request, then open your browser's Developer Tools and select the http request of interest. There will be an `_inspect` key in the response containing every Elasticsearch query made during that request including both requests and responses to and from Elasticsearch.
 
 ![image](https://user-images.githubusercontent.com/209966/140500012-b075adf0-8401-40fd-99f8-85b68711de17.png)
 
-## Example
 
-When "Inspect ES queries" are enabed all API calls to the APM API will be include the query param `_inspect=true`. For the environments API the request / response will be:
 
+
+
+
+<details>
+  <summary>See example</summary>
+  
 ```
 GET /internal/apm/environments?start=<start>&end=<end>&_inspect=true
 ```
@@ -143,3 +150,6 @@ GET /internal/apm/environments?start=<start>&end=<end>&_inspect=true
   ]
 }
 ```
+
+</details>
+

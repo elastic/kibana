@@ -13,9 +13,9 @@ export const rubyDefinition: LanguageDefinition = {
   advancedConfig: docLinks.rubyAdvancedConfig,
   apiReference: docLinks.rubyExamples,
   buildSearchQuery: `client.search(index: 'books', q: 'snow')`,
-  configureClient: `client = ElasticsearchServerless::Client.new(
-  api_key: 'your_api_key',
-  url: 'https://my-deployment-url'
+  configureClient: ({ url, apiKey }) => `client = ElasticsearchServerless::Client.new(
+  api_key: '${apiKey}',
+  url: '${url}'
 )
 `,
   basicConfig: docLinks.rubyBasicConfig,
@@ -38,5 +38,5 @@ $ gem install elasticsearch-serverless-x.x.x.gem`,
   name: i18n.translate('xpack.serverlessSearch.languages.ruby', {
     defaultMessage: 'Ruby',
   }),
-  testConnection: `TBD`,
+  testConnection: `client.info`,
 };

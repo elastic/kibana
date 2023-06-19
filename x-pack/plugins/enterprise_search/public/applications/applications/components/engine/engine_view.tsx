@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { useParams, Redirect, Switch } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
@@ -48,9 +48,16 @@ export const EngineView: React.FC = () => {
   }>();
   const { renderHeaderActions } = useValues(KibanaLogic);
 
+  useLayoutEffect(() => {
+    renderHeaderActions(EngineHeaderDocsAction);
+
+    return () => {
+      renderHeaderActions();
+    };
+  }, []);
+
   useEffect(() => {
     fetchEngine({ engineName });
-    renderHeaderActions(EngineHeaderDocsAction);
   }, [engineName]);
 
   if (fetchEngineApiStatus === Status.ERROR) {
@@ -90,7 +97,7 @@ export const EngineView: React.FC = () => {
         <Route path={SEARCH_APPLICATION_CONNECT_PATH} component={EngineConnect} />
         <Redirect
           from={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}`}
-          to={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}/${SearchApplicationConnectTabs.API}`}
+          to={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}/${SearchApplicationConnectTabs.SAFESEARCHAPI}`}
         />
         <Route>
           <EnterpriseSearchEnginesPageTemplate

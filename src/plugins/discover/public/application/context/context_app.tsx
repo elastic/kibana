@@ -69,14 +69,14 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
 
   useEffect(() => {
     services.chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(referrer),
+      ...getRootBreadcrumbs({ breadcrumb: referrer, services }),
       {
         text: i18n.translate('discover.context.breadcrumb', {
           defaultMessage: 'Surrounding documents',
         }),
       },
     ]);
-  }, [locator, referrer, services.chrome]);
+  }, [locator, referrer, services]);
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -169,11 +169,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     };
   };
 
-  const contextAppTitle = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    contextAppTitle.current?.focus();
-  }, []);
-
   return (
     <Fragment>
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
@@ -184,8 +179,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
             id="contextAppTitle"
             className="euiScreenReaderOnly"
             data-test-subj="discoverContextAppTitle"
-            tabIndex={-1}
-            ref={contextAppTitle}
           >
             {i18n.translate('discover.context.pageTitle', {
               defaultMessage: 'Documents surrounding #{anchorId}',

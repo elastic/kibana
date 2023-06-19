@@ -48,6 +48,7 @@ export const CreatePackageJson: Task = {
         sha: config.getBuildSha(),
         distributable: true,
         release: config.isRelease,
+        date: config.getBuildDate(),
       },
       repository: pkg.repository,
       engines: {

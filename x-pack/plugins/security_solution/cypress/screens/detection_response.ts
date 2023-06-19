@@ -39,3 +39,6 @@ export const RULE_TABLE_VIEW_ALL_OPEN_ALERTS_BTN = getDataTestSubjectSelector(
 export const RULE_TABLE_ROW_RULE_NAME_BTN = getDataTestSubjectSelector(
   'severityRuleAlertsTable-name'
 );
+
+export const ALERTS_DONUT_CHART =
+  '[data-test-subj="detection-response-alerts-by-status-panel"] [data-test-subj="donut-chart"]';

@@ -58,6 +58,14 @@ export interface Module {
   kibana: KibanaObjects;
 }
 
+export interface RecognizeResult {
+  id: string;
+  title: string;
+  query: any;
+  description: string;
+  logo: Logo;
+}
+
 export interface FileBasedModule extends Omit<Module, 'jobs' | 'datafeeds' | 'kibana'> {
   jobs: Array<{ file: string; id: string }>;
   datafeeds: Array<{ file: string; job_id: string; id: string }>;

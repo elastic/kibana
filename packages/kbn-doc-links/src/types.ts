@@ -130,6 +130,7 @@ export interface DocLinks {
     readonly connectorsPostgreSQL: string;
     readonly connectorsS3: string;
     readonly connectorsSharepoint: string;
+    readonly connectorsSharepointOnline: string;
     readonly connectorsWorkplaceSearch: string;
     readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
@@ -147,6 +148,7 @@ export interface DocLinks {
     readonly machineLearningStart: string;
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
+    readonly searchApplicationsTemplates: string;
     readonly searchApplications: string;
     readonly searchTemplates: string;
     readonly start: string;
@@ -393,6 +395,7 @@ export interface DocLinks {
     indexAction: string;
     esQuery: string;
     indexThreshold: string;
+    maintenanceWindows: string;
     pagerDutyAction: string;
     preconfiguredConnectors: string;
     preconfiguredAlertHistoryConnector: string;
@@ -534,5 +537,8 @@ export interface DocLinks {
   };
   readonly synthetics: {
     readonly featureRoles: string;
+  };
+  readonly telemetry: {
+    readonly settings: string;
   };
 }

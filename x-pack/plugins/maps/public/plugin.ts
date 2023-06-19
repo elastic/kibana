@@ -185,7 +185,7 @@ export class MapsPlugin
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
-    plugins.visualizations.registerAlias(getMapsVisTypeAlias(plugins.visualizations));
+    plugins.visualizations.registerAlias(getMapsVisTypeAlias());
     plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
 
     core.application.register({

@@ -24,7 +24,7 @@
 [
   {
     "name": "apm",
-    "version": "8.9.0-preview-1683859066",
+    "version": "8.9.0-preview-1684289323",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
@@ -43,6 +43,12 @@
   {
     "name": "profiler_symbolizer",
     "version": "8.8.0-preview",
+    "forceAlignStackVersion": true,
+    "allowSyncToPrerelease": true
+  },
+  {
+    "name": "profiler_collector",
+    "version": "8.9.0-preview",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },

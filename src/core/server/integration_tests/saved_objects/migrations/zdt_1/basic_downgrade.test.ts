@@ -97,7 +97,7 @@ describe('ZDT upgrades - basic downgrade', () => {
   it('migrates the documents', async () => {
     await createBaseline();
 
-    const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
+    const { runMigrations, client } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
       logFilePath,
       types: [typeV1],
@@ -129,10 +129,9 @@ describe('ZDT upgrades - basic downgrade', () => {
       sample_type: '10.2.0',
     });
 
-    const { saved_objects: sampleDocs } = await savedObjectsRepository.find({
-      type: 'sample_type',
-    });
-    expect(sampleDocs).toHaveLength(5);
+    await expect(
+      client.count({ index: '.kibana_1', query: { term: { type: 'sample_type' } } })
+    ).resolves.toHaveProperty('count', 5);
 
     const records = await parseLogFile(logFilePath);
 

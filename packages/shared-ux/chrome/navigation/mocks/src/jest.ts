@@ -6,21 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { BehaviorSubject } from 'rxjs';
 import { NavigationServices, ChromeNavigationNodeViewModel } from '../../types';
+import { navLinksMock } from './navlinks';
 
-export const getServicesMock = (): NavigationServices => {
+export const getServicesMock = ({
+  navLinks = navLinksMock,
+}: { navLinks?: ChromeNavLink[] } = {}): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
-  const loadingCount$ = new BehaviorSubject(0);
   const recentlyAccessed$ = new BehaviorSubject([]);
+  const navLinks$ = new BehaviorSubject(navLinks);
 
   return {
     basePath,
-    loadingCount$,
     recentlyAccessed$,
+    navLinks$,
     navIsOpen: true,
     navigateToUrl,
+    onProjectNavigationChange: jest.fn(),
   };
 };
 

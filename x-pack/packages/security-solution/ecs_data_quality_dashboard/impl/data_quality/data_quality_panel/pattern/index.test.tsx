@@ -46,6 +46,7 @@ const defaultProps = {
   getGroupByFieldsOnClick: jest.fn(),
   ilmPhases: ['hot', 'warm', 'unmanaged'],
   indexNames: undefined,
+  isAssistantEnabled: true,
   openCreateCaseFlyout: jest.fn(),
   patternRollup: undefined,
   selectedIndex: null,

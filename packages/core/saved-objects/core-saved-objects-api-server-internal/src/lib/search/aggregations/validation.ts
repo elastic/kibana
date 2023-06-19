@@ -194,11 +194,9 @@ const recursiveRewrite = (
       newValue = recursiveRewrite(value, nestedContext, [...parents, key]);
     }
 
-    return {
-      ...memo,
-      [newKey]: newValue,
-    };
-  }, {});
+    memo[newKey] = newValue;
+    return memo;
+  }, {} as Record<string, unknown>);
 };
 
 const childContext = (context: ValidationContext, path: string): ValidationContext => {

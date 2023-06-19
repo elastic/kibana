@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import {
   getAllMonitors,
@@ -61,7 +62,9 @@ export class StatusRuleExecutor {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
-    this.esClient = new UptimeEsClient(this.soClient, scopedClient);
+    this.esClient = new UptimeEsClient(this.soClient, scopedClient, {
+      heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+    });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
   }
@@ -128,6 +131,9 @@ export class StatusRuleExecutor {
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
     } = await this.getMonitors();
+    const from = this.previousStartedAt
+      ? moment(this.previousStartedAt).subtract(1, 'minute').toISOString()
+      : 'now-2m';
 
     if (enabledMonitorQueryIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
@@ -135,7 +141,7 @@ export class StatusRuleExecutor {
         listOfLocations,
         {
           to: 'now',
-          from: this.previousStartedAt?.toISOString() ?? 'now-1m',
+          from,
         },
         enabledMonitorQueryIds,
         monitorLocationMap,
