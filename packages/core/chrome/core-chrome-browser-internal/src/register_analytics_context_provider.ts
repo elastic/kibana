@@ -7,7 +7,7 @@
  */
 
 import { type Observable, map } from 'rxjs';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 
 /**
  * Registers the Analytics context provider to enrich events with the page title.
