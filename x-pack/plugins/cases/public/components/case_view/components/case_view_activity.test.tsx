@@ -38,7 +38,6 @@ import { ActionTypes } from '../../../../common/api';
 import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
-import { category } from '@kbn/custom-integrations-plugin/common';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
