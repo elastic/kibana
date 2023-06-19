@@ -63,7 +63,7 @@ export const guideCards: GuideCardConstants[] = [
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
-        defaultMessage="Search across databases and {lineBreak} business systems"
+        defaultMessage="Search across databases {lineBreak} and business systems"
         values={{
           lineBreak: <br />,
         }}
@@ -132,6 +132,22 @@ export const guideCards: GuideCardConstants[] = [
     order: 11,
   },
   {
+    solution: 'observability',
+    icon: 'videoPlayer',
+    title: i18n.translate(
+      'guidedOnboardingPackage.gettingStarted.cards.syntheticsObservability.title',
+      {
+        defaultMessage: 'Create a Synthetic Monitor',
+      }
+    ),
+    navigateTo: {
+      appId: 'synthetics',
+      path: '/monitors/getting-started',
+    },
+    telemetryId: 'onboarding--observability--synthetics',
+    order: 14,
+  },
+  {
     solution: 'security',
     icon: 'securitySignal',
     title: (
@@ -172,7 +188,7 @@ export const guideCards: GuideCardConstants[] = [
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"
-        defaultMessage="Secure my cloud assets with {lineBreak} cloud security posture management (CSPM)"
+        defaultMessage="Secure my cloud assets with cloud {lineBreak} security posture management (CSPM)"
         values={{
           lineBreak: <br />,
         }}

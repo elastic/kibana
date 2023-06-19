@@ -8,6 +8,8 @@
 import { merge } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { getApmPolicy } from './get_apm_policy';
 import { ProfilingSetupOptions } from './types';
 import { PartialSetupState } from '../../../common/setup';
@@ -112,18 +114,39 @@ const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
 const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 
+async function getPackagePolicy({
+  soClient,
+  packagePolicyClient,
+  packageName,
+}: {
+  packagePolicyClient: PackagePolicyClient;
+  soClient: SavedObjectsClientContract;
+  packageName: string;
+}) {
+  const packagePolicies = await packagePolicyClient.list(soClient, {});
+  return packagePolicies.items.find((pkg) => pkg.name === packageName);
+}
+
+export async function getCollectorPolicy({
+  soClient,
+  packagePolicyClient,
+}: {
+  packagePolicyClient: PackagePolicyClient;
+  soClient: SavedObjectsClientContract;
+}) {
+  return getPackagePolicy({
+    soClient,
+    packagePolicyClient,
+    packageName: COLLECTOR_PACKAGE_POLICY_NAME,
+  });
+}
+
 export async function validateCollectorPackagePolicy({
   soClient,
   packagePolicyClient,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const packagePolicies = await packagePolicyClient.list(soClient, {});
-  return {
-    policies: {
-      collector: {
-        installed: packagePolicies.items.some((pkg) => pkg.name === COLLECTOR_PACKAGE_POLICY_NAME),
-      },
-    },
-  };
+  const collectorPolicy = await getCollectorPolicy({ soClient, packagePolicyClient });
+  return { policies: { collector: { installed: !!collectorPolicy } } };
 }
 
 export function generateSecretToken() {
@@ -138,6 +161,7 @@ export function generateSecretToken() {
   return result;
 }
 
+type PackagePolicyVars = PackageInputType & { secret_token?: string };
 export function getVarsFor({
   config,
   includeSecretToken,
@@ -145,13 +169,13 @@ export function getVarsFor({
   config: PackageInputType;
   includeSecretToken: boolean;
 }) {
-  const configKeys = Object.keys(config) as Array<keyof PackageInputType>;
+  const configKeys = Object.keys(config) as Array<keyof PackagePolicyVars>;
   if (includeSecretToken) {
     configKeys.push('secret_token');
   }
 
   return configKeys.reduce<
-    Partial<Record<keyof PackageInputType, { type: 'text' | 'bool'; value: any }>>
+    Partial<Record<keyof PackagePolicyVars, { type: 'text' | 'bool'; value: any }>>
   >((acc, currKey) => {
     const value = currKey === 'secret_token' ? generateSecretToken() : config[currKey];
     const type = typeof value === 'boolean' ? 'bool' : 'text';
@@ -198,18 +222,26 @@ export async function createCollectorPackagePolicy({
   });
 }
 
+export async function getSymbolizerPolicy({
+  soClient,
+  packagePolicyClient,
+}: {
+  packagePolicyClient: PackagePolicyClient;
+  soClient: SavedObjectsClientContract;
+}) {
+  return getPackagePolicy({
+    soClient,
+    packagePolicyClient,
+    packageName: SYMBOLIZER_PACKAGE_POLICY_NAME,
+  });
+}
+
 export async function validateSymbolizerPackagePolicy({
   soClient,
   packagePolicyClient,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const packagePolicies = await packagePolicyClient.list(soClient, {});
-  return {
-    policies: {
-      symbolizer: {
-        installed: packagePolicies.items.some((pkg) => pkg.name === SYMBOLIZER_PACKAGE_POLICY_NAME),
-      },
-    },
-  };
+  const symbolizerPackagePolicy = await getSymbolizerPolicy({ soClient, packagePolicyClient });
+  return { policies: { symbolizer: { installed: !!symbolizerPackagePolicy } } };
 }
 
 export async function createSymbolizerPackagePolicy({

@@ -67,42 +67,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(response).to.eql(testData);
     });
 
-    // This test will need to be fixed.
-    it.skip('applies the correct CSS classes', async () => {
-      const grokPattern = '\\[(?:-|%{NUMBER:bytes:int})\\]';
-
-      await PageObjects.grokDebugger.setPatternInput(grokPattern);
-
-      const GROK_START = 'grokStart';
-      const GROK_PATTERN_NAME = 'grokPatternName';
-      const GROK_SEPARATOR = 'grokSeparator';
-      const GROK_FIELD_NAME = 'grokFieldName';
-      const GROK_FIELD_TYPE = 'grokFieldType';
-      const GROK_END = 'grokEnd';
-      const GROK_ESCAPE = 'grokEscape';
-      const GROK_ESCAPED = 'grokEscaped';
-      const GROK_REGEX = 'grokRegex';
-
-      await PageObjects.grokDebugger.assertPatternInputSyntaxHighlighting([
-        { token: GROK_ESCAPE, content: '\\' },
-        { token: GROK_ESCAPED, content: '[' },
-        { token: GROK_REGEX, content: '(' },
-        { token: GROK_REGEX, content: '?' },
-        { token: GROK_REGEX, content: ':' },
-        { token: GROK_REGEX, content: '|' },
-        { token: GROK_START, content: '%{' },
-        { token: GROK_PATTERN_NAME, content: 'NUMBER' },
-        { token: GROK_SEPARATOR, content: ':' },
-        { token: GROK_FIELD_NAME, content: 'bytes' },
-        { token: GROK_SEPARATOR, content: ':' },
-        { token: GROK_FIELD_TYPE, content: 'int' },
-        { token: GROK_END, content: '}' },
-        { token: GROK_REGEX, content: ')' },
-        { token: GROK_ESCAPE, content: '\\' },
-        { token: GROK_ESCAPED, content: ']' },
-      ]);
-    });
-
     after(async () => {
       await security.testUser.restoreDefaults();
     });

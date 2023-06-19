@@ -9,6 +9,7 @@
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AvailableAnnotationIcons } from '../constants';
+import { EventAnnotationConfig } from '../types';
 
 import type { QueryPointEventAnnotationArgs, QueryPointEventAnnotationOutput } from './types';
 
@@ -111,3 +112,22 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
     };
   },
 };
+
+export const getDefaultQueryAnnotation = (
+  id: string,
+  fieldName: string,
+  timeField: string
+): EventAnnotationConfig => ({
+  filter: {
+    type: 'kibana_query',
+    query: `${fieldName}: *`,
+    language: 'kuery',
+  },
+  timeField,
+  type: 'query',
+  key: {
+    type: 'point_in_time',
+  },
+  id,
+  label: `${fieldName}: *`,
+});
