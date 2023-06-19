@@ -12,11 +12,11 @@ import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
 import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
 import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
-import type { NavLinkItem } from '../types';
+import type { NavigationLink } from '../../../links/types';
 import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
 
-const manageNavLink: NavLinkItem = {
+const manageNavLink: NavigationLink = {
   id: SecurityPageName.administration,
   title: 'manage',
   description: 'manage description',
@@ -30,7 +30,7 @@ const manageNavLink: NavLinkItem = {
     },
   ],
 };
-const alertsNavLink: NavLinkItem = {
+const alertsNavLink: NavigationLink = {
   id: SecurityPageName.alerts,
   title: 'alerts',
   description: 'alerts description',

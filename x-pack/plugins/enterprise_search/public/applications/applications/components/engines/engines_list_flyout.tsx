@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
 
-import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
+import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
 import { SEARCH_INDEX_PATH } from '../../../enterprise_search_content/routes';
 import { healthColorsMap } from '../../../shared/constants/health_colors';
@@ -54,7 +54,7 @@ export const EngineListIndicesFlyout: React.FC = () => {
   const { indices } = fetchEngineData;
   const engineFetchError = fetchEngineApiStatus === Status.ERROR ? true : false;
 
-  const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngineIndex>> = [
+  const columns: Array<EuiBasicTableColumn<EnterpriseSearchApplicationIndex>> = [
     {
       field: 'name',
       name: i18n.translate(

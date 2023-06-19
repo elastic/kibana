@@ -45,6 +45,7 @@ const enabledActionTypes = [
   '.jira',
   '.resilient',
   '.gen-ai',
+  '.d3security',
   '.slack',
   '.slack_api',
   '.tines',

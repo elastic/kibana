@@ -10,7 +10,10 @@ import { chain } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  DEFAULT_INDEX_TYPES_MAP,
+  type IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type {
   BaseState,
   CalculateExcludeFiltersState,
@@ -60,7 +63,6 @@ import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
 import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
-import { DEFAULT_INDEX_TYPES_MAP } from '../kibana_migrator_constants';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {
@@ -100,6 +102,7 @@ describe('migrations v2 model', () => {
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
     tempIndex: '.kibana_7.11.0_reindex_temp',
+    tempIndexAlias: '.kibana_7.11.0_reindex_temp_alias',
     excludeOnUpgradeQuery: {
       bool: {
         must_not: [
@@ -330,6 +333,21 @@ describe('migrations v2 model', () => {
             `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
           );
         });
+        test('INIT -> FATAL when later version alias exists', () => {
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_7.12.0': {}, '.kibana': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+          });
+          const newState = model(initState, res) as FatalState;
+
+          expect(newState.controlState).toEqual('FATAL');
+          expect(newState.reason).toMatchInlineSnapshot(
+            `"The .kibana_7.12.0 alias refers to a newer version of Kibana: v7.12.0"`
+          );
+        });
         test('INIT -> FATAL when .kibana points to multiple indices', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana_7.12.0_001': {
@@ -365,13 +383,13 @@ describe('migrations v2 model', () => {
             '.kibana_7.invalid.0_001': {
               aliases: {
                 '.kibana': {},
-                '.kibana_7.12.0': {},
+                '.kibana_7.11.0': {},
               },
               mappings: mappingsWithUnknownType,
               settings: {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+            '.kibana_7.10.0_001': {
+              aliases: { '.kibana_7.10.0': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
@@ -571,13 +589,13 @@ describe('migrations v2 model', () => {
             '.kibana_7.invalid.0_001': {
               aliases: {
                 '.kibana': {},
-                '.kibana_7.12.0': {},
+                '.kibana_7.11.0': {},
               },
               mappings: mappingsWithUnknownType,
               settings: {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+            '.kibana_7.10.0_001': {
+              aliases: { '.kibana_7.10.0': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
@@ -588,8 +606,8 @@ describe('migrations v2 model', () => {
           expect(newState.sourceIndex.value).toBe('.kibana_7.invalid.0_001');
           expect(newState.aliases).toEqual({
             '.kibana': '.kibana_7.invalid.0_001',
-            '.kibana_7.11.0': '.kibana_7.11.0_001',
-            '.kibana_7.12.0': '.kibana_7.invalid.0_001',
+            '.kibana_7.10.0': '.kibana_7.10.0_001',
+            '.kibana_7.11.0': '.kibana_7.invalid.0_001',
           });
         });
 
@@ -1746,9 +1764,10 @@ describe('migrations v2 model', () => {
 
       describe('if the migrator source index did NOT exist', () => {
         test('READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC', () => {
-          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right(
-            'synchronized_successfully' as const
-          );
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+            type: 'synchronization_successful' as const,
+            data: [],
+          });
           const newState = model(state, res);
           expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
         });
@@ -1756,9 +1775,10 @@ describe('migrations v2 model', () => {
 
       describe('if the migrator source index did exist', () => {
         test('READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
-          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right(
-            'synchronized_successfully' as const
-          );
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+            type: 'synchronization_successful' as const,
+            data: [],
+          });
           const newState = model(
             {
               ...state,
@@ -1773,7 +1793,7 @@ describe('migrations v2 model', () => {
 
       test('READY_TO_REINDEX_SYNC -> FATAL if the synchronization between migrators fails', () => {
         const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.left({
-          type: 'sync_failed',
+          type: 'synchronization_failed',
           error: new Error('Other migrators failed to reach the synchronization point'),
         });
         const newState = model(state, res);
@@ -2026,15 +2046,16 @@ describe('migrations v2 model', () => {
       };
 
       test('DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK if synchronization succeeds', () => {
-        const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.right(
-          'synchronized_successfully' as const
-        );
+        const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+          type: 'synchronization_successful' as const,
+          data: [],
+        });
         const newState = model(state, res);
         expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
       });
       test('DONE_REINDEXING_SYNC -> FATAL if the synchronization between migrators fails', () => {
         const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.left({
-          type: 'sync_failed',
+          type: 'synchronization_failed',
           error: new Error('Other migrators failed to reach the synchronization point'),
         });
         const newState = model(state, res);
@@ -2934,6 +2955,24 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
 
+      test('CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC if mustRelocateDocuments === true', () => {
+        const versionIndexReadyActions = Option.some([
+          { add: { index: 'kibana-index', alias: 'my-alias' } },
+        ]);
+
+        const newState = model(
+          {
+            ...сheckVersionIndexReadyActionsState,
+            mustRelocateDocuments: true,
+            versionIndexReadyActions,
+          },
+          res
+        ) as PostInitState;
+        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY_SYNC');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+
       test('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE if none versionIndexReadyActions', () => {
         const newState = model(сheckVersionIndexReadyActionsState, res) as PostInitState;
         expect(newState.controlState).toEqual('DONE');
@@ -2953,10 +2992,10 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.none as Option.None,
         targetIndex: '.kibana_7.11.0_001',
       };
-      test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY', () => {
+      test('CREATE_NEW_TARGET -> CHECK_VERSION_INDEX_READY_ACTIONS', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
         const newState = model(createNewTargetState, res);
-        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.controlState).toEqual('CHECK_VERSION_INDEX_READY_ACTIONS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -2970,7 +3009,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
-      test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
+      test('CREATE_NEW_TARGET -> CHECK_VERSION_INDEX_READY_ACTIONS resets the retry count and delay', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
         const testState = {
           ...createNewTargetState,
@@ -2979,7 +3018,7 @@ describe('migrations v2 model', () => {
         };
 
         const newState = model(testState, res);
-        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.controlState).toEqual('CHECK_VERSION_INDEX_READY_ACTIONS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });

@@ -82,7 +82,7 @@ class InternalEngineTransporter implements Transporter {
   ) {}
 
   async performRequest(request: SearchRequest) {
-    const url = `/internal/enterprise_search/engines/${this.engineName}/search`;
+    const url = `/internal/enterprise_search/search_applications/${this.engineName}/search`;
 
     const response = await this.http.post<SearchResponse>(url, {
       body: JSON.stringify(request),
@@ -136,19 +136,22 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
         panelPaddingSize="none"
         closePopover={setCloseConfiguration}
         button={
-          <EuiButtonEmpty
-            color="primary"
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={setCloseConfiguration}
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
-              {
-                defaultMessage: 'Configuration',
-              }
-            )}
-          </EuiButtonEmpty>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            {hasSchemaConflicts && <EuiIcon type="alert" color="danger" />}
+            <EuiButtonEmpty
+              color="primary"
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={setCloseConfiguration}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
+                {
+                  defaultMessage: 'Configuration',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexGroup>
         }
       >
         <EuiContextMenuPanel style={{ width: 300 }}>
@@ -232,7 +235,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
-                  connectTabId: SearchApplicationConnectTabs.API,
+                  connectTabId: SearchApplicationConnectTabs.SAFESEARCHAPI,
                   engineName,
                 })
               )

@@ -27,20 +27,24 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
 // `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
 
 interface ProgressControlProps {
+  isBrushCleared: boolean;
   progress: number;
   progressMessage: string;
   onRefresh: () => void;
   onCancel: () => void;
+  onReset: () => void;
   isRunning: boolean;
   shouldRerunAnalysis: boolean;
 }
 
 export const ProgressControls: FC<ProgressControlProps> = ({
   children,
+  isBrushCleared,
   progress,
   progressMessage,
   onRefresh,
   onCancel,
+  onReset,
   isRunning,
   shouldRerunAnalysis,
 }) => {
@@ -49,7 +53,7 @@ export const ProgressControls: FC<ProgressControlProps> = ({
   const analysisCompleteStyle = { display: 'none' };
 
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
         {!isRunning && (
           <EuiButton
@@ -89,9 +93,21 @@ export const ProgressControls: FC<ProgressControlProps> = ({
           </EuiButton>
         )}
       </EuiFlexItem>
+      {(progress === 1 || isRunning === false) && !isBrushCleared ? (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="aiopsClearSelectionBadge"
+            size="s"
+            onClick={onReset}
+            color="text"
+          >
+            <FormattedMessage id="xpack.aiops.resetLabel" defaultMessage="Reset" />
+          </EuiButton>
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem>
         {progress === 1 ? (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
             </EuiFlexItem>

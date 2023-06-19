@@ -14,6 +14,7 @@ import type {
   SelectedDataView,
   SourcererDataView,
   SourcererUrlState,
+  RunTimeMappings,
 } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
@@ -371,6 +372,7 @@ export const useSourcererDataView = (
     []
   );
   const {
+    defaultDataView,
     signalIndexName,
     selectedDataView,
     sourcererScope: { missingPatterns, selectedPatterns: scopeSelectedPatterns, loading },
@@ -382,6 +384,7 @@ export const useSourcererDataView = (
       sourcererScope,
     };
   });
+
   const selectedPatterns = useMemo(
     () => sortWithExcludesAtEnd(scopeSelectedPatterns),
     [scopeSelectedPatterns]
@@ -395,14 +398,14 @@ export const useSourcererDataView = (
     () => ({
       ...fetchIndexReturn,
       dataView: fetchIndexReturn.dataView,
-      runtimeMappings: fetchIndexReturn.dataView?.getRuntimeMappings() ?? {},
-      title: fetchIndexReturn.dataView?.getIndexPattern() ?? '',
+      runtimeMappings: (fetchIndexReturn.dataView?.runtimeFieldMap as RunTimeMappings) ?? {},
+      title: fetchIndexReturn.dataView?.title ?? '',
       id: fetchIndexReturn.dataView?.id ?? null,
       loading: indexPatternsLoading,
       patternList: fetchIndexReturn.indexes,
       indexFields: fetchIndexReturn.indexPatterns
         .fields as SelectedDataView['indexPattern']['fields'],
-      fields: fetchIndexReturn.indexPatterns.fields,
+      fields: fetchIndexReturn.dataView?.fields,
     }),
     [fetchIndexReturn, indexPatternsLoading]
   );
@@ -430,15 +433,23 @@ export const useSourcererDataView = (
             scopeId,
             signalIndexName,
             patternList: sourcererDataView.patternList,
+            isDefaultDataViewSelected: sourcererDataView.id === defaultDataView.id,
           }),
-    [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
+    [
+      defaultDataView.id,
+      loading,
+      scopeId,
+      signalIndexName,
+      sourcererDataView.id,
+      sourcererDataView.loading,
+      sourcererDataView.patternList,
+    ]
   );
 
   const browserFields = useCallback(() => {
     const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
       sourcererDataView.patternList.join(','),
-      sourcererDataView.fields,
-      false
+      sourcererDataView.fields
     );
     return dataViewBrowserFields;
   }, [sourcererDataView.fields, sourcererDataView.patternList]);
