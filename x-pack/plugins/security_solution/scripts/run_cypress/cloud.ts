@@ -32,7 +32,6 @@ export const cli = () => {
         headless: false,
         headed: true,
         browser: 'chrome',
-        spec: './cypress/e2e/{,!(investigations,explore)/**/}*.cy.ts',
         ciBuildId:
           process.env.BUILDKITE_STEP_ID ??
           `hello-currents-${Math.random().toString(36).substring(2)}`,
