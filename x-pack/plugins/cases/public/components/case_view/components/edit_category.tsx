@@ -87,12 +87,15 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <EuiFlexGroup gutterSize="none" data-test-subj="case-category">
-          {!category && !isEditCategory && (
-            <p data-test-subj="no-categories">{i18n.NO_CATEGORIES}</p>
-          )}
-          {!isEditCategory && category && (
+          {!isEditCategory && (
             <EuiFlexItem>
-              <CategoryViewer category={category} />
+              {category ? (
+                <CategoryViewer category={category} />
+              ) : (
+                <EuiText size="xs" data-test-subj="no-categories">
+                  {i18n.NO_CATEGORIES}
+                </EuiText>
+              )}
             </EuiFlexItem>
           )}
           {isEditCategory && (
