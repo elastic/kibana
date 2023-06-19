@@ -40,11 +40,6 @@ export enum AggregationType {
   P99 = '99th',
 }
 
-export interface PreviewChartResponseItem {
-  name: string;
-  data: Array<{ x: number; y: number | null }>;
-}
-
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
 export type ThresholdMetActionGroupId = typeof THRESHOLD_MET_GROUP_ID;
 const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {

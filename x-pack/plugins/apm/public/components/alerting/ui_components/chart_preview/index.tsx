@@ -11,6 +11,7 @@ import {
   BarSeries,
   Chart,
   LineAnnotation,
+  niceTimeFormatter,
   Position,
   RectAnnotation,
   RectAnnotationDatum,
@@ -31,7 +32,6 @@ import {
   TimeLabelForData,
   TIME_LABELS,
   getDomain,
-  useDateFormatter,
 } from './chart_preview_helper';
 import { ALERT_PREVIEW_BUCKET_SIZE } from '../../utils/helper';
 import { Coordinate } from '../../../../../typings/timeseries';
@@ -106,7 +106,10 @@ export function ChartPreview({
     min: Math.min(yMin, threshold) * 0.9, // Add 10% headroom.
   };
 
-  const dateFormatter = useDateFormatter(xMin, xMax);
+  const dateFormatter = useMemo(
+    () => niceTimeFormatter([xMin, xMax]),
+    [xMin, xMax]
+  );
 
   const lookback = timeSize * ALERT_PREVIEW_BUCKET_SIZE;
   const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];

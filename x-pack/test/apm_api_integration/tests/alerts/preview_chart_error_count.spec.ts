@@ -10,7 +10,7 @@ import {
   SERVICE_NAME,
   ERROR_GROUP_ID,
 } from '@kbn/apm-plugin/common/es_fields/apm';
-import { PreviewChartResponseItem } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import type { PreviewChartResponseItem } from '@kbn/apm-plugin/server/routes/alerts/route';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateErrorData } from './generate_data';

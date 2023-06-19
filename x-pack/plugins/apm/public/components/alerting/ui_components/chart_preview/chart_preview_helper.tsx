@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { niceTimeFormatter } from '@elastic/charts';
-import { min as getMin, max as getMax } from 'lodash';
 import { Coordinate } from '../../../../../typings/timeseries';
 
 export const TIME_LABELS = {
@@ -29,51 +27,16 @@ export const TIME_LABELS = {
   }),
 };
 
-export const useDateFormatter = (xMin?: number, xMax?: number) => {
-  const dateFormatter = useMemo(() => {
-    if (typeof xMin === 'number' && typeof xMax === 'number') {
-      return niceTimeFormatter([xMin, xMax]);
-    } else {
-      return (value: number) => `${value}`;
-    }
-  }, [xMin, xMax]);
-  return dateFormatter;
-};
-
 export const getDomain = (
   series: Array<{ name?: string; data: Coordinate[] }>
 ) => {
-  let min: number | null = null;
-  let max: number | null = null;
-  const valuesByTimestamp = series.reduce<{ [timestamp: number]: number[] }>(
-    (acc, serie) => {
-      serie.data.forEach((point) => {
-        const valuesForTimestamp = acc[point.x] || [];
-        acc[point.x] = [...valuesForTimestamp, point.y ?? 0];
-      });
-      return acc;
-    },
-    {}
-  );
-  const pointValues = Object.values(valuesByTimestamp);
-  pointValues.forEach((results) => {
-    const maxResult = getMax(results);
-    const minResult = getMin(results);
-    if (maxResult && (!max || maxResult > max)) {
-      max = maxResult;
-    }
-    if (minResult && (!min || minResult < min)) {
-      min = minResult;
-    }
-  });
-  const timestampValues = Object.keys(valuesByTimestamp).map(Number);
-  const minTimestamp = getMin(timestampValues) || 0;
-  const maxTimestamp = getMax(timestampValues) || 0;
+  const xValues = series.flatMap((item) => item.data.map((d) => d.x));
+  const yValues = series.flatMap((item) => item.data.map((d) => d.y || 0));
   return {
-    yMin: min || 0,
-    yMax: max || 0,
-    xMin: minTimestamp,
-    xMax: maxTimestamp,
+    xMax: Math.max(...xValues),
+    xMin: Math.min(...xValues),
+    yMax: Math.max(...yValues),
+    yMin: Math.min(...yValues),
   };
 };
 
