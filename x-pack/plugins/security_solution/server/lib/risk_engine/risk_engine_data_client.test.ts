@@ -20,7 +20,7 @@ jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateIndexTemplate: jest.fn(),
 }));
 
-jest.mock('./utils/create_ds', () => ({
+jest.mock('./utils/create_datastream', () => ({
   createDataStream: jest.fn(),
 }));
 
