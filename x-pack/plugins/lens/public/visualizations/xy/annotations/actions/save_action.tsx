@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import {
   OnSaveProps as SavedObjectOnSaveProps,
   SavedObjectSaveModal,
@@ -49,46 +49,48 @@ export const SaveModal = ({
   const closeModal = () => unmountComponentAtNode(domElement);
 
   return (
-    <SavedObjectSaveModal
-      onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
-      onClose={closeModal}
-      title={title}
-      description={description}
-      showCopyOnSave={showCopyOnSave}
-      objectType={i18n.translate(
-        'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.objectType',
-        { defaultMessage: 'group' }
-      )}
-      customModalTitle={i18n.translate(
-        'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.modalTitle',
-        {
-          defaultMessage: 'Save annotation group to library',
+    <I18nProvider>
+      <SavedObjectSaveModal
+        onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
+        onClose={closeModal}
+        title={title}
+        description={description}
+        showCopyOnSave={showCopyOnSave}
+        objectType={i18n.translate(
+          'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.objectType',
+          { defaultMessage: 'group' }
+        )}
+        customModalTitle={i18n.translate(
+          'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.modalTitle',
+          {
+            defaultMessage: 'Save annotation group to library',
+          }
+        )}
+        showDescription={true}
+        confirmButtonLabel={
+          <>
+            <div>
+              <EuiIcon type="save" />
+            </div>
+            <div>
+              {i18n.translate(
+                'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.confirmButton',
+                { defaultMessage: 'Save group' }
+              )}
+            </div>
+          </>
         }
-      )}
-      showDescription={true}
-      confirmButtonLabel={
-        <>
-          <div>
-            <EuiIcon type="save" />
-          </div>
-          <div>
-            {i18n.translate(
-              'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.confirmButton',
-              { defaultMessage: 'Save group' }
-            )}
-          </div>
-        </>
-      }
-      options={
-        savedObjectsTagging ? (
-          <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-            initialSelection={selectedTags}
-            onTagsSelected={setSelectedTags}
-            markOptional
-          />
-        ) : undefined
-      }
-    />
+        options={
+          savedObjectsTagging ? (
+            <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+              initialSelection={selectedTags}
+              onTagsSelected={setSelectedTags}
+              markOptional
+            />
+          ) : undefined
+        }
+      />
+    </I18nProvider>
   );
 };
 
