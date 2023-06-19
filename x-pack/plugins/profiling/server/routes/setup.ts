@@ -191,9 +191,11 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
+        const apmServerHost = dependencies.setup.cloud?.apm?.url;
         const setupInstructions = await getSetupInstructions({
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: (await context.core).savedObjects.client,
+          apmServerHost,
         });
 
         return response.ok({ body: setupInstructions });
