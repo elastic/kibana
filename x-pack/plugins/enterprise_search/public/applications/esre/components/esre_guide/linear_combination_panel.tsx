@@ -69,7 +69,7 @@ export const LinearCombinationPanel: React.FC = () => (
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.esre.linearCombinationPanel.description"
-              defaultMessage="Used to calculate a similarity score or distance between data points. It combines attributes or features using weights, allowing customization of the relevance of different factors for determining nearest neighbors."
+              defaultMessage="Used to calculate a similarity score or distance between data points. Combines attributes or features using weights, which enables customized relevance factors."
             />
           </p>
         </EuiText>

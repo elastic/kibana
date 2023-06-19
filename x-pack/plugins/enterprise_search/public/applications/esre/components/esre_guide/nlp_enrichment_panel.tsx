@@ -86,7 +86,7 @@ const steps: EuiContainedStepProps[] = [
   },
   {
     title: i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step3.title', {
-      defaultMessage: 'Create a ML inference pipeline',
+      defaultMessage: 'Create an ML inference pipeline',
     }),
     children: (
       <EuiText>
