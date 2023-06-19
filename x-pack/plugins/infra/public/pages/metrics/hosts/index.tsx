@@ -27,7 +27,7 @@ import { BetaBadge } from '../../../components/beta_badge';
 import { NoRemoteCluster } from '../../../components/empty_states';
 
 const HOSTS_FEEDBACK_LINK =
-  ' https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
+  'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
 const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
 
 const getHostFeedbackURL = (kibanaVersion?: string) => {
