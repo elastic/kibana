@@ -5,7 +5,14 @@
   background: $euiPageBackgroundColor;
 
   top: $kbnHeaderOffset;
+  &.dashboardTopNav-withHeaderBanner {
+    top: $kbnHeaderOffsetWithBanner;
+  }
+
   &.dashboardTopNav-fullscreenMode {
     top: 0;
+    &.dashboardTopNav-withHeaderBanner {
+      top: $kbnHeaderBannerHeight;
+    }
   }
 }

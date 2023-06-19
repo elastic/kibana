@@ -35,6 +35,7 @@ import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
 
 import './_dashboard_top_nav.scss';
+
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
@@ -61,6 +62,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       getIsVisible$: getChromeIsVisible$,
       recentlyAccessed: chromeRecentlyAccessed,
     },
+    chrome: { hasHeaderBanner$ },
     settings: { uiSettings },
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },
@@ -94,6 +96,15 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const dashboardTitle = useMemo(() => {
     return getDashboardTitle(title, viewMode, !lastSavedId);
   }, [title, viewMode, lastSavedId]);
+
+  // store whether or not a global header is present in state & subscribe to banner changes
+  const [hasHeaderBanner, setHasHeaderBanner] = useState(false);
+  useEffect(() => {
+    const hasHeaderBannerSubscription = hasHeaderBanner$().subscribe((hasBanner) => {
+      setHasHeaderBanner(hasBanner);
+    });
+    return () => hasHeaderBannerSubscription.unsubscribe();
+  }, [hasHeaderBanner$]);
 
   /**
    * focus on the top header when title or view mode is changed
@@ -209,6 +220,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   return (
     <div
       className={classNames('dashboardTopNav', {
+        'dashboardTopNav-withHeaderBanner': hasHeaderBanner,
         'dashboardTopNav-fullscreenMode': fullScreenMode,
       })}
     >
