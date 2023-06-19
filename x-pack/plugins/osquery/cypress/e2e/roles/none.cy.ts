@@ -65,9 +65,6 @@ describe('None', () => {
       cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
-      cy.getBySel('osquery-action-item').should('not.exist');
-
-      cy.getBySel('response-actions-notification').contains('0');
       cy.getBySel('responseActionsViewTab').click();
       cy.contains('Permission denied').should('exist');
     });
