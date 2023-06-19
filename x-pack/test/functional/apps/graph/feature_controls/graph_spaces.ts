@@ -89,7 +89,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
           ensureCurrentUrl: false,
         });
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.error.expectNotFound();
       });
     });
