@@ -26,7 +26,7 @@ export const THREAT_INTELLIGENCE_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Intelligence"]';
 
 export const MANAGE_PAGE =
-  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Manage"]';
+  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Settings"]';
 
 export const KIBANA_NAVIGATION_TOGGLE = '[data-test-subj="toggleNavButton"]';
 

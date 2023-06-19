@@ -19,6 +19,17 @@ import {
   entityAnalyticsLinks,
   overviewLinks,
 } from '../overview/links';
+import { IconDashboards } from '../common/icons/dashboards';
+
+const subLinks: LinkItem[] = [
+  overviewLinks,
+  detectionResponseLinks,
+  kubernetesLinks,
+  cspDashboardLinks,
+  vulnerabilityDashboardLink,
+  entityAnalyticsLinks,
+  ecsDataQualityDashboardLinks,
+].map((link) => ({ ...link, icon: IconDashboards }));
 
 export const dashboardsLinks: LinkItem = {
   id: SecurityPageName.dashboards,
@@ -31,15 +42,6 @@ export const dashboardsLinks: LinkItem = {
       defaultMessage: 'Dashboards',
     }),
   ],
-  // showSideNavIcons: true,
-  links: [
-    overviewLinks,
-    detectionResponseLinks,
-    kubernetesLinks,
-    cspDashboardLinks,
-    vulnerabilityDashboardLink,
-    entityAnalyticsLinks,
-    ecsDataQualityDashboardLinks,
-  ],
+  links: subLinks,
   skipUrlState: false,
 };

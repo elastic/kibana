@@ -11,7 +11,7 @@ import { SERVER_APP_ID } from '../../common/constants';
 import cloudSecurityPostureDashboardImage from '../common/images/cloud_security_posture_dashboard_page.png';
 import cloudNativeVulnerabilityManagementDashboardImage from '../common/images/cloud_native_vulnerability_management_dashboard_page.png';
 import type { LinkItem } from '../common/links/types';
-import { IconEndpoints } from '../management/icons/endpoints';
+import { IconEndpoints } from '../common/icons/endpoints';
 
 const commonLinkProperties: Partial<LinkItem> = {
   hideTimeline: true,
@@ -55,6 +55,6 @@ export const benchmarksLinks: LinkItem = {
       defaultMessage: 'View benchmark rules.',
     }
   ),
-  landingIcon: IconEndpoints,
+  icon: IconEndpoints,
   ...commonLinkProperties,
 };

@@ -39,19 +39,19 @@ import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
 import { manageLinks as cloudDefendLinks } from '../cloud_defend/links';
-import { IconActionHistory } from './icons/action_history';
-import { IconBlocklist } from './icons/blocklist';
-import { IconEndpoints } from './icons/endpoints';
-import { IconEndpointPolicies } from './icons/endpoint_policies';
-import { IconEventFilters } from './icons/event_filters';
-import { IconHostIsolation } from './icons/host_isolation';
-import { IconTrustedApplications } from './icons/trusted_applications';
+import { IconConsole } from '../common/icons/console';
+import { IconShield } from '../common/icons/shield';
+import { IconEndpoints } from '../common/icons/endpoints';
+import { IconTool } from '../common/icons/tool';
+import { IconPipeline } from '../common/icons/pipeline';
+import { IconSavedObject } from '../common/icons/saved_object';
+import { IconDashboards } from '../common/icons/dashboards';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
-      defaultMessage: 'ENDPOINTS',
+      defaultMessage: 'Endpoints',
     }),
     linkIds: [
       SecurityPageName.endpoints,
@@ -62,6 +62,12 @@ const categories = [
       SecurityPageName.blocklist,
       SecurityPageName.responseActionsHistory,
     ],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
+      defaultMessage: 'Cloud Security',
+    }),
+    linkIds: [cloudDefendLinks.id],
   },
 ];
 
@@ -85,7 +91,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.endpointsDescription', {
         defaultMessage: 'Hosts running Elastic Defend.',
       }),
-      landingIcon: IconEndpoints,
+      icon: IconEndpoints,
       title: ENDPOINTS,
       path: ENDPOINTS_PATH,
       skipUrlState: true,
@@ -98,7 +104,7 @@ export const links: LinkItem = {
         defaultMessage:
           'Use policies to customize endpoint and cloud workload protections and other configurations.',
       }),
-      landingIcon: IconEndpointPolicies,
+      icon: IconTool,
       path: POLICIES_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -113,7 +119,7 @@ export const links: LinkItem = {
             'Improve performance or alleviate conflicts with other applications running on your hosts.',
         }
       ),
-      landingIcon: IconTrustedApplications,
+      icon: IconDashboards,
       path: TRUSTED_APPS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -124,7 +130,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.eventFiltersDescription', {
         defaultMessage: 'Exclude high volume or unwanted events being written into Elasticsearch.',
       }),
-      landingIcon: IconEventFilters,
+      icon: IconPipeline,
       path: EVENT_FILTERS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -135,7 +141,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.hostIsolationDescription', {
         defaultMessage: 'Allow isolated hosts to communicate with specific IPs.',
       }),
-      landingIcon: IconHostIsolation,
+      icon: IconSavedObject,
       path: HOST_ISOLATION_EXCEPTIONS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -146,7 +152,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.blocklistDescription', {
         defaultMessage: 'Exclude unwanted applications from running on your hosts.',
       }),
-      landingIcon: IconBlocklist,
+      icon: IconShield,
       path: BLOCKLIST_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -157,7 +163,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.actionHistoryDescription', {
         defaultMessage: 'View the history of response actions performed on hosts.',
       }),
-      landingIcon: IconActionHistory,
+      icon: IconConsole,
       path: RESPONSE_ACTIONS_HISTORY_PATH,
       skipUrlState: true,
       hideTimeline: true,

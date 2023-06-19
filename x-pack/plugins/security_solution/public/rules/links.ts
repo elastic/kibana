@@ -17,8 +17,8 @@ import { ADD_RULES, CREATE_NEW_RULE, EXCEPTIONS, RULES, SIEM_RULES } from '../ap
 import { SecurityPageName } from '../app/types';
 import { benchmarksLinks } from '../cloud_security_posture/links';
 import type { LinkItem } from '../common/links';
-import { IconExceptionLists } from './icons/exception_lists';
-import { IconSiemRules } from './icons/siem_rules';
+import { IconConsoleCloud } from '../common/icons/console_cloud';
+import { IconRollup } from '../common/icons/rollup';
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
@@ -33,7 +33,7 @@ export const links: LinkItem = {
         defaultMessage:
           "Create and manage rules to check for suspicious source events, and create alerts when a rule's conditions are met.",
       }),
-      landingIcon: IconSiemRules,
+      icon: IconRollup,
       path: RULES_PATH,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.rules', {
@@ -64,7 +64,7 @@ export const links: LinkItem = {
         defaultMessage:
           'Create and manage shared exception lists to prevent the creation of unwanted alerts.',
       }),
-      landingIcon: IconExceptionLists,
+      icon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
       skipUrlState: true,
       hideTimeline: true,

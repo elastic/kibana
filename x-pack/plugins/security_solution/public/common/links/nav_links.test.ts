@@ -21,7 +21,7 @@ const mockNavLinks: AppLinkItems = [
         path: '/path_2',
         title: 'title 2',
         sideNavDisabled: true,
-        landingIcon: 'someicon',
+        icon: 'someicon',
         landingImage: 'someimage',
         skipUrlState: true,
       },

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { SecurityPageName } from '../../common/constants';
 import { SERVER_APP_ID } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
-import { IconCloudDefend } from '../management/icons/cloud_defend';
+import { IconCloudDefend } from '../common/icons/cloud_defend';
 
 const commonLinkProperties: Partial<LinkItem> = {
   isBeta: true,
@@ -23,6 +23,6 @@ export const manageLinks: LinkItem = {
     defaultMessage:
       'Secure container workloads in Kubernetes from attacks and drift through granular and flexible runtime policies.',
   }),
-  landingIcon: IconCloudDefend,
+  icon: IconCloudDefend,
   ...commonLinkProperties,
 };

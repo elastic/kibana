@@ -7,7 +7,14 @@
 import type { SVGProps } from 'react';
 import React from 'react';
 export const IconCloudDefend: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg
+    width="32"
+    height="32"
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
     <g clipPath="url(#clip0_327_292367)">
       <path
         fillRule="evenodd"

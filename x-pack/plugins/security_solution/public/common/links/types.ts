@@ -94,10 +94,9 @@ export interface LinkItem {
     text: string;
   };
   /**
-   * Icon that is displayed on menu navigation landing page.
-   * Only required for pages that are displayed inside a landing page.
+   * Icon that is displayed on the navigation menu and the landing page.
    */
-  landingIcon?: IconType;
+  icon?: IconType;
   /**
    * Image that is displayed on menu navigation landing page.
    * Only required for pages that are displayed inside a landing page.

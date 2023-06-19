@@ -42,7 +42,7 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
         data-test-subj="settings-plus-in-circle"
         iconType="plusInCircle"
         color="primary"
-        size="m"
+        size="s"
         onClick={onButtonClick}
         aria-label={i18n.ADD_TIMELINE}
       />
