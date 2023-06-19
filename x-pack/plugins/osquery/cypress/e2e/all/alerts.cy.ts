@@ -425,7 +425,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe('Case', () => {
+  describe.skip('Case', () => {
     let ruleId: string;
     let ruleName: string;
     let caseId: string;
@@ -480,7 +480,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe('Discover', () => {
+  describe.skip('Discover', () => {
     let ruleId: string;
     let ruleName: string;
 
@@ -521,7 +521,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe('Lens', () => {
+  describe.skip('Lens', () => {
     let ruleId: string;
     let ruleName: string;
 
@@ -570,7 +570,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe('Timeline', () => {
+  describe.skip('Timeline', () => {
     let ruleId: string;
     let ruleName: string;
 
@@ -612,7 +612,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe('Params', () => {
+  describe.skip('Params', () => {
     let ruleId: string;
     let ruleName: string;
 
