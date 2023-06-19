@@ -29,8 +29,8 @@
       "unifiedSearch",
       "visualizations"
     ],
-    "optionalPlugins": ["discover", "home", "licensing", "usageCollection"],
-    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch"],
+    "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud"],
+    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "cloudChat"],
     "extraPublicDirs": ["common"]
   }
 }
