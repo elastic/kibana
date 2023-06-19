@@ -190,7 +190,7 @@ export const config: PluginConfigDescriptor = {
     createArtifactsBulkBatchSize: schema.maybe(
       schema.number({
         defaultValue: BULK_CREATE_MAX_ARTIFACTS_BYTES,
-        max: 5_000_000,
+        max: 4_000_000,
         min: 400,
       })
     ),
