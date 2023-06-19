@@ -29,21 +29,19 @@ export const TLSRuleComponent: React.FC<{
   }, [dispatch, settings]);
 
   return (
-    <>
-      <AlertTlsComponent
-        ageThreshold={
-          ruleParams.certAgeThreshold ??
-          settings?.certAgeThreshold ??
-          DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
-        }
-        expirationThreshold={
-          ruleParams.certExpirationThreshold ??
-          settings?.certExpirationThreshold ??
-          DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
-        }
-        setAgeThreshold={(value) => setRuleParams('certAgeThreshold', Number(value))}
-        setExpirationThreshold={(value) => setRuleParams('certExpirationThreshold', Number(value))}
-      />
-    </>
+    <AlertTlsComponent
+      ageThreshold={
+        ruleParams.certAgeThreshold ??
+        settings?.certAgeThreshold ??
+        DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
+      }
+      expirationThreshold={
+        ruleParams.certExpirationThreshold ??
+        settings?.certExpirationThreshold ??
+        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
+      }
+      setAgeThreshold={(value) => setRuleParams('certAgeThreshold', Number(value))}
+      setExpirationThreshold={(value) => setRuleParams('certExpirationThreshold', Number(value))}
+    />
   );
 };

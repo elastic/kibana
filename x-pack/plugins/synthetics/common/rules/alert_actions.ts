@@ -58,6 +58,11 @@ export function populateAlertActions({
       id: aId.id,
       group: groupId,
       params: {},
+      frequency: {
+        notifyWhen: 'onActionGroupChange',
+        throttle: null,
+        summary: false,
+      },
     };
 
     const recoveredAction: RuleAction = {
@@ -65,6 +70,11 @@ export function populateAlertActions({
       group: 'recovered',
       params: {
         message: translations.defaultRecoveryMessage,
+      },
+      frequency: {
+        notifyWhen: 'onActionGroupChange',
+        throttle: null,
+        summary: false,
       },
     };
 

@@ -18,6 +18,9 @@ import {
   SYNTHETICS_ALERT_RULE_TYPES,
 } from '../../../common/constants/synthetics_alerts';
 
+// uuid based on the string 'uptime-tls-default-alert'
+const TLS_DEFAULT_ALERT_ID = '7a532181-ff1d-4317-9367-7ca789133920';
+
 export class TLSAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
@@ -35,21 +38,12 @@ export class TLSAlertService {
 
   async getExistingAlert() {
     const rulesClient = (await this.context.alerting)?.getRulesClient();
-
-    const { data } = await rulesClient.find({
-      options: {
-        page: 1,
-        perPage: 1,
-        filter: `alert.attributes.alertTypeId:(${SYNTHETICS_ALERT_RULE_TYPES.TLS})`,
-      },
-    });
-
-    const alert = data?.[0];
-    if (!alert) {
-      return;
+    try {
+      const alert = await rulesClient.get({ id: TLS_DEFAULT_ALERT_ID });
+      return { ...alert, ruleTypeId: alert.alertTypeId };
+    } catch (e) {
+      return null;
     }
-
-    return { ...alert, ruleTypeId: alert.alertTypeId };
   }
   async createDefaultAlertIfNotExist() {
     const alert = await this.getExistingAlert();
@@ -66,12 +60,14 @@ export class TLSAlertService {
         params: {},
         consumer: 'uptime',
         alertTypeId: SYNTHETICS_ALERT_RULE_TYPES.TLS,
-        schedule: { interval: '10m' },
-        notifyWhen: 'onActionGroupChange',
+        schedule: { interval: '1m' },
         tags: ['SYNTHETICS_TLS_DEFAULT_ALERT'],
         name: `Synthetics internal TLS alert`,
         enabled: true,
         throttle: null,
+      },
+      options: {
+        id: TLS_DEFAULT_ALERT_ID,
       },
     });
     return { ...newAlert, ruleTypeId: newAlert.alertTypeId };

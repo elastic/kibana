@@ -24,6 +24,13 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
       tlsAlertService.createDefaultAlertIfNotExist(),
     ]);
 
+    if (statusRule.status === 'rejected') {
+      throw statusRule.reason;
+    }
+    if (tlsRule.status === 'rejected') {
+      throw tlsRule.reason;
+    }
+
     return {
       statusRule: statusRule.status === 'fulfilled' ? statusRule.value : null,
       tlsRule: tlsRule.status === 'fulfilled' ? tlsRule.value : null,
