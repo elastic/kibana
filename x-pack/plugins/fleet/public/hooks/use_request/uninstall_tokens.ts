@@ -9,8 +9,8 @@ import { uninstallTokensRouteService } from '../../../common/services';
 
 import type {
   GetUninstallTokensForOnePolicyResponse,
-  GetUninstallTokensRequest,
-  GetUninstallTokensResponse,
+  GetUninstallTokensMetadataRequest,
+  GetUninstallTokensMetadataResponse,
 } from '../../../common/types/rest_spec/uninstall_token';
 
 import { useRequest } from './use_request';
@@ -19,14 +19,14 @@ export const useGetUninstallTokens = ({
   policyId,
   page,
   perPage,
-}: GetUninstallTokensRequest['query'] = {}) => {
-  const query: GetUninstallTokensRequest['query'] = {
+}: GetUninstallTokensMetadataRequest['query'] = {}) => {
+  const query: GetUninstallTokensMetadataRequest['query'] = {
     policyId,
     page,
     perPage,
   };
 
-  return useRequest<GetUninstallTokensResponse>({
+  return useRequest<GetUninstallTokensMetadataResponse>({
     method: 'get',
     path: uninstallTokensRouteService.getListPath(),
     query,

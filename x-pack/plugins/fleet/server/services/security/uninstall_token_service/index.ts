@@ -29,10 +29,13 @@ import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/ty
 
 import type {
   GetUninstallTokensForOnePolicyResponse,
-  GetUninstallTokensResponse,
+  GetUninstallTokensMetadataResponse,
 } from '../../../../common/types/rest_spec/uninstall_token';
 
-import type { UninstallToken } from '../../../../common/types/models/uninstall_token';
+import type {
+  UninstallToken,
+  UninstallTokenMetadata,
+} from '../../../../common/types/models/uninstall_token';
 
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
 import { appContextService } from '../../app_context';
@@ -56,13 +59,16 @@ interface UninstallTokenSOAggregation {
 export interface UninstallTokenServiceInterface {
   getTokenHistoryForPolicy(policyId: string): Promise<GetUninstallTokensForOnePolicyResponse>;
 
-  searchRawTokens(
+  searchTokenMetadata(
     searchString: string,
     page?: number,
     perPage?: number
-  ): Promise<GetUninstallTokensResponse>;
+  ): Promise<GetUninstallTokensMetadataResponse>;
 
-  getRawTokensForAllPolicies(page?: number, perPage?: number): Promise<GetUninstallTokensResponse>;
+  getTokenMetadataForAllPolicies(
+    page?: number,
+    perPage?: number
+  ): Promise<GetUninstallTokensMetadataResponse>;
 
   getHashedTokenForPolicyId(policyId: string): Promise<string>;
 
@@ -123,20 +129,19 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   /**
-   * searches for un-decrypted uninstall token by policy ID, paginated
+   * searches for uninstall token metadata using partial policyID, paginated
    *
    * @param searchString a string for partial matching the policyId
    * @param page
    * @param perPage
-   * @param policyId agent policy id
-   * @returns GetUninstallTokensResponse
+   * @returns Uninstall Tokens Metadata Response
    */
-  public async searchRawTokens(
+  public async searchTokenMetadata(
     searchString: string,
     page: number = 1,
     perPage: number = 20
-  ): Promise<GetUninstallTokensResponse> {
-    return await this.getRawTokensByIncludeFilter({
+  ): Promise<GetUninstallTokensMetadataResponse> {
+    return await this.getTokenMetadataByIncludeFilter({
       include: `.*${searchString}.*`,
       page,
       perPage,
@@ -144,20 +149,20 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   /**
-   * gets un-decrypted uninstall tokens for all policies, optionally paginated or returns all tokens
+   * gets uninstall token metadata for all policies, optionally paginated, returns all by default
    *
    * @param page
    * @param perPage
-   * @returns GetUninstallTokensResponse
+   * @returns Uninstall Tokens Metadata Response
    */
-  public async getRawTokensForAllPolicies(
+  public async getTokenMetadataForAllPolicies(
     page?: number,
     perPage?: number
-  ): Promise<GetUninstallTokensResponse> {
-    return this.getRawTokensByIncludeFilter({ perPage, page });
+  ): Promise<GetUninstallTokensMetadataResponse> {
+    return this.getTokenMetadataByIncludeFilter({ perPage, page });
   }
 
-  private async getRawTokensByIncludeFilter({
+  private async getTokenMetadataByIncludeFilter({
     page = 1,
     perPage = SO_SEARCH_LIMIT,
     include,
@@ -165,15 +170,14 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     include?: AggregationsTermsInclude;
     perPage?: number;
     page?: number;
-  }): Promise<GetUninstallTokensResponse> {
+  }): Promise<GetUninstallTokensMetadataResponse> {
     const tokenObjects = await this.getTokenObjectsByIncludeFilter(include);
 
-    const items: UninstallToken[] = tokenObjects
+    const items: UninstallTokenMetadata[] = tokenObjects
       .slice((page - 1) * perPage, page * perPage)
       .map((aggResult) => aggResult._source)
       .map(({ [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: attributes, created_at: createdAt }) => ({
         policy_id: attributes.policy_id,
-        token: attributes.token || attributes.token_plain,
         ...(createdAt ? { created_at: createdAt } : {}),
       }));
 
@@ -242,6 +246,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
               top_hits: {
                 size: 1,
                 sort: [{ created_at: { order: 'desc' } }],
+                _source: [`${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.policy_id`, 'created_at'],
               },
             },
           },

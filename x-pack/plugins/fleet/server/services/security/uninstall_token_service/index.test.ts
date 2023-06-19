@@ -212,11 +212,11 @@ describe('UninstallTokenService', () => {
         });
       });
 
-      it('can correctly getRawTokensForAllPolicies', async () => {
+      it('can correctly getTokenMetadataForAllPolicies', async () => {
         const so = getDefaultSO(canEncrypt);
         const so2 = getDefaultSO2(canEncrypt);
 
-        const tokensMap = (await uninstallTokenService.getRawTokensForAllPolicies()).items;
+        const tokensMap = (await uninstallTokenService.getTokenMetadataForAllPolicies()).items;
         expect(tokensMap).toEqual([
           {
             policy_id: so.attributes.policy_id,

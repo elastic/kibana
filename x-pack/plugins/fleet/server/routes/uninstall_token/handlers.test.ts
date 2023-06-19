@@ -14,7 +14,7 @@ import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 import type {
   GetUninstallTokensForOnePolicyResponse,
-  GetUninstallTokensResponse,
+  GetUninstallTokensMetadataResponse,
 } from '../../../common/types/rest_spec/uninstall_token';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -24,12 +24,15 @@ import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services';
 import type {
   GetUninstallTokensForOnePolicyRequestSchema,
-  GetUninstallTokensRequestSchema,
+  GetUninstallTokensMetadataRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
 
 import { registerRoutes } from '.';
 
-import { getUninstallTokensForOnePolicyHandler, getUninstallTokensHandler } from './handlers';
+import {
+  getUninstallTokensForOnePolicyHandler,
+  getUninstallTokensMetadataHandler,
+} from './handlers';
 
 describe('uninstall token handlers', () => {
   let context: FleetRequestHandlerContext;
@@ -38,11 +41,11 @@ describe('uninstall token handlers', () => {
   let getAllTokensMock: jest.Mock;
   let getTokensForOnePolicyMock: jest.Mock;
 
-  const uninstallTokensResponseFixture: GetUninstallTokensResponse = {
+  const uninstallTokensResponseFixture: GetUninstallTokensMetadataResponse = {
     items: [
-      { policy_id: 'policy-id-1', token: '123456' },
-      { policy_id: 'policy-id-2', token: 'abcdef' },
-      { policy_id: 'policy-id-3', token: '9876543210' },
+      { policy_id: 'policy-id-1' },
+      { policy_id: 'policy-id-2' },
+      { policy_id: 'policy-id-3' },
     ],
     total: 3,
     page: 1,
@@ -57,7 +60,7 @@ describe('uninstall token handlers', () => {
     appContextService.start(appContextStartContractMock);
 
     const uninstallTokenService = appContextService.getUninstallTokenService()!;
-    getAllTokensMock = uninstallTokenService.getRawTokensForAllPolicies as jest.Mock;
+    getAllTokensMock = uninstallTokenService.getTokenMetadataForAllPolicies as jest.Mock;
     getTokensForOnePolicyMock = uninstallTokenService.getTokenHistoryForPolicy as jest.Mock;
   });
 
@@ -67,7 +70,10 @@ describe('uninstall token handlers', () => {
   });
 
   describe('getUninstallTokensHandler', () => {
-    let request: KibanaRequest<unknown, TypeOf<typeof GetUninstallTokensRequestSchema.query>>;
+    let request: KibanaRequest<
+      unknown,
+      TypeOf<typeof GetUninstallTokensMetadataRequestSchema.query>
+    >;
 
     beforeEach(() => {
       request = httpServerMock.createKibanaRequest();
@@ -76,7 +82,7 @@ describe('uninstall token handlers', () => {
     it('should return uninstall tokens for all policies', async () => {
       getAllTokensMock.mockResolvedValue(uninstallTokensResponseFixture);
 
-      await getUninstallTokensHandler(context, request, response);
+      await getUninstallTokensMetadataHandler(context, request, response);
 
       expect(response.ok).toHaveBeenCalledWith({
         body: uninstallTokensResponseFixture,
@@ -91,7 +97,7 @@ describe('uninstall token handlers', () => {
         uninstallTokenService: undefined,
       });
 
-      await getUninstallTokensHandler(context, request, response);
+      await getUninstallTokensMetadataHandler(context, request, response);
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
@@ -102,7 +108,7 @@ describe('uninstall token handlers', () => {
     it('should return internal error when uninstallTokenService throws error', async () => {
       getAllTokensMock.mockRejectedValue(Error('something happened'));
 
-      await getUninstallTokensHandler(context, request, response);
+      await getUninstallTokensMetadataHandler(context, request, response);
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
@@ -120,7 +126,7 @@ describe('uninstall token handlers', () => {
 
     it('should return uninstall tokens for all policies', async () => {
       const tokenForOnePolicy: GetUninstallTokensForOnePolicyResponse = {
-        items: [uninstallTokensResponseFixture.items[0]],
+        items: [{ ...uninstallTokensResponseFixture.items[0], token: '123456' }],
         total: 1,
       };
       getTokensForOnePolicyMock.mockResolvedValue(tokenForOnePolicy);
@@ -171,7 +177,10 @@ describe('uninstall token handlers', () => {
 
       registerRoutes(router, config);
 
-      expect(router.get).toHaveBeenCalledWith(expect.any(Object), getUninstallTokensHandler);
+      expect(router.get).toHaveBeenCalledWith(
+        expect.any(Object),
+        getUninstallTokensMetadataHandler
+      );
       expect(router.get).toHaveBeenCalledWith(
         expect.any(Object),
         getUninstallTokensForOnePolicyHandler

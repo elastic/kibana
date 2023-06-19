@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { UninstallToken } from '../models/uninstall_token';
+import type { UninstallToken, UninstallTokenMetadata } from '../models/uninstall_token';
 
 import type { ListResult } from './common';
 
-export interface GetUninstallTokensRequest {
+export interface GetUninstallTokensMetadataRequest {
   query: {
     policyId?: string;
     perPage?: number;
@@ -17,7 +17,7 @@ export interface GetUninstallTokensRequest {
   };
 }
 
-export type GetUninstallTokensResponse = ListResult<UninstallToken>;
+export type GetUninstallTokensMetadataResponse = ListResult<UninstallTokenMetadata>;
 
 export interface GetUninstallTokensForOnePolicyResponse {
   items: UninstallToken[];

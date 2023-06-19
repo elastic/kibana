@@ -10,3 +10,5 @@ export interface UninstallToken {
   token: string;
   created_at?: string;
 }
+
+export type UninstallTokenMetadata = Omit<UninstallToken, 'token'>;

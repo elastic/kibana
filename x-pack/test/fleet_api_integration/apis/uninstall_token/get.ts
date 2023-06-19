@@ -13,7 +13,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import {
   GetUninstallTokensForOnePolicyResponse,
-  GetUninstallTokensResponse,
+  GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import * as uuid from 'uuid';
 import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services';
@@ -47,12 +47,12 @@ export default function (providerContext: FtrProviderContext) {
           await cleanSavedObjects();
         });
 
-        it('should return tokens for all policies if number of policies is below default perPage', async () => {
+        it('should return token metadata for all policies if number of policies is below default perPage', async () => {
           const response = await supertest
             .get(uninstallTokensRouteService.getListPath())
             .expect(200);
 
-          const body: GetUninstallTokensResponse = response.body;
+          const body: GetUninstallTokensMetadataResponse = response.body;
           expect(body.total).to.equal(generatedPolicyIds.size);
           expect(body.page).to.equal(1);
           expect(body.perPage).to.equal(20);
@@ -63,13 +63,13 @@ export default function (providerContext: FtrProviderContext) {
           );
         });
 
-        it('should return token with creation date', async () => {
+        it('should return token metadata with creation date', async () => {
           const response = await supertest
             .get(uninstallTokensRouteService.getListPath())
             .expect(200);
 
-          const body: GetUninstallTokensResponse = response.body;
-          expect(body.items[0]).to.have.property('token');
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.items[0]).to.have.property('policy_id');
           expect(body.items[0]).to.have.property('created_at');
 
           const createdAt = new Date(body.items[0].created_at!).getTime();
@@ -78,13 +78,13 @@ export default function (providerContext: FtrProviderContext) {
           expect(createdAt).to.lessThan(Date.now()).greaterThan(thirtyMinutesAgo);
         });
 
-        it('should return default perPage number of tokens if total is above default perPage', async () => {
+        it('should return default perPage number of token metadata if total is above default perPage', async () => {
           generatedPolicyIds.add((await generatePolicies(1))[0]);
 
           const response1 = await supertest
             .get(uninstallTokensRouteService.getListPath())
             .expect(200);
-          const body1: GetUninstallTokensResponse = response1.body;
+          const body1: GetUninstallTokensMetadataResponse = response1.body;
           expect(body1.total).to.equal(generatedPolicyIds.size);
           expect(body1.page).to.equal(1);
           expect(body1.perPage).to.equal(20);
@@ -94,14 +94,14 @@ export default function (providerContext: FtrProviderContext) {
             .get(uninstallTokensRouteService.getListPath())
             .query({ page: 2 })
             .expect(200);
-          const body2: GetUninstallTokensResponse = response2.body;
+          const body2: GetUninstallTokensMetadataResponse = response2.body;
           expect(body2.total).to.equal(generatedPolicyIds.size);
           expect(body2.page).to.equal(2);
           expect(body2.perPage).to.equal(20);
           expect(body2.items.length).to.equal(1);
         });
 
-        it('should return all tokens via pagination', async () => {
+        it('should return metadata for all tokens via pagination', async () => {
           const receivedPolicyIds: string[] = [];
 
           for (let i = 1; i <= 4; i++) {
@@ -113,7 +113,7 @@ export default function (providerContext: FtrProviderContext) {
               })
               .expect(200);
 
-            const body: GetUninstallTokensResponse = response.body;
+            const body: GetUninstallTokensMetadataResponse = response.body;
             expect(body.total).to.equal(generatedPolicyIds.size);
             expect(body.perPage).to.equal(8);
             expect(body.page).to.equal(i);
@@ -128,7 +128,7 @@ export default function (providerContext: FtrProviderContext) {
           );
         });
 
-        it('should return tokens correctly paginated and sorted by their creation date desc', async () => {
+        it('should return token metadata correctly paginated and sorted by their creation date desc', async () => {
           let prevCreatedAt = Date.now();
 
           for (let i = 1; i <= 4; i++) {
@@ -140,7 +140,7 @@ export default function (providerContext: FtrProviderContext) {
               })
               .expect(200);
 
-            const body: GetUninstallTokensResponse = response.body;
+            const body: GetUninstallTokensMetadataResponse = response.body;
 
             body.items.forEach(({ created_at: createdAt }) => {
               const currentCreatedAt = new Date(createdAt!).getTime();
@@ -175,12 +175,12 @@ export default function (providerContext: FtrProviderContext) {
           await cleanSavedObjects();
         });
 
-        it('should return only the latest token for every policy', async () => {
+        it("should return only the latest token's metadata for every policy", async () => {
           const response = await supertest
             .get(uninstallTokensRouteService.getListPath())
             .expect(200);
 
-          const body: GetUninstallTokensResponse = response.body;
+          const body: GetUninstallTokensMetadataResponse = response.body;
           expect(body.total).to.equal(generatedPolicyIds.size);
           expect(body.page).to.equal(1);
           expect(body.perPage).to.equal(20);
@@ -201,7 +201,7 @@ export default function (providerContext: FtrProviderContext) {
           await cleanSavedObjects();
         });
 
-        it('should return token for full policyID if found', async () => {
+        it('should return token metadata for full policyID if found', async () => {
           const selectedPolicyId = [...generatedPolicyIds][3];
 
           const response = await supertest
@@ -211,14 +211,14 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
-          const body: GetUninstallTokensResponse = response.body;
+          const body: GetUninstallTokensMetadataResponse = response.body;
           expect(body.total).to.equal(1);
           expect(body.page).to.equal(1);
           expect(body.perPage).to.equal(20);
           expect(body.items[0].policy_id).to.equal(selectedPolicyId);
         });
 
-        it('should return token for partial policyID if found', async () => {
+        it('should return token metadata for partial policyID if found', async () => {
           const selectedPolicyId = [...generatedPolicyIds][2];
 
           const response = await supertest
@@ -228,7 +228,7 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
-          const body: GetUninstallTokensResponse = response.body;
+          const body: GetUninstallTokensMetadataResponse = response.body;
           expect(body.total).to.equal(1);
           expect(body.page).to.equal(1);
           expect(body.perPage).to.equal(20);
@@ -243,7 +243,7 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
-          const body: GetUninstallTokensResponse = response.body;
+          const body: GetUninstallTokensMetadataResponse = response.body;
           expect(body.total).to.equal(0);
           expect(body.page).to.equal(1);
           expect(body.perPage).to.equal(20);

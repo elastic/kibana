@@ -11,10 +11,10 @@ import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core-http-se
 
 import { appContextService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
-import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
+import type { GetUninstallTokensMetadataResponse } from '../../../common/types/rest_spec/uninstall_token';
 import type {
   GetUninstallTokensForOnePolicyRequestSchema,
-  GetUninstallTokensRequestSchema,
+  GetUninstallTokensMetadataRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
 import { defaultFleetErrorHandler } from '../../errors';
 
@@ -23,9 +23,9 @@ const UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR: CustomHttpResponseOptions<Respo
   body: { message: 'Uninstall Token Service is unavailable.' },
 };
 
-export const getUninstallTokensHandler: FleetRequestHandler<
+export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   unknown,
-  TypeOf<typeof GetUninstallTokensRequestSchema.query>
+  TypeOf<typeof GetUninstallTokensMetadataRequestSchema.query>
 > = async (context, request, response) => {
   const uninstallTokenService = appContextService.getUninstallTokenService();
   if (!uninstallTokenService) {
@@ -35,11 +35,11 @@ export const getUninstallTokensHandler: FleetRequestHandler<
   try {
     const { page = 1, perPage = 20, policyId } = request.query;
 
-    let body: GetUninstallTokensResponse;
+    let body: GetUninstallTokensMetadataResponse;
     if (policyId) {
-      body = await uninstallTokenService.searchRawTokens(policyId, page, perPage);
+      body = await uninstallTokenService.searchTokenMetadata(policyId, page, perPage);
     } else {
-      body = await uninstallTokenService.getRawTokensForAllPolicies(page, perPage);
+      body = await uninstallTokenService.getTokenMetadataForAllPolicies(page, perPage);
     }
 
     return response.ok({ body });
