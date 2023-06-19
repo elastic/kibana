@@ -10,7 +10,12 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
+import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
 import { RuleStatusBadge } from '../../../../../detections/components/rules/rule_execution_status/rule_status_badge';
+
+interface OptionData {
+  status: RuleExecutionStatus;
+}
 
 interface RuleExecutionStatusSelectorProps {
   selectedStatus?: RuleExecutionStatus;
@@ -31,17 +36,17 @@ const RuleExecutionStatusSelectorComponent = ({
 
   const selectableOptions = [
     {
-      label: RuleExecutionStatus.succeeded,
+      label: getCapitalizedStatusText(RuleExecutionStatus.succeeded),
       data: { status: RuleExecutionStatus.succeeded },
       checked: selectedStatus === RuleExecutionStatus.succeeded ? 'on' : undefined,
     },
     {
-      label: RuleExecutionStatus['partial failure'],
+      label: getCapitalizedStatusText(RuleExecutionStatus['partial failure']),
       data: { status: RuleExecutionStatus['partial failure'] },
       checked: selectedStatus === RuleExecutionStatus['partial failure'] ? 'on' : undefined,
     },
     {
-      label: RuleExecutionStatus.failed,
+      label: getCapitalizedStatusText(RuleExecutionStatus.failed),
       data: { status: RuleExecutionStatus.failed },
       checked: selectedStatus === RuleExecutionStatus.failed ? 'on' : undefined,
     },
@@ -93,10 +98,20 @@ const RuleExecutionStatusSelectorComponent = ({
         options={selectableOptions}
         onChange={handleSelectableOptionsChange}
         singleSelection
-        listProps={{ isVirtualized: false }}
+        listProps={{
+          isVirtualized: false,
+        }}
         renderOption={(option) => {
-          const status = option.label as RuleExecutionStatus;
-          return <RuleStatusBadge status={status} />;
+          const status = (option as EuiSelectableOption<OptionData>).status;
+          return (
+            <div
+              css={`
+                margin-top: 4px; // aligns the badge within the option
+              `}
+            >
+              <RuleStatusBadge status={status} showTooltip={false} />
+            </div>
+          );
         }}
       >
         {(list) => (
