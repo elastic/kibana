@@ -28,7 +28,7 @@ export const Route = <T extends {}>({
   component: Component,
   render,
   ...rest
-}: RouteProps<string, T>) => {
+}: RouteProps<string, { [K: string]: string } & T>) => {
   const component = useMemo(() => {
     if (!Component) {
       return undefined;
