@@ -53,6 +53,7 @@ export class StorybookMock extends AbstractStorybookMock<
       recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
       navLinks$: params.navLinks$ ?? new BehaviorSubject([]),
       onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
+      getActiveNodes$: () => new BehaviorSubject([]),
     };
   }
 

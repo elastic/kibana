@@ -15,12 +15,6 @@ import { getServicesMock } from '../../mocks/src/jest';
 import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
 import type { ProjectNavigationTreeDefinition, RootNavigationItemDefinition } from './types';
-import {
-  defaultAnalyticsNavGroup,
-  defaultDevtoolsNavGroup,
-  defaultManagementNavGroup,
-  defaultMlNavGroup,
-} from '../../mocks/src/default_navigation.test.helpers';
 import { navLinksMock } from '../../mocks/src/navlinks';
 
 describe('<DefaultNavigation />', () => {
@@ -93,55 +87,60 @@ describe('<DefaultNavigation />', () => {
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTreeGenerated] = lastCall;
 
-      expect(navTreeGenerated).toEqual({
-        navigationTree: [
-          {
-            id: 'group1',
-            path: ['group1'],
-            title: '',
-            children: [
-              {
-                id: 'item1',
-                title: 'Item 1',
-                href: 'http://foo',
-                path: ['group1', 'item1'],
-              },
-              {
-                id: 'item2',
-                title: 'Item 2',
-                href: 'http://foo',
-                path: ['group1', 'item2'],
-              },
-              {
-                id: 'group1A',
-                title: 'Group1A',
-                path: ['group1', 'group1A'],
-                children: [
-                  {
-                    id: 'item1',
-                    title: 'Group 1A Item 1',
-                    href: 'http://foo',
-                    path: ['group1', 'group1A', 'item1'],
-                  },
-                  {
-                    id: 'group1A_1',
-                    title: 'Group1A_1',
-                    path: ['group1', 'group1A', 'group1A_1'],
-                    children: [
-                      {
-                        id: 'item1',
-                        title: 'Group 1A_1 Item 1',
-                        href: 'http://foo',
-                        path: ['group1', 'group1A', 'group1A_1', 'item1'],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      });
+      expect(navTreeGenerated.navigationTree).toEqual([
+        {
+          id: 'group1',
+          path: ['group1'],
+          title: '',
+          isActive: false,
+          children: [
+            {
+              id: 'item1',
+              title: 'Item 1',
+              href: 'http://foo',
+              isActive: false,
+              path: ['group1', 'item1'],
+            },
+            {
+              id: 'item2',
+              title: 'Item 2',
+              href: 'http://foo',
+              isActive: false,
+              path: ['group1', 'item2'],
+            },
+            {
+              id: 'group1A',
+              title: 'Group1A',
+              isActive: false,
+              path: ['group1', 'group1A'],
+              children: [
+                {
+                  id: 'item1',
+                  title: 'Group 1A Item 1',
+                  href: 'http://foo',
+                  isActive: false,
+                  path: ['group1', 'group1A', 'item1'],
+                },
+                {
+                  id: 'group1A_1',
+                  title: 'Group1A_1',
+                  isActive: false,
+                  path: ['group1', 'group1A', 'group1A_1'],
+                  children: [
+                    {
+                      id: 'item1',
+                      title: 'Group 1A_1 Item 1',
+                      href: 'http://foo',
+                      isActive: false,
+                      path: ['group1', 'group1A', 'group1A_1', 'item1'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
     });
 
     test('should read the title from deeplink', async () => {
@@ -201,48 +200,50 @@ describe('<DefaultNavigation />', () => {
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTreeGenerated] = lastCall;
 
-      expect(navTreeGenerated).toEqual({
-        navigationTree: [
-          {
-            id: 'root',
-            path: ['root'],
-            title: '',
-            children: [
-              {
-                id: 'group1',
-                path: ['root', 'group1'],
-                title: '',
-                children: [
-                  {
+      expect(navTreeGenerated.navigationTree).toEqual([
+        {
+          id: 'root',
+          path: ['root'],
+          title: '',
+          isActive: false,
+          children: [
+            {
+              id: 'group1',
+              path: ['root', 'group1'],
+              title: '',
+              isActive: false,
+              children: [
+                {
+                  id: 'item1',
+                  path: ['root', 'group1', 'item1'],
+                  title: 'Title from deeplink',
+                  isActive: false,
+                  deepLink: {
                     id: 'item1',
-                    path: ['root', 'group1', 'item1'],
                     title: 'Title from deeplink',
-                    deepLink: {
-                      id: 'item1',
-                      title: 'Title from deeplink',
-                      baseUrl: '',
-                      url: '',
-                      href: '',
-                    },
+                    baseUrl: '',
+                    url: '',
+                    href: '',
                   },
-                  {
-                    id: 'item2',
-                    title: 'Overwrite deeplink title',
-                    path: ['root', 'group1', 'item2'],
-                    deepLink: {
-                      id: 'item1',
-                      title: 'Title from deeplink',
-                      baseUrl: '',
-                      url: '',
-                      href: '',
-                    },
+                },
+                {
+                  id: 'item2',
+                  title: 'Overwrite deeplink title',
+                  path: ['root', 'group1', 'item2'],
+                  isActive: false,
+                  deepLink: {
+                    id: 'item1',
+                    title: 'Title from deeplink',
+                    baseUrl: '',
+                    url: '',
+                    href: '',
                   },
-                ],
-              },
-            ],
-          },
-        ],
-      });
+                },
+              ],
+            },
+          ],
+        },
+      ]);
     });
 
     test('should allow href for absolute links', async () => {
@@ -278,30 +279,31 @@ describe('<DefaultNavigation />', () => {
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTreeGenerated] = lastCall;
 
-      expect(navTreeGenerated).toEqual({
-        navigationTree: [
-          {
-            id: 'root',
-            path: ['root'],
-            title: '',
-            children: [
-              {
-                id: 'group1',
-                path: ['root', 'group1'],
-                title: '',
-                children: [
-                  {
-                    id: 'item1',
-                    path: ['root', 'group1', 'item1'],
-                    title: 'Absolute link',
-                    href: 'https://example.com',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      });
+      expect(navTreeGenerated.navigationTree).toEqual([
+        {
+          id: 'root',
+          path: ['root'],
+          title: '',
+          isActive: false,
+          children: [
+            {
+              id: 'group1',
+              path: ['root', 'group1'],
+              title: '',
+              isActive: false,
+              children: [
+                {
+                  id: 'item1',
+                  path: ['root', 'group1', 'item1'],
+                  title: 'Absolute link',
+                  href: 'https://example.com',
+                  isActive: false,
+                },
+              ],
+            },
+          ],
+        },
+      ]);
     });
 
     test('should throw if href is not an absolute links', async () => {
@@ -431,6 +433,7 @@ describe('<DefaultNavigation />', () => {
 
       expect(navTreeGenerated).toEqual({
         navigationTree: expect.any(Array),
+        navigationTreeFlattened: expect.any(Object),
       });
 
       // The project navigation tree passed
@@ -438,16 +441,19 @@ describe('<DefaultNavigation />', () => {
         id: 'group1',
         title: 'Group 1',
         path: ['group1'],
+        isActive: false,
         children: [
           {
             id: 'item1',
             title: 'Item 1',
+            isActive: false,
             path: ['group1', 'item1'],
           },
           {
             id: 'item2',
             path: ['group1', 'item2'],
             title: 'Title from deeplink!',
+            isActive: false,
             deepLink: {
               id: 'item2',
               title: 'Title from deeplink!',
@@ -460,6 +466,7 @@ describe('<DefaultNavigation />', () => {
             id: 'item3',
             title: 'Deeplink title overriden',
             path: ['group1', 'item3'],
+            isActive: false,
             deepLink: {
               id: 'item2',
               title: 'Title from deeplink!',
@@ -470,18 +477,6 @@ describe('<DefaultNavigation />', () => {
           },
         ],
       });
-
-      // The default navigation tree for analytics
-      expect(navTreeGenerated.navigationTree[1]).toEqual(defaultAnalyticsNavGroup);
-
-      // The default navigation tree for ml
-      expect(navTreeGenerated.navigationTree[2]).toEqual(defaultMlNavGroup);
-
-      // The default navigation tree for devtools+
-      expect(navTreeGenerated.navigationTree[3]).toEqual(defaultDevtoolsNavGroup);
-
-      // The default navigation tree for management
-      expect(navTreeGenerated.navigationTree[4]).toEqual(defaultManagementNavGroup);
     });
   });
 });

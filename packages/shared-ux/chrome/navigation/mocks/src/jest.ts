@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ChromeNavLink } from '@kbn/core-chrome-browser';
-import { BehaviorSubject } from 'rxjs';
+import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { BehaviorSubject, of } from 'rxjs';
 import { NavigationServices, ChromeNavigationNodeViewModel } from '../../types';
 import { navLinksMock } from './navlinks';
+
+const activeNodes: ChromeProjectNavigationNode[][] = [];
 
 export const getServicesMock = ({
   navLinks = navLinksMock,
@@ -26,6 +28,7 @@ export const getServicesMock = ({
     navIsOpen: true,
     navigateToUrl,
     onProjectNavigationChange: jest.fn(),
+    getActiveNodes$: () => of(activeNodes),
   };
 };
 
