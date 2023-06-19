@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { SuperTest, Test } from 'supertest';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { ApmDocumentType, ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
@@ -68,6 +69,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body as TransactionsGroupsMainStatistics;
   }
 
+  async function runRuleSoon(ruleId: string, supertest: SuperTest<Test>) {
+    if (!ruleId) return;
+    return await supertest
+      .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
+      .set('kbn-xsrf', 'foo');
+  }
+
   registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('Alerts', () => {
       const transactions = [
@@ -105,7 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await synthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
-            .rate(5)
+            .rate(1)
             .generator((timestamp) => {
               return transactions.map(({ name, duration, type }) => {
                 return serviceGoProdInstance
@@ -153,6 +161,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           ruleId = createdRule.id;
+          await runRuleSoon(ruleId, supertest);
           await waitForActiveAlert({ ruleId, esClient, log });
         });
 
@@ -172,6 +181,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             name,
             alertsCount,
           }));
+
+          console.log('txGroupsTypeRequest===', txGroupsTypeRequest);
 
           expect(expected).to.eql([
             { name: 'GET /api/failed/request', alertsCount: 0 },
@@ -203,6 +214,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           ruleId = createdRule.id;
+          await runRuleSoon(ruleId, supertest);
           await waitForActiveAlert({ ruleId, esClient, log });
         });
 
@@ -255,6 +267,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           ruleId = createdRule.id;
+          await runRuleSoon(ruleId, supertest);
           await waitForActiveAlert({ ruleId, esClient, log });
         });
 
