@@ -449,7 +449,7 @@ describe('Alert Event Details', () => {
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('responseActionsViewTab').click();
-      cy.getBySel('osquery-results').should('exist');
+      cy.getBySel('responseActionsViewWrapper').should('exist');
       cy.contains('select * from users;');
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
       cy.getBySel('osquery-results-comment').each(($comment) => {
@@ -499,7 +499,7 @@ describe('Alert Event Details', () => {
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('responseActionsViewTab').click();
-      cy.getBySel('osquery-results').should('exist');
+      cy.getBySel('responseActionsViewWrapper').should('exist');
       checkActionItemsInResults({
         lens: true,
         discover: true,
@@ -540,7 +540,7 @@ describe('Alert Event Details', () => {
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('responseActionsViewTab').click();
-      cy.getBySel('osquery-results').should('exist');
+      cy.getBySel('responseActionsViewWrapper').should('exist');
       checkActionItemsInResults({
         lens: true,
         discover: true,
@@ -590,7 +590,7 @@ describe('Alert Event Details', () => {
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
       cy.getBySel('responseActionsViewTab').click();
-      cy.getBySel('osquery-results').should('exist');
+      cy.getBySel('responseActionsViewWrapper').should('exist');
       checkActionItemsInResults({
         lens: true,
         discover: true,
@@ -632,14 +632,14 @@ describe('Alert Event Details', () => {
       let updatedNotificationCount: number;
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('osquery-actions-notification')
+      cy.getBySel('response-actions-notification')
         .should('not.have.text', '0')
         .then((element) => {
           initialNotificationCount = parseInt(element.text(), 10);
         });
       takeOsqueryActionWithParams();
       cy.getBySel('osquery-empty-button').click();
-      cy.getBySel('osquery-actions-notification')
+      cy.getBySel('response-actions-notification')
         .should('not.have.text', '0')
         .then((element) => {
           updatedNotificationCount = parseInt(element.text(), 10);
@@ -647,7 +647,7 @@ describe('Alert Event Details', () => {
         })
         .then(() => {
           cy.getBySel('responseActionsViewTab').click();
-          cy.getBySel('osquery-results').within(() => {
+          cy.getBySel('responseActionsViewWrapper').within(() => {
             cy.contains('tags');
             cy.getBySel('osquery-results-comment').should('have.length', updatedNotificationCount);
           });

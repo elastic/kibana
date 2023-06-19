@@ -67,7 +67,7 @@ describe('None', () => {
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').should('not.exist');
 
-      cy.getBySel('osquery-actions-notification').contains('0');
+      cy.getBySel('response-actions-notification').contains('0');
       cy.getBySel('responseActionsViewTab').click();
       cy.contains('Permission denied').should('exist');
       cy.contains('Error while fetching live queries').should('exist');
