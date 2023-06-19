@@ -34,11 +34,7 @@ import {
  * Exposes an interface for access artifacts from within the context of a single integration (`packageName`)
  */
 export class FleetArtifactsClient implements ArtifactsClientInterface {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private packageName: string,
-    private createArtifactsBulkBatchSize?: number
-  ) {
+  constructor(private esClient: ElasticsearchClient, private packageName: string) {
     if (!packageName) {
       throw new ArtifactsClientError('packageName is required');
     }
@@ -104,12 +100,7 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
       newArtifactsData.push(newArtifactData);
     }
 
-    return bulkCreateArtifacts(
-      this.esClient,
-      newArtifactsData,
-      false,
-      this.createArtifactsBulkBatchSize
-    );
+    return bulkCreateArtifacts(this.esClient, newArtifactsData);
   }
 
   async deleteArtifact(id: string) {

@@ -94,7 +94,7 @@ export const BULK_CREATE_MAX_ARTIFACTS_BYTES = 5_000_000;
 // Function to split artifacts in batches depending on the encoded_size value.
 const generateArtifactBatches = (
   artifacts: NewArtifact[],
-  maxArtifactsBatchSizeInBytes: number
+  maxArtifactsBatchSizeInBytes: number = BULK_CREATE_MAX_ARTIFACTS_BYTES
 ): {
   batches: Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>>;
   artifactsEsResponse: Artifact[];
@@ -144,12 +144,11 @@ const generateArtifactBatches = (
 export const bulkCreateArtifacts = async (
   esClient: ElasticsearchClient,
   artifacts: NewArtifact[],
-  refresh = false,
-  bulkCreateMaxArtifactsBytes: number = BULK_CREATE_MAX_ARTIFACTS_BYTES
+  refresh = false
 ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
   const { batches, artifactsEsResponse } = generateArtifactBatches(
     artifacts,
-    bulkCreateMaxArtifactsBytes
+    appContextService.getConfig()?.createArtifactsBulkBatchSize
   );
 
   const logger = appContextService.getLogger();

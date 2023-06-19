@@ -550,7 +550,6 @@ export class FleetPlugin
       }
     })();
 
-    const config = this.configInitialValue;
     const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     return {
       authz: {
@@ -577,11 +576,7 @@ export class FleetPlugin
         return appContextService.addExternalCallback(type, callback);
       },
       createArtifactsClient(packageName: string) {
-        return new FleetArtifactsClient(
-          core.elasticsearch.client.asInternalUser,
-          packageName,
-          config.createArtifactsBulkBatchSize
-        );
+        return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
       createFilesClient: Object.freeze(
         getFilesClientFactory({
