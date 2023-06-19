@@ -59,7 +59,6 @@ export default defineCypressConfig({
           ];
           const options = {
             env: {
-              NODE_TLS_REJECT_UNAUTHORIZED: '0',
               NODE_OPTIONS: '--no-warnings',
               PATH: process.env.PATH,
             },
