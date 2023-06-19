@@ -104,7 +104,12 @@ export function registerSetupRoute({
           },
         });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while checking plugin setup',
+        });
       }
     }
   );
@@ -181,7 +186,12 @@ export function registerSetupRoute({
         // and is not guaranteed to complete before Kibana sends a response.
         return response.accepted();
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while setting up Universal Profiling',
+        });
       }
     }
   );
@@ -201,7 +211,12 @@ export function registerSetupRoute({
 
         return response.ok({ body: setupInstructions });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching Universal Profiling instructions',
+        });
       }
     }
   );

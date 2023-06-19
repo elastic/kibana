@@ -75,7 +75,12 @@ export function registerTopNFunctionsSearchRoute({
           body: topNFunctions,
         });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching TopN functions',
+        });
       }
     }
   );

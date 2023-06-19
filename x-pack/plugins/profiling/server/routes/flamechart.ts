@@ -79,7 +79,12 @@ export function registerFlameChartSearchRoute({
 
         return response.ok({ body: flamegraph });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching flamegraph',
+        });
       }
     }
   );

@@ -187,7 +187,12 @@ export function queryTopNCommon({
           }),
         });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching TopN functions',
+        });
       }
     }
   );

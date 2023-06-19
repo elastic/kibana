@@ -29,14 +29,5 @@ export const PROFILING_FEATURE = {
       ui: ['show'],
       api: [PROFILING_SERVER_FEATURE_ID],
     },
-    read: {
-      app: [PROFILING_SERVER_FEATURE_ID, 'ux', 'kibana'],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: ['show'],
-      api: [PROFILING_SERVER_FEATURE_ID],
-    },
   },
 };
