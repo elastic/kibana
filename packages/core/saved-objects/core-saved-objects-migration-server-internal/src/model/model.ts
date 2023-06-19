@@ -1423,10 +1423,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
       if (!res.right.match) {
-        return {
-          ...stateP,
-          controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
-        };
+        if (res.right.updatedTypes?.length) {
+          return {
+            ...stateP,
+            controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+            updatedTypesQuery: Option.some({
+              bool: {
+                should: res.right.updatedTypes.map((type) => ({ term: { type } })),
+              },
+            }),
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'info',
+                message: `Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings: ${res.right.updatedTypes}.`,
+              },
+            ],
+          };
+        } else {
+          return {
+            ...stateP,
+            controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+            updatedTypesQuery: Option.none,
+          };
+        }
       }
 
       // The md5 of the mappings match, so there's no need to update target mappings

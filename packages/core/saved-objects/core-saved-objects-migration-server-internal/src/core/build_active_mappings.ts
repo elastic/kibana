@@ -63,6 +63,27 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
   return changedProp ? { changedProp: `properties.${changedProp}` } : undefined;
 }
 
+/**
+ * Compares the actual vs expected mappings' hashes.
+ * Returns a boolean query to select only the types with updated mappings (updated hashes).
+ */
+export const getUpdatedTypes = (
+  current: IndexMapping,
+  updated: IndexMapping
+): string[] | undefined => {
+  if (!current._meta?.migrationMappingPropertyHashes) {
+    return undefined;
+  }
+
+  const updatedTypes = Object.keys(updated._meta!.migrationMappingPropertyHashes!).filter(
+    (key) =>
+      current._meta!.migrationMappingPropertyHashes![key] !==
+      updated._meta!.migrationMappingPropertyHashes![key]
+  );
+
+  return updatedTypes;
+};
+
 // Convert an object to an md5 hash string, using a stable serialization (canonicalStringify)
 function md5Object(obj: any) {
   return crypto.createHash('md5').update(canonicalStringify(obj)).digest('hex');

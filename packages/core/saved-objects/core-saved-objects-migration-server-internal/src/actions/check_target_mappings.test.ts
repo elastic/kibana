@@ -9,21 +9,36 @@
 import * as Either from 'fp-ts/lib/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { checkTargetMappings } from './check_target_mappings';
-import { diffMappings } from '../core/build_active_mappings';
+import { diffMappings, getUpdatedTypes } from '../core/build_active_mappings';
 
 jest.mock('../core/build_active_mappings');
 
 const diffMappingsMock = diffMappings as jest.MockedFn<typeof diffMappings>;
+const getUpdatedTypesMock = getUpdatedTypes as jest.MockedFn<typeof getUpdatedTypes>;
 
 const actualMappings: IndexMapping = {
   properties: {
-    field: { type: 'integer' },
+    type1: { type: 'integer' },
+    type2: { type: 'integer' },
+  },
+  _meta: {
+    migrationMappingPropertyHashes: {
+      type1: 'type1OldHash',
+      type2: 'type2OldHash',
+    },
   },
 };
 
 const expectedMappings: IndexMapping = {
   properties: {
-    field: { type: 'long' },
+    type1: { type: 'long' },
+    type2: { type: 'long' },
+  },
+  _meta: {
+    migrationMappingPropertyHashes: {
+      type1: 'type1NewHash',
+      type2: 'type2NewHash',
+    },
   },
 };
 
@@ -66,7 +81,8 @@ describe('checkTargetMappings', () => {
   });
 
   it('returns match=false if diffMappings() finds differences', async () => {
-    diffMappingsMock.mockReturnValueOnce({ changedProp: 'field' });
+    diffMappingsMock.mockReturnValueOnce({ changedProp: 'type1' });
+    getUpdatedTypesMock.mockReturnValueOnce(['type1', 'type2']);
 
     const task = checkTargetMappings({
       actualMappings,
@@ -74,6 +90,6 @@ describe('checkTargetMappings', () => {
     });
 
     const result = await task();
-    expect(result).toEqual(Either.right({ match: false }));
+    expect(result).toEqual(Either.right({ match: false, updatedTypes: ['type1', 'type2'] }));
   });
 });

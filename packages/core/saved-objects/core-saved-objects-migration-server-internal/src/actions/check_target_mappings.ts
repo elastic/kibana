@@ -8,8 +8,8 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 
-import { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { diffMappings } from '../core/build_active_mappings';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { diffMappings, getUpdatedTypes } from '../core/build_active_mappings';
 
 /** @internal */
 export interface CheckTargetMappingsParams {
@@ -20,6 +20,7 @@ export interface CheckTargetMappingsParams {
 /** @internal */
 export interface TargetMappingsCompareResult {
   match: boolean;
+  updatedTypes?: string[];
 }
 
 export const checkTargetMappings =
@@ -32,5 +33,6 @@ export const checkTargetMappings =
       return Either.right({ match: false });
     }
     const diff = diffMappings(actualMappings, expectedMappings);
-    return Either.right({ match: !diff });
+    const updatedTypes = getUpdatedTypes(actualMappings, expectedMappings);
+    return Either.right({ match: !diff, updatedTypes });
   };
