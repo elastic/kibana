@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
 import { LandingPageComponent } from '../../common/components/landing_page';
@@ -24,6 +25,7 @@ export const LandingPage = memo(() => {
           <LandingPageComponent />
         </PluginTemplateWrapper>
       )}
+      <Chat />
       <SpyRoute pageName={SecurityPageName.landing} />
     </>
   );

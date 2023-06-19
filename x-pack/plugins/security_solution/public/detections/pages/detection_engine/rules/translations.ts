@@ -1211,3 +1211,10 @@ export const UPDATE_RULE_BUTTON = i18n.translate(
     defaultMessage: 'Update rule',
   }
 );
+
+export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.goBackToRulesTableButton',
+  {
+    defaultMessage: 'Go back to installed Elastic rules',
+  }
+);
