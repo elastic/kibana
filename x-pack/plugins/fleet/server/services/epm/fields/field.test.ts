@@ -11,7 +11,7 @@ import path from 'path';
 import globby from 'globby';
 import { safeLoad } from 'js-yaml';
 
-import { getField, processFields } from './field';
+import { getField, processFields, addTimeSeriesFields } from './field';
 import type { Field, Fields } from './field';
 
 // Add our own serialiser to just do JSON.stringify
@@ -669,5 +669,50 @@ describe('processFields', () => {
         }
       ]
     `);
+  });
+
+  describe('addTimeSeriesFields', () => {
+    const literalYml = `
+    - name: total
+      type: long
+      format: bytes
+      unit: byte
+      metric_type: gauge
+      description: |
+        Total swap memory.
+`;
+
+    const fields: Field[] = safeLoad(literalYml);
+
+    test('Copies metric_type to time_series_metric field when tsds is enabled', () => {
+      expect(addTimeSeriesFields(fields, true)).toMatchInlineSnapshot(`
+        [
+          {
+            "name": "total",
+            "type": "long",
+            "format": "bytes",
+            "unit": "byte",
+            "metric_type": "gauge",
+            "description": "Total swap memory.\\n",
+            "time_series_metric": "gauge"
+          }
+        ]
+      `);
+    });
+
+    test('Returns input fields when tsds is disabled', () => {
+      expect(addTimeSeriesFields(fields, false)).toMatchInlineSnapshot(`
+        [
+          {
+            "name": "total",
+            "type": "long",
+            "format": "bytes",
+            "unit": "byte",
+            "metric_type": "gauge",
+            "description": "Total swap memory.\\n"
+          }
+        ]
+      `);
+    });
   });
 });
