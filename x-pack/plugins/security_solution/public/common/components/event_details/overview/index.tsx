@@ -198,7 +198,7 @@ export const Overview = React.memo<Props>(
 
     // 675px is the container width at which none of the cards, when hovered,
     // creates a visual overflow in a single row setup
-    const showAsSingleRow = width === 0 || width >= 675;
+    const showAsSingleRow = width === 0 || (width && width >= 675);
 
     // Only render cards with content
     const cards = [signalCard, severityCard, riskScoreCard, ruleNameCard].filter(isNotNull);

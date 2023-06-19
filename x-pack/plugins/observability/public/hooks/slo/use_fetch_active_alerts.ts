@@ -62,7 +62,7 @@ export function useFetchActiveAlerts({ sloIds = [] }: Params): UseFetchActiveAle
                   {
                     range: {
                       '@timestamp': {
-                        gte: 'now-15m/m',
+                        gte: 'now-5m/m',
                       },
                     },
                   },
