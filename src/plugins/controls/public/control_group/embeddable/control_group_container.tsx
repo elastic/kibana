@@ -190,6 +190,19 @@ export class ControlGroupContainer extends Container<
     );
   };
 
+  public updateInputAndReinitialize = (newInput: Partial<ControlGroupInput>) => {
+    this.subscriptions.unsubscribe();
+    this.subscriptions = new Subscription();
+    this.initialized$.next(false);
+    this.updateInput(newInput);
+    this.untilAllChildrenReady().then(() => {
+      this.recalculateDataViews();
+      this.recalculateFilters();
+      this.setupSubscriptions();
+      this.initialized$.next(true);
+    });
+  };
+
   public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
     this.lastUsedDataViewId = lastUsedDataViewId;
   };
