@@ -278,6 +278,28 @@ export default ({ getService }: FtrProviderContext): void => {
           await createCase(supertest, getPostCaseRequest({ tags }), 400);
         });
       });
+
+      describe('categories', async () => {
+        it('400s when the category is too long', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              category: 'A very long category with more than fifty characters!',
+            }),
+            400
+          );
+        });
+
+        it('400s when the category is an empty string', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              category: '',
+            }),
+            400
+          );
+        });
+      });
     });
 
     describe('rbac', () => {
