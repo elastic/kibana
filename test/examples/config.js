@@ -30,6 +30,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./search'),
       require.resolve('./content_management'),
       require.resolve('./unified_field_list_examples'),
+      require.resolve('./discover_customization_examples'),
     ],
     services: {
       ...functionalConfig.get('services'),

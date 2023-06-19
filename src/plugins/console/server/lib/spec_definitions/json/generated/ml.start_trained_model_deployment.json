@@ -2,6 +2,7 @@
   "ml.start_trained_model_deployment": {
     "url_params": {
       "cache_size": "",
+      "deployment_id": "",
       "number_of_allocations": 0,
       "threads_per_allocation": 0,
       "priority": "",

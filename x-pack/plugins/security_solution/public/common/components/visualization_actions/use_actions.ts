@@ -205,7 +205,7 @@ const getAddToNewCaseAction = ({
       return ADD_TO_NEW_CASE;
     },
     getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'plusInCircle';
+      return 'casesApp';
     },
     type: 'actionButton',
     async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
@@ -259,7 +259,7 @@ const getAddToExistingCaseAction = ({
       return ADD_TO_EXISTING_CASE;
     },
     getIconType(context: ActionExecutionContext<object>): string | undefined {
-      return 'plusInCircle';
+      return 'casesApp';
     },
     type: 'actionButton',
     async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {

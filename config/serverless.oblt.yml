@@ -27,3 +27,14 @@ xpack.apm.serverlessOnboarding: true
 xpack.fleet.packages:
   - name: apm
     version: latest
+## Disable APM UI components and API calls
+xpack.apm.featureFlags.agentConfigurationAvailable: false
+xpack.apm.featureFlags.configurableIndicesAvailable: false
+xpack.apm.featureFlags.infrastructureTabAvailable: false
+xpack.apm.featureFlags.infraUiAvailable: false
+xpack.apm.featureFlags.migrationToFleetAvailable: false
+xpack.apm.featureFlags.sourcemapApiAvailable: false
+xpack.apm.featureFlags.storageExplorerAvailable: false
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: observability
