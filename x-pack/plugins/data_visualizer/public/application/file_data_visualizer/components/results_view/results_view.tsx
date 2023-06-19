@@ -52,9 +52,25 @@ export const ResultsView: FC<Props> = ({
 }) => {
   return (
     <EuiPageBody data-test-subj="dataVisualizerPageFileResults">
-      <EuiTitle>
-        <h2 data-test-subj="dataVisualizerFileResultsTitle">{fileName}</h2>
-      </EuiTitle>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h2 data-test-subj="dataVisualizerFileResultsTitle">{fileName}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={onCancel}
+            data-test-subj="dataVisualizerFileResultsCancelButton"
+            size="s"
+          >
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.resultsView.cancelButtonLabel"
+              defaultMessage="Select a different file"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
       <div className="results">
