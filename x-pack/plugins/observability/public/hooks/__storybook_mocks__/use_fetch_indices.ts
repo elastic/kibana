@@ -15,15 +15,10 @@ export const useFetchIndices = (): UseFetchIndicesResponse => {
     data: [
       ...Array(10)
         .fill(0)
-        .map((_, i) => ({
-          name: `.index-${i}`,
-        })),
+        .map((_, i) => `.index-${i}`),
       ...Array(10)
         .fill(0)
-        .map((_, i) => ({
-          name: `.some-other-index-${i}`,
-        })),
+        .map((_, i) => `.some-other-index-${i}`),
     ] as Index[],
-    refetch: function () {} as UseFetchIndicesResponse['refetch'],
   };
 };
