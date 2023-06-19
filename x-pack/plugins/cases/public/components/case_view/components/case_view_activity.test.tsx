@@ -671,5 +671,23 @@ describe('Case View Page activity tab', () => {
         });
       });
     });
+
+    describe('Category', () => {
+      it('should show the category correctly', async () => {
+        appMockRender.render(
+          <CaseViewActivity
+            {...caseProps}
+            caseData={{
+              ...caseProps.caseData,
+              category: 'My category',
+            }}
+          />
+        );
+
+        await waitFor(() => {
+          expect(screen.getByText('My category'));
+        });
+      });
+    });
   });
 });

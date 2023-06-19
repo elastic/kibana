@@ -16,7 +16,6 @@ import {
   EuiButtonIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import styled, { css } from 'styled-components';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useGetCategories } from '../../../containers/use_get_categories';
 import * as i18n from '../../category/translations';
@@ -29,27 +28,6 @@ export interface EditCategoryProps {
   onSubmit: (category: string | null | undefined) => void;
   category: string | null | undefined;
 }
-
-const MyFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    width: 100%;
-    p {
-      font-size: ${theme.eui.euiSizeM};
-      margin-block-end: unset;
-    }
-  `}
-`;
-
-const ColumnFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    & {
-      max-width: 100%;
-      @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
-        flex-direction: row;
-      }
-    }
-  `}
-`;
 
 export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditCategoryProps) => {
   const { permissions } = useCasesContext();
@@ -108,7 +86,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
           )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup gutterSize="none" data-test-subj="case-category">
+        <EuiFlexGroup gutterSize="none" data-test-subj="case-category">
           {!category && !isEditCategory && (
             <p data-test-subj="no-categories">{i18n.NO_CATEGORIES}</p>
           )}
@@ -118,7 +96,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
             </EuiFlexItem>
           )}
           {isEditCategory && (
-            <ColumnFlexGroup data-test-subj="edit-category" direction="column">
+            <EuiFlexGroup data-test-subj="edit-category" direction="column">
               <Form form={form}>
                 <CategoryFormField isLoading={isLoadingAll} availableCategories={categories} />
               </Form>
@@ -148,9 +126,9 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-            </ColumnFlexGroup>
+            </EuiFlexGroup>
           )}
-        </MyFlexGroup>
+        </EuiFlexGroup>
       </EuiText>
     </EuiFlexItem>
   );
