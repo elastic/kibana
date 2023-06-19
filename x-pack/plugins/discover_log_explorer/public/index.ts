@@ -4,11 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-<<<<<<< HEAD
-
-import './index.scss';
-=======
->>>>>>> 389778b70c6 (feat(observability-logs): try discover customization)
 
 import { DiscoverLogExplorerPlugin } from './plugin';
 
