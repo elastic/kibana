@@ -178,6 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('infraOps');
 
       await pageObjects.infraHome.clickDismissKubernetesTourButton();
+      await pageObjects.infraHostsView.getBetaBadgeExists();
       await pageObjects.infraHostsView.clickTryHostViewBadge();
 
       const pageUrl = await browser.getCurrentUrl();
@@ -206,6 +207,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('Should show hosts landing page with callout when the hosts view is disabled', async () => {
+          await pageObjects.infraHostsView.getBetaBadgeExists();
           const landingPageDisabled =
             await pageObjects.infraHostsView.getHostsLandingPageDisabled();
           const learnMoreDocsUrl = await pageObjects.infraHostsView.getHostsLandingPageDocsLink();
@@ -354,6 +356,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should render the correct page title', async () => {
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
+      });
+
+      it('should render the title beta badge', async () => {
+        await pageObjects.infraHostsView.getBetaBadgeExists();
       });
 
       describe('Hosts table', async () => {
