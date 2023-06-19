@@ -457,7 +457,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
-        'Top values of ip'
+        termTranslator('terms', 'ip')
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         termTranslator('average', 'bytes')
@@ -469,7 +469,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('bar', termTranslator('bar'));
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-        'Top values of ip'
+        termTranslator('terms', 'ip')
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         termTranslator('average', 'bytes')
@@ -490,7 +490,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         termTranslator('average', 'bytes')
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
-        'Top values of ip'
+        termTranslator('terms', 'ip')
       );
     });
 
@@ -505,7 +505,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('treemap', termTranslator('treemap'));
       expect(
         await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
-      ).to.eql(['Top values of geo.dest', 'Top values of geo.src']);
+      ).to.eql([termTranslator('terms', 'geo.dest'), termTranslator('terms', 'geo.src')]);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         termTranslator('average', 'bytes')
       );
