@@ -209,6 +209,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
     expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
     expect(result.getByTestId('case-tags')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-categories')).toBeInTheDocument();
     expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
 
@@ -225,7 +226,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
     expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
     expect(result.getByTestId('case-tags')).toBeInTheDocument();
-    expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-categories')).toBeInTheDocument();
     expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.getByTestId('case-severity-selection')).toBeDisabled();
 
