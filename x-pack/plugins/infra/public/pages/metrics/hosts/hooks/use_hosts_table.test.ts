@@ -26,24 +26,32 @@ const mockHostNode: InfraAssetMetricsItem[] = [
   {
     metrics: [
       {
-        name: 'rx',
-        value: 252456.92916666667,
+        name: 'cpu',
+        value: 0.6353277777777777,
       },
       {
-        name: 'tx',
-        value: 252758.425,
+        name: 'diskSpaceUsage',
+        value: 0.2040001,
       },
       {
         name: 'memory',
         value: 0.94525,
       },
       {
-        name: 'cpu',
-        value: 0.6353277777777777,
+        name: 'memoryFree',
+        value: 34359.738368,
       },
       {
-        name: 'memoryTotal',
-        value: 34359.738368,
+        name: 'normalizedLoad1m',
+        value: 239.2040001,
+      },
+      {
+        name: 'rx',
+        value: 252456.92916666667,
+      },
+      {
+        name: 'tx',
+        value: 252758.425,
       },
     ],
     metadata: [
@@ -55,24 +63,32 @@ const mockHostNode: InfraAssetMetricsItem[] = [
   {
     metrics: [
       {
-        name: 'rx',
-        value: 95.86339715321859,
+        name: 'cpu',
+        value: 0.8647805555555556,
       },
       {
-        name: 'tx',
-        value: 110.38566859563191,
+        name: 'diskSpaceUsage',
+        value: 0.5400000214576721,
       },
       {
         name: 'memory',
         value: 0.5400000214576721,
       },
       {
-        name: 'cpu',
-        value: 0.8647805555555556,
+        name: 'memoryFree',
+        value: 9.194304,
       },
       {
-        name: 'memoryTotal',
-        value: 9.194304,
+        name: 'normalizedLoad1m',
+        value: 100,
+      },
+      {
+        name: 'rx',
+        value: 95.86339715321859,
+      },
+      {
+        name: 'tx',
+        value: 110.38566859563191,
       },
     ],
     metadata: [
@@ -110,7 +126,9 @@ describe('useHostTable hook', () => {
         tx: 252758.425,
         memory: 0.94525,
         cpu: 0.6353277777777777,
-        memoryTotal: 34359.738368,
+        diskSpaceUsage: 0.2040001,
+        memoryFree: 34359.738368,
+        normalizedLoad1m: 239.2040001,
       },
       {
         name: 'host-1',
@@ -125,7 +143,9 @@ describe('useHostTable hook', () => {
         tx: 110.38566859563191,
         memory: 0.5400000214576721,
         cpu: 0.8647805555555556,
-        memoryTotal: 9.194304,
+        diskSpaceUsage: 0.5400000214576721,
+        memoryFree: 9.194304,
+        normalizedLoad1m: 100,
       },
     ];
 

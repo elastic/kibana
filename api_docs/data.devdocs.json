@@ -13329,12 +13329,12 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
+                "plugin": "threatIntelligence",
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13501,6 +13501,14 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
+              },
+              {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
               },
@@ -13509,24 +13517,20 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
               {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
               },
               {
                 "plugin": "ml",
@@ -13563,6 +13567,10 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "exploratoryView",
@@ -13743,10 +13751,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/components/rules/eql_query_bar/validators.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -17920,37 +17924,7 @@
                   "SearchResponse",
                   "<TDocument, TAggregations>>; }; helpers: ",
                   "default",
-                  "; name: string | symbol; security: ",
-                  "default",
-                  "; monitoring: ",
-                  "default",
-                  "; count: { (this: That, params?: ",
-                  "CountRequest",
-                  " | ",
-                  "CountRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "CountResponse",
-                  ">; (this: That, params?: ",
-                  "CountRequest",
-                  " | ",
-                  "CountRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "CountResponse",
-                  ", unknown>>; (this: That, params?: ",
-                  "CountRequest",
-                  " | ",
-                  "CountRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "CountResponse",
-                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -18044,7 +18018,33 @@
                   "ClosePointInTimeResponse",
                   ">; }; cluster: ",
                   "default",
-                  "; danglingIndices: ",
+                  "; count: { (this: That, params?: ",
+                  "CountRequest",
+                  " | ",
+                  "CountRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "CountResponse",
+                  ">; (this: That, params?: ",
+                  "CountRequest",
+                  " | ",
+                  "CountRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "CountResponse",
+                  ", unknown>>; (this: That, params?: ",
+                  "CountRequest",
+                  " | ",
+                  "CountRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "CountResponse",
+                  ">; }; danglingIndices: ",
                   "default",
                   "; deleteByQuery: { (this: That, params: ",
                   "DeleteByQueryRequest",
@@ -18468,6 +18468,8 @@
                   "default",
                   "; ml: ",
                   "default",
+                  "; monitoring: ",
+                  "default",
                   "; msearch: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params: ",
@@ -18871,6 +18873,8 @@
                   " | undefined): Promise<",
                   "SearchTemplateResponse",
                   "<TDocument>>; }; searchableSnapshots: ",
+                  "default",
+                  "; security: ",
                   "default",
                   "; shutdown: ",
                   "default",
@@ -20955,12 +20959,12 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
+                "plugin": "threatIntelligence",
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -21127,6 +21131,14 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
+              },
+              {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
               },
@@ -21135,24 +21147,20 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
               {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
               },
               {
                 "plugin": "ml",
@@ -21189,6 +21197,10 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "exploratoryView",
@@ -21369,10 +21381,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/components/rules/eql_query_bar/validators.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
               },
               {
                 "plugin": "securitySolution",
