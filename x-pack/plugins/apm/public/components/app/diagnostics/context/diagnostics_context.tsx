@@ -32,7 +32,6 @@ export function DiagnosticsContextProvider({
   children: React.ReactChild;
 }) {
   const {
-    // @ts-expect-error
     query: { kuery, rangeFrom, rangeTo },
   } = useApmParams('/diagnostics/*');
 

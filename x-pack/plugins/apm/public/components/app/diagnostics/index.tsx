@@ -10,6 +10,7 @@ import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
 import * as t from 'io-ts';
 import { EuiButton, EuiCallOut, EuiIcon } from '@elastic/eui';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { DiagnosticsSummary } from './summary_tab';
@@ -29,6 +30,22 @@ import { getDataStreamTabStatus } from './summary_tab/data_streams_status';
 import { getIndicesTabStatus } from './summary_tab/indicies_status';
 import { DiagnosticsApmEvents } from './apm_events_tab';
 
+const params = t.type({
+  query: t.intersection([
+    t.type({
+      rangeFrom: t.string,
+      rangeTo: t.string,
+    }),
+    t.partial({
+      refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+      refreshInterval: t.string,
+      kuery: t.string,
+      // comparisonEnabled: toBooleanRt,
+    }),
+    // offsetRt,
+  ]),
+});
+
 export const diagnosticsRoute = {
   '/diagnostics': {
     element: (
@@ -38,36 +55,35 @@ export const diagnosticsRoute = {
         </DiagnosticsTemplate>
       </DiagnosticsContextProvider>
     ),
+    // params,
     children: {
       '/diagnostics': {
         element: <DiagnosticsSummary />,
+        params,
       },
       '/diagnostics/index-pattern-settings': {
         element: <DiagnosticsIndexPatternSettings />,
+        params,
       },
       '/diagnostics/index-templates': {
         element: <DiagnosticsIndexTemplates />,
+        params,
       },
       '/diagnostics/data-streams': {
         element: <DiagnosticsDataStreams />,
+        params,
       },
       '/diagnostics/indices': {
         element: <DiagnosticsIndices />,
+        params,
       },
       '/diagnostics/events': {
         element: <DiagnosticsApmEvents />,
-        params: t.type({
-          query: t.partial({
-            rangeFrom: t.string,
-            rangeTo: t.string,
-            refreshPaused: t.union([t.literal('true'), t.literal('false')]),
-            refreshInterval: t.string,
-            kuery: t.string,
-          }),
-        }),
+        params,
       },
       '/diagnostics/import-export': {
         element: <DiagnosticsImportExport />,
+        params,
       },
     },
   },
@@ -77,6 +93,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
   const routePath = useApmRoutePath();
   const router = useApmRouter();
   const { diagnosticsBundle } = useDiagnosticsContext();
+  const { query } = useApmParams('/diagnostics/*');
 
   return (
     <ApmMainTemplate
@@ -90,7 +107,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         description: <TemplateDescription />,
         tabs: [
           {
-            href: router.link('/diagnostics'),
+            href: router.link('/diagnostics', { query }),
             label: i18n.translate('xpack.apm.diagnostics.tab.summary', {
               defaultMessage: 'Summary',
             }),
@@ -100,7 +117,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             prepend: !getIndexPatternTabStatus(diagnosticsBundle) && (
               <EuiIcon type="warning" color="red" />
             ),
-            href: router.link('/diagnostics/index-pattern-settings'),
+            href: router.link('/diagnostics/index-pattern-settings', { query }),
             label: i18n.translate(
               'xpack.apm.diagnostics.tab.index_pattern_settings',
               {
@@ -113,7 +130,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             prepend: !getIndexTemplateStatus(diagnosticsBundle) && (
               <EuiIcon type="warning" color="red" />
             ),
-            href: router.link('/diagnostics/index-templates'),
+            href: router.link('/diagnostics/index-templates', { query }),
             label: i18n.translate('xpack.apm.diagnostics.tab.index_templates', {
               defaultMessage: 'Index templates',
             }),
@@ -123,7 +140,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             prepend: !getDataStreamTabStatus(diagnosticsBundle) && (
               <EuiIcon type="warning" color="red" />
             ),
-            href: router.link('/diagnostics/data-streams'),
+            href: router.link('/diagnostics/data-streams', { query }),
             label: i18n.translate('xpack.apm.diagnostics.tab.datastreams', {
               defaultMessage: 'Data streams',
             }),
@@ -133,21 +150,21 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             prepend: !getIndicesTabStatus(diagnosticsBundle) && (
               <EuiIcon type="warning" color="red" />
             ),
-            href: router.link('/diagnostics/indices'),
+            href: router.link('/diagnostics/indices', { query }),
             label: i18n.translate('xpack.apm.diagnostics.tab.indices', {
               defaultMessage: 'Indices',
             }),
             isSelected: routePath === '/diagnostics/indices',
           },
           {
-            href: router.link('/diagnostics/events', { query: {} }),
+            href: router.link('/diagnostics/events', { query }),
             label: i18n.translate('xpack.apm.diagnostics.tab.apmEvents', {
               defaultMessage: 'Documents',
             }),
             isSelected: routePath === '/diagnostics/events',
           },
           {
-            href: router.link('/diagnostics/import-export'),
+            href: router.link('/diagnostics/import-export', { query }),
             label: i18n.translate('xpack.apm.diagnostics.tab.import_export', {
               defaultMessage: 'Import/Export',
             }),
