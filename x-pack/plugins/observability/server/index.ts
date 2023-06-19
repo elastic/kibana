@@ -36,7 +36,7 @@ const configSchema = schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
       logs: schema.object({
-        // Enable it by defult: https://github.com/elastic/kibana/issues/159945
+        // Enable it by default: https://github.com/elastic/kibana/issues/159945
         enabled: schema.boolean({ defaultValue: true }),
       }),
       uptime: schema.object({
