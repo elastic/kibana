@@ -62,7 +62,7 @@ export const AlertTlsComponent: React.FC<Props> = ({
 export const TlsTranslations = {
   criteriaAriaLabel: i18n.translate('xpack.synthetics.alerts.tls.criteriaExpression.ariaLabel', {
     defaultMessage:
-      'An expression displaying the criteria for monitor that are watched by this alert',
+      'An expression displaying the criteria for the monitors that are being watched by this alert',
   }),
   criteriaDescription: i18n.translate(
     'xpack.synthetics.alerts.tls.criteriaExpression.description',
