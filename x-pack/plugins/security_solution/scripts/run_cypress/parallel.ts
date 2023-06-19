@@ -77,6 +77,10 @@ export const cli = () => {
     async () => {
       const { argv } = yargs(process.argv.slice(2));
 
+      const isOpen = argv._[0] === 'open';
+
+      console.error('isOpen', isOpen);
+
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
       const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
@@ -90,6 +94,10 @@ export const cli = () => {
       const fleetServerPorts: number[] = [8220];
 
       const getEsPort = <T>(): T | number => {
+        if (isOpen) {
+          return 9222;
+        }
+
         const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
         if (esPorts.includes(esPort)) {
           return getEsPort();
@@ -99,6 +107,10 @@ export const cli = () => {
       };
 
       const getKibanaPort = <T>(): T | number => {
+        if (isOpen) {
+          return 5620;
+        }
+
         const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
         if (kibanaPorts.includes(kibanaPort)) {
           return getKibanaPort();
@@ -108,6 +120,10 @@ export const cli = () => {
       };
 
       const getFleetServerPort = <T>(): T | number => {
+        if (isOpen) {
+          return 8220;
+        }
+
         const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
         if (fleetServerPorts.includes(fleetServerPort)) {
           return getFleetServerPort();
@@ -197,8 +213,6 @@ export const cli = () => {
       });
 
       const hostRealIp = getLocalhostRealIp();
-
-      const isOpen = argv._[0] === 'open';
 
       await pMap(
         files,
@@ -300,9 +314,11 @@ export const cli = () => {
               ...readProviderSpec('Service', config.get('services')),
             ]);
 
+            console.error('xcxc', process.env);
+
             const options = {
-              installDir: process.env.KIBANA_INSTALL_DIR,
-              ci: process.env.CI,
+              // installDir: process.env.KIBANA_INSTALL_DIR,
+              // ci: process.env.CI,
             };
 
             const shutdownEs = await pRetry(
