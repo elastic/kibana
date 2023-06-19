@@ -131,6 +131,15 @@ export interface GetCspRuleTemplateResponse {
 
 // CNVM DASHBOARD
 
+export interface VulnScoreTrend {
+  '@timestamp': string;
+  policy_template: 'vuln_mgmt';
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+}
+
 export interface CnvmStatistics {
   criticalCount: number | undefined;
   highCount: number | undefined;
@@ -141,6 +150,51 @@ export interface CnvmStatistics {
 
 export interface CnvmDashboardData {
   cnvmStatistics: CnvmStatistics;
+  vulnTrends: VulnScoreTrend[];
+  topVulnerableResources: VulnerableResourceStat[];
+  topPatchableVulnerabilities: PatchableVulnerabilityStat[];
+  topVulnerabilities: VulnerabilityStat[];
 }
 
 export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+
+export interface VulnerableResourceStat {
+  vulnerabilityCount: number | undefined;
+  resource: {
+    id: string | undefined;
+    name: string | undefined;
+  };
+  cloudRegion: string | undefined;
+}
+
+export interface PatchableVulnerabilityStat {
+  vulnerabilityCount: number | undefined;
+  packageFixVersion: string | undefined;
+  cve: string | undefined;
+  cvss: {
+    score: number | undefined;
+    version: string | undefined;
+  };
+}
+
+export interface VulnerabilityStat {
+  packageFixVersion: string | undefined;
+  packageName: string | undefined;
+  packageVersion: string | undefined;
+  severity: string | undefined;
+  vulnerabilityCount: number | undefined;
+  cvss: {
+    score: number | undefined;
+    version: string | undefined;
+  };
+  cve: string | undefined;
+}
+
+export interface AggFieldBucket {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: Array<{
+    key?: string;
+    doc_count?: string;
+  }>;
+}
