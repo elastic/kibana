@@ -16,10 +16,6 @@ import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environmen
 const environment = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
-  const connectionsPerService = 100;
-
-  const uniqueConnectionsPerService = 10;
-
   const numServices = 500;
 
   const tracesPerMinute = 10;
