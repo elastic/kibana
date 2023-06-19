@@ -12,9 +12,9 @@ export {
   createCreateIndexStream,
   createDeleteIndexStream,
   createGenerateIndexRecordsStream,
-  deleteKibanaIndices,
-  migrateKibanaIndex,
-  cleanKibanaIndices,
+  deleteSavedObjectIndices,
+  migrateSavedObjectIndex,
+  cleanSavedObjectIndices,
   createDefaultSpace,
 } from './indices';
 
