@@ -22,6 +22,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   CreateExceptionListItemBuilderSchema,
+  DataViewField,
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
   OperatorOption,
@@ -99,6 +100,7 @@ export interface ExceptionBuilderProps {
   operatorsList?: OperatorOption[];
   exceptionItemName?: string;
   allowCustomFieldOptions?: boolean;
+  getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 export const ExceptionBuilderComponent = ({
@@ -122,6 +124,7 @@ export const ExceptionBuilderComponent = ({
   osTypes,
   operatorsList,
   allowCustomFieldOptions = false,
+  getExtendedFields,
 }: ExceptionBuilderProps): JSX.Element => {
   const [state, dispatch] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
@@ -449,6 +452,7 @@ export const ExceptionBuilderComponent = ({
                 isDisabled={isDisabled}
                 operatorsList={operatorsList}
                 allowCustomOptions={allowCustomFieldOptions}
+                getExtendedFields={getExtendedFields}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -39,6 +39,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
       </MlPageHeader>
       {dataView && (
         <ExplainLogRateSpikes
+          // Default to false for now, until page restructure work to enable smooth sticky histogram is done
+          stickyHistogram={false}
           dataView={dataView}
           savedSearch={savedSearch}
           appDependencies={pick(services, [
