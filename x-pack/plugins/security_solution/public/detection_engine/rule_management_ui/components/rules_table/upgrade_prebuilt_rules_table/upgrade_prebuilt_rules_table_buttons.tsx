@@ -15,9 +15,8 @@ export const UpgradePrebuiltRulesTableButtons = () => {
   const {
     state: { rules, selectedRules, loadingRules, isUpgradeModalVisible, legacyJobsInstalled },
     actions: {
-      upgradeAllRules,
-      upgradeSelectedRules,
-      upgradeRulesWrapper,
+      upgradeSelectedRulesCTAClick: upgradeSelectedRules,
+      upgradeAllRulesCTAClick: upgradeAllRules,
       mlJobUpgradeModalConfirm,
       mlJobUpgradeModalCancel,
     },
@@ -34,10 +33,7 @@ export const UpgradePrebuiltRulesTableButtons = () => {
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         {shouldDisplayUpgradeSelectedRulesButton ? (
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => upgradeRulesWrapper('SPECIFIC_RULES', upgradeSelectedRules)}
-              disabled={isRuleUpgrading}
-            >
+            <EuiButton onClick={upgradeSelectedRules} disabled={isRuleUpgrading}>
               <>
                 {i18n.UPDATE_SELECTED_RULES(numberOfSelectedRules)}
                 {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
@@ -49,7 +45,7 @@ export const UpgradePrebuiltRulesTableButtons = () => {
           <EuiButton
             fill
             iconType="plusInCircle"
-            onClick={() => upgradeRulesWrapper('ALL_RULES', upgradeAllRules)}
+            onClick={upgradeAllRules}
             disabled={!isRulesAvailableForUpgrade || isRuleUpgrading}
           >
             {i18n.UPDATE_ALL}

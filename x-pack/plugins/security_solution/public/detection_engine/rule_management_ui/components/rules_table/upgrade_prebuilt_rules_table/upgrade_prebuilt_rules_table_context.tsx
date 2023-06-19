@@ -86,18 +86,11 @@ export interface UpgradePrebuiltRulesTableState {
 
 export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
-  upgradeOneRule: (ruleId: string) => Promise<void>;
-  upgradeSelectedRules: () => Promise<void>;
-  upgradeAllRules: () => Promise<void>;
+  upgradeSingleRuleFromRowCTA: (ruleId: string) => void;
+  upgradeSelectedRulesCTAClick: () => void;
+  upgradeAllRulesCTAClick: () => void;
   selectRules: (rules: RuleUpgradeInfoForReview[]) => void;
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
-  setModalConfirmationUpgradeMethod: Dispatch<SetStateAction<ModalConfirmationUpgradeMethod>>;
-  setRuleIdToUpgrade: Dispatch<SetStateAction<string>>;
-  upgradeRulesWrapper: (
-    upgradeMethod: ModalConfirmationUpgradeMethod,
-    upgradeRuleMethod: () => Promise<void>
-  ) => void;
-  upgradeSingleRuleFromRowCTA: (ruleId: string) => void;
   mlJobUpgradeModalConfirm: () => void;
   mlJobUpgradeModalCancel: () => void;
 }
@@ -202,16 +195,20 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 
   // Wrapper around upgrade rules methods to display ML Jobs warning modal when necessary
   const upgradeRulesWrapper = useCallback(
-    (upgradeMethod: ModalConfirmationUpgradeMethod, upgradeRuleMethod: () => Promise<void>) => {
-      if (legacyJobsInstalled.length > 0) {
-        showUpgradeModal();
-        setModalConfirmationUpgradeMethod(upgradeMethod);
-      } else {
-        upgradeRuleMethod();
-      }
-    },
+    (upgradeMethod: ModalConfirmationUpgradeMethod, upgradeRuleMethod: () => Promise<void>) =>
+      () => {
+        if (legacyJobsInstalled.length > 0) {
+          showUpgradeModal();
+          setModalConfirmationUpgradeMethod(upgradeMethod);
+        } else {
+          upgradeRuleMethod();
+        }
+      },
     [legacyJobsInstalled.length, showUpgradeModal]
   );
+
+  const upgradeSelectedRulesCTAClick = upgradeRulesWrapper('SPECIFIC_RULES', upgradeSelectedRules);
+  const upgradeAllRulesCTAClick = upgradeRulesWrapper('ALL_RULES', upgradeAllRules);
 
   // Wrapper around upgradeOneRule to display ML Jobs warning modal when necessary
   // when attempting to upgrade a single rule from each rule row CTA
@@ -260,25 +257,19 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const actions = useMemo<UpgradePrebuiltRulesTableActions>(
     () => ({
       reFetchRules: refetch,
-      upgradeOneRule,
-      upgradeSelectedRules,
-      upgradeAllRules,
+      upgradeSingleRuleFromRowCTA,
+      upgradeSelectedRulesCTAClick,
+      upgradeAllRulesCTAClick,
       setFilterOptions,
       selectRules: setSelectedRules,
-      setModalConfirmationUpgradeMethod,
-      setRuleIdToUpgrade,
-      upgradeRulesWrapper,
-      upgradeSingleRuleFromRowCTA,
       mlJobUpgradeModalConfirm,
       mlJobUpgradeModalCancel,
     }),
     [
       refetch,
-      upgradeOneRule,
-      upgradeSelectedRules,
-      upgradeAllRules,
-      upgradeRulesWrapper,
       upgradeSingleRuleFromRowCTA,
+      upgradeSelectedRulesCTAClick,
+      upgradeAllRulesCTAClick,
       mlJobUpgradeModalConfirm,
       mlJobUpgradeModalCancel,
     ]
