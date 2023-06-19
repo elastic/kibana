@@ -39,6 +39,6 @@ describe('GET /api/status', () => {
   it('respond with a 503 and with redacted status', async () => {
     await setupServer();
     const response = await supertest(httpPreboot.server.listener).get('/api/status').expect(503);
-    expect(response.body).toEqual({ status: 'unavailable' });
+    expect(response.body).toEqual({ status: { overall: { level: 'unavailable' } } });
   });
 });

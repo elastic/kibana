@@ -14,7 +14,12 @@ import type { IRouter } from '@kbn/core-http-server';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
-import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import {
+  ServiceStatus,
+  ServiceStatusLevel,
+  CoreStatus,
+  ServiceStatusLevels,
+} from '@kbn/core-status-common';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
@@ -48,8 +53,12 @@ interface StatusHttpBody extends Omit<StatusResponse, 'status'> {
   status: StatusInfo | LegacyStatusInfo;
 }
 
-interface RedactedStatusHttpBody {
-  status: string;
+export interface RedactedStatusHttpBody {
+  status: {
+    overall: {
+      level: ServiceStatusLevel;
+    };
+  };
 }
 
 export const registerStatusRoute = ({
@@ -188,7 +197,11 @@ const getRedactedStatusResponse = ({
   coreOverall: ServiceStatus;
 }): RedactedStatusHttpBody => {
   const body: RedactedStatusHttpBody = {
-    status: coreOverall.level.toString(),
+    status: {
+      overall: {
+        level: coreOverall.level,
+      },
+    },
   };
   return body;
 };

@@ -30,7 +30,11 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertestWithoutAuth.get('/api/status').set('kbn-xsrf', 'kibana');
 
         expect(Object.keys(body)).to.eql(['status']);
-        expect(body.status).to.be.a('string');
+        expect(body.status).to.be.an('object');
+        expect(Object.keys(body.status)).to.eql(['overall']);
+        expect(body.status.overall).to.be.an('object');
+        expect(Object.keys(body.status.overall)).to.eql(['level']);
+        expect(body.status.overall.level).to.be.a('string');
       });
     });
   });

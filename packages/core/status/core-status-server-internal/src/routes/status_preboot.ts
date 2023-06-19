@@ -8,6 +8,7 @@
 
 import type { IRouter } from '@kbn/core-http-server';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
+import type { RedactedStatusHttpBody } from './status';
 
 export const registerPrebootStatusRoute = ({ router }: { router: IRouter }) => {
   router.get(
@@ -20,8 +21,15 @@ export const registerPrebootStatusRoute = ({ router }: { router: IRouter }) => {
       validate: false,
     },
     async (context, req, res) => {
+      const body: RedactedStatusHttpBody = {
+        status: {
+          overall: {
+            level: ServiceStatusLevels.unavailable,
+          },
+        },
+      };
       return res.custom({
-        body: { status: ServiceStatusLevels.unavailable.toString() },
+        body,
         statusCode: 503,
         bypassErrorFormat: true,
       });

@@ -19,7 +19,6 @@ import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '@kbn/cor
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-
 import { registerStatusRoute } from '@kbn/core-status-server-internal';
 
 const coreId = Symbol('core');
@@ -40,7 +39,12 @@ describe('GET /api/status', () => {
   const setupServer = async ({
     allowAnonymous = true,
     coreOverall,
-  }: { allowAnonymous?: boolean; coreOverall?: ServiceStatus } = {}) => {
+    overall,
+  }: {
+    allowAnonymous?: boolean;
+    coreOverall?: ServiceStatus;
+    overall?: ServiceStatus;
+  } = {}) => {
     const coreContext = createCoreContext({ coreId });
     const contextService = new ContextService(coreContext);
 
@@ -56,6 +60,9 @@ describe('GET /api/status', () => {
     const status = statusServiceMock.createInternalSetupContract();
     if (coreOverall) {
       status.coreOverall$ = new BehaviorSubject(coreOverall);
+    }
+    if (overall) {
+      status.overall$ = new BehaviorSubject(overall);
     }
 
     const pluginsStatus$ = new BehaviorSubject<Record<string, ServiceStatus>>({
@@ -139,6 +146,14 @@ describe('GET /api/status', () => {
         });
         await supertest(httpSetup.server.listener).get('/api/status').expect(503);
       });
+      it('does not depend on the overall status', async () => {
+        await setupServer({
+          allowAnonymous: false,
+          coreOverall: createServiceStatus(ServiceStatusLevels.available),
+          overall: createServiceStatus(ServiceStatusLevels.critical),
+        });
+        await supertest(httpSetup.server.listener).get('/api/status').expect(200);
+      });
     });
 
     describe('response payload', () => {
@@ -148,7 +163,7 @@ describe('GET /api/status', () => {
           coreOverall: createServiceStatus(ServiceStatusLevels.available),
         });
         const response = await supertest(httpSetup.server.listener).get('/api/status').expect(200);
-        expect(response.body).toEqual({ status: 'available' });
+        expect(response.body).toEqual({ status: { overall: { level: 'available' } } });
       });
 
       it('returns redacted body for requests with bad credentials', async () => {
@@ -160,7 +175,7 @@ describe('GET /api/status', () => {
           .get('/api/status')
           .set('Authorization', 'fake creds')
           .expect(200);
-        expect(response.body).toEqual({ status: 'available' });
+        expect(response.body).toEqual({ status: { overall: { level: 'available' } } });
       });
 
       it('returns full body for authenticated requests', async () => {
