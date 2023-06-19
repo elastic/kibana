@@ -202,6 +202,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
             significantTermsGroups: data.significantTermsGroups,
           });
         }
+        if (data.significantTerms.length > 0) {
+          console.log(`Field name,Field value,Doc count,p-value\n${data.significantTerms
+            .map((d) => [d.fieldName, d.fieldValue, d.doc_count, d.pValue].join(','))
+            .join('\n')}
+          `);
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
