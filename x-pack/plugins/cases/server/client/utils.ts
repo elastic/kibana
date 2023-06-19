@@ -197,10 +197,6 @@ interface FilterField {
   type?: string;
 }
 
-interface NestedFilterField extends FilterField {
-  nestedField: string;
-}
-
 export const buildFilter = ({
   filters,
   field,
@@ -218,48 +214,7 @@ export const buildFilter = ({
   }
 
   return nodeBuilder[operator](
-    filtersAsArray.map((filter) =>
-      nodeBuilder.is(`${escapeKuery(type)}.attributes.${escapeKuery(field)}`, escapeKuery(filter))
-    )
-  );
-};
-
-/**
- * Creates a KueryNode filter for the Saved Object find API's filter field. This handles constructing a filter for
- * a nested field.
- *
- * @param filters is a string or array of strings that defines the values to search for
- * @param field is the location to search for
- * @param nestedField is the field in the saved object that has a type of 'nested'
- * @param operator whether to 'or'/'and' the created filters together
- * @type the type of saved object being searched
- * @returns a constructed KueryNode representing the filter or undefined if one could not be built
- */
-export const buildNestedFilter = ({
-  filters,
-  field,
-  nestedField,
-  operator,
-  type = CASE_SAVED_OBJECT,
-}: NestedFilterField): KueryNode | undefined => {
-  if (filters === undefined) {
-    return;
-  }
-
-  const filtersAsArray = Array.isArray(filters) ? filters : [filters];
-
-  if (filtersAsArray.length === 0) {
-    return;
-  }
-
-  return nodeBuilder[operator](
-    filtersAsArray.map((filter) =>
-      fromKueryExpression(
-        `${escapeKuery(type)}.attributes.${escapeKuery(nestedField)}:{ ${escapeKuery(
-          field
-        )}: ${escapeKuery(filter)} }`
-      )
-    )
+    filtersAsArray.map((filter) => nodeBuilder.is(`${type}.attributes.${field}`, filter))
   );
 };
 
@@ -365,7 +320,7 @@ export const buildAssigneesFilter = ({
   );
 
   const assigneesFilter = assigneesWithoutNone.map((filter) =>
-    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, filter)
   );
 
   if (!hasNoneAssignee) {

@@ -155,6 +155,7 @@ export function TransactionDurationRuleType(props: Props) {
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
       uiSettings={services.uiSettings}
+      totalGroups={0} // TODO: will be updated in https://github.com/elastic/kibana/pull/158439
     />
   ) : null;
 
