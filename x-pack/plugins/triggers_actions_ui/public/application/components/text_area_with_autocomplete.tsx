@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { EuiTextArea, EuiFormRow, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
+import getCaretCoordinates from 'textarea-caret';
 import { AddMessageVariables } from './add_message_variables';
 import { templateActionVariable } from '../lib';
 
@@ -83,7 +84,9 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
   const suggestions = convertArrayToObject(messageVariables?.map(({ name }) => name));
   const [matches, setMatches] = useState<string[]>([]);
-
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const parentRef = useRef<any>(null);
+  const [caretPosition, setCaretPosition] = useState({ top: 0, left: 0, height: 0 });
   const optionsToShow: EuiSelectableOption[] = useMemo(() => {
     return matches?.map((variable) => ({
       label: variable,
@@ -107,6 +110,20 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
 
   const onChangeWithMessageVariable = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const inputValue = event.target.value;
+
+    if (textAreaRef.current) {
+      const newCaretPosition =
+        textAreaRef.current &&
+        getCaretCoordinates(textAreaRef.current, textAreaRef.current.selectionStart);
+
+      const top = textAreaRef.current?.getBoundingClientRect().top;
+
+      setCaretPosition({
+        top: top + newCaretPosition?.top + newCaretPosition.height,
+        left: newCaretPosition.left,
+        height: newCaretPosition.height,
+      });
+    }
 
     const lastOpenBracketIndex = inputValue.lastIndexOf('{{');
     const lastCloseBracketIndex = inputValue.lastIndexOf('}}');
@@ -144,7 +161,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <>
+    <div style={{}} ref={parentRef}>
       <EuiFormRow
         fullWidth
         error={errors}
@@ -161,6 +178,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       >
         <EuiTextArea
           disabled={isDisabled}
+          inputRef={textAreaRef}
           fullWidth
           isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
           name={paramsProperty}
@@ -178,10 +196,21 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
         />
       </EuiFormRow>
       {matches.length > 0 && (
-        <EuiSelectable options={optionsToShow} onChange={onOptionPick} singleSelection>
+        <EuiSelectable
+          style={{
+            position: 'fixed',
+            top: caretPosition.top,
+            width: 200,
+            border: '2px solid grey',
+            background: 'white',
+          }}
+          options={optionsToShow}
+          onChange={onOptionPick}
+          singleSelection
+        >
           {(list) => list}
         </EuiSelectable>
       )}
-    </>
+    </div>
   );
 };
