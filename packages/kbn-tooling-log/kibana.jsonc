@@ -2,5 +2,6 @@
   "type": "shared-common",
   "id": "@kbn/tooling-log",
   "devOnly": true,
-  "owner": "@elastic/kibana-operations"
+  "owner": "@elastic/kibana-operations",
+  "sideEffects": false
 }
