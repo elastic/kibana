@@ -12,6 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { createMemoryHistory, MemoryHistory } from 'history';
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import type { AppMountParameters, AppUpdater } from '@kbn/core-application-browser';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
@@ -38,11 +39,13 @@ describe('ApplicationService', () => {
   beforeEach(() => {
     history = createMemoryHistory();
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
 
     http.post.mockResolvedValue({ navLinks: {} });
 
     setupDeps = {
       http,
+      analytics,
       history: history as any,
     };
     startDeps = {
