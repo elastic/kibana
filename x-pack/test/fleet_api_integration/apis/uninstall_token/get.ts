@@ -324,6 +324,18 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
+      it('should return 500 if token is missing', async () => {
+        const savedObjectId = await saveAdditionalToken(generatedPolicyId, '');
+
+        const response = await supertest
+          .get(uninstallTokensRouteService.getInfoPath(generatedPolicyId))
+          .expect(500);
+
+        expect(response.body.message).to.equal('Uninstall Token is missing the token.');
+
+        await deleteAdditionalToken(savedObjectId);
+      });
+
       describe('authorization', () => {
         it('should return 200 if the user has FLEET ALL (and INTEGRATIONS READ) privilege', async () => {
           const { username, password } = testUsers.fleet_all_int_read;
@@ -370,13 +382,22 @@ export default function (providerContext: FtrProviderContext) {
     await kibanaServer.savedObjects.clean({ types: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE] });
   };
 
-  const saveAdditionalToken = async (policyId: string, token: string) =>
-    kibanaServer.savedObjects.create({
+  const saveAdditionalToken = async (policyId: string, token: string) => {
+    const savedObject = await kibanaServer.savedObjects.create({
       type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       attributes: {
         policy_id: policyId,
         token,
       },
       overwrite: false,
+    });
+
+    return savedObject.id;
+  };
+
+  const deleteAdditionalToken = async (savedObjectId: string) =>
+    kibanaServer.savedObjects.delete({
+      type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+      id: savedObjectId,
     });
 }
