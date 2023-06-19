@@ -67,8 +67,8 @@ export const defaultAnalyticsNavGroup = {
 
 export const defaultMlNavGroup = {
   id: 'rootNav:ml',
-  title: 'Machine learning',
-  icon: 'indexMapping',
+  title: 'Machine Learning',
+  icon: 'machineLearningApp',
   path: ['rootNav:ml'],
   children: [
     {
@@ -159,7 +159,7 @@ export const defaultMlNavGroup = {
     },
     {
       id: 'data_frame_analytics',
-      title: 'Data frame analytics',
+      title: 'Data Frame Analytics',
       path: ['rootNav:ml', 'data_frame_analytics'],
       children: [
         {
@@ -202,7 +202,7 @@ export const defaultMlNavGroup = {
     },
     {
       id: 'model_management',
-      title: 'Model management',
+      title: 'Model Management',
       path: ['rootNav:ml', 'model_management'],
       children: [
         {
@@ -233,7 +233,7 @@ export const defaultMlNavGroup = {
     },
     {
       id: 'data_visualizer',
-      title: 'Data visualizer',
+      title: 'Data Visualizer',
       path: ['rootNav:ml', 'data_visualizer'],
       children: [
         {
@@ -268,7 +268,7 @@ export const defaultMlNavGroup = {
       path: ['rootNav:ml', 'aiops_labs'],
       children: [
         {
-          title: 'Explain log rate spikes',
+          title: 'Deeplink ml:explainLogRateSpikes',
           id: 'ml:explainLogRateSpikes',
           path: ['rootNav:ml', 'aiops_labs', 'ml:explainLogRateSpikes'],
           deepLink: {
@@ -289,6 +289,18 @@ export const defaultMlNavGroup = {
             href: 'http://mocked/ml:logPatternAnalysis',
             baseUrl: '/mocked',
             url: '/mocked/ml:logPatternAnalysis',
+          },
+        },
+        {
+          id: 'ml:changePointDetections',
+          path: ['rootNav:ml', 'aiops_labs', 'ml:changePointDetections'],
+          title: 'Deeplink ml:changePointDetections',
+          deepLink: {
+            id: 'ml:changePointDetections',
+            title: 'Deeplink ml:changePointDetections',
+            href: 'http://mocked/ml:changePointDetections',
+            baseUrl: '/mocked',
+            url: '/mocked/ml:changePointDetections',
           },
         },
       ],
