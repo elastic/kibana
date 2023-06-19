@@ -98,5 +98,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.context).to.have.property('viewport_height');
       expect(event.context.viewport_height).to.be.a('number');
     });
+
+    it('should have the properties provided by the "page title" context provider', async () => {
+      expect(event.context).to.have.property('page_title');
+      expect(event.context.page_title).to.be.a('string');
+    });
   });
 }
