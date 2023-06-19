@@ -82,7 +82,7 @@ export interface ChromeProjectNavigation {
    * The flattened navigation tree representation of the side bar navigation.
    * This is optional, if not provided it will be computed from the navigationTree
    */
-  navigationTreeFlattened: Record<string, ChromeProjectNavigationNode>;
+  navigationTreeFlattened?: Record<string, ChromeProjectNavigationNode>;
 }
 
 /** @public */

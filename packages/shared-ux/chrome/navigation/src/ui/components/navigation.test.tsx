@@ -651,11 +651,13 @@ describe('<Navigation />', () => {
       const getActiveNodes$ = () => activeNodes$.asObservable();
 
       const onProjectNavigationChange = (nav: ChromeProjectNavigation) => {
-        Object.values(nav.navigationTreeFlattened).forEach((node) => {
-          if (node.getIsActive) {
-            activeNodes$.next([[node]]);
-          }
-        });
+        if (nav.navigationTreeFlattened) {
+          Object.values(nav.navigationTreeFlattened).forEach((node) => {
+            if (node.getIsActive) {
+              activeNodes$.next([[node]]);
+            }
+          });
+        }
       };
 
       const { findByTestId } = render(
