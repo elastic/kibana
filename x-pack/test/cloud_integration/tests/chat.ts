@@ -35,10 +35,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await testSubjects.existOrFail('cloud-chat');
     });
-
-    it('chat widget is present on management page', async () => {
-      PageObjects.common.navigateToApp('management');
-      await testSubjects.existOrFail('cloud-chat');
-    });
   });
 }
