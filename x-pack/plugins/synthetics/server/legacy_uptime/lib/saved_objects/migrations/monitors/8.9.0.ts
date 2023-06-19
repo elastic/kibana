@@ -34,7 +34,7 @@ export const migration890 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
             tls: {
               enabled: true,
             },
-            ...(migrated.attributes[ConfigKey.ALERT_CONFIG] ?? {})
+            ...(migrated.attributes[ConfigKey.ALERT_CONFIG] ?? {}),
           },
           // when any action to change a project monitor configuration is taken
           // outside the synthetics agent cli, we should set the config hash back
