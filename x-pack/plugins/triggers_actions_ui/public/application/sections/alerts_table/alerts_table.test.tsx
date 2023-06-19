@@ -32,6 +32,7 @@ import { BulkActionsContext } from './bulk_actions/context';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
+import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { createAppMockRenderer } from '../test_utils';
 import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
@@ -303,10 +304,12 @@ describe('AlertsTable', () => {
   };
 
   const casesMap = getCasesMockMap();
+  const maintenanceWindowsMap = getMaintenanceWindowMockMap();
 
   const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
     cases: { data: casesMap, isLoading: false },
+    maintenanceWindows: { data: maintenanceWindowsMap, isLoading: false },
     columns,
     deletedEventIds: [],
     disabledCellActions: [],

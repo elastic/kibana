@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ServerError } from '../types';
+import { useLicense } from '../../../hooks/use_license';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
 import {
   bulkGetMaintenanceWindows,
@@ -46,7 +47,15 @@ export const useBulkGetMaintenanceWindows = (props: UseBulkGetMaintenanceWindows
   const {
     http,
     notifications: { toasts },
+    application: {
+      capabilities: {
+        maintenanceWindow: { show },
+      },
+    },
   } = useKibana().services;
+
+  const { isAtLeastPlatinum } = useLicense();
+  const hasLicense = isAtLeastPlatinum();
 
   const queryFn = () => {
     return bulkGetMaintenanceWindows({ http, ids });
@@ -60,7 +69,7 @@ export const useBulkGetMaintenanceWindows = (props: UseBulkGetMaintenanceWindows
 
   const { data, isFetching } = useQuery({
     queryKey: triggersActionsUiQueriesKeys.maintenanceWindowsBulkGet(ids),
-    enabled: ids.length > 0 && canFetchMaintenanceWindows,
+    enabled: hasLicense && show && ids.length > 0 && canFetchMaintenanceWindows,
     select: transformMaintenanceWindows,
     queryFn,
     onError,

@@ -47,7 +47,11 @@ export const TooltipContent = memo((props: TooltipContentProps) => {
   const { status, title, eventStartTime, eventEndTime } = maintenanceWindow;
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column">
+    <EuiFlexGroup
+      data-test-subj="maintenance-window-tooltip-content"
+      gutterSize="xs"
+      direction="column"
+    >
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiBadge color={STATUS_DISPLAY[status].color}>{STATUS_DISPLAY[status].label}</EuiBadge>
