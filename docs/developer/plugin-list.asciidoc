@@ -660,7 +660,7 @@ Elastic.
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_onboarding/README.md[observabilityOnboarding]
 |This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_logs/README.md[observabilityLogs]
+|{kib-repo}blob/{branch}/x-pack/plugins/discover_log_explorer/README.md[discoverLogExplorer]
 |This plugin exposes and registers Logs+ features.
 
 
