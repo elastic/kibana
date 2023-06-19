@@ -52,13 +52,12 @@ export function registerTopNFunctionsSearchRoute({
           kuery,
         });
 
-        const { stackTraceEvents, stackTraces, executables, stackFrames } = await searchStackTraces(
-          {
+        const { stackTraceEvents, stackTraces, executables, stackFrames, samplingRate } =
+          await searchStackTraces({
             client: profilingElasticsearchClient,
             filter,
             sampleSize: targetSampleSize,
-          }
-        );
+          });
 
         const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
           return createTopNFunctions(
@@ -67,7 +66,8 @@ export function registerTopNFunctionsSearchRoute({
             stackFrames,
             executables,
             startIndex,
-            endIndex
+            endIndex,
+            samplingRate
           );
         });
 

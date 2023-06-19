@@ -49,12 +49,18 @@ export function registerFlameChartSearchRoute({
         });
         const totalSeconds = timeTo - timeFrom;
 
-        const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames } =
-          await searchStackTraces({
-            client: profilingElasticsearchClient,
-            filter,
-            sampleSize: targetSampleSize,
-          });
+        const {
+          stackTraceEvents,
+          stackTraces,
+          executables,
+          stackFrames,
+          totalFrames,
+          samplingRate,
+        } = await searchStackTraces({
+          client: profilingElasticsearchClient,
+          filter,
+          sampleSize: targetSampleSize,
+        });
 
         const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
           const tree = createCalleeTree(
@@ -62,10 +68,11 @@ export function registerFlameChartSearchRoute({
             stackTraces,
             stackFrames,
             executables,
-            totalFrames
+            totalFrames,
+            samplingRate
           );
 
-          const fg = createBaseFlameGraph(tree, totalSeconds);
+          const fg = createBaseFlameGraph(tree, samplingRate, totalSeconds);
 
           return fg;
         });

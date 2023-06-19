@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiTableRow,
@@ -22,17 +22,43 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useCoPilot, CoPilotPrompt } from '@kbn/observability-plugin/public';
+import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import useToggle from 'react-use/lib/useToggle';
-import { AutoSizer } from '../../../../../../../components/auto_sizer';
 import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
 
 interface Props {
   cells: React.ReactNode[];
   item: Process;
+  supportCopilot?: boolean;
 }
+export const CopilotProcessRow = ({ command }: { command: string }) => {
+  const coPilotService = useCoPilot();
+  const explainProcessParams = useMemo(() => {
+    return command ? { command } : undefined;
+  }, [command]);
+  return (
+    <>
+      {coPilotService?.isEnabled() && explainProcessParams ? (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CoPilotPrompt
+                coPilot={coPilotService}
+                title={explainProcessMessageTitle}
+                params={explainProcessParams}
+                promptId={CoPilotPromptId.InfraExplainProcess}
+              />
+            </EuiFlexItem>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
+    </>
+  );
+};
 
-export const ProcessRow = ({ cells, item }: Props) => {
+export const ProcessRow = ({ cells, item, supportCopilot = false }: Props) => {
   const [isExpanded, toggle] = useToggle(false);
 
   return (
@@ -50,78 +76,79 @@ export const ProcessRow = ({ cells, item }: Props) => {
       </EuiTableRow>
       <EuiTableRow isExpandable isExpandedRow={isExpanded}>
         {isExpanded && (
-          <AutoSizer bounds>
-            {({ measureRef, bounds: { height = 0 } }) => (
-              <ExpandedRowCell commandHeight={height}>
-                <EuiSpacer size="s" />
-                <ExpandedRowDescriptionList>
-                  <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem>
-                      <div ref={measureRef}>
-                        <EuiDescriptionListTitle>
-                          {i18n.translate(
-                            'xpack.infra.metrics.nodeDetails.processes.expandedRowLabelCommand',
-                            {
-                              defaultMessage: 'Command',
-                            }
-                          )}
-                        </EuiDescriptionListTitle>
-                        <EuiDescriptionListDescription>
-                          <ExpandedCommandLine>{item.command}</ExpandedCommandLine>
-                        </EuiDescriptionListDescription>
-                      </div>
-                    </EuiFlexItem>
-                    {item.apmTrace && (
-                      <EuiFlexItem grow={false}>
-                        <EuiButton data-test-subj="infraProcessRowViewTraceInApmButton">
-                          {i18n.translate(
-                            'xpack.infra.metrics.nodeDetails.processes.viewTraceInAPM',
-                            {
-                              defaultMessage: 'View trace in APM',
-                            }
-                          )}
-                        </EuiButton>
-                      </EuiFlexItem>
+          <ExpandedRowCell>
+            <EuiSpacer size="s" />
+            <ExpandedRowDescriptionList>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <div>
+                    <EuiDescriptionListTitle>
+                      {i18n.translate(
+                        'xpack.infra.metrics.nodeDetails.processes.expandedRowLabelCommand',
+                        {
+                          defaultMessage: 'Command',
+                        }
+                      )}
+                    </EuiDescriptionListTitle>
+                    <EuiDescriptionListDescription>
+                      <ExpandedCommandLine>{item.command}</ExpandedCommandLine>
+                    </EuiDescriptionListDescription>
+                  </div>
+                </EuiFlexItem>
+                {item.apmTrace && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton data-test-subj="infraProcessRowViewTraceInApmButton">
+                      {i18n.translate('xpack.infra.metrics.nodeDetails.processes.viewTraceInAPM', {
+                        defaultMessage: 'View trace in APM',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+              <EuiFlexGrid columns={2} gutterSize="s" responsive={false}>
+                <EuiFlexItem>
+                  <EuiDescriptionListTitle>
+                    {i18n.translate(
+                      'xpack.infra.metrics.nodeDetails.processes.expandedRowLabelPID',
+                      {
+                        defaultMessage: 'PID',
+                      }
                     )}
-                  </EuiFlexGroup>
-                  <EuiFlexGrid columns={2} gutterSize="s" responsive={false}>
-                    <EuiFlexItem>
-                      <EuiDescriptionListTitle>
-                        {i18n.translate(
-                          'xpack.infra.metrics.nodeDetails.processes.expandedRowLabelPID',
-                          {
-                            defaultMessage: 'PID',
-                          }
-                        )}
-                      </EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        <CodeListItem>{item.pid}</CodeListItem>
-                      </EuiDescriptionListDescription>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiDescriptionListTitle>
-                        {i18n.translate(
-                          'xpack.infra.metrics.nodeDetails.processes.expandedRowLabelUser',
-                          {
-                            defaultMessage: 'User',
-                          }
-                        )}
-                      </EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        <CodeListItem>{item.user}</CodeListItem>
-                      </EuiDescriptionListDescription>
-                    </EuiFlexItem>
-                    <ProcessRowCharts command={item.command} />
-                  </EuiFlexGrid>
-                </ExpandedRowDescriptionList>
-              </ExpandedRowCell>
-            )}
-          </AutoSizer>
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    <CodeListItem>{item.pid}</CodeListItem>
+                  </EuiDescriptionListDescription>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiDescriptionListTitle>
+                    {i18n.translate(
+                      'xpack.infra.metrics.nodeDetails.processes.expandedRowLabelUser',
+                      {
+                        defaultMessage: 'User',
+                      }
+                    )}
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    <CodeListItem>{item.user}</CodeListItem>
+                  </EuiDescriptionListDescription>
+                </EuiFlexItem>
+                <ProcessRowCharts command={item.command} />
+              </EuiFlexGrid>
+              {supportCopilot && <CopilotProcessRow command={item.command} />}
+            </ExpandedRowDescriptionList>
+          </ExpandedRowCell>
         )}
       </EuiTableRow>
     </>
   );
 };
+
+const explainProcessMessageTitle = i18n.translate(
+  'xpack.infra.hostFlyout.explainProcessMessageTitle',
+  {
+    defaultMessage: "What's this process?",
+  }
+);
 
 const ExpandedRowDescriptionList = euiStyled(EuiDescriptionList).attrs({
   compressed: true,
@@ -149,8 +176,8 @@ const ExpandedCommandLine = euiStyled(EuiCode).attrs({
 const ExpandedRowCell = euiStyled(EuiTableRowCell).attrs({
   textOnly: false,
   colSpan: 6,
-})<{ commandHeight: number }>`
-  height: ${(props) => props.commandHeight + 240}px;
-  padding: 0 ${(props) => props.theme.eui.euiSizeM};
+})`
+  padding-top: ${(props) => props.theme.eui.euiSizeM} !important;
+  padding-bottom: ${(props) => props.theme.eui.euiSizeM} !important;
   background-color: ${(props) => props.theme.eui.euiColorLightestShade};
 `;
