@@ -79,7 +79,7 @@ export class LogsSharedPlugin
       ...domainLibs,
       logViews,
       registerUsageCollectorActions: (usageCollector: UsageCollector) => {
-        this.usageCollector = usageCollector;
+        Object.assign(this.usageCollector, usageCollector);
       },
     };
   }
