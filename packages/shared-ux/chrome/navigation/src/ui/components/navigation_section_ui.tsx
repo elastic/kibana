@@ -46,9 +46,12 @@ const navigationNodeToEuiItem = (
     );
   };
 
+  const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
+
   return {
     id,
     name: item.title,
+    isSelected,
     onClick:
       href !== undefined
         ? (event: React.MouseEvent) => {
