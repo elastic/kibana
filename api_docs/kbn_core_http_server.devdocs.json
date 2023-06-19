@@ -3489,14 +3489,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/query/routes.ts"
               },
               {
@@ -6535,22 +6527,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/query/routes.ts"
               },
               {
@@ -8889,10 +8865,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/query/routes.ts"
               },
               {
@@ -10066,10 +10038,6 @@
               {
                 "plugin": "bfetch",
                 "path": "src/plugins/bfetch/server/plugin.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
@@ -14167,6 +14135,14 @@
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/has_data_views.ts"
               },
               {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/json_schema.ts"
               },
@@ -14655,6 +14631,10 @@
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
               },
               {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/annotations.ts"
               },
@@ -14813,6 +14793,22 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
@@ -15373,6 +15369,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/delete_data_view.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
               },
               {
                 "plugin": "data",
