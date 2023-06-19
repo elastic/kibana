@@ -30,6 +30,7 @@ export function ApiKeyCallout({
           )}
           color="success"
           iconType="check"
+          data-test-subj="apiKeySuccessCallout"
         >
           {i18n.translate(
             'xpack.apm.onboarding.apiKey.success.calloutMessage',
@@ -57,6 +58,7 @@ export function ApiKeyCallout({
         )}
         color="warning"
         iconType="warning"
+        data-test-subj="apiKeyWarningCallout"
       >
         {i18n.translate('xpack.apm.onboarding.apiKey.warning.calloutMessage', {
           defaultMessage:
@@ -76,6 +78,7 @@ export function ApiKeyCallout({
       })}
       color="danger"
       iconType="error"
+      data-test-subj="apiKeyErrorCallout"
     >
       {i18n.translate('xpack.apm.onboarding.apiKey.error.calloutMessage', {
         defaultMessage: 'Error: {errorMessage}',
