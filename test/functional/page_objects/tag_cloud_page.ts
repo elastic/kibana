@@ -12,7 +12,6 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 export class TagCloudPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly header = this.ctx.getPageObject('header');
-  private readonly visChart = this.ctx.getPageObject('visChart');
 
   public async selectTagCloudTag(tagDisplayText: string) {
     const elements = await this.find.allByCssSelector('text');
@@ -24,13 +23,11 @@ export class TagCloudPageObject extends FtrService {
   }
 
   public async getTextTagByElement(webElement: WebElementWrapper) {
-    await this.visChart.waitForVisualization();
     const elements = await webElement.findAllByCssSelector('text');
     return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
   }
 
   public async getTextTag() {
-    await this.visChart.waitForVisualization();
     const elements = await this.find.allByCssSelector('text');
     return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
   }
