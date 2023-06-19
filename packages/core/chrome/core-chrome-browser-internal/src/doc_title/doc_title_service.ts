@@ -54,7 +54,7 @@ export class DocTitleService {
 
   private applyTitle(title: string | string[]) {
     const rendered = this.render(title);
-    this.document!.title = this.render(title);
+    this.document!.title = rendered;
     this.titleSubject.next(rendered);
   }
 
