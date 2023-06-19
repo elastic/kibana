@@ -6,6 +6,9 @@
  */
 
 import React, { memo } from 'react';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { SecurityPageName } from '../../../common/constants';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 
@@ -13,6 +16,8 @@ export const LandingPage = memo(() => {
   return (
     <SecuritySolutionPageWrapper>
       <LandingPageComponent />
+      <Chat />
+      <SpyRoute pageName={SecurityPageName.landing} />
     </SecuritySolutionPageWrapper>
   );
 });
