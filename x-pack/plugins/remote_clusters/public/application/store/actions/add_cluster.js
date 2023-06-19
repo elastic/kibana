@@ -44,7 +44,7 @@ export const addCluster = (cluster) => async (dispatch) => {
                 message: i18n.translate(
                   'xpack.remoteClusters.addAction.clusterNameAlreadyExistsErrorMessage',
                   {
-                    defaultMessage: `A cluster with the name '{clusterName}' already exists.`,
+                    defaultMessage: `A cluster with the name ''{clusterName}'' already exists.`,
                     values: { clusterName: cluster.name },
                   }
                 ),

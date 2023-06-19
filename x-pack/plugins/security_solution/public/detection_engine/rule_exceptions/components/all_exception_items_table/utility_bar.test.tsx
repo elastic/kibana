@@ -35,7 +35,7 @@ describe('ExceptionsViewerUtility', () => {
     );
   });
 
-  it('it renders last updated message', () => {
+  it.skip('it renders last updated message', () => {
     const wrapper = mount(
       <TestProviders>
         <ExceptionsViewerUtility

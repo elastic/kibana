@@ -34,7 +34,7 @@ export function validateRollupDelay(rollupDelay) {
       return [
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.rollupDelayInvalidCalendarInterval"
-          defaultMessage="The '{unit}' unit only allows values of 1. Try {suggestion}."
+          defaultMessage="The ''{unit}'' unit only allows values of 1. Try {suggestion}."
           values={{
             unit,
             suggestion: (

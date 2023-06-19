@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { selectUnit } from '@formatjs/intl-utils';
 import styled from 'styled-components';
 import { CREATED, LAST_UPDATED } from './translations';
 import type { FormattedRelativePreferenceDateProps } from '../../../../common/components/formatted_date';
@@ -50,7 +51,10 @@ export const DateFieldValue = memo<DateFieldProps>(
             </EuiFlexItem>
             <EuiFlexItem className="eui-textTruncate" data-test-subj={getTestId('value')}>
               <TextValueDisplay bold>
-                <FormattedRelativePreferenceDate value={date} dateFormat="M/D/YYYY" />
+                <FormattedRelativePreferenceDate
+                  {...selectUnit(new Date(date))}
+                  dateFormat="M/D/YYYY"
+                />
               </TextValueDisplay>
             </EuiFlexItem>
           </EuiFlexGroup>

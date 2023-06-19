@@ -16,9 +16,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
         <h2
           class="euiTitle emotion-euiTitle-m"
         >
-          <span>
-            No data available
-          </span>
+          No data available
         </h2>
         <div
           class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -27,9 +25,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
           class="euiText emotion-euiText-m-euiTextColor-subdued"
         >
           <p>
-            <span>
-              The element did not provide any data.
-            </span>
+            The element did not provide any data.
           </p>
         </div>
       </div>
@@ -124,9 +120,7 @@ Array [
             <span
               class="emotion-euiButtonDisplayContent"
             >
-              <span>
-                Download CSV
-              </span>
+              Download CSV
               <span
                 color="inherit"
                 data-euiicon-type="arrowDown"
@@ -400,9 +394,7 @@ Array [
           aria-live="polite"
           role="status"
         >
-          <span>
-            There are 2 tables in total
-          </span>
+          There are 2 tables in total
         </p>
       </div>
       <div
@@ -415,9 +407,7 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <strong>
-            <span>
-              Selected:
-            </span>
+            Selected:
           </strong>
         </div>
         <div
@@ -446,9 +436,7 @@ Array [
                   <span
                     class="euiButtonEmpty__text"
                   >
-                    <span>
-                      Table 1
-                    </span>
+                    Table 1
                   </span>
                 </span>
               </button>
@@ -474,9 +462,7 @@ Array [
             <span
               class="emotion-euiButtonDisplayContent"
             >
-              <span>
-                Download CSV
-              </span>
+              Download CSV
               <span
                 color="inherit"
                 data-euiicon-type="arrowDown"

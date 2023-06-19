@@ -6,6 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { selectUnit } from '@formatjs/intl-utils';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -43,8 +44,10 @@ export const SessionExpirationToast: FunctionComponent<SessionExpirationToastPro
       values={{
         timeout: (
           <FormattedRelativeTime
-            value={Math.max(state.expiresInMs - SESSION_GRACE_PERIOD_MS, 0) + Date.now()}
-            updateIntervalInSeconds={1000}
+            {...selectUnit(Math.max(state.expiresInMs - SESSION_GRACE_PERIOD_MS, 0) + Date.now())}
+            numeric="auto"
+            style="long"
+            updateIntervalInSeconds={1}
           />
         ),
       }}

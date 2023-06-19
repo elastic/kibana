@@ -41,7 +41,7 @@ describe('SessionExpirationToast', () => {
   it('renders session expiration time', () => {
     const sessionState$ = of<SessionState>({
       lastExtensionTime: Date.now(),
-      expiresInMs: 60 * 1000,
+      expiresInMs: 10 * 1000,
       canBeExtended: true,
     });
 
