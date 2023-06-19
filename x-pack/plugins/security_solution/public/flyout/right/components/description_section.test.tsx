@@ -16,6 +16,8 @@ import { RightPanelContext } from '../context';
 
 const panelContextValue = {} as unknown as RightPanelContext;
 
+jest.mock('../../../common/components/link_to');
+
 describe('<DescriptionSection />', () => {
   it('should render the component collapsed', () => {
     const { getByTestId } = render(
