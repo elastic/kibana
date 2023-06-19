@@ -7,6 +7,7 @@
  */
 
 import fetch from 'node-fetch';
+import pRetry from 'p-retry';
 import { Logger } from '../../utils/create_logger';
 
 export class ApmSynthtraceKibanaClient {
@@ -42,17 +43,20 @@ export class ApmSynthtraceKibanaClient {
   async installApmPackage(packageVersion: string) {
     this.logger.debug(`Installing APM package ${packageVersion}`);
 
-    const response = await fetch(`${this.target}/api/fleet/epm/packages/apm/${packageVersion}`, {
-      method: 'POST',
-      headers: kibanaHeaders(),
-      body: '{"force":true}',
+    const url = `${this.target}/api/fleet/epm/packages/apm/${packageVersion}`;
+    const response = await pRetry(() => {
+      return fetch(url, {
+        method: 'POST',
+        headers: kibanaHeaders(),
+        body: '{"force":true}',
+      });
     });
 
     const responseJson = await response.json();
 
     if (!responseJson.items) {
       throw new Error(
-        `Failed to install APM package version ${packageVersion}, received HTTP ${response.status} and message: ${responseJson.message}`
+        `Failed to install APM package version ${packageVersion}, received HTTP ${response.status} and message: ${responseJson.message} for url ${url}`
       );
     }
 

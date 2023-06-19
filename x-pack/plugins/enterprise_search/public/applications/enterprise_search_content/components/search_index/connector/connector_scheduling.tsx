@@ -27,6 +27,7 @@ import { ConnectorStatus, SyncJobType } from '../../../../../../common/types/con
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
+import { LicensingLogic } from '../../../../shared/licensing';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
@@ -70,6 +71,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     useValues(IndexViewLogic);
   const { index } = useValues(IndexViewLogic);
   const { hasChanges } = useValues(ConnectorSchedulingLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const shouldShowIncrementalSync =
     hasIncrementalSyncFeature && productFeatures.hasIncrementalSyncEnabled;
@@ -211,7 +213,11 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                 }
               )}
             >
-              <ConnectorContentScheduling type={SyncJobType.ACCESS_CONTROL} index={index} />
+              <ConnectorContentScheduling
+                type={SyncJobType.ACCESS_CONTROL}
+                index={index}
+                hasPlatinumLicense={hasPlatinumLicense}
+              />
             </SchedulePanel>
           </EuiFlexItem>
         )}
