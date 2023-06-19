@@ -7,6 +7,8 @@
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { LensEmbeddableInput, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
+import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/visualizations';
+import type { CommentRequestPersistableStateType } from '../../../../common/api';
 import { CommentType } from '../../../../common';
 
 export const isLensEmbeddable = (embeddable: IEmbeddable): embeddable is LensEmbeddable => {
@@ -19,16 +21,17 @@ export const hasInput = (embeddable: LensEmbeddable) => {
   return attributes != null && timeRange != null;
 };
 
+type PersistableStateAttachmentWithoutOwner = Omit<CommentRequestPersistableStateType, 'owner'>;
+
 export const getLensCaseAttachment = ({
   timeRange,
   attributes,
 }: {
   timeRange: LensEmbeddableInput['timeRange'];
   attributes: LensSavedObjectAttributes | undefined;
-}) => ({
-  comment: `!{lens${JSON.stringify({
-    timeRange,
-    attributes,
-  })}}`,
-  type: CommentType.user as const,
-});
+}): PersistableStateAttachmentWithoutOwner =>
+  ({
+    persistableStateAttachmentState: { attributes, timeRange },
+    persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
+    type: CommentType.persistableState,
+  } as unknown as PersistableStateAttachmentWithoutOwner);

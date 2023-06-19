@@ -23,7 +23,6 @@ import {
   MockEmbeddable,
   mockTimeRange,
 } from './mocks';
-import { CommentType } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { waitFor } from '@testing-library/dom';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
@@ -176,17 +175,16 @@ describe('createAddToExistingCaseLensAction', () => {
         expect(mockOpenModal).toHaveBeenCalled();
 
         const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
-        expect(getAttachments()).toEqual(
-          expect.objectContaining([
-            {
-              comment: `!{lens${JSON.stringify({
-                timeRange: mockTimeRange,
-                attributes: mockAttributes,
-              })}}`,
-              type: CommentType.user as const,
+        expect(getAttachments()).toEqual([
+          {
+            persistableStateAttachmentState: {
+              attributes: mockAttributes,
+              timeRange: mockTimeRange,
             },
-          ])
-        );
+            persistableStateAttachmentTypeId: '.lens',
+            type: 'persistableState',
+          },
+        ]);
       });
     });
 

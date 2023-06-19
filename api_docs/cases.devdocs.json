@@ -2381,6 +2381,21 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.LENS_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "LENS_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\".lens\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/visualizations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.OBSERVABILITY_OWNER",
         "type": "string",
         "tags": [],
