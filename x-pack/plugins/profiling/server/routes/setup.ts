@@ -118,7 +118,7 @@ export function registerSetupRoute({
     {
       path: paths.HasSetupESResources,
       options: { tags: ['access:profiling'] },
-      validate: {},
+      validate: false,
     },
     async (context, request, response) => {
       try {

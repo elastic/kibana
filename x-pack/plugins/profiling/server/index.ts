@@ -9,6 +9,12 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ProfilingPlugin } from './plugin';
 
+/**
+ * These properties are used to create both the Collector and the Symbolizer integrations
+ * when Universal Profiling is initialized.
+ * As of now Universal Profiling is only availble on Elastic Cloud, so
+ * Elastic Cloud will be responsable of filling these properties up and pass it to Kibana.
+ */
 const packageInputSchema = schema.object({
   host: schema.maybe(schema.string()),
   tls_enabled: schema.maybe(schema.boolean()),
