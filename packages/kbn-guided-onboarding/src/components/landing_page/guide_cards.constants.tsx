@@ -133,7 +133,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
-    icon: 'uptimeApp',
+    icon: 'videoPlayer',
     title: i18n.translate(
       'guidedOnboardingPackage.gettingStarted.cards.syntheticsObservability.title',
       {
