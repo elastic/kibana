@@ -9,9 +9,10 @@
 import { EuiText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiTextProps } from '@elastic/eui/src/components/text/text';
+import type { EuiTextProps } from '@elastic/eui/src/components/text/text';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { emptyTitleText } from './constants';
 
 export const defaultDimensionTriggerTooltip = (
   <p>
@@ -36,6 +37,10 @@ export const DimensionTrigger = ({
   color?: EuiTextProps['color'];
   dataTestSubj?: string;
 }) => {
+  let safeLabel = label;
+  if (typeof label === 'string') {
+    safeLabel = label?.trim().length > 0 ? label : emptyTitleText;
+  }
   return (
     <EuiText
       size="s"
@@ -61,7 +66,7 @@ export const DimensionTrigger = ({
               }
             `}
           >
-            {label}
+            {safeLabel}
           </span>
         </span>
       </EuiFlexItem>
