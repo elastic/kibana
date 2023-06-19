@@ -17,7 +17,11 @@ import {
   CaseSeverity,
   decodeWithExcessOrThrow,
 } from '../../../common/api';
-import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
+import {
+  MAX_ASSIGNEES_PER_CASE,
+  MAX_CATEGORY_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../../common/constants';
 import {
   isInvalidTag,
   areTotalAssigneesInvalid,
@@ -32,13 +36,11 @@ import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 
-function validateCategory(category: string | null | undefined) {
-  if (category === undefined) {
-    return;
-  }
-
+function validateCategory(category?: string | null) {
   if (isCategoryFieldTooLong(category)) {
-    throw Boom.badRequest('The length of the category is too long.');
+    throw Boom.badRequest(
+      `The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}`
+    );
   }
 
   if (isCategoryFieldInvalidString(category)) {

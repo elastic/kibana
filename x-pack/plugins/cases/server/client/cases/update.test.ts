@@ -323,5 +323,24 @@ describe('update', () => {
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category cannot be an empty string. Ids: [mock-id-1]'
       );
     });
+
+    it('does not update the category if it is a string with empty characters', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                category: '   ',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category cannot be an empty string. Ids: [mock-id-1]'
+      );
+    });
   });
 });

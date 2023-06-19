@@ -109,5 +109,11 @@ describe('create', () => {
         'Failed to create case: Error: The category cannot be an empty string.'
       );
     });
+
+    it('should throw an error if the category is a string with empty characters', async () => {
+      await expect(create({ ...theCase, category: '   ' }, clientArgs)).rejects.toThrow(
+        'Failed to create case: Error: The category cannot be an empty string.'
+      );
+    });
   });
 });

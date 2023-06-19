@@ -18,7 +18,8 @@ export const areTotalAssigneesInvalid = (assignees?: CaseAssignees): boolean => 
   return assignees.length > MAX_ASSIGNEES_PER_CASE;
 };
 
-export const isCategoryFieldInvalidString = (category?: string | null): boolean => category === '';
+export const isCategoryFieldInvalidString = (category?: string | null): boolean =>
+  category?.trim().length === 0;
 
 export const isCategoryFieldTooLong = (category?: string | null): boolean =>
-  category !== undefined && category !== null && category.length > MAX_CATEGORY_LENGTH;
+  category != null && category.length > MAX_CATEGORY_LENGTH;

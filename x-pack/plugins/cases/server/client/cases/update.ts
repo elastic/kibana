@@ -127,12 +127,12 @@ function throwIfUpdateAssigneesWithoutValidLicense(
  * the length is > MAX_CATEGORY_LENGTH.
  */
 function throwIfCategoryLengthIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsInvalidTitle = requests.filter(({ updateReq }) =>
+  const requestsInvalidCategory = requests.filter(({ updateReq }) =>
     isCategoryFieldTooLong(updateReq.category)
   );
 
-  if (requestsInvalidTitle.length > 0) {
-    const ids = requestsInvalidTitle.map(({ updateReq }) => updateReq.id);
+  if (requestsInvalidCategory.length > 0) {
+    const ids = requestsInvalidCategory.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(
       `The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}, ids: [${ids.join(
         ', '
@@ -146,12 +146,12 @@ function throwIfCategoryLengthIsInvalid(requests: UpdateRequestWithOriginalCase[
  * the new value is an empty string.
  */
 function throwIfCategoryIsInvalidString(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsInvalidTitle = requests.filter(({ updateReq }) =>
+  const requestsInvalidCategory = requests.filter(({ updateReq }) =>
     isCategoryFieldInvalidString(updateReq.category)
   );
 
-  if (requestsInvalidTitle.length > 0) {
-    const ids = requestsInvalidTitle.map(({ updateReq }) => updateReq.id);
+  if (requestsInvalidCategory.length > 0) {
+    const ids = requestsInvalidCategory.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(`The category cannot be an empty string. Ids: [${ids.join(', ')}]`);
   }
 }

@@ -614,6 +614,23 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedHttpCode: 400,
           });
         });
+
+        it('400s when a string with spaces category value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  category: '  ',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
       });
     });
 

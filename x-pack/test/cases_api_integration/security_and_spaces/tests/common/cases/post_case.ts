@@ -299,6 +299,16 @@ export default ({ getService }: FtrProviderContext): void => {
             400
           );
         });
+
+        it('400s when the category is a string just with spaces', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              category: '   ',
+            }),
+            400
+          );
+        });
       });
     });
 
