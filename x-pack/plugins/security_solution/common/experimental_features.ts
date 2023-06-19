@@ -82,7 +82,7 @@ export const allowedExperimentalValues = Object.freeze({
   securityFlyoutEnabled: false,
 
   /**
-   * Enables the Elastic Security Assistant
+   * Enables the Elastic AI Assistant
    */
   assistantEnabled: false,
 
