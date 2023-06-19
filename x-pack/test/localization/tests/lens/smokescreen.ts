@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const browser = getService('browser');
 
-  function getTranslationFr(term: string) {
+  function getTranslationFr(term: string, field?: string) {
     switch (term) {
       case 'legacyMetric':
         return 'Ancien indicateur';
@@ -53,6 +53,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return 'enregistrements';
       case 'moving_average':
         return 'Moyenne mobile de';
+      case 'average':
+        return field ? `Moyenne de ${field}` : `Moyenne`;
       case 'sum':
         return 'somme';
       default:
@@ -60,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
-  function getTranslationJa(term: string) {
+  function getTranslationJa(term: string, field?: string) {
     switch (term) {
       case 'legacyMetric':
         return 'レガシーメトリック';
@@ -91,6 +93,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return '記録';
       case 'moving_average':
         return 'の移動平均';
+      case 'average':
+        return field ? `${field} の平均` : `平均`;
       case 'sum':
         return '合計';
       default:
@@ -98,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
-  function getTranslationZh(term: string) {
+  function getTranslationZh(term: string, field?: string) {
     switch (term) {
       case 'legacyMetric':
         return '旧版指标';
@@ -129,6 +133,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return '记录';
       case 'moving_average':
         return '的移动平均值';
+      case 'average':
+        return field ? `${field} 的平均值` : '平均值';
       case 'sum':
         return '求和';
       default:
