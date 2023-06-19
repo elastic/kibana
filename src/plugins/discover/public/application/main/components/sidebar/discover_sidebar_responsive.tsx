@@ -27,6 +27,7 @@ import {
   useExistingFieldsFetcher,
   useQuerySubscriber,
 } from '@kbn/unified-field-list-plugin/public';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverSidebar } from './discover_sidebar';
@@ -126,7 +127,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
-  const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
+  const selectedDataView = useInternalStateSelector((state) => state.dataView!);
+
+  const { onFieldEdited, onDataViewCreated } = props;
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
