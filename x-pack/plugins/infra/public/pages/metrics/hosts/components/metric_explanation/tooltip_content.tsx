@@ -50,7 +50,7 @@ export const TooltipContent = ({
       {showDocumentationLink && (
         <p>
           <FormattedMessage
-            id="xpack.infra.hostsViewPage.table.tooltip.documentationLink"
+            id="xpack.infra.hostsViewPage.table.tooltip.documentationLabel"
             defaultMessage="See {documentation} for more information"
             values={{
               documentation: (

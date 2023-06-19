@@ -14,7 +14,7 @@ export const HostMetricsDocsLink = () => {
   return (
     <EuiText size="xs">
       <EuiLink
-        data-test-subj="hostsViewDocumentationLink"
+        data-test-subj="hostsViewMetricsDocumentationLink"
         href={HOST_METRICS_DOC_HREF}
         target="_blank"
       >
