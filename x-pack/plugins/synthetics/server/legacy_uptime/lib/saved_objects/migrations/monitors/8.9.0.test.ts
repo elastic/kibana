@@ -44,6 +44,30 @@ describe('Monitor migrations v8.8.0 -> v8.9.0', () => {
               enabled: false,
             },
             tls: {
+              enabled: true,
+            },
+          },
+        },
+      };
+      expect(testMonitor.attributes[ConfigKey.ALERT_CONFIG]).toBeTruthy();
+      const actual = migration890(encryptedSavedObjectsSetup)(testMonitor, context);
+      expect(actual.attributes[ConfigKey.ALERT_CONFIG]).toEqual({
+        status: {
+          enabled: false,
+        },
+        tls: {
+          enabled: true,
+        },
+      });
+    });
+
+    it('uses existing alerting config when it already exists', () => {
+      const testMonitor = {
+        ...browserUI,
+        attributes: {
+          ...browserUI.attributes,
+          [ConfigKey.ALERT_CONFIG]: {
+            status: {
               enabled: false,
             },
           },
@@ -56,7 +80,7 @@ describe('Monitor migrations v8.8.0 -> v8.9.0', () => {
           enabled: false,
         },
         tls: {
-          enabled: false,
+          enabled: true,
         },
       });
     });
