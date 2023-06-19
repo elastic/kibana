@@ -72,7 +72,7 @@ import {
   cloneLayer,
   getNotifiableFeatures,
 } from './utils';
-import { isDraggedDataViewField } from '../../utils';
+import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
@@ -500,28 +500,15 @@ export function getFormBasedDatasource({
     uniqueLabels(state: FormBasedPrivateState, indexPatternsMap: IndexPatternMap) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
-      const counts = {} as Record<string, number>;
 
-      const makeUnique = (label: string) => {
-        let uniqueLabel = label;
+      const uniqueLabelGenerator = getUniqueLabelGenerator();
 
-        while (counts[uniqueLabel] >= 0) {
-          const num = ++counts[uniqueLabel];
-          uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
-            defaultMessage: '{label} [{num}]',
-            values: { label, num },
-          });
-        }
-
-        counts[uniqueLabel] = 0;
-        return uniqueLabel;
-      };
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
-          columnLabelMap[columnId] = makeUnique(
+          columnLabelMap[columnId] = uniqueLabelGenerator(
             column.customLabel
               ? column.label
               : operationDefinitionMap[column.operationType].getDefaultLabel(

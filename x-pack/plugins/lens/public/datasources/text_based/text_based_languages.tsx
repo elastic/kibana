@@ -43,6 +43,7 @@ import type {
 import { FieldSelect } from './field_select';
 import type { Datasource, IndexPatternMap } from '../../types';
 import { LayerPanel } from './layerpanel';
+import { getUniqueLabelGenerator } from '../../utils';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -509,28 +510,14 @@ export function getTextBasedDatasource({
     uniqueLabels(state: TextBasedPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
-      const counts = {} as Record<string, number>;
+      const uniqueLabelGenerator = getUniqueLabelGenerator();
 
-      const makeUnique = (label: string) => {
-        let uniqueLabel = label;
-
-        while (counts[uniqueLabel] >= 0) {
-          const num = ++counts[uniqueLabel];
-          uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
-            defaultMessage: '{label} [{num}]',
-            values: { label, num },
-          });
-        }
-
-        counts[uniqueLabel] = 0;
-        return uniqueLabel;
-      };
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          columnLabelMap[column.columnId] = makeUnique(column.fieldName);
+          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
         });
       });
 
