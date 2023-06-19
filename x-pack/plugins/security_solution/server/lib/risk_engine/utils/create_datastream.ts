@@ -150,7 +150,7 @@ export const createDataStream = async ({
 }: CreateConcreteWriteIndexOpts) => {
   logger.info(`Creating data stream - ${indexPatterns.alias}`);
 
-  // check if a ds already exists
+  // check if a datastream already exists
   let dataStreams: ConcreteIndexInfo[] = [];
   try {
     // Specify both the index pattern for the backing indices and their aliases
@@ -172,7 +172,7 @@ export const createDataStream = async ({
       )}`
     );
   } catch (error) {
-    // 404 is expected if no ds have been created
+    // 404 is expected if no datastream have been created
     if (error.statusCode !== 404) {
       logger.error(
         `Error fetching concrete indices for ${indexPatterns.alias} pattern - ${error.message}`
@@ -183,12 +183,12 @@ export const createDataStream = async ({
 
   const isDataStreamsExist = dataStreams.length > 0;
 
-  // if a concrete write ds already exists, update the underlying mapping
+  // if a concrete write datastream already exists, update the underlying mapping
   if (dataStreams.length > 0) {
     await updateIndexMappings({ logger, esClient, totalFieldsLimit, concreteIndices: dataStreams });
   }
 
-  // check if a concrete write ds already exists
+  // check if a concrete write datastream already exists
   if (!isDataStreamsExist) {
     try {
       await retryTransientEsErrors(
@@ -199,7 +199,7 @@ export const createDataStream = async ({
         { logger }
       );
     } catch (error) {
-      logger.error(`Error creating ds - ${error.message}`);
+      logger.error(`Error creating datastream - ${error.message}`);
       throw error;
     }
   }

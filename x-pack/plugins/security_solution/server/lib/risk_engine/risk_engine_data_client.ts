@@ -136,7 +136,7 @@ export class RiskEngineDataClient {
 
       this.initializeWriter(namespace);
     } catch (error) {
-      this.options.logger.error(`Error initializing risk engine resources: ${error}`);
+      this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
     }
   }
 }
