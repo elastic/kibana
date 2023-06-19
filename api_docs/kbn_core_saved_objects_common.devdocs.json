@@ -1418,14 +1418,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
-          },
-          {
             "plugin": "upgradeAssistant",
             "path": "x-pack/plugins/upgrade_assistant/common/types.ts"
           },
@@ -1540,18 +1532,6 @@
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/effects.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/effects.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/index.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/index.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",

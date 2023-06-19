@@ -10,6 +10,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TriggersAndActionsUiServices } from '../../../application/app';
@@ -40,6 +41,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     },
     history: scopedHistoryMock.create(),
     setBreadcrumbs: jest.fn(),
+    dashboard: dashboardPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     dataViews: dataViewPluginMocks.createStartContract(),
     dataViewEditor: {
