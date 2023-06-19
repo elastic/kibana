@@ -6,10 +6,10 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { cloudPlugin } from 'cypress-cloud/plugin';
+import path from 'path';
+import { fork } from 'child_process';
 import { esArchiver } from './support/es_archiver';
-const { cloudPlugin } = require('cypress-cloud/plugin');
-const path = require('path');
-const fork = require('child_process').fork;
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
