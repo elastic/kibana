@@ -78,9 +78,6 @@ export const cli = () => {
       const { argv } = yargs(process.argv.slice(2));
 
       const isOpen = argv._[0] === 'open';
-
-      console.error('isOpen', isOpen);
-
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
       const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
@@ -314,11 +311,9 @@ export const cli = () => {
               ...readProviderSpec('Service', config.get('services')),
             ]);
 
-            console.error('xcxc', process.env);
-
             const options = {
-              // installDir: process.env.KIBANA_INSTALL_DIR,
-              // ci: process.env.CI,
+              installDir: process.env.KIBANA_INSTALL_DIR,
+              ci: process.env.CI,
             };
 
             const shutdownEs = await pRetry(
