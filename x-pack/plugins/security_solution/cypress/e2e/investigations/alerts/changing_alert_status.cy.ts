@@ -34,19 +34,18 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visit } from '../../../tasks/login';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Changing alert status', () => {
   before(() => {
-    esArchiverLoad('auditbeat_big');
+    cy.task('esArchiverLoad', 'auditbeat_big');
     cleanKibana();
   });
 
   after(() => {
-    esArchiverUnload('auditbeat_big');
+    cy.task('esArchiverUnload', 'auditbeat_big');
   });
 
   context('Opening alerts', () => {

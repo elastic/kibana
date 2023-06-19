@@ -14,7 +14,6 @@ import {
 import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../../screens/users/user_events';
 import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../../screens/users/user_risk_score';
 import { cleanKibana } from '../../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 import { login, visit, visitUserDetailsPage } from '../../../tasks/login';
 
@@ -23,9 +22,9 @@ import { USERS_URL } from '../../../urls/navigation';
 describe('Users stats and tables', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('users');
+    cy.task('esArchiverLoad', 'users');
 
-    esArchiverLoad('risk_users');
+    cy.task('esArchiverLoad', 'risk_users');
   });
 
   beforeEach(() => {
@@ -34,8 +33,8 @@ describe('Users stats and tables', () => {
   });
 
   after(() => {
-    esArchiverUnload('users');
-    esArchiverUnload('risk_users');
+    cy.task('esArchiverUnload', 'users');
+    cy.task('esArchiverUnload', 'risk_users');
   });
 
   describe('Users page tabs', () => {

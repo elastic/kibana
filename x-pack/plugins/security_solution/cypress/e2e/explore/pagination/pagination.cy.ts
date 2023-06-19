@@ -10,7 +10,6 @@ import {
   UNCOMMON_PROCESSES_TABLE,
 } from '../../../screens/hosts/uncommon_processes';
 import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../screens/table_pagination';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { openEvents, openUncommonProcesses } from '../../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../../tasks/hosts/uncommon_processes';
@@ -24,7 +23,7 @@ import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagina
 describe('Pagination', () => {
   describe('Host uncommon processes table)', () => {
     before(() => {
-      esArchiverLoad('host_uncommon_processes');
+      cy.task('esArchiverLoad', 'host_uncommon_processes');
     });
 
     beforeEach(() => {
@@ -34,7 +33,7 @@ describe('Pagination', () => {
     });
 
     after(() => {
-      esArchiverUnload('host_uncommon_processes');
+      cy.task('esArchiverUnload', 'host_uncommon_processes');
     });
 
     it('pagination updates results and page number', () => {
@@ -100,7 +99,7 @@ describe('Pagination', () => {
 
   describe('All users and all Hosts tables', () => {
     before(() => {
-      esArchiverLoad('all_users');
+      cy.task('esArchiverLoad', 'all_users');
     });
 
     beforeEach(() => {
@@ -108,7 +107,7 @@ describe('Pagination', () => {
     });
 
     after(() => {
-      esArchiverUnload('all_users');
+      cy.task('esArchiverUnload', 'all_users');
     });
 
     it(`reset all Hosts pagination when sorting column`, () => {

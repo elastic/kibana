@@ -34,7 +34,6 @@ import { kqlSearch } from '../../../tasks/security_header';
 
 import { HOSTS_URL } from '../../../urls/navigation';
 import { resetFields } from '../../../tasks/timeline';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -48,11 +47,11 @@ const defaultHeadersInDefaultEcsCategory = [
 
 describe('Events Viewer', () => {
   before(() => {
-    esArchiverLoad('auditbeat_big');
+    cy.task('esArchiverLoad', 'auditbeat_big');
   });
 
   after(() => {
-    esArchiverUnload('auditbeat_big');
+    cy.task('esArchiverUnload', 'auditbeat_big');
   });
 
   context('Fields rendering', () => {

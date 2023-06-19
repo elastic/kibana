@@ -27,7 +27,6 @@ import {
   validateExceptionConditionField,
   validateExceptionCommentCountAndText,
 } from '../../../tasks/exceptions';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   goToAlertsTab,
@@ -51,14 +50,14 @@ describe('Rule Exceptions workflows from Alert', () => {
     deleteAlertsAndRules();
   });
   after(() => {
-    esArchiverUnload('exceptions');
+    cy.task('esArchiverUnload', 'exceptions');
   });
   afterEach(() => {
-    esArchiverUnload('exceptions_2');
+    cy.task('esArchiverUnload', 'exceptions_2');
   });
 
   it('Creates an exception item from alert actions overflow menu and close all matching alerts', () => {
-    esArchiverLoad('exceptions');
+    cy.task('esArchiverLoad', 'exceptions');
     login();
     postDataView('exceptions-*');
     createRule({
@@ -105,7 +104,7 @@ describe('Rule Exceptions workflows from Alert', () => {
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
     // load more docs
-    esArchiverLoad('exceptions_2');
+    cy.task('esArchiverLoad', 'exceptions_2');
 
     // now that there are no more exceptions, the docs should match and populate alerts
     goToAlertsTab();
@@ -117,7 +116,7 @@ describe('Rule Exceptions workflows from Alert', () => {
   });
 
   it('Creates an exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields ', () => {
-    esArchiverLoad('endpoint');
+    cy.task('esArchiverLoad', 'endpoint');
     login();
     createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);

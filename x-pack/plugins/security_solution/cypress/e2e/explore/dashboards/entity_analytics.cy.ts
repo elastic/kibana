@@ -9,7 +9,6 @@ import { login, visit } from '../../../tasks/login';
 
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   ANOMALIES_TABLE,
@@ -74,8 +73,8 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('Risk Score enabled but still no data', () => {
     before(() => {
-      esArchiverLoad('risk_hosts_no_data');
-      esArchiverLoad('risk_users_no_data');
+      cy.task('esArchiverLoad', 'risk_hosts_no_data');
+      cy.task('esArchiverLoad', 'risk_users_no_data');
     });
 
     beforeEach(() => {
@@ -84,8 +83,8 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     after(() => {
-      esArchiverUnload('risk_hosts_no_data');
-      esArchiverUnload('risk_users_no_data');
+      cy.task('esArchiverUnload', 'risk_hosts_no_data');
+      cy.task('esArchiverUnload', 'risk_users_no_data');
     });
 
     it('shows no data detected prompt for host risk score module', () => {
@@ -99,8 +98,8 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With Legacy data', () => {
     before(() => {
-      esArchiverLoad('risk_hosts_legacy_data');
-      esArchiverLoad('risk_users_legacy_data');
+      cy.task('esArchiverLoad', 'risk_hosts_legacy_data');
+      cy.task('esArchiverLoad', 'risk_users_legacy_data');
     });
 
     beforeEach(() => {
@@ -109,8 +108,8 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     after(() => {
-      esArchiverUnload('risk_hosts_legacy_data');
-      esArchiverUnload('risk_users_legacy_data');
+      cy.task('esArchiverUnload', 'risk_hosts_legacy_data');
+      cy.task('esArchiverUnload', 'risk_users_legacy_data');
     });
 
     it('shows upgrade host risk button', () => {
@@ -124,7 +123,7 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With host risk data', () => {
     before(() => {
-      esArchiverLoad('risk_hosts');
+      cy.task('esArchiverLoad', 'risk_hosts');
     });
 
     beforeEach(() => {
@@ -133,7 +132,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     after(() => {
-      esArchiverUnload('risk_hosts');
+      cy.task('esArchiverUnload', 'risk_hosts');
     });
 
     it('renders donut chart', () => {
@@ -212,7 +211,7 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With user risk data', () => {
     before(() => {
-      esArchiverLoad('risk_users');
+      cy.task('esArchiverLoad', 'risk_users');
     });
 
     beforeEach(() => {
@@ -221,7 +220,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     after(() => {
-      esArchiverUnload('risk_users');
+      cy.task('esArchiverUnload', 'risk_users');
     });
 
     it('renders donut chart', () => {
@@ -301,11 +300,11 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With anomalies data', () => {
     before(() => {
-      esArchiverLoad('network');
+      cy.task('esArchiverLoad', 'network');
     });
 
     after(() => {
-      esArchiverUnload('network');
+      cy.task('esArchiverUnload', 'network');
     });
 
     beforeEach(() => {

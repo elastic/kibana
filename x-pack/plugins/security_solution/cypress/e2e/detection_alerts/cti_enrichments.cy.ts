@@ -152,7 +152,7 @@ describe('CTI Enrichment', () => {
 
   describe('with additional indicators', () => {
     before(() => {
-      esArchiverLoad('threat_indicator2');
+      cy.task('esArchiverLoad', 'threat_indicator2');
     });
 
     beforeEach(() => {
@@ -162,7 +162,7 @@ describe('CTI Enrichment', () => {
     });
 
     after(() => {
-      esArchiverUnload('threat_indicator2');
+      cy.task('esArchiverUnload', 'threat_indicator2');
     });
 
     it('Displays matched fields from both indicator match rules and investigation time enrichments on Threat Intel tab', () => {

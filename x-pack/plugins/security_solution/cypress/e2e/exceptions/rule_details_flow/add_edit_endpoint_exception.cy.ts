@@ -9,7 +9,6 @@ import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   goToEndpointExceptionsTab,
@@ -50,7 +49,7 @@ describe('Add endpoint exception from rule details', () => {
 
   before(() => {
     cy.task('esArchiverResetKibana');
-    esArchiverLoad('auditbeat');
+    cy.task('esArchiverLoad', 'auditbeat');
     login();
     deleteAlertsAndRules();
     // create rule with exception
@@ -93,7 +92,7 @@ describe('Add endpoint exception from rule details', () => {
   });
 
   after(() => {
-    esArchiverUnload('auditbeat');
+    cy.task('esArchiverUnload', 'auditbeat');
   });
 
   it('creates an exception item', () => {

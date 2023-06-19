@@ -19,7 +19,6 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   addExceptionFlyoutItemName,
@@ -43,7 +42,7 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    esArchiverLoad('endpoint');
+    cy.task('esArchiverLoad', 'endpoint');
     createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
@@ -52,8 +51,8 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   });
 
   after(() => {
-    esArchiverUnload('endpoint');
-    esArchiverUnload('endpoint_2');
+    cy.task('esArchiverUnload', 'endpoint');
+    cy.task('esArchiverUnload', 'endpoint_2');
   });
 
   it('Should be able to create and close single Endpoint exception from overflow menu', () => {
@@ -87,7 +86,7 @@ describe('Endpoint Exceptions workflows from Alert', () => {
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
     // load more docs
-    esArchiverLoad('endpoint_2');
+    cy.task('esArchiverLoad', 'endpoint_2');
 
     goToAlertsTab();
     goToOpenedAlertsOnRuleDetailsPage();

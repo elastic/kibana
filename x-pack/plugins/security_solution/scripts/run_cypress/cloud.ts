@@ -8,7 +8,6 @@
 import path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
-import _ from 'lodash';
 import { run as cypressRun } from 'cypress-cloud';
 
 export const cli = () => {
@@ -37,31 +36,7 @@ export const cli = () => {
         ciBuildId:
           process.env.BUILDKITE_STEP_ID ??
           `hello-currents-${Math.random().toString(36).substring(2)}`,
-      })
-        //   )
-        // )
-        .then((results) => {
-          if (!results.length) {
-            process.exit(0);
-          }
-          if (_.some(results, ['status', 'failed'])) {
-            process.exit(1);
-          }
-
-          // const overallFailed = result.totalFailed + result.totalSkipped;
-          // if (overallFailed > 0) {
-          //   process.exit(overallFailed);
-          // }
-          process.exit(0);
-        });
-      // .catch((err) => {
-      //   // if (err instanceof ValidationError) {
-      //   //   // program.error(withError(err.toString()));
-      //   // } else {
-      //   console.error(err);
-      //   // }
-      //   process.exit(1);
-      // });
+      });
     },
     {
       flags: {

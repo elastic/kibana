@@ -15,12 +15,11 @@ import { OVERVIEW_URL } from '../../../urls/navigation';
 import { cleanKibana } from '../../../tasks/common';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 describe('Overview Page', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('overview');
+    cy.task('esArchiverLoad', 'overview');
   });
 
   beforeEach(() => {
@@ -29,7 +28,7 @@ describe('Overview Page', () => {
   });
 
   after(() => {
-    esArchiverUnload('overview');
+    cy.task('esArchiverUnload', 'overview');
   });
 
   it('Host stats render with correct values', () => {
@@ -67,10 +66,10 @@ describe('Overview Page', () => {
 
 describe('Overview page with no data', () => {
   before(() => {
-    esArchiverUnload('auditbeat');
+    cy.task('esArchiverUnload', 'auditbeat');
   });
   after(() => {
-    esArchiverLoad('auditbeat');
+    cy.task('esArchiverLoad', 'auditbeat');
   });
 
   it('Splash screen should be here', () => {

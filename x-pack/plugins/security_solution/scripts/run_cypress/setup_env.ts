@@ -304,6 +304,7 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
           resolve(0);
         }
 
+        // eslint-disable-next-line no-process-exit
         process.exit(0);
       });
     });

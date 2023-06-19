@@ -13,7 +13,6 @@ import {
   FILTER_OUT,
   SHOW_TOP_FIELD,
 } from '../../../screens/network/flows';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 import { login, visit } from '../../../tasks/login';
 import { mouseoverOnToOverflowItem, openHoverActions } from '../../../tasks/network/flows';
@@ -26,7 +25,7 @@ const testDomainTwo = 'myTest2';
 describe('Overflow items', () => {
   context('Network stats and tables', () => {
     before(() => {
-      esArchiverLoad('network');
+      cy.task('esArchiverLoad', 'network');
     });
 
     beforeEach(() => {
@@ -44,7 +43,7 @@ describe('Overflow items', () => {
     });
 
     after(() => {
-      esArchiverUnload('network');
+      cy.task('esArchiverUnload', 'network');
     });
 
     it('Shows more items in the popover', () => {
