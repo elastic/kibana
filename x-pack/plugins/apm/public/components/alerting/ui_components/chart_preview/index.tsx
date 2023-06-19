@@ -33,7 +33,7 @@ import {
   getDomain,
   useDateFormatter,
 } from './chart_preview_helper';
-import { BUCKET_SIZE } from '../../utils/helper';
+import { ALERT_PREVIEW_BUCKET_SIZE } from '../../utils/helper';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { Maybe } from '../../../../../typings/common';
 
@@ -108,7 +108,7 @@ export function ChartPreview({
 
   const dateFormatter = useDateFormatter(xMin, xMax);
 
-  const lookback = timeSize * BUCKET_SIZE;
+  const lookback = timeSize * ALERT_PREVIEW_BUCKET_SIZE;
   const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
 
   const rectDataValues: RectAnnotationDatum[] = [
