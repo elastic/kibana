@@ -180,8 +180,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             alertsCount,
           }));
 
-          console.log('txGroupsTypeRequest===', txGroupsTypeRequest);
-
           expect(expected).to.eql([
             { name: 'GET /api/failed/request', alertsCount: 0 },
             { name: 'GET /api/request/p95', alertsCount: 0 },
