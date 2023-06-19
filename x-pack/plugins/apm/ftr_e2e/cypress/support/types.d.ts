@@ -10,6 +10,9 @@ declare namespace Cypress {
     loginAsViewerUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsEditorUser(): Cypress.Chainable<Cypress.Response<any>>;
     loginAsMonitorUser(): Cypress.Chainable<Cypress.Response<any>>;
+    loginAsApmManageOwnAndCreateAgentKeys(): Cypress.Chainable<
+      Cypress.Response<any>
+    >;
     loginAs(params: {
       username: string;
       password: string;
