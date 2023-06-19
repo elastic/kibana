@@ -132,47 +132,6 @@ export function SloEditFormObjectiveSection() {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            isInvalid={getFieldState('objective.target').invalid}
-            label={
-              <span>
-                {i18n.translate('xpack.observability.slo.sloEdit.targetSlo.label', {
-                  defaultMessage: 'Target / SLO (%)',
-                })}{' '}
-                <EuiIconTip
-                  content={i18n.translate('xpack.observability.slo.sloEdit.targetSlo.tooltip', {
-                    defaultMessage: 'The target objective in percentage for the SLO.',
-                  })}
-                  position="top"
-                />
-              </span>
-            }
-          >
-            <Controller
-              name="objective.target"
-              control={control}
-              rules={{
-                required: true,
-                min: 0.001,
-                max: 99.999,
-              }}
-              render={({ field: { ref, ...field }, fieldState }) => (
-                <EuiFieldNumber
-                  {...field}
-                  required
-                  isInvalid={fieldState.invalid}
-                  data-test-subj="sloFormObjectiveTargetInput"
-                  value={String(field.value)}
-                  min={0.001}
-                  max={99.999}
-                  step={0.001}
-                  onChange={(event) => field.onChange(Number(event.target.value))}
-                />
-              )}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
       </EuiFlexGrid>
 
       <EuiSpacer size="l" />
@@ -218,6 +177,52 @@ export function SloEditFormObjectiveSection() {
         {watch('budgetingMethod') === 'timeslices' ? (
           <SloEditFormObjectiveSectionTimeslices />
         ) : null}
+      </EuiFlexGrid>
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGrid columns={3}>
+        <EuiFlexItem>
+          <EuiFormRow
+            isInvalid={getFieldState('objective.target').invalid}
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.targetSlo.label', {
+                  defaultMessage: 'Target / SLO (%)',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.observability.slo.sloEdit.targetSlo.tooltip', {
+                    defaultMessage: 'The target objective in percentage for the SLO.',
+                  })}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="objective.target"
+              control={control}
+              rules={{
+                required: true,
+                min: 0.001,
+                max: 99.999,
+              }}
+              render={({ field: { ref, ...field }, fieldState }) => (
+                <EuiFieldNumber
+                  {...field}
+                  required
+                  isInvalid={fieldState.invalid}
+                  data-test-subj="sloFormObjectiveTargetInput"
+                  value={String(field.value)}
+                  min={0.001}
+                  max={99.999}
+                  step={0.001}
+                  onChange={(event) => field.onChange(Number(event.target.value))}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
       </EuiFlexGrid>
     </EuiPanel>
   );
