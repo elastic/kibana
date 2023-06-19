@@ -88,6 +88,7 @@ module.exports = (_, argv) => {
         'classnames',
         'fflate',
         'history',
+        'io-ts',
         'jquery',
         'lodash',
         'lodash/fp',
