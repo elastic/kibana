@@ -632,16 +632,18 @@ async function installTemplate({
   logger: Logger;
   template: IndexTemplateEntry;
 }) {
-  // TODO: Check return values for errors
   const esClientParams = {
     name: template.templateName,
     body: template.indexTemplate,
   };
-
-  await retryTransientEsErrors(
-    () => esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] }),
-    { logger }
-  );
+  try {
+    await retryTransientEsErrors(
+      () => esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] }),
+      { logger }
+    );
+  } catch (e) {
+    logger.warn(`Error while trying to install index template: ${e.message}`);
+  }
 }
 
 export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
