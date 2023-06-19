@@ -42,7 +42,7 @@ export const buildIntegrationsTree = ({
   return integrations.reduce(
     (res: IntegrationsTree, integration) => {
       const entryId: PanelId = getIntegrationId(integration);
-      const { name, version, datasets } = integration;
+      const { name, version, dataStreams } = integration;
 
       res.items.push({
         name,
@@ -54,7 +54,7 @@ export const buildIntegrationsTree = ({
         id: entryId,
         title: name,
         width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-        items: datasets.map((stream) => ({
+        items: dataStreams.map((stream) => ({
           name: stream.title,
           onClick: () =>
             onStreamSelected({ title: `[${name}] ${stream.title}`, name: stream.name }),
