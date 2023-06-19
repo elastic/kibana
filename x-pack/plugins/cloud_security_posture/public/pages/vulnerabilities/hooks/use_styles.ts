@@ -39,6 +39,10 @@ export const useStyles = () => {
     & .euiDataGridRowCell__expandActions > [data-test-subj='euiDataGridCellExpandButton'] {
       display: none;
     }
+    & .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
+      padding: 0;
+    }
+
     & .euiDataGridRowCell__expandFlex {
       align-items: center;
     }
