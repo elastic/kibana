@@ -52,9 +52,10 @@ export const createDetectionEngineHealthClient = (
         } catch (e) {
           const logMessage = 'Error calculating rule health';
           const logReason = e instanceof Error ? e.message : String(e);
-          const logSuffix = `[rule id ${ruleId}]`;
+          const logSuffix = `[rule id ${ruleId}][space id ${currentSpaceId}]`;
           const logMeta: ExtMeta = {
             rule: { id: ruleId },
+            kibana: { spaceId: currentSpaceId },
           };
 
           logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
@@ -114,8 +115,12 @@ export const createDetectionEngineHealthClient = (
         } catch (e) {
           const logMessage = 'Error calculating cluster health';
           const logReason = e instanceof Error ? e.message : String(e);
+          const logSuffix = `[space id ${currentSpaceId}]`;
+          const logMeta: ExtMeta = {
+            kibana: { spaceId: currentSpaceId },
+          };
 
-          logger.error(`${logMessage}: ${logReason}`);
+          logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
           throw e;
         }
       });
@@ -126,12 +131,16 @@ export const createDetectionEngineHealthClient = (
         'IDetectionEngineHealthClient.installAssetsForMonitoringHealth',
         async () => {
           try {
-            await installAssetsForRuleMonitoring(savedObjectsImporter, logger);
+            await installAssetsForRuleMonitoring(savedObjectsImporter, logger, currentSpaceId);
           } catch (e) {
             const logMessage = 'Error installing assets for monitoring Detection Engine health';
             const logReason = e instanceof Error ? e.message : String(e);
+            const logSuffix = `[space id ${currentSpaceId}]`;
+            const logMeta: ExtMeta = {
+              kibana: { spaceId: currentSpaceId },
+            };
 
-            logger.error(`${logMessage}: ${logReason}`);
+            logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
             throw e;
           }
         }

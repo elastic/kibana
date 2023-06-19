@@ -105,10 +105,6 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({
-          savedObjectsClient: coreContext.savedObjects.client,
-          savedObjectsImporter: coreContext.savedObjects.getImporter(
-            coreContext.savedObjects.client
-          ),
           rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
           eventLogClient: startPlugins.eventLog.getClient(request),
           currentSpaceId: getSpaceId(),

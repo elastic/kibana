@@ -24,7 +24,6 @@ import type { IRuleExecutionLogForExecutors } from './rule_execution_log/client_
 import { createRuleExecutionLogClientForExecutors } from './rule_execution_log/client_for_executors/client';
 
 import { registerEventLogProvider } from './event_log/register_event_log_provider';
-import { installAssetsForRuleMonitoring } from './detection_engine_health/assets/install_assets_for_rule_monitoring';
 import { createDetectionEngineHealthClient } from './detection_engine_health/detection_engine_health_client';
 import { createEventLogHealthClient } from './detection_engine_health/event_log/event_log_health_client';
 import { createRuleObjectsHealthClient } from './detection_engine_health/rule_objects/rule_objects_health_client';
@@ -44,6 +43,7 @@ export const createRuleMonitoringService = (
 ): IRuleMonitoringService => {
   let coreSetup: SecuritySolutionPluginCoreSetupDependencies | null = null;
   let pluginsSetup: SecuritySolutionPluginSetupDependencies | null = null;
+  let coreStart: SecuritySolutionPluginCoreStartDependencies | null = null;
 
   return {
     setup: (
@@ -60,37 +60,27 @@ export const createRuleMonitoringService = (
       core: SecuritySolutionPluginCoreStartDependencies,
       plugins: SecuritySolutionPluginStartDependencies
     ): void => {
-      const { savedObjects } = core;
-      const savedObjectsRepository = savedObjects.createInternalRepository();
-      const savedObjectsClient = new SavedObjectsClient(savedObjectsRepository);
-      const savedObjectsImporter = savedObjects.createImporter(savedObjectsClient);
-
-      Promise.resolve()
-        .then(
-          () => installAssetsForRuleMonitoring(savedObjectsImporter, logger),
-          (e) => {
-            const logMessage = 'Error installing assets for monitoring Detection Engine health';
-            const logReason = e instanceof Error ? e.message : String(e);
-
-            logger.error(`${logMessage}: ${logReason}`);
-            logger.error(e);
-          }
-        )
-        .catch((e) => {
-          const logMessage = 'Error starting rule monitoring service';
-          const logReason = e instanceof Error ? e.message : String(e);
-
-          logger.error(`${logMessage}: ${logReason}`);
-          logger.error(e);
-        });
+      coreStart = core;
     },
 
     createDetectionEngineHealthClient: (
       params: DetectionEngineHealthClientParams
     ): IDetectionEngineHealthClient => {
-      const { savedObjectsImporter, rulesClient, eventLogClient, currentSpaceId } = params;
+      invariant(coreStart, 'Dependencies of RuleMonitoringService are not initialized');
+
+      const { rulesClient, eventLogClient, currentSpaceId } = params;
+      const { savedObjects } = coreStart;
+
       const ruleObjectsHealthClient = createRuleObjectsHealthClient(rulesClient);
       const eventLogHealthClient = createEventLogHealthClient(eventLogClient);
+
+      // Create an importer that can import saved objects on behalf of the internal Kibana user.
+      // This is important because we want to let users with access to Security Solution
+      // to be able to install our internal assets like rule monitoring dashboard without
+      // the need to configure the additional `Saved Objects Management: All` privilege.
+      const savedObjectsRepository = savedObjects.createInternalRepository();
+      const savedObjectsClient = new SavedObjectsClient(savedObjectsRepository);
+      const savedObjectsImporter = savedObjects.createImporter(savedObjectsClient);
 
       return createDetectionEngineHealthClient(
         ruleObjectsHealthClient,

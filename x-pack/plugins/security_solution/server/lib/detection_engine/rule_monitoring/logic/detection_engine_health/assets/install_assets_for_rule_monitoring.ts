@@ -6,6 +6,7 @@
  */
 
 import type { ISavedObjectsImporter, Logger } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { Readable } from 'stream';
 
@@ -19,22 +20,24 @@ const MAX_RETRIES = 2;
  */
 export const installAssetsForRuleMonitoring = async (
   savedObjectsImporter: ISavedObjectsImporter,
-  logger: Logger
+  logger: Logger,
+  currentSpaceId: string
 ): Promise<void> => {
   const operation = async (attemptCount: number) => {
     logger.debug(`Installing assets for rule monitoring (attempt ${attemptCount})...`);
 
-    const readStream = Readable.from([kibanaEventLogDataView, ruleMonitoringDashboard]);
+    const assets = getAssetsForRuleMonitoring(currentSpaceId);
 
     // The assets are marked as "managed: true" at the saved object level, which in the future
     // should be reflected in the UI for the user. Ticket to track:
     // https://github.com/elastic/kibana/issues/140364
     const importResult = await savedObjectsImporter.import({
-      readStream,
+      readStream: Readable.from(assets),
       managed: true,
       overwrite: true,
       createNewCopies: false,
       refresh: false,
+      namespace: spaceIdToNamespace(currentSpaceId),
     });
 
     importResult.warnings.forEach((w) => {
@@ -59,3 +62,9 @@ export const installAssetsForRuleMonitoring = async (
 
   await pRetry(operation, { retries: MAX_RETRIES });
 };
+
+const getAssetsForRuleMonitoring = (currentSpaceId: string) => {
+  return [kibanaEventLogDataView, ruleMonitoringDashboard];
+};
+
+const spaceIdToNamespace = SavedObjectsUtils.namespaceStringToId;

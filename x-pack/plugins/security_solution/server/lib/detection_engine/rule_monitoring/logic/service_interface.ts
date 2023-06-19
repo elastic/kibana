@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISavedObjectsImporter, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type {
   PublicRuleResultService,
@@ -52,8 +52,6 @@ export interface IRuleMonitoringService {
 }
 
 export interface DetectionEngineHealthClientParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: ISavedObjectsImporter;
   rulesClient: RulesClientApi;
   eventLogClient: IEventLogClient;
   currentSpaceId: string;
