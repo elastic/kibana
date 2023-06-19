@@ -43,43 +43,6 @@ export function SloEditFormObjectiveSection() {
           <EuiFormRow
             label={
               <span>
-                {i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.label', {
-                  defaultMessage: 'Budgeting method',
-                })}{' '}
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.observability.slo.sloEdit.budgetingMethod.tooltip',
-                    {
-                      defaultMessage:
-                        'Occurrences-based SLO uses the ratio of good events over the total events during the time window. Timeslices-based SLO uses the ratio of good time slices over the total time slices during the time window.',
-                    }
-                  )}
-                  position="top"
-                />
-              </span>
-            }
-          >
-            <Controller
-              name="budgetingMethod"
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { ref, ...field } }) => (
-                <EuiSelect
-                  {...field}
-                  required
-                  id={budgetingSelect}
-                  data-test-subj="sloFormBudgetingMethodSelect"
-                  options={BUDGETING_METHOD_OPTIONS}
-                />
-              )}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiFormRow
-            label={
-              <span>
                 {i18n.translate('xpack.observability.slo.sloEdit.timeWindow.label', {
                   defaultMessage: 'Time window',
                 })}{' '}
@@ -154,12 +117,50 @@ export function SloEditFormObjectiveSection() {
         </EuiFlexItem>
       </EuiFlexGrid>
 
-      {watch('budgetingMethod') === 'timeslices' ? (
-        <>
-          <EuiSpacer size="xl" />
+      <EuiSpacer size="l" />
+
+      <EuiFlexGrid columns={3}>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.label', {
+                  defaultMessage: 'Budgeting method',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.observability.slo.sloEdit.budgetingMethod.tooltip',
+                    {
+                      defaultMessage:
+                        'Occurrences-based SLO uses the ratio of good events over the total events during the time window. Timeslices-based SLO uses the ratio of good time slices over the total time slices during the time window.',
+                    }
+                  )}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="budgetingMethod"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect
+                  {...field}
+                  required
+                  id={budgetingSelect}
+                  data-test-subj="sloFormBudgetingMethodSelect"
+                  options={BUDGETING_METHOD_OPTIONS}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        {watch('budgetingMethod') === 'timeslices' ? (
           <SloEditFormObjectiveSectionTimeslices />
-        </>
-      ) : null}
+        ) : null}
+      </EuiFlexGrid>
     </EuiPanel>
   );
 }
