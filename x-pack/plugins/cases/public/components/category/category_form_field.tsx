@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFormRowProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -21,6 +22,7 @@ import { CATEGORY, EMPTY_CATEGORY_VALIDATION_MSG, MAX_LENGTH_ERROR } from './tra
 interface Props {
   isLoading: boolean;
   availableCategories: string[];
+  formRowProps?: Partial<EuiFormRowProps>;
 }
 
 type CategoryField = CaseUI['category'] | undefined;
@@ -57,7 +59,11 @@ const getIndexConfig = (): FieldConfig<CategoryField> => ({
   ],
 });
 
-const CategoryFormFieldComponent: React.FC<Props> = ({ isLoading, availableCategories }) => {
+const CategoryFormFieldComponent: React.FC<Props> = ({
+  isLoading,
+  availableCategories,
+  formRowProps,
+}) => {
   return (
     <UseField<CategoryField> path={'category'} config={getIndexConfig()}>
       {(field) => {
@@ -68,7 +74,13 @@ const CategoryFormFieldComponent: React.FC<Props> = ({ isLoading, availableCateg
         };
 
         return (
-          <EuiFormRow label={CATEGORY} error={errorMessage} isInvalid={isInvalid} fullWidth>
+          <EuiFormRow
+            {...formRowProps}
+            label={CATEGORY}
+            error={errorMessage}
+            isInvalid={isInvalid}
+            fullWidth
+          >
             <CategoryComponent
               isLoading={isLoading}
               onChange={onChange}

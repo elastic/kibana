@@ -53,6 +53,16 @@ describe('Category', () => {
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
   });
 
+  it('shows the optional label correctly', () => {
+    appMockRender.render(
+      <FormComponent>
+        <Category isLoading={false} />
+      </FormComponent>
+    );
+
+    expect(screen.getByText('Optional')).toBeInTheDocument();
+  });
+
   it('disables the combobox when it is loading', () => {
     appMockRender.render(
       <FormComponent>
