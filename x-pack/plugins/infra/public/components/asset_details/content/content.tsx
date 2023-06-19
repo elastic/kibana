@@ -36,7 +36,7 @@ export const Content = ({
         <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.LOGS}>
-        <Logs nodeId={node.id} nodeType={nodeType} currentTime={currentTimeRange.to} />
+        <Logs nodeName={node.name} nodeType={nodeType} currentTime={currentTimeRange.to} />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.METADATA}>
         <Metadata

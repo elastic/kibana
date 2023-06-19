@@ -11,7 +11,7 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { HostFlyout, useHostFlyoutUrlState } from '../../hooks/use_host_flyout_url_state';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
-import { metadataTab, processesTab } from './tabs';
+import { tabs } from './tabs';
 
 export interface Props {
   node: HostNodeRow;
@@ -54,7 +54,7 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
           selectedTabId: state.activeTabId as HostFlyout['selectedTabId'],
         })
       }
-      tabs={[metadataTab, processesTab]}
+      tabs={tabs}
       links={['apmServices', 'uptime']}
       renderMode={{
         showInFlyout: true,

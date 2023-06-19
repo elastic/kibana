@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LogViewReference } from '../../../../../../../common/log_views';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
@@ -37,6 +38,11 @@ export const LogsTabContent = () => {
 
     return filterQuery.query || hostsFilterQueryParam;
   }, [filterQuery.query, hostNodes]);
+
+  const logView = useMemo(
+    (): LogViewReference => ({ type: 'log-view-reference', logViewId: 'default' }),
+    []
+  );
 
   if (loading) {
     return (
@@ -71,7 +77,7 @@ export const LogsTabContent = () => {
       <EuiFlexItem>
         <LogStream
           height={500}
-          logView={{ type: 'log-view-reference', logViewId: 'default' }}
+          logView={logView}
           startTimestamp={from}
           endTimestamp={to}
           filters={[hostsFilterQuery]}
