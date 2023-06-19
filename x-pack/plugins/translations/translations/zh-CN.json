@@ -20248,7 +20248,6 @@
     "xpack.lens.indexPattern.timeShiftMultipleWarning": "{label} 使用的时间偏移 {columnTimeShift} 不是 Date Histogram 时间间隔 {interval} 的倍数。要防止数据不匹配，请使用 {interval} 的倍数作为时间偏移。",
     "xpack.lens.indexPattern.timeShiftSmallWarning": "{label} 使用的时间偏移 {columnTimeShift} 小于 Date Histogram 时间间隔 {interval}。要防止数据不匹配，请使用 {interval} 的倍数作为时间偏移。",
     "xpack.lens.indexPattern.tsdbRollupWarning": "{label} 使用的函数不受汇总/打包数据支持。请选择其他函数，或更改时间范围。",
-    "xpack.lens.indexPattern.uniqueLabel": "{label} [{num}]",
     "xpack.lens.indexPattern.valueCountOf": "{name} 的计数",
     "xpack.lens.indexPatternSuggestion.removeLayerLabel": "仅显示 {indexPatternTitle}",
     "xpack.lens.indexPatternSuggestion.removeLayerPositionLabel": "仅显示图层 {layerNumber}",
