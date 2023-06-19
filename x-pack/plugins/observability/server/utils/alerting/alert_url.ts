@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { IBasePath } from '@kbn/core-http-server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import moment from 'moment';
-import { AlertsLocatorParams } from '../..';
+import { AlertsLocatorParams } from '../../../common';
 
 export const getAlertUrl = async (
   alertUuid: string | null,

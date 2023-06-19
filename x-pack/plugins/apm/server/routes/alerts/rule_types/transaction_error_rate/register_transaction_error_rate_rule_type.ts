@@ -7,10 +7,10 @@
 
 import {
   formatDurationFromTimeUnitChar,
-  getAlertUrl,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
+import { getAlertUrl } from '@kbn/observability-plugin/server';
 import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {

@@ -7,7 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { getAlertUrl, AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { getAlertUrl } from '@kbn/observability-plugin/server';
 import {
   ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,

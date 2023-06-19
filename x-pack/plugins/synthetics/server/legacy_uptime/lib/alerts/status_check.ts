@@ -18,9 +18,9 @@ import {
   alertsLocatorID,
   AlertsLocatorParams,
   formatDurationFromTimeUnitChar,
-  getAlertUrl,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
+import { getAlertUrl } from '@kbn/observability-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { UptimeAlertTypeFactory } from './types';

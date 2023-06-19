@@ -8,7 +8,8 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { KibanaRequest } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { getAlertUrl, ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getAlertUrl } from '@kbn/observability-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
