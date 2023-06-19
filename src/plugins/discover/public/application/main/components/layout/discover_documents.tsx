@@ -115,7 +115,7 @@ export function useMergedDiscoverState(stateContainer: DiscoverStateContainer) {
             }
             state$.next(nextMsg);
           }
-        } else if (!currentState.isDataLoading) {
+        } else if (currentState.appState.index === next.searchSource.getField('index')?.id!) {
           const nextSavedSearch = next;
           const nextAppState = { ...currentState.appState };
           let setNextAppState = false;
