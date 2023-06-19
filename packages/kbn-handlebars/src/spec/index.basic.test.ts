@@ -14,11 +14,11 @@ describe('basic context', () => {
   });
 
   it('escaping', () => {
-    expectTemplate(`'{{foo}}`).withInput({ foo: 'food' }).toCompileTo('{{foo}}');
-    expectTemplate(`content '{{foo}}`).withInput({ foo: 'food' }).toCompileTo('content {{foo}}');
-    expectTemplate(`''{{foo}}`).withInput({ foo: 'food' }).toCompileTo('\\food');
-    expectTemplate(`content ''{{foo}}`).withInput({ foo: 'food' }).toCompileTo('content \\food');
-    expectTemplate(`'' {{foo}}`).withInput({ foo: 'food' }).toCompileTo('\\\\ food');
+    expectTemplate('\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('{{foo}}');
+    expectTemplate('content \\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content {{foo}}');
+    expectTemplate('\\\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('\\food');
+    expectTemplate('content \\\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content \\food');
+    expectTemplate('\\\\ {{foo}}').withInput({ foo: 'food' }).toCompileTo('\\\\ food');
   });
 
   it('compiling with a basic context', () => {

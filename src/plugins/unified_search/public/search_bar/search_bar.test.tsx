@@ -81,7 +81,6 @@ function wrapSearchBarInContext(testProps: any) {
   const defaultOptions = {
     appName: 'test',
     timeHistory: mockTimeHistory,
-    intl: null as any,
   };
 
   const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
@@ -128,7 +127,7 @@ function wrapSearchBarInContext(testProps: any) {
     <EuiThemeProvider>
       <I18nProvider>
         <KibanaContextProvider services={services}>
-          <SearchBar.WrappedComponent {...defaultOptions} {...testProps} />
+          <SearchBar {...defaultOptions} {...testProps} />
         </KibanaContextProvider>
       </I18nProvider>
     </EuiThemeProvider>

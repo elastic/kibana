@@ -17,7 +17,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
   intl={
     Object {
       "defaultFormats": Object {},
-      "defaultLocale": "en-US",
+      "defaultLocale": "en",
       "formatDate": [Function],
       "formatDateToParts": [Function],
       "formatDisplayName": [Function],
@@ -40,7 +40,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
         "getPluralRules": [Function],
         "getRelativeTimeFormat": [Function],
       },
-      "locale": "en-US",
+      "locale": "en",
       "messages": Object {},
       "onError": [Function],
       "textComponent": Symbol(react.fragment),
@@ -127,14 +127,14 @@ exports[`<CodeEditor /> is rendered 1`] = `
                       data-emotion="css"
                       data-s=""
                     >
-                      
+
                       .emotion-euiToolTipAnchor-block{display:block;}
                     </style>
                     <style
                       data-emotion="css"
                       data-s=""
                     >
-                      
+
                       .emotion-euiToolTipAnchor-block *[disabled]{pointer-events:none;}
                     </style>
                     <style
@@ -153,14 +153,14 @@ exports[`<CodeEditor /> is rendered 1`] = `
                       data-emotion="css"
                       data-s=""
                     >
-                      
+
                       .emotion-euiToolTipAnchor-block{display:block;}
                     </style>,
                     <style
                       data-emotion="css"
                       data-s=""
                     >
-                      
+
                       .emotion-euiToolTipAnchor-block *[disabled]{pointer-events:none;}
                     </style>,
                   ],

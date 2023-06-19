@@ -38,7 +38,7 @@ function getOptions(context = {}, childContextTypes = {}, props = {}) {
       ...childContextTypes,
       intl: PropTypes.object.isRequired,
     },
-    // wrappingComponent: I18nProvider,
+    wrappingComponent: I18nProvider,
     ...props,
   };
 }

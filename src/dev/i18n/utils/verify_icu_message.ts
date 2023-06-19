@@ -7,7 +7,7 @@
  */
 
 // @ts-ignore
-import parser from 'intl-messageformat-parser';
+import * as parser from 'intl-messageformat-parser';
 // @ts-ignore
 import { createParserErrorMessage } from './utils';
 import { SelectFormatNode } from './intl_types';
@@ -20,7 +20,7 @@ export function verifySelectFormatNode(node: SelectFormatNode) {
   if (node.type !== 'selectFormat') {
     throw new parser.SyntaxError(
       'Unable to verify select format icu-syntax',
-      'selectFormat',
+      [{ type: 'literal', text: 'selectFormat', ignoreCase: false }],
       node.type,
       node.location
     );
@@ -31,7 +31,7 @@ export function verifySelectFormatNode(node: SelectFormatNode) {
       if (!checkEnglishOnly(option.selector)) {
         throw new parser.SyntaxError(
           'selectFormat Selector must be in english',
-          'English only selector',
+          [{ type: 'literal', text: 'English only selector', ignoreCase: false }],
           option.selector,
           node.location
         );
@@ -43,12 +43,15 @@ export function verifySelectFormatNode(node: SelectFormatNode) {
 export function verifyICUMessage(message: string) {
   try {
     const results = parser.parse(message);
-    for (const node of results.elements) {
+    console.log('dupa', results);
+    for (const node of results) {
+      console.log('node', node);
       if (node.type === 'argumentElement' && node.format?.type === 'selectFormat') {
         verifySelectFormatNode(node.format);
       }
     }
   } catch (error) {
+    console.log('errir', error);
     if (error.name === 'SyntaxError') {
       const errorWithContext = createParserErrorMessage(message, {
         loc: {

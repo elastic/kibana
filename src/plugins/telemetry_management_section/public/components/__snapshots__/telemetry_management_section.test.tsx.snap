@@ -154,7 +154,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
   intl={
     Object {
       "defaultFormats": Object {},
-      "defaultLocale": "en-US",
+      "defaultLocale": "en",
       "formatDate": [Function],
       "formatDateToParts": [Function],
       "formatDisplayName": [Function],
@@ -177,7 +177,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "getPluralRules": [Function],
         "getRelativeTimeFormat": [Function],
       },
-      "locale": "en-US",
+      "locale": "en",
       "messages": Object {},
       "onError": [Function],
       "textComponent": Symbol(react.fragment),

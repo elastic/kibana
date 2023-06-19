@@ -34,7 +34,7 @@ describe('verifyICUMessage', () => {
     expect(() => verifyICUMessage(message)).not.toThrowError();
   });
 
-  it('throws on malformed string', () => {
+  it.only('throws on malformed string', () => {
     const message =
       'CDATA[extended_bounds設定を使用すると、強制的にヒストグラムアグリゲーションを実行し、特定の最小値に対してバケットの作成を開始し、最大値までバケットを作成し続けます。 ]]></target>\n\t\t\t<note>Kibana-SW - String "data.search.aggs.buckets.dateHistogram.extendedBounds.help" in Json.Root "messages\\strings" ';
 
