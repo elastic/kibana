@@ -165,9 +165,9 @@ const StepRuleActionsReadOnlyComponent: FC<StepRuleActionsReadOnlyProps> = ({
   const notificationActions = ruleActionsData.actions;
   const responseActions = ruleActionsData.responseActions || [];
 
-  const ruleHasNoActions = notificationActions.length === 0 && responseActions.length === 0;
+  const ruleHasActions = notificationActions.length > 0 || responseActions.length > 0;
 
-  if (ruleHasNoActions || !connectors || !connectorTypes || !ruleActionsData) {
+  if (!ruleHasActions || !connectors || !connectorTypes) {
     return null;
   }
 

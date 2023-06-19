@@ -652,6 +652,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const defaultRuleStackByOption: AlertsStackByField = 'event.category';
 
+  const hasNotificationActions = ruleActionsData != null && ruleActionsData.actions.length > 0;
+  const hasResponseActions =
+    ruleActionsData != null && (ruleActionsData.responseActions || []).length > 0;
+  const hasActions = hasNotificationActions || hasResponseActions;
+
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
@@ -799,7 +804,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         )}
                       </StepPanel>
                     </EuiFlexItem>
-                    {ruleActionsData != null && ruleActionsData.actions.length > 0 && (
+                    {hasActions && (
                       <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
                         <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
                           <StepRuleActionsReadOnly
