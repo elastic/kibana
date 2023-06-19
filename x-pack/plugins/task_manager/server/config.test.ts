@@ -41,7 +41,7 @@ describe('config validation', () => {
         "request_capacity": 1000,
         "requeue_invalid_tasks": Object {
           "delay": 3000,
-          "enabled": true,
+          "enabled": false,
           "max_attempts": 20,
         },
         "unsafe": Object {
@@ -98,7 +98,7 @@ describe('config validation', () => {
         "request_capacity": 1000,
         "requeue_invalid_tasks": Object {
           "delay": 3000,
-          "enabled": true,
+          "enabled": false,
           "max_attempts": 20,
         },
         "unsafe": Object {
@@ -158,7 +158,7 @@ describe('config validation', () => {
         "request_capacity": 1000,
         "requeue_invalid_tasks": Object {
           "delay": 3000,
-          "enabled": true,
+          "enabled": false,
           "max_attempts": 20,
         },
         "unsafe": Object {
