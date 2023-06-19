@@ -10,7 +10,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
-import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
+import { RuleStatusBadge } from '../../../../../detections/components/rules/rule_execution_status/rule_status_badge';
 
 interface RuleExecutionStatusSelectorProps {
   selectedStatus?: RuleExecutionStatus;
@@ -31,17 +31,17 @@ const RuleExecutionStatusSelectorComponent = ({
 
   const selectableOptions = [
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus.succeeded),
+      label: RuleExecutionStatus.succeeded,
       data: { status: RuleExecutionStatus.succeeded },
       checked: selectedStatus === RuleExecutionStatus.succeeded ? 'on' : undefined,
     },
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus['partial failure']),
+      label: RuleExecutionStatus['partial failure'],
       data: { status: RuleExecutionStatus['partial failure'] },
       checked: selectedStatus === RuleExecutionStatus['partial failure'] ? 'on' : undefined,
     },
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus.failed),
+      label: RuleExecutionStatus.failed,
       data: { status: RuleExecutionStatus.failed },
       checked: selectedStatus === RuleExecutionStatus.failed ? 'on' : undefined,
     },
@@ -78,7 +78,7 @@ const RuleExecutionStatusSelectorComponent = ({
   );
 
   return (
-    <EuiPopover // has position: absolute
+    <EuiPopover
       ownFocus
       button={triggerButton}
       isOpen={isExecutionStatusPopoverOpen}
@@ -94,6 +94,10 @@ const RuleExecutionStatusSelectorComponent = ({
         onChange={handleSelectableOptionsChange}
         singleSelection
         listProps={{ isVirtualized: false }}
+        renderOption={(option) => {
+          const status = option.label as RuleExecutionStatus;
+          return <RuleStatusBadge status={status} />;
+        }}
       >
         {(list) => (
           <div
