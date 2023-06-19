@@ -9,6 +9,7 @@
 import { CoreSetup, Plugin } from '@kbn/core/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import {
   manualPointEventAnnotation,
   eventAnnotationGroup,
@@ -16,9 +17,12 @@ import {
   queryPointEventAnnotation,
 } from '../common';
 import { setupSavedObjects } from './saved_objects';
+import { EventAnnotationGroupStorage } from './content_management';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 interface SetupDependencies {
   expressions: ExpressionsServerSetup;
+  contentManagement: ContentManagementServerSetup;
 }
 export interface EventAnnotationStartDependencies {
   data: DataPluginStart;
@@ -35,6 +39,14 @@ export class EventAnnotationServerPlugin implements Plugin<object, object> {
     dependencies.expressions.registerFunction(eventAnnotationGroup);
 
     setupSavedObjects(core);
+
+    dependencies.contentManagement.register({
+      id: CONTENT_ID,
+      storage: new EventAnnotationGroupStorage(),
+      version: {
+        latest: LATEST_VERSION,
+      },
+    });
 
     return {};
   }

@@ -8,20 +8,26 @@
 import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useState, useMemo } from 'react';
-import type { LogsEndpointActionWithHosts } from '../../../../common/endpoint/types/actions';
+import type {
+  LogsEndpointActionWithHosts,
+  ActionDetails,
+} from '../../../../common/endpoint/types/actions';
 import { useUserPrivileges } from '../user_privileges';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_COMMANDS } from '../event_details/translations';
 import { ResponseActionsEmptyPrompt } from './response_actions_empty_prompt';
 
 interface EndpointResponseActionResultsProps {
   action: LogsEndpointActionWithHosts;
+  ruleName?: string;
 }
 
-export const EndpointResponseActionResults = ({ action }: EndpointResponseActionResultsProps) => {
-  const { rule, agent } = action;
+export const EndpointResponseActionResults = ({
+  action,
+  ruleName,
+}: EndpointResponseActionResultsProps) => {
+  const { agent } = action;
   const { action_id: actionId, expiration } = action.EndpointActions;
   const {
     endpointPrivileges: { canAccessEndpointActionsLogManagement },
@@ -42,7 +48,7 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
     });
   }, [expandedAction]);
 
-  const eventText = getCommentText(action.EndpointActions.data.command);
+  const eventText = expandedAction ? getCommentText(expandedAction) : '';
 
   const hostName = useMemo(
     // we want to get the first and only hostname
@@ -52,7 +58,7 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
 
   return (
     <EuiComment
-      username={rule?.name}
+      username={ruleName}
       timestamp={<FormattedRelative value={action['@timestamp']} />}
       event={eventText}
       data-test-subj={'endpoint-results-comment'}
@@ -73,12 +79,16 @@ export const EndpointResponseActionResults = ({ action }: EndpointResponseAction
   );
 };
 
-const getCommentText = (command: ResponseActionsApiCommandNames): string => {
-  if (command === 'isolate') {
-    return ENDPOINT_COMMANDS.isolated;
+const getCommentText = (action: ActionDetails): string => {
+  if (action.errors?.length) {
+    return ENDPOINT_COMMANDS.failed(action.command);
   }
-  if (command === 'unisolate') {
-    return ENDPOINT_COMMANDS.released;
+  if (action.status === 'pending') {
+    return ENDPOINT_COMMANDS.pending(action.command);
   }
-  return ENDPOINT_COMMANDS.generic(command);
+  if (action.status === 'successful') {
+    return ENDPOINT_COMMANDS.executed(action.command);
+  }
+
+  return ENDPOINT_COMMANDS.tried(action.command);
 };
