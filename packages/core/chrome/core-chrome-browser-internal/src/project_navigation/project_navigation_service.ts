@@ -32,7 +32,9 @@ export class ProjectNavigationService {
     current: SideNavComponent | null;
   }>({ current: null });
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
+  private projectNavigation$ = new BehaviorSubject<
+    Omit<ChromeProjectNavigation, 'navigationTreeFlattened'> | undefined
+  >(undefined);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
   private projectNavigationNavTreeFlattened: Record<string, ChromeProjectNavigationNode> = {};
 
@@ -59,8 +61,10 @@ export class ProjectNavigationService {
         return this.projectHome$.asObservable();
       },
       setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
-        this.projectNavigation$.next(projectNavigation);
-        this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
+        const { navigationTreeFlattened, ...rest } = projectNavigation;
+        this.projectNavigation$.next(rest);
+        this.projectNavigationNavTreeFlattened =
+          navigationTreeFlattened ?? flattenNav(projectNavigation.navigationTree);
         this.setActiveProjectNavigationNodes();
       },
       getProjectNavigation$: () => {

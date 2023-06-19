@@ -51,7 +51,10 @@ export interface NavigationKibanaDependencies {
     };
   };
   serverless: {
-    setNavigation: (projectNavigation: ChromeProjectNavigation) => void;
+    setNavigation: (
+      projectNavigation: ChromeProjectNavigation,
+      navigationTreeFlattened?: Record<string, ChromeProjectNavigationNode>
+    ) => void;
     getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
   };
 }
