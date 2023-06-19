@@ -6,6 +6,6 @@
  */
 
 import React from 'react';
-import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
+import type { Ecs } from '@kbn/cases-plugin/common';
 
-export const AlertAttachmentContext = React.createContext<EcsSecurityExtension | null>(null);
+export const AlertAttachmentContext = React.createContext<Ecs | undefined | null>(null);

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { TooltipValue } from '@elastic/charts';
+import type { TooltipHeaderFormatter } from '@elastic/charts';
 import {
   Chart,
   LineSeries,
@@ -80,8 +80,8 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
   const timeZone = useTimeZone();
 
   const dataTimeFormatter = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);
-  const headerFormatter = useCallback(
-    (tooltip: TooltipValue) => <PreferenceFormattedDate value={tooltip.value} />,
+  const headerFormatter = useCallback<TooltipHeaderFormatter>(
+    ({ value }) => <PreferenceFormattedDate value={value} />,
     []
   );
 

@@ -66,6 +66,12 @@ const mockKibana = () => {
       application: {
         navigateToUrl: mockNavigate,
       },
+      charts: {
+        theme: {
+          useChartsTheme: () => {},
+          useChartsBaseTheme: () => {},
+        },
+      },
       data: {
         dataViews: {
           find: jest.fn().mockReturnValue([]),
@@ -338,7 +344,7 @@ describe('SLO Edit Page', () => {
                   },
                   "timeWindow": Object {
                     "duration": "7d",
-                    "isRolling": true,
+                    "type": "rolling",
                   },
                 },
               ],

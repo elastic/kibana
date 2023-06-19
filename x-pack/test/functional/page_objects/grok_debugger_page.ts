@@ -51,29 +51,4 @@ export class GrokDebuggerPageObject extends FtrService {
     });
     return value;
   }
-
-  // This needs to be fixed to work with the new test functionality. This method is skipped currently.
-  async assertPatternInputSyntaxHighlighting(expectedHighlights: any[]) {
-    const patternInputElement = await this.testSubjects.find(
-      'grokDebuggerContainer > acePatternInput > codeEditorContainer'
-    );
-    const highlightedElements = await patternInputElement.findAllByXpath(
-      './/div[@class="ace_line"]/*'
-    );
-
-    expect(highlightedElements.length).to.be(expectedHighlights.length);
-    await Promise.all(
-      highlightedElements.map(async (element: any, index) => {
-        const highlightClass = await element.getAttribute('class');
-        const highlightedContent = await element.getVisibleText();
-
-        const expectedHighlight = expectedHighlights[index];
-        const expectedHighlightClass = `ace_${expectedHighlight.token}`;
-        const expectedHighlightedContent = expectedHighlight.content;
-
-        expect(highlightClass).to.be(expectedHighlightClass);
-        expect(highlightedContent).to.be(expectedHighlightedContent);
-      })
-    );
-  }
 }

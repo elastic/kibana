@@ -16,15 +16,13 @@ import {
   EuiBadge,
   EuiButton,
   EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiHealth,
   EuiToolTip,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
-import { Status } from '@kbn/cases-components';
+import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
@@ -50,10 +48,6 @@ type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>
   | EuiTableComputedColumnType<CaseUI>
   | EuiTableFieldDataColumnType<CaseUI>;
-
-const MediumShadeText = styled.p`
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
-`;
 
 const LINE_CLAMP = 3;
 const LineClampedEuiBadgeGroup = euiStyled(EuiBadgeGroup)`
@@ -124,16 +118,8 @@ export const useCasesColumns = ({
               <TruncatedText text={theCase.title} />
             </CaseDetailsLink>
           );
-          return theCase.status !== CaseStatuses.closed ? (
-            caseDetailsLinkComponent
-          ) : (
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>{caseDetailsLinkComponent}</EuiFlexItem>
-              <EuiFlexItem>
-                <MediumShadeText>{i18n.CLOSED}</MediumShadeText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
+
+          return caseDetailsLinkComponent;
         }
         return getEmptyTagValue();
       },

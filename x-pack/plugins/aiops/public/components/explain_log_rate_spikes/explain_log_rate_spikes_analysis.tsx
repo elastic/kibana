@@ -27,11 +27,11 @@ import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
-
 import {
   getGroupTableItems,
   SpikeAnalysisTable,
@@ -69,6 +69,11 @@ const groupResultsOnMessage = i18n.translate(
 const resultsGroupedOffId = 'aiopsExplainLogRateSpikesGroupingOff';
 const resultsGroupedOnId = 'aiopsExplainLogRateSpikesGroupingOn';
 
+export interface ExplainLogRateSpikesAnalysisResults {
+  significantTerms: SignificantTerm[];
+  significantTermsGroups: SignificantTermGroup[];
+}
+
 /**
  * ExplainLogRateSpikes props require a data view.
  */
@@ -79,21 +84,38 @@ interface ExplainLogRateSpikesAnalysisProps {
   earliest: number;
   /** End timestamp filter */
   latest: number;
+  isBrushCleared: boolean;
+  /** Option to make main histogram sticky */
+  stickyHistogram?: boolean;
+  /** Callback for resetting the analysis */
+  onReset: () => void;
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
   /** The search query to be applied to the analysis as a filter */
   searchQuery: estypes.QueryDslQueryContainer;
   /** Sample probability to be applied to random sampler aggregations */
   sampleProbability: number;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
+  /** Optional callback that exposes data of the completed analysis */
+  onAnalysisCompleted?: (d: ExplainLogRateSpikesAnalysisResults) => void;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
   dataView,
   earliest,
+  isBrushCleared,
   latest,
+  stickyHistogram,
+  onReset,
   windowParameters,
   searchQuery,
   sampleProbability,
+  barColorOverride,
+  barHighlightColorOverride,
+  onAnalysisCompleted,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
@@ -139,6 +161,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     errors: streamErrors,
   } = useFetchStream<ApiExplainLogRateSpikes, typeof basePath>(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
+    '1',
     {
       start: earliest,
       end: latest,
@@ -173,6 +196,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         setOverrides({ loaded, remainingFieldCandidates, significantTerms: data.significantTerms });
       } else {
         setOverrides(undefined);
+        if (onAnalysisCompleted) {
+          onAnalysisCompleted({
+            significantTerms: data.significantTerms,
+            significantTermsGroups: data.significantTermsGroups,
+          });
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -255,11 +284,13 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   return (
     <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
       <ProgressControls
+        isBrushCleared={isBrushCleared}
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
         isRunning={isRunning}
         onRefresh={() => startHandler(false)}
         onCancel={cancel}
+        onReset={onReset}
         shouldRerunAnalysis={shouldRerunAnalysis}
       >
         <EuiFlexItem grow={false}>
@@ -360,25 +391,43 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           }
         />
       )}
-      {showSpikeAnalysisTable && groupResults ? (
-        <SpikeAnalysisGroupsTable
-          significantTerms={data.significantTerms}
-          groupTableItems={groupTableItems}
-          loading={isRunning}
-          dataView={dataView}
-          timeRangeMs={timeRangeMs}
-          searchQuery={searchQuery}
-        />
-      ) : null}
-      {showSpikeAnalysisTable && !groupResults ? (
-        <SpikeAnalysisTable
-          significantTerms={data.significantTerms}
-          loading={isRunning}
-          dataView={dataView}
-          timeRangeMs={timeRangeMs}
-          searchQuery={searchQuery}
-        />
-      ) : null}
+      {/* Using inline style as Eui Table overwrites overflow settings  */}
+      <div
+        style={
+          stickyHistogram
+            ? {
+                height: '500px',
+                overflowX: 'hidden',
+                overflowY: 'auto',
+                paddingTop: '20px',
+              }
+            : undefined
+        }
+      >
+        {showSpikeAnalysisTable && groupResults ? (
+          <SpikeAnalysisGroupsTable
+            significantTerms={data.significantTerms}
+            groupTableItems={groupTableItems}
+            loading={isRunning}
+            dataView={dataView}
+            timeRangeMs={timeRangeMs}
+            searchQuery={searchQuery}
+            barColorOverride={barColorOverride}
+            barHighlightColorOverride={barHighlightColorOverride}
+          />
+        ) : null}
+        {showSpikeAnalysisTable && !groupResults ? (
+          <SpikeAnalysisTable
+            significantTerms={data.significantTerms}
+            loading={isRunning}
+            dataView={dataView}
+            timeRangeMs={timeRangeMs}
+            searchQuery={searchQuery}
+            barColorOverride={barColorOverride}
+            barHighlightColorOverride={barHighlightColorOverride}
+          />
+        ) : null}
+      </div>
     </div>
   );
 };
