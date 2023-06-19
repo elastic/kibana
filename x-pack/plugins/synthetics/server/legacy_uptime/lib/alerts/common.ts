@@ -7,7 +7,7 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
-import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
+import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';

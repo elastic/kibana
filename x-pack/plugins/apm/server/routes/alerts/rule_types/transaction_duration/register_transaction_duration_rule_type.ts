@@ -9,11 +9,13 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import {
   asDuration,
   formatDurationFromTimeUnitChar,
-  getAlertDetailsUrl,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  getAlertDetailsUrl,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,

@@ -24,6 +24,8 @@ export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
 
+export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';
+
 const configSchema = schema.object({
   annotations: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

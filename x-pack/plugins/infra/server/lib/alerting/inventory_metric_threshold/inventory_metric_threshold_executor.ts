@@ -15,7 +15,7 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { getAlertUrl } from '@kbn/observability-plugin/common';
+import { getAlertUrl } from '@kbn/observability-plugin/server';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
