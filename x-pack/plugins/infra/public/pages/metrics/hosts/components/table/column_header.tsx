@@ -7,8 +7,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { EuiPopover, EuiIcon, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useKibanaHeader } from '../../../../../hooks/use_kibana_header';
 import { TooltipContent } from '../metric_explanation/tooltip_content';
-import { useKibanaHeader } from '../../hooks/use_kibana_header';
 
 interface Props {
   label: string;
