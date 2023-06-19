@@ -23,12 +23,12 @@ import { useSharedUXExecutionContext } from './use_execution_context';
  * and send them to the execution context, later used to enrich APM
  * 'route-change' transactions.
  */
-export const Route = ({
+export const Route = <T extends {}>({
   children,
   component: Component,
   render,
   ...rest
-}: RouteProps<string, { [K: string]: string }>) => {
+}: RouteProps<string, T>) => {
   const component = useMemo(() => {
     if (!Component) {
       return undefined;
@@ -68,7 +68,7 @@ export const Route = ({
 };
 
 /**
- * The match propogator that is part of the Route
+ * The match propagator that is part of the Route
  */
 export const MatchPropagator = () => {
   const { executionContext } = useKibanaSharedUX().services;
