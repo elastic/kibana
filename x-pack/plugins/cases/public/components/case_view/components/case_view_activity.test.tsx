@@ -28,6 +28,7 @@ import { useFindCaseUserActions } from '../../../containers/use_find_case_user_a
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../../containers/use_get_tags';
+import { useGetCategories } from '../../../containers/use_get_categories';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
@@ -37,6 +38,7 @@ import { ActionTypes } from '../../../../common/api';
 import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
+import { category } from '@kbn/custom-integrations-plugin/common';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -49,12 +51,14 @@ jest.mock('../../user_actions/timestamp', () => ({
 jest.mock('../../../common/navigation/hooks');
 jest.mock('../../../containers/use_get_action_license');
 jest.mock('../../../containers/use_get_tags');
+jest.mock('../../../containers/use_get_categories');
 jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../containers/use_get_case_connectors');
 jest.mock('../../../containers/use_get_case_users');
 jest.mock('../use_on_update_field');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
+(useGetCategories as jest.Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: jest.fn() });
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -169,6 +173,7 @@ describe('Case View Page activity tab', () => {
     expect(screen.getByTestId('case-view-activity')).toBeInTheDocument();
     expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
     expect(screen.getByTestId('case-tags')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-categories')).toBeInTheDocument();
     expect(screen.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(screen.getByTestId('case-view-status-action-button')).toBeInTheDocument();
 
@@ -221,6 +226,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
     expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
     expect(result.getByTestId('case-tags')).toBeInTheDocument();
+    expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.getByTestId('case-severity-selection')).toBeDisabled();
 

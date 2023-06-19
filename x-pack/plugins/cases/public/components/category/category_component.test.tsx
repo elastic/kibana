@@ -21,7 +21,7 @@ const defaultProps: CategoryComponentProps = {
 
 describe('Category ', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders list correctly', () => {
@@ -93,7 +93,9 @@ describe('Category ', () => {
   it('should call onChange when adding new category', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
-    await userEvent.type(screen.getByTestId('comboBoxSearchInput'), 'hi{enter}', { delay: 1 });
+    const list = screen.getByTestId('comboBoxSearchInput');
+
+    userEvent.type(list, 'hi{enter}');
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith('hi');

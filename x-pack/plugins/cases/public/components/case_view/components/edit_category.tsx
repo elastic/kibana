@@ -83,7 +83,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiText data-test-subj="case-view-categories-list">
+      <EuiText data-test-subj="cases-categories">
         <EuiFlexGroup
           alignItems="center"
           gutterSize="none"
@@ -116,7 +116,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
             </EuiFlexItem>
           )}
           {isEditCategory && (
-            <ColumnFlexGroup data-test-subj="edit-tags" direction="column">
+            <ColumnFlexGroup data-test-subj="edit-category" direction="column">
               <Form form={form}>
                 <CategoryFormField isLoading={isLoadingAll} availableCategories={categories} />
               </Form>
