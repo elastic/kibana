@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HOST_METRICS_DOC_HREF } from '../../constants';
 
 export const HostMetricsDocsLink = () => {
   return (
-    <>
+    <EuiText size="xs">
       <EuiLink
         data-test-subj="hostsViewDocumentationLink"
         href={HOST_METRICS_DOC_HREF}
@@ -23,6 +23,6 @@ export const HostMetricsDocsLink = () => {
           defaultMessage="What are these metrics?"
         />
       </EuiLink>
-    </>
+    </EuiText>
   );
 };
