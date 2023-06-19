@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-export type BarSeriesDataMap = Record<
-  string,
-  Array<{ x: number; y: number | null }>
->;
+import { Coordinate } from '../../../../../typings/timeseries';
 
-type BarSeries = Array<{
-  name: string;
-  data: Array<{
-    x: number;
-    y: number | null;
-  }>;
-}>;
+export type BarSeriesDataMap = Record<string, Coordinate[]>;
+type BarSeriesData = Array<{ name: string; data: Coordinate[] }>;
 
 const NUM_SERIES = 5;
 
-export const getFilteredBarSeries = (barSeries: BarSeries) => {
+export const getFilteredBarSeries = (barSeries: BarSeriesData) => {
   const sortedSeries = barSeries.sort((a, b) => {
     const aMax = Math.max(...a.data.map((point) => point.y as number));
     const bMax = Math.max(...b.data.map((point) => point.y as number));

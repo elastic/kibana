@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { Coordinate } from '../../../typings/timeseries';
 import {
   getTransactionDurationChartPreview,
   TransactionDurationChartPreviewResponse,
@@ -41,7 +42,7 @@ const alertParamsRt = t.intersection([
 
 export interface PreviewChartResponseItem {
   name: string;
-  data: Array<{ x: number; y: number | null }>;
+  data: Coordinate[];
 }
 
 export interface PreviewChartResponse {

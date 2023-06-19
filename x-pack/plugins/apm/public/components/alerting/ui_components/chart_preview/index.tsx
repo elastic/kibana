@@ -35,7 +35,6 @@ import {
 } from './chart_preview_helper';
 import { ALERT_PREVIEW_BUCKET_SIZE } from '../../utils/helper';
 import { Coordinate } from '../../../../../typings/timeseries';
-import { Maybe } from '../../../../../typings/common';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
@@ -81,16 +80,9 @@ export function ChartPreview({
   };
 
   const barSeries = useMemo(() => {
-    return series.reduce<
-      Array<{ x: number; y: Maybe<number>; groupBy: string | undefined }>
-    >((acc, serie) => {
-      const barPoints = serie.data.reduce<
-        Array<{ x: number; y: Maybe<number>; groupBy: string | undefined }>
-      >((pointAcc, point) => {
-        return [...pointAcc, { ...point, groupBy: serie.name }];
-      }, []);
-      return [...acc, ...barPoints];
-    }, []);
+    return series.flatMap((serie) =>
+      serie.data.map((point) => ({ ...point, groupBy: serie.name }))
+    );
   }, [series]);
 
   const timeZone = getTimeZone(uiSettings);
