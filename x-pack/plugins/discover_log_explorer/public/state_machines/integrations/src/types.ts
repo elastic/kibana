@@ -16,33 +16,33 @@ export interface IntegrationsSearchParams {
   integrationId?: string;
 }
 
-interface WithCache {
+export interface WithCache {
   cache: IImmutableCache<IntegrationsSearchParams, FindIntegrationsResponse>;
 }
 
-interface WithSearch {
+export interface WithSearch {
   search: IntegrationsSearchParams;
 }
 
-interface WithIntegrations {
+export interface WithIntegrations {
   integrationsSource: Integration[];
   integrations: Integration[];
 }
 
-interface WithNullishIntegrations {
+export interface WithNullishIntegrations {
   integrationsSource: null;
   integrations: null;
 }
 
-interface WithError {
+export interface WithError {
   error: Error;
 }
 
-interface WithNullishError {
+export interface WithNullishError {
   error: null;
 }
 
-interface WithTotal {
+export interface WithTotal {
   total: number;
 }
 

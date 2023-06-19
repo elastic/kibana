@@ -14,27 +14,27 @@ export interface DataStreamsSearchParams {
   sortOrder?: SortOrder;
 }
 
-interface WithCache {
+export interface WithCache {
   cache: IImmutableCache<DataStreamsSearchParams, FindDataStreamsResponse>;
 }
 
-interface WithSearch {
+export interface WithSearch {
   search: DataStreamsSearchParams;
 }
 
-interface WithDataStreams {
+export interface WithDataStreams {
   dataStreams: DataStream[];
 }
 
-interface WithNullishDataStreams {
+export interface WithNullishDataStreams {
   dataStreams: null;
 }
 
-interface WithError {
+export interface WithError {
   error: Error;
 }
 
-interface WithNullishError {
+export interface WithNullishError {
   error: null;
 }
 
