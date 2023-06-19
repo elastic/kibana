@@ -120,6 +120,23 @@ export class ProjectNavigationService {
     // e.g. /app/kibana#/management
     currentPathname = stripQueryParams(`${currentPathname}${location.hash}`);
     const activeNodes = findActiveNodes(currentPathname, this.projectNavigationNavTreeFlattened);
+
+    let requiresUpdate = false;
+
+    if (activeNodes.length !== this.activeNodes$.value.length) {
+      requiresUpdate = true;
+    } else {
+      this.activeNodes$.value.forEach((nodesBranch, i) => {
+        nodesBranch.forEach((node, j) => {
+          if (node.id !== activeNodes[i][j].id) {
+            requiresUpdate = true;
+          }
+        });
+      });
+    }
+
+    if (!requiresUpdate) return;
+
     this.activeNodes$.next(activeNodes);
   }
 
