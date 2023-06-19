@@ -107,6 +107,7 @@ export const useInitNavNode = <
   node: NodePropsEnhanced<LinkId, Id, ChildrenId>
 ) => {
   const { isActive: isActiveControlled } = node;
+
   /**
    * Map of children nodes
    */
@@ -115,11 +116,6 @@ export const useInitNavNode = <
   >({});
 
   const isMounted = useRef(false);
-
-  /**
-   * Flag to indicate if the current node has been registered
-   */
-  const isRegistered = useRef(false);
 
   /**
    * Reference to the unregister function
@@ -146,12 +142,6 @@ export const useInitNavNode = <
   const [isActiveState, setIsActive] = useState(false);
   const isActive = isActiveControlled ?? isActiveState;
 
-  /**
-   * Whenever a child node is registered, we need to re-register the current node
-   * on the parent. This state keeps track when child node register.
-   */
-  const [childrenNodesUpdated, setChildrenNodesUpdated] = useState<string[]>([]);
-
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
   const { register: registerNodeOnParent } = useRegisterTreeNode();
@@ -171,30 +161,30 @@ export const useInitNavNode = <
       return;
     }
 
-    if (!isRegistered.current || childrenNodesUpdated.length > 0) {
-      const children = Object.values(childrenNodes).sort((a, b) => {
-        const aOrder = orderChildrenRef.current[a.id];
-        const bOrder = orderChildrenRef.current[b.id];
-        return aOrder - bOrder;
-      });
+    const children = Object.values(childrenNodes).sort((a, b) => {
+      const aOrder = orderChildrenRef.current[a.id];
+      const bOrder = orderChildrenRef.current[b.id];
+      return aOrder - bOrder;
+    });
 
-      const { unregister, path } = registerNodeOnParent({
-        ...internalNavNode,
-        children: children.length ? children : undefined,
-      });
+    const { unregister, path } = registerNodeOnParent({
+      ...internalNavNode,
+      children: children.length ? children : undefined,
+    });
 
-      setNodePath(path);
-      setChildrenNodesUpdated([]);
+    setNodePath((prev) => {
+      if (!isSamePath(prev, path)) {
+        return path;
+      }
+      return prev;
+    });
 
-      unregisterRef.current = unregister;
-      isRegistered.current = true;
-    }
-  }, [internalNavNode, childrenNodesUpdated.length, childrenNodes, registerNodeOnParent]);
+    unregisterRef.current = unregister;
+  }, [internalNavNode, childrenNodes, registerNodeOnParent]);
 
   // Un-register from the parent. This will happen when the node is unmounted or if the deeplink
   // is not active anymore.
   const unregister = useCallback(() => {
-    isRegistered.current = false;
     if (unregisterRef.current) {
       unregisterRef.current(id);
       unregisterRef.current = undefined;
@@ -216,10 +206,8 @@ export const useInitNavNode = <
       });
 
       if (orderChildrenRef.current[childNode.id] === undefined) {
-      orderChildrenRef.current[childNode.id] = idx.current++;
+        orderChildrenRef.current[childNode.id] = idx.current++;
       }
-
-      setChildrenNodesUpdated((prev) => [...prev, childNode.id]);
 
       return {
         unregister: (childId: string) => {
