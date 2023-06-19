@@ -119,8 +119,15 @@ describe('ApplicationService', () => {
         await flushPromises();
         await navigate('/app/app2#/foo');
         await flushPromises();
+        await navigate('/app/app2#/another-path');
+        await flushPromises();
 
-        expect(locations).toEqual(['/', '/app/app1/bar', '/app/app2#/foo']);
+        expect(locations).toEqual([
+          '/',
+          '/app/app1/bar',
+          '/app/app2#/foo',
+          '/app/app2#/another-path',
+        ]);
       });
     });
 
@@ -194,8 +201,12 @@ describe('ApplicationService', () => {
           await navigateToApp('app2', { path: '/nested' });
           update();
         });
+        await act(async () => {
+          await navigateToApp('app2', { path: '/another-path' });
+          update();
+        });
 
-        expect(locations).toEqual(['/', '/app/app1', '/app/app2/nested']);
+        expect(locations).toEqual(['/', '/app/app1', '/app/app2/nested', '/app/app2/another-path']);
       });
 
       it('replaces the current history entry when the `replace` option is true', async () => {
