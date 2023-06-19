@@ -18,7 +18,6 @@ export enum InfraRuleType {
 export enum AlertStates {
   OK,
   ALERT,
-  WARNING,
   NO_DATA,
   ERROR,
 }
