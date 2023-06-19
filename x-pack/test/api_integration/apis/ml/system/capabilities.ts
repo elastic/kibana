@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
-const NUMBER_OF_CAPABILITIES = 39;
+const NUMBER_OF_CAPABILITIES = 42;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -93,6 +93,9 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
+          isADEnabled: true,
+          isDFAEnabled: true,
+          isNLPEnabled: true,
         });
       });
 
@@ -139,6 +142,9 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateTrainedModels: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,
+          isADEnabled: true,
+          isDFAEnabled: true,
+          isNLPEnabled: true,
         });
       });
     });
