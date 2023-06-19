@@ -55,7 +55,7 @@ export const diagnosticsRoute = {
         </DiagnosticsTemplate>
       </DiagnosticsContextProvider>
     ),
-    // params,
+    params,
     children: {
       '/diagnostics': {
         element: <DiagnosticsSummary />,

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { orderBy } from 'lodash';
@@ -18,7 +23,7 @@ import { ApmPluginStartDeps } from '../../../plugin';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 
 export function DiagnosticsApmEvents() {
-  const { diagnosticsBundle } = useDiagnosticsContext();
+  const { diagnosticsBundle, isImported } = useDiagnosticsContext();
   const { discover } = useKibana<ApmPluginStartDeps>().services;
   const [sortField, setSortField] = useState<keyof ApmEvent>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -94,7 +99,23 @@ export function DiagnosticsApmEvents() {
 
   return (
     <>
-      <SearchBar />
+      {isImported && diagnosticsBundle ? (
+        <>
+          <EuiBadge>
+            From: {new Date(diagnosticsBundle.params.start).toISOString()}
+          </EuiBadge>
+          <EuiBadge>
+            To: {new Date(diagnosticsBundle.params.end).toISOString()}
+          </EuiBadge>
+          <EuiBadge>
+            Filter: {diagnosticsBundle?.params.kuery ?? <em>Empty</em>}
+          </EuiBadge>
+          <EuiSpacer />
+        </>
+      ) : (
+        <SearchBar />
+      )}
+
       <EuiBasicTable
         items={orderBy(items, sortField, sortDirection)}
         sorting={{

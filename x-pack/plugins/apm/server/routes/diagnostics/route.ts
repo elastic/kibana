@@ -78,6 +78,7 @@ const getDiagnosticsRoute = createApmServerRoute({
         templateName: string;
       }>;
     }>;
+    params: { start: number; end: number; kuery?: string };
   }> => {
     const { start, end, kuery } = resources.params.query;
     const coreContext = await resources.context.core;
@@ -94,6 +95,7 @@ const getDiagnosticsRoute = createApmServerRoute({
       end,
       kuery,
     });
+
     const fleetPackageInfo = await getFleetPackageInfo(resources);
     const kibanaVersion = resources.kibanaVersion;
 

@@ -28,9 +28,9 @@ export async function getDiagnosticsBundle({
 }: {
   esClient: ElasticsearchClient;
   apmIndices: ApmIndicesConfig;
-  start?: number;
-  end?: number;
-  kuery?: string;
+  start: number | undefined;
+  end: number | undefined;
+  kuery: string | undefined;
 }) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
 
@@ -89,6 +89,7 @@ export async function getDiagnosticsBundle({
     dataStreams,
     nonDataStreamIndices,
     apmEvents,
+    params: { start, end, kuery },
   };
 }
 
