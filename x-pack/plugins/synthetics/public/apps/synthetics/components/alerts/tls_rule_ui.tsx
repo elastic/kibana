@@ -8,8 +8,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertTlsComponent } from './alert_tls';
 import { getDynamicSettings } from '../../state/settings/api';
 import { selectDynamicSettings } from '../../state/settings';
@@ -47,24 +45,5 @@ export const TLSRuleComponent: React.FC<{
         setExpirationThreshold={(value) => setRuleParams('certExpirationThreshold', Number(value))}
       />
     </>
-  );
-};
-
-export const AlertMonitorCount = ({ count, loading }: { count: number; loading?: boolean }) => {
-  return (
-    <EuiCallOut
-      size="s"
-      title={
-        <span data-test-subj="alertSnapShotCount">
-          <FormattedMessage
-            id="xpack.synthetics.alerts.monitorStatus.monitorCallOut.title"
-            defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
-            values={{ snapshotCount: loading ? '...' : count }}
-          />{' '}
-          {loading && <EuiLoadingSpinner />}
-        </span>
-      }
-      iconType="iInCircle"
-    />
   );
 };

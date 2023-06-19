@@ -106,10 +106,6 @@ export const getCertSummary = (
     issuer: cert.issuer ?? '',
     summary,
     status,
-    monitorId: cert.monitor?.id,
-    monitorName: cert.monitor?.name,
-    monitorType: cert.monitor?.type,
-    locationName: cert.observer?.geo?.name!,
   };
 };
 

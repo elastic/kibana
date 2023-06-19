@@ -45,6 +45,10 @@ export const CertType = t.intersection([
     common_name: t.string,
     issuer: t.string,
     sha1: t.string,
+    monitorName: t.string,
+    monitorType: t.string,
+    monitorUrl: t.string,
+    locationName: t.string,
   }),
 ]);
 

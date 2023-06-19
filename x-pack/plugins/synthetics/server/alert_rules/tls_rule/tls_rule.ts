@@ -15,6 +15,15 @@ import {
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { schema } from '@kbn/config-schema';
+import { TlsTranslations } from '../../../common/rules/synthetics/translations';
+import {
+  CERT_COMMON_NAME,
+  CERT_HASH_SHA256,
+  CERT_ISSUER_NAME,
+  CERT_VALID_NOT_AFTER,
+  CERT_VALID_NOT_BEFORE,
+} from '../../../common/field_names';
+import { getCertSummary } from './message_utils';
 import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { TLSRuleExecutor } from './tls_rule_executor';
@@ -32,8 +41,6 @@ import {
   setRecoveredAlertsContext,
   UptimeRuleTypeAlertDefinition,
 } from '../../legacy_uptime/lib/alerts/common';
-import { TlsTranslations } from '../../../common/rules/legacy_uptime/translations';
-import { getCertSummary } from '../../legacy_uptime/lib/alerts/tls';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_CERTIFICATE>;
 
@@ -109,13 +116,13 @@ export const registerSyntheticsTLSCheckRule = (
           const alertInstance = alertWithLifecycle({
             id: alertId,
             fields: {
-              'tls.server.x509.subject.common_name': cert.common_name,
-              'tls.server.x509.issuer.common_name': cert.issuer,
-              'tls.server.x509.not_after': cert.not_after,
-              'tls.server.x509.not_before': cert.not_before,
-              'tls.server.hash.sha256': cert.sha256,
-              [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
+              [CERT_COMMON_NAME]: cert.common_name,
+              [CERT_ISSUER_NAME]: cert.issuer,
+              [CERT_VALID_NOT_AFTER]: cert.not_after,
+              [CERT_VALID_NOT_BEFORE]: cert.not_before,
+              [CERT_HASH_SHA256]: cert.sha256,
               [ALERT_UUID]: alertUuid,
+              [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
             },
           });
 
