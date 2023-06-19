@@ -14,7 +14,7 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createApmRule } from '../alerts/alerting_api_helper';
-import { waitForRuleStatus } from '../alerts/wait_for_rule_status';
+import { waitForRuleStatus, runRuleSoon } from '../alerts/wait_for_rule_status';
 
 type TransactionsGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -150,7 +150,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
           });
-
+          expect(createdRule.id).to.not.eql(undefined);
           ruleId = createdRule.id;
         });
 
@@ -166,6 +166,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             supertest,
           });
           expect(executionStatus.status).to.be('active');
+        });
+
+        it('should successfully run the rule', async () => {
+          const response = await runRuleSoon({
+            ruleId,
+            supertest,
+          });
+          expect(response.status).to.be(204);
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -208,7 +216,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
           });
-
+          expect(createdRule.id).to.not.eql(undefined);
           ruleId = createdRule.id;
         });
 
@@ -224,6 +232,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             supertest,
           });
           expect(executionStatus.status).to.be('active');
+        });
+
+        it('should successfully run the rule', async () => {
+          const response = await runRuleSoon({
+            ruleId,
+            supertest,
+          });
+          expect(response.status).to.be(204);
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -268,7 +284,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             ruleTypeId: ApmRuleType.TransactionErrorRate,
           });
-
+          expect(createdRule.id).to.not.eql(undefined);
           ruleId = createdRule.id;
         });
 
@@ -284,6 +300,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             supertest,
           });
           expect(executionStatus.status).to.be('active');
+        });
+
+        it('should successfully run the rule', async () => {
+          const response = await runRuleSoon({
+            ruleId,
+            supertest,
+          });
+          expect(response.status).to.be(204);
         });
 
         it('returns the correct number of alert counts', async () => {
