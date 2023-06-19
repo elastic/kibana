@@ -12,7 +12,10 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
-import type { UninstallToken } from '../../../../common/types/models/uninstall_token';
+import type {
+  UninstallToken,
+  UninstallTokenMetadata,
+} from '../../../../common/types/models/uninstall_token';
 
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../../../constants';
 import { createAppContextStartContractMock, type MockedFleetAppContext } from '../../../mocks';
@@ -22,6 +25,7 @@ import { agentPolicyService } from '../../agent_policy';
 import { UninstallTokenService, type UninstallTokenServiceInterface } from '.';
 
 describe('UninstallTokenService', () => {
+  const now = new Date().toISOString();
   const aDayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
 
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
@@ -38,6 +42,7 @@ describe('UninstallTokenService', () => {
             policy_id: 'test-policy-id',
             token: 'test-token',
           },
+          created_at: now,
         }
       : {
           id: 'test-so-id',
@@ -45,6 +50,7 @@ describe('UninstallTokenService', () => {
             policy_id: 'test-policy-id',
             token_plain: 'test-token-plain',
           },
+          created_at: now,
         };
   }
 
@@ -82,6 +88,7 @@ describe('UninstallTokenService', () => {
                 ...defaultSO,
                 _source: {
                   [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: defaultSO.attributes,
+                  created_at: defaultSO.created_at,
                 },
               },
             ],
@@ -197,12 +204,14 @@ describe('UninstallTokenService', () => {
           so.attributes.policy_id
         );
 
-        expect(tokens.items).toEqual([
+        const expectedItems: UninstallToken[] = [
           {
             policy_id: so.attributes.policy_id,
             token: getToken(so, canEncrypt),
+            created_at: so.created_at,
           },
-        ] as UninstallToken[]);
+        ];
+        expect(tokens.items).toEqual(expectedItems);
 
         expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith({
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
@@ -216,18 +225,18 @@ describe('UninstallTokenService', () => {
         const so = getDefaultSO(canEncrypt);
         const so2 = getDefaultSO2(canEncrypt);
 
-        const tokensMap = (await uninstallTokenService.getTokenMetadataForAllPolicies()).items;
-        expect(tokensMap).toEqual([
+        const actualItems = (await uninstallTokenService.getTokenMetadataForAllPolicies()).items;
+        const expectedItems: UninstallTokenMetadata[] = [
           {
             policy_id: so.attributes.policy_id,
-            token: getToken(so, canEncrypt),
+            created_at: so.created_at,
           },
           {
             policy_id: so2.attributes.policy_id,
-            token: getToken(so2, canEncrypt),
-            created_at: aDayAgo,
+            created_at: so2.created_at,
           },
-        ] as UninstallToken[]);
+        ];
+        expect(actualItems).toEqual(expectedItems);
       });
     });
 

@@ -27,6 +27,8 @@ import { asyncForEach } from '@kbn/std';
 
 import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { FleetError } from '../../../../common/errors';
+
 import type {
   GetUninstallTokensForOnePolicyResponse,
   GetUninstallTokensMetadataResponse,
@@ -116,11 +118,17 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     }
     tokensFinder.close();
 
-    const decryptedTokens = decryptedTokenObjects.map(({ created_at: createdAt, attributes }) => ({
-      policy_id: attributes.policy_id,
-      token: attributes.token || attributes.token_plain,
-      ...(createdAt ? { created_at: createdAt } : {}),
-    }));
+    const decryptedTokens = decryptedTokenObjects.map(({ created_at: createdAt, attributes }) => {
+      this.assertPolicyId(attributes);
+      this.assertToken(attributes);
+      this.assertCreatedAt(createdAt);
+
+      return {
+        policy_id: attributes.policy_id,
+        token: attributes.token || attributes.token_plain,
+        created_at: createdAt,
+      };
+    });
 
     return {
       items: decryptedTokens,
@@ -175,23 +183,27 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     const items: UninstallTokenMetadata[] = tokenObjects
       .slice((page - 1) * perPage, page * perPage)
-      .map((aggResult) => aggResult._source)
-      .map(({ [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: attributes, created_at: createdAt }) => ({
-        policy_id: attributes.policy_id,
-        ...(createdAt ? { created_at: createdAt } : {}),
-      }));
+      .map<UninstallTokenMetadata>(({ _source }) => {
+        this.assertPolicyId(_source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]);
+        this.assertCreatedAt(_source.created_at);
+
+        return {
+          policy_id: _source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE].policy_id,
+          created_at: _source.created_at,
+        };
+      });
 
     return { items, total: tokenObjects.length, page, perPage };
   }
 
   private async getDecryptedTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
-    const sos = await this.getTokenObjectsByIncludeFilter(policyIds);
+    const tokenObjectHits = await this.getTokenObjectsByIncludeFilter(policyIds);
 
-    if (sos.length === 0) {
+    if (tokenObjectHits.length === 0) {
       return [];
     }
 
-    const filter: string = sos
+    const filter: string = tokenObjectHits
       .map(({ _id }) => {
         return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${_id}"`;
       })
@@ -213,15 +225,19 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     }
     tokensFinder.close();
 
-    const uninstallTokens: UninstallToken[] = tokenObjects
-      .filter(
-        ({ attributes }) => attributes.policy_id && (attributes.token || attributes.token_plain)
-      )
-      .map(({ attributes, created_at: createdAt }) => ({
-        policy_id: attributes.policy_id,
-        token: attributes.token || attributes.token_plain,
-        ...(createdAt ? { created_at: createdAt } : {}),
-      }));
+    const uninstallTokens: UninstallToken[] = tokenObjects.map(
+      ({ attributes, created_at: createdAt }) => {
+        this.assertPolicyId(attributes);
+        this.assertToken(attributes);
+        this.assertCreatedAt(createdAt);
+
+        return {
+          policy_id: attributes.policy_id,
+          token: attributes.token || attributes.token_plain,
+          created_at: createdAt,
+        };
+      }
+    );
 
     return uninstallTokens;
   }
@@ -529,5 +545,23 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   private get isEncryptionAvailable(): boolean {
     return appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt ?? false;
+  }
+
+  private assertCreatedAt(createdAt: string | undefined): asserts createdAt is string {
+    if (!createdAt) {
+      throw new FleetError('Uninstall Token is missing creation date!');
+    }
+  }
+
+  private assertToken(attributes: UninstallTokenSOAttributes | undefined) {
+    if (!attributes?.token && !attributes?.token_plain) {
+      throw new FleetError('Uninstall Token is missing token! ');
+    }
+  }
+
+  private assertPolicyId(attributes: UninstallTokenSOAttributes | undefined) {
+    if (!attributes?.policy_id) {
+      throw new FleetError('Uninstall Token is missing policy ID!');
+    }
   }
 }
