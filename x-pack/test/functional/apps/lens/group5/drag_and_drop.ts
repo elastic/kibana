@@ -180,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           xyChartContainer
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-          'Top 3 values of clientip + 1 other'
+          'Top values of clientip + 1 other'
         );
       });
 
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           xyChartContainer
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-          'Top 3 values of clientip + 1 other'
+          'Top values of clientip + 1 other'
         );
       });
 
