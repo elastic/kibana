@@ -68,7 +68,7 @@ describe('None', () => {
       cy.getBySel('osquery-action-item').should('not.exist');
 
       cy.getBySel('osquery-actions-notification').contains('0');
-      cy.contains('Osquery Results').click();
+      cy.getBySel('responseActionsViewTab').click();
       cy.contains('Permission denied').should('exist');
       cy.contains('Error while fetching live queries').should('exist');
     });
