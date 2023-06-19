@@ -22,4 +22,3 @@ describe('Category viewer ', () => {
     expect(screen.getByTestId('category-viewer')).toHaveTextContent(sampleCategory);
   });
 });
-
