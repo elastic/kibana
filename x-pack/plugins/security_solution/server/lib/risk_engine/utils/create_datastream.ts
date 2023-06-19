@@ -167,9 +167,9 @@ export const createDataStream = async ({
     }));
 
     logger.debug(
-      `Found ${dataStreams.length} concrete indices for ${
-        indexPatterns.alias
-      } - ${JSON.stringify(dataStreams)}`
+      `Found ${dataStreams.length} concrete indices for ${indexPatterns.alias} - ${JSON.stringify(
+        dataStreams
+      )}`
     );
   } catch (error) {
     // 404 is expected if no ds have been created

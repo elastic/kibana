@@ -20,7 +20,7 @@ import {
   totalFieldsLimit,
   mappingComponentName,
   ilmPolicyName,
-  ilmPolicy
+  ilmPolicy,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
 
@@ -96,10 +96,8 @@ export class RiskEngineDataClient {
             },
           } as ClusterPutComponentTemplateRequest,
           totalFieldsLimit,
-        })
-      ])
-
-
+        }),
+      ]);
 
       await createOrUpdateIndexTemplate({
         logger: this.options.logger,

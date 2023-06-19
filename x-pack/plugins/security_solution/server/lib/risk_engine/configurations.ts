@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
-import { IIndexPatternString } from './utils/create_datastream';
+import type { IIndexPatternString } from './utils/create_datastream';
 
 export const ilmPolicy = {
   _meta: {
