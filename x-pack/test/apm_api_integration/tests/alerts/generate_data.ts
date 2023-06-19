@@ -20,6 +20,47 @@ export const config = {
   },
 };
 
+export async function generateLatencyData({
+  synthtraceEsClient,
+  serviceName,
+  start,
+  end,
+}: {
+  synthtraceEsClient: ApmSynthtraceEsClient;
+  serviceName: string;
+  start: number;
+  end: number;
+}) {
+  const serviceInstance = apm
+    .service({ name: serviceName, environment: 'production', agentName: 'go' })
+    .instance('instance-a');
+
+  const interval = '1m';
+
+  const { bananaTransaction, appleTransaction } = config;
+
+  const documents = [
+    timerange(start, end)
+      .interval(interval)
+      .generator((timestamp) =>
+        serviceInstance
+          .transaction({ transactionName: appleTransaction.name })
+          .timestamp(timestamp)
+          .duration(10)
+      ),
+    timerange(start, end)
+      .interval(interval)
+      .generator((timestamp) =>
+        serviceInstance
+          .transaction({ transactionName: bananaTransaction.name })
+          .timestamp(timestamp)
+          .duration(5)
+      ),
+  ];
+
+  await synthtraceEsClient.index(documents);
+}
+
 export async function generateErrorData({
   synthtraceEsClient,
   serviceName,
