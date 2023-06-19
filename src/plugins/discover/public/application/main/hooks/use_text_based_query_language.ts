@@ -56,14 +56,22 @@ export function useTextBasedQueryLanguage({
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
       }
+      const sendComplete = () => {
+        stateContainer.dataState.data$.documents$.next({
+          ...next,
+          fetchStatus: FetchStatus.COMPLETE,
+        });
+      };
       const { columns: stateColumns, index, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
-      const hasResults = next.result?.length && next.fetchStatus === FetchStatus.COMPLETE;
+      const hasResults =
+        next.result?.length &&
+        (next.fetchStatus === FetchStatus.COMPLETE || next.fetchStatus === FetchStatus.PARTIAL);
       const initialFetch = !prev.current.columns.length;
 
-      if (isTextBasedQueryLang) {
+      if (isTextBasedQueryLang && next.fetchStatus === FetchStatus.PARTIAL) {
         if (hasResults) {
           // check if state needs to contain column transformation due to a different columns in the resultset
           const firstRow = next.result![0];
@@ -92,6 +100,7 @@ export function useTextBasedQueryLanguage({
         const addDataViewToState = Boolean(dataViewObj?.id !== index) || initialFetch;
         const queryChanged = indexPatternFromQuery !== indexTitle.current;
         if (!addColumnsToState && !queryChanged) {
+          sendComplete();
           return;
         }
 
@@ -106,7 +115,8 @@ export function useTextBasedQueryLanguage({
             viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
           }),
         };
-        stateContainer.appState.replaceUrlState(nextState);
+        await stateContainer.appState.replaceUrlState(nextState);
+        sendComplete();
       } else {
         // cleanup for a "regular" query
         cleanup();

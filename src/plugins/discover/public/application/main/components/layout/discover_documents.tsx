@@ -114,7 +114,9 @@ function DiscoverDocumentsComponent({
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState = useDataState(documents$);
-  const isDataLoading = documentState.fetchStatus === FetchStatus.LOADING;
+  const isDataLoading =
+    documentState.fetchStatus === FetchStatus.LOADING ||
+    documentState.fetchStatus === FetchStatus.PARTIAL;
   // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
   // 1. When switching the data view, the sorting in the URL is reset to the default sorting of the selected data view.
   // 2. The new sort param is already available in this component and propagated to the EuiDataGrid.
@@ -123,8 +125,9 @@ function DiscoverDocumentsComponent({
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
   const isDataViewLoading = index && dataView.id && index !== dataView.id;
-  const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
+  const isEmptyDataResult =
+    isPlainRecord || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const {

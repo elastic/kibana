@@ -50,7 +50,27 @@ export const buildStateSubscribe =
       return;
     }
     addLog('[appstate] subscribe triggered', nextState);
-    const { hideChart, interval, breakdownField, sort, index } = appState.getPrevious();
+    const {
+      hideChart,
+      interval,
+      breakdownField,
+      sort,
+      index,
+      query: prevQuery,
+    } = appState.getPrevious();
+    const nextQuery = nextState.query;
+
+    const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
+
+    if (isTextBasedQueryLang) {
+      const isTextBasedQueryLandPrev = isTextBasedQuery(prevQuery);
+      if (!isTextBasedQueryLandPrev) {
+        savedSearchState.update({ nextState });
+        dataState.reset(savedSearch);
+        dataState.fetch();
+        return;
+      }
+    }
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);

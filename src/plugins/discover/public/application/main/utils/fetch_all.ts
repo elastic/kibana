@@ -95,7 +95,7 @@ export function fetchAll(
         }
 
         dataSubjects.documents$.next({
-          fetchStatus: FetchStatus.COMPLETE,
+          fetchStatus: useSql ? FetchStatus.PARTIAL : FetchStatus.COMPLETE,
           result: records,
           textBasedQueryColumns,
           recordRawType,
