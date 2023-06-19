@@ -127,6 +127,8 @@ describe('when on the package policy create page', () => {
     mockApiCalls(testRenderer.startServices.http);
     testRenderer.mountHistory.push(createPageUrlPath);
 
+    jest.mocked(useStartServices().application.navigateToApp).mockReset();
+
     mockPackageInfo = {
       data: {
         item: {
@@ -339,6 +341,9 @@ describe('when on the package policy create page', () => {
       test('should navigate to save navigate path with query param if set', async () => {
         const routeState = {
           onSaveNavigateTo: [PLUGIN_ID, { path: '/save/url/here' }],
+          onSaveQueryParams: {
+            openEnrollmentFlyout: true,
+          },
         };
         const queryParamsPolicyId = 'agent-policy-1';
         await setupSaveNavigate(routeState, queryParamsPolicyId);
@@ -357,10 +362,12 @@ describe('when on the package policy create page', () => {
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
       });
 
-      test('should set history if no routeState', async () => {
+      test('should navigate to agent policy if no route state is set', async () => {
         await setupSaveNavigate({});
 
-        expect(useHistory().push).toHaveBeenCalledWith('/policies/agent-policy-1');
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
+          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
+        });
       });
     });
 
