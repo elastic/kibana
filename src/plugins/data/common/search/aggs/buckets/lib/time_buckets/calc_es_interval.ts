@@ -75,7 +75,7 @@ export function convertIntervalToEsInterval(interval: string): EsInterval {
 
 declare module 'moment' {
   interface Locale {
-    _config: LocaleSpecification;
+    _config: moment.LocaleSpecification;
   }
 }
 
