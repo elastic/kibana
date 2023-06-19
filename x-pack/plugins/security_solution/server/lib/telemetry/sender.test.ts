@@ -558,6 +558,13 @@ describe('getV3UrlFromV2', () => {
     ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
   });
 
+  it('should work when receiving a V3 URL', () => {
+    const sender = new TelemetryEventsSender(logger);
+    expect(
+      sender.getV3UrlFromV2('https://telemetry.elastic.co/v3/send/channel', 'alerts-endpoint')
+    ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
+  });
+
   it('should return staging url', () => {
     const sender = new TelemetryEventsSender(logger);
     expect(

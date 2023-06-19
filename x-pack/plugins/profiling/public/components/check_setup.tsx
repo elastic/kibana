@@ -21,9 +21,9 @@ import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
-import { NoDataPage } from './no_data_page';
+import { NoDataView } from '../views/no_data_view';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
-import { LicensePrompt } from './shared/license_prompt';
+import { LicensePrompt } from './license_prompt';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
@@ -88,7 +88,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   if (displayNoDataScreen) {
     return (
-      <NoDataPage
+      <NoDataView
         subTitle={i18n.translate('xpack.profiling.noDataPage.introduction', {
           defaultMessage: `You're almost there! Follow the instructions below to add data.`,
         })}
