@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
 import { isEqual } from 'lodash';
 import { CriteriaWithPagination } from '@elastic/eui';
 import { isNumber } from 'lodash/fp';
+import { EuiButton } from '@elastic/eui';
+import { EuiTableSelectionType } from '@elastic/eui';
+import type { EuiBasicTable } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
@@ -24,6 +27,8 @@ import { useHostFlyoutUrlState } from './use_host_flyout_url_state';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { useMetricsDataViewContext } from './use_data_view';
+import { buildCombinedHostsFilter } from '../helpers';
 
 /**
  * Columns and items types
@@ -161,16 +166,61 @@ const toggleDialogActionLabel = i18n.translate(
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = () => {
+  const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const [{ pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
-    services: { telemetry },
+    services: {
+      telemetry,
+      data: {
+        query: { filterManager: filterManagerService },
+      },
+    },
   } = useKibanaContextForPlugin();
+  const { dataView } = useMetricsDataViewContext();
 
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
 
   const closeFlyout = useCallback(() => setHostFlyoutState(null), [setHostFlyoutState]);
+
+  const onSelectionChange = (newSelectedItems: HostNodeRow[]) => {
+    setSelectedItems(newSelectedItems);
+  };
+
+  const hostsTableRef = useRef<EuiBasicTable | null>(null);
+
+  const filterSelectedHosts = useCallback(() => {
+    if (!selectedItems.length) {
+      return [];
+    }
+    const selectedHostNames = selectedItems.map(({ name }) => name);
+    const newFilter = buildCombinedHostsFilter({
+      field: 'host.name',
+      values: selectedHostNames,
+      dataView,
+    });
+
+    if (newFilter) {
+      filterManagerService.addFilters(newFilter);
+      setSelectedItems([]);
+      hostsTableRef.current?.setSelection([]);
+    }
+  }, [dataView, filterManagerService, selectedItems]);
+
+  const FilterButton =
+    selectedItems.length > 0 ? (
+      <EuiButton
+        data-test-subj="infraUseHostsTableHostsButton"
+        color="primary"
+        iconType="filter"
+        onClick={filterSelectedHosts}
+      >
+        {i18n.translate('xpack.infra.hostsViewPage.table.addFilter', {
+          defaultMessage: 'Add filter',
+        })}
+      </EuiButton>
+    ) : null;
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -325,6 +375,11 @@ export const useHostsTable = () => {
     ]
   );
 
+  const selection: EuiTableSelectionType<HostNodeRow> = {
+    onSelectionChange,
+    selectable: (item: HostNodeRow) => !!item.name,
+  };
+
   return {
     columns,
     clickedItem,
@@ -335,6 +390,9 @@ export const useHostsTable = () => {
     onTableChange,
     pagination,
     sorting,
+    selection,
+    FilterButton,
+    hostsTableRef,
   };
 };
 
