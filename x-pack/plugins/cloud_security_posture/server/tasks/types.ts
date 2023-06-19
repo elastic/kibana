@@ -38,6 +38,28 @@ export interface VulnSeverityAggs {
   low: {
     doc_count: number;
   };
+  score_by_cloud_account_id: {
+    buckets: Array<{
+      key: string; // cloud account id
+      critical: {
+        doc_count: number;
+      };
+      high: {
+        doc_count: number;
+      };
+      medium: {
+        doc_count: number;
+      };
+      low: {
+        doc_count: number;
+      };
+      cloud_account_name: {
+        buckets: Array<{
+          key: string; // cloud account name
+        }>;
+      };
+    }>;
+  };
 }
 
 export type TaskHealthStatus = 'ok' | 'warning' | 'error';

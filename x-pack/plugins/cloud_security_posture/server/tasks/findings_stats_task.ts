@@ -197,6 +197,37 @@ const getVulnScoreQuery = (): SearchRequest => ({
     low: {
       filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.LOW } },
     },
+    score_by_cloud_account_id: {
+      terms: {
+        field: 'cloud.account.id',
+      },
+      aggs: {
+        cloud_account_id: {
+          terms: {
+            field: 'cloud.account.id',
+            size: 1,
+          },
+        },
+        cloud_account_name: {
+          terms: {
+            field: 'cloud.account.name',
+            size: 1,
+          },
+        },
+        critical: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.CRITICAL } },
+        },
+        high: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.HIGH } },
+        },
+        medium: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.MEDIUM } },
+        },
+        low: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.LOW } },
+        },
+      },
+    },
   },
 });
 
@@ -240,6 +271,18 @@ const getVulnScoresDocIndexingPromises = (
 ) => {
   if (!vulnScoreAggs) return;
 
+  // creating score per cluster id objects
+  const scoreByCloudAccount = vulnScoreAggs.score_by_cloud_account_id.buckets.map(
+    (accountScore) => ({
+      cloudAccountId: accountScore.key,
+      cloudAccountName: accountScore.cloud_account_name.buckets[0].key,
+      critical: accountScore.critical.doc_count,
+      high: accountScore.high.doc_count,
+      medium: accountScore.medium.doc_count,
+      low: accountScore.low.doc_count,
+    })
+  );
+
   return esClient.index({
     index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
     document: {
@@ -248,6 +291,7 @@ const getVulnScoresDocIndexingPromises = (
       high: vulnScoreAggs.high.doc_count,
       medium: vulnScoreAggs.medium.doc_count,
       low: vulnScoreAggs.low.doc_count,
+      score_by_cloud_account: scoreByCloudAccount,
     },
   });
 };

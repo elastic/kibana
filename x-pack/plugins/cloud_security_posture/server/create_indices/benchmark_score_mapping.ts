@@ -47,5 +47,27 @@ export const benchmarkScoreMapping: MappingTypeMapping = {
     low: {
       type: 'long',
     },
+    score_by_cloud_account: {
+      properties: {
+        cloudAccountId: {
+          type: 'keyword',
+        },
+        cloudAccountName: {
+          type: 'keyword',
+        },
+        critical: {
+          type: 'long',
+        },
+        high: {
+          type: 'long',
+        },
+        low: {
+          type: 'long',
+        },
+        medium: {
+          type: 'long',
+        },
+      },
+    },
   },
 };
