@@ -235,7 +235,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
-                  connectTabId: SearchApplicationConnectTabs.API,
+                  connectTabId: SearchApplicationConnectTabs.SAFESEARCHAPI,
                   engineName,
                 })
               )

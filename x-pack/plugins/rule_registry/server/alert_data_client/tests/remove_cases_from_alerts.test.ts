@@ -31,6 +31,7 @@ describe('remove cases from alerts', () => {
       esClient: esClientMock,
       auditLogger,
       ruleDataService: ruleDataServiceMock.create(),
+      getRuleType: jest.fn(),
     };
 
     beforeEach(() => {
@@ -87,6 +88,7 @@ describe('remove cases from alerts', () => {
       esClient: esClientMock,
       auditLogger,
       ruleDataService: ruleDataServiceMock.create(),
+      getRuleType: jest.fn(),
     };
 
     beforeEach(() => {

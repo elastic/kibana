@@ -847,6 +847,8 @@ describe('helpers', () => {
             updated: 1585233356356,
             noteId: 'note-id',
             note: 'I am a note',
+            timelineId: null,
+            version: 'testVersion',
           },
         ],
       })();
@@ -864,7 +866,7 @@ describe('helpers', () => {
             user: 'unknown',
             saveObjectId: 'note-id',
             timelineId: null,
-            version: undefined,
+            version: 'testVersion',
           },
         ],
       });
