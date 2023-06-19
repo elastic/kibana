@@ -16,6 +16,7 @@ const createLogsSharedSetupMock = () => {
   const logsSharedSetupMock: jest.Mocked<LogsSharedPluginSetup> = {
     logViews: createLogViewsServiceSetupMock(),
     logEntries: createLogsSharedLogEntriesDomainMock(),
+    registerUsageCollectorActions: jest.fn(),
   };
 
   return logsSharedSetupMock;
