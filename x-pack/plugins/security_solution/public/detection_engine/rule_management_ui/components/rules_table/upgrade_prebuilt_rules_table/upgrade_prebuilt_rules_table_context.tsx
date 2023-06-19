@@ -103,14 +103,17 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       invariant(rule, `Rule with id ${ruleId} not found`);
 
       setLoadingRules((prev) => [...prev, ruleId]);
-      await upgradeSpecificRulesRequest([
-        {
-          rule_id: ruleId,
-          version: rule.diff.fields.version?.target_version ?? rule.rule.version,
-          revision: rule.revision,
-        },
-      ]);
-      setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
+      try {
+        await upgradeSpecificRulesRequest([
+          {
+            rule_id: ruleId,
+            version: rule.diff.fields.version?.target_version ?? rule.rule.version,
+            revision: rule.revision,
+          },
+        ]);
+      } finally {
+        setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
+      }
     },
     [rules, upgradeSpecificRulesRequest]
   );
@@ -122,17 +125,23 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       revision: rule.revision,
     }));
     setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
-    await upgradeSpecificRulesRequest(rulesToUpgrade);
-    setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
-    setSelectedRules([]);
+    try {
+      await upgradeSpecificRulesRequest(rulesToUpgrade);
+    } finally {
+      setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
+      setSelectedRules([]);
+    }
   }, [selectedRules, upgradeSpecificRulesRequest]);
 
   const upgradeAllRules = useCallback(async () => {
     // Unselect all rules so that the table doesn't show the "bulk actions" bar
     setLoadingRules((prev) => [...prev, ...rules.map((r) => r.rule_id)]);
-    await upgradeAllRulesRequest();
-    setLoadingRules((prev) => prev.filter((id) => !rules.some((r) => r.rule_id === id)));
-    setSelectedRules([]);
+    try {
+      await upgradeAllRulesRequest();
+    } finally {
+      setLoadingRules([]);
+      setSelectedRules([]);
+    }
   }, [rules, upgradeAllRulesRequest]);
 
   const actions = useMemo<UpgradePrebuiltRulesTableActions>(

@@ -1831,5 +1831,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         Record<string, { content: string; type: string }> | undefined
       >(() => window.ELASTIC_LENS_CSV_CONTENT);
     },
+
+    async closeSuggestionPanel() {
+      const isSuggestionPanelOpen = await testSubjects.exists('lnsSuggestionsPanel');
+      if (isSuggestionPanelOpen) {
+        await testSubjects.click('lensSuggestionsPanelToggleButton');
+      }
+    },
   });
 }

@@ -137,6 +137,7 @@ export const applicationUsageSchema = {
   enterpriseSearchContent: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
+  enterpriseSearchEsre: commonSchema,
   elasticsearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,

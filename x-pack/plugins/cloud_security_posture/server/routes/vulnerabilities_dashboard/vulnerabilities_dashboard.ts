@@ -11,7 +11,9 @@ import { VULNERABILITIES_DASHBOARD_ROUTE_PATH } from '../../../common/constants'
 import { getSafeVulnerabilitiesQueryFilter } from '../../../common/utils/get_safe_vulnerabilities_query_filter';
 import { CspRouter } from '../../types';
 import { getVulnerabilitiesStatistics } from './get_vulnerabilities_statistics';
-
+import { getTopVulnerableResources } from './get_top_vulnerable_resources';
+import { getTopPatchableVulnerabilities } from './get_top_patchable_vulnerabilities';
+import { getTopVulnerabilities } from './get_top_vulnerabilities';
 export interface KeyDocCount<TKey = string> {
   key: TKey;
   doc_count: number;
@@ -34,10 +36,23 @@ export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void 
 
         const query = getSafeVulnerabilitiesQueryFilter();
 
-        const [cnvmStatistics] = await Promise.all([getVulnerabilitiesStatistics(esClient, query)]);
+        const [
+          cnvmStatistics,
+          topVulnerableResources,
+          topPatchableVulnerabilities,
+          topVulnerabilities,
+        ] = await Promise.all([
+          getVulnerabilitiesStatistics(esClient, query),
+          getTopVulnerableResources(esClient, query),
+          getTopPatchableVulnerabilities(esClient, query),
+          getTopVulnerabilities(esClient, query),
+        ]);
 
         const body: CnvmDashboardData = {
           cnvmStatistics,
+          topVulnerableResources,
+          topPatchableVulnerabilities,
+          topVulnerabilities,
         };
 
         return response.ok({
