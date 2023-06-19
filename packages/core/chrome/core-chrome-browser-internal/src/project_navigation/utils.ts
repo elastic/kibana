@@ -7,6 +7,7 @@
  */
 
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
+import type { Location } from 'history';
 
 const wrapIdx = (index: number): string => `[${index}]`;
 
@@ -99,16 +100,27 @@ function extractParentPaths(key: string) {
  */
 export const findActiveNodes = (
   currentPathname: string,
-  navTree: Record<string, ChromeProjectNavigationNode>
+  navTree: Record<string, ChromeProjectNavigationNode>,
+  location?: Location
 ): ChromeProjectNavigationNode[][] => {
   const activeNodes: ChromeProjectNavigationNode[][] = [];
   const matches: string[][] = [];
 
   Object.entries(navTree).forEach(([key, node]) => {
+    if (node.getIsActive && location) {
+      const isActive = node.getIsActive(location);
+      if (isActive) {
+        const keysWithParents = extractParentPaths(key);
+        activeNodes.push(keysWithParents.map((k) => navTree[k]));
+      }
+      return;
+    }
+
     const nodePath = serializeDeeplinkUrl(node.deepLink?.url);
 
     if (nodePath) {
       const match = currentPathname.startsWith(nodePath);
+
       if (match) {
         const { length } = nodePath;
         if (!matches[length]) {

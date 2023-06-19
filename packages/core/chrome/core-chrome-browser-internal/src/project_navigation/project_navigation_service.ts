@@ -119,7 +119,12 @@ export class ProjectNavigationService {
     // We add possible hash to the current pathname
     // e.g. /app/kibana#/management
     currentPathname = stripQueryParams(`${currentPathname}${location.hash}`);
-    const activeNodes = findActiveNodes(currentPathname, this.projectNavigationNavTreeFlattened);
+
+    const activeNodes = findActiveNodes(
+      currentPathname,
+      this.projectNavigationNavTreeFlattened,
+      location
+    );
 
     let requiresUpdate = false;
 

@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import type {
+  ChromeNavLink,
+  ChromeProjectNavigation,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { of, type Observable } from 'rxjs';
+import { BehaviorSubject, of, type Observable } from 'rxjs';
 import { getServicesMock } from '../../../mocks/src/jest';
 import { NavigationProvider } from '../../services';
 import { Navigation } from './navigation';
@@ -554,6 +558,130 @@ describe('<Navigation />', () => {
       // @ts-expect-error we're mocking the console so "mockImplementation" exists
       // eslint-disable-next-line no-console
       console.error.mockRestore();
+    });
+
+    test('should set the active node', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Item 1',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+        {
+          id: 'item2',
+          title: 'Item 2',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const activeNodes$ = new BehaviorSubject([
+        [
+          {
+            id: 'group1',
+            title: 'Group 1',
+            path: ['group1'],
+          },
+          {
+            id: 'item1',
+            title: 'Item 1',
+            path: ['group1', 'item1'],
+          },
+        ],
+      ]);
+
+      const getActiveNodes$ = () => activeNodes$.asObservable();
+
+      const { findByTestId } = render(
+        <NavigationProvider {...services} getActiveNodes$={getActiveNodes$} navLinks$={navLinks$}>
+          <Navigation>
+            <Navigation.Group id="group1">
+              <Navigation.Item<any> link="item1" title="Item 1" />
+              <Navigation.Item<any> link="item2" title="Item 2" />
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
+        'euiSideNavItemButton-isSelected'
+      );
+      expect(await findByTestId('nav-item-group1.item2')).not.toHaveClass(
+        'euiSideNavItemButton-isSelected'
+      );
+
+      activeNodes$.next([
+        [
+          {
+            id: 'group1',
+            title: 'Group 1',
+            path: ['group1'],
+          },
+          {
+            id: 'item2',
+            title: 'Item 2',
+            path: ['group1', 'item2'],
+          },
+        ],
+      ]);
+
+      expect(await findByTestId('nav-item-group1.item1')).not.toHaveClass(
+        'euiSideNavItemButton-isSelected'
+      );
+      expect(await findByTestId('nav-item-group1.item2')).toHaveClass(
+        'euiSideNavItemButton-isSelected'
+      );
+    });
+
+    test('should override the history behaviour to set the active node', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Item 1',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
+      const getActiveNodes$ = () => activeNodes$.asObservable();
+
+      const onProjectNavigationChange = (nav: ChromeProjectNavigation) => {
+        Object.values(nav.navigationTreeFlattened).forEach((node) => {
+          if (node.getIsActive) {
+            activeNodes$.next([[node]]);
+          }
+        });
+      };
+
+      const { findByTestId } = render(
+        <NavigationProvider
+          {...services}
+          getActiveNodes$={getActiveNodes$}
+          navLinks$={navLinks$}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <Navigation>
+            <Navigation.Group id="group1">
+              <Navigation.Item<any>
+                link="item1"
+                title="Item 1"
+                getIsActive={() => {
+                  return true;
+                }}
+              />
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
+        'euiSideNavItemButton-isSelected'
+      );
     });
   });
 });

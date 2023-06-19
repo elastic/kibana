@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { createLocation } from 'history';
 import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
 import { flattenNav, findActiveNodes } from './utils';
 
@@ -315,5 +316,66 @@ describe('findActiveNodes', () => {
     expect(findActiveNodes(`/foo/appRoot/bar`, flattendNavTree)).toEqual(expected);
     expect(findActiveNodes(`/foo/appRoot/bar?q=hello`, flattendNavTree)).toEqual(expected);
     expect(findActiveNodes(`/foo/other`, flattendNavTree)).toEqual([]);
+  });
+
+  test('should use isActive() handler if passed', () => {
+    const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
+      '[0]': {
+        id: 'root',
+        title: 'Root',
+        path: ['root'],
+      },
+      '[0][1]': {
+        id: 'item1',
+        title: 'Item 1',
+        path: ['root', 'item1'],
+        getIsActive: (loc) => loc.pathname.startsWith('/foo'), // Should match
+      },
+      '[0][2]': {
+        id: 'item2',
+        title: 'Item 2',
+        deepLink: getDeepLink('item2', 'item2'), // Should match
+        path: ['root', 'item2'],
+      },
+    };
+
+    let currentPathname = '/other/bad';
+
+    expect(
+      findActiveNodes(currentPathname, flattendNavTree, createLocation(currentPathname))
+    ).toEqual([]);
+
+    currentPathname = '/foo/item2/bar';
+
+    expect(
+      findActiveNodes(currentPathname, flattendNavTree, createLocation(currentPathname))
+    ).toEqual([
+      [
+        {
+          id: 'root',
+          title: 'Root',
+          path: ['root'],
+        },
+        {
+          id: 'item1',
+          title: 'Item 1',
+          getIsActive: expect.any(Function),
+          path: ['root', 'item1'],
+        },
+      ],
+      [
+        {
+          id: 'root',
+          title: 'Root',
+          path: ['root'],
+        },
+        {
+          id: 'item2',
+          title: 'Item 2',
+          deepLink: getDeepLink('item2', 'item2'),
+          path: ['root', 'item2'],
+        },
+      ],
+    ]);
   });
 });
