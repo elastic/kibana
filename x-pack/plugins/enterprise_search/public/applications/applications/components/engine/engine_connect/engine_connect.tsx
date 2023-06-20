@@ -35,7 +35,7 @@ const pageTitle = i18n.translate(
     defaultMessage: 'Connect',
   }
 );
-const API_TAB_TITLE = i18n.translate(
+const SAFE_SEARCH_API_TAB_TITLE = i18n.translate(
   'xpack.enterpriseSearch.content.searchApplications.connect.safeSearchAPITabTitle',
   {
     defaultMessage: 'Safe Search API',
@@ -50,8 +50,8 @@ const DOCUMENTATION_TAB_TITLE = i18n.translate(
 const ConnectTabs: string[] = Object.values(SearchApplicationConnectTabs);
 const getTabBreadCrumb = (tabId: string) => {
   switch (tabId) {
-    case SearchApplicationConnectTabs.API:
-      return API_TAB_TITLE;
+    case SearchApplicationConnectTabs.SAFESEARCHAPI:
+      return SAFE_SEARCH_API_TAB_TITLE;
     case SearchApplicationConnectTabs.DOCUMENTATION:
       return DOCUMENTATION_TAB_TITLE;
     default:
@@ -61,7 +61,7 @@ const getTabBreadCrumb = (tabId: string) => {
 
 export const EngineConnect: React.FC = () => {
   const { engineName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
-  const { connectTabId = SearchApplicationConnectTabs.API } = useParams<{
+  const { connectTabId = SearchApplicationConnectTabs.SAFESEARCHAPI } = useParams<{
     connectTabId?: string;
   }>();
 
@@ -106,9 +106,9 @@ export const EngineConnect: React.FC = () => {
         rightSideItems: [],
         tabs: [
           {
-            isSelected: connectTabId === SearchApplicationConnectTabs.API,
-            label: API_TAB_TITLE,
-            onClick: onTabClick(SearchApplicationConnectTabs.API),
+            isSelected: connectTabId === SearchApplicationConnectTabs.SAFESEARCHAPI,
+            label: SAFE_SEARCH_API_TAB_TITLE,
+            onClick: onTabClick(SearchApplicationConnectTabs.SAFESEARCHAPI),
           },
           {
             isSelected: connectTabId === SearchApplicationConnectTabs.DOCUMENTATION,
@@ -120,7 +120,7 @@ export const EngineConnect: React.FC = () => {
       engineName={engineName}
       hasSchemaConflicts={hasSchemaConflicts}
     >
-      {connectTabId === SearchApplicationConnectTabs.API && <SearchApplicationAPI />}
+      {connectTabId === SearchApplicationConnectTabs.SAFESEARCHAPI && <SearchApplicationAPI />}
       {connectTabId === SearchApplicationConnectTabs.DOCUMENTATION && (
         <SearchApplicationDocumentation />
       )}

@@ -12,6 +12,7 @@ import {
   fetchHistoricalSummaryParamsSchema,
   findSLOParamsSchema,
   getSLOBurnRatesParamsSchema,
+  getPreviewDataParamsSchema,
   getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
@@ -43,6 +44,7 @@ import type { ObservabilityRequestHandlerContext } from '../../types';
 import { ManageSLO } from '../../services/slo/manage_slo';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 import { getBurnRates } from '../../services/slo/get_burn_rates';
+import { GetPreviewData } from '../../services/slo/get_preview_data';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -328,6 +330,25 @@ const getSloBurnRates = createObservabilityServerRoute({
   },
 });
 
+const getPreviewData = createObservabilityServerRoute({
+  endpoint: 'POST /internal/observability/slos/_preview',
+  options: {
+    tags: ['access:slo_read'],
+  },
+  params: getPreviewDataParamsSchema,
+  handler: async ({ context, params }) => {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const service = new GetPreviewData(esClient);
+    return await service.execute(params.body);
+  },
+});
+
 export const sloRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
@@ -340,4 +361,5 @@ export const sloRouteRepository = {
   ...getDiagnosisRoute,
   ...getSloDiagnosisRoute,
   ...getSloBurnRates,
+  ...getPreviewData,
 };

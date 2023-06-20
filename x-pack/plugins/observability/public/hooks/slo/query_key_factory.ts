@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Indicator } from '@kbn/slo-schema';
+
 interface SloKeyFilter {
   name: string;
   page: number;
@@ -32,6 +34,7 @@ export const sloKeys = {
   historicalSummary: (sloIds: string[]) => [...sloKeys.historicalSummaries(), sloIds] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   burnRates: (sloId: string) => [...sloKeys.all, 'burnRates', sloId] as const,
+  preview: (indicator?: Indicator) => [...sloKeys.all, 'preview', indicator] as const,
 };
 
 export const compositeSloKeys = {

@@ -37,6 +37,7 @@ export function useFetchIndexPatternFields(
         throw new Error(`Something went wrong. Error: ${error}`);
       }
     },
+    retry: false,
     refetchOnWindowFocus: false,
     enabled: Boolean(indexPattern),
   });
