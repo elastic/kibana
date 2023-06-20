@@ -137,136 +137,136 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const title = await testSubjects.getVisibleText('header-page-title');
           expect(title).to.equal('Endpoints');
         });
-      });
 
-      it('displays table data', async () => {
-        const tableData = await formattedTableData();
-        expect(tableData.sort()).to.eql(expectedData.sort());
-      });
-
-      describe('for the search bar', () => {
-        before(async () => {
-          await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 60000);
-        });
-        after(async () => {
-          const adminSearchBar = await testSubjects.find('adminSearchBar');
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
-          await adminSearchBar.clearValueWithKeyboard();
-          await querySubmitButton.click();
-        });
-        it('when the kql query is `na`, table shows an empty list', async () => {
-          const adminSearchBar = await testSubjects.find('adminSearchBar');
-          await adminSearchBar.clearValueWithKeyboard();
-          await adminSearchBar.type('na');
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
-          await querySubmitButton.click();
-          const expectedDataFromQuery = [
-            [
-              'Endpoint',
-              'Agent status',
-              'Policy',
-              'Policy status',
-              'OS',
-              'IP address',
-              'Version',
-              'Last active',
-              'Actions',
-            ],
-            ['No items found'],
-          ];
-
-          await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable', 10000);
-          const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
-          expect(tableData).to.eql(expectedDataFromQuery);
-        });
-
-        it('when the kql filters for united.endpoint.host.hostname, table shows 1 item', async () => {
-          const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
-          const hostName = expectedDataFromQuery[1][0];
-          const adminSearchBar = await testSubjects.find('adminSearchBar');
-          await adminSearchBar.clearValueWithKeyboard();
-          await adminSearchBar.type(
-            `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
-          );
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
-          await querySubmitButton.click();
-          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
-            'endpointListTable',
-            1,
-            90000
-          );
+        it('displays table data', async () => {
           const tableData = await formattedTableData();
-          expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
+          expect(tableData.sort()).to.eql(expectedData.sort());
         });
 
-        it('when the kql filters for multiple matches, table shows the correct items', async () => {
-          const expectedDataFromQuery = [...expectedData.slice(0, 3).map((row) => [...row])];
-          const adminSearchBar = await testSubjects.find('adminSearchBar');
-          await adminSearchBar.clearValueWithKeyboard();
-          await adminSearchBar.type(
-            `united.endpoint.host.os.family : "windows" or host.os.family : "windows" `
-          );
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
-          await querySubmitButton.click();
-          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
-            'endpointListTable',
-            2,
-            90000
-          );
-          const tableData = await formattedTableData();
-          expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
-        });
-      });
-      it('does not show the details flyout initially', async () => {
-        await testSubjects.missingOrFail('endpointDetailsFlyout');
-      });
+        describe('for the search bar', () => {
+          before(async () => {
+            await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 60000);
+          });
+          after(async () => {
+            const adminSearchBar = await testSubjects.find('adminSearchBar');
+            const querySubmitButton = await testSubjects.find('querySubmitButton');
+            await adminSearchBar.clearValueWithKeyboard();
+            await querySubmitButton.click();
+          });
+          it('when the kql query is `na`, table shows an empty list', async () => {
+            const adminSearchBar = await testSubjects.find('adminSearchBar');
+            await adminSearchBar.clearValueWithKeyboard();
+            await adminSearchBar.type('na');
+            const querySubmitButton = await testSubjects.find('querySubmitButton');
+            await querySubmitButton.click();
+            const expectedDataFromQuery = [
+              [
+                'Endpoint',
+                'Agent status',
+                'Policy',
+                'Policy status',
+                'OS',
+                'IP address',
+                'Version',
+                'Last active',
+                'Actions',
+              ],
+              ['No items found'],
+            ];
 
-      describe('when the hostname is clicked on,', () => {
-        before(async () => {
-          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
-            'endpointListTable',
-            3,
-            90000
-          );
+            await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable', 10000);
+            const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+            expect(tableData).to.eql(expectedDataFromQuery);
+          });
+
+          it('when the kql filters for united.endpoint.host.hostname, table shows 1 item', async () => {
+            const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
+            const hostName = expectedDataFromQuery[1][0];
+            const adminSearchBar = await testSubjects.find('adminSearchBar');
+            await adminSearchBar.clearValueWithKeyboard();
+            await adminSearchBar.type(
+              `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
+            );
+            const querySubmitButton = await testSubjects.find('querySubmitButton');
+            await querySubmitButton.click();
+            await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
+              'endpointListTable',
+              1,
+              90000
+            );
+            const tableData = await formattedTableData();
+            expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
+          });
+
+          it('when the kql filters for multiple matches, table shows the correct items', async () => {
+            const expectedDataFromQuery = [...expectedData.slice(0, 3).map((row) => [...row])];
+            const adminSearchBar = await testSubjects.find('adminSearchBar');
+            await adminSearchBar.clearValueWithKeyboard();
+            await adminSearchBar.type(
+              `united.endpoint.host.os.family : "windows" or host.os.family : "windows" `
+            );
+            const querySubmitButton = await testSubjects.find('querySubmitButton');
+            await querySubmitButton.click();
+            await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
+              'endpointListTable',
+              2,
+              90000
+            );
+            const tableData = await formattedTableData();
+            expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
+          });
         });
-        it('display the details flyout', async () => {
-          await (await testSubjects.find('hostnameCellLink')).click();
-          await testSubjects.existOrFail('endpointDetailsFlyout');
+        it('does not show the details flyout initially', async () => {
+          await testSubjects.missingOrFail('endpointDetailsFlyout');
         });
 
-        it('updates the details flyout when a new hostname is selected from the list', async () => {
-          // display flyout for the first endpoint in the list
-          await (await testSubjects.findAll('hostnameCellLink'))[0].click();
-          await testSubjects.existOrFail('endpointDetailsFlyoutTitle');
-          const endpointDetailTitle0 = await testSubjects.getVisibleText(
-            'endpointDetailsFlyoutTitle'
-          );
-          // select the 2nd endpoint in the endpoint list
-          await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-          await pageObjects.endpoint.waitForVisibleTextToChange(
-            'endpointDetailsFlyoutTitle',
-            endpointDetailTitle0
-          );
-          const endpointDetailTitle1 = await testSubjects.getVisibleText(
-            'endpointDetailsFlyoutTitle'
-          );
-          expect(endpointDetailTitle1).to.not.eql(endpointDetailTitle0);
-        });
+        describe('when the hostname is clicked on,', () => {
+          before(async () => {
+            await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
+              'endpointListTable',
+              3,
+              90000
+            );
+          });
+          it('display the details flyout', async () => {
+            await (await testSubjects.find('hostnameCellLink')).click();
+            await testSubjects.existOrFail('endpointDetailsFlyout');
+          });
 
-        it('has the same flyout info when the same hostname is selected', async () => {
-          // display flyout for the first endpoint in the list
-          await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-          await testSubjects.existOrFail('endpointDetailsFlyoutTitle');
-          const endpointDetailTitleInitial = await testSubjects.getVisibleText(
-            'endpointDetailsFlyoutTitle'
-          );
-          // select the same endpoint in the endpoint list
-          await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-          await sleep(500); // give page time to refresh and verify it did not change
-          const endpointDetailTitleNew = await testSubjects.getVisibleText(
-            'endpointDetailsFlyoutTitle'
-          );
-          expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
+          it('updates the details flyout when a new hostname is selected from the list', async () => {
+            // display flyout for the first endpoint in the list
+            await (await testSubjects.findAll('hostnameCellLink'))[0].click();
+            await testSubjects.existOrFail('endpointDetailsFlyoutTitle');
+            const endpointDetailTitle0 = await testSubjects.getVisibleText(
+              'endpointDetailsFlyoutTitle'
+            );
+            // select the 2nd endpoint in the endpoint list
+            await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+            await pageObjects.endpoint.waitForVisibleTextToChange(
+              'endpointDetailsFlyoutTitle',
+              endpointDetailTitle0
+            );
+            const endpointDetailTitle1 = await testSubjects.getVisibleText(
+              'endpointDetailsFlyoutTitle'
+            );
+            expect(endpointDetailTitle1).to.not.eql(endpointDetailTitle0);
+          });
+
+          it('has the same flyout info when the same hostname is selected', async () => {
+            // display flyout for the first endpoint in the list
+            await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+            await testSubjects.existOrFail('endpointDetailsFlyoutTitle');
+            const endpointDetailTitleInitial = await testSubjects.getVisibleText(
+              'endpointDetailsFlyoutTitle'
+            );
+            // select the same endpoint in the endpoint list
+            await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+            await sleep(500); // give page time to refresh and verify it did not change
+            const endpointDetailTitleNew = await testSubjects.getVisibleText(
+              'endpointDetailsFlyoutTitle'
+            );
+            expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
+          });
         });
       });
     });
