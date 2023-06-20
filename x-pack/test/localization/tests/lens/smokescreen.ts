@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `Maximum de ${field}` : 'Maximum';
       case 'terms':
-        return field ? `Principales valeurs de ${field}` : 'Valeurs les plus élevées';
+        return field ? `3 principales valeurs de ${field}` : 'Valeurs les plus élevées';
       case 'sum':
         return 'somme';
       default:
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `${field} お最高値` : '最高';
       case 'terms':
-        return field ? `${field}の上位の値` : 'トップの値';
+        return field ? `${field}の上位の3 値` : 'トップの値';
       case 'sum':
         return '合計';
       default:
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `${field} 的最大值` : '最大值';
       case 'terms':
-        return field ? `${field} 的排名前  的值` : `排名最前值`;
+        return field ? `${field} 的排名前 3 的值` : `排名最前值`;
       case 'sum':
         return '求和';
       default:

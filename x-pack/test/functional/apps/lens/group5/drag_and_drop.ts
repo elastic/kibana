@@ -228,7 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-          'Top 3 values of clientip + 2 others'
+          'Top values of clientip + 2 others'
         );
       });
     });
@@ -477,7 +477,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Median of bytes',
         ]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-1')).to.eql([
-          'Top 3 values of ip + 1 other',
+          'Top values of ip + 1 other',
         ]);
       });
     });
