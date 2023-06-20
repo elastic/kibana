@@ -23,6 +23,7 @@ interface ManagementRouterProps {
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
+  showNavigationCards?: boolean;
 }
 
 export const ManagementRouter = memo(
