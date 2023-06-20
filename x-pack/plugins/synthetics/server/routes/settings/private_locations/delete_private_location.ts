@@ -6,15 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getAllPrivateLocations } from './get_private_locations';
+import { getAllPrivateLocationsAttributes } from './get_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import {
   privateLocationsSavedObjectId,
   privateLocationsSavedObjectName,
 } from '../../../../common/saved_objects/private_locations';
+import type { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
+import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
+import { toClientContract } from './helpers';
 
-export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory = () => ({
+export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
+  SyntheticsPrivateLocations
+> = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
   validate: {
@@ -23,13 +28,13 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory = () => (
     }),
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
+  handler: async ({ savedObjectsClient, request }) => {
     const { locationId } = request.params as { locationId: string };
 
-    const { locations } = await getAllPrivateLocations(savedObjectsClient);
+    const { locations } = await getAllPrivateLocationsAttributes(savedObjectsClient);
     const remainingLocations = locations.filter((loc) => loc.id !== locationId);
 
-    const result = await savedObjectsClient.create(
+    const result = await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
       privateLocationsSavedObjectName,
       { locations: remainingLocations },
       {
@@ -38,6 +43,6 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory = () => (
       }
     );
 
-    return result.attributes;
+    return toClientContract(result.attributes);
   },
 });

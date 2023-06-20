@@ -48,7 +48,7 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<
     const existingLocations = locations.filter((loc) => loc.id !== location.agentPolicyId);
     const formattedLocation = toSavedObjectContract(location);
 
-    const result = await savedObjectsClient.create(
+    const result = await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
       privateLocationsSavedObjectName,
       { locations: [...existingLocations, formattedLocation] },
       {
