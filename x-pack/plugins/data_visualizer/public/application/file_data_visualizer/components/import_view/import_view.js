@@ -10,7 +10,6 @@ import React, { Component } from 'react';
 
 import {
   EuiButton,
-  EuiPage,
   EuiPageBody,
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPanel,
@@ -481,174 +480,172 @@ export class ImportView extends Component {
       checkingValidIndex === true;
 
     return (
-      <EuiPage data-test-subj="dataVisualizerPageFileImport">
-        <EuiPageBody>
-          <EuiPageContentHeader>
-            <EuiTitle>
-              <h1>{this.props.fileName}</h1>
-            </EuiTitle>
-          </EuiPageContentHeader>
+      <EuiPageBody data-test-subj="dataVisualizerPageFileImport">
+        <EuiPageContentHeader>
+          <EuiTitle>
+            <h1>{this.props.fileName}</h1>
+          </EuiTitle>
+        </EuiPageContentHeader>
+        <EuiSpacer size="m" />
+        <EuiPanel data-test-subj="dataVisualizerFileImportSettingsPanel">
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.importView.importDataTitle"
+                defaultMessage="Import data"
+              />
+            </h2>
+          </EuiTitle>
+
+          <ImportSettings
+            index={index}
+            dataView={dataView}
+            initialized={initialized}
+            onIndexChange={this.onIndexChange}
+            createDataView={createDataView}
+            onCreateDataViewChange={this.onCreateDataViewChange}
+            onDataViewChange={this.onDataViewChange}
+            indexSettingsString={indexSettingsString}
+            mappingsString={mappingsString}
+            pipelineString={pipelineString}
+            onIndexSettingsStringChange={this.onIndexSettingsStringChange}
+            onMappingsStringChange={this.onMappingsStringChange}
+            onPipelineStringChange={this.onPipelineStringChange}
+            indexNameError={indexNameError}
+            dataViewNameError={dataViewNameError}
+            combinedFields={combinedFields}
+            onCombinedFieldsChange={this.onCombinedFieldsChange}
+            results={this.props.results}
+          />
+
           <EuiSpacer size="m" />
-          <EuiPanel data-test-subj="dataVisualizerFileImportSettingsPanel">
-            <EuiTitle size="s">
-              <h2>
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.importView.importDataTitle"
-                  defaultMessage="Import data"
-                />
-              </h2>
-            </EuiTitle>
 
-            <ImportSettings
-              index={index}
-              dataView={dataView}
-              initialized={initialized}
-              onIndexChange={this.onIndexChange}
-              createDataView={createDataView}
-              onCreateDataViewChange={this.onCreateDataViewChange}
-              onDataViewChange={this.onDataViewChange}
-              indexSettingsString={indexSettingsString}
-              mappingsString={mappingsString}
-              pipelineString={pipelineString}
-              onIndexSettingsStringChange={this.onIndexSettingsStringChange}
-              onMappingsStringChange={this.onMappingsStringChange}
-              onPipelineStringChange={this.onPipelineStringChange}
-              indexNameError={indexNameError}
-              dataViewNameError={dataViewNameError}
-              combinedFields={combinedFields}
-              onCombinedFieldsChange={this.onCombinedFieldsChange}
-              results={this.props.results}
-            />
+          {(initialized === false || importing === true) && (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  isDisabled={disableImport}
+                  onClick={this.clickImport}
+                  isLoading={importing}
+                  iconSide="right"
+                  fill
+                  data-test-subj="dataVisualizerFileImportButton"
+                >
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.importView.importButtonLabel"
+                    defaultMessage="Import"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={() => this.props.onChangeMode(DATAVISUALIZER_MODE.READ)}
+                  isDisabled={importing}
+                >
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.importView.backButtonLabel"
+                    defaultMessage="Back"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.importView.cancelButtonLabel"
+                    defaultMessage="Select a different file"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
 
+          {initialized === true && importing === false && (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={this.clickReset}>
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.importView.resetButtonLabel"
+                    defaultMessage="Reset"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={() => this.props.onChangeMode(DATAVISUALIZER_MODE.READ)}
+                  isDisabled={importing}
+                >
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.importView.backButtonLabel"
+                    defaultMessage="Back"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.importView.importNewButtonLabel"
+                    defaultMessage="Import a new file"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </EuiPanel>
+
+        {initialized === true && (
+          <React.Fragment>
             <EuiSpacer size="m" />
 
-            {(initialized === false || importing === true) && (
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    isDisabled={disableImport}
-                    onClick={this.clickImport}
-                    isLoading={importing}
-                    iconSide="right"
-                    fill
-                    data-test-subj="dataVisualizerFileImportButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.importView.importButtonLabel"
-                      defaultMessage="Import"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={() => this.props.onChangeMode(DATAVISUALIZER_MODE.READ)}
-                    isDisabled={importing}
-                  >
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.importView.backButtonLabel"
-                      defaultMessage="Back"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.importView.cancelButtonLabel"
-                      defaultMessage="Select a different file"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
+            <EuiPanel>
+              <ImportProgress statuses={statuses} />
 
-            {initialized === true && importing === false && (
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiButton onClick={this.clickReset}>
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.importView.resetButtonLabel"
-                      defaultMessage="Reset"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={() => this.props.onChangeMode(DATAVISUALIZER_MODE.READ)}
-                    isDisabled={importing}
-                  >
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.importView.backButtonLabel"
-                      defaultMessage="Back"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.importView.importNewButtonLabel"
-                      defaultMessage="Import a new file"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </EuiPanel>
+              {imported === true && (
+                <React.Fragment>
+                  <EuiSpacer size="m" />
 
-          {initialized === true && (
-            <React.Fragment>
-              <EuiSpacer size="m" />
+                  <ImportSummary
+                    index={index}
+                    dataView={dataView === '' ? index : dataView}
+                    ingestPipelineId={ingestPipelineId}
+                    docCount={docCount}
+                    importFailures={importFailures}
+                    createDataView={createDataView}
+                    createPipeline={createPipeline}
+                  />
 
-              <EuiPanel>
-                <ImportProgress statuses={statuses} />
+                  <EuiSpacer size="l" />
 
-                {imported === true && (
-                  <React.Fragment>
-                    <EuiSpacer size="m" />
+                  <ResultsLinks
+                    fieldStats={this.props.results?.field_stats}
+                    index={index}
+                    dataViewId={dataViewId}
+                    timeFieldName={timeFieldName}
+                    createDataView={createDataView}
+                    showFilebeatFlyout={this.showFilebeatFlyout}
+                    getAdditionalLinks={this.props.getAdditionalLinks ?? []}
+                  />
 
-                    <ImportSummary
+                  {isFilebeatFlyoutVisible && (
+                    <FilebeatConfigFlyout
                       index={index}
-                      dataView={dataView === '' ? index : dataView}
+                      results={this.props.results}
                       ingestPipelineId={ingestPipelineId}
-                      docCount={docCount}
-                      importFailures={importFailures}
-                      createDataView={createDataView}
-                      createPipeline={createPipeline}
+                      closeFlyout={this.closeFilebeatFlyout}
                     />
+                  )}
+                </React.Fragment>
+              )}
+            </EuiPanel>
+          </React.Fragment>
+        )}
+        {errors.length > 0 && (
+          <React.Fragment>
+            <EuiSpacer size="m" />
 
-                    <EuiSpacer size="l" />
-
-                    <ResultsLinks
-                      fieldStats={this.props.results?.field_stats}
-                      index={index}
-                      dataViewId={dataViewId}
-                      timeFieldName={timeFieldName}
-                      createDataView={createDataView}
-                      showFilebeatFlyout={this.showFilebeatFlyout}
-                      getAdditionalLinks={this.props.getAdditionalLinks ?? []}
-                    />
-
-                    {isFilebeatFlyoutVisible && (
-                      <FilebeatConfigFlyout
-                        index={index}
-                        results={this.props.results}
-                        ingestPipelineId={ingestPipelineId}
-                        closeFlyout={this.closeFilebeatFlyout}
-                      />
-                    )}
-                  </React.Fragment>
-                )}
-              </EuiPanel>
-            </React.Fragment>
-          )}
-          {errors.length > 0 && (
-            <React.Fragment>
-              <EuiSpacer size="m" />
-
-              <ImportErrors errors={errors} statuses={statuses} />
-            </React.Fragment>
-          )}
-        </EuiPageBody>
-      </EuiPage>
+            <ImportErrors errors={errors} statuses={statuses} />
+          </React.Fragment>
+        )}
+      </EuiPageBody>
     );
   }
 }
