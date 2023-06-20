@@ -376,6 +376,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.discover.selectTextBaseLang('SQL');
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '50 selected fields. 51 available fields.'
