@@ -28,8 +28,8 @@
       "unifiedSearch",
       "visualizations"
     ],
-    "optionalPlugins": ["discover", "home", "licensing", "spaces", "usageCollection"],
-    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch"],
+    "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud", "spaces"],
+    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "cloudChat", "spaces"],
     "extraPublicDirs": ["common"]
   }
 }

@@ -140,15 +140,30 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  * @experimental
  */
 export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   get: VersionedRouteRegistrar<'get', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   put: VersionedRouteRegistrar<'put', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   post: VersionedRouteRegistrar<'post', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   patch: VersionedRouteRegistrar<'patch', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   delete: VersionedRouteRegistrar<'delete', Ctx>;
 }
 
@@ -165,7 +180,7 @@ export interface VersionedRouteResponseValidation {
  * Versioned route validation
  * @experimental
  */
-interface FullValidationConfig<P, Q, B> {
+export interface FullValidationConfig<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @experimental

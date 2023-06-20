@@ -24,6 +24,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -49,6 +50,7 @@ export interface AppDependencies {
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
+  savedSearch: SavedSearchPublicPluginStart;
   storage: Storage;
   overlays: OverlayStart;
   theme: ThemeServiceStart;

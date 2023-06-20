@@ -11,8 +11,10 @@ export {
   formatDurationFromTimeUnitChar,
   asPercent,
   getDurationFormatter,
+  asDuration,
 } from './utils/formatters';
 export { getInspectResponse } from './utils/get_inspect_response';
+export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';
 
 export { ProcessorEvent } from './processor_event';
 
@@ -43,7 +45,6 @@ export {
 } from './progressive_loading';
 
 export const sloFeatureId = 'slo';
-
 export const casesFeatureId = 'observabilityCases';
 
 // The ID of the observability app. Should more appropriately be called
@@ -82,3 +83,5 @@ export {
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
+
+export { CoPilotPromptId, coPilotPrompts } from './co_pilot';

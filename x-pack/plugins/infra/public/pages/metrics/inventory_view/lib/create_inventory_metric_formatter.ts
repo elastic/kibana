@@ -31,30 +31,42 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
-  memory: {
-    formatter: InfraFormatterType.percent,
-    template: '{{value}}',
-  },
-  memoryTotal: {
-    formatter: InfraFormatterType.bytes,
-    template: '{{value}}',
-  },
-  diskLatency: {
-    formatter: InfraFormatterType.number,
-    template: '{{value}} ms',
-  },
-  rx: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  tx: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  logRate: {
-    formatter: InfraFormatterType.abbreviatedNumber,
-    template: '{{value}}/s',
-  },
   diskIOReadBytes: {
     formatter: InfraFormatterType.bytes,
     template: '{{value}}/s',
   },
   diskIOWriteBytes: {
     formatter: InfraFormatterType.bytes,
+    template: '{{value}}/s',
+  },
+  diskLatency: {
+    formatter: InfraFormatterType.number,
+    template: '{{value}} ms',
+  },
+  diskSpaceUsage: {
+    formatter: InfraFormatterType.percent,
+    template: '{{value}}',
+  },
+  memory: {
+    formatter: InfraFormatterType.percent,
+    template: '{{value}}',
+  },
+  memoryFree: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  memoryTotal: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  normalizedLoad1m: {
+    formatter: InfraFormatterType.percent,
+    template: '{{value}}',
+  },
+  rx: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  tx: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  logRate: {
+    formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',
   },
   s3BucketSize: {

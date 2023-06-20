@@ -74,6 +74,7 @@ export const elasticUser = {
 };
 
 export const tags: string[] = ['coke', 'pepsi'];
+export const categories: string[] = ['snickers', 'twix'];
 
 export const basicComment: CommentUI = {
   comment: 'Solve this fast!',
@@ -241,6 +242,7 @@ export const basicCase: CaseUI = {
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+  category: null,
 };
 
 export const basicFileMock: FileJSON = {
@@ -357,6 +359,7 @@ export const mockCase: CaseUI = {
     syncAlerts: true,
   },
   assignees: [],
+  category: null,
 };
 
 export const basicCasePost: CaseUI = {

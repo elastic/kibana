@@ -9,18 +9,40 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ProfilingPlugin } from './plugin';
 
+/**
+ * These properties are used to create both the Collector and the Symbolizer integrations
+ * when Universal Profiling is initialized.
+ * As of now Universal Profiling is only availble on Elastic Cloud, so
+ * Elastic Cloud will be responsable of filling these properties up and pass it to Kibana.
+ */
+const packageInputSchema = schema.object({
+  host: schema.maybe(schema.string()),
+  tls_enabled: schema.maybe(schema.boolean()),
+  tls_supported_protocols: schema.maybe(schema.arrayOf(schema.string())),
+  tls_certificate_path: schema.maybe(schema.string()),
+  tls_key_path: schema.maybe(schema.string()),
+});
+
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  elasticsearch: schema.maybe(
-    schema.object({
-      hosts: schema.string(),
-      username: schema.string(),
-      password: schema.string(),
-    })
+  symbolizer: schema.maybe(packageInputSchema),
+  collector: schema.maybe(packageInputSchema),
+  elasticsearch: schema.conditional(
+    schema.contextRef('dist'),
+    schema.literal(true),
+    schema.never(),
+    schema.maybe(
+      schema.object({
+        hosts: schema.string(),
+        username: schema.string(),
+        password: schema.string(),
+      })
+    )
   ),
 });
 
 export type ProfilingConfig = TypeOf<typeof configSchema>;
+export type PackageInputType = TypeOf<typeof packageInputSchema>;
 
 // plugin config
 export const config: PluginConfigDescriptor<ProfilingConfig> = {

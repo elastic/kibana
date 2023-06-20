@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
 import {
@@ -41,6 +41,11 @@ declare global {
   }
 }
 
+interface TimeFilterRange {
+  from: number;
+  to: number;
+}
+
 export interface DocumentCountChartPoint {
   time: number | string;
   value: number;
@@ -57,7 +62,11 @@ interface DocumentCountChartProps {
   chartPointsSplitLabel: string;
   isBrushCleared: boolean;
   /* Timestamp for start of initial analysis */
-  autoAnalysisStart?: number;
+  autoAnalysisStart?: number | WindowParameters;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
 }
 
 const SPEC_ID = 'document_count';
@@ -104,6 +113,8 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   chartPointsSplitLabel,
   isBrushCleared,
   autoAnalysisStart,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
@@ -186,10 +197,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   }, [timeRangeEarliest, timeRangeLatest, interval]);
 
   const timefilterUpdateHandler = useCallback(
-    (ranges: { from: number; to: number }) => {
+    (range: TimeFilterRange) => {
       data.query.timefilter.timefilter.setTime({
-        from: moment(ranges.from).toISOString(),
-        to: moment(ranges.to).toISOString(),
+        from: moment(range.from).toISOString(),
+        to: moment(range.to).toISOString(),
         mode: 'absolute',
       });
     },
@@ -215,26 +226,28 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   >();
 
   const triggerAnalysis = useCallback(
-    (startRange: number) => {
-      const range = {
-        from: startRange,
-        to: startRange + interval,
-      };
+    (startRange: number | WindowParameters) => {
+      if (viewMode === VIEW_MODE.ZOOM && typeof startRange === 'number') {
+        const range: TimeFilterRange = {
+          from: startRange,
+          to: startRange + interval,
+        };
 
-      if (viewMode === VIEW_MODE.ZOOM) {
         timefilterUpdateHandler(range);
-      } else {
+      } else if (viewMode === VIEW_MODE.BRUSH) {
         if (
-          typeof startRange === 'number' &&
           originalWindowParameters === undefined &&
           windowParameters === undefined &&
           adjustedChartPoints !== undefined
         ) {
-          const wp = getWindowParameters(
-            startRange + interval / 2,
-            timeRangeEarliest,
-            timeRangeLatest + interval
-          );
+          const wp =
+            typeof startRange === 'number'
+              ? getWindowParameters(
+                  startRange + interval / 2,
+                  timeRangeEarliest,
+                  timeRangeLatest + interval
+                )
+              : startRange;
           const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
           setOriginalWindowParameters(wpSnap);
           setWindowParameters(wpSnap);
@@ -317,6 +330,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const baselineBadgeMarginLeft =
     (mlBrushMarginLeft ?? 0) + (windowParametersAsPixels?.baselineMin ?? 0);
 
+  const barColor = barColorOverride ? [barColorOverride] : undefined;
+  const barHighlightColor = barHighlightColorOverride ? [barHighlightColorOverride] : ['orange'];
+
   return (
     <>
       {isBrushVisible && (
@@ -398,6 +414,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               yAccessors={['value']}
               data={adjustedChartPoints}
               timeZone={timeZone}
+              color={barColor}
               yNice
             />
           )}
@@ -411,7 +428,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               yAccessors={['value']}
               data={adjustedChartPointsSplit}
               timeZone={timeZone}
-              color={['orange']}
+              color={barHighlightColor}
               yNice
             />
           )}

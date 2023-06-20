@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { useCorrelations } from '../hooks/use_correlations';
+import { useCorrelations } from '../../shared/hooks/use_correlations';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
 import { InsightsSubSection } from './insights_subsection';
 import { useRightPanelContext } from '../context';
@@ -33,9 +33,10 @@ export const CorrelationsOverview: React.FC = () => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, openLeftPanel, indexName]);
+  }, [eventId, openLeftPanel, indexName, scopeId]);
 
   const { loading, error, data } = useCorrelations({
     eventId,
@@ -43,6 +44,20 @@ export const CorrelationsOverview: React.FC = () => {
     dataFormattedForFieldBrowser,
     scopeId,
   });
+
+  const correlationRows = useMemo(
+    () =>
+      data.map((d) => (
+        <InsightsSummaryRow
+          icon={d.icon}
+          value={d.value}
+          text={d.text}
+          data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
+          key={`correlation-row-${d.text}`}
+        />
+      )),
+    [data]
+  );
 
   return (
     <InsightsSubSection
@@ -53,14 +68,7 @@ export const CorrelationsOverview: React.FC = () => {
     >
       <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="none">
-          {data.map((d) => (
-            <InsightsSummaryRow
-              icon={d.icon}
-              value={d.value}
-              text={d.text}
-              data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
-            />
-          ))}
+          {correlationRows}
         </EuiFlexGroup>
       </EuiPanel>
       <EuiButtonEmpty
