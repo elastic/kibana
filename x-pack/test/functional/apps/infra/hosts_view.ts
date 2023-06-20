@@ -178,6 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('infraOps');
 
       await pageObjects.infraHome.clickDismissKubernetesTourButton();
+      await pageObjects.infraHostsView.getBetaBadgeExists();
       await pageObjects.infraHostsView.clickTryHostViewBadge();
 
       const pageUrl = await browser.getCurrentUrl();
@@ -206,6 +207,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('Should show hosts landing page with callout when the hosts view is disabled', async () => {
+          await pageObjects.infraHostsView.getBetaBadgeExists();
           const landingPageDisabled =
             await pageObjects.infraHostsView.getHostsLandingPageDisabled();
           const learnMoreDocsUrl = await pageObjects.infraHostsView.getHostsLandingPageDocsLink();
@@ -356,6 +358,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
       });
 
+      it('should render the title beta badge', async () => {
+        await pageObjects.infraHostsView.getBetaBadgeExists();
+      });
+
       describe('Hosts table', async () => {
         let hostRows: WebElementWrapper[] = [];
 
@@ -440,6 +446,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('should load the Logs tab section when clicking on it', async () => {
           await testSubjects.existOrFail('hostsView-logs');
+        });
+
+        it('should load the Logs tab with the right columns', async () => {
+          await retry.try(async () => {
+            const columnLabels = await pageObjects.infraHostsView.getLogsTableColumnHeaders();
+
+            expect(columnLabels).to.eql(['Timestamp', 'host.name', 'Message']);
+          });
         });
       });
 

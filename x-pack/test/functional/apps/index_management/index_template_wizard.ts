@@ -102,7 +102,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Mappings step', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/159403
+    describe.skip('Mappings step', async () => {
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('indexManagement');
         // Navigate to the index templates tab
