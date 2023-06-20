@@ -52,7 +52,7 @@ export async function getDefaultAsyncSubmitParams(
     // TODO: adjust for partial results
     batched_reduce_size: searchConfig.asyncSearch.batchedReduceSize,
     // Decreases delays due to network when using CCS
-    ccs_minimize_roundtrips: false,
+    ccs_minimize_roundtrips: true,
     ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),

@@ -122,7 +122,7 @@ describe('request utils', () => {
       });
       const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {});
       expect(params).toHaveProperty('batched_reduce_size', batchedReduceSize);
-      expect(params).toHaveProperty('ccs_minimize_roundtrips', false);
+      expect(params).toHaveProperty('ccs_minimize_roundtrips', true);
     });
   });
 
