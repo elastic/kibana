@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
-  defaultMessage: 'Elastic Security Assistant',
+  defaultMessage: 'Elastic AI Assistant',
 });
 
 export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overview', {

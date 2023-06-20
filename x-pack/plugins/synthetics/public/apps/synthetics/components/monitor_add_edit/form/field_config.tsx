@@ -76,6 +76,7 @@ import {
   ResponseBodyIndexPolicy,
   ResponseCheckJSON,
   ThrottlingConfig,
+  RequestBodyCheck,
 } from '../types';
 import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
 import { getDefaultFormFields } from './defaults';
@@ -499,6 +500,31 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       // isDisabled: readOnly,
     }),
   },
+  [AlertConfigKey.TLS_ENABLED]: {
+    fieldKey: AlertConfigKey.TLS_ENABLED,
+    component: Switch,
+    label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.tls.label', {
+      defaultMessage: 'Enable TLS alerts',
+    }),
+    controlled: true,
+    props: ({ isEdit, setValue, field }): EuiSwitchProps => ({
+      id: 'syntheticsMonitorConfigIsTlsAlertEnabled',
+      label: isEdit
+        ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertTlsEnabled.label', {
+            defaultMessage: 'Disabling will stop tls alerting on this monitor.',
+          })
+        : i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
+            defaultMessage: 'Enable tls alerts on this monitor.',
+          }),
+      checked: field?.value || false,
+      onChange: (event) => {
+        setValue(AlertConfigKey.TLS_ENABLED, !!event.target.checked);
+      },
+      'data-test-subj': 'syntheticsAlertStatusSwitch',
+      // alert config is an allowed field for read only
+      // isDisabled: readOnly,
+    }),
+  },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
     component: FormattedComboBox,
@@ -718,12 +744,20 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: (headers) => !validateHeaders(headers),
     }),
+    dependencies: [ConfigKey.REQUEST_BODY_CHECK],
     error: i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.error', {
       defaultMessage: 'Header key must be a valid HTTP token.',
     }),
-    props: (): HeaderFieldProps => ({
-      readOnly,
-    }),
+    // contentMode is optional for other implementations, but required for this implemention of this field
+    props: ({
+      dependencies,
+    }): HeaderFieldProps & { contentMode: HeaderFieldProps['contentMode'] } => {
+      const [requestBody] = dependencies;
+      return {
+        readOnly,
+        contentMode: (requestBody as RequestBodyCheck).type,
+      };
+    },
   },
   [ConfigKey.REQUEST_BODY_CHECK]: {
     fieldKey: ConfigKey.REQUEST_BODY_CHECK,
