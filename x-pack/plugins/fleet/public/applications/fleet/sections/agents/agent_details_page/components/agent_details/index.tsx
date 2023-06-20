@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Agent, AgentPolicy } from '../../../../../types';
 
 import { AgentDetailsOverviewSection } from './agent_details_overview';
-import { AgentDetailsIntegrationsSection } from './agent_details_integrations';
+import { AgentDetailsIntegrations } from './agent_details_integrations';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -49,7 +49,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <AgentDetailsIntegrationsSection agent={agent} agentPolicy={agentPolicy} />
+          <AgentDetailsIntegrations agent={agent} agentPolicy={agentPolicy} />
         </FlexItemWithMinWidth>
       </EuiFlexGroup>
     </>

@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Router, Switch, Redirect } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -183,7 +184,9 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 
   return (
     <Router history={history}>
-      <AppHandlingClusterUpgradeState />
+      <CompatRouter>
+        <AppHandlingClusterUpgradeState />
+      </CompatRouter>
     </Router>
   );
 };

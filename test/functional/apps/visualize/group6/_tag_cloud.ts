@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show correct tag cloud data', async function () {
+      await PageObjects.visChart.waitForVisualization();
       const data = await PageObjects.tagCloud.getTextTag();
       log.debug(data);
       expect(data).to.eql([
@@ -86,6 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
       await PageObjects.common.sleep(1000);
+      await PageObjects.visChart.waitForVisualization();
       const data = await PageObjects.tagCloud.getTextTag();
       log.debug(data);
       expect(data).to.eql([
@@ -102,6 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.sleep(1000);
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.sleep(1000);
+      await PageObjects.visChart.waitForVisualization();
       const data = await PageObjects.tagCloud.getTextTag();
       expect(data).to.eql([
         '32,212,254,720',
@@ -173,6 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should format tags with field formatter', async function () {
+        await PageObjects.visChart.waitForVisualization();
         const data = await PageObjects.tagCloud.getTextTag();
         log.debug(data);
         expect(data).to.eql(['30GB', '20GB', '18GB', '19GB', '17GB']);
@@ -181,6 +185,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should apply filter with unformatted value', async function () {
         await PageObjects.tagCloud.selectTagCloudTag('30GB');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visChart.waitForVisualization();
         const data = await PageObjects.tagCloud.getTextTag();
         expect(data).to.eql(['30GB']);
       });

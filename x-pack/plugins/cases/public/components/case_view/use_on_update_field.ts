@@ -67,6 +67,10 @@ export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
           const tagsUpdate = getTypedPayload<string[]>(value);
           callUpdate('tags', tagsUpdate);
           break;
+        case 'category':
+          const categoryUpdate = getTypedPayload<string>(value);
+          callUpdate('category', categoryUpdate);
+          break;
         case 'status':
           const statusUpdate = getTypedPayload<CaseStatuses>(value);
           if (caseData.status !== value) {

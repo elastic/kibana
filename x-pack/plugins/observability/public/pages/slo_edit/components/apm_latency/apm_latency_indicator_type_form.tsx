@@ -143,7 +143,6 @@ export function ApmLatencyIndicatorTypeForm() {
         </EuiFlexItem>
         <EuiFlexItem>
           <QueryBuilder
-            control={control}
             dataTestSubj="apmLatencyFilterInput"
             indexPatternString={watch('indicator.params.index')}
             label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {
