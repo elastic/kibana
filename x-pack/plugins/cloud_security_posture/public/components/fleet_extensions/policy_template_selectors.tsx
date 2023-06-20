@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
@@ -66,6 +66,7 @@ interface PolicyTemplateVarsFormProps {
   newPolicy: NewPackagePolicy;
   input: NewPackagePolicyPostureInput;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
+  packageInfo: PackageInfo;
 }
 
 export const PolicyTemplateVarsForm = ({ input, ...props }: PolicyTemplateVarsFormProps) => {
