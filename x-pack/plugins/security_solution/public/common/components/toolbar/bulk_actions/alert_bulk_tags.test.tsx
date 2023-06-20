@@ -14,10 +14,12 @@ import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useSetAlertTags } from './use_set_alert_tags';
+import { getUpdateAlertsQuery } from '../../../../detections/components/alerts_table/actions';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_app_toasts');
 jest.mock('./use_set_alert_tags');
+jest.mock('../../../../detections/components/alerts_table/actions');
 
 const mockTagItems = [
   {
@@ -36,6 +38,7 @@ const mockTagItems = [
 (useSetAlertTags as jest.Mock).mockReturnValue({
   setAlertTags: jest.fn(),
 });
+(getUpdateAlertsQuery as jest.Mock).mockReturnValue({ query: {} });
 
 describe('BulkAlertTagsPanel', () => {
   test('it renders', () => {
@@ -49,6 +52,6 @@ describe('BulkAlertTagsPanel', () => {
       </TestProviders>
     );
 
-    expect(wrapper.queryByTestId('alert-tags-selectable-menu')).toBeTruthy();
+    expect(wrapper.getByTestId('alert-tags-selectable-menu')).toBeInTheDocument();
   });
 });

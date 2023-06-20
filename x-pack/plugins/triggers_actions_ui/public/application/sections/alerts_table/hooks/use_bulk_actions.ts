@@ -72,7 +72,7 @@ const getCaseAttachments = ({
   return groupAlertsByRule?.(filteredAlerts) ?? [];
 };
 
-const addItemsToInitalPanel = ({
+const addItemsToInitialPanel = ({
   panels,
   items,
 }: {
@@ -184,7 +184,7 @@ export function useBulkActions({
 
   const bulkActions =
     caseBulkActions.length !== 0
-      ? addItemsToInitalPanel({
+      ? addItemsToInitialPanel({
           panels: configBulkActionPanels,
           items: caseBulkActions,
         })

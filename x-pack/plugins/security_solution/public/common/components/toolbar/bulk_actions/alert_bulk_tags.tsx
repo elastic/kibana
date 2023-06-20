@@ -11,11 +11,9 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
-import { getUpdateAlertsQuery } from '../../../../detections/components/alerts_table/actions';
 import { DEFAULT_ALERT_TAGS_KEY } from '../../../../../common/constants';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { useSetAlertTags } from './use_set_alert_tags';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
 import { createInitialTagsState } from './helpers';
 
@@ -36,9 +34,8 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
   closePopoverMenu,
 }) => {
   const [defaultAlertTagOptions] = useUiSetting$<string[]>(DEFAULT_ALERT_TAGS_KEY);
-  const { addSuccess, addError, addWarning } = useAppToasts();
 
-  const { setAlertTags } = useSetAlertTags();
+  const [, setAlertTags] = useSetAlertTags();
   const existingTags = useMemo(
     () =>
       alertItems.map(
@@ -46,7 +43,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
       ),
     [alertItems]
   );
-  const initalTagsState = useMemo(
+  const initialTagsState = useMemo(
     () => createInitialTagsState(existingTags, defaultAlertTagOptions),
     [existingTags, defaultAlertTagOptions]
   );
@@ -54,69 +51,36 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
   const tagsToAdd: Set<string> = useMemo(() => new Set(), []);
   const tagsToRemove: Set<string> = useMemo(() => new Set(), []);
 
-  const onUpdateSuccess = useCallback(
-    (updated: number, conflicts: number) => {
-      if (conflicts > 0) {
-        addWarning({
-          title: i18n.UPDATE_ALERT_TAGS_FAILED(conflicts),
-          text: i18n.UPDATE_ALERT_TAGS_FAILED_DETAILED(updated, conflicts),
-        });
-      } else {
-        addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated));
-      }
-    },
-    [addSuccess, addWarning]
-  );
-
-  const onUpdateFailure = useCallback(
-    (error: Error) => {
-      addError(error.message, { title: i18n.UPDATE_ALERT_TAGS_FAILURE });
-    },
-    [addError]
-  );
-
   const [selectableAlertTags, setSelectableAlertTags] =
-    useState<EuiSelectableOption[]>(initalTagsState);
+    useState<EuiSelectableOption[]>(initialTagsState);
 
-  const onTagsUpdate = useCallback(async () => {
+  const onTagsUpdate = useCallback(() => {
     closePopoverMenu();
-    const ids = alertItems.map((item) => item._id);
-    const query: Record<string, unknown> = getUpdateAlertsQuery(ids).query;
+    if (tagsToAdd.size === 0 && tagsToRemove.size === 0) {
+      return;
+    }
     const tagsToAddArray = Array.from(tagsToAdd);
     const tagsToRemoveArray = Array.from(tagsToRemove);
-    try {
-      setIsLoading(true);
-
-      const response = await setAlertTags({
-        tags: { tags_to_add: tagsToAddArray, tags_to_remove: tagsToRemoveArray },
-        query,
-      });
-
-      setIsLoading(false);
+    const ids = alertItems.map((item) => item._id);
+    const tags = { tags_to_add: tagsToAddArray, tags_to_remove: tagsToRemoveArray };
+    const onSuccess = () => {
       if (refetchQuery) refetchQuery();
       if (refresh) refresh();
       if (clearSelection) clearSelection();
-
-      if (response.version_conflicts && ids.length === 1) {
-        throw new Error(i18n.BULK_ACTION_FAILED_SINGLE_ALERT);
-      }
-
-      onUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0);
-    } catch (err) {
-      onUpdateFailure(err);
+    };
+    if (setAlertTags != null) {
+      setAlertTags(tags, ids, onSuccess, setIsLoading);
     }
   }, [
     closePopoverMenu,
-    alertItems,
     tagsToAdd,
     tagsToRemove,
-    setIsLoading,
+    alertItems,
     setAlertTags,
     refetchQuery,
     refresh,
     clearSelection,
-    onUpdateSuccess,
-    onUpdateFailure,
+    setIsLoading,
   ]);
 
   const handleTagsOnChange = (

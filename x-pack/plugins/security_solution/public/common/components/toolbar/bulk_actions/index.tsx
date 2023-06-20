@@ -64,7 +64,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
   const panels = [
     {
       id: 0,
-      items: [...bulkActionItems],
+      items: bulkActionItems,
     },
   ];
 

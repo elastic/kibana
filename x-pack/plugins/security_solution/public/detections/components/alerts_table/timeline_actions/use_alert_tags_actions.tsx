@@ -6,13 +6,11 @@
  */
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useMemo } from 'react';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { useBulkAlertTagsItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { getScopedActions } from '../../../../helpers';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { AlertTableContextMenuItem } from '../types';
 
@@ -24,7 +22,6 @@ interface Props {
 }
 
 export const useAlertTagsActions = ({ closePopover, ecsRowData, scopeId, refetch }: Props) => {
-  const dispatch = useDispatch();
   const { hasIndexWrite } = useAlertsPrivileges();
   const alertId = ecsRowData._id;
   const alertTagData = useMemo(() => {
@@ -42,16 +39,6 @@ export const useAlertTagsActions = ({ closePopover, ecsRowData, scopeId, refetch
       },
     ];
   }, [alertId, ecsRowData._index, ecsRowData?.kibana?.alert.workflow_tags]);
-
-  const scopedActions = getScopedActions(scopeId);
-  const localSetEventsLoading = useCallback(
-    ({ isLoading }) => {
-      if (scopedActions) {
-        dispatch(scopedActions.setEventsLoading({ id: scopeId, eventIds: [alertId], isLoading }));
-      }
-    },
-    [dispatch, scopeId, scopedActions, alertId]
-  );
 
   const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems({ refetch });
 
@@ -71,12 +58,12 @@ export const useAlertTagsActions = ({ closePopover, ecsRowData, scopeId, refetch
       alertTagsPanels.map((panel) => {
         const content = panel.renderContent({
           closePopoverMenu: closePopover,
-          setIsBulkActionsLoading: localSetEventsLoading,
+          setIsBulkActionsLoading: () => {},
           alertItems: alertTagData,
         });
         return { title: panel.title, content, id: panel.id };
       }),
-    [alertTagData, alertTagsPanels, closePopover, localSetEventsLoading]
+    [alertTagData, alertTagsPanels, closePopover]
   );
 
   return {
