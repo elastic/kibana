@@ -102,7 +102,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                     'xpack.enterpriseSearch.content.index.pipelines.settings.extractBinaryDisabledWarningContent',
                     {
                       defaultMessage:
-                        "Because local content extraction has been enabled in this connector's configuration, pipeline content extraction settings cannot be used.",
+                        "Because local content extraction is enabled for this connector, pipeline content extraction settings cannot be used.",
                     }
                   )}
                 </p>
