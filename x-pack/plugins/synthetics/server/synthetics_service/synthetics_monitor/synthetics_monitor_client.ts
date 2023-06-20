@@ -20,13 +20,11 @@ import {
   SyntheticsPrivateLocation,
 } from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
-
 import {
   EncryptedSyntheticsMonitor,
   HeartbeatConfig,
   MonitorFields,
   MonitorServiceLocation,
-  PrivateLocation,
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
@@ -35,6 +33,7 @@ import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from '../formatters/public_formatters/format_configs';
+import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 
 export class SyntheticsMonitorClient {
   public syntheticsService: SyntheticsService;
@@ -49,7 +48,7 @@ export class SyntheticsMonitorClient {
     monitors: Array<{ monitor: MonitorFields; id: string }>,
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
     const privateConfigs: PrivateConfig[] = [];
@@ -94,7 +93,7 @@ export class SyntheticsMonitorClient {
       decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
     }>,
     routeContext: RouteContext,
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
     const { request } = routeContext;
@@ -222,7 +221,7 @@ export class SyntheticsMonitorClient {
   }: {
     spaceId: string;
     request: KibanaRequest;
-    allPrivateLocations: PrivateLocation[];
+    allPrivateLocations: PrivateLocationAttributes[];
     savedObjectsClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
@@ -360,7 +359,7 @@ export class SyntheticsMonitorClient {
     monitorObj: { monitor: MonitorFields; id: string },
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string,
     hideParams: boolean,
     canSave: boolean

@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { PrivateLocation, SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import type {
   SyntheticsPrivateLocationsAttributes,
-  PrivateLocationConfiguration,
+  PrivateLocationAttributes,
 } from '../../../runtime_types/private_locations';
 
 export const toClientContract = (
-  attributes: SyntheticsPrivateLocationsAttributes
+  attributes: SyntheticsPrivateLocationsAttributes,
+  agentPolicies?: AgentPolicy[]
 ): SyntheticsPrivateLocations => {
   return {
     locations: attributes.locations.map((location) => ({
@@ -20,8 +21,10 @@ export const toClientContract = (
       id: location.id,
       agentPolicyId: location.agentPolicyId,
       concurrentMonitors: location.concurrentMonitors,
-      isServiceManaged: location.isServiceManaged,
-      isInvalid: location.isInvalid,
+      isServiceManaged: false,
+      isInvalid:
+        agentPolicies?.find((policy) => policy.id === location.agentPolicyId) === undefined ||
+        false,
       tags: location.tags,
       geo: {
         lat: location.geo?.lat ? Number(location.geo.lat) : null,
@@ -31,14 +34,12 @@ export const toClientContract = (
   };
 };
 
-export const toSavedObjectContract = (location: PrivateLocation): PrivateLocationConfiguration => {
+export const toSavedObjectContract = (location: PrivateLocation): PrivateLocationAttributes => {
   return {
     label: location.label,
     id: location.id,
     agentPolicyId: location.agentPolicyId,
     concurrentMonitors: location.concurrentMonitors,
-    isServiceManaged: location.isServiceManaged,
-    isInvalid: location.isInvalid,
     tags: location.tags,
     geo: {
       // to do: change 0 to null

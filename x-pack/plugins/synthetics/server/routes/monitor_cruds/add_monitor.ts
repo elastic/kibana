@@ -15,15 +15,15 @@ import {
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
-import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
   EncryptedSyntheticsMonitor,
-  PrivateLocation,
 } from '../../../common/runtime_types';
+import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
+import { getPrivateLocationsSO } from '../settings/private_locations/get_private_locations';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
@@ -69,7 +69,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const normalizedMonitor = validationResult.decodedMonitor;
 
-    const privateLocations: PrivateLocation[] = await getPrivateLocations(
+    const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,
       normalizedMonitor
     );
@@ -181,7 +181,7 @@ export const syncNewMonitor = async ({
   id?: string;
   normalizedMonitor: SyntheticsMonitor;
   routeContext: RouteContext;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
 }) => {
   const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId } = routeContext;
   const newMonitorId = id ?? uuidV4();
@@ -277,7 +277,7 @@ export const deleteMonitorIfCreated = async ({
   }
 };
 
-export const getPrivateLocations = async (
+export const getPrivateLocationsForMonitor = async (
   soClient: SavedObjectsClientContract,
   normalizedMonitor: SyntheticsMonitor
 ) => {
@@ -286,7 +286,7 @@ export const getPrivateLocations = async (
   if (hasPrivateLocation.length === 0) {
     return [];
   }
-  return await getSyntheticsPrivateLocations(soClient);
+  return await getPrivateLocationsSO(soClient);
 };
 
 export const getMonitorNamespace = (

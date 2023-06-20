@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const PrivateLocationConfigCodec = t.intersection([
+export const PrivateLocationAttributesCodec = t.intersection([
   t.interface({
     label: t.string,
     id: t.string,
@@ -15,8 +15,6 @@ export const PrivateLocationConfigCodec = t.intersection([
     concurrentMonitors: t.number,
   }),
   t.partial({
-    isServiceManaged: t.boolean,
-    isInvalid: t.boolean,
     tags: t.array(t.string),
     /* Empty Lat lon was accidentally saved as an empty string instead of undefined or null
      * Need a migration to fix */
@@ -25,9 +23,9 @@ export const PrivateLocationConfigCodec = t.intersection([
 ]);
 
 export const SyntheticsPrivateLocationsAttributesCodec = t.type({
-  locations: t.array(PrivateLocationConfigCodec),
+  locations: t.array(PrivateLocationAttributesCodec),
 });
-export type PrivateLocationConfiguration = t.TypeOf<typeof PrivateLocationConfigCodec>;
+export type PrivateLocationAttributes = t.TypeOf<typeof PrivateLocationAttributesCodec>;
 export type SyntheticsPrivateLocationsAttributes = t.TypeOf<
   typeof SyntheticsPrivateLocationsAttributesCodec
 >;

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getAllPrivateLocationsAttributes } from './get_private_locations';
+import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import {
@@ -28,10 +28,13 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
     }),
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request }) => {
+  handler: async ({ savedObjectsClient, syntheticsMonitorClient, request }) => {
     const { locationId } = request.params as { locationId: string };
 
-    const { locations } = await getAllPrivateLocationsAttributes(savedObjectsClient);
+    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
+      savedObjectsClient,
+      syntheticsMonitorClient
+    );
     const remainingLocations = locations.filter((loc) => loc.id !== locationId);
 
     const result = await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
@@ -43,6 +46,6 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
       }
     );
 
-    return toClientContract(result.attributes);
+    return toClientContract(result.attributes, agentPolicies);
   },
 });
