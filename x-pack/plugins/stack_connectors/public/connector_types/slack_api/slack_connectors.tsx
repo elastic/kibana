@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActionConnectorFieldsProps,
   ConfigFieldSchema,
@@ -18,10 +18,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';
 
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { debounce } from 'lodash';
+import { debounce, isEmpty } from 'lodash';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as i18n from './translations';
-import { ChannelsResponse, GetChannelsResponse } from '../../../common/slack_api/types';
-import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../../common';
+import { useFetchChannels } from './use_fetch_channels';
 
 /** wait this many ms after the user completes typing before applying the filter input */
 const INPUT_TIMEOUT = 250;
@@ -67,62 +67,18 @@ const getConfigFormSchemaAfterSecrets = (
   },
 ];
 
-const SlackActionFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
-  const {
-    docLinks,
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> = ({
+  readOnly,
+  isEdit,
+}) => {
+  const { docLinks } = useKibana().services;
 
   const form = useFormContext();
   const { setFieldValue } = form;
   const [formData] = useFormData({ form });
   const [authToken, setAuthToken] = useState('');
-  const [channels, setChannels] = useState<EuiComboBoxOptionOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const abortCtrlRef = useRef(new AbortController());
-  const isMounted = useRef(false);
 
-  async function fetchChannels(newAuthToken: string) {
-    setIsLoading(true);
-    setChannels([]);
-    setFieldValue('config.allowedChannels', []);
-    isMounted.current = true;
-    abortCtrlRef.current.abort();
-    abortCtrlRef.current = new AbortController();
-
-    try {
-      const res = await http.post<GetChannelsResponse>(
-        `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_slack_api/channels`,
-        {
-          body: JSON.stringify({
-            authToken: newAuthToken,
-          }),
-          signal: abortCtrlRef.current.signal,
-        }
-      );
-
-      setIsLoading(false);
-      if (isMounted.current && res.ok) {
-        setChannels(
-          (res?.channels ?? []).map((channel: ChannelsResponse) => ({
-            label: channel.name,
-          }))
-        );
-        toasts.addSuccess(i18n.SUCCESS_FETCH_CHANNELS);
-      }
-
-      return res;
-    } catch (error) {
-      if (isMounted.current) {
-        setIsLoading(false);
-        setChannels([]);
-        if (error.name !== 'AbortError') {
-          toasts.addDanger(error.body?.message ?? i18n.ERROR_FETCH_CHANNELS);
-        }
-      }
-    }
-  }
+  const { channels, isLoading } = useFetchChannels({ authToken });
 
   const configFormSchemaAfterSecrets = useMemo(
     () => getConfigFormSchemaAfterSecrets(channels, isLoading, channels.length === 0),
@@ -138,19 +94,11 @@ const SlackActionFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isE
   }, [formData.secrets]);
 
   useEffect(() => {
-    if (isMounted.current && authToken && authToken.length > 0) {
-      fetchChannels(authToken);
+    if (isEmpty(authToken)) {
+      setFieldValue('config.allowedChannels', []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authToken]);
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-      abortCtrlRef.current.abort();
-    };
-  }, []);
 
   return (
     <SimpleConnectorForm
@@ -162,6 +110,14 @@ const SlackActionFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isE
     />
   );
 };
+
+export const simpleConnectorQueryClient = new QueryClient();
+
+const SlackActionFields: React.FC<ActionConnectorFieldsProps> = (props) => (
+  <QueryClientProvider client={simpleConnectorQueryClient}>
+    <SlackActionFieldsComponents {...props} />
+  </QueryClientProvider>
+);
 
 // eslint-disable-next-line import/no-default-export
 export { SlackActionFields as default };

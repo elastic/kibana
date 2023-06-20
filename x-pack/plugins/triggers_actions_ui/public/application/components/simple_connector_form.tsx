@@ -99,6 +99,14 @@ const getFieldConfig = ({
     : {}),
 });
 
+const getComponentByType = (type?: keyof typeof FIELD_TYPES) => {
+  let UseField = UseTextField;
+  if (type && FIELD_TYPES[type] === FIELD_TYPES.COMBO_BOX) {
+    UseField = UseComboBoxField;
+  }
+  return UseField;
+};
+
 const FormRow: React.FC<FormRowProps> = ({
   id,
   label,
@@ -112,10 +120,7 @@ const FormRow: React.FC<FormRowProps> = ({
   type,
 }) => {
   const dataTestSub = `${id}-input`;
-  let UseField = UseTextField;
-  if (type && FIELD_TYPES[type] === FIELD_TYPES.COMBO_BOX) {
-    UseField = UseComboBoxField;
-  }
+  const UseField = getComponentByType(type);
   return (
     <>
       <EuiFlexGroup>

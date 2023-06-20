@@ -50,6 +50,9 @@ export interface SlackAPiResponse {
   message?: {
     text: string;
   };
+  response_metadata?: {
+    next_cursor: string;
+  };
 }
 
 export interface ChannelsResponse {
