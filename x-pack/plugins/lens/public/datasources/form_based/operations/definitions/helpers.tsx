@@ -21,7 +21,7 @@ import {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import type { FormBasedLayer } from '../../types';
+import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
 import { hasField } from '../../pure_utils';
 
 export function getInvalidFieldMessage(
@@ -205,7 +205,8 @@ export function getFilter(
 ) {
   let filter = previousColumn?.filter;
   if (
-    previousColumn?.operationType === 'last_value' &&
+    previousColumn &&
+    isColumnOfType<LastValueIndexPatternColumn>('last_value', previousColumn) &&
     isEqual(filter, getExistsFilter((previousColumn as LastValueColumn)?.sourceField))
   ) {
     return;
