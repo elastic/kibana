@@ -60,6 +60,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
   };
 
   const isLoadingAll = isLoading || isLoadingCategories;
+  const isCategoryValid = form.isValid;
 
   return (
     <EuiFlexItem grow={false}>
@@ -113,6 +114,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
                       iconType="save"
                       onClick={onSubmitCategory}
                       size="s"
+                      disabled={!isCategoryValid || isLoadingAll}
                     >
                       {i18n.SAVE}
                     </EuiButton>

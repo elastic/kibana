@@ -186,7 +186,7 @@ describe('Category', () => {
     });
   });
 
-  it('setting an empty and clear it do not produce an error', async () => {
+  it('setting an empty category and clear it do not produce an error', async () => {
     appMockRender.render(
       <FormComponent>
         <CategoryFormField isLoading={false} availableCategories={categories} />

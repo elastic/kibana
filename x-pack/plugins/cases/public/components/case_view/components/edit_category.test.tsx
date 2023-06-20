@@ -104,6 +104,11 @@ describe('EditCategory ', () => {
     });
 
     userEvent.type(screen.getByRole('combobox'), `${categories[0]}{enter}`);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
+    });
+
     userEvent.click(screen.getByTestId('edit-category-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(categories[0]));
@@ -119,6 +124,11 @@ describe('EditCategory ', () => {
     });
 
     userEvent.type(screen.getByRole('combobox'), 'new{enter}');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
+    });
+
     userEvent.click(screen.getByTestId('edit-category-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith('new'));
@@ -159,9 +169,61 @@ describe('EditCategory ', () => {
     });
 
     userEvent.click(screen.getByTestId('comboBoxClearButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
+    });
+
     userEvent.click(screen.getByTestId('edit-category-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(null));
+  });
+
+  it('should disabled the save button on error', async () => {
+    const bigCategory = 'a'.repeat(51);
+
+    appMockRender.render(<EditCategory {...defaultProps} />);
+
+    userEvent.click(screen.getByTestId('category-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
+    });
+
+    userEvent.type(screen.getByRole('combobox'), `${bigCategory}{enter}`);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('The length of the category is too long. The maximum length is 50.')
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
+  });
+
+  it('should disabled the save button on empty state', async () => {
+    appMockRender.render(<EditCategory {...defaultProps} />);
+
+    userEvent.click(screen.getByTestId('category-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
+  });
+
+  it('should disabled the save button on when not changing category', async () => {
+    appMockRender.render(<EditCategory {...defaultProps} category={'My category'} />);
+
+    userEvent.click(screen.getByTestId('category-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
+      expect(screen.getByText('My category')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
   });
 
   it('does not show edit button when the user does not have update permissions', () => {
