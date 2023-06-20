@@ -31,7 +31,7 @@ import { useUnifiedSearchContext } from './use_unified_search';
 import { useMetricsDataViewContext } from './use_data_view';
 import { ColumnHeader } from '../components/table/column_header';
 import { TOOLTIP, TABLE_COLUMN_LABEL } from '../translations';
-import { createHostsFilter } from '../utils';
+import { buildCombinedHostsFilter } from '../utils';
 
 /**
  * Columns and items types
@@ -154,7 +154,11 @@ export const useHostsTable = () => {
       return [];
     }
     const selectedHostNames = selectedItems.map(({ name }) => name);
-    const newFilter = createHostsFilter(selectedHostNames, dataView);
+    const newFilter = buildCombinedHostsFilter({
+      field: 'host.name',
+      values: selectedHostNames,
+      dataView,
+    });
 
     filterManagerService.addFilters(newFilter);
     setSelectedItems([]);
