@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-export const toClientContract = (attributes: SyntheticsPrivateLocationsAttributes) => {
+import type { PrivateLocation, SyntheticsPrivateLocations } from '../../../../common/runtime_types';
+import type {
+  SyntheticsPrivateLocationsAttributes,
+  PrivateLocationConfiguration,
+} from '../../../runtime_types/private_locations';
+
+export const toClientContract = (
+  attributes: SyntheticsPrivateLocationsAttributes
+): SyntheticsPrivateLocations => {
   return {
     locations: attributes.locations.map((location) => ({
       label: location.label,
@@ -20,5 +28,22 @@ export const toClientContract = (attributes: SyntheticsPrivateLocationsAttribute
         lon: location.geo?.lon ? Number(location.geo.lon) : null,
       },
     })),
+  };
+};
+
+export const toSavedObjectContract = (location: PrivateLocation): PrivateLocationConfiguration => {
+  return {
+    label: location.label,
+    id: location.id,
+    agentPolicyId: location.agentPolicyId,
+    concurrentMonitors: location.concurrentMonitors,
+    isServiceManaged: location.isServiceManaged,
+    isInvalid: location.isInvalid,
+    tags: location.tags,
+    geo: {
+      // to do: change 0 to null
+      lat: location.geo?.lat ? location.geo.lat : 0,
+      lon: location.geo?.lon ? location.geo.lon : 0,
+    },
   };
 };
