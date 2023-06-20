@@ -27,23 +27,6 @@ export function useCreateSlo() {
     },
     {
       mutationKey: ['createSlo'],
-      onSuccess: (_data, { slo: { name } }) => {
-        toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.create.successNotification', {
-            defaultMessage: 'Successfully created {name}',
-            values: { name },
-          })
-        );
-        queryClient.invalidateQueries(sloKeys.lists());
-      },
-      onError: (error, { slo: { name } }) => {
-        toasts.addError(new Error(String(error)), {
-          title: i18n.translate('xpack.observability.slo.create.errorNotification', {
-            defaultMessage: 'Something went wrong while creating {name}',
-            values: { name },
-          }),
-        });
-      },
       onMutate: async ({ slo }) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
         await queryClient.cancelQueries(sloKeys.lists());
@@ -65,6 +48,23 @@ export function useCreateSlo() {
 
         // Return a context object with the snapshotted value
         return { previousSloList: data };
+      },
+      onSuccess: (_data, { slo: { name } }) => {
+        toasts.addSuccess(
+          i18n.translate('xpack.observability.slo.create.successNotification', {
+            defaultMessage: 'Successfully created {name}',
+            values: { name },
+          })
+        );
+        queryClient.invalidateQueries(sloKeys.lists());
+      },
+      onError: (error, { slo: { name } }) => {
+        toasts.addError(new Error(String(error)), {
+          title: i18n.translate('xpack.observability.slo.create.errorNotification', {
+            defaultMessage: 'Something went wrong while creating {name}',
+            values: { name },
+          }),
+        });
       },
     }
   );
