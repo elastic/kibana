@@ -31316,7 +31316,6 @@
     "xpack.securitySolution.detectionEngine.rules.stepActionsTitle": "操作",
     "xpack.securitySolution.detectionEngine.rules.stepDefinitionTitle": "定义",
     "xpack.securitySolution.detectionEngine.rules.stepScheduleTitle": "计划",
-    "xpack.securitySolution.detectionEngine.rules.tour.createRuleTourContent": "告警阻止选项现在可用于定制查询规则，并且可以在新字词规则中选择多个字段",
     "xpack.securitySolution.detectionEngine.rules.tour.createRuleTourTitle": "有新的安全规则功能可用",
     "xpack.securitySolution.detectionEngine.rules.updateButtonTitle": "更新",
     "xpack.securitySolution.detectionEngine.rulesSnoozeBadge.error.unableToFetch": "无法提取暂停设置",
