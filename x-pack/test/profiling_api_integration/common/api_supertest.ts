@@ -39,7 +39,7 @@ export function createProfilingApiClient(st: supertest.SuperTest<supertest.Test>
     }
 
     // supertest doesn't throw on http errors
-    if (res?.status !== 200) {
+    if (res?.status !== 200 && res?.status !== 202) {
       throw new ProfilingApiError(res, endpoint);
     }
 

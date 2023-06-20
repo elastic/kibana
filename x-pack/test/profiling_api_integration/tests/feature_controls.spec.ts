@@ -37,34 +37,35 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   const endpoints: Endpoint[] = [
-    // {
-    //   url: profilingRoutePaths.TopNContainers,
-    //   params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
-    // },
-    // {
-    //   url: profilingRoutePaths.TopNDeployments,
-    //   params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
-    // },
-    // {
-    //   url: profilingRoutePaths.TopNHosts,
-    //   params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
-    // },
-    // {
-    //   url: profilingRoutePaths.TopNTraces,
-    //   params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
-    // },
+    {
+      url: profilingRoutePaths.TopNContainers,
+      params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
+    },
+    {
+      url: profilingRoutePaths.TopNDeployments,
+      params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
+    },
+    {
+      url: profilingRoutePaths.TopNHosts,
+      params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
+    },
+    {
+      url: profilingRoutePaths.TopNTraces,
+      params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
+    },
     {
       url: profilingRoutePaths.TopNThreads,
       params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
     },
-    // {
-    //   url: profilingRoutePaths.TopNFunctions,
-    //   params: { query: { timeFrom: start, timeTo: end, kuery: '', startIndex: 1, endIndex: 5 } },
-    // },
+    {
+      url: profilingRoutePaths.TopNFunctions,
+      params: { query: { timeFrom: start, timeTo: end, kuery: '', startIndex: 1, endIndex: 5 } },
+    },
     {
       url: profilingRoutePaths.Flamechart,
       params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
     },
+    { url: profilingRoutePaths.SetupDataCollectionInstructions },
   ];
 
   async function executeRequests({
@@ -81,12 +82,13 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         log.info(`Requesting: ${endpointPath}. Expecting: ${expectation}`);
         const result = await runAsUser({
           endpoint: endpointPath,
-          params: endpoint.params,
+          params: endpoint.params || {},
         });
+
         if (expectation === 'forbidden') {
           throw new Error(
             `Endpoint: ${endpointPath}
-              Status code: ${result.status}
+            Status code: ${result.status}
               Response: ${result.body}`
           );
         }
@@ -108,24 +110,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     }
   }
 
-  registry.when('Profiling feature controls', { config: 'cloud', archives: [] }, () => {
-    before(async () => {
-      try {
-        const result = await profilingApiClient.adminUser({
-          endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-        });
-        console.log('### caue  profilingApiClient:  result:', result.body);
-        if (!result.body.has_setup) {
-          console.log('#### setting up Universal Profiling');
-          await profilingApiClient.adminUser({
-            endpoint: `POST ${profilingRoutePaths.HasSetupESResources}`,
-          });
-          console.log('### Profiling set up');
-        }
-      } catch (e) {
-        console.log('### caue  profilingApiClient:  e:', e);
-      }
-    });
+  registry.when('Profiling feature controls', { config: 'cloud' }, () => {
+    before(async () => {});
     it(`returns forbidden for users with no access to profiling APIs`, async () => {
       await executeRequests({
         runAsUser: profilingApiClient.noAccessUser,

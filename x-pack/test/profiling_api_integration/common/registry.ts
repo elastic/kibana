@@ -10,18 +10,19 @@ import { maybe } from '@kbn/apm-plugin/common/utils/maybe';
 import callsites from 'callsites';
 import { castArray, groupBy } from 'lodash';
 import Path from 'path';
+import fs from 'fs';
 import { ProfilingFtrConfigName } from '../configs';
 import { FtrProviderContext } from './ftr_provider_context';
 
-type ArchiveName = any;
+const esArchiversPath = Path.posix.join(__dirname, 'fixtures', 'es_archiver', 'profiling');
 
 interface RunCondition {
   config: ProfilingFtrConfigName;
-  archives: ArchiveName[];
 }
 
 export function RegistryProvider({ getService }: FtrProviderContext) {
   const profilingFtrConfig = getService('profilingFtrConfig');
+  const es = getService('es');
 
   const callbacks: Array<
     RunCondition & {
@@ -94,9 +95,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
     run: () => {
       running = true;
 
-      const esArchiver = getService('esArchiver');
       const logger = getService('log');
-      const supertest = getService('supertest');
 
       const logWithTimer = () => {
         const start = process.hrtime();
@@ -108,7 +107,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
         };
       };
 
-      const groups = joinByKey(callbacks, ['config', 'archives'], (a, b) => ({
+      const groups = joinByKey(callbacks, ['config'], (a, b) => ({
         ...a,
         ...b,
         runs: a.runs.concat(b.runs),
@@ -125,42 +124,36 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
         // and their snapshots are not marked as obsolete
         (config === profilingFtrConfig.name ? describe : describe.skip)(config, () => {
           groupsForConfig.forEach((group) => {
-            const { runs, ...condition } = group;
+            const { runs } = group;
 
             const runBefore = async () => {
               const log = logWithTimer();
-              for (const archiveName of condition.archives) {
-                log(`Loading ${archiveName}`);
-
-                await esArchiver.load(
-                  Path.join(
-                    'x-pack/test/profiling_api_integration/common/fixtures/es_archiver',
-                    archiveName
-                  )
-                );
-              }
-              if (condition.archives.length) {
-                log('Loaded all archives');
-              }
+              const content = fs.readFileSync(`${esArchiversPath}/data.json`, 'utf8');
+              log(`Loading profiling data`);
+              await es.bulk({ operations: content.split('\n'), refresh: 'wait_for' });
+              log('Loaded profiling data');
             };
 
             const runAfter = async () => {
               const log = logWithTimer();
-              for (const archiveName of condition.archives) {
-                log(`Unloading ${archiveName}`);
-                await esArchiver.unload(
-                  Path.join(
-                    'x-pack/test/profiling_api_integration/common/fixtures/es_archiver',
-                    archiveName
-                  )
-                );
-              }
-              if (condition.archives.length) {
-                log('Unloaded all archives');
-              }
+              log(`Unloading Profiling data`);
+              const indices = await es.cat.indices({ format: 'json' });
+              const profilingIndices = indices
+                .filter((index) => index.index !== undefined)
+                .map((index) => index.index)
+                .filter((index) => {
+                  return index!.startsWith('profiling') || index!.startsWith('.profiling');
+                }) as string[];
+              await Promise.all([
+                ...profilingIndices.map((index) => es.indices.delete({ index })),
+                es.indices.deleteDataStream({
+                  name: 'profiling-events*',
+                }),
+              ]);
+              log('Unloaded Profiling data');
             };
 
-            describe(condition.archives.join(',') || 'no archive', () => {
+            describe('Loading profiling data', () => {
               before(runBefore);
 
               runs.forEach((run) => {

@@ -8,6 +8,7 @@
 import { format, UrlObject } from 'url';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
+import { getRoutePaths } from '@kbn/profiling-plugin/common';
 import { ProfilingFtrConfigName } from '../configs';
 import {
   FtrProviderContext,
@@ -23,6 +24,7 @@ import {
 import { createProfilingUsers } from './create_profiling_users';
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
+const profilingRoutePaths = getRoutePaths();
 
 export async function getProfilingApiClient({
   kibanaServer,
@@ -99,7 +101,25 @@ export function createTestConfig(
             kibana: { hostname: kibanaServerUrl },
           });
 
+          const adminUser = await getProfilingApiClient({
+            kibanaServer,
+            username: 'elastic',
+          });
+
           await supertest(kibanaServerUrl).post('/api/fleet/setup').set('kbn-xsrf', 'foo');
+
+          const result = await adminUser({
+            endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+          });
+          if (!result.body.has_setup) {
+            // eslint-disable-next-line no-console
+            console.log('Setting up Universal Profiling');
+            await adminUser({
+              endpoint: `POST ${profilingRoutePaths.HasSetupESResources}`,
+            });
+            // eslint-disable-next-line no-console
+            console.log('Universal Profiling set up');
+          }
 
           return {
             noAccessUser: await getProfilingApiClient({
@@ -110,10 +130,7 @@ export function createTestConfig(
               kibanaServer,
               username: ProfilingUsername.viewerUser,
             }),
-            adminUser: await getProfilingApiClient({
-              kibanaServer,
-              username: 'elastic',
-            }),
+            adminUser,
           };
         },
       },
