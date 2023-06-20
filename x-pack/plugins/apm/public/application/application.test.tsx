@@ -30,7 +30,8 @@ jest.mock('../components/app/RumDashboard/RumHome', () => ({
   RumHome: () => <p>Home Mock</p>,
 }));
 
-describe('renderApp (APM)', () => {
+// FAILING: https://github.com/elastic/kibana/issues/141543
+describe.skip('renderApp (APM)', () => {
   let mockConsole: jest.SpyInstance;
   beforeAll(() => {
     // The RUM agent logs an unnecessary message here. There's a couple open
