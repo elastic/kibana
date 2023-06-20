@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { EuiSpacer, EuiFlexGrid, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFlexGrid,
+  EuiPanel,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetchSloBurnRates } from '../../../hooks/slo/use_fetch_slo_burn_rates';
 import { BurnRateWindow, BurnRateWindowParams } from './burn_rate_window';
@@ -130,13 +138,33 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.observability.slo.burnRate.title', {
-            defaultMessage: 'Burn rate windows',
-          })}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.observability.slo.burnRate.title', {
+                defaultMessage: 'Burn rate windows',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={0}>
+          <EuiBetaBadge
+            label={i18n.translate('xpack.observability.slo.burnRate.technicalPreviewBadgeTitle', {
+              defaultMessage: 'Technical Preview',
+            })}
+            size="s"
+            tooltipPosition="bottom"
+            tooltipContent={i18n.translate(
+              'xpack.observability.slo.burnRate.technicalPreviewBadgeDescription',
+              {
+                defaultMessage:
+                  'This functionality is in technical preview and is subject to change or maybe removed in future versions. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Technical preview features are not subject to the support service level agreement of official generally available features.',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGrid columns={4}>
         <BurnRateWindow {...criticalWindowParams} isLoading={isLoading} />
