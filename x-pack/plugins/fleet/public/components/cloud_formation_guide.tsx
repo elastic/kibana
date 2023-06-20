@@ -40,7 +40,7 @@ export const CloudFormationGuide = () => {
           <li>
             <FormattedMessage
               id="xpack.fleet.cloudFormation.guide.steps.launch"
-              defaultMessage="Click the Launch CloudFormation button bellow."
+              defaultMessage="Click the Launch CloudFormation button below."
             />
           </li>
           <li>
