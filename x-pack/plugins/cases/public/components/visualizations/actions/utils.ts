@@ -28,7 +28,7 @@ export const getLensCaseAttachment = ({
   attributes,
 }: {
   timeRange: LensEmbeddableInput['timeRange'];
-  attributes: LensSavedObjectAttributes | undefined;
+  attributes: LensSavedObjectAttributes;
 }): PersistableStateAttachmentWithoutOwner =>
   ({
     persistableStateAttachmentState: { attributes, timeRange },
