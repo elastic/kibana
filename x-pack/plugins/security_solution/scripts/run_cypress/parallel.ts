@@ -291,12 +291,10 @@ export const cli = () => {
                   );
                 }
 
-                console.log('RESULT', vars.esTestCluster);
                 return vars;
               }
             );
 
-            console.log({ config });
             const lifecycle = new Lifecycle(log);
 
             const providers = new ProviderCollection(log, [
