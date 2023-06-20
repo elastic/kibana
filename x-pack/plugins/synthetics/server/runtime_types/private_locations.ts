@@ -16,15 +16,14 @@ export const PrivateLocationAttributesCodec = t.intersection([
   }),
   t.partial({
     tags: t.array(t.string),
-    /* Empty Lat lon was accidentally saved as an empty string instead of undefined or null
-     * Need a migration to fix */
-    geo: t.interface({ lat: t.union([t.string, t.number]), lon: t.union([t.string, t.number]) }),
+    geo: t.interface({ lat: t.union([t.null, t.number]), lon: t.union([t.null, t.number]) }),
   }),
 ]);
 
 export const SyntheticsPrivateLocationsAttributesCodec = t.type({
   locations: t.array(PrivateLocationAttributesCodec),
 });
+
 export type PrivateLocationAttributes = t.TypeOf<typeof PrivateLocationAttributesCodec>;
 export type SyntheticsPrivateLocationsAttributes = t.TypeOf<
   typeof SyntheticsPrivateLocationsAttributesCodec

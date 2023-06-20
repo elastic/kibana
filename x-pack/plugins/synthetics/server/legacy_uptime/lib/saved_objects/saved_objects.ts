@@ -12,7 +12,7 @@ import {
   SYNTHETICS_SECRET_ENCRYPTED_TYPE,
   syntheticsParamSavedObjectType,
 } from './synthetics_param';
-import { privateLocationsSavedObject } from './private_locations';
+import { PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../../constants/settings';
 import { DynamicSettingsAttributes } from '../../../runtime_types/settings';
 import { ConfigKey } from '../../../../common/runtime_types';
@@ -30,7 +30,7 @@ export const registerUptimeSavedObjects = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) => {
   savedObjectsService.registerType(umDynamicSettings);
-  savedObjectsService.registerType(privateLocationsSavedObject);
+  savedObjectsService.registerType(PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE);
 
   savedObjectsService.registerType(getSyntheticsMonitorSavedObjectType(encryptedSavedObjects));
   savedObjectsService.registerType(syntheticsServiceApiKey);
