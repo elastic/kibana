@@ -34,6 +34,8 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { SUPPORTED_KBN_TYPES as SUPPORTED_CELL_ACTIONS_TYPES } from '@kbn/cell-actions/src/constants';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -459,7 +461,10 @@ export const DiscoverGrid = ({
       cellActionsTriggerId && !isPlainRecord
         ? visibleColumns.map((columnName) => {
             const field = dataView.getFieldByName(columnName)?.spec;
-            if (field?.type === '_source' || field?.type === 'flattened') {
+            if (
+              !field?.type ||
+              !SUPPORTED_CELL_ACTIONS_TYPES.includes(field.type as KBN_FIELD_TYPES)
+            ) {
               // disable custom actions on object columns
               return {
                 name: '',
@@ -468,8 +473,8 @@ export const DiscoverGrid = ({
             }
             return {
               name: columnName,
-              type: field?.type ?? 'keyword',
-              aggregatable: field?.aggregatable ?? false,
+              type: field.type,
+              aggregatable: field.aggregatable,
             };
           })
         : undefined,
