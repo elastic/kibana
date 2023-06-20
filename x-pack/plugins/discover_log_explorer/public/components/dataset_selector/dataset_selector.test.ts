@@ -10,4 +10,6 @@
  * AS SOON AS A FIRST SOLID MVP IS DEFINED FOR PRODUCTION, A COMPLETE TEST WILL BE IMPLEMENTED.
  */
 
+describe.skip('DatasetSelector', () => {});
+
 export {};
