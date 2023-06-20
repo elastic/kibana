@@ -41,8 +41,8 @@ const DANGER = 'danger';
 const SUCCESS = 'success';
 const WARNING = 'warning';
 
-function getColorBasedOnBurnRate(target: number, burnRate: number | null) {
-  if (burnRate === null || burnRate === 0) {
+function getColorBasedOnBurnRate(target: number, burnRate: number | null, sli: number | null) {
+  if (burnRate === null || sli === -1) {
     return SUBDUED;
   }
   if (burnRate > target) {
@@ -59,8 +59,8 @@ export function BurnRateWindow({
   isLoading,
   size = 's',
 }: BurnRateWindowParams) {
-  const longWindowColor = getColorBasedOnBurnRate(target, longWindow.burnRate);
-  const shortWindowColor = getColorBasedOnBurnRate(target, shortWindow.burnRate);
+  const longWindowColor = getColorBasedOnBurnRate(target, longWindow.burnRate, longWindow.sli);
+  const shortWindowColor = getColorBasedOnBurnRate(target, shortWindow.burnRate, shortWindow.sli);
 
   const overallColor =
     longWindowColor === DANGER && shortWindowColor === DANGER
@@ -70,6 +70,13 @@ export function BurnRateWindow({
       : longWindowColor === SUBDUED && shortWindowColor === SUBDUED
       ? SUBDUED
       : SUCCESS;
+
+  const isLongWindowValid =
+    longWindow.burnRate != null && longWindow.sli != null && longWindow.sli > 0;
+
+  const isShortWindowValid =
+    shortWindow.burnRate != null && shortWindow.sli != null && shortWindow.sli > 0;
+
   return (
     <EuiPanel color={overallColor}>
       <EuiText color={overallColor}>
@@ -88,7 +95,7 @@ export function BurnRateWindow({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiStat
-            title={longWindow.burnRate ? `${numeral(longWindow.burnRate).format('0.[00]')}x` : '--'}
+            title={isLongWindowValid ? `${numeral(longWindow.burnRate).format('0.[00]')}x` : '--'}
             titleColor={longWindowColor}
             titleSize={size}
             textAlign="left"
@@ -102,9 +109,7 @@ export function BurnRateWindow({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
-            title={
-              shortWindow.burnRate ? `${numeral(shortWindow.burnRate).format('0.[00]')}x` : '--'
-            }
+            title={isShortWindowValid ? `${numeral(shortWindow.burnRate).format('0.[00]')}x` : '--'}
             titleColor={shortWindowColor}
             titleSize={size}
             textAlign="left"
