@@ -87,3 +87,28 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     tags: values.tags,
   };
 }
+
+export function transformCreateSLOInputToCreateSLOForm(values: CreateSLOInput): CreateSLOForm {
+  return {
+    name: values.name,
+    description: values.description,
+    indicator: values.indicator,
+    budgetingMethod: values.budgetingMethod,
+    timeWindow: {
+      duration: values.timeWindow.duration,
+      type: values.timeWindow.type,
+    },
+    objective: {
+      target: values.objective.target * 100,
+      ...(values.budgetingMethod === 'timeslices' &&
+        values.objective.timesliceTarget && {
+          timesliceTarget: values.objective.timesliceTarget * 100,
+        }),
+      ...(values.budgetingMethod === 'timeslices' &&
+        values.objective.timesliceWindow && {
+          timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
+        }),
+    },
+    tags: values?.tags ?? [],
+  };
+}
