@@ -48,7 +48,7 @@ type ESGeoLineSourceSyncMeta = Pick<
 
 const MAX_TRACKS = 250;
 
-// Constant is used to identify time series id field in UIs, tooltips, and styling. 
+// Constant is used to identify time series id field in UIs, tooltips, and styling.
 // Constant is not passed to Elasticsearch APIs and is not related to '_tsid' document metadata field.
 // Constant value of '_tsid' is arbitrary.
 const TIME_SERIES_ID_FIELD_NAME = '_tsid';
@@ -168,18 +168,14 @@ export class ESGeoLineSource extends AbstractESAggSource {
   }
 
   getFieldNames() {
-    return [
-      ...this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName()),
-    ];
+    return [...this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName())];
   }
 
   async getFields(): Promise<IField[]> {
     const groupByField = this._descriptor.groupByTimeseries
       ? this._createTsidField()
       : this._createSplitField();
-    return groupByField
-      ? [...this.getMetricFields(), groupByField]
-      : this.getMetricFields()
+    return groupByField ? [...this.getMetricFields(), groupByField] : this.getMetricFields();
   }
 
   getFieldByName(name: string): IField | null {
@@ -245,7 +241,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         cardinality: {
           field: '_tsid',
           precision_threshold: MAX_TRACKS,
-        }
+        },
       },
       tracks: {
         time_series: {
@@ -274,14 +270,17 @@ export class ESGeoLineSource extends AbstractESAggSource {
       }),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.esGeoLine.timeSeriesTrackRequestDescription', {
-        defaultMessage:
-          'Get tracks from data view: {dataViewName}, geospatial field: {geoFieldName}',
-        values: {
-          dataViewName: indexPattern.getName(),
-          geoFieldName: this._descriptor.geoField,
-        },
-      }),
+      requestDescription: i18n.translate(
+        'xpack.maps.source.esGeoLine.timeSeriesTrackRequestDescription',
+        {
+          defaultMessage:
+            'Get tracks from data view: {dataViewName}, geospatial field: {geoFieldName}',
+          values: {
+            dataViewName: indexPattern.getName(),
+            geoFieldName: this._descriptor.geoField,
+          },
+        }
+      ),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_geo_line:time_series_tracks' },
@@ -292,7 +291,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       resp,
-      TIME_SERIES_ID_FIELD_NAME,
+      TIME_SERIES_ID_FIELD_NAME
     );
 
     const entityCount = featureCollection.features.length;
@@ -318,17 +317,21 @@ export class ESGeoLineSource extends AbstractESAggSource {
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     if (!this._descriptor.splitField) {
-      throw new Error(i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
-        defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
-        values: { inputLabel: ENTITY_INPUT_LABEL }
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
+          defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
+          values: { inputLabel: ENTITY_INPUT_LABEL },
+        })
+      );
     }
 
     if (!this._descriptor.sortField) {
-      throw new Error(i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
-        defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
-        values: { inputLabel: SORT_INPUT_LABEL }
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
+          defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
+          values: { inputLabel: SORT_INPUT_LABEL },
+        })
+      );
     }
 
     const indexPattern = await this.getIndexPattern();
