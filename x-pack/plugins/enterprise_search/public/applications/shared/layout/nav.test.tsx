@@ -57,6 +57,11 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'ESRE',
           },
           {
+            href: '/app/enterprise_search/vector_search',
+            id: 'vectorSearch',
+            name: 'Vector Search',
+          },
+          {
             href: '/app/enterprise_search/search_experiences',
             id: 'searchExperiences',
             name: 'Search Experiences',
