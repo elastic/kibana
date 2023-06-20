@@ -85,43 +85,50 @@ export const renderApp = ({
 
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+  const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
+
   ReactDOM.render(
     <EuiErrorBoundary>
       <ApplicationUsageTrackingProvider>
         <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-              storage: new Storage(localStorage),
-              isDev,
-              kibanaVersion,
-            }}
-          >
-            <PluginContext.Provider
-              value={{
-                config,
-                appMountParameters,
-                observabilityRuleTypeRegistry,
-                ObservabilityPageTemplate,
+          <CloudProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+                storage: new Storage(localStorage),
+                isDev,
+                kibanaVersion,
               }}
             >
-              <Router history={history}>
-                <EuiThemeProvider darkMode={isDarkMode}>
-                  <i18nCore.Context>
-                    <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                      <QueryClientProvider client={queryClient}>
-                        <HasDataContextProvider>
-                          <App />
-                        </HasDataContextProvider>
-                        <HideableReactQueryDevTools />
-                      </QueryClientProvider>
-                    </RedirectAppLinks>
-                  </i18nCore.Context>
-                </EuiThemeProvider>
-              </Router>
-            </PluginContext.Provider>
-          </KibanaContextProvider>
+              <PluginContext.Provider
+                value={{
+                  config,
+                  appMountParameters,
+                  observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate,
+                }}
+              >
+                <Router history={history}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <i18nCore.Context>
+                      <RedirectAppLinks
+                        application={core.application}
+                        className={APP_WRAPPER_CLASS}
+                      >
+                        <QueryClientProvider client={queryClient}>
+                          <HasDataContextProvider>
+                            <App />
+                          </HasDataContextProvider>
+                          <HideableReactQueryDevTools />
+                        </QueryClientProvider>
+                      </RedirectAppLinks>
+                    </i18nCore.Context>
+                  </EuiThemeProvider>
+                </Router>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </CloudProvider>
         </KibanaThemeProvider>
       </ApplicationUsageTrackingProvider>
     </EuiErrorBoundary>,

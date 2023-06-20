@@ -84,7 +84,7 @@ const headerStrings = {
   },
 };
 
-interface Props {
+export interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   actionMenu$: Observable<MountPoint | undefined>;
   kibanaDocLink: string;
@@ -169,18 +169,6 @@ export const ProjectHeader = ({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
 
-  const handleCloseNav = useCallback(() => {
-    setIsOpen(false);
-    if (toggleCollapsibleNavRef.current) {
-      toggleCollapsibleNavRef.current.focus();
-    }
-  }, [setIsOpen, toggleCollapsibleNavRef]);
-
-  const handleToggleNavButtonClick = useCallback(
-    () => setIsOpen((prevIsOpen) => !prevIsOpen),
-    [setIsOpen]
-  );
-
   return (
     <>
       <EuiHeader position="fixed" data-test-subj="kibanaProjectHeader">
@@ -190,12 +178,17 @@ export const ProjectHeader = ({
               <CompatRouter>
                 <ProjectNavigation
                   isOpen={isOpen!}
-                  closeNav={handleCloseNav}
+                  closeNav={() => {
+                    setIsOpen(false);
+                    if (toggleCollapsibleNavRef.current) {
+                      toggleCollapsibleNavRef.current.focus();
+                    }
+                  }}
                   button={
                     <EuiHeaderSectionItemButton
                       data-test-subj="toggleNavButton"
                       aria-label={headerStrings.nav.closeNavAriaLabel}
-                      onClick={handleToggleNavButtonClick}
+                      onClick={() => setIsOpen(!isOpen)}
                       aria-expanded={isOpen!}
                       aria-pressed={isOpen!}
                       aria-controls={navId}
