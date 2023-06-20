@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { BottomBar } from './bottom_bar';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Status API', () => {
+    loadTestFile(require.resolve('./status'));
+  });
+}
