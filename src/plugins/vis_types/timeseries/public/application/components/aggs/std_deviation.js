@@ -24,14 +24,13 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { useI18n, FormattedMessage } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 const RESTRICT_FIELDS = KBN_FIELD_TYPES.NUMBER;
 
 const StandardDeviationAggUi = (props) => {
-  const intl = useI18n();
-  const { series, panel, fields } = props;
+  const { series, panel, fields, intl } = props;
   const defaults = { sigma: '' };
   const model = { ...defaults, ...props.model };
 
@@ -175,4 +174,4 @@ StandardDeviationAggUi.propTypes = {
   siblings: PropTypes.array,
 };
 
-export const StandardDeviationAgg = React.memo(StandardDeviationAggUi);
+export const StandardDeviationAgg = injectI18n(StandardDeviationAggUi);

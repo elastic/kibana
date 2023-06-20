@@ -7,6 +7,7 @@
  */
 
 import { compact } from 'lodash';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
@@ -32,6 +33,7 @@ import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
+  intl: InjectedIntl;
   timeHistory?: TimeHistoryContract;
   // Filter bar
   onFiltersUpdated?: (filters: Filter[]) => void;
@@ -632,10 +634,12 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default withEuiTheme(
-  withKibana(
-    SearchBarUI as React.ComponentType<
-      SearchBarOwnProps<AggregateQuery | Query> & SearchBarInjectedDeps & WithEuiThemeProps<{}>
-    >
+export default injectI18n(
+  withEuiTheme(
+    withKibana(
+      SearchBarUI as React.ComponentType<
+        SearchBarOwnProps<AggregateQuery | Query> & SearchBarInjectedDeps & WithEuiThemeProps<{}>
+      >
+    )
   )
 );

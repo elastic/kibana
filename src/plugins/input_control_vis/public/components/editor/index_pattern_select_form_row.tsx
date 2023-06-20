@@ -7,7 +7,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { useI18n } from '@kbn/i18n-react';
+import { injectI18n, IntlShape } from '@kbn/i18n-react';
 import { EuiFormRow } from '@elastic/eui';
 import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
 
@@ -16,11 +16,11 @@ export interface IndexPatternSelectFormRowUiProps {
   indexPatternId: string;
   controlIndex: number;
   IndexPatternSelect: ComponentType<IndexPatternSelectProps>;
+  intl: IntlShape;
 }
 
 function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
-  const intl = useI18n();
-  const { controlIndex, indexPatternId, onChange } = props;
+  const { controlIndex, indexPatternId, intl, onChange } = props;
   const selectId = `indexPatternSelect-${controlIndex}`;
 
   return (
@@ -44,4 +44,4 @@ function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
   );
 }
 
-export const IndexPatternSelectFormRow = React.memo(IndexPatternSelectFormRowUi);
+export const IndexPatternSelectFormRow = injectI18n(IndexPatternSelectFormRowUi);

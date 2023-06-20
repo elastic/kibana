@@ -7,7 +7,8 @@
 
 import { EuiComment, EuiErrorBoundary } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
+import { selectUnit } from '@formatjs/intl-utils';
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -22,45 +23,48 @@ import { ATTACHED_QUERY } from '../../agents/translations';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { OsqueryActionResultProps } from './types';
 
-const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
-  ({ actionId, ruleName, startDate, ecsData }) => {
-    const { read } = useKibana().services.application.capabilities.osquery;
+const OsqueryResultComponent: React.FC<OsqueryActionResultProps> = ({
+  actionId,
+  ruleName,
+  startDate,
+  ecsData,
+}) => {
+  const { read } = useKibana().services.application.capabilities.osquery;
 
-    const [isLive, setIsLive] = useState(false);
-    const { data } = useLiveQueryDetails({
-      actionId,
-      isLive,
-      skip: !read,
-    });
+  const [isLive, setIsLive] = useState(false);
+  const { data } = useLiveQueryDetails({
+    actionId,
+    isLive,
+    skip: !read,
+  });
 
-    useEffect(() => {
-      setIsLive(() => !(data?.status === 'completed'));
-    }, [data?.status]);
+  useEffect(() => {
+    setIsLive(() => !(data?.status === 'completed'));
+  }, [data?.status]);
 
-    return (
-      <AlertAttachmentContext.Provider value={ecsData}>
-        <EuiComment
-          username={ruleName}
-          timestamp={<FormattedRelative value={startDate} />}
-          event={ATTACHED_QUERY}
-          data-test-subj={'osquery-results-comment'}
-        >
-          {!read ? (
-            <EmptyPrompt />
-          ) : (
-            <PackQueriesStatusTable
-              actionId={actionId}
-              data={data?.queries}
-              startDate={data?.['@timestamp']}
-              expirationDate={data?.expiration}
-              agentIds={data?.agents}
-            />
-          )}
-        </EuiComment>
-      </AlertAttachmentContext.Provider>
-    );
-  }
-);
+  return (
+    <AlertAttachmentContext.Provider value={ecsData}>
+      <EuiComment
+        username={ruleName}
+        timestamp={<FormattedRelativeTime {...selectUnit(new Date(startDate))} />}
+        event={ATTACHED_QUERY}
+        data-test-subj={'osquery-results-comment'}
+      >
+        {!read ? (
+          <EmptyPrompt />
+        ) : (
+          <PackQueriesStatusTable
+            actionId={actionId}
+            data={data?.queries}
+            startDate={data?.['@timestamp']}
+            expirationDate={data?.expiration}
+            agentIds={data?.agents}
+          />
+        )}
+      </EuiComment>
+    </AlertAttachmentContext.Provider>
+  );
+};
 
 export const OsqueryActionResult = React.memo(OsqueryResultComponent);
 type OsqueryActionResultsWrapperProps = {

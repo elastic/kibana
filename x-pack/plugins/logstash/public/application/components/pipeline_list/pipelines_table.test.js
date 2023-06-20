@@ -40,33 +40,33 @@ describe('PipelinesTable component', () => {
   });
 
   it('renders component as expected', () => {
-    const wrapper = shallowWithIntl(<PipelinesTable {...props} />);
+    const wrapper = shallowWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('calls clone when cloned button clicked', () => {
     props.pipelines = [{ id: 'testPipeline', isCentrallyManaged: true }];
-    const wrapper = mountWithIntl(<PipelinesTable {...props} />);
+    const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     wrapper.find('[iconType="copy"]').first().simulate('click');
     expect(clonePipeline).toHaveBeenCalled();
   });
 
   it('calls createPipeline on create button clicked', () => {
-    const wrapper = mountWithIntl(<PipelinesTable {...props} />);
+    const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     wrapper.find('button[data-test-subj="btnAdd"]').simulate('click');
     expect(createPipeline).toHaveBeenCalled();
   });
 
   it('calls delete prompt on delete click', () => {
     props.selection = [{ id: 'testPipeline' }];
-    const wrapper = mountWithIntl(<PipelinesTable {...props} />);
+    const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     wrapper.find('button[data-test-subj="btnDeletePipeline"]').simulate('click');
     expect(onDeleteSelectedPipelines).toHaveBeenCalled();
   });
 
   it('calls openPipeline on id click', () => {
     props.pipelines = [{ id: 'testPipeline', isCentrallyManaged: true }];
-    const wrapper = mountWithIntl(<PipelinesTable {...props} />);
+    const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     wrapper.find(EuiLink).find('button').simulate('click');
     expect(openPipeline).toHaveBeenCalledWith('testPipeline');
   });

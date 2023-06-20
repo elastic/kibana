@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import { useI18n, FormattedMessage } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { AggSelect } from './agg_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
@@ -27,8 +27,7 @@ import { createSelectHandler } from '../lib/create_select_handler';
 import { titleStyles } from '../../styles/common.styles';
 
 function SeriesAggUi(props) {
-  const { panel, model } = props;
-  const intl = useI18n();
+  const { panel, model, intl } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -196,4 +195,4 @@ SeriesAggUi.propTypes = {
   siblings: PropTypes.array,
 };
 
-export const SeriesAgg = React.memo(SeriesAggUi);
+export const SeriesAgg = injectI18n(SeriesAggUi);
