@@ -120,6 +120,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     );
 
     const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
+    const [canFetchIntegration, setCanFetchIntegration] = useState(true);
 
     // delaying component rendering due to a race condition issue from Fleet
     // TODO: remove this workaround when the following issue is resolved:
@@ -133,7 +134,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
-    const { data: packagePolicyList } = usePackagePolicyList(packageInfo.name);
+    const { data: packagePolicyList } = usePackagePolicyList(packageInfo.name, canFetchIntegration);
 
     useEffect(() => {
       if (isEditPage) return;
@@ -161,6 +162,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       integration,
       newPolicy,
       updatePolicy,
+      setCanFetchIntegration,
     });
 
     if (isLoading) {
@@ -229,7 +231,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
         {/* Defines the vars of the enabled input of the active policy template */}
-        <PolicyTemplateVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
+        <PolicyTemplateVarsForm
+          input={input}
+          newPolicy={newPolicy}
+          updatePolicy={updatePolicy}
+          packageInfo={packageInfo}
+        />
         <EuiSpacer />
       </>
     );
@@ -264,6 +271,7 @@ const usePolicyTemplateInitialName = ({
   newPolicy,
   packagePolicyList,
   updatePolicy,
+  setCanFetchIntegration,
 }: {
   isEditPage: boolean;
   isLoading: boolean;
@@ -271,6 +279,7 @@ const usePolicyTemplateInitialName = ({
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
   updatePolicy: (policy: NewPackagePolicy) => void;
+  setCanFetchIntegration: (canFetch: boolean) => void;
 }) => {
   useEffect(() => {
     if (!integration) return;
@@ -286,11 +295,15 @@ const usePolicyTemplateInitialName = ({
     if (newPolicy.name === currentIntegrationName) {
       return;
     }
+
     updatePolicy({
       ...newPolicy,
       name: currentIntegrationName,
     });
-  }, [isLoading, integration, isEditPage, packagePolicyList, newPolicy, updatePolicy]);
+    setCanFetchIntegration(false);
+    // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, integration, isEditPage, packagePolicyList]);
 };
 
 const getSelectedOption = (
