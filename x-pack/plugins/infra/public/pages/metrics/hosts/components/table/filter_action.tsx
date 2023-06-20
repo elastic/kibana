@@ -50,7 +50,7 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
       }
     >
       <EuiButtonEmpty
-        data-test-subj="infraUseHostsTableHostsButton"
+        data-test-subj="infraHostsTableAddFilterButton"
         iconType="filter"
         onClick={onAddFilterClick}
       >
