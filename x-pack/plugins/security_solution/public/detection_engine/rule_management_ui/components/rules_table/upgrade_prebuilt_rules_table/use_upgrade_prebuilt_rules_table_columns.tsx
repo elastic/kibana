@@ -82,7 +82,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 };
 
 const createUpgradeButtonColumn = (
-  upgradeSingleRuleFromRowCTA: (ruleId: string) => void,
+  upgradeOneRule: (ruleId: string) => void,
   loadingRules: RuleSignatureId[]
 ): TableColumn => ({
   field: 'rule_id',
@@ -90,11 +90,7 @@ const createUpgradeButtonColumn = (
   render: (ruleId: RuleUpgradeInfoForReview['rule_id']) => {
     const isRuleUpgrading = loadingRules.includes(ruleId);
     return (
-      <EuiButtonEmpty
-        size="s"
-        disabled={isRuleUpgrading}
-        onClick={() => upgradeSingleRuleFromRowCTA(ruleId)}
-      >
+      <EuiButtonEmpty size="s" disabled={isRuleUpgrading} onClick={() => upgradeOneRule(ruleId)}>
         {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPDATE_RULE_BUTTON}
       </EuiButtonEmpty>
     );
@@ -109,7 +105,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
     state: { loadingRules },
-    actions: { upgradeSingleRuleFromRowCTA },
+    actions: { upgradeOneRule },
   } = useUpgradePrebuiltRulesTableContext();
 
   return useMemo(
@@ -137,10 +133,8 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions
-        ? [createUpgradeButtonColumn(upgradeSingleRuleFromRowCTA, loadingRules)]
-        : []),
+      ...(hasCRUDPermissions ? [createUpgradeButtonColumn(upgradeOneRule, loadingRules)] : []),
     ],
-    [hasCRUDPermissions, loadingRules, showRelatedIntegrations, upgradeSingleRuleFromRowCTA]
+    [hasCRUDPermissions, loadingRules, showRelatedIntegrations, upgradeOneRule]
   );
 };

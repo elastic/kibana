@@ -8,18 +8,12 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import * as i18n from './translations';
-import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 
 export const UpgradePrebuiltRulesTableButtons = () => {
   const {
-    state: { rules, selectedRules, loadingRules, isUpgradeModalVisible, legacyJobsInstalled },
-    actions: {
-      upgradeSelectedRulesCTAClick: upgradeSelectedRules,
-      upgradeAllRulesCTAClick: upgradeAllRules,
-      mlJobUpgradeModalConfirm,
-      mlJobUpgradeModalCancel,
-    },
+    state: { rules, selectedRules, loadingRules },
+    actions: { upgradeSelectedRules, upgradeAllRules },
   } = useUpgradePrebuiltRulesTableContext();
 
   const isRulesAvailableForUpgrade = rules.length > 0;
@@ -53,13 +47,6 @@ export const UpgradePrebuiltRulesTableButtons = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isUpgradeModalVisible && (
-        <MlJobUpgradeModal
-          jobs={legacyJobsInstalled}
-          onCancel={mlJobUpgradeModalCancel}
-          onConfirm={mlJobUpgradeModalConfirm}
-        />
-      )}
     </>
   );
 };
