@@ -8,17 +8,20 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
+import { compact, filter, map } from 'lodash';
 
-import { compact, map } from 'lodash';
+import { ENDPOINT_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
-import { SortOrder } from '../../../../common/search_strategy/security_solution/response_actions/types';
+import type { ResponseActionsSearchHit } from '../../../../common/search_strategy/endpoint/response_actions/types';
+import { SortOrder } from '../../../../common/search_strategy/endpoint/response_actions/types';
+import { ResponseActionsQueries } from '../../../../common/search_strategy/endpoint/response_actions';
 import type {
   ActionResponsesRequestOptions,
   ActionRequestOptions,
   ActionRequestStrategyResponse,
   ActionResponsesRequestStrategyResponse,
-} from '../../../../common/search_strategy/security_solution/response_actions';
-import { ResponseActionsQueries } from '../../../../common/search_strategy/security_solution/response_actions';
+} from '../../../../common/search_strategy/endpoint/response_actions';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
   EndpointAutomatedActionListRequestQuery,
@@ -50,14 +53,26 @@ export const useGetAutomatedActionList = (
             factoryQueryType: ResponseActionsQueries.actions,
           },
           {
-            strategy: 'securitySolutionSearchStrategy',
+            strategy: ENDPOINT_SEARCH_STRATEGY,
           }
         )
       );
 
+      // fields have to firstly be expanded from dotted object to kind of normal nested object
+      const items = map(
+        filter(responseData.edges, 'fields'),
+        (
+          edge: ResponseActionsSearchHit & {
+            fields: object;
+          }
+        ) => {
+          return expandDottedObject(edge.fields, true);
+        }
+      );
+
       return {
         ...responseData,
-        items: compact(map(responseData.edges, '_source')),
+        items: compact(items),
       };
     },
     enabled,
@@ -101,7 +116,7 @@ export const useGetAutomatedActionResponseList = (
             factoryQueryType: ResponseActionsQueries.results,
           },
           {
-            strategy: 'securitySolutionSearchStrategy',
+            strategy: ENDPOINT_SEARCH_STRATEGY,
           }
         )
       );

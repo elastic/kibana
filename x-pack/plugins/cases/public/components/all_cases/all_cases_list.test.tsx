@@ -36,6 +36,7 @@ import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mo
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useGetCategories } from '../../containers/use_get_categories';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCases, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
@@ -47,6 +48,7 @@ import * as api from '../../containers/api';
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/use_get_categories');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
@@ -66,6 +68,7 @@ const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
+const useGetCategoriesMock = useGetCategories as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -149,6 +152,7 @@ describe('AllCasesListGeneric', () => {
     appMockRenderer = createAppMockRenderer();
     useGetCasesMock.mockReturnValue(defaultGetCases);
     useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
+    useGetCategoriesMock.mockReturnValue({ data: ['twix', 'snickers'], refetch: jest.fn() });
     useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
@@ -165,7 +169,6 @@ describe('AllCasesListGeneric', () => {
 
   it('should render AllCasesList', async () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-
     appMockRenderer.render(<AllCasesList />);
 
     await waitFor(() => {
@@ -260,6 +263,21 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should not call onCreateCasePressed if onRowClick is not provided when create case from case page', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        cases: [],
+      },
+    });
+    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+    userEvent.click(screen.getByTestId('cases-table-add-case'));
+    await waitFor(() => {
+      expect(onRowClick).not.toHaveBeenCalled();
+    });
+  });
+
   it('should tableHeaderSortButton AllCasesList', async () => {
     appMockRenderer.render(<AllCasesList />);
 
@@ -282,22 +300,28 @@ describe('AllCasesListGeneric', () => {
     expect(screen.getByTestId('tableHeaderCell_title_0')).toBeInTheDocument();
   });
 
+  it('renders the category column', async () => {
+    appMockRenderer.render(<AllCasesList />);
+
+    expect(screen.getByTestId('tableHeaderCell_category_4')).toBeInTheDocument();
+  });
+
   it('renders the updated on column', async () => {
     appMockRenderer.render(<AllCasesList />);
 
-    expect(screen.getByTestId('tableHeaderCell_updatedAt_5')).toBeInTheDocument();
+    expect(screen.getByTestId('tableHeaderCell_updatedAt_6')).toBeInTheDocument();
   });
 
   it('renders the status column', async () => {
     appMockRenderer.render(<AllCasesList />);
 
-    expect(screen.getByTestId('tableHeaderCell_status_7')).toBeInTheDocument();
+    expect(screen.getByTestId('tableHeaderCell_status_8')).toBeInTheDocument();
   });
 
   it('renders the severity column', async () => {
     appMockRenderer.render(<AllCasesList />);
 
-    expect(screen.getByTestId('tableHeaderCell_severity_8')).toBeInTheDocument();
+    expect(screen.getByTestId('tableHeaderCell_severity_9')).toBeInTheDocument();
   });
 
   it('should not render table utility bar when isSelectorView=true', async () => {
@@ -347,9 +371,10 @@ describe('AllCasesListGeneric', () => {
   it('should call onRowClick with no cases and isSelectorView=true when create case is clicked', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />);
     userEvent.click(screen.getByTestId('cases-table-add-case-filter-bar'));
-
+    const isCreateCase = true;
     await waitFor(() => {
       expect(onRowClick).toHaveBeenCalled();
+      expect(onRowClick).toBeCalledWith(undefined, isCreateCase);
     });
   });
 
@@ -379,7 +404,7 @@ describe('AllCasesListGeneric', () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
     userEvent.click(
-      within(screen.getByTestId('tableHeaderCell_status_7')).getByTestId('tableHeaderSortButton')
+      within(screen.getByTestId('tableHeaderCell_status_8')).getByTestId('tableHeaderSortButton')
     );
 
     await waitFor(() => {
@@ -395,12 +420,13 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should render only Name, CreatedOn and Severity columns when isSelectorView=true', async () => {
+  it('should render Name, Category, CreatedOn and Severity columns when isSelectorView=true', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={true} />);
     await waitFor(() => {
       expect(screen.getByTestId('tableHeaderCell_title_0')).toBeInTheDocument();
-      expect(screen.getByTestId('tableHeaderCell_createdAt_1')).toBeInTheDocument();
-      expect(screen.getByTestId('tableHeaderCell_severity_2')).toBeInTheDocument();
+      expect(screen.getByTestId('tableHeaderCell_category_1')).toBeInTheDocument();
+      expect(screen.getByTestId('tableHeaderCell_createdAt_2')).toBeInTheDocument();
+      expect(screen.getByTestId('tableHeaderCell_severity_3')).toBeInTheDocument();
       expect(screen.queryByTestId('tableHeaderCell_assignees_1')).not.toBeInTheDocument();
     });
   });
@@ -409,7 +435,7 @@ describe('AllCasesListGeneric', () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
     userEvent.click(
-      within(screen.getByTestId('tableHeaderCell_severity_8')).getByTestId('tableHeaderSortButton')
+      within(screen.getByTestId('tableHeaderCell_severity_9')).getByTestId('tableHeaderSortButton')
     );
 
     await waitFor(() => {
@@ -449,7 +475,7 @@ describe('AllCasesListGeneric', () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
     userEvent.click(
-      within(screen.getByTestId('tableHeaderCell_updatedAt_5')).getByTestId('tableHeaderSortButton')
+      within(screen.getByTestId('tableHeaderCell_updatedAt_6')).getByTestId('tableHeaderSortButton')
     );
 
     await waitFor(() => {
@@ -458,6 +484,26 @@ describe('AllCasesListGeneric', () => {
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
             sortField: SortFieldCase.updatedAt,
+            sortOrder: 'asc',
+          },
+        })
+      );
+    });
+  });
+
+  it('should sort by category', async () => {
+    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+    userEvent.click(
+      within(screen.getByTestId('tableHeaderCell_category_4')).getByTestId('tableHeaderSortButton')
+    );
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          queryParams: {
+            ...DEFAULT_QUERY_PARAMS,
+            sortField: SortFieldCase.category,
             sortOrder: 'asc',
           },
         })
@@ -653,6 +699,7 @@ describe('AllCasesListGeneric', () => {
           tags: [],
           assignees: [],
           owner: ['securitySolution', 'observability'],
+          category: [],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
@@ -679,6 +726,7 @@ describe('AllCasesListGeneric', () => {
           tags: [],
           assignees: [],
           owner: ['securitySolution'],
+          category: [],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
@@ -701,6 +749,7 @@ describe('AllCasesListGeneric', () => {
           tags: [],
           assignees: [],
           owner: ['securitySolution', 'observability'],
+          category: [],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
@@ -733,6 +782,7 @@ describe('AllCasesListGeneric', () => {
           tags: [],
           assignees: [],
           owner: ['securitySolution'],
+          category: [],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });

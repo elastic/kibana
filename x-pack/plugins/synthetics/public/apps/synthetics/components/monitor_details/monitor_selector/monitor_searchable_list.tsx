@@ -28,7 +28,7 @@ type MonitorOption = EuiSelectableOption & {
 
 export const MonitorSearchableList = ({ closePopover }: { closePopover: () => void }) => {
   const history = useHistory();
-  const recentlyViewed = useRecentlyViewedMonitors();
+  const { recentMonitorOptions, loading: recentMonitorsLoading } = useRecentlyViewedMonitors();
 
   const [options, setOptions] = useState<MonitorOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
@@ -37,13 +37,13 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
 
   const { basePath } = useSyntheticsSettingsContext();
 
-  const { values, loading } = useMonitorName({ search: searchValue });
+  const { values, loading: searchLoading } = useMonitorName({ search: searchValue });
 
   useEffect(() => {
     const newOptions: MonitorOption[] = [];
-    if (recentlyViewed.length > 0 && !searchValue) {
+    if (recentMonitorOptions.length > 0 && !searchValue) {
       const otherMonitors = values.filter((value) =>
-        recentlyViewed.every((recent) => recent.key !== value.key)
+        recentMonitorOptions.every((recent) => recent.key !== value.key)
       ) as MonitorOption[];
 
       if (otherMonitors.length > 0) {
@@ -55,11 +55,11 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
         });
       }
 
-      setOptions([...recentlyViewed, ...newOptions, ...otherMonitors]);
+      setOptions([...recentMonitorOptions, ...newOptions, ...otherMonitors]);
     } else {
       setOptions(values);
     }
-  }, [recentlyViewed, searchValue, values]);
+  }, [recentMonitorOptions, searchValue, values]);
 
   const getLocationId = (option: MonitorOption) => {
     if (option.locationIds?.includes(selectedLocation?.id ?? '')) {
@@ -71,7 +71,7 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
   return (
     <EuiSelectable<MonitorOption>
       searchable
-      isLoading={loading}
+      isLoading={searchLoading || recentMonitorsLoading}
       searchProps={{
         placeholder: PLACEHOLDER,
         compressed: true,
@@ -108,7 +108,7 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
       {(list, search) => (
         <div style={{ width: 280 }}>
           <EuiPopoverTitle paddingSize="s">
-            {options.length > 0 || searchValue ? (
+            {options.length > 0 || searchValue || searchLoading || recentMonitorsLoading ? (
               search
             ) : (
               <EuiText color="subdued" size="s" className="eui-textCenter">

@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { parse } from 'url';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
@@ -22,63 +23,63 @@ const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const tableEntries = [
   {
     title: 'demo-stack-apache-01',
-    os: '-',
     cpuUsage: '1.2%',
-    diskLatency: '1.6 ms',
+    normalizedLoad: '0.5%',
+    memoryUsage: '18.4%',
+    memoryFree: '3.2 GB',
+    diskSpaceUsage: '17.6%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '18.4%',
   },
   {
     title: 'demo-stack-client-01',
-    os: '-',
     cpuUsage: '0.5%',
-    diskLatency: '8.7 ms',
+    normalizedLoad: '0.1%',
+    memoryUsage: '13.8%',
+    memoryFree: '3.3 GB',
+    diskSpaceUsage: '16.9%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '13.8%',
   },
   {
     title: 'demo-stack-haproxy-01',
-    os: '-',
     cpuUsage: '0.8%',
-    diskLatency: '7 ms',
+    normalizedLoad: '0%',
+    memoryUsage: '16.5%',
+    memoryFree: '3.2 GB',
+    diskSpaceUsage: '16.3%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '16.5%',
   },
   {
     title: 'demo-stack-mysql-01',
-    os: '-',
     cpuUsage: '0.9%',
-    diskLatency: '6.6 ms',
+    normalizedLoad: '0%',
+    memoryUsage: '18.2%',
+    memoryFree: '3.2 GB',
+    diskSpaceUsage: '17.8%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '18.2%',
   },
   {
     title: 'demo-stack-nginx-01',
-    os: '-',
     cpuUsage: '0.8%',
-    diskLatency: '5.7 ms',
+    normalizedLoad: '1.4%',
+    memoryUsage: '18%',
+    memoryFree: '3.2 GB',
+    diskSpaceUsage: '17.5%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '18%',
   },
   {
     title: 'demo-stack-redis-01',
-    os: '-',
     cpuUsage: '0.8%',
-    diskLatency: '6.3 ms',
+    normalizedLoad: '0%',
+    memoryUsage: '15.9%',
+    memoryFree: '3.3 GB',
+    diskSpaceUsage: '16.3%',
     rx: '0 bit/s',
     tx: '0 bit/s',
-    memoryTotal: '3.9 GB',
-    memory: '15.9%',
   },
 ];
 
@@ -146,10 +147,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       security.user.delete('global_hosts_read_privileges_user'),
     ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/157721
-  describe.skip('Hosts View', function () {
-    this.tags('includeFirefox');
+  const returnTo = async (path: string, timeout = 2000) =>
+    retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
+      await browser.goBack();
+      const currentUrl = await browser.getCurrentUrl();
+      return !!currentUrl.match(path);
+    });
 
+  describe('Hosts View', function () {
     before(async () => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
@@ -160,17 +165,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await browser.setWindowSize(1600, 1200);
     });
 
-    after(() => {
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts');
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
-      browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
+    after(async () => {
+      await Promise.all([
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
+        browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY),
+      ]);
     });
 
     it('should be accessible from the Inventory page', async () => {
       await pageObjects.common.navigateToApp('infraOps');
 
       await pageObjects.infraHome.clickDismissKubernetesTourButton();
+      await pageObjects.infraHostsView.getBetaBadgeExists();
       await pageObjects.infraHostsView.clickTryHostViewBadge();
 
       const pageUrl = await browser.getCurrentUrl();
@@ -190,6 +198,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('User with read permission', () => {
         beforeEach(async () => {
           await loginWithReadOnlyUser();
+          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+          await pageObjects.header.waitUntilLoadingHasFinished();
         });
 
         afterEach(async () => {
@@ -197,9 +207,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('Should show hosts landing page with callout when the hosts view is disabled', async () => {
-          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-          await pageObjects.header.waitUntilLoadingHasFinished();
-
+          await pageObjects.infraHostsView.getBetaBadgeExists();
           const landingPageDisabled =
             await pageObjects.infraHostsView.getHostsLandingPageDisabled();
           const learnMoreDocsUrl = await pageObjects.infraHostsView.getHostsLandingPageDocsLink();
@@ -214,10 +222,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Admin user', () => {
-        it('as an admin, should see an enable button when the hosts view is disabled', async () => {
+        beforeEach(async () => {
           await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
           await pageObjects.header.waitUntilLoadingHasFinished();
+        });
 
+        it('as an admin, should see an enable button when the hosts view is disabled', async () => {
           const landingPageEnableButton =
             await pageObjects.infraHostsView.getHostsLandingPageEnableButton();
           const landingPageEnableButtonText = await landingPageEnableButton.getVisibleText();
@@ -225,8 +235,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('as an admin, should be able to enable the hosts view feature', async () => {
-          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-          await pageObjects.header.waitUntilLoadingHasFinished();
           await pageObjects.infraHostsView.clickEnableHostViewButton();
 
           const titleElement = await find.byCssSelector('h1');
@@ -239,17 +247,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('#Single host Flyout', () => {
       before(async () => {
-        await loginWithReadOnlyUser();
+        await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.timePicker.setAbsoluteRange(
           START_HOST_PROCESSES_DATE.format(timepickerFormat),
           END_HOST_PROCESSES_DATE.format(timepickerFormat)
         );
-      });
-
-      after(async () => {
-        await logoutAndDeleteReadOnlyUser();
       });
 
       beforeEach(async () => {
@@ -284,66 +288,56 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should navigate to Uptime after click', async () => {
         await pageObjects.infraHostsView.clickFlyoutUptimeLink();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(
-          'app/uptime/?search=host.name%3A%20%22Jennys-MBP.fritz.box%22%20OR%20host.ip%3A%20%22192.168.1.79%22'
-        );
-        await browser.goBack();
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        const url = parse(await browser.getCurrentUrl());
+
+        const search = 'search=host.name: "Jennys-MBP.fritz.box" OR host.ip: "192.168.1.79"';
+        const query = decodeURIComponent(url.query ?? '');
+
+        expect(url.pathname).to.eql('/app/uptime/');
+        expect(query).to.contain(search);
+
+        await returnTo(HOSTS_VIEW_PATH);
       });
 
       it('should navigate to APM services after click', async () => {
         await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain('app/apm/services?kuery=host.hostname%3A%22Jennys-MBP.fritz.box%22');
-        await browser.goBack();
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        const url = parse(await browser.getCurrentUrl());
+
+        const query = decodeURIComponent(url.query ?? '');
+
+        const environment = 'environment=ENVIRONMENT_ALL';
+        const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
+        const rangeFrom = 'rangeFrom=2023-03-28T18:20:00.000Z';
+        const rangeTo = 'rangeTo=2023-03-28T18:21:00.000Z';
+
+        expect(url.pathname).to.eql('/app/apm/services');
+        expect(query).to.contain(environment);
+        expect(query).to.contain(kuery);
+        expect(query).to.contain(rangeFrom);
+        expect(query).to.contain(rangeTo);
+
+        await returnTo(HOSTS_VIEW_PATH);
       });
 
-      describe('should render processes tab', async () => {
-        const processTitles = [
-          'Total processes',
-          'Running',
-          'Sleeping',
-          'Dead',
-          'Stopped',
-          'Idle',
-          'Zombie',
-          'Unknown',
-        ];
+      it('should render processes tab and with Total Value summary', async () => {
+        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+        const processesTotalValue =
+          await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+        const processValue = await processesTotalValue.getVisibleText();
+        expect(processValue).to.eql('313');
+      });
 
-        processTitles.forEach((value, index) => {
-          it(`Render title: ${value}`, async () => {
-            await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-            const processesTitleValue =
-              await pageObjects.infraHostsView.getProcessesTabContentTitle(index);
-            const processValue = await processesTitleValue.getVisibleText();
-            expect(processValue).to.eql(value);
-          });
-        });
-
-        it('should render processes total value', async () => {
-          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-          const processesTotalValue =
-            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
-          const processValue = await processesTotalValue.getVisibleText();
-          expect(processValue).to.eql('313');
-        });
-
-        it('should render processes table', async () => {
-          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-          await pageObjects.infraHostsView.getProcessesTable();
-          await pageObjects.infraHostsView.getProcessesTableBody();
-          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
-        });
+      it('should expand processes table row', async () => {
+        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+        await pageObjects.infraHostsView.getProcessesTable();
+        await pageObjects.infraHostsView.getProcessesTableBody();
+        await pageObjects.infraHostsView.clickProcessesTableExpandButton();
       });
     });
 
     describe('#Page Content', () => {
       before(async () => {
-        await loginWithReadOnlyUser();
+        await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.timePicker.setAbsoluteRange(
@@ -359,13 +353,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
-      after(async () => {
-        await logoutAndDeleteReadOnlyUser();
-      });
-
       it('should render the correct page title', async () => {
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
+      });
+
+      it('should render the title beta badge', async () => {
+        await pageObjects.infraHostsView.getBetaBadgeExists();
       });
 
       describe('Hosts table', async () => {
@@ -406,10 +400,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         [
           { metric: 'hostsCount', value: '6' },
-          { metric: 'cpu', value: '0.8%' },
-          { metric: 'memory', value: '16.81%' },
-          { metric: 'tx', value: 'N/A' },
-          { metric: 'rx', value: 'N/A' },
+          { metric: 'cpuUsage', value: '0.8%' },
+          { metric: 'normalizedLoad1m', value: '0.3%' },
+          { metric: 'memoryUsage', value: '16.8%' },
+          { metric: 'diskSpaceUsage', value: '17.1%' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             await retry.try(async () => {
@@ -430,9 +424,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await browser.scrollTop();
         });
 
-        it('should load 8 lens metric charts', async () => {
+        it('should load 12 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
-          expect(metricCharts.length).to.equal(8);
+          expect(metricCharts.length).to.equal(12);
         });
 
         it('should have an option to open the chart in lens', async () => {
@@ -453,13 +447,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should load the Logs tab section when clicking on it', async () => {
           await testSubjects.existOrFail('hostsView-logs');
         });
+
+        it('should load the Logs tab with the right columns', async () => {
+          await retry.try(async () => {
+            const columnLabels = await pageObjects.infraHostsView.getLogsTableColumnHeaders();
+
+            expect(columnLabels).to.eql(['Timestamp', 'host.name', 'Message']);
+          });
+        });
       });
 
       describe('Alerts Tab', () => {
         const ACTIVE_ALERTS = 6;
         const RECOVERED_ALERTS = 4;
         const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-        const COLUMNS = 5;
+        const COLUMNS = 6;
 
         before(async () => {
           await browser.scrollTop();
@@ -558,10 +560,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await Promise.all(
             [
               { metric: 'hostsCount', value: '3' },
-              { metric: 'cpu', value: '0.8%' },
-              { metric: 'memory', value: '16.25%' },
-              { metric: 'tx', value: 'N/A' },
-              { metric: 'rx', value: 'N/A' },
+              { metric: 'cpuUsage', value: '0.8%' },
+              { metric: 'normalizedLoad1m', value: '0.2%' },
+              { metric: 'memoryUsage', value: '16.3%' },
+              { metric: 'diskSpaceUsage', value: '16.9%' },
             ].map(async ({ metric, value }) => {
               await retry.try(async () => {
                 const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
@@ -581,7 +583,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const ACTIVE_ALERTS = 2;
           const RECOVERED_ALERTS = 2;
           const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-          const COLUMNS = 5;
+          const COLUMNS = 6;
 
           await pageObjects.infraHostsView.visitAlertTab();
 
@@ -642,20 +644,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
-        it('should sort by Disk Latency asc', async () => {
-          await pageObjects.infraHostsView.sortByDiskLatency();
-          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
-          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-          expect(hostDataFirtPage).to.eql(tableEntries[0]);
-
-          await pageObjects.infraHostsView.paginateTo(2);
-          hostRows = await pageObjects.infraHostsView.getHostsTableData();
-          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-          expect(hostDataLastPage).to.eql(tableEntries[1]);
-        });
-
-        it('should sort by Disk Latency desc', async () => {
-          await pageObjects.infraHostsView.sortByDiskLatency();
+        it('should sort by a numeric field asc', async () => {
+          await pageObjects.infraHostsView.sortByCpuUsage();
           let hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
           expect(hostDataFirtPage).to.eql(tableEntries[1]);
@@ -666,7 +656,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(hostDataLastPage).to.eql(tableEntries[0]);
         });
 
-        it('should sort by Title asc', async () => {
+        it('should sort by a numeric field desc', async () => {
+          await pageObjects.infraHostsView.sortByCpuUsage();
+          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataFirtPage).to.eql(tableEntries[0]);
+
+          await pageObjects.infraHostsView.paginateTo(2);
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataLastPage).to.eql(tableEntries[1]);
+        });
+
+        it('should sort by text field asc', async () => {
           await pageObjects.infraHostsView.sortByTitle();
           let hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
@@ -678,7 +680,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(hostDataLastPage).to.eql(tableEntries[5]);
         });
 
-        it('should sort by Title desc', async () => {
+        it('should sort by text field desc', async () => {
           await pageObjects.infraHostsView.sortByTitle();
           let hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);

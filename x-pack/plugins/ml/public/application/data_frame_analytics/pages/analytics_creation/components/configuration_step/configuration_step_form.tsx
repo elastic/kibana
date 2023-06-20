@@ -22,12 +22,18 @@ import { Query } from '@kbn/data-plugin/common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import {
+  getCombinedRuntimeMappings,
+  isRuntimeMappings,
+  isRuntimeField,
+  type RuntimeMappings as RuntimeMappingsType,
+} from '@kbn/ml-runtime-field-utils';
+import {
   type FieldSelectionItem,
   ANALYSIS_CONFIG_TYPE,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '@kbn/ml-data-frame-analytics-utils';
-
+import { DataGrid } from '@kbn/ml-data-grid';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
@@ -35,15 +41,9 @@ import {
 } from '../../../../../components/field_stats_flyout';
 import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { useMlContext } from '../../../../../contexts/ml';
-import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
+import { useDataSource } from '../../../../../contexts/ml';
 
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
-import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
-import {
-  isRuntimeMappings,
-  isRuntimeField,
-} from '../../../../../../../common/util/runtime_field_utils';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { Messages } from '../shared';
 import {
@@ -58,7 +58,6 @@ import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
 import { AnalysisFieldsTable } from './analysis_fields_table';
-import { DataGrid } from '../../../../../components/data_grid';
 import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
@@ -121,8 +120,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   state,
   setCurrentStep,
 }) => {
-  const mlContext = useMlContext();
-  const { currentDataView, selectedSavedSearch } = mlContext;
+  const { currentDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);

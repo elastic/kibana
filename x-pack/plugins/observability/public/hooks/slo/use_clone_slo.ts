@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 export function useCloneSlo() {
   const {
@@ -22,40 +23,36 @@ export function useCloneSlo() {
   return useMutation<
     CreateSLOResponse,
     string,
-    { slo: CreateSLOInput; idToCopyFrom?: string },
+    { slo: CreateSLOInput; originalSloId?: string },
     { previousSloList: FindSLOResponse | undefined }
   >(
     ['cloneSlo'],
-    ({ slo }: { slo: CreateSLOInput; idToCopyFrom?: string }) => {
+    ({ slo }: { slo: CreateSLOInput; originalSloId?: string }) => {
       const body = JSON.stringify(slo);
       return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
     },
     {
-      onMutate: async ({ slo, idToCopyFrom }) => {
+      onMutate: async ({ slo, originalSloId }) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(['fetchSloList'], { exact: false });
+        await queryClient.cancelQueries(sloKeys.lists());
 
-        const latestFetchSloListRequest = (
-          queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
+        const latestQueriesData = (
+          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) ?? []
         ).at(0);
+        const [queryKey, data] = latestQueriesData ?? [];
 
-        const [queryKey, data] = latestFetchSloListRequest || [];
-
-        const sloUsedToClone = data?.results.find((el) => el.id === idToCopyFrom);
-
+        const originalSlo = data?.results?.find((el) => el.id === originalSloId);
         const optimisticUpdate = {
           ...data,
           results: [
-            ...(data?.results || []),
-            { ...sloUsedToClone, name: slo.name, id: uuidv1(), summary: undefined },
+            ...(data?.results ?? []),
+            { ...originalSlo, name: slo.name, id: uuidv1(), summary: undefined },
           ],
-          total: data?.total && data.total + 1,
+          total: data?.total ? data.total + 1 : 1,
         };
 
         // Optimistically update to the new value
-        if (queryKey) {
-          queryClient.setQueryData(queryKey, optimisticUpdate);
-        }
+        queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
 
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.clone.successNotification', {
@@ -70,7 +67,7 @@ export function useCloneSlo() {
       // If the mutation fails, use the context returned from onMutate to roll back
       onError: (_err, { slo }, context) => {
         if (context?.previousSloList) {
-          queryClient.setQueryData(['fetchSloList'], context.previousSloList);
+          queryClient.setQueryData(sloKeys.lists(), context.previousSloList);
         }
         toasts.addDanger(
           i18n.translate('xpack.observability.slo.clone.errorNotification', {
@@ -80,7 +77,7 @@ export function useCloneSlo() {
         );
       },
       onSuccess: () => {
-        queryClient.invalidateQueries(['fetchSloList'], { exact: false });
+        queryClient.invalidateQueries(sloKeys.lists());
       },
     }
   );
