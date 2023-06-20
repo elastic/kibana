@@ -7,7 +7,7 @@
 
 import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
@@ -23,11 +23,7 @@ import {
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerJobGenerationRoutes } from '../generate_from_jobparams';
-import {
-  PdfExportType,
-  PdfExportTypeSetupDeps,
-  PdfExportTypeStartDeps,
-} from '../../../export_types/printable_pdf_v2';
+import { PdfExportType } from '../../../export_types/printable_pdf_v2';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -44,30 +40,14 @@ describe('POST /api/reporting/generate', () => {
   });
 
   const mockLogger = loggingSystemMock.createLogger();
+  const mockCoreSetup = coreMock.createSetup();
 
-  const mockPdfExportType: Partial<PdfExportType> = {
-    id: 'printablePdf',
-    name: 'not sure why this field exists',
-    jobType: 'printable_pdf',
-    jobContentEncoding: 'base64',
-    jobContentExtension: 'pdf',
-    validLicenses: ['basic', 'gold'],
-    setup(setupDeps: PdfExportTypeSetupDeps): void {
-      throw new Error('Function not implemented.');
-    },
-    start(startDeps: PdfExportTypeStartDeps): void {
-      throw new Error('Function not implemented.');
-    },
-    getSpaceId: jest.fn(),
-    getSavedObjectsClient: jest.fn(),
-    getUiSettingsServiceFactory: jest.fn(),
-    getUiSettingsClient: jest.fn(),
-    getFakeRequest: jest.fn(),
-    getServerInfo: jest.fn(),
-    getScreenshots: jest.fn(),
-    createJob: jest.fn(),
-    runTask: jest.fn(),
-  };
+  const mockPdfExportType = new PdfExportType(
+    mockCoreSetup,
+    mockConfigSchema,
+    mockLogger,
+    coreMock.createPluginInitializerContext(mockConfigSchema)
+  );
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
