@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const supertest = getService('supertest');
   const PageObjects = getPageObjects(['common']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/159929
-  describe.skip('Telemetry service', () => {
+  describe('Telemetry service', () => {
     describe('Screenshot mode', () => {
       const checkCanSendTelemetry = (): Promise<boolean> => {
         return browser.executeAsync<boolean>((cb) => {
