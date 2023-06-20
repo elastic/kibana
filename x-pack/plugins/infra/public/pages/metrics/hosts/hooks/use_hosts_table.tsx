@@ -201,8 +201,8 @@ export const useHostsTable = () => {
 
   const items = useMemo(() => buildItemsList(hostNodes), [hostNodes]);
   const clickedItem = useMemo(
-    () => items.find(({ id }) => id === hostFlyoutState?.clickedItemId),
-    [hostFlyoutState?.clickedItemId, items]
+    () => items.find(({ id }) => id === hostFlyoutState?.itemId),
+    [hostFlyoutState?.itemId, items]
   );
 
   const currentPage = useMemo(() => {
@@ -225,19 +225,17 @@ export const useHostsTable = () => {
             name: toggleDialogActionLabel,
             description: toggleDialogActionLabel,
             icon: ({ id }) =>
-              hostFlyoutState?.clickedItemId && id === hostFlyoutState?.clickedItemId
-                ? 'minimize'
-                : 'expand',
+              hostFlyoutState?.itemId && id === hostFlyoutState?.itemId ? 'minimize' : 'expand',
             type: 'icon',
             'data-test-subj': 'hostsView-flyout-button',
             onClick: ({ id }) => {
               setHostFlyoutState({
-                clickedItemId: id,
+                itemId: id,
               });
-              if (id === hostFlyoutState?.clickedItemId) {
+              if (id === hostFlyoutState?.itemId) {
                 setHostFlyoutState(null);
               } else {
-                setHostFlyoutState({ clickedItemId: id });
+                setHostFlyoutState({ itemId: id });
               }
             },
           },
@@ -317,12 +315,7 @@ export const useHostsTable = () => {
         width: '120px',
       },
     ],
-    [
-      hostFlyoutState?.clickedItemId,
-      reportHostEntryClick,
-      searchCriteria.dateRange,
-      setHostFlyoutState,
-    ]
+    [hostFlyoutState?.itemId, reportHostEntryClick, searchCriteria.dateRange, setHostFlyoutState]
   );
 
   return {
@@ -331,7 +324,7 @@ export const useHostsTable = () => {
     currentPage,
     closeFlyout,
     items,
-    isFlyoutOpen: !!hostFlyoutState?.clickedItemId,
+    isFlyoutOpen: !!hostFlyoutState?.itemId,
     onTableChange,
     pagination,
     sorting,

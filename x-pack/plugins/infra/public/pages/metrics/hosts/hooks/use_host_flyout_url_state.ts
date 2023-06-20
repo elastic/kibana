@@ -15,12 +15,12 @@ import { FlyoutTabIds } from '../../../../components/asset_details/types';
 import { useUrlState } from '../../../../utils/use_url_state';
 
 export const DEFAULT_STATE: HostFlyout = {
-  clickedItemId: '',
-  selectedTabId: FlyoutTabIds.METADATA,
+  itemId: '',
+  tabId: FlyoutTabIds.METADATA,
   processSearch: undefined,
   metadataSearch: undefined,
 };
-const HOST_FLYOUT_URL_STATE_KEY = 'hostFlyoutOpen';
+const HOST_FLYOUT_URL_STATE_KEY = 'flyout';
 
 type SetHostFlyoutState = (newProp: Payload | null) => void;
 
@@ -52,12 +52,13 @@ const FlyoutTabIdRT = rt.union([
 
 const HostFlyoutStateRT = rt.intersection([
   rt.type({
-    clickedItemId: rt.string,
-    selectedTabId: FlyoutTabIdRT,
+    itemId: rt.string,
+    tabId: FlyoutTabIdRT,
   }),
   rt.partial({
     processSearch: rt.string,
     metadataSearch: rt.string,
+    logsSearch: rt.string,
   }),
 ]);
 
