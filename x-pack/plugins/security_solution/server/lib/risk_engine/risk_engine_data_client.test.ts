@@ -198,9 +198,6 @@ describe('RiskEngineDataClient', () => {
         indexPatterns: {
           template: `.risk-score.risk-score-default-index-template`,
           alias: `risk-score.risk-score-default`,
-          pattern: '',
-          basePattern: '',
-          name: '',
         },
       });
     });
@@ -214,7 +211,7 @@ describe('RiskEngineDataClient', () => {
       await riskEngineDataClient.initializeResources({ namespace: 'default' });
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Error initializing risk engine resources: ${error}`
+        `Error initializing risk engine resources: ${error.message}`
       );
     });
   });
