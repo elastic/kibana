@@ -35,7 +35,8 @@ const items: SolutionSideNavItem[] = [
       },
       {
         id: 'panelLink2',
-        label: 'I am the second nested',
+        label: 'I have an icon',
+        iconType: 'logoVulnerabilityManagement',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
@@ -93,7 +94,7 @@ const items: SolutionSideNavItem[] = [
       },
     ],
   },
-  { id: 'linkTruncated', href: '#', label: 'I have truncated text because I am too long' },
+  { id: 'linkWrapped', href: '#', label: 'I have wrapped text because I am too long' },
   {
     id: 'footerLink',
     href: '#',

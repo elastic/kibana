@@ -281,6 +281,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
             <EuiListGroupItem
               label={itemLabel}
               href={href}
+              wrapText
               onClick={onLinkClicked}
               className={itemClassNames}
               color="text"
