@@ -39,11 +39,6 @@ describe('Legacy Alert Actions factory', () => {
     });
     expect(resp).toEqual([
       {
-        frequency: {
-          notifyWhen: 'onActionGroupChange',
-          summary: false,
-          throttle: null,
-        },
         group: 'recovered',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
@@ -54,11 +49,6 @@ describe('Legacy Alert Actions factory', () => {
         },
       },
       {
-        frequency: {
-          notifyWhen: 'onActionGroupChange',
-          summary: false,
-          throttle: null,
-        },
         group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
@@ -76,11 +66,6 @@ describe('Legacy Alert Actions factory', () => {
       groupId: MONITOR_STATUS.id,
       defaultActions: [
         {
-          frequency: {
-            notifyWhen: 'onActionGroupChange',
-            summary: false,
-            throttle: null,
-          },
           actionTypeId: '.email',
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
@@ -105,11 +90,6 @@ describe('Legacy Alert Actions factory', () => {
     });
     expect(resp).toEqual([
       {
-        frequency: {
-          notifyWhen: 'onActionGroupChange',
-          summary: false,
-          throttle: null,
-        },
         group: 'recovered',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
@@ -128,11 +108,6 @@ describe('Legacy Alert Actions factory', () => {
         },
       },
       {
-        frequency: {
-          notifyWhen: 'onActionGroupChange',
-          summary: false,
-          throttle: null,
-        },
         group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
@@ -178,11 +153,6 @@ describe('Legacy Alert Actions factory', () => {
     });
     expect(resp).toEqual([
       {
-        frequency: {
-          notifyWhen: 'onActionGroupChange',
-          summary: false,
-          throttle: null,
-        },
         group: 'recovered',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
@@ -200,11 +170,6 @@ describe('Legacy Alert Actions factory', () => {
         },
       },
       {
-        frequency: {
-          notifyWhen: 'onActionGroupChange',
-          summary: false,
-          throttle: null,
-        },
         group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
@@ -228,11 +193,6 @@ describe('Legacy Alert Actions factory', () => {
       groupId: MONITOR_STATUS.id,
       defaultActions: [
         {
-          frequency: {
-            notifyWhen: 'onActionGroupChange',
-            summary: false,
-            throttle: null,
-          },
           actionTypeId: '.pagerduty',
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
@@ -251,14 +211,10 @@ describe('Legacy Alert Actions factory', () => {
         defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
         defaultRecoverySubjectMessage: MonitorStatusTranslations.defaultRecoverySubjectMessage,
       },
+      isLegacy: true,
     });
     expect(resp).toEqual([
       {
-        frequency: {
-          notifyWhen: 'onActionGroupChange',
-          summary: false,
-          throttle: null,
-        },
         group: 'recovered',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
@@ -269,11 +225,6 @@ describe('Legacy Alert Actions factory', () => {
         },
       },
       {
-        frequency: {
-          notifyWhen: 'onActionGroupChange',
-          summary: false,
-          throttle: null,
-        },
         group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
