@@ -34,6 +34,7 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
           screenshotting.getScreenshots({
             request,
             expression: request.query.expression,
+            urls: [],
           })
         );
 
