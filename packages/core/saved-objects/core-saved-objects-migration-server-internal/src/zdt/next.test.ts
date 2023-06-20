@@ -85,7 +85,7 @@ describe('actions', () => {
       expect(setMetaMappingMigrationCompleteMock).toHaveBeenCalledTimes(1);
       expect(setMetaMappingMigrationCompleteMock).toHaveBeenCalledWith({
         meta: state.currentIndexMeta,
-        versions: context.typeModelVersions,
+        versions: context.typeVirtualVersions,
       });
     });
 
@@ -123,7 +123,7 @@ describe('actions', () => {
       expect(setMetaDocMigrationCompleteMock).toHaveBeenCalledTimes(1);
       expect(setMetaDocMigrationCompleteMock).toHaveBeenCalledWith({
         meta: state.currentIndexMeta,
-        versions: context.typeModelVersions,
+        versions: context.typeVirtualVersions,
       });
     });
 

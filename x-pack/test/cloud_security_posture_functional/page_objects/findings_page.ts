@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';
+const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -33,17 +34,48 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     });
 
   const index = {
-    remove: () => es.indices.delete({ index: FINDINGS_INDEX, ignore_unavailable: true }),
+    remove: () =>
+      Promise.all([
+        es.deleteByQuery({
+          index: FINDINGS_INDEX,
+          query: {
+            match_all: {},
+          },
+          ignore_unavailable: true,
+          refresh: true,
+        }),
+        es.deleteByQuery({
+          index: FINDINGS_LATEST_INDEX,
+          query: {
+            match_all: {},
+          },
+          ignore_unavailable: true,
+          refresh: true,
+        }),
+      ]),
     add: async <T>(findingsMock: T[]) => {
-      await waitForPluginInitialized();
-      await Promise.all(
-        findingsMock.map((finding) =>
+      await Promise.all([
+        ...findingsMock.map((finding) =>
           es.index({
             index: FINDINGS_INDEX,
-            body: finding,
+            body: {
+              ...finding,
+              '@timestamp': new Date().toISOString(),
+            },
+            refresh: true,
           })
-        )
-      );
+        ),
+        ...findingsMock.map((finding) =>
+          es.index({
+            index: FINDINGS_LATEST_INDEX,
+            body: {
+              ...finding,
+              '@timestamp': new Date().toISOString(),
+            },
+            refresh: true,
+          })
+        ),
+      ]);
     },
   };
 
@@ -183,6 +215,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     resourceFindingsTable,
     findingsByResourceTable,
     index,
+    waitForPluginInitialized,
     distributionBar,
   };
 }

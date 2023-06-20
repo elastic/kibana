@@ -7,12 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
-import { APP_ID, APP_ICON } from '../common/constants';
-import { getAppTitle } from '../common/i18n_getters';
+import { APP_ID, APP_ICON, APP_NAME } from '../common/constants';
 
 export const featureCatalogueEntry = {
   id: APP_ID,
-  title: getAppTitle(),
+  title: APP_NAME,
   subtitle: i18n.translate('xpack.maps.featureCatalogue.mapsSubtitle', {
     defaultMessage: 'Plot geographic data.',
   }),

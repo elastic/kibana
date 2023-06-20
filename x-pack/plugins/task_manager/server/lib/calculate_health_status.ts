@@ -16,7 +16,7 @@ export function calculateHealthStatus(
   config: TaskManagerConfig,
   shouldRunTasks: boolean,
   logger: Logger
-): HealthStatus {
+): { status: HealthStatus; reason?: string } {
   const now = Date.now();
 
   // if "hot" health stats are any more stale than monitored_stats_required_freshness
@@ -28,27 +28,35 @@ export function calculateHealthStatus(
   const requiredColdStatsFreshness: number = config.monitored_aggregated_stats_refresh_rate * 1.5;
 
   if (hasStatus(summarizedStats.stats, HealthStatus.Error)) {
-    return HealthStatus.Error;
+    return {
+      status: HealthStatus.Error,
+      reason: summarizedStats.stats.capacity_estimation?.reason,
+    };
   }
 
   // Hot timestamps look at runtime stats which are not available when tasks are not running
   if (shouldRunTasks) {
     if (hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness)) {
-      logger.debug('setting HealthStatus.Error because of expired hot timestamps');
-      return HealthStatus.Error;
+      const reason = 'setting HealthStatus.Error because of expired hot timestamps';
+      logger.debug(reason);
+      return { status: HealthStatus.Error, reason };
     }
   }
 
   if (hasExpiredColdTimestamps(summarizedStats, now, requiredColdStatsFreshness)) {
-    logger.debug('setting HealthStatus.Error because of expired cold timestamps');
-    return HealthStatus.Error;
+    const reason = 'setting HealthStatus.Error because of expired cold timestamps';
+    logger.debug(reason);
+    return { status: HealthStatus.Error, reason };
   }
 
   if (hasStatus(summarizedStats.stats, HealthStatus.Warning)) {
-    return HealthStatus.Warning;
+    return {
+      status: HealthStatus.Warning,
+      reason: summarizedStats.stats.capacity_estimation?.reason,
+    };
   }
 
-  return HealthStatus.OK;
+  return { status: HealthStatus.OK };
 }
 
 function hasStatus(stats: RawMonitoringStats['stats'], status: HealthStatus): boolean {

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import {
   AttachmentTotals,
-  CaseResponse,
+  Case,
   CasesByAlertId,
   RelatedCaseInfo,
 } from '@kbn/cases-plugin/common/api';
@@ -17,7 +17,7 @@ import { xorWith, isEqual } from 'lodash';
 type AttachmentTotalsKeys = keyof AttachmentTotals;
 
 export interface TestCaseWithTotals {
-  caseInfo: CaseResponse;
+  caseInfo: Case;
   totals?: Partial<AttachmentTotals>;
 }
 

@@ -204,6 +204,7 @@ export const ConfigSchema = schema.object({
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
   showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),
+  showNavLinks: schema.boolean({ defaultValue: true }),
   cookieName: schema.string({ defaultValue: 'sid' }),
   encryptionKey: schema.conditional(
     schema.contextRef('dist'),
@@ -295,6 +296,19 @@ export const ConfigSchema = schema.object({
       )
     ),
   }),
+  enabled: schema.boolean({ defaultValue: true }),
+
+  // Setting only allowed in the Serverless offering
+  ui: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.object({
+      userManagementEnabled: schema.boolean({ defaultValue: false }),
+      roleManagementEnabled: schema.boolean({ defaultValue: false }),
+      roleMappingManagementEnabled: schema.boolean({ defaultValue: false }),
+    }),
+    schema.never()
+  ),
 });
 
 export function createConfig(

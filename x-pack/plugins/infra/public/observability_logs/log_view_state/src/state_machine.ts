@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core/public';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
 import { ILogViewsClient } from '../../../services/log_views';
@@ -23,9 +21,9 @@ import {
   LogViewTypestate,
 } from './types';
 import {
-  initializeFromUrl,
-  updateContextInUrl,
-  listenForUrlChanges,
+  InitializeFromUrl,
+  UpdateContextInUrl,
+  ListenForUrlChanges,
 } from './url_state_storage_service';
 
 export const createPureLogViewStateMachine = (initialContext: LogViewContextWithReference) =>
@@ -223,6 +221,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         notifyLoadingStarted: actions.pure(() => undefined),
         notifyLoadingSucceeded: actions.pure(() => undefined),
         notifyLoadingFailed: actions.pure(() => undefined),
+        updateContextInUrl: actions.pure(() => undefined),
         storeLogViewReference: assign((context, event) =>
           'logViewReference' in event && event.logViewReference !== null
             ? ({
@@ -282,6 +281,11 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             : {}
         ),
       },
+      services: {
+        initializeFromUrl: (_context, _event) => (send) =>
+          send({ type: 'INITIALIZED_FROM_URL', logViewReference: null }),
+        listenForUrlChanges: (_context, _event) => (send) => {},
+      },
       guards: {
         isPersistedLogView: (context, event) =>
           context.logViewReference.type === 'log-view-reference',
@@ -293,16 +297,18 @@ export interface LogViewStateMachineDependencies {
   initialContext: LogViewContextWithReference;
   logViews: ILogViewsClient;
   notificationChannel?: NotificationChannel<LogViewContext, LogViewEvent, LogViewNotificationEvent>;
-  toastsService: IToasts;
-  urlStateStorage: IKbnUrlStateStorage;
+  initializeFromUrl?: InitializeFromUrl;
+  updateContextInUrl?: UpdateContextInUrl;
+  listenForUrlChanges?: ListenForUrlChanges;
 }
 
 export const createLogViewStateMachine = ({
   initialContext,
   logViews,
   notificationChannel,
-  toastsService,
-  urlStateStorage,
+  initializeFromUrl,
+  updateContextInUrl,
+  listenForUrlChanges,
 }: LogViewStateMachineDependencies) =>
   createPureLogViewStateMachine(initialContext).withConfig({
     actions: {
@@ -319,11 +325,11 @@ export const createLogViewStateMachine = ({
             ),
           }
         : {}),
-      updateContextInUrl: updateContextInUrl({ toastsService, urlStateStorage }),
+      ...(updateContextInUrl ? { updateContextInUrl } : {}),
     },
     services: {
-      initializeFromUrl: initializeFromUrl({ toastsService, urlStateStorage }),
-      listenForUrlChanges: listenForUrlChanges({ urlStateStorage }),
+      ...(initializeFromUrl ? { initializeFromUrl } : {}),
+      ...(listenForUrlChanges ? { listenForUrlChanges } : {}),
       loadLogView: (context) =>
         from(
           'logViewReference' in context

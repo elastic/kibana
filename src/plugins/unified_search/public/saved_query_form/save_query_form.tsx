@@ -53,7 +53,7 @@ export function SaveQueryForm({
   const titleConflictErrorText = i18n.translate(
     'unifiedSearch.search.searchBar.savedQueryForm.titleConflictText',
     {
-      defaultMessage: 'Name conflicts with an existing saved query',
+      defaultMessage: 'Name conflicts with an existing query',
     }
   );
 
@@ -203,7 +203,7 @@ export function SaveQueryForm({
           disabled={hasErrors}
         >
           {i18n.translate('unifiedSearch.search.searchBar.savedQueryFormSaveButtonText', {
-            defaultMessage: 'Save saved query',
+            defaultMessage: 'Save query',
           })}
         </EuiButton>
       </EuiFormRow>

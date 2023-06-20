@@ -24,4 +24,5 @@ export type SnakeToCamelCase<T> = T extends Record<string, unknown>
 export enum CASE_VIEW_PAGE_TABS {
   ALERTS = 'alerts',
   ACTIVITY = 'activity',
+  FILES = 'files',
 }

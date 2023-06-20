@@ -8,19 +8,20 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { useMetricsExplorerViews } from '../../../hooks/use_metrics_explorer_views';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { NoData } from '../../../components/empty_states';
+import { NoData, NoRemoteCluster } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { useSourceContext } from '../../../containers/metrics_source';
-import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 import { MetricsPageTemplate } from '../page_template';
 import { metricsExplorerTitle } from '../../../translations';
-import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { SavedViews } from './components/saved_views';
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
   derivedIndexPattern: DerivedIndexPattern;
@@ -45,12 +46,14 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     onViewStateChange,
     refresh,
   } = useMetricsExplorerState(source, derivedIndexPattern, enabled);
-  const { currentView, shouldLoadDefault } = useSavedViewContext();
+  const { currentView } = useMetricsExplorerViews();
+  const { source: sourceContext, metricIndicesExist } = useSourceContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
 
-  const { metricIndicesExist } = useSourceContext();
+  const { remoteClustersExist } = sourceContext?.status ?? {};
+
   useEffect(() => {
     if (currentView) {
       onViewStateChange(currentView);
@@ -58,11 +61,11 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
   }, [currentView, onViewStateChange]);
 
   useEffect(() => {
-    if (currentView != null || !shouldLoadDefault) {
+    if (currentView != null) {
       // load metrics explorer data after default view loaded, unless we're not isLoading a view
       setEnabled(true);
     }
-  }, [currentView, shouldLoadDefault]);
+  }, [currentView]);
 
   useMetricsBreadcrumbs([
     {
@@ -70,21 +73,25 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     },
   ]);
 
+  const viewState = {
+    options,
+    chartOptions,
+    currentTimerange: timeRange,
+  };
+
+  if (isLoading && !sourceContext) return <SourceLoadingPage />;
+
+  if (!remoteClustersExist) {
+    return <NoRemoteCluster />;
+  }
+
   return (
     <EuiErrorBoundary>
       <MetricsPageTemplate
         hasData={metricIndicesExist}
         pageHeader={{
           pageTitle: metricsExplorerTitle,
-          rightSideItems: [
-            <SavedViewsToolbarControls
-              viewState={{
-                options,
-                chartOptions,
-                currentTimerange: timeRange,
-              }}
-            />,
-          ],
+          rightSideItems: [<SavedViews viewState={viewState} />],
         }}
       >
         <MetricsExplorerToolbar

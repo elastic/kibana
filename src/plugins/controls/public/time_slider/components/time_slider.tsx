@@ -8,14 +8,12 @@
 
 import React, { FC, useRef } from 'react';
 import { EuiInputPopover } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { timeSliderReducers } from '../time_slider_reducers';
-import { TimeSliderReduxState } from '../types';
+import { FROM_INDEX, TO_INDEX } from '../time_utils';
+import { EuiDualRangeRef } from './time_slider_sliding_window_range';
+import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
+import { useTimeSlider } from '../embeddable/time_slider_embeddable';
 import { TimeSliderPopoverButton } from './time_slider_popover_button';
 import { TimeSliderPopoverContent } from './time_slider_popover_content';
-import { EuiDualRangeRef } from './time_slider_sliding_window_range';
-import { FROM_INDEX, TO_INDEX } from '../time_utils';
-import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
 
 import './index.scss';
 
@@ -25,25 +23,21 @@ interface Props {
 }
 
 export const TimeSlider: FC<Props> = (props: Props) => {
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions,
-  } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
-  const dispatch = useEmbeddableDispatch();
-  const stepSize = select((state) => {
+  const timeSlider = useTimeSlider();
+
+  const stepSize = timeSlider.select((state) => {
     return state.componentState.stepSize;
   });
-  const ticks = select((state) => {
+  const ticks = timeSlider.select((state) => {
     return state.componentState.ticks;
   });
-  const timeRangeBounds = select(getRoundedTimeRangeBounds);
+  const timeRangeBounds = timeSlider.select(getRoundedTimeRangeBounds);
   const timeRangeMin = timeRangeBounds[FROM_INDEX];
   const timeRangeMax = timeRangeBounds[TO_INDEX];
-  const value = select((state) => {
+  const value = timeSlider.select((state) => {
     return state.componentState.value;
   });
-  const isOpen = select((state) => {
+  const isOpen = timeSlider.select((state) => {
     return state.componentState.isOpen;
   });
 
@@ -64,7 +58,7 @@ export const TimeSlider: FC<Props> = (props: Props) => {
       input={
         <TimeSliderPopoverButton
           onClick={() => {
-            dispatch(actions.setIsOpen({ isOpen: !isOpen }));
+            timeSlider.dispatch.setIsOpen({ isOpen: !isOpen });
           }}
           formatDate={props.formatDate}
           from={from}
@@ -72,7 +66,7 @@ export const TimeSlider: FC<Props> = (props: Props) => {
         />
       }
       isOpen={isOpen}
-      closePopover={() => dispatch(actions.setIsOpen({ isOpen: false }))}
+      closePopover={() => timeSlider.dispatch.setIsOpen({ isOpen: false })}
       panelPaddingSize="s"
       anchorPosition="downCenter"
       disableFocusTrap

@@ -11,6 +11,7 @@ import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../application/explorer/explorer_constants';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
@@ -18,7 +19,6 @@ import type { AnomalyTimelineService } from '../application/services/anomaly_tim
 import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
-import { EntityField } from '../../common/util/anomaly_utils';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
@@ -107,7 +107,7 @@ export interface AnomalyChartsServices {
 
 export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, AnomalyChartsServices];
 export interface AnomalyChartsCustomOutput {
-  entityFields?: EntityField[];
+  entityFields?: MlEntityField[];
   severity?: number;
   indexPatterns?: DataView[];
 }
@@ -119,7 +119,7 @@ export interface AnomalyChartsFieldSelectionContext extends EditAnomalyChartsPan
   /**
    * Optional fields selected using anomaly charts
    */
-  data?: EntityField[];
+  data?: MlEntityField[];
 }
 export function isAnomalyExplorerEmbeddable(
   arg: unknown

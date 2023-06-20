@@ -35,6 +35,32 @@ export async function waitForRuleStatus({
   );
 }
 
+export async function runRuleSoon({
+  ruleId,
+  supertest,
+}: {
+  ruleId: string;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+}): Promise<Record<string, any>> {
+  return pRetry(
+    async () => {
+      try {
+        const response = await supertest
+          .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
+        if (response.status !== 204) {
+          throw new Error(`runRuleSoon got ${response.status} status`);
+        }
+        return response;
+      } catch (error) {
+        throw new Error(`[Rule] Running a rule ${ruleId} failed: ${error}`);
+      }
+    },
+    { retries: 10 }
+  );
+}
+
 export async function waitForDocumentInIndex<T>({
   es,
   indexName,
@@ -45,6 +71,36 @@ export async function waitForDocumentInIndex<T>({
   return pRetry(
     async () => {
       const response = await es.search<T>({ index: indexName });
+      if (response.hits.hits.length === 0) {
+        throw new Error('No hits found');
+      }
+      return response;
+    },
+    { retries: 10 }
+  );
+}
+
+export async function waitForAlertInIndex<T>({
+  es,
+  indexName,
+  ruleId,
+}: {
+  es: Client;
+  indexName: string;
+  ruleId: string;
+}): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
+  return pRetry(
+    async () => {
+      const response = await es.search<T>({
+        index: indexName,
+        body: {
+          query: {
+            term: {
+              'kibana.alert.rule.uuid': ruleId,
+            },
+          },
+        },
+      });
       if (response.hits.hits.length === 0) {
         throw new Error('No hits found');
       }

@@ -69,7 +69,7 @@ describe('AggsService - server', () => {
           {} as ElasticsearchClient
         );
 
-      expect(start.types.get('terms').name).toBe('terms');
+      expect(start.types.get('terms')?.name).toBe('terms');
     });
 
     test('registers default agg types', async () => {

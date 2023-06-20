@@ -47,6 +47,19 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
   { id: 'rule.name' },
+  { id: 'cloud.provider' },
+  { id: 'cloud.region' },
+  { id: 'cloud.provider' },
+  { id: 'cloud.region' },
+  { id: 'orchestrator.cluster.id' },
+  { id: 'orchestrator.cluster.name' },
+  { id: 'container.image.name' },
+  { id: 'container.image.tag' },
+  { id: 'orchestrator.namespace' },
+  { id: 'orchestrator.resource.parent.type' },
+  { id: 'orchestrator.resource.type' },
+  { id: 'process.executable' },
+  { id: 'file.path' },
   { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
 ];
 
@@ -203,9 +216,16 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
+  This function is exported because it is used in the Exception Component to
+  populate the conditions with the Highlighted Fields. Additionally, the new 
+  Alert Summary Flyout also requires access to these fields.
+  As the Alert Summary components will undergo changes soon we will go with
+  exporting the function only for now.
+ */
+/**
  * Assembles a list of fields to display based on the event
  */
-function getEventFieldsToDisplay({
+export function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,

@@ -10,6 +10,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
+import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
+import type {
+  HostPolicyResponse,
+  LogsEndpointActionResponse,
+} from '../../../common/endpoint/types';
+import type { IndexEndpointHostsCyTaskOptions, HostActionResponse } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
   IndexedFleetEndpointPolicyResponse,
@@ -50,6 +57,20 @@ declare global {
         ...args: Parameters<Cypress.Chainable<E>['find']>
       ): Chainable<JQuery<E>>;
 
+      /**
+       * Continuously call provided callback function until it either return `true`
+       * or fail if `timeout` is reached.
+       * @param fn
+       * @param options
+       */
+      waitUntil(
+        fn: (subject?: any) => boolean | Promise<boolean> | Chainable<boolean>,
+        options?: Partial<{
+          interval: number;
+          timeout: number;
+        }>
+      ): Chainable<Subject>;
+
       task(
         name: 'indexFleetEndpointPolicy',
         arg: {
@@ -79,7 +100,7 @@ declare global {
 
       task(
         name: 'indexEndpointHosts',
-        arg?: { count?: number },
+        arg?: IndexEndpointHostsCyTaskOptions,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<IndexedHostsAndAlertsResponse>;
 
@@ -100,6 +121,54 @@ declare global {
         arg: IndexedEndpointRuleAlerts['alerts'],
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<DeletedIndexedEndpointRuleAlerts>;
+
+      task(
+        name: 'indexEndpointPolicyResponse',
+        arg: HostPolicyResponse,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<IndexedEndpointPolicyResponse>;
+
+      task(
+        name: 'deleteIndexedEndpointPolicyResponse',
+        arg: IndexedEndpointPolicyResponse,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<null>;
+
+      task(
+        name: 'sendHostActionResponse',
+        arg: HostActionResponse,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<LogsEndpointActionResponse>;
+
+      task(
+        name: 'deleteAllEndpointData',
+        arg: { endpointAgentIds: string[] },
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<DeleteAllEndpointDataResponse>;
+
+      task(
+        name: 'createFileOnEndpoint',
+        arg: { hostname: string; path: string; content: string },
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<null>;
+
+      task(
+        name: 'uploadFileToEndpoint',
+        arg: { hostname: string; srcPath: string; destPath: string },
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<null>;
+
+      task(
+        name: 'installPackagesOnEndpoint',
+        arg: { hostname: string; packages: string[] },
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<null>;
+
+      task(
+        name: 'readZippedFileContentOnEndpoint',
+        arg: { hostname: string; path: string; password?: string },
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<string>;
     }
   }
 }

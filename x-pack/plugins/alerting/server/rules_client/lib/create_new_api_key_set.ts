@@ -13,21 +13,33 @@ import { RulesClientContext } from '../types';
 export async function createNewAPIKeySet(
   context: RulesClientContext,
   {
-    attributes,
+    id,
+    ruleName,
     username,
+    shouldUpdateApiKey,
+    errorMessage,
   }: {
-    attributes: RawRule;
+    id: string;
+    ruleName: string;
     username: string | null;
+    shouldUpdateApiKey: boolean;
+    errorMessage?: string;
   }
-): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner'>> {
+): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser'>> {
   let createdAPIKey = null;
+  let isAuthTypeApiKey = false;
   try {
-    createdAPIKey = await context.createAPIKey(
-      generateAPIKeyName(attributes.alertTypeId, attributes.name)
-    );
+    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
+    const name = generateAPIKeyName(id, ruleName);
+    createdAPIKey = shouldUpdateApiKey
+      ? isAuthTypeApiKey
+        ? context.getAuthenticationAPIKey(`${name}-user-created`)
+        : await context.createAPIKey(name)
+      : null;
   } catch (error) {
-    throw Boom.badRequest(`Error creating API key for rule: ${error.message}`);
+    const message = errorMessage ? errorMessage : 'Error creating API key for rule';
+    throw Boom.badRequest(`${message} - ${error.message}`);
   }
 
-  return apiKeyAsAlertAttributes(createdAPIKey, username);
+  return apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey);
 }

@@ -7,7 +7,7 @@
 import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
-  UserskKpiStrategyResponse,
+  UsersKpiStrategyResponse,
 } from '../../../../common/search_strategy';
 import type { UpdateDateRange } from '../../../common/components/charts/common';
 import type { StatItems, StatItemsProps } from './types';
@@ -15,7 +15,7 @@ import { addValueToAreaChart, addValueToBarChart, addValueToFields } from './uti
 
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse,
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UsersKpiStrategyResponse,
   id: string,
   from: string,
   to: string,

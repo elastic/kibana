@@ -4,34 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import { partition } from 'lodash';
-import { CASE_SAVED_OBJECT, MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
+import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import type { BulkGetAttachmentsResponse, CommentAttributes } from '../../../common/api';
 import {
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
   BulkGetAttachmentsResponseRt,
   BulkGetAttachmentsRequestRt,
 } from '../../../common/api';
 import { flattenCommentSavedObjects } from '../../common/utils';
 import { createCaseError } from '../../common/error';
-import type { CasesClientArgs, SOWithErrors } from '../types';
+import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { BulkGetArgs } from './types';
 import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/attachments/types';
-import { CASE_REF_NAME } from '../../common/constants';
 import type { CasesClient } from '../client';
+import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
+import { partitionByCaseAssociation } from '../../common/partitioning';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
-type AttachmentSavedObjectWithErrors = SOWithErrors<CommentAttributes>;
-
-type AttachmentSavedObject = SavedObject<CommentAttributes>;
+type AttachmentSavedObjectWithErrors = Array<SOWithErrors<CommentAttributes>>;
 
 /**
  * Retrieves multiple attachments by id.
@@ -48,10 +43,7 @@ export async function bulkGet(
   } = clientArgs;
 
   try {
-    const request = pipe(
-      excess(BulkGetAttachmentsRequestRt).decode({ ids: attachmentIDs }),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: attachmentIDs });
 
     throwErrorIfIdsExceedTheLimit(request.ids);
 
@@ -76,10 +68,12 @@ export async function bulkGet(
       caseId: caseID,
     });
 
-    return BulkGetAttachmentsResponseRt.encode({
+    const res = {
       attachments: flattenCommentSavedObjects(authorizedAttachments),
       errors,
-    });
+    };
+
+    return decodeOrThrow(BulkGetAttachmentsResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,
@@ -125,17 +119,6 @@ const partitionBySOError = (attachments: Array<OptionalAttributes<CommentAttribu
     attachments,
     (attachment) => attachment.error == null && attachment.attributes != null
   ) as [AttachmentSavedObject[], AttachmentSavedObjectWithErrors];
-
-const partitionByCaseAssociation = (caseId: string, attachments: AttachmentSavedObject[]) =>
-  partition(attachments, (attachment) => {
-    const ref = getCaseReference(attachment.references);
-
-    return caseId === ref?.id;
-  });
-
-const getCaseReference = (references: SavedObjectReference[]): SavedObjectReference | undefined => {
-  return references.find((ref) => ref.name === CASE_REF_NAME && ref.type === CASE_SAVED_OBJECT);
-};
 
 const constructErrors = ({
   caseId,

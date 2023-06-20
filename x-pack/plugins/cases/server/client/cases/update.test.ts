@@ -249,5 +249,98 @@ describe('update', () => {
       expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([]);
       expect(clientArgs.services.notificationService.notifyAssignees).not.toHaveBeenCalled();
     });
+
+    it('should throw an error when an invalid field is included in the request payload', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                assignees: [{ uid: '1' }],
+                // @ts-expect-error invalid field
+                foo: 'bar',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: invalid keys \\"foo\\""`
+      );
+    });
+  });
+
+  describe('Category', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+    });
+
+    it('does not update the category if the length is too long', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                category: 'A very long category with more than fifty characters!',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too long. The maximum length is 50, ids: [mock-id-1]'
+      );
+    });
+
+    it('does not update the category if it is just an empty string', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                category: '',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category cannot be an empty string. Ids: [mock-id-1]'
+      );
+    });
+
+    it('does not update the category if it is a string with empty characters', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                category: '   ',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category cannot be an empty string. Ids: [mock-id-1]'
+      );
+    });
   });
 });

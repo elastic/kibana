@@ -6,6 +6,11 @@
  */
 
 import { ILicense } from '@kbn/licensing-plugin/server';
+import {
+  LICENSE_MISSING_ERROR,
+  LICENSE_NOT_ACTIVE_ERROR,
+  LICENSE_NOT_SUPPORTED_ERROR,
+} from '../../../../common/constants';
 
 export interface UMLicenseStatusResponse {
   statusCode: number;
@@ -18,19 +23,19 @@ export type UMLicenseCheck = (
 export const licenseCheck: UMLicenseCheck = (license) => {
   if (license === undefined) {
     return {
-      message: 'Missing license information',
+      message: LICENSE_MISSING_ERROR,
       statusCode: 400,
     };
   }
   if (!license.hasAtLeast('basic')) {
     return {
-      message: 'License not supported',
+      message: LICENSE_NOT_SUPPORTED_ERROR,
       statusCode: 401,
     };
   }
   if (license.isActive === false) {
     return {
-      message: 'License not active',
+      message: LICENSE_NOT_ACTIVE_ERROR,
       statusCode: 403,
     };
   }

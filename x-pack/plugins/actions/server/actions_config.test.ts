@@ -33,6 +33,7 @@ const defaultActionsConfig: ActionsConfig = {
     proxyVerificationMode: 'full',
     verificationMode: 'full',
   },
+  enableFooterInEmail: true,
 };
 
 describe('ensureUriAllowed', () => {

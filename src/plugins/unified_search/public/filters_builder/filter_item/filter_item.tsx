@@ -96,6 +96,7 @@ export function FilterItem({
     dropTarget,
     globalParams: { hideOr },
     timeRangeForSuggestionsOverride,
+    filtersForSuggestions,
     disabled,
   } = useContext(FiltersBuilderContextType);
   const conditionalOperationType = getBooleanRelationType(filter);
@@ -309,6 +310,7 @@ export function FilterItem({
                                   onHandleParamsChange={onHandleParamsChange}
                                   onHandleParamsUpdate={onHandleParamsUpdate}
                                   timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                                  filtersForSuggestions={filtersForSuggestions}
                                 />
                               </div>
                             </EuiFormRow>

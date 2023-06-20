@@ -19,7 +19,10 @@ import {
   RuleExecutionEventType,
   ruleExecutionStatusToNumber,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
-import { RULE_SAVED_OBJECT_TYPE, RULE_EXECUTION_LOG_PROVIDER } from './constants';
+import {
+  RULE_SAVED_OBJECT_TYPE,
+  RULE_EXECUTION_LOG_PROVIDER,
+} from '../../event_log/event_log_constants';
 
 export interface IEventLogWriter {
   logMessage(args: MessageArgs): void;
@@ -31,6 +34,7 @@ export interface BaseArgs {
   ruleId: string;
   ruleUuid: string;
   ruleName: string;
+  ruleRevision: number;
   ruleType: string;
   spaceId: string;
   executionId: string;
@@ -83,6 +87,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
               execution: {
                 uuid: args.executionId,
               },
+              revision: args.ruleRevision,
             },
           },
           space_ids: [args.spaceId],
@@ -126,6 +131,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
                 status: args.newStatus,
                 status_order: ruleExecutionStatusToNumber(args.newStatus),
               },
+              revision: args.ruleRevision,
             },
           },
           space_ids: [args.spaceId],
@@ -167,6 +173,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
                 uuid: args.executionId,
                 metrics: args.metrics,
               },
+              revision: args.ruleRevision,
             },
           },
           space_ids: [args.spaceId],

@@ -9,12 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { initTransform } from './object_transform';
 
-import type {
-  ObjectMigrationDefinition,
-  ObjectTransforms,
-  Version,
-  VersionableObject,
-} from './types';
+import type { ObjectMigrationDefinition, Version, VersionableObject } from './types';
 
 interface FooV1 {
   fullName: string;
@@ -25,7 +20,7 @@ const v1Tv2Transform = jest.fn((v1: FooV1): FooV2 => {
   return { firstName, lastName };
 });
 
-const fooDefV1: VersionableObject = {
+const fooDefV1: VersionableObject<any, any, any, any> = {
   schema: schema.object({
     fullName: schema.string({ minLength: 1 }),
   }),
@@ -43,7 +38,7 @@ const v2Tv1Transform = jest.fn((v2: FooV2): FooV1 => {
   };
 });
 
-const fooDefV2: VersionableObject = {
+const fooDefV2: VersionableObject<any, any, any, any> = {
   schema: schema.object({
     firstName: schema.string(),
     lastName: schema.string(),
@@ -56,8 +51,10 @@ const fooMigrationDef: ObjectMigrationDefinition = {
   2: fooDefV2,
 };
 
-const setup = (browserVersion: Version): ObjectTransforms => {
-  const transformsFactory = initTransform(browserVersion);
+const setup = <UpIn = unknown, UpOut = unknown, DownIn = unknown, DownOut = unknown>(
+  browserVersion: Version
+) => {
+  const transformsFactory = initTransform<UpIn, UpOut, DownIn, DownOut>(browserVersion);
   return transformsFactory(fooMigrationDef);
 };
 
@@ -127,7 +124,12 @@ describe('object transform', () => {
 
   describe('down()', () => {
     test('it should down transform to a previous version', () => {
-      const fooTransforms = setup(1);
+      const fooTransforms = setup<
+        void,
+        void,
+        { firstName: string; lastName: string },
+        { fullName: string }
+      >(1);
       const { value } = fooTransforms.down({ firstName: 'John', lastName: 'Snow' });
       const expected = { fullName: 'John Snow' };
       expect(value).toEqual(expected);

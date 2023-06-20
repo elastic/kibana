@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from '@kbn/core/public';
-import { from } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -20,7 +20,10 @@ import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
+import type {
+  ExploratoryViewPublicSetup,
+  ExploratoryViewPublicStart,
+} from '@kbn/exploratory-view-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -31,6 +34,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/p
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
 import {
+  enableLegacyUptimeApp,
   FetchDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -43,6 +47,11 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
+import { AppStatus, AppUpdater } from '@kbn/core-application-browser';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import {
@@ -50,13 +59,11 @@ import {
   LazySyntheticsPolicyEditExtension,
 } from './legacy_uptime/components/fleet_package';
 import { LazySyntheticsCustomAssetsExtension } from './legacy_uptime/components/fleet_package/lazy_synthetics_custom_assets_extension';
-import { uptimeOverviewNavigatorParams } from './apps/locators/overview';
 import {
   uptimeAlertTypeInitializers,
   legacyAlertTypeInitializers,
 } from './legacy_uptime/lib/alert_types';
-import { monitorDetailNavigatorParams } from './apps/locators/monitor_detail';
-import { editMonitorNavigatorParams } from './apps/locators/edit_monitor';
+import { locators } from './apps/locators';
 import { setStartServices } from './kibana_services';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 
@@ -65,6 +72,7 @@ export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
@@ -77,7 +85,9 @@ export interface ClientPluginsStart {
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
+  exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
@@ -92,7 +102,6 @@ export interface ClientPluginsStart {
   docLinks: DocLinksStart;
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
-  savedObjects: CoreStart['savedObjects'];
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -109,6 +118,8 @@ export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
   constructor(private readonly initContext: PluginInitializerContext) {}
+
+  private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
     if (plugins.home) {
@@ -129,9 +140,9 @@ export class UptimePlugin
       return UptimeDataHelper(coreStart);
     };
 
-    plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
-    plugins.share.url.locators.create(monitorDetailNavigatorParams);
-    plugins.share.url.locators.create(editMonitorNavigatorParams);
+    locators.forEach((locator) => {
+      plugins.share.url.locators.create(locator);
+    });
 
     plugins.observability.dashboard.register({
       appName: 'uptime',
@@ -159,7 +170,7 @@ export class UptimePlugin
       },
     });
 
-    registerUptimeRoutesWithNavigation(core, plugins);
+    registerSyntheticsRoutesWithNavigation(core, plugins);
 
     core.getStartServices().then(([coreStart, clientPluginsStart]) => {});
 
@@ -184,6 +195,7 @@ export class UptimePlugin
     core.application.register({
       id: PLUGIN.ID,
       euiIconType: 'logoObservability',
+
       order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -198,6 +210,7 @@ export class UptimePlugin
         const { renderApp } = await import('./legacy_uptime/app/render_app');
         return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
       },
+      updater$: this.uptimeAppUpdater,
     });
 
     // Register the Synthetics UI plugin
@@ -205,11 +218,7 @@ export class UptimePlugin
       id: 'synthetics',
       euiIconType: 'logoObservability',
       order: 8400,
-      title:
-        PLUGIN.SYNTHETICS +
-        i18n.translate('xpack.synthetics.overview.headingBeta', {
-          defaultMessage: ' (beta)',
-        }),
+      title: PLUGIN.SYNTHETICS,
       category: DEFAULT_APP_CATEGORIES.observability,
       keywords: appKeywords,
       deepLinks: [],
@@ -262,50 +271,77 @@ export class UptimePlugin
         triggersActionsUi.ruleTypeRegistry.register(alertInitializer);
       }
     });
+
+    setUptimeAppStatus(coreStart, pluginsStart, this.uptimeAppUpdater);
   }
 
   public stop(): void {}
 }
 
-function registerUptimeRoutesWithNavigation(
+function registerUptimeRoutesWithNavigation(coreStart: CoreStart, plugins: ClientPluginsStart) {
+  async function getUptimeSections() {
+    if (coreStart.application.capabilities.uptime.show) {
+      return [
+        {
+          label: 'Uptime',
+          sortKey: 500,
+          entries: [
+            {
+              label: i18n.translate('xpack.synthetics.overview.uptimeHeading', {
+                defaultMessage: 'Uptime Monitors',
+              }),
+              app: 'uptime',
+              path: '/',
+              matchFullPath: true,
+              ignoreTrailingSlash: true,
+            },
+            {
+              label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
+                defaultMessage: 'TLS Certificates',
+              }),
+              app: 'uptime',
+              path: '/certificates',
+              matchFullPath: true,
+            },
+          ],
+        },
+      ];
+    }
+    return [];
+  }
+  plugins.observabilityShared.navigation.registerSections(from(getUptimeSections()));
+}
+
+function registerSyntheticsRoutesWithNavigation(
   core: CoreSetup<ClientPluginsStart, unknown>,
   plugins: ClientPluginsSetup
 ) {
-  plugins.observability.navigation.registerSections(
+  plugins.observabilityShared.navigation.registerSections(
     from(core.getStartServices()).pipe(
       map(([coreStart]) => {
         if (coreStart.application.capabilities.uptime.show) {
           return [
             {
-              label: 'Uptime',
-              sortKey: 500,
+              label: 'Synthetics',
+              sortKey: 499,
               entries: [
                 {
-                  label: i18n.translate('xpack.synthetics.overview.uptimeHeading', {
-                    defaultMessage: 'Uptime Monitors',
+                  label: i18n.translate('xpack.synthetics.overview.SyntheticsHeading', {
+                    defaultMessage: 'Monitors',
                   }),
-                  app: 'uptime',
-                  path: '/',
+                  app: 'synthetics',
+                  path: OVERVIEW_ROUTE,
                   matchFullPath: true,
                   ignoreTrailingSlash: true,
+                  isNewFeature: true,
                 },
                 {
                   label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
                     defaultMessage: 'TLS Certificates',
                   }),
-                  app: 'uptime',
+                  app: 'synthetics',
                   path: '/certificates',
                   matchFullPath: true,
-                },
-                {
-                  label: i18n.translate('xpack.synthetics.overview.headingBetaSection', {
-                    defaultMessage: 'Synthetics',
-                  }),
-                  app: 'synthetics',
-                  path: OVERVIEW_ROUTE,
-                  matchFullPath: false,
-                  ignoreTrailingSlash: true,
-                  isBetaFeature: true,
                 },
               ],
             },
@@ -336,5 +372,29 @@ function registerUptimeFleetExtensions(registerExtension: FleetStart['registerEx
     package: 'synthetics',
     view: 'package-detail-assets',
     Component: LazySyntheticsCustomAssetsExtension,
+  });
+}
+
+function setUptimeAppStatus(
+  coreStart: CoreStart,
+  pluginsStart: ClientPluginsStart,
+  updater: BehaviorSubject<AppUpdater>
+) {
+  import('./legacy_uptime/app/uptime_overview_fetcher').then(({ UptimeDataHelper }) => {
+    const isEnabled = coreStart.uiSettings.get<boolean>(enableLegacyUptimeApp);
+    if (isEnabled) {
+      registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
+      updater.next(() => ({ status: AppStatus.accessible }));
+    } else {
+      const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d', 'now');
+      indexStatusPromise.then((indexStatus) => {
+        if (indexStatus.indexExists) {
+          registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
+          updater.next(() => ({ status: AppStatus.accessible }));
+        } else {
+          updater.next(() => ({ status: AppStatus.inaccessible }));
+        }
+      });
+    }
   });
 }

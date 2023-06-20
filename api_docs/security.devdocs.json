@@ -514,6 +514,19 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-public.SecurityLicenseFeatures.allowRoleRemoteIndexPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleRemoteIndexPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote index privileges in roles."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-public.SecurityLicenseFeatures.allowRbac",
             "type": "boolean",
             "tags": [],
@@ -931,6 +944,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "security",
+        "id": "def-public.ALL_SPACES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ALL_SPACES_ID",
+        "description": [
+          "\nThe identifier in a saved object's `namespaces` array when it is shared globally to all spaces."
+        ],
+        "signature": [
+          "\"*\""
+        ],
+        "path": "x-pack/plugins/security/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "security",
         "id": "def-public.AuthenticationServiceStart",
@@ -3061,7 +3091,7 @@
         "label": "CasesSupportedOperations",
         "description": [],
         "signature": [
-          "\"pushCase\" | \"createCase\" | \"createComment\" | \"createConfiguration\" | \"getCase\" | \"getComment\" | \"getTags\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"updateConfiguration\" | \"deleteCase\" | \"deleteComment\""
+          "\"getTags\" | \"pushCase\" | \"createCase\" | \"createComment\" | \"createConfiguration\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"updateConfiguration\" | \"deleteCase\" | \"deleteComment\""
         ],
         "path": "x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
@@ -3170,10 +3200,6 @@
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
             {
-              "plugin": "logstash",
-              "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts"
-            },
-            {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
             },
@@ -3196,6 +3222,10 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
+            },
+            {
+              "plugin": "logstash",
+              "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts"
             },
             {
               "plugin": "cloudChat",
@@ -4148,7 +4178,9 @@
                 "section": "def-common.RoleIndexPrivilege",
                 "text": "RoleIndexPrivilege"
               },
-              "[]; run_as: string[]; }"
+              "[]; remote_indices?: ",
+              "RoleRemoteIndexPrivilege",
+              "[] | undefined; run_as: string[]; }"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
             "deprecated": false,
@@ -4623,6 +4655,19 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowRoleRemoteIndexPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleRemoteIndexPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote index privileges in roles."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-common.SecurityLicenseFeatures.allowRbac",
             "type": "boolean",
             "tags": [],
@@ -4918,14 +4963,14 @@
           {
             "parentPluginId": "security",
             "id": "def-common.UserProfileAvatarData.imageUrl",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "imageUrl",
             "description": [
               "\nBase64 data URL for the user avatar image."
             ],
             "signature": [
-              "string | undefined"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
             "deprecated": false,

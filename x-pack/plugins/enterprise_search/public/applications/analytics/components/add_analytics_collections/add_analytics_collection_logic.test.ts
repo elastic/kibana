@@ -151,6 +151,20 @@ describe('addAnalyticsCollectionLogic', () => {
         });
       });
     });
+
+    describe('setNameValue', () => {
+      it('should call an error if name is not valid', () => {
+        AddAnalyticsCollectionLogic.actions.setNameValue('Invalid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeTruthy();
+      });
+
+      it('should remove error if name become valid', () => {
+        AddAnalyticsCollectionLogic.actions.setNameValue('Invalid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeTruthy();
+        AddAnalyticsCollectionLogic.actions.setNameValue('valid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeFalsy();
+      });
+    });
   });
 
   describe('selectors', () => {

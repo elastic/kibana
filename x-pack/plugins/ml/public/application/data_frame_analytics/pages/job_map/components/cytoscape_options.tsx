@@ -6,10 +6,7 @@
  */
 
 import cytoscape from 'cytoscape';
-import {
-  ANALYSIS_CONFIG_TYPE,
-  JOB_MAP_NODE_TYPES,
-} from '../../../../../../common/constants/data_frame_analytics';
+import { ANALYSIS_CONFIG_TYPE, JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { EuiThemeType } from '../../../../components/color_range_legend';
 import classificationJobIcon from './icons/ml_classification_job.svg';
 import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';

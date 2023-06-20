@@ -66,6 +66,8 @@ export function streamReducer(
       return { ...state, errors: [...state.errors, action.payload] };
     case API_ACTION_NAME.RESET_ERRORS:
       return { ...state, errors: [] };
+    case API_ACTION_NAME.RESET_GROUPS:
+      return { ...state, significantTermsGroups: [] };
     case API_ACTION_NAME.RESET_ALL:
       return initialState;
     case API_ACTION_NAME.UPDATE_LOADING_STATE:

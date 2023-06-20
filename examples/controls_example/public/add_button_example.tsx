@@ -9,11 +9,8 @@
 import React from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 
 export const AddButtonExample = ({ dataViewId }: { dataViewId: string }) => {
   return (

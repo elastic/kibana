@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  CommentType,
-  ExternalReferenceStorageType,
-  FILE_ATTACHMENT_TYPE,
-} from '../../../common/api';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { CommentType, ExternalReferenceStorageType } from '../../../common/api';
 import type {
   CommentRequestUserType,
   CommentRequestAlertType,
@@ -39,7 +36,7 @@ export const createFileRequests = ({
   const files: FileAttachmentMetadata['files'] = [...Array(numFiles).keys()].map((value) => {
     return {
       name: `${value}`,
-      createdAt: '2023-02-27T20:26:54.345Z',
+      created: '2023-02-27T20:26:54.345Z',
       extension: 'png',
       mimeType: 'image/png',
     };

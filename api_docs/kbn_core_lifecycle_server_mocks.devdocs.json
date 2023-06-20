@@ -184,7 +184,7 @@
               "IExecutionContext",
               ">; coreUsageData: jest.Mocked<",
               "InternalCoreUsageDataSetup",
-              ">; customBranding: { register: jest.Mock<any, any>; getBrandingFor: jest.Mock<any, any>; }; }"
+              ">; customBranding: { register: jest.Mock<any, any>; getBrandingFor: jest.Mock<any, any>; }; userSettings: { setUserProfileSettings: jest.Mock<any, any>; getUserSettingDarkMode: jest.Mock<any, any>; }; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
             "deprecated": false,

@@ -107,7 +107,8 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
 
   // Merge all valid meta fields into the flattened object
   indexPattern?.metaFields?.forEach((fieldName) => {
-    const isExcludedMetaField = EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.at(0) !== '_';
+    const isExcludedMetaField =
+      EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.charAt(0) !== '_';
     if (isExcludedMetaField) {
       return;
     }

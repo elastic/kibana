@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getMappingConflictsInfo } from '.';
+import { getMappingConflictsInfo, fieldSupportsMatches } from '.';
 
 describe('Helpers', () => {
   describe('getMappingConflictsInfo', () => {
@@ -141,6 +141,44 @@ describe('Helpers', () => {
           ],
         },
       ]);
+    });
+  });
+
+  describe('fieldSupportsMatches', () => {
+    test('it returns true if esTypes is keyword', () => {
+      expect(
+        fieldSupportsMatches({ name: 'field', type: 'conflict', esTypes: ['keyword'] })
+      ).toBeTruthy();
+    });
+
+    test('it returns true if one of the esTypes is kibana type string and another is not', () => {
+      expect(
+        fieldSupportsMatches({ name: 'field', type: 'conflict', esTypes: ['keyword', 'object'] })
+      ).toBeTruthy();
+    });
+
+    test('it returns true if one of the esTypes is keyword', () => {
+      expect(
+        fieldSupportsMatches({ name: 'field', type: 'conflict', esTypes: ['keyword', 'unmapped'] })
+      ).toBeTruthy();
+    });
+
+    test('it returns true if one of the esTypes is text', () => {
+      expect(
+        fieldSupportsMatches({ name: 'field', type: 'conflict', esTypes: ['text', 'unmapped'] })
+      ).toBeTruthy();
+    });
+
+    test('it returns true if all of the esTypes is map to kibana type string', () => {
+      expect(
+        fieldSupportsMatches({ name: 'field', type: 'conflict', esTypes: ['text', 'keyword'] })
+      ).toBeTruthy();
+    });
+
+    test('it returns false if none of the esTypes map to kibana type string', () => {
+      expect(
+        fieldSupportsMatches({ name: 'field', type: 'conflict', esTypes: ['bool', 'unmapped'] })
+      ).toBeFalsy();
     });
   });
 });

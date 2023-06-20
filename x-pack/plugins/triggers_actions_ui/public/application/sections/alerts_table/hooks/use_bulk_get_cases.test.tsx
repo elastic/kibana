@@ -44,7 +44,6 @@ describe('useBulkGetCases', () => {
       expect.anything(),
       {
         ids: ['case-1'],
-        fields: ['title', 'description', 'status', 'totalComment', 'created_at', 'created_by'],
       },
       expect.any(AbortSignal)
     );
@@ -75,7 +74,6 @@ describe('useBulkGetCases', () => {
         expect.anything(),
         {
           ids: ['case-1'],
-          fields: ['title', 'description', 'status', 'totalComment', 'created_at', 'created_by'],
         },
         expect.any(AbortSignal)
       );

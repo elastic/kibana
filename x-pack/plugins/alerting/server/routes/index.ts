@@ -46,6 +46,15 @@ import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './get_rule_tags';
 
+import { createMaintenanceWindowRoute } from './maintenance_window/create_maintenance_window';
+import { getMaintenanceWindowRoute } from './maintenance_window/get_maintenance_window';
+import { updateMaintenanceWindowRoute } from './maintenance_window/update_maintenance_window';
+import { deleteMaintenanceWindowRoute } from './maintenance_window/delete_maintenance_window';
+import { findMaintenanceWindowsRoute } from './maintenance_window/find_maintenance_windows';
+import { archiveMaintenanceWindowRoute } from './maintenance_window/archive_maintenance_window';
+import { finishMaintenanceWindowRoute } from './maintenance_window/finish_maintenance_window';
+import { activeMaintenanceWindowsRoute } from './maintenance_window/active_maintenance_windows';
+
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
@@ -93,4 +102,12 @@ export function defineRoutes(opts: RouteOptions) {
   getFlappingSettingsRoute(router, licenseState);
   updateFlappingSettingsRoute(router, licenseState);
   getRuleTagsRoute(router, licenseState);
+  createMaintenanceWindowRoute(router, licenseState);
+  getMaintenanceWindowRoute(router, licenseState);
+  updateMaintenanceWindowRoute(router, licenseState);
+  deleteMaintenanceWindowRoute(router, licenseState);
+  findMaintenanceWindowsRoute(router, licenseState);
+  archiveMaintenanceWindowRoute(router, licenseState);
+  finishMaintenanceWindowRoute(router, licenseState);
+  activeMaintenanceWindowsRoute(router, licenseState);
 }

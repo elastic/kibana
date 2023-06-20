@@ -25,11 +25,6 @@ import {
 } from '../../legacy_uptime/lib/telemetry/constants';
 import { MonitorErrorEvent } from '../../legacy_uptime/lib/telemetry/types';
 
-export interface UpgradeError {
-  key?: string;
-  message: string | string[];
-}
-
 export function sendTelemetryEvents(
   logger: Logger,
   eventsTelemetry: TelemetryEventsSender | undefined,
@@ -165,8 +160,6 @@ function getScriptType(
   isInlineScript: boolean
 ): MonitorUpdateEvent['scriptType'] | undefined {
   switch (true) {
-    case Boolean(attributes[ConfigKey.SOURCE_ZIP_URL]):
-      return 'zip';
     case Boolean(
       isInlineScript && attributes[ConfigKey.METADATA]?.script_source?.is_generated_script
     ):

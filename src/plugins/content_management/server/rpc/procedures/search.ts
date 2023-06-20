@@ -8,31 +8,20 @@
 
 import { rpcSchemas } from '../../../common/schemas';
 import type { SearchIn } from '../../../common';
-import type { StorageContext, ContentCrud } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { validateRequestVersion } from './utils';
+import { getStorageContext } from './utils';
 
 export const search: ProcedureDefinition<Context, SearchIn<string>> = {
   schemas: rpcSchemas.search,
-  fn: async (ctx, { contentTypeId, version: _version, query, options }) => {
-    const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
-    const version = validateRequestVersion(_version, contentDefinition.version.latest);
+  fn: async (ctx, { contentTypeId, version, query, options }) => {
+    const storageContext = getStorageContext({
+      contentTypeId,
+      version,
+      ctx,
+    });
 
-    // Execute CRUD
-    const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
-    const storageContext: StorageContext = {
-      requestHandlerContext: ctx.requestHandlerContext,
-      version: {
-        request: version,
-        latest: contentDefinition.version.latest,
-      },
-      utils: {
-        getTransforms: ctx.getTransformsFactory(contentTypeId),
-      },
-    };
-    const result = await crudInstance.search(storageContext, query, options);
-
-    return result;
+    const crudInstance = ctx.contentRegistry.getCrud(contentTypeId);
+    return crudInstance.search(storageContext, query, options);
   },
 };

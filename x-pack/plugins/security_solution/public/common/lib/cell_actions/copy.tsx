@@ -6,11 +6,11 @@
  */
 
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { getPageRowIndex } from '@kbn/securitysolution-data-table';
 import React, { useMemo } from 'react';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
-import { getPageRowIndex } from '../../components/data_table/pagination';
 import { EmptyComponent, useKibanaServices } from './helpers';
 
 export const getCopyCellAction = ({

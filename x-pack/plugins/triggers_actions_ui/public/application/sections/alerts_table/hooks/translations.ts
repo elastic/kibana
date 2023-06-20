@@ -35,9 +35,16 @@ export const ADD_TO_NEW_CASE = i18n.translate(
   }
 );
 
-export const ADD_TO_CASE_DISABLED = i18n.translate(
-  'xpack.triggersActionsUI.alerts.table.actions.addToCaseDisabled',
+export const NO_ALERTS_ADDED_TO_CASE = i18n.translate(
+  'xpack.triggersActionsUI.alerts.table.actions.noAlertsAddedToCaseTitle',
   {
-    defaultMessage: 'Add to case is not supported for this selection',
+    defaultMessage: 'No alerts added to the case',
+  }
+);
+
+export const ALERTS_ALREADY_ATTACHED_TO_CASE = i18n.translate(
+  'xpack.triggersActionsUI.alerts.table.actions.alertsAlreadyAttachedToCase',
+  {
+    defaultMessage: 'All selected alerts are already attached to the case',
   }
 );

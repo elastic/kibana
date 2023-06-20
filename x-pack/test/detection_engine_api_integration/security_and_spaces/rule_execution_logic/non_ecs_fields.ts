@@ -8,7 +8,7 @@
 import expect from 'expect';
 import {
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getPreviewAlerts,
   getRuleForSignalTesting,
   previewRule,
@@ -56,7 +56,8 @@ export default ({ getService }: FtrProviderContext) => {
     };
   };
 
-  describe('Non ECS fields in alert document source', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154277
+  describe.skip('Non ECS fields in alert document source', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
@@ -67,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
       );
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

@@ -1,14 +1,11 @@
 {
   "description": "Security: Network - Looks for an unusually large spike in network traffic. Such a burst of traffic, if not caused by a surge in business activity, can be due to suspicious or malicious activity. Large-scale data exfiltration may produce a burst of network traffic; this could also be due to unusually large amounts of reconnaissance or enumeration traffic.  Denial-of-service attacks or traffic floods may also produce such a surge in traffic.",
-  "groups": [
-    "security",
-    "network"
-  ],
+  "groups": ["security", "network"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high_count",
+        "detector_description": "Detects high count of network events.",
         "function": "high_count",
         "detector_index": 0
       }
@@ -18,8 +15,7 @@
       "destination.as.organization.name",
       "source.ip",
       "destination.ip"
-    ],
-    "model_prune_window": "30d"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -30,6 +26,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-network",
-    "security_app_display_name": "Spike in Network Traffic"
+    "security_app_display_name": "Spike in Network Traffic",
+    "managed": true,
+    "job_revision": 4
   }
 }

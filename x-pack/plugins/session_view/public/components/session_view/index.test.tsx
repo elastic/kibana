@@ -7,6 +7,10 @@
 
 import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
+import {
+  TEST_PROCESS_INDEX,
+  TEST_SESSION_START_TIME,
+} from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/session_view_process_events.mock';
 import { sessionViewProcessEventsMergedMock } from '../../../common/mocks/responses/session_view_process_events_merged.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
@@ -14,6 +18,7 @@ import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';
 import { useDateFormat } from '../../hooks';
 import { GET_TOTAL_IO_BYTES_ROUTE, PROCESS_EVENTS_ROUTE } from '../../../common/constants';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;
@@ -41,14 +46,20 @@ describe('SessionView component', () => {
       })),
     });
 
-    global.ResizeObserver = require('resize-observer-polyfill');
+    global.ResizeObserver = ResizeObserver;
   });
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     mockedApi = mockedContext.coreStart.http.get;
     render = () =>
-      (renderResult = mockedContext.render(<SessionView sessionEntityId="test-entity-id" />));
+      (renderResult = mockedContext.render(
+        <SessionView
+          index={TEST_PROCESS_INDEX}
+          sessionStartTime={TEST_SESSION_START_TIME}
+          sessionEntityId="test-entity-id"
+        />
+      ));
     mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
-import { MetricThresholdRuleTypeParams } from '..';
+import { MetricThresholdAlert, MetricThresholdRule } from '../components/alert_details_app_section';
 
 export const buildMetricThresholdRule = (
-  rule: Partial<Rule<MetricThresholdRuleTypeParams>> = {}
-): Rule<MetricThresholdRuleTypeParams> => {
+  rule: Partial<MetricThresholdRule> = {}
+): MetricThresholdRule => {
   return {
     alertTypeId: 'metrics.alert.threshold',
     createdBy: 'admin',
@@ -85,7 +84,7 @@ export const buildMetricThresholdRule = (
         },
       ],
       filterQuery:
-        '{"bool":{"filter":[{"bool":{"should":[{"term":{"host.hostname":{"value":"Maryams-MacBook-Pro.local"}}}],"minimum_should_match":1}},{"bool":{"should":[{"term":{"service.type":{"value":"system"}}}],"minimum_should_match":1}}]}}',
+        '{"bool":{"filter":[{"bool":{"should":[{"term":{"host.hostname":{"value":"Users-System.local"}}}],"minimum_should_match":1}},{"bool":{"should":[{"term":{"service.type":{"value":"system"}}}],"minimum_should_match":1}}]}}',
       groupBy: ['host.hostname'],
     },
     monitoring: {
@@ -118,5 +117,73 @@ export const buildMetricThresholdRule = (
     },
     revision: 1,
     ...rule,
+  };
+};
+
+export const buildMetricThresholdAlert = (
+  alert: Partial<MetricThresholdAlert> = {}
+): MetricThresholdAlert => {
+  return {
+    link: '/app/metrics/explorer',
+    reason: 'system.cpu.user.pct reported no data in the last 1m for ',
+    fields: {
+      'kibana.alert.rule.parameters': {
+        criteria: [
+          {
+            aggType: Aggregators.AVERAGE,
+            comparator: Comparator.GT,
+            threshold: [2000],
+            timeSize: 15,
+            timeUnit: 'm',
+            metric: 'system.cpu.user.pct',
+          },
+          {
+            aggType: Aggregators.MAX,
+            comparator: Comparator.GT,
+            threshold: [4],
+            timeSize: 15,
+            timeUnit: 'm',
+            metric: 'system.cpu.user.pct',
+            warningComparator: Comparator.GT,
+            warningThreshold: [2.2],
+          },
+        ],
+        sourceId: 'default',
+        alertOnNoData: true,
+        alertOnGroupDisappear: true,
+      },
+      'kibana.alert.evaluation.values': [2500, 5],
+      'kibana.alert.rule.category': 'Metric threshold',
+      'kibana.alert.rule.consumer': 'alerts',
+      'kibana.alert.rule.execution.uuid': '62dd07ef-ead9-4b1f-a415-7c83d03925f7',
+      'kibana.alert.rule.name': 'One condition',
+      'kibana.alert.rule.producer': 'infrastructure',
+      'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+      'kibana.alert.rule.uuid': '3a1ed8c0-c1a8-11ed-9249-ed6d75986bdc',
+      'kibana.space_ids': ['default'],
+      'kibana.alert.rule.tags': [],
+      '@timestamp': '2023-03-28T14:40:00.000Z',
+      'kibana.alert.reason': 'system.cpu.user.pct reported no data in the last 1m for ',
+      'kibana.alert.action_group': 'metrics.threshold.nodata',
+      tags: [],
+      'kibana.alert.duration.us': 248391946000,
+      'kibana.alert.time_range': {
+        gte: '2023-03-13T14:06:23.695Z',
+      },
+      'kibana.alert.instance.id': '*',
+      'kibana.alert.start': '2023-03-28T13:40:00.000Z',
+      'kibana.alert.uuid': '50faddcd-c0a0-4122-a068-c204f4a7ec87',
+      'kibana.alert.status': 'active',
+      'kibana.alert.workflow_status': 'open',
+      'event.kind': 'signal',
+      'event.action': 'active',
+      'kibana.version': '8.8.0',
+      'kibana.alert.flapping': false,
+      'kibana.alert.rule.revision': 1,
+    },
+    active: true,
+    start: 1678716383695,
+    lastUpdated: 1678964775641,
+    ...alert,
   };
 };

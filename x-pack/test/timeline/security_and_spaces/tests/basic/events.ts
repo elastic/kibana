@@ -14,6 +14,7 @@ import {
   Direction,
   TimelineEventsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { User } from '../../../../rule_registry/common/lib/authentication/types';
 import { getSpaceUrlPrefix } from '../../../../rule_registry/common/lib/authentication/spaces';
 
@@ -126,6 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
           const resp = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
             .auth(username, password)
+            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
             .set('kbn-xsrf', 'true')
             .set('Content-Type', 'application/json')
             .send({ ...body })
@@ -157,6 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
             const resp = await supertestWithoutAuth
               .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
               .auth(username, password)
+              .set(ELASTIC_HTTP_VERSION_HEADER, '1')
               .set('kbn-xsrf', 'true')
               .set('Content-Type', 'application/json')
               .send({ ...body })
@@ -178,6 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
             .auth(username, password)
+            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
             .set('kbn-xsrf', 'true')
             .set('Content-Type', 'application/json')
             .send({ ...body })

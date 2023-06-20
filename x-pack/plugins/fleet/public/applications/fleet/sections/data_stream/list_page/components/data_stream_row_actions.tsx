@@ -10,13 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DataStream } from '../../../../types';
-import { useKibanaLink } from '../../../../hooks';
+import { useDashboardLocator } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 
 import { useAPMServiceDetailHref } from '../../../../hooks/use_apm_service_href';
 
 export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastream }) => {
   const { dashboards } = datastream;
+  const dashboardLocator = useDashboardLocator();
+
   const actionNameSingular = (
     <FormattedMessage
       id="xpack.fleet.dataStreamList.viewDashboardActionText"
@@ -82,8 +84,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
         items: [
           {
             icon: 'dashboardApp',
-            /* eslint-disable-next-line react-hooks/rules-of-hooks */
-            href: useKibanaLink(`/dashboard/${dashboards[0].id || ''}`),
+            href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboards[0]?.id } || ''),
             name: actionNameSingular,
           },
         ],
@@ -109,8 +110,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
       items: dashboards.map((dashboard) => {
         return {
           icon: 'dashboardApp',
-          /* eslint-disable-next-line react-hooks/rules-of-hooks */
-          href: useKibanaLink(`/dashboard/${dashboard.id || ''}`),
+          href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboard?.id } || ''),
           name: dashboard.title,
         };
       }),

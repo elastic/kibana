@@ -6,13 +6,26 @@
  */
 
 import React from 'react';
+import { mockGlobals } from '../../utils/testing';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
+import { useMonitorName } from '../../hooks/use_monitor_name';
 import { ConfigKey } from '../../../../../common/runtime_types';
 
-import * as observabilityPublic from '@kbn/observability-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
+import {
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../../common/constants/monitor_defaults';
 
-jest.mock('@kbn/observability-plugin/public');
+mockGlobals();
+
+jest.mock('@kbn/observability-shared-plugin/public');
+
+jest.mock('../../hooks/use_monitor_name', () => ({
+  ...jest.requireActual('../../hooks/use_monitor_name'),
+  useMonitorName: jest.fn().mockReturnValue({ nameAlreadyExists: false }),
+}));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -32,16 +45,17 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 describe('MonitorEditPage', () => {
-  const { FETCH_STATUS } = observabilityPublic;
+  const { FETCH_STATUS } = observabilitySharedPublic;
 
   it('renders correctly', async () => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: {
         attributes: {
           [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
           [ConfigKey.FORM_MONITOR_TYPE]: 'multistep',
           [ConfigKey.LOCATIONS]: [],
+          [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
         },
       },
       refetch: () => null,
@@ -96,7 +110,7 @@ describe('MonitorEditPage', () => {
   });
 
   it('renders when monitor is loading', async () => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: null,
       refetch: () => null,
@@ -154,7 +168,7 @@ describe('MonitorEditPage', () => {
   });
 
   it('renders a monitor loading error', async () => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: null,
       refetch: () => null,
@@ -183,4 +197,49 @@ describe('MonitorEditPage', () => {
     // error
     expect(getByText('Unable to load monitor configuration')).toBeInTheDocument();
   });
+
+  it.each([true, false])(
+    'shows duplicate error when "nameAlreadyExists" is %s',
+    (nameAlreadyExists) => {
+      (useMonitorName as jest.Mock).mockReturnValue({ nameAlreadyExists });
+
+      jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+        status: FETCH_STATUS.SUCCESS,
+        data: {
+          attributes: {
+            [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
+            [ConfigKey.FORM_MONITOR_TYPE]: 'multistep',
+            [ConfigKey.LOCATIONS]: [],
+            [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
+          },
+        },
+        refetch: () => null,
+        loading: false,
+      });
+      const { getByText, queryByText } = render(<MonitorEditPage />, {
+        state: {
+          serviceLocations: {
+            locations: [
+              {
+                id: 'us_central',
+                label: 'Us Central',
+              },
+              {
+                id: 'us_east',
+                label: 'US East',
+              },
+            ],
+            locationsLoaded: true,
+            loading: false,
+          },
+        },
+      });
+
+      if (nameAlreadyExists) {
+        expect(getByText('Monitor name already exists')).toBeInTheDocument();
+      } else {
+        expect(queryByText('Monitor name already exists')).not.toBeInTheDocument();
+      }
+    }
+  );
 });

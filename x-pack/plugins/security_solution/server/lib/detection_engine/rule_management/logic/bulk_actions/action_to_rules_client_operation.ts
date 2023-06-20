@@ -6,26 +6,12 @@
  */
 
 import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
+import { transformNormalizedRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 
 import type { BulkActionEditForRuleAttributes } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-
-import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
-
-const getThrottleOperation = (throttle: string) =>
-  ({
-    field: 'throttle',
-    operation: 'set',
-    value: transformToAlertThrottle(throttle),
-  } as const);
-
-const getNotifyWhenOperation = (throttle: string) =>
-  ({
-    field: 'notifyWhen',
-    operation: 'set',
-    value: transformToNotifyWhen(throttle),
-  } as const);
+import { transformToActionFrequency } from '../../normalization/rule_actions';
 
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation
@@ -70,10 +56,10 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'add',
-          value: action.value.actions,
+          value: transformToActionFrequency(action.value.actions, action.value.throttle).map(
+            transformNormalizedRuleToAlertAction
+          ),
         },
-        getThrottleOperation(action.value.throttle),
-        getNotifyWhenOperation(action.value.throttle),
       ];
 
     case BulkActionEditType.set_rule_actions:
@@ -81,10 +67,10 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'set',
-          value: action.value.actions,
+          value: transformToActionFrequency(action.value.actions, action.value.throttle).map(
+            transformNormalizedRuleToAlertAction
+          ),
         },
-        getThrottleOperation(action.value.throttle),
-        getNotifyWhenOperation(action.value.throttle),
       ];
 
     // schedule actions

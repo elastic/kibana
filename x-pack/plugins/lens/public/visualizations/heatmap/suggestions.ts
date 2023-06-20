@@ -130,6 +130,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
       hide,
       previewIcon: IconChartHeatmap,
       score: Number(score.toFixed(1)),
+      incomplete: isSingleBucketDimension || isOnlyMetricDimension,
     },
   ];
 };

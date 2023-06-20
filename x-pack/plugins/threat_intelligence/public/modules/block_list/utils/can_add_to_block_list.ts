@@ -6,7 +6,7 @@
  */
 
 import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { getIndicatorFieldAndValue } from '../../indicators';
+import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 /**
  * Checks if an indicator has sha256, sha1 or md5 (in that order) and returns an empty string if it does not.

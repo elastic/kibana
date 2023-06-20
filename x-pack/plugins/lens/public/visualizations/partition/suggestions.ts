@@ -96,6 +96,10 @@ export function suggestions({
     return [];
   }
 
+  if (metrics.length > 1 && !state?.layers[0].allowMultipleMetrics) {
+    return [];
+  }
+
   const incompleteConfiguration = metrics.length === 0 || groups.length === 0;
 
   if (incompleteConfiguration && state && !subVisualizationId) {
@@ -330,5 +334,6 @@ export function suggestions({
     .map((suggestion) => ({
       ...suggestion,
       hide: shouldHideSuggestion || incompleteConfiguration || suggestion.hide,
+      incomplete: incompleteConfiguration,
     }));
 }

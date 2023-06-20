@@ -9,8 +9,8 @@ import {
   buildClassificationDecisionPathData,
   buildRegressionDecisionPathData,
 } from './use_classification_path_data';
-import type { FeatureImportance } from '../../../../../../../common/types/feature_importance';
-import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
+import type { FeatureImportance } from '@kbn/ml-data-frame-analytics-utils';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 
 describe('buildClassificationDecisionPathData()', () => {
   test('returns correct prediction probability for binary classification', () => {

@@ -11,6 +11,7 @@ import { type TransformHealth, type TransformState, TRANSFORM_STATE } from '../c
 import { TransformId } from './transform';
 
 export interface TransformHealthIssue {
+  type: string;
   issue: string;
   details?: string;
   count: number;
@@ -32,7 +33,9 @@ export interface TransformStats {
         percent_complete: number;
       };
     };
-    operations_behind: number;
+    changes_last_detected_at: number;
+    last_search_time?: number;
+    operations_behind?: number;
   };
   health: {
     status: TransformHealth;

@@ -16,19 +16,25 @@ function ndjsonToObject(input: string): string[] {
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('export', () => {
-    before(() =>
-      esArchiver.load(
+    before(async () => {
+      await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-      )
-    );
-    after(() =>
-      esArchiver.unload(
+      );
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
+      );
+    });
+    after(async () => {
+      await esArchiver.unload(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-      )
-    );
-
+      );
+      await kibanaServer.savedObjects.clean({
+        types: ['test-hidden-importable-exportable'],
+      });
+    });
     it('exports objects with importableAndExportable types', async () =>
       await supertest
         .post('/api/saved_objects/_export')

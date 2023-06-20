@@ -12,7 +12,7 @@ import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import type { SessionsComponentsProps } from './types';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { licenseService } from '../../hooks/use_license';
 import { mount } from 'enzyme';
 import type { EventsViewerProps } from '../events_viewer';

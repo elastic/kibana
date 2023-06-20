@@ -170,16 +170,17 @@ export function useFieldStatsSearchStrategy(
       browserSessionSeed: searchStrategyParams.browserSessionSeed,
       samplingOption: searchStrategyParams.samplingOption,
     };
+
+    const { sessionId, embeddableExecutionContext } = searchStrategyParams;
     const searchOptions: ISearchOptions = {
       abortSignal: abortCtrl.current.signal,
-      sessionId: searchStrategyParams?.sessionId,
+      sessionId,
+      ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
     };
 
     const batches = createBatchedRequests(
       pageOfConfigs.map((config, idx) => ({
-        fieldName: config.fieldName,
-        type: config.type,
-        cardinality: config.cardinality,
+        ...config,
         safeFieldName: getSafeAggregationName(config.fieldName, idx),
       })),
       10

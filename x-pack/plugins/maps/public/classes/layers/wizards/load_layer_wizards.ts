@@ -28,6 +28,7 @@ import { ObservabilityLayerWizardConfig } from './solution_layers/observability'
 import { SecurityLayerWizardConfig } from './solution_layers/security';
 import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
 import { newVectorLayerWizardConfig } from './new_vector_layer_wizard';
+import { spatialJoinWizardConfig } from './spatial_join_wizard';
 
 let registered = false;
 
@@ -38,17 +39,25 @@ export function registerLayerWizards() {
 
   registerLayerWizardInternal(uploadLayerWizardConfig);
   registerLayerWizardInternal(layerGroupWizardConfig);
+
   registerLayerWizardInternal(esDocumentsLayerWizardConfig);
   registerLayerWizardInternal(choroplethLayerWizardConfig);
+
+  registerLayerWizardInternal(spatialJoinWizardConfig);
+  registerLayerWizardInternal(point2PointLayerWizardConfig);
+
   registerLayerWizardInternal(clustersLayerWizardConfig);
   registerLayerWizardInternal(heatmapLayerWizardConfig);
+
   registerLayerWizardInternal(esTopHitsLayerWizardConfig);
   registerLayerWizardInternal(geoLineLayerWizardConfig);
-  registerLayerWizardInternal(point2PointLayerWizardConfig);
+
   registerLayerWizardInternal(emsBoundariesLayerWizardConfig);
-  registerLayerWizardInternal(newVectorLayerWizardConfig);
   registerLayerWizardInternal(emsBaseMapLayerWizardConfig);
+
+  registerLayerWizardInternal(newVectorLayerWizardConfig);
   registerLayerWizardInternal(kibanaBasemapLayerWizardConfig);
+
   registerLayerWizardInternal(tmsLayerWizardConfig);
   registerLayerWizardInternal(wmsLayerWizardConfig);
 

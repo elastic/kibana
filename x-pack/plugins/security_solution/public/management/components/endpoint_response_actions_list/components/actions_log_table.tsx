@@ -6,7 +6,6 @@
  */
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiI18nNumber,
   EuiAvatar,
@@ -19,10 +18,15 @@ import {
   EuiText,
   EuiToolTip,
   type HorizontalAlignment,
+  type CriteriaWithPagination,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { SecurityPageName } from '../../../../../common/constants';
+import { getRuleDetailsUrl } from '../../../../common/components/link_to';
+import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../../common/endpoint/schema/actions';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -52,12 +56,12 @@ interface ExpandedRowMapType {
 
 const getResponseActionListTableColumns = ({
   getTestId,
-  itemIdToExpandedRowMap,
+  expandedRowMap,
   showHostNames,
   onClickCallback,
 }: {
   getTestId: (suffix?: string | undefined) => string | undefined;
-  itemIdToExpandedRowMap: ExpandedRowMapType;
+  expandedRowMap: ExpandedRowMapType;
   showHostNames: boolean;
   onClickCallback: (actionListDataItem: ActionListApiResponse['data'][number]) => () => void;
 }) => {
@@ -98,24 +102,46 @@ const getResponseActionListTableColumns = ({
       },
     },
     {
-      field: 'createdBy',
       name: TABLE_COLUMN_NAMES.user,
       width: !showHostNames ? '21%' : '14%',
       truncateText: true,
-      render: (userId: ActionListApiResponse['data'][number]['createdBy']) => {
+      render: ({ createdBy, ruleId }: ActionListApiResponse['data'][number]) => {
+        if (createdBy === 'unknown' && ruleId) {
+          return (
+            <EuiToolTip content={UX_MESSAGES.triggeredByRule} anchorClassName="eui-textTruncate">
+              <SecuritySolutionLinkAnchor
+                data-test-subj="ruleName"
+                deepLinkId={SecurityPageName.rules}
+                path={getRuleDetailsUrl(ruleId)}
+              >
+                <EuiText
+                  size="s"
+                  className="eui-textTruncate eui-fullWidth"
+                  data-test-subj={getTestId('column-user-name')}
+                >
+                  {UX_MESSAGES.triggeredByRule}
+                </EuiText>
+              </SecuritySolutionLinkAnchor>
+            </EuiToolTip>
+          );
+        }
         return (
           <StyledFacetButton
             icon={
-              <EuiAvatar name={userId} data-test-subj={getTestId('column-user-avatar')} size="s" />
+              <EuiAvatar
+                name={createdBy}
+                data-test-subj={getTestId('column-user-avatar')}
+                size="s"
+              />
             }
           >
-            <EuiToolTip content={userId} anchorClassName="eui-textTruncate">
+            <EuiToolTip content={createdBy} anchorClassName="eui-textTruncate">
               <EuiText
                 size="s"
                 className="eui-textTruncate eui-fullWidth"
                 data-test-subj={getTestId('column-user-name')}
               >
-                {userId}
+                {createdBy}
               </EuiText>
             </EuiToolTip>
           </StyledFacetButton>
@@ -142,6 +168,7 @@ const getResponseActionListTableColumns = ({
           .join(', ');
 
         let hostnames = _hostnames;
+
         if (!_hostnames) {
           if (hosts.length > 1) {
             // when action was for a single agent and no host name
@@ -185,12 +212,11 @@ const getResponseActionListTableColumns = ({
       },
     },
     {
-      field: 'status',
       name: TABLE_COLUMN_NAMES.status,
       width: !showHostNames ? '15%' : '10%',
-      render: (_status: ActionListApiResponse['data'][number]['status']) => {
+      render: (action: ActionListApiResponse['data'][number]) => {
+        const _status = action.errors?.length ? 'failed' : action.status;
         const status = getActionStatus(_status);
-
         return (
           <EuiToolTip content={status} anchorClassName="eui-textTruncate">
             <StatusBadge
@@ -220,10 +246,8 @@ const getResponseActionListTableColumns = ({
           <EuiButtonIcon
             data-test-subj={getTestId('expand-button')}
             onClick={onClickCallback(actionListDataItem)}
-            aria-label={
-              itemIdToExpandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand
-            }
-            iconType={itemIdToExpandedRowMap[actionId] ? 'arrowUp' : 'arrowDown'}
+            aria-label={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
+            iconType={expandedRowMap[actionId] ? 'arrowUp' : 'arrowDown'}
           />
         );
       },
@@ -265,13 +289,13 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     showHostNames,
     totalItemCount,
   }) => {
-    const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMapType>({});
-
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { pagination: paginationFromUrlParams } = useUrlPagination();
     const { withOutputs: withOutputsFromUrl } = useActionHistoryUrlParams();
 
-    const getActionIdsWithDetails = useCallback((): string[] => {
+    const [expandedRowMap, setExpandedRowMap] = useState<ExpandedRowMapType>({});
+
+    const actionIdsWithOpenTrays = useMemo((): string[] => {
       // get the list of action ids from URL params on the history page
       if (!isFlyout) {
         return withOutputsFromUrl ?? [];
@@ -284,40 +308,48 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
         : [];
     }, [isFlyout, queryParams.withOutputs, withOutputsFromUrl]);
 
+    const redoOpenTrays = useCallback(() => {
+      if (actionIdsWithOpenTrays.length && items.length) {
+        const openDetails = actionIdsWithOpenTrays.reduce<ExpandedRowMapType>(
+          (idToRowMap, actionId) => {
+            const actionItem = items.find((item) => item.id === actionId);
+            if (!actionItem) {
+              idToRowMap[actionId] = <EuiSkeletonText size="relative" lines={8} />;
+            } else {
+              idToRowMap[actionId] = (
+                <ActionsLogExpandedTray action={actionItem} data-test-subj={dataTestSubj} />
+              );
+            }
+            return idToRowMap;
+          },
+          {}
+        );
+        setExpandedRowMap(openDetails);
+      }
+    }, [actionIdsWithOpenTrays, dataTestSubj, items]);
+
+    // open trays that were open using URL params/ query params
     useEffect(() => {
-      const actionIdsWithDetails = getActionIdsWithDetails();
-      const openDetails = actionIdsWithDetails.reduce<ExpandedRowMapType>(
-        (idToRowMap, actionId) => {
-          idToRowMap[actionId] = (
-            <ActionsLogExpandedTray
-              action={items.filter((item) => item.id === actionId)[0]}
-              data-test-subj={dataTestSubj}
-            />
-          );
-          return idToRowMap;
-        },
-        {}
-      );
-      setItemIdToExpandedRowMap(openDetails);
-    }, [dataTestSubj, getActionIdsWithDetails, items, queryParams.withOutputs, withOutputsFromUrl]);
+      redoOpenTrays();
+    }, [redoOpenTrays]);
 
     const toggleDetails = useCallback(
       (action: ActionListApiResponse['data'][number]) => {
-        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-        if (itemIdToExpandedRowMapValues[action.id]) {
+        const expandedRowMapCopy = { ...expandedRowMap };
+        if (expandedRowMapCopy[action.id]) {
           // close tray
-          delete itemIdToExpandedRowMapValues[action.id];
+          delete expandedRowMapCopy[action.id];
         } else {
           // assign the expanded tray content to the map
           // with action details
-          itemIdToExpandedRowMapValues[action.id] = (
+          expandedRowMapCopy[action.id] = (
             <ActionsLogExpandedTray action={action} data-test-subj={dataTestSubj} />
           );
         }
-        onShowActionDetails(Object.keys(itemIdToExpandedRowMapValues));
-        setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+        onShowActionDetails(Object.keys(expandedRowMapCopy));
+        setExpandedRowMap(expandedRowMapCopy);
       },
-      [itemIdToExpandedRowMap, onShowActionDetails, dataTestSubj]
+      [expandedRowMap, onShowActionDetails, dataTestSubj]
     );
 
     // memoized callback for toggleDetails
@@ -384,11 +416,11 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
       () =>
         getResponseActionListTableColumns({
           getTestId,
-          itemIdToExpandedRowMap,
+          expandedRowMap,
           onClickCallback,
           showHostNames,
         }),
-      [itemIdToExpandedRowMap, getTestId, onClickCallback, showHostNames]
+      [expandedRowMap, getTestId, onClickCallback, showHostNames]
     );
 
     return (
@@ -400,7 +432,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           items={items}
           columns={columns}
           itemId="id"
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          itemIdToExpandedRowMap={expandedRowMap}
           isExpandable
           pagination={tablePagination}
           onChange={onChange}

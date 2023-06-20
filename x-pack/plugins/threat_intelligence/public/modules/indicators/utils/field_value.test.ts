@@ -10,7 +10,7 @@ import {
   generateMockFileIndicator,
   generateMockUrlIndicator,
 } from '../../../../common/types/indicator';
-import { EMPTY_VALUE } from '../../../common/constants';
+import { EMPTY_VALUE } from '../../../constants/common';
 
 describe('field_value', () => {
   describe('getIndicatorFieldAndValue()', () => {

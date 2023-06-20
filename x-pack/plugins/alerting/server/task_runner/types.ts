@@ -21,6 +21,7 @@ import {
   SanitizedRule,
   RuleTypeState,
   RuleAction,
+  RuleAlertData,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
@@ -64,7 +65,8 @@ export interface ExecutionHandlerOptions<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   ruleType: NormalizedRuleType<
     Params,
@@ -73,7 +75,8 @@ export interface ExecutionHandlerOptions<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   logger: Logger;
   alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
@@ -85,7 +88,9 @@ export interface ExecutionHandlerOptions<
   ruleConsumer: string;
   executionId: string;
   ruleLabel: string;
+  previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
+  maintenanceWindowIds?: string[];
 }
 
 export interface Executable<

@@ -117,7 +117,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s" direction="row">
-            {!isAgentPolicyLoading && !agentPolicyData?.item?.is_managed && (
+            {!isAgentPolicyLoading && (
               <EuiFlexItem grow={false}>
                 <AgentDetailsActionMenu
                   agent={agentData.item}

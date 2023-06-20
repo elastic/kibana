@@ -15,6 +15,7 @@ const STORYBOOKS = [
   'apm',
   'canvas',
   'cases',
+  'cell_actions',
   'ci_composite',
   'cloud_chat',
   'coloring',
@@ -34,6 +35,7 @@ const STORYBOOKS = [
   'expression_shape',
   'expression_tagcloud',
   'fleet',
+  'grouping',
   'home',
   'infra',
   'kibana_react',
@@ -41,11 +43,14 @@ const STORYBOOKS = [
   'observability',
   'presentation',
   'security_solution',
+  'serverless',
   'shared_ux',
   'triggers_actions_ui',
   'ui_actions_enhanced',
   'language_documentation_popover',
   'unified_search',
+  'random_sampling',
+  'text_based_editor',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';

@@ -8,12 +8,17 @@
 import React, { FC, ReactElement, useEffect, useState } from 'react';
 import classNames from 'classnames';
 
-import { IEmbeddable, panelHoverTrigger, PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
+import {
+  type ViewMode,
+  type IEmbeddable,
+  type EmbeddableInput,
+  panelHoverTrigger,
+  PANEL_HOVER_TRIGGER,
+} from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
 import { pluginServices } from '../../services';
 import './floating_actions.scss';
-import { ReduxEmbeddableState } from '../../redux_embeddables';
 
 export interface FloatingActionsProps {
   children: ReactElement;
@@ -21,8 +26,8 @@ export interface FloatingActionsProps {
   className?: string;
   isEnabled?: boolean;
   embeddable?: IEmbeddable;
-  viewMode?: ReduxEmbeddableState['explicitInput']['viewMode'];
-  disabledActions?: ReduxEmbeddableState['explicitInput']['disabledActions'];
+  viewMode?: ViewMode;
+  disabledActions?: EmbeddableInput['disabledActions'];
 }
 
 export const FloatingActions: FC<FloatingActionsProps> = ({

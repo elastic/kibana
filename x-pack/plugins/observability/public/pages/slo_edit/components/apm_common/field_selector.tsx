@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
+import React, { ReactNode, useState } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
+
+import { debounce } from 'lodash';
 import {
   Suggestion,
   useFetchApmSuggestions,
@@ -27,6 +29,7 @@ export interface Props {
   label: string;
   name: FieldPath<CreateSLOInput>;
   placeholder: string;
+  tooltip?: ReactNode;
 }
 
 export function FieldSelector({
@@ -36,8 +39,9 @@ export function FieldSelector({
   label,
   name,
   placeholder,
+  tooltip,
 }: Props) {
-  const { control, watch } = useFormContext<CreateSLOInput>();
+  const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
   const serviceName = watch('indicator.params.service');
   const [search, setSearch] = useState<string>('');
   const { suggestions, isLoading } = useFetchApmSuggestions({
@@ -45,6 +49,8 @@ export function FieldSelector({
     search,
     serviceName,
   });
+
+  const debouncedSearch = debounce((value) => setSearch(value), 200);
 
   const options = (
     allowAllOption
@@ -61,51 +67,60 @@ export function FieldSelector({
 
   return (
     <EuiFlexItem>
-      <EuiFormLabel>{label}</EuiFormLabel>
+      <EuiFormRow
+        label={
+          !!tooltip ? (
+            <span>
+              {label} {tooltip}
+            </span>
+          ) : (
+            label
+          )
+        }
+        isInvalid={getFieldState(name).invalid}
+      >
+        <Controller
+          shouldUnregister
+          defaultValue=""
+          name={name}
+          control={control}
+          rules={{ required: true }}
+          render={({ field, fieldState }) => (
+            <EuiComboBox
+              {...field}
+              aria-label={placeholder}
+              async
+              data-test-subj={dataTestSubj}
+              isClearable
+              isDisabled={name !== 'indicator.params.service' && !serviceName}
+              isInvalid={fieldState.invalid}
+              isLoading={isLoading}
+              onChange={(selected: EuiComboBoxOptionOption[]) => {
+                if (selected.length) {
+                  return field.onChange(selected[0].value);
+                }
 
-      <Controller
-        shouldUnregister={true}
-        defaultValue=""
-        name={name}
-        control={control}
-        rules={{ required: true }}
-        render={({ field, fieldState }) => (
-          <EuiComboBox
-            {...field}
-            aria-label={placeholder}
-            async
-            data-test-subj={dataTestSubj}
-            isClearable={true}
-            isDisabled={name !== 'indicator.params.service' && !serviceName}
-            isInvalid={!!fieldState.error}
-            isLoading={isLoading}
-            onChange={(selected: EuiComboBoxOptionOption[]) => {
-              if (selected.length) {
-                return field.onChange(selected[0].value);
+                field.onChange('');
+              }}
+              onSearchChange={(value: string) => debouncedSearch(value)}
+              options={options}
+              placeholder={placeholder}
+              selectedOptions={
+                !!field.value && typeof field.value === 'string'
+                  ? [
+                      {
+                        value: field.value,
+                        label: field.value,
+                        'data-test-subj': `${dataTestSubj}SelectedValue`,
+                      },
+                    ]
+                  : []
               }
-
-              field.onChange('');
-            }}
-            onSearchChange={(value: string) => {
-              setSearch(value);
-            }}
-            options={options}
-            placeholder={placeholder}
-            selectedOptions={
-              !!field.value && typeof field.value === 'string'
-                ? [
-                    {
-                      value: field.value,
-                      label: field.value,
-                      'data-test-subj': `${dataTestSubj}SelectedValue`,
-                    },
-                  ]
-                : []
-            }
-            singleSelection
-          />
-        )}
-      />
+              singleSelection
+            />
+          )}
+        />
+      </EuiFormRow>
     </EuiFlexItem>
   );
 }

@@ -12,6 +12,8 @@ import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 
+const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
+
 describe('processAlerts', () => {
   let clock: sinon.SinonFakeTimers;
 
@@ -58,6 +60,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(newAlerts).toEqual({ '1': newAlert });
@@ -96,6 +99,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(newAlerts).toEqual({ '1': newAlert1, '2': newAlert2 });
@@ -111,6 +115,46 @@ describe('processAlerts', () => {
 
       expect(newAlert1State.end).not.toBeDefined();
       expect(newAlert2State.end).not.toBeDefined();
+    });
+
+    test('sets maintenance window IDs in new alert state', () => {
+      const newAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const newAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
+
+      const existingAlerts = {
+        '3': existingAlert1,
+        '4': existingAlert2,
+      };
+
+      const updatedAlerts = {
+        ...cloneDeep(existingAlerts),
+        '1': newAlert1,
+        '2': newAlert2,
+      };
+
+      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['3'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['4'].scheduleActions('default' as never, { foo: '2' });
+
+      expect(newAlert1.getState()).toStrictEqual({});
+      expect(newAlert2.getState()).toStrictEqual({});
+
+      const { newAlerts } = processAlerts({
+        alerts: updatedAlerts,
+        existingAlerts,
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+        autoRecoverAlerts: true,
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds,
+      });
+
+      expect(newAlerts['1'].getMaintenanceWindowIds()).toEqual(maintenanceWindowIds);
+      expect(newAlerts['2'].getMaintenanceWindowIds()).toEqual(maintenanceWindowIds);
     });
   });
 
@@ -142,6 +186,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toEqual({
@@ -180,6 +225,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toEqual({
@@ -228,6 +274,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toEqual({
@@ -286,6 +333,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toEqual({
@@ -302,6 +350,72 @@ describe('processAlerts', () => {
 
       expect(activeAlert1State.stateField1).toEqual('xyz');
       expect(activeAlert2State.anotherState).toEqual(true);
+
+      expect(activeAlert1State.duration).toEqual('172800000000000');
+      expect(activeAlert2State.duration).toEqual('59160000000000');
+
+      expect(activeAlert1State.end).not.toBeDefined();
+      expect(activeAlert2State.end).not.toBeDefined();
+    });
+
+    test('preserves changes to other state fields', () => {
+      const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+
+      const existingAlerts = {
+        '2': existingAlert1,
+        '3': existingAlert2,
+      };
+      existingAlerts['2'].replaceState({
+        stateField1: 'xyz',
+        start: '1969-12-30T00:00:00.000Z',
+        duration: 33000,
+      });
+      existingAlerts['3'].replaceState({
+        anotherState: true,
+        start: '1969-12-31T07:34:00.000Z',
+        duration: 23532,
+      });
+
+      const updatedAlerts = {
+        ...cloneDeep(existingAlerts),
+        '1': newAlert,
+      };
+
+      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['2']
+        .scheduleActions('default' as never, { foo: '1' })
+        .replaceState({ stateField1: 'abc' });
+      updatedAlerts['3']
+        .scheduleActions('default' as never, { foo: '2' })
+        .replaceState({ anotherState: false });
+
+      const { activeAlerts } = processAlerts({
+        alerts: updatedAlerts,
+        existingAlerts,
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+        autoRecoverAlerts: true,
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
+      });
+
+      expect(activeAlerts).toEqual({
+        '1': updatedAlerts['1'],
+        '2': updatedAlerts['2'],
+        '3': updatedAlerts['3'],
+      });
+
+      const activeAlert1State = activeAlerts['2'].getState();
+      const activeAlert2State = activeAlerts['3'].getState();
+
+      expect(activeAlert1State.start).toEqual('1969-12-30T00:00:00.000Z');
+      expect(activeAlert2State.start).toEqual('1969-12-31T07:34:00.000Z');
+
+      expect(activeAlert1State.stateField1).toEqual('abc');
+      expect(activeAlert2State.anotherState).toEqual(false);
 
       expect(activeAlert1State.duration).toEqual('172800000000000');
       expect(activeAlert2State.duration).toEqual('59160000000000');
@@ -347,6 +461,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(
@@ -364,6 +479,37 @@ describe('processAlerts', () => {
 
       expect(previouslyRecoveredAlert1State.end).not.toBeDefined();
       expect(previouslyRecoveredAlert2State.end).not.toBeDefined();
+    });
+
+    test('should not set maintenance window IDs for active alerts', () => {
+      const newAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+
+      const existingAlerts = {
+        '2': existingAlert1,
+      };
+      existingAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
+
+      const updatedAlerts = {
+        ...cloneDeep(existingAlerts),
+        '1': newAlert,
+      };
+
+      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
+
+      const { activeAlerts } = processAlerts({
+        alerts: updatedAlerts,
+        existingAlerts,
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+        autoRecoverAlerts: true,
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds,
+      });
+
+      expect(activeAlerts['2'].getMaintenanceWindowIds()).toEqual([]);
     });
   });
 
@@ -390,6 +536,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'] });
@@ -418,6 +565,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(recoveredAlerts).toEqual({});
@@ -448,6 +596,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
@@ -487,6 +636,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
@@ -526,6 +676,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(recoveredAlerts).toEqual(updatedAlerts);
@@ -556,9 +707,38 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: false,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(recoveredAlerts).toEqual({});
+    });
+
+    test('should not set maintenance window IDs for recovered alerts', () => {
+      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const recoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+
+      const existingAlerts = {
+        '1': activeAlert,
+        '2': recoveredAlert1,
+      };
+      existingAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
+
+      const updatedAlerts = cloneDeep(existingAlerts);
+
+      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
+
+      const { recoveredAlerts } = processAlerts({
+        alerts: updatedAlerts,
+        existingAlerts,
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+        autoRecoverAlerts: true,
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds,
+      });
+
+      expect(recoveredAlerts['2'].getMaintenanceWindowIds()).toEqual([]);
     });
   });
 
@@ -602,6 +782,7 @@ describe('processAlerts', () => {
         alertLimit: 7,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(recoveredAlerts).toEqual({});
@@ -638,6 +819,7 @@ describe('processAlerts', () => {
         alertLimit: 7,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toEqual({
@@ -698,6 +880,7 @@ describe('processAlerts', () => {
         alertLimit: MAX_ALERTS,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(Object.keys(activeAlerts).length).toEqual(MAX_ALERTS);
@@ -715,11 +898,75 @@ describe('processAlerts', () => {
         '7': newAlert7,
       });
     });
+
+    test('should set maintenance window IDs for new alerts when reached alert limit', () => {
+      const MAX_ALERTS = 7;
+      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+      const existingAlert3 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+      const existingAlert4 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
+      const existingAlert5 = new Alert<AlertInstanceState, AlertInstanceContext>('5');
+      const newAlert6 = new Alert<AlertInstanceState, AlertInstanceContext>('6');
+      const newAlert7 = new Alert<AlertInstanceState, AlertInstanceContext>('7');
+      const newAlert8 = new Alert<AlertInstanceState, AlertInstanceContext>('8');
+      const newAlert9 = new Alert<AlertInstanceState, AlertInstanceContext>('9');
+      const newAlert10 = new Alert<AlertInstanceState, AlertInstanceContext>('10');
+
+      const existingAlerts = {
+        '1': existingAlert1,
+        '2': existingAlert2,
+        '3': existingAlert3,
+        '4': existingAlert4,
+        '5': existingAlert5,
+      };
+
+      const updatedAlerts = {
+        ...cloneDeep(existingAlerts),
+        '6': newAlert6,
+        '7': newAlert7,
+        '8': newAlert8,
+        '9': newAlert9,
+        '10': newAlert10,
+      };
+
+      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['3'].scheduleActions('default' as never, { foo: '2' });
+      updatedAlerts['4'].scheduleActions('default' as never, { foo: '2' });
+      // intentionally not scheduling actions for alert "5"
+      updatedAlerts['6'].scheduleActions('default' as never, { foo: '2' });
+      updatedAlerts['7'].scheduleActions('default' as never, { foo: '2' });
+      updatedAlerts['8'].scheduleActions('default' as never, { foo: '2' });
+      updatedAlerts['9'].scheduleActions('default' as never, { foo: '2' });
+      updatedAlerts['10'].scheduleActions('default' as never, { foo: '2' });
+
+      const { activeAlerts, newAlerts } = processAlerts({
+        alerts: updatedAlerts,
+        existingAlerts,
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: true,
+        alertLimit: MAX_ALERTS,
+        autoRecoverAlerts: true,
+        flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds,
+      });
+
+      expect(Object.keys(activeAlerts).length).toEqual(MAX_ALERTS);
+      expect(newAlerts['6'].getMaintenanceWindowIds()).toEqual(maintenanceWindowIds);
+      expect(newAlerts['7'].getMaintenanceWindowIds()).toEqual(maintenanceWindowIds);
+      expect(activeAlerts['1'].getMaintenanceWindowIds()).toEqual([]);
+      expect(activeAlerts['2'].getMaintenanceWindowIds()).toEqual([]);
+      expect(activeAlerts['3'].getMaintenanceWindowIds()).toEqual([]);
+      expect(activeAlerts['4'].getMaintenanceWindowIds()).toEqual([]);
+      expect(activeAlerts['5'].getMaintenanceWindowIds()).toEqual([]);
+    });
   });
 
   describe('updating flappingHistory', () => {
     test('if new alert, set flapping state to true', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+        meta: { uuid: 'uuid-1' },
+      });
 
       const alerts = cloneDeep({ '1': activeAlert });
       alerts['1'].scheduleActions('default' as never, { foo: '1' });
@@ -732,6 +979,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -741,6 +989,8 @@ describe('processAlerts', () => {
               "flappingHistory": Array [
                 true,
               ],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -756,6 +1006,8 @@ describe('processAlerts', () => {
               "flappingHistory": Array [
                 true,
               ],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -769,7 +1021,7 @@ describe('processAlerts', () => {
 
     test('if alert is still active, set flapping state to false', () => {
       const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-1' },
       });
 
       const alerts = cloneDeep({ '1': activeAlert });
@@ -783,6 +1035,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -793,6 +1046,8 @@ describe('processAlerts', () => {
                 false,
                 false,
               ],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {},
           },
@@ -803,9 +1058,11 @@ describe('processAlerts', () => {
     });
 
     test('if alert is active and previously recovered, set flapping state to true', () => {
-      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+        meta: { uuid: 'uuid-1' },
+      });
       const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-2' },
       });
 
       const alerts = cloneDeep({ '1': activeAlert });
@@ -820,6 +1077,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -830,6 +1088,8 @@ describe('processAlerts', () => {
                 false,
                 true,
               ],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -846,6 +1106,8 @@ describe('processAlerts', () => {
                 false,
                 true,
               ],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -859,11 +1121,11 @@ describe('processAlerts', () => {
 
     test('if alert is recovered and previously active, set flapping state to true', () => {
       const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-1' },
       });
       activeAlert.scheduleActions('default' as never, { foo: '1' });
       const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-1' },
       });
 
       const alerts = cloneDeep({ '1': recoveredAlert });
@@ -876,6 +1138,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
@@ -888,6 +1151,8 @@ describe('processAlerts', () => {
                 false,
                 true,
               ],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {},
           },
@@ -897,7 +1162,7 @@ describe('processAlerts', () => {
 
     test('if alert is still recovered, set flapping state to false', () => {
       const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-1' },
       });
 
       const alerts = cloneDeep({ '1': recoveredAlert });
@@ -910,6 +1175,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
@@ -922,6 +1188,8 @@ describe('processAlerts', () => {
                 false,
                 false,
               ],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {},
           },
@@ -930,14 +1198,16 @@ describe('processAlerts', () => {
     });
 
     test('if setFlapping is false should not update flappingHistory', () => {
-      const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+        meta: { uuid: 'uuid-1' },
+      });
       activeAlert1.scheduleActions('default' as never, { foo: '1' });
       const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-2' },
       });
       activeAlert2.scheduleActions('default' as never, { foo: '1' });
       const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('3', {
-        meta: { flappingHistory: [false] },
+        meta: { flappingHistory: [false], uuid: 'uuid-3' },
       });
 
       const previouslyRecoveredAlerts = cloneDeep({ '3': recoveredAlert });
@@ -952,6 +1222,7 @@ describe('processAlerts', () => {
         alertLimit: 10,
         autoRecoverAlerts: true,
         flappingSettings: DISABLE_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
       });
 
       expect(activeAlerts).toMatchInlineSnapshot(`
@@ -959,6 +1230,8 @@ describe('processAlerts', () => {
           "1": Object {
             "meta": Object {
               "flappingHistory": Array [],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -970,6 +1243,8 @@ describe('processAlerts', () => {
               "flappingHistory": Array [
                 false,
               ],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-2",
             },
             "state": Object {},
           },
@@ -980,6 +1255,8 @@ describe('processAlerts', () => {
           "1": Object {
             "meta": Object {
               "flappingHistory": Array [],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-1",
             },
             "state": Object {
               "duration": "0",
@@ -995,6 +1272,8 @@ describe('processAlerts', () => {
               "flappingHistory": Array [
                 false,
               ],
+              "maintenanceWindowIds": Array [],
+              "uuid": "uuid-3",
             },
             "state": Object {},
           },
@@ -1005,7 +1284,7 @@ describe('processAlerts', () => {
     describe('when hasReachedAlertLimit is true', () => {
       test('if alert is still active, set flapping state to false', () => {
         const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
+          meta: { flappingHistory: [false], uuid: 'uuid-1' },
         });
 
         const alerts = cloneDeep({ '1': activeAlert });
@@ -1019,6 +1298,7 @@ describe('processAlerts', () => {
           alertLimit: 10,
           autoRecoverAlerts: true,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          maintenanceWindowIds: [],
         });
 
         expect(activeAlerts).toMatchInlineSnapshot(`
@@ -1029,6 +1309,8 @@ describe('processAlerts', () => {
                   false,
                   false,
                 ],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-1",
               },
               "state": Object {},
             },
@@ -1040,10 +1322,12 @@ describe('processAlerts', () => {
 
       test('if new alert, set flapping state to true', () => {
         const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
+          meta: { flappingHistory: [false], uuid: 'uuid-1' },
         });
         activeAlert1.scheduleActions('default' as never, { foo: '1' });
-        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2', {
+          meta: { flappingHistory: [false], uuid: 'uuid-2' },
+        });
         activeAlert2.scheduleActions('default' as never, { foo: '1' });
 
         const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
@@ -1056,6 +1340,7 @@ describe('processAlerts', () => {
           alertLimit: 10,
           autoRecoverAlerts: true,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          maintenanceWindowIds: [],
         });
 
         expect(activeAlerts).toMatchInlineSnapshot(`
@@ -1066,14 +1351,19 @@ describe('processAlerts', () => {
                   false,
                   false,
                 ],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-1",
               },
               "state": Object {},
             },
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [
+                  false,
                   true,
                 ],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",
@@ -1087,8 +1377,11 @@ describe('processAlerts', () => {
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [
+                  false,
                   true,
                 ],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",
@@ -1102,10 +1395,12 @@ describe('processAlerts', () => {
 
       test('if alert is active and previously recovered, set flapping state to true', () => {
         const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
+          meta: { flappingHistory: [false], uuid: 'uuid-1' },
         });
         activeAlert1.scheduleActions('default' as never, { foo: '1' });
-        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { uuid: 'uuid-2' },
+        });
         activeAlert2.scheduleActions('default' as never, { foo: '1' });
 
         const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
@@ -1118,6 +1413,7 @@ describe('processAlerts', () => {
           alertLimit: 10,
           autoRecoverAlerts: true,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          maintenanceWindowIds: [],
         });
 
         expect(activeAlerts).toMatchInlineSnapshot(`
@@ -1128,6 +1424,8 @@ describe('processAlerts', () => {
                   false,
                   true,
                 ],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-1",
               },
               "state": Object {
                 "duration": "0",
@@ -1139,6 +1437,8 @@ describe('processAlerts', () => {
                 "flappingHistory": Array [
                   true,
                 ],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",
@@ -1155,6 +1455,8 @@ describe('processAlerts', () => {
                   false,
                   true,
                 ],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-1",
               },
               "state": Object {
                 "duration": "0",
@@ -1166,6 +1468,8 @@ describe('processAlerts', () => {
                 "flappingHistory": Array [
                   true,
                 ],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",
@@ -1179,10 +1483,12 @@ describe('processAlerts', () => {
 
       test('if setFlapping is false should not update flappingHistory', () => {
         const activeAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
-          meta: { flappingHistory: [false] },
+          meta: { flappingHistory: [false], uuid: 'uuid-1' },
         });
         activeAlert1.scheduleActions('default' as never, { foo: '1' });
-        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+        const activeAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('1', {
+          meta: { uuid: 'uuid-2' },
+        });
         activeAlert2.scheduleActions('default' as never, { foo: '1' });
 
         const alerts = cloneDeep({ '1': activeAlert1, '2': activeAlert2 });
@@ -1195,6 +1501,7 @@ describe('processAlerts', () => {
           alertLimit: 10,
           autoRecoverAlerts: true,
           flappingSettings: DISABLE_FLAPPING_SETTINGS,
+          maintenanceWindowIds: [],
         });
 
         expect(activeAlerts).toMatchInlineSnapshot(`
@@ -1204,12 +1511,16 @@ describe('processAlerts', () => {
                 "flappingHistory": Array [
                   false,
                 ],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-1",
               },
               "state": Object {},
             },
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",
@@ -1223,6 +1534,8 @@ describe('processAlerts', () => {
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [],
+                "maintenanceWindowIds": Array [],
+                "uuid": "uuid-2",
               },
               "state": Object {
                 "duration": "0",

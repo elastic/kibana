@@ -11,7 +11,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiDescriptionList,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TagsBadges } from './tag_badges';
-import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
@@ -31,6 +30,7 @@ import {
   Ping,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 
 const TitleLabel = euiStyled(EuiDescriptionListTitle)`
   width: 40%;
@@ -62,12 +62,15 @@ export const MonitorDetailsPanel = ({
   const dispatch = useDispatch();
 
   if (!monitor) {
-    return <EuiLoadingContent lines={8} />;
+    return <EuiSkeletonText lines={8} />;
   }
+
+  const url = latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS];
 
   return (
     <PanelWithTitle
       paddingSize="m"
+      margin="none"
       title={MONITOR_DETAILS_LABEL}
       titleLeftAlign
       hasBorder={hasBorder}
@@ -94,13 +97,15 @@ export const MonitorDetailsPanel = ({
           )}
           <TitleLabel>{URL_LABEL}</TitleLabel>
           <DescriptionLabel style={{ wordBreak: 'break-all' }}>
-            <EuiLink
-              data-test-subj="syntheticsMonitorDetailsPanelLink"
-              href={latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
-              external
-            >
-              {latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
-            </EuiLink>
+            {url ? (
+              <EuiLink data-test-subj="syntheticsMonitorDetailsPanelLink" href={url} external>
+                {url}
+              </EuiLink>
+            ) : (
+              <EuiText color="subdued" size="s">
+                {UN_AVAILABLE_LABEL}
+              </EuiText>
+            )}
           </DescriptionLabel>
           <TitleLabel>{LAST_RUN_LABEL}</TitleLabel>
           <DescriptionLabel>
@@ -121,7 +126,7 @@ export const MonitorDetailsPanel = ({
             </>
           )}
           <TitleLabel>{MONITOR_ID_ITEM_TEXT}</TitleLabel>
-          <DescriptionLabel>{configId}</DescriptionLabel>
+          <DescriptionLabel>{monitor.id}</DescriptionLabel>
           <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
           <DescriptionLabel>
             <MonitorTypeBadge monitor={monitor} />
@@ -202,7 +207,8 @@ function translateUnitMessage(unitMsg: string) {
 }
 
 const Time = ({ timestamp }: { timestamp?: string }) => {
-  const dateTimeFormatted = useFormatTestRunAt(timestamp);
+  const formatter = useDateFormat();
+  const dateTimeFormatted = formatter(timestamp);
 
   return timestamp ? <time dateTime={timestamp}>{dateTimeFormatted}</time> : null;
 };
@@ -230,7 +236,7 @@ const TAGS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.tags'
 });
 
 const ENABLED_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails.enabled', {
-  defaultMessage: 'Enabled',
+  defaultMessage: 'Enabled (all locations)',
 });
 
 const MONITOR_TYPE_LABEL = i18n.translate(
@@ -258,4 +264,8 @@ const PROJECT_ID_LABEL = i18n.translate('xpack.synthetics.monitorList.projectIdH
 
 const MONITOR_ID_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.monitorIdItemText', {
   defaultMessage: 'Monitor ID',
+});
+
+const UN_AVAILABLE_LABEL = i18n.translate('xpack.synthetics.monitorList.unAvailable', {
+  defaultMessage: '(unavailable)',
 });

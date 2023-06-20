@@ -28,16 +28,23 @@ jest.mock('../kibana_services', () => {
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { DataView } from '@kbn/data-plugin/common';
 import { GeoIndexPatternSelect } from './geo_index_pattern_select';
 
+const defaultProps = {
+  dataView: {
+    id: 'weblogs',
+    fields: [
+      {
+        type: 'geo_point',
+      },
+    ],
+  } as unknown as DataView,
+  onChange: () => {},
+};
+
 test('should render', async () => {
-  const component = shallow(<GeoIndexPatternSelect onChange={() => {}} value={'indexPatternId'} />);
+  const component = shallow(<GeoIndexPatternSelect {...defaultProps} />);
 
-  expect(component).toMatchSnapshot();
-});
-
-test('should render no index pattern warning when there are no matching index patterns', async () => {
-  const component = shallow(<GeoIndexPatternSelect onChange={() => {}} value={'indexPatternId'} />);
-  component.setState({ noIndexPatternsExist: true });
   expect(component).toMatchSnapshot();
 });

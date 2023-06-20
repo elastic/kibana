@@ -14,9 +14,10 @@ import {
 } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { useSavedSearchInitial } from '../services/discover_state_provider';
 import type { DiscoverStateContainer } from '../services/discover_state';
-import type { DataDocuments$ } from '../services/discover_data_state_container';
+import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
@@ -26,20 +27,18 @@ const MAX_NUM_OF_COLUMNS = 50;
  * If necessary this is setting displayed columns and selected data view
  */
 export function useTextBasedQueryLanguage({
-  documents$,
   dataViews,
   stateContainer,
-  savedSearch,
 }: {
-  documents$: DataDocuments$;
   stateContainer: DiscoverStateContainer;
   dataViews: DataViewsContract;
-  savedSearch: SavedSearch;
 }) {
   const prev = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
     columns: [],
     query: undefined,
   });
+  const indexTitle = useRef<string>('');
+  const savedSearch = useSavedSearchInitial();
 
   const cleanup = useCallback(() => {
     if (prev.current.query) {
@@ -52,12 +51,12 @@ export function useTextBasedQueryLanguage({
   }, []);
 
   useEffect(() => {
-    const subscription = documents$.subscribe(async (next) => {
+    const subscription = stateContainer.dataState.data$.documents$.subscribe(async (next) => {
       const { query, recordRawType } = next;
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
       }
-      const { columns: stateColumns, index } = stateContainer.appState.getState();
+      const { columns: stateColumns, index, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
@@ -82,39 +81,30 @@ export function useTextBasedQueryLanguage({
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-        const internalState = stateContainer.internalState.getState();
-        const dataViewList = [...internalState.savedDataViews, ...internalState.adHocDataViews];
-        let dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
-        // no dataview found but the index pattern is valid
-        // create an adhoc instance instead
-        if (!dataViewObj) {
-          dataViewObj = await dataViews.create({
-            title: indexPatternFromQuery,
-          });
-          stateContainer.internalState.transitions.setAdHocDataViews([dataViewObj]);
-
-          if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-            dataViewObj.timeFieldName = '@timestamp';
-          } else if (dataViewObj.fields.getByType('date')?.length) {
-            const dateFields = dataViewObj.fields.getByType('date');
-            dataViewObj.timeFieldName = dateFields[0].name;
-          }
-        }
+        const dataViewObj = stateContainer.internalState.getState().dataView!;
 
         // don't set the columns on initial fetch, to prevent overwriting existing state
         const addColumnsToState = Boolean(
           nextColumns.length && (!initialFetch || !stateColumns?.length)
         );
         // no need to reset index to state if it hasn't changed
-        const addDataViewToState = Boolean(dataViewObj.id !== index);
-        if (!addColumnsToState && !addDataViewToState) {
+        const addDataViewToState = Boolean(dataViewObj?.id !== index) || initialFetch;
+        const queryChanged = indexPatternFromQuery !== indexTitle.current;
+        if (!addColumnsToState && !queryChanged) {
           return;
+        }
+
+        if (queryChanged) {
+          indexTitle.current = indexPatternFromQuery;
         }
 
         const nextState = {
           ...(addDataViewToState && { index: dataViewObj.id }),
           ...(addColumnsToState && { columns: nextColumns }),
+          ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
+            viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
+          }),
         };
         stateContainer.appState.replaceUrlState(nextState);
       } else {
@@ -127,5 +117,5 @@ export function useTextBasedQueryLanguage({
       cleanup();
       subscription.unsubscribe();
     };
-  }, [documents$, dataViews, stateContainer, savedSearch, cleanup]);
+  }, [dataViews, stateContainer, savedSearch, cleanup]);
 }

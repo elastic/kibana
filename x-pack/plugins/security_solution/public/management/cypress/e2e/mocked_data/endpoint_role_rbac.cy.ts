@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { closeAllToasts } from '../../tasks/close_all_toasts';
+import { closeAllToasts } from '../../tasks/toasts';
 import { login } from '../../tasks/login';
 
 describe('When defining a kibana role for Endpoint security access', () => {
@@ -46,8 +46,7 @@ describe('When defining a kibana role for Endpoint security access', () => {
         'Host Isolation Perform the "isolate" and "release" response actions.Host Isolation sub-feature privilegeAllNone',
         'Process Operations Perform process-related response actions in the response console.Process Operations sub-feature privilegeAllNone',
         'File Operations Perform file-related response actions in the response console.File Operations sub-feature privilegeAllNone',
-        // TODO: uncomment item below once Execute response action FF is enabled
-        // 'Execute Operations Perform script execution on the endpoint.Execute Operations sub-feature privilegeAllNone',
+        'Execute Operations Perform script execution on the endpoint.Execute Operations sub-feature privilegeAllNone',
       ]);
   });
 

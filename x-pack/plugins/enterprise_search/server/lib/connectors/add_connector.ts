@@ -54,7 +54,7 @@ const createConnector = async (
   const result = await client.asCurrentUser.index({
     document,
     index: CONNECTORS_INDEX,
-    refresh: true,
+    refresh: 'wait_for',
   });
   await createIndex(client, document.index_name, language, false);
 
@@ -68,7 +68,7 @@ export const addConnector = async (
     index_name: string;
     is_native: boolean;
     language: string | null;
-    service_type?: string | null;
+    service_type?: string;
   }
 ): Promise<{ id: string; index_name: string }> => {
   const connectorsIndexExists = await client.asCurrentUser.indices.exists({
@@ -96,7 +96,7 @@ export const addConnector = async (
           run_ml_inference: pipeline.default_run_ml_inference,
         }
       : null,
-    serviceType: input.service_type,
+    serviceType: input.service_type ?? null,
   });
 
   return await createConnector(document, client, input.language, !!input.delete_existing_connector);

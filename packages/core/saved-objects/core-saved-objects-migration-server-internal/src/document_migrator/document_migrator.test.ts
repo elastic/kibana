@@ -25,18 +25,18 @@ const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 const kibanaVersion = '25.2.3';
 
+const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
+  name: 'unknown',
+  namespaceType: 'single',
+  hidden: false,
+  mappings: { properties: {} },
+  migrations: {},
+  ...parts,
+});
+
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach((type) =>
-    registry.registerType({
-      name: 'unknown',
-      namespaceType: 'single',
-      hidden: false,
-      mappings: { properties: {} },
-      migrations: {},
-      ...type,
-    })
-  );
+  types.forEach((type) => registry.registerType(createType(type)));
   registry.registerType({
     name: LEGACY_URL_ALIAS_TYPE,
     namespaceType: 'agnostic',
@@ -466,7 +466,7 @@ describe('DocumentMigrator', () => {
       });
     });
 
-    it('allows changing type', () => {
+    it('does not allow changing type', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry(
@@ -485,20 +485,17 @@ describe('DocumentMigrator', () => {
         ),
       });
       migrator.prepareMigrations();
-      const actual = migrator.migrate({
-        id: 'smelly',
-        type: 'dog',
-        attributes: { name: 'Callie' },
-        typeMigrationVersion: '',
-        coreMigrationVersion: '8.8.0',
-      });
-      expect(actual).toEqual({
-        id: 'smelly',
-        type: 'cat',
-        attributes: { name: 'Kitty Callie' },
-        coreMigrationVersion: '8.8.0',
-        typeMigrationVersion: '1.0.0',
-      });
+      expect(() =>
+        migrator.migrate({
+          id: 'smelly',
+          type: 'dog',
+          attributes: { name: 'Callie' },
+          typeMigrationVersion: '',
+          coreMigrationVersion: '8.8.0',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Changing a document's type during a migration is not supported."`
+      );
     });
 
     it('disallows updating a typeMigrationVersion prop to a lower version', () => {
@@ -638,12 +635,53 @@ describe('DocumentMigrator', () => {
         ),
       });
       migrator.prepareMigrations();
-      expect(migrator.migrationVersion).toEqual({
+      expect(migrator.getMigrationVersion()).toEqual({
         aaa: '10.4.0',
         bbb: '3.2.3',
         ccc: '11.0.0',
         [LEGACY_URL_ALIAS_TYPE]: '0.1.2',
       });
+    });
+
+    test('extracts the latest non-deferred migration version info', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'aaa',
+          migrations: {
+            '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '10.4.0': {
+              // @ts-expect-error
+              deferred: true,
+              transform: (doc: SavedObjectUnsanitizedDoc) => doc,
+            },
+          },
+        }),
+      });
+      migrator.prepareMigrations();
+      expect(migrator.getMigrationVersion({ includeDeferred: false })).toHaveProperty(
+        'aaa',
+        '2.2.1'
+      );
+    });
+
+    test('extracts the latest core migration version info', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'aaa',
+          migrations: {
+            '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
+          },
+        }),
+      });
+      migrator.prepareMigrations();
+      expect(migrator.getMigrationVersion({ migrationType: 'core' })).toHaveProperty(
+        'aaa',
+        '8.8.0'
+      );
     });
 
     describe('conversion to multi-namespace type', () => {
@@ -804,6 +842,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '1.0.0',
+              managed: false,
             },
           ]);
         });
@@ -819,6 +858,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '1.0.0',
+              managed: false,
               namespace: 'foo-namespace',
             },
           ]);
@@ -852,6 +892,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: '8.8.0',
+              managed: false,
             },
           ]);
         });
@@ -868,6 +909,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
               coreMigrationVersion: '8.8.0',
               namespace: 'foo-namespace',
+              managed: false,
             },
           ]);
         });
@@ -965,6 +1007,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '1.0.0',
+              managed: false,
               namespaces: ['default'],
             },
           ]);
@@ -995,6 +1038,7 @@ describe('DocumentMigrator', () => {
               typeMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'cute',
+              managed: false,
             },
             {
               id: 'foo-namespace:dog:cute',
@@ -1050,6 +1094,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '2.0.0',
+              managed: false,
             },
           ]);
         });
@@ -1067,6 +1112,7 @@ describe('DocumentMigrator', () => {
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '2.0.0',
               namespace: 'foo-namespace',
+              managed: false,
             },
           ]);
         });
@@ -1177,6 +1223,7 @@ describe('DocumentMigrator', () => {
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '2.0.0',
               namespaces: ['default'],
+              managed: false,
             },
           ]);
         });
@@ -1206,6 +1253,7 @@ describe('DocumentMigrator', () => {
               typeMigrationVersion: '2.0.0',
               namespaces: ['foo-namespace'],
               originId: 'pretty',
+              managed: false,
             },
             {
               id: 'foo-namespace:dog:pretty',
@@ -1327,6 +1375,95 @@ describe('DocumentMigrator', () => {
         expect(actual).not.toHaveProperty('typeMigrationVersion');
         expect(actual).not.toHaveProperty('migrationVersion');
       });
+    });
+  });
+
+  describe('down migration', () => {
+    it('accepts to downgrade the document if `allowDowngrade` is true', () => {
+      const registry = createRegistry({});
+
+      const fooType = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.5.0',
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: (attrs: any) => {
+                return {
+                  foo: attrs.foo,
+                };
+              },
+            },
+          },
+        },
+      });
+      registry.registerType(fooType);
+
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: registry,
+      });
+      migrator.prepareMigrations();
+
+      const document: SavedObjectUnsanitizedDoc = {
+        id: 'smelly',
+        type: 'foo',
+        attributes: {
+          foo: 'bar',
+          hello: 'dolly',
+        },
+        typeMigrationVersion: '10.2.0',
+      };
+
+      const migrated = migrator.migrate(document, { allowDowngrade: true });
+
+      expect(migrated).toHaveProperty('typeMigrationVersion', '10.1.0');
+      expect(migrated.attributes).toEqual({ foo: 'bar' });
+    });
+
+    it('throws when trying to downgrade if `allowDowngrade` is false', () => {
+      const registry = createRegistry({});
+
+      const fooType = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.5.0',
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: (attrs: any) => {
+                return {
+                  foo: attrs.foo,
+                };
+              },
+            },
+          },
+        },
+      });
+      registry.registerType(fooType);
+
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: registry,
+      });
+      migrator.prepareMigrations();
+
+      const document: SavedObjectUnsanitizedDoc = {
+        id: 'smelly',
+        type: 'foo',
+        attributes: {
+          foo: 'bar',
+          hello: 'dolly',
+        },
+        typeMigrationVersion: '10.2.0',
+      };
+
+      expect(() =>
+        migrator.migrate(document, { allowDowngrade: false })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Document \\"smelly\\" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0]."`
+      );
     });
   });
 });

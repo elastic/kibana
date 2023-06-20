@@ -9,7 +9,8 @@
 import { ReactElement } from 'react';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { getSavedSearchUrl, SearchInput } from '..';
+import { SearchInput } from '..';
+import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../build_services';
 import { dataViewMock } from '../__mocks__/data_view';
 import { discoverServiceMock } from '../__mocks__/services';
@@ -132,13 +133,16 @@ describe('saved search embeddable', () => {
     jest.spyOn(embeddable, 'updateOutput');
 
     embeddable.render(mountpoint);
+    expect(render).toHaveBeenCalledTimes(1);
     await waitOneTick();
+    expect(render).toHaveBeenCalledTimes(2);
 
     const searchProps = discoverComponent.find(SavedSearchEmbeddableComponent).prop('searchProps');
 
     searchProps.onAddColumn!('bytes');
     await waitOneTick();
     expect(searchProps.columns).toEqual(['message', 'extension', 'bytes']);
+    expect(render).toHaveBeenCalledTimes(4); // twice per an update to show and then hide a loading indicator
 
     searchProps.onRemoveColumn!('bytes');
     await waitOneTick();

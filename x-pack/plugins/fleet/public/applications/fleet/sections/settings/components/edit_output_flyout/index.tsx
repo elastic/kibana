@@ -145,18 +145,38 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               />
             }
           >
-            <EuiSelect
-              fullWidth
-              data-test-subj="settingsOutputsFlyout.typeInput"
-              {...inputs.typeInput.props}
-              options={OUTPUT_TYPE_OPTIONS}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.typeInputPlaceholder',
-                {
-                  defaultMessage: 'Specify type',
-                }
+            <>
+              <EuiSelect
+                fullWidth
+                data-test-subj="settingsOutputsFlyout.typeInput"
+                {...inputs.typeInput.props}
+                options={OUTPUT_TYPE_OPTIONS}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.typeInputPlaceholder',
+                  {
+                    defaultMessage: 'Specify type',
+                  }
+                )}
+              />
+              {isESOutput && (
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout',
+                      {
+                        defaultMessage:
+                          'This output type currently does not support connectivity to a remote Elasticsearch cluster.',
+                      }
+                    )}
+                    iconType="alert"
+                    color="warning"
+                    size="s"
+                    heading="p"
+                  />
+                </>
               )}
-            />
+            </>
           </EuiFormRow>
           {showLogstashNeedEncryptedSavedObjectCallout && (
             <>
@@ -332,6 +352,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               }
               options={proxiesOptions}
               singleSelection={{ asPlainText: true }}
+              isDisabled={inputs.proxyIdInput.props.disabled}
               isClearable={true}
               placeholder={i18n.translate(
                 'xpack.fleet.settings.editOutputFlyout.proxyIdPlaceholder',

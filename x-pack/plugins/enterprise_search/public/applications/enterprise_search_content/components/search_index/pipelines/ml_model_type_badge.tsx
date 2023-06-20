@@ -9,11 +9,14 @@ import React from 'react';
 
 import { EuiBadge } from '@elastic/eui';
 
-import { ELSER_TASK_TYPE } from '../../../../../../common/ml_inference_pipeline';
+import {
+  TEXT_EXPANSION_TYPE,
+  TEXT_EXPANSION_FRIENDLY_TYPE,
+} from '../../../../../../common/ml_inference_pipeline';
 
 export const MLModelTypeBadge: React.FC<{ type: string }> = ({ type }) => {
-  if (type === ELSER_TASK_TYPE) {
-    return <EuiBadge color="success">ELSER</EuiBadge>;
+  if (type === TEXT_EXPANSION_TYPE) {
+    return <EuiBadge color="success">{TEXT_EXPANSION_FRIENDLY_TYPE}</EuiBadge>;
   }
   return <EuiBadge color="hollow">{type}</EuiBadge>;
 };

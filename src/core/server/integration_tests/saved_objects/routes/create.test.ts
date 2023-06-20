@@ -115,7 +115,12 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       'index-pattern',
       { title: 'Testing' },
-      { overwrite: false, id: undefined, migrationVersion: undefined }
+      {
+        overwrite: false,
+        id: undefined,
+        migrationVersion: undefined,
+        migrationVersionCompatibility: 'compatible',
+      }
     );
   });
 
@@ -135,7 +140,7 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(args).toEqual([
       'index-pattern',
       { title: 'Testing' },
-      { overwrite: false, id: 'logstash-*' },
+      { overwrite: false, id: 'logstash-*', migrationVersionCompatibility: 'compatible' },
     ]);
   });
 

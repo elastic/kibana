@@ -4191,7 +4191,7 @@
             "section": "def-common.IToasts",
             "text": "IToasts"
           },
-          ") => { onGetError: (error: Error) => void; onSetError: (error: Error) => void; }"
+          ") => { onGetError: (e: Error) => void; onSetError: (e: Error) => void; }"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
         "deprecated": false,

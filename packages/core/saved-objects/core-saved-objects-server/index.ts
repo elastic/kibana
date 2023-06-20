@@ -41,8 +41,10 @@ export type {
   SavedObjectsMappingProperties,
 } from './src/mapping_definition';
 export type {
+  SavedObjectMigration,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
+  SavedObjectMigrationParams,
   SavedObjectsMigrationLogger,
   SavedObjectMigrationFn,
 } from './src/migration';
@@ -52,6 +54,15 @@ export type {
   SavedObjectsExportablePredicate,
 } from './src/saved_objects_management';
 export type { SavedObjectStatusMeta } from './src/saved_objects_status';
+export {
+  MAIN_SAVED_OBJECT_INDEX,
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
+  INGEST_SAVED_OBJECT_INDEX,
+  ALERTING_CASES_SAVED_OBJECT_INDEX,
+  SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+  ANALYTICS_SAVED_OBJECT_INDEX,
+  ALL_SAVED_OBJECT_INDICES,
+} from './src/saved_objects_index_pattern';
 export type {
   SavedObjectsType,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
@@ -114,12 +125,19 @@ export type {
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
   SavedObjectsModelChange,
-  SavedObjectsModelExpansionChange,
+  SavedObjectsModelMappingsAdditionChange,
+  SavedObjectsModelMappingsDeprecationChange,
+  SavedObjectsModelDataBackfillChange,
   SavedObjectModelTransformationDoc,
   SavedObjectModelTransformationContext,
   SavedObjectModelTransformationFn,
   SavedObjectModelBidirectionalTransformation,
   SavedObjectModelTransformationResult,
+  SavedObjectModelDataBackfillFn,
+  SavedObjectsModelVersionSchemaDefinitions,
+  SavedObjectModelVersionForwardCompatibilityFn,
+  SavedObjectModelVersionForwardCompatibilityObjectSchema,
+  SavedObjectModelVersionForwardCompatibilitySchema,
 } from './src/model_version';
 
 // We re-export the SavedObject types here for convenience.

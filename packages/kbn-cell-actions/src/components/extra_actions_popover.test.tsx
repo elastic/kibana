@@ -12,17 +12,17 @@ import { makeAction, makeActionContext } from '../mocks/helpers';
 import { ExtraActionsPopOver, ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
 
 const actionContext = makeActionContext();
+const defaultProps = {
+  anchorPosition: 'rightCenter' as const,
+  actionContext,
+  isOpen: false,
+  closePopOver: () => {},
+  actions: [],
+  button: <span />,
+};
 describe('ExtraActionsPopOver', () => {
   it('renders', () => {
-    const { queryByTestId } = render(
-      <ExtraActionsPopOver
-        actionContext={actionContext}
-        isOpen={false}
-        closePopOver={() => {}}
-        actions={[]}
-        button={<span />}
-      />
-    );
+    const { queryByTestId } = render(<ExtraActionsPopOver {...defaultProps} />);
 
     expect(queryByTestId('extraActionsPopOver')).toBeInTheDocument();
   });
@@ -33,11 +33,10 @@ describe('ExtraActionsPopOver', () => {
     const action = { ...makeAction('test-action'), execute: executeAction };
     const { getByLabelText } = render(
       <ExtraActionsPopOver
-        actionContext={actionContext}
+        {...defaultProps}
         isOpen={true}
         closePopOver={closePopOver}
         actions={[action]}
-        button={<span />}
       />
     );
 
@@ -56,13 +55,7 @@ describe('ExtraActionsPopOverWithAnchor', () => {
 
   it('renders', () => {
     const { queryByTestId } = render(
-      <ExtraActionsPopOverWithAnchor
-        actionContext={actionContext}
-        isOpen={false}
-        closePopOver={() => {}}
-        actions={[]}
-        anchorRef={{ current: anchorElement }}
-      />
+      <ExtraActionsPopOverWithAnchor {...defaultProps} anchorRef={{ current: anchorElement }} />
     );
 
     expect(queryByTestId('extraActionsPopOverWithAnchor')).toBeInTheDocument();
@@ -74,7 +67,7 @@ describe('ExtraActionsPopOverWithAnchor', () => {
     const action = { ...makeAction('test-action'), execute: executeAction };
     const { getByLabelText } = render(
       <ExtraActionsPopOverWithAnchor
-        actionContext={actionContext}
+        {...defaultProps}
         isOpen={true}
         closePopOver={closePopOver}
         actions={[action]}

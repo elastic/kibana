@@ -12,13 +12,6 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { EditDownloadSourceFlyout } from '.';
 
-jest.mock('../../../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-  useFleetStatus: jest.fn().mockReturnValue({}),
-}));
-
 function renderFlyout(downloadSource?: DownloadSource) {
   const renderer = createFleetTestRendererMock();
 

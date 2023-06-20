@@ -48,7 +48,12 @@ discover-app {
 }
 
 .dscPageContent--centered {
+  width: auto;
   height: auto;
+  align-self: center;
+  margin-top: auto;
+  margin-bottom: auto;
+  flex-grow: 0;
 }
 
 .dscTable {

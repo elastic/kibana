@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
-import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 
 interface WhenExpressionProps {
-  value: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
-  onChange: (value: ANOMALY_THRESHOLD) => void;
+  value: Exclude<ML_ANOMALY_THRESHOLD, ML_ANOMALY_THRESHOLD.LOW>;
+  onChange: (value: ML_ANOMALY_THRESHOLD) => void;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -31,29 +31,29 @@ interface WhenExpressionProps {
 }
 
 const options = {
-  [ANOMALY_THRESHOLD.CRITICAL]: {
+  [ML_ANOMALY_THRESHOLD.CRITICAL]: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.severityScore.criticalLabel', {
       defaultMessage: 'Critical',
     }),
-    value: ANOMALY_THRESHOLD.CRITICAL,
+    value: ML_ANOMALY_THRESHOLD.CRITICAL,
   },
-  [ANOMALY_THRESHOLD.MAJOR]: {
+  [ML_ANOMALY_THRESHOLD.MAJOR]: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.severityScore.majorLabel', {
       defaultMessage: 'Major',
     }),
-    value: ANOMALY_THRESHOLD.MAJOR,
+    value: ML_ANOMALY_THRESHOLD.MAJOR,
   },
-  [ANOMALY_THRESHOLD.MINOR]: {
+  [ML_ANOMALY_THRESHOLD.MINOR]: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.severityScore.minorLabel', {
       defaultMessage: 'Minor',
     }),
-    value: ANOMALY_THRESHOLD.MINOR,
+    value: ML_ANOMALY_THRESHOLD.MINOR,
   },
-  [ANOMALY_THRESHOLD.WARNING]: {
+  [ML_ANOMALY_THRESHOLD.WARNING]: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.severityScore.warningLabel', {
       defaultMessage: 'Warning',
     }),
-    value: ANOMALY_THRESHOLD.WARNING,
+    value: ML_ANOMALY_THRESHOLD.WARNING,
   },
 };
 
@@ -101,7 +101,7 @@ export const SeverityThresholdExpression = ({
           value={value}
           fullWidth
           onChange={(e) => {
-            onChange(Number(e.target.value) as ANOMALY_THRESHOLD);
+            onChange(Number(e.target.value) as ML_ANOMALY_THRESHOLD);
             setAggTypePopoverOpen(false);
           }}
           options={Object.values(options).map((o) => o)}

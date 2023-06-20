@@ -104,13 +104,11 @@ export const beatsAggResponseHandler = (response?: BeatsElasticsearchResponse) =
   const buckets = response?.aggregations?.types?.buckets ?? [];
   const beatTotal = response?.aggregations?.total.value ?? 0;
   const beatTypes = buckets.reduce((types: BucketCount<{ type: string }>, typeBucket) => {
-    return [
-      ...types,
-      {
-        type: upperFirst(typeBucket.key),
-        count: typeBucket.uuids.buckets.length,
-      },
-    ];
+    types.push({
+      type: upperFirst(typeBucket.key),
+      count: typeBucket.uuids.buckets.length,
+    });
+    return types;
   }, []);
 
   const eventsTotalMax = response?.aggregations?.max_events_total.value ?? 0;

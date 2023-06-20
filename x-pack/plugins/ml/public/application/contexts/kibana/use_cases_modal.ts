@@ -36,7 +36,7 @@ export const useCasesModal = <EmbeddableType extends MlEmbeddableTypes>(
       }
 
       selectCaseModal.open({
-        attachments: [
+        getAttachments: () => [
           {
             type: CommentType.persistableState,
             persistableStateAttachmentTypeId: embeddableType,

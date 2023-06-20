@@ -6,18 +6,19 @@
  */
 
 import React, { useMemo } from 'react';
-import { TableId } from '../../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { SecurityPageName } from '../../../../app/types';
 import { SessionsView } from '../../../../common/components/sessions_viewer';
-import { hostNameExistsFilter } from '../../../../common/components/visualization_actions/utils';
+import { fieldNameExistsFilter } from '../../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../../common/hooks/use_license';
 import type { AlertsComponentQueryProps } from './types';
 
 export const SessionsTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
   const { pageFilters, filterQuery, ...rest } = alertsProps;
-  const hostPageFilters = useMemo(
-    () => (pageFilters != null ? [...hostNameExistsFilter, ...pageFilters] : hostNameExistsFilter),
-    [pageFilters]
-  );
+  const hostPageFilters = useMemo(() => {
+    const hostNameExistsFilter = fieldNameExistsFilter(SecurityPageName.hosts);
+    return pageFilters != null ? [...hostNameExistsFilter, ...pageFilters] : hostNameExistsFilter;
+  }, [pageFilters]);
   const isEnterprisePlus = useLicense().isEnterprise();
 
   return isEnterprisePlus ? (

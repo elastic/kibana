@@ -17,3 +17,4 @@ export { migratePackagePolicyToV840 } from './to_v8_4_0';
 export { migratePackagePolicyToV850 } from './to_v8_5_0';
 export { migratePackagePolicyToV860 } from './to_v8_6_0';
 export { migratePackagePolicyToV870 } from './to_v8_7_0';
+export { migratePackagePolicyToV880 } from './to_v8_8_0';

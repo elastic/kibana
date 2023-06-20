@@ -110,7 +110,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   value,
 }) => {
   const { uiSettings } = useKibana().services;
-  const { from, deleteQuery, setQuery, to } = useGlobalTime(false);
+  const { from, deleteQuery, setQuery, to } = useGlobalTime();
 
   const options = getOptions(isActiveTimeline(scopeId ?? '') ? activeTimelineEventType : undefined);
 

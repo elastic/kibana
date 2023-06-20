@@ -37,10 +37,11 @@ import {
 const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, TodoCreateOut>();
 const useDeleteTodoMutation = () => useDeleteContentMutation<TodoDeleteIn, TodoDeleteOut>();
 const useUpdateTodoMutation = () => useUpdateContentMutation<TodoUpdateIn, TodoUpdateOut>();
-const useSearchTodosQuery = ({ filter }: { filter: TodoSearchIn['query']['filter'] }) =>
+const useSearchTodosQuery = ({ options: { filter } = {} }: { options: TodoSearchIn['options'] }) =>
   useSearchContentQuery<TodoSearchIn, TodoSearchOut>({
     contentTypeId: TODO_CONTENT_ID,
-    query: { filter },
+    query: {},
+    options: { filter },
   });
 
 type TodoFilter = 'all' | 'completed' | 'todo';
@@ -63,7 +64,7 @@ export const Todos = () => {
   const [filterIdSelected, setFilterIdSelected] = React.useState<TodoFilter>('all');
 
   const { data, isError, error, isFetching, isLoading } = useSearchTodosQuery({
-    filter: filterIdSelected === 'all' ? undefined : filterIdSelected,
+    options: { filter: filterIdSelected === 'all' ? undefined : filterIdSelected },
   });
 
   const createTodoMutation = useCreateTodoMutation();

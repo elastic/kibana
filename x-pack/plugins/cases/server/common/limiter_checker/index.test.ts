@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
 import { AttachmentLimitChecker } from '.';
 import { createAttachmentServiceMock } from '../../services/mocks';
 import { createAlertRequests, createFileRequests, createUserRequests } from './test_utils';
 
 describe('AttachmentLimitChecker', () => {
   const mockAttachmentService = createAttachmentServiceMock();
-  const checker = new AttachmentLimitChecker(mockAttachmentService, 'id');
+  const mockFileService = createFileServiceMock();
+  const checker = new AttachmentLimitChecker(mockAttachmentService, mockFileService, 'id');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -21,6 +23,13 @@ describe('AttachmentLimitChecker', () => {
         limiter: {
           value: 5,
         },
+      };
+    });
+
+    mockFileService.find.mockImplementation(async () => {
+      return {
+        files: [],
+        total: 5,
       };
     });
   });

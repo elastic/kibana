@@ -23,6 +23,7 @@ import {
   INDICATOR_APM_AVAILABILITY,
   INDICATOR_APM_LATENCY,
   INDICATOR_CUSTOM_KQL,
+  INDICATOR_CUSTOM_METRIC,
 } from '../../../utils/slo/labels';
 
 export interface SloListSearchFilterSortBarProps {
@@ -32,11 +33,12 @@ export interface SloListSearchFilterSortBarProps {
   onChangeIndicatorTypeFilter: (filter: FilterType[]) => void;
 }
 
-export type SortType = 'name' | 'indicatorType';
+export type SortType = 'creationTime' | 'indicatorType';
 export type FilterType =
   | 'sli.apm.transactionDuration'
   | 'sli.apm.transactionErrorRate'
-  | 'sli.kql.custom';
+  | 'sli.kql.custom'
+  | 'sli.metric.custom';
 
 export type Item<T> = EuiSelectableOption & {
   label: string;
@@ -46,10 +48,10 @@ export type Item<T> = EuiSelectableOption & {
 
 const SORT_OPTIONS: Array<Item<SortType>> = [
   {
-    label: i18n.translate('xpack.observability.slo.list.sortBy.name', {
-      defaultMessage: 'Name',
+    label: i18n.translate('xpack.observability.slo.list.sortBy.creationTime', {
+      defaultMessage: 'Creation time',
     }),
-    type: 'name',
+    type: 'creationTime',
     checked: 'on',
   },
   {
@@ -72,6 +74,10 @@ const INDICATOR_TYPE_OPTIONS: Array<Item<FilterType>> = [
   {
     label: INDICATOR_CUSTOM_KQL,
     type: 'sli.kql.custom',
+  },
+  {
+    label: INDICATOR_CUSTOM_METRIC,
+    type: 'sli.metric.custom',
   },
 ];
 
@@ -108,7 +114,7 @@ export function SloListSearchFilterSortBar({
   };
 
   useEffect(() => {
-    if (selectedSort?.type === 'name' || selectedSort?.type === 'indicatorType') {
+    if (selectedSort?.type === 'creationTime' || selectedSort?.type === 'indicatorType') {
       onChangeSort(selectedSort.type);
     }
   }, [onChangeSort, selectedSort]);

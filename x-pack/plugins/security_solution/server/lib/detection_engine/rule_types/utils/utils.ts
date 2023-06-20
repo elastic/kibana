@@ -953,3 +953,7 @@ export const getUnprocessedExceptionsWarnings = (
     )}`;
   }
 };
+
+export const getMaxSignalsWarning = (): string => {
+  return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created.`;
+};

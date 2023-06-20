@@ -11,9 +11,10 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
+import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
-import { mockOptionsListReduxEmbeddableTools } from '../../../common/mocks';
+import { mockOptionsListEmbeddable } from '../../../common/mocks';
 import { OptionsListControl } from './options_list_control';
 import { BehaviorSubject } from 'rxjs';
 
@@ -30,16 +31,16 @@ describe('Options list control', () => {
   }
 
   async function mountComponent(options?: Partial<MountOptions>) {
-    const mockReduxEmbeddableTools = await mockOptionsListReduxEmbeddableTools({
+    const optionsListEmbeddable = await mockOptionsListEmbeddable({
       componentState: options?.componentState ?? {},
       explicitInput: options?.explicitInput ?? {},
       output: options?.output ?? {},
     } as Partial<OptionsListReduxState>);
 
     return mountWithIntl(
-      <mockReduxEmbeddableTools.Wrapper>
+      <OptionsListEmbeddableContext.Provider value={optionsListEmbeddable}>
         <OptionsListControl {...defaultProps} />
-      </mockReduxEmbeddableTools.Wrapper>
+      </OptionsListEmbeddableContext.Provider>
     );
   }
 

@@ -29,4 +29,17 @@ describe('registerCloudDeploymentIdAnalyticsContext', () => {
       cloudId: 'cloud_id',
     });
   });
+
+  test('it registers the context provider and emits the cloudId and deploymentId', async () => {
+    registerCloudDeploymentMetadataAnalyticsContext(analytics, {
+      id: 'cloud_id',
+      deployment_url: 'deployments/uuid-of-my-deployment',
+    });
+    expect(analytics.registerContextProvider).toHaveBeenCalledTimes(1);
+    const [{ context$ }] = analytics.registerContextProvider.mock.calls[0];
+    await expect(firstValueFrom(context$)).resolves.toEqual({
+      cloudId: 'cloud_id',
+      deploymentId: 'uuid-of-my-deployment',
+    });
+  });
 });

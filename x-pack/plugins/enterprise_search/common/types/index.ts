@@ -33,15 +33,15 @@ export interface ConfiguredLimits {
 
 export interface ProductAccess {
   hasAppSearchAccess: boolean;
-  hasSearchEnginesAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
 }
 
 export interface ProductFeatures {
   hasConnectors: boolean;
   hasDefaultIngestPipeline: boolean;
+  hasDocumentLevelSecurityEnabled: boolean;
+  hasIncrementalSyncEnabled: boolean;
   hasNativeConnectors: boolean;
-  hasSearchApplications: boolean;
   hasWebCrawler: boolean;
 }
 

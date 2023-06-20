@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
-        expect(await testSubjects.exists('emptyPlaceholder'));
+        expect(await testSubjects.exists('emptyPlaceholder')).to.be(true);
         await PageObjects.dashboard.clickQuickSave();
       });
 
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardBadgeActions.expectMissingTimeRangeBadgeAction();
-        expect(await testSubjects.exists('xyVisChart'));
+        expect(await testSubjects.exists('xyVisChart')).to.be(true);
       });
     });
 
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
-        expect(await testSubjects.exists('emptyPlaceholder'));
+        expect(await testSubjects.exists('emptyPlaceholder')).to.be(true);
         await PageObjects.dashboard.clickQuickSave();
       });
 
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardBadgeActions.expectMissingTimeRangeBadgeAction();
-        expect(await testSubjects.exists('xyVisChart'));
+        expect(await testSubjects.exists('xyVisChart')).to.be(true);
       });
     });
 

@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import {
   getAllMonitors,
@@ -34,7 +35,8 @@ export interface StaleDownConfig extends OverviewStatusMetaData {
   isLocationRemoved?: boolean;
 }
 
-export interface AlertOverviewStatus extends Omit<OverviewStatus, 'disabledCount'> {
+export interface AlertOverviewStatus
+  extends Omit<OverviewStatus, 'disabledCount' | 'disabledMonitorQueryIds'> {
   staleDownConfigs: Record<string, StaleDownConfig>;
 }
 
@@ -60,7 +62,9 @@ export class StatusRuleExecutor {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
-    this.esClient = new UptimeEsClient(this.soClient, scopedClient);
+    this.esClient = new UptimeEsClient(this.soClient, scopedClient, {
+      heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+    });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
   }
@@ -127,6 +131,9 @@ export class StatusRuleExecutor {
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
     } = await this.getMonitors();
+    const from = this.previousStartedAt
+      ? moment(this.previousStartedAt).subtract(1, 'minute').toISOString()
+      : 'now-2m';
 
     if (enabledMonitorQueryIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
@@ -134,7 +141,7 @@ export class StatusRuleExecutor {
         listOfLocations,
         {
           to: 'now',
-          from: this.previousStartedAt?.toISOString() ?? 'now-1m',
+          from,
         },
         enabledMonitorQueryIds,
         monitorLocationMap,
@@ -194,7 +201,10 @@ export class StatusRuleExecutor {
         delete downConfigs[locPlusId];
       } else {
         const { locations } = monitor.attributes;
-        if (!locations.some((l) => l.label === downConfig.location)) {
+        const isLocationRemoved = !locations.some(
+          (l) => l.id === this.getLocationId(downConfig.location)
+        );
+        if (isLocationRemoved) {
           staleDownConfigs[locPlusId] = { ...downConfig, isLocationRemoved: true };
           delete downConfigs[locPlusId];
         }

@@ -21,6 +21,10 @@ export interface RoleIndexPrivilege {
   query?: string;
 }
 
+export interface RoleRemoteIndexPrivilege extends RoleIndexPrivilege {
+  clusters: string[];
+}
+
 export interface RoleKibanaPrivilege {
   spaces: string[];
   base: string[];
@@ -33,6 +37,7 @@ export interface Role {
   elasticsearch: {
     cluster: string[];
     indices: RoleIndexPrivilege[];
+    remote_indices?: RoleRemoteIndexPrivilege[];
     run_as: string[];
   };
   kibana: RoleKibanaPrivilege[];

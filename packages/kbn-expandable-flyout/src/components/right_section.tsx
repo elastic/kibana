@@ -29,10 +29,12 @@ export const RightSection: React.FC<RightSectionProps> = ({
   width,
 }: RightSectionProps) => {
   return (
-    <EuiFlexItem grow={false} style={{ height: '100%' }} data-test-subj={RIGHT_SECTION}>
-      <EuiFlexGroup direction="column" style={{ width }}>
-        {component}
-      </EuiFlexGroup>
+    <EuiFlexItem
+      grow={false}
+      style={{ height: '100%', width: `${width * 100}%` }}
+      data-test-subj={RIGHT_SECTION}
+    >
+      <EuiFlexGroup direction="column">{component}</EuiFlexGroup>
     </EuiFlexItem>
   );
 };

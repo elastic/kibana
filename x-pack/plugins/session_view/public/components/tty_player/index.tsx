@@ -17,7 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import useResizeObserver from 'use-resize-observer';
 import { throttle } from 'lodash';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import type { ProcessEvent } from '../../../common';
 import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';
@@ -33,8 +33,10 @@ import { TTYPlayerControls } from '../tty_player_controls';
 import { BETA, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
-  show: boolean;
+  index: string;
   sessionEntityId: string;
+  sessionStartTime: string;
+  show: boolean;
   onClose(): void;
   isFullscreen: boolean;
   onJumpToEvent(event: ProcessEvent): void;
@@ -43,8 +45,10 @@ export interface TTYPlayerDeps {
 }
 
 export const TTYPlayer = ({
-  show,
+  index,
   sessionEntityId,
+  sessionStartTime,
+  show,
   onClose,
   isFullscreen,
   onJumpToEvent,
@@ -54,8 +58,11 @@ export const TTYPlayer = ({
   const ref = useRef<HTMLDivElement>(null);
   const { ref: scrollRef, height: containerHeight = 1 } = useResizeObserver<HTMLDivElement>({});
 
-  const { data, fetchNextPage, hasNextPage, isFetching, refetch } =
-    useFetchIOEvents(sessionEntityId);
+  const { data, fetchNextPage, hasNextPage, isFetching, refetch } = useFetchIOEvents(
+    index,
+    sessionEntityId,
+    sessionStartTime
+  );
   const { lines, processStartMarkers } = useIOLines(data?.pages);
   const [fontSize, setFontSize] = useState(DEFAULT_TTY_FONT_SIZE);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -88,7 +95,7 @@ export const TTYPlayer = ({
   useEffect(() => {
     if (show) {
       // refetch the most recent page when tty player is loaded
-      refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+      refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
     }
   }, [refetch, show]);
 

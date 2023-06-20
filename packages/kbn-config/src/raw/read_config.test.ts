@@ -47,6 +47,18 @@ test('should throw an exception when referenced environment variable in a config
   ).toThrowErrorMatchingSnapshot();
 });
 
+test('throws parsing a config with forbidden paths', () => {
+  expect(() =>
+    getConfigFromFiles([fixtureFile('forbidden_1.yml')])
+  ).toThrowErrorMatchingInlineSnapshot(`"Forbidden path detected: test.aaa.__proto__.hello"`);
+});
+
+test('throws parsing another config with forbidden paths', () => {
+  expect(() =>
+    getConfigFromFiles([fixtureFile('forbidden_2.yml')])
+  ).toThrowErrorMatchingInlineSnapshot(`"Forbidden path detected: test.hello.__proto__"`);
+});
+
 describe('different cwd()', () => {
   const originalCwd = process.cwd();
   const tempCwd = resolve(__dirname);

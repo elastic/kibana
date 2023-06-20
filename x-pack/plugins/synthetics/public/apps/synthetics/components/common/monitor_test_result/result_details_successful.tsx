@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { StepMetrics, TimingDetails } from './result_details';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';

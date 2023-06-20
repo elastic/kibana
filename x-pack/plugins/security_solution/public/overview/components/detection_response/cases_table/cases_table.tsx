@@ -71,6 +71,7 @@ export const CasesTable = React.memo(() => {
           toggleQuery={setToggleStatus}
           subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
           showInspectButton={false}
+          tooltip={i18n.CASES_TABLE_SECTION_TOOLTIP}
         />
 
         {toggleStatus && (

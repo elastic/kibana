@@ -75,7 +75,7 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
           <EuiFlexItem>
             <SyncJobDocumentsPanel
               added={syncJob.indexed_document_count}
-              total={0}
+              total={syncJob.total_document_count ?? 0}
               removed={syncJob.deleted_document_count}
               volume={syncJob.indexed_document_volume ?? 0}
             />
@@ -85,9 +85,9 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
               canceledAt={syncJob.canceled_at ?? ''}
               cancelationRequestedAt={syncJob.cancelation_requested_at ?? ''}
               syncRequestedAt={syncJob.created_at}
-              syncStarted={syncJob.started_at}
+              syncStarted={syncJob.started_at ?? ''}
               completed={syncJob.completed_at ?? ''}
-              lastUpdated={syncJob.last_seen}
+              lastUpdated={syncJob.last_seen ?? ''}
               triggerMethod={syncJob.trigger_method}
             />
           </EuiFlexItem>

@@ -16,10 +16,7 @@ import {
 } from '../constants';
 
 export async function waitForMetadataTransformsReady(esClient: Client): Promise<void> {
-  await waitFor(
-    () => areMetadataTransformsReady(esClient),
-    'failed while waiting for transform to start'
-  );
+  await waitFor(() => areMetadataTransformsReady(esClient));
 }
 
 export async function stopMetadataTransforms(esClient: Client): Promise<void> {
@@ -40,7 +37,7 @@ export async function stopMetadataTransforms(esClient: Client): Promise<void> {
 export async function startMetadataTransforms(
   esClient: Client,
   // agentIds to wait for
-  agentIds?: string[]
+  agentIds: string[]
 ): Promise<void> {
   const transformIds = await getMetadataTransformIds(esClient);
   const currentTransformId = transformIds.find((transformId) =>
@@ -50,7 +47,9 @@ export async function startMetadataTransforms(
     transformId.startsWith(METADATA_UNITED_TRANSFORM)
   );
   if (!currentTransformId || !unitedTransformId) {
-    throw new Error('failed to start metadata transforms, transforms not found');
+    // eslint-disable-next-line no-console
+    console.warn('metadata transforms not found, skipping transform start');
+    return;
   }
 
   try {
@@ -102,8 +101,8 @@ async function areMetadataTransformsReady(esClient: Client): Promise<boolean> {
   );
 }
 
-async function waitForCurrentMetdataDocs(esClient: Client, agentIds?: string[]) {
-  const query = agentIds?.length
+async function waitForCurrentMetdataDocs(esClient: Client, agentIds: string[]) {
+  const query = agentIds.length
     ? {
         bool: {
           filter: [
@@ -116,12 +115,9 @@ async function waitForCurrentMetdataDocs(esClient: Client, agentIds?: string[]) 
         },
       }
     : {
-        size: 1,
-        query: {
-          match_all: {},
-        },
+        match_all: {},
       };
-  const size = agentIds?.length ? agentIds.length : 1;
+  const size = agentIds.length ?? 1;
   await waitFor(
     async () =>
       (
@@ -131,16 +127,14 @@ async function waitForCurrentMetdataDocs(esClient: Client, agentIds?: string[]) 
           size,
           rest_total_hits_as_int: true,
         })
-      ).hits.total === size,
-    'failed while waiting for current metadata docs to populate'
+      ).hits.total === size
   );
 }
 
 async function waitFor(
   cb: () => Promise<boolean>,
-  errorMessage: string,
   interval: number = 20000,
-  maxAttempts = 5
+  maxAttempts = 6
 ): Promise<void> {
   let attempts = 0;
   let isReady = false;
@@ -151,7 +145,7 @@ async function waitFor(
     attempts++;
 
     if (attempts > maxAttempts) {
-      throw new Error(errorMessage);
+      return;
     }
   }
 }

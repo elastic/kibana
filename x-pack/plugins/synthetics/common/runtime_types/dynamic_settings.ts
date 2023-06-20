@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-const DefaultEmailType = t.intersection([
+const DefaultEmailCodec = t.intersection([
   t.type({
     to: t.array(t.string),
   }),
@@ -17,19 +17,7 @@ const DefaultEmailType = t.intersection([
   }),
 ]);
 
-export const DynamicSettingsType = t.intersection([
-  t.strict({
-    heartbeatIndices: t.string,
-    certAgeThreshold: t.number,
-    certExpirationThreshold: t.number,
-    defaultConnectors: t.array(t.string),
-  }),
-  t.partial({
-    defaultEmail: DefaultEmailType,
-  }),
-]);
-
-export const DynamicSettingsSaveType = t.intersection([
+export const DynamicSettingsSaveCodec = t.intersection([
   t.type({
     success: t.boolean,
   }),
@@ -38,6 +26,30 @@ export const DynamicSettingsSaveType = t.intersection([
   }),
 ]);
 
-export type DynamicSettings = t.TypeOf<typeof DynamicSettingsType>;
-export type DefaultEmail = t.TypeOf<typeof DefaultEmailType>;
-export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveType>;
+export const DynamicSettingsCodec = t.intersection([
+  t.strict({
+    heartbeatIndices: t.string,
+    certAgeThreshold: t.number,
+    certExpirationThreshold: t.number,
+    defaultConnectors: t.array(t.string),
+  }),
+  t.partial({
+    defaultEmail: DefaultEmailCodec,
+  }),
+]);
+
+export type DynamicSettings = t.TypeOf<typeof DynamicSettingsCodec>;
+export type DefaultEmail = t.TypeOf<typeof DefaultEmailCodec>;
+export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveCodec>;
+
+export const LocationMonitorsType = t.type({
+  status: t.number,
+  payload: t.array(
+    t.type({
+      id: t.string,
+      count: t.number,
+    })
+  ),
+});
+
+export type LocationMonitorsResponse = t.TypeOf<typeof LocationMonitorsType>;

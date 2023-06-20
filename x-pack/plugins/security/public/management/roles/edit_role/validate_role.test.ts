@@ -103,7 +103,7 @@ describe('validateIndexPrivileges', () => {
     validator = new RoleValidator({ shouldValidate: true });
   });
 
-  test('it ignores privilegs with no indices defined', () => {
+  test('it ignores privileges with no indices defined', () => {
     const role = {
       name: '',
       elasticsearch: {
@@ -124,7 +124,7 @@ describe('validateIndexPrivileges', () => {
     });
   });
 
-  test('it requires privilges when an index is defined', () => {
+  test('it requires privileges when an index is defined', () => {
     const role = {
       name: '',
       elasticsearch: {
@@ -158,6 +158,97 @@ describe('validateIndexPrivileges', () => {
 
     // @ts-ignore
     expect(() => validator.validateIndexPrivileges(role)).toThrowErrorMatchingSnapshot();
+  });
+});
+
+describe('validateRemoteIndexPrivileges', () => {
+  beforeEach(() => {
+    validator = new RoleValidator({ shouldValidate: true });
+  });
+
+  test('it ignores empty remote privileges', () => {
+    const role = {
+      name: '',
+      elasticsearch: {
+        indices: [],
+        remote_indices: [
+          {
+            clusters: [],
+            names: [],
+            privileges: [],
+          },
+        ],
+        cluster: [],
+        run_as: [],
+      },
+      kibana: [],
+    };
+
+    expect(validator.validateRemoteIndexPrivileges(role)).toEqual({
+      isInvalid: false,
+    });
+  });
+
+  test('it requires privileges when an index is defined', () => {
+    const role = {
+      name: '',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        remote_indices: [
+          {
+            clusters: ['cluster'],
+            names: ['index-*'],
+            privileges: [],
+          },
+        ],
+        run_as: [],
+      },
+      kibana: [],
+    };
+
+    expect(validator.validateRemoteIndexPrivileges(role)).toEqual({
+      isInvalid: true,
+    });
+  });
+
+  test('it requires indices and privileges when clusters is defined', () => {
+    const role = {
+      name: '',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        remote_indices: [
+          {
+            clusters: ['cluster'],
+            names: [],
+            privileges: [],
+          },
+        ],
+        run_as: [],
+      },
+      kibana: [],
+    };
+
+    expect(validator.validateRemoteIndexPrivileges(role)).toEqual({
+      isInvalid: true,
+    });
+  });
+
+  test('it throws when indices is not an array', () => {
+    const role = {
+      name: '',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        remote_indices: 'asdf',
+        run_as: [],
+      },
+      kibana: [],
+    };
+
+    // @ts-ignore
+    expect(() => validator.validateRemoteIndexPrivileges(role)).toThrowErrorMatchingSnapshot();
   });
 });
 

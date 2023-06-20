@@ -7,6 +7,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import { OperationDefinition } from '.';
 import {
   ReferenceBasedIndexPatternColumn,
@@ -14,7 +15,6 @@ import {
   ValueFormatConfig,
 } from './column_types';
 import type { IndexPattern } from '../../../../types';
-import { useDebouncedValue } from '../../../../shared_components';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
 

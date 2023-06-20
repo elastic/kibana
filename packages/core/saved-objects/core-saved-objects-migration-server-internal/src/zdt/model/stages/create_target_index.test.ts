@@ -101,7 +101,7 @@ describe('Stage: createTargetIndex', () => {
         currentIndexMeta: state.indexMappings._meta,
         aliases: [],
         aliasActions,
-        newIndexCreation: true,
+        skipDocumentMigration: true,
       });
     });
 
@@ -121,7 +121,7 @@ describe('Stage: createTargetIndex', () => {
         currentIndexMeta: state.indexMappings._meta,
         aliases: [],
         aliasActions: [],
-        newIndexCreation: true,
+        skipDocumentMigration: true,
       });
     });
   });

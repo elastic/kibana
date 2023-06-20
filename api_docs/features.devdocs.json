@@ -339,9 +339,7 @@
             "parentPluginId": "features",
             "id": "def-public.FeatureKibanaPrivileges.disabled",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "disabled",
             "description": [
               "\nWhether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`."
@@ -350,51 +348,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/plugin.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/__fixtures__/kibana_features.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              }
-            ]
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "features",
@@ -1771,9 +1726,7 @@
             "parentPluginId": "features",
             "id": "def-server.FeatureKibanaPrivileges.disabled",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "disabled",
             "description": [
               "\nWhether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`."
@@ -1782,51 +1735,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/plugin.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/__fixtures__/kibana_features.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              }
-            ]
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "features",
@@ -3646,9 +3556,7 @@
             "parentPluginId": "features",
             "id": "def-common.FeatureKibanaPrivileges.disabled",
             "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "disabled",
             "description": [
               "\nWhether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`."
@@ -3657,51 +3565,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/plugin.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/__fixtures__/kibana_features.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.test.ts"
-              }
-            ]
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "features",

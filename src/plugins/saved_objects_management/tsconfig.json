@@ -26,6 +26,8 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-browser",
     "@kbn/shared-ux-router",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": [
     "target/**/*",

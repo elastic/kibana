@@ -5,14 +5,9 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { deletePermissionError } from '../../synthetics_service/private_location/synthetics_private_location';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
@@ -20,9 +15,8 @@ import {
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   formatTelemetryDeleteEvent,
@@ -34,29 +28,21 @@ import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framewo
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
-  path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
   writeAccess: true,
-  handler: async ({
-    request,
-    response,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, response } = routeContext;
     const { monitorId } = request.params;
 
     try {
       const errors = await deleteMonitor({
-        savedObjectsClient,
-        server,
+        routeContext,
         monitorId,
-        syntheticsMonitorClient,
-        request,
       });
 
       if (errors && errors.length > 0) {
@@ -77,18 +63,13 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 });
 
 export const deleteMonitor = async ({
-  savedObjectsClient,
-  server,
+  routeContext,
   monitorId,
-  syntheticsMonitorClient,
-  request,
 }: {
-  savedObjectsClient: SavedObjectsClientContract;
-  server: UptimeServerSetup;
+  routeContext: RouteContext;
   monitorId: string;
-  syntheticsMonitorClient: SyntheticsMonitorClient;
-  request: KibanaRequest;
 }) => {
+  const { savedObjectsClient, server, syntheticsMonitorClient, request } = routeContext;
   const { logger, telemetry, stackVersion } = server;
 
   const { monitor, monitorWithSecret } = await getMonitorToDelete(
@@ -97,19 +78,12 @@ export const deleteMonitor = async ({
     server
   );
 
-  const { locations } = monitor.attributes;
-
-  const hasPrivateLocation = locations.filter((loc) => !loc.isServiceManaged);
-
-  if (hasPrivateLocation.length > 0) {
-    await syntheticsMonitorClient.privateLocationAPI.checkPermissions(
-      request,
-      deletePermissionError(monitor.attributes.name)
-    );
-  }
+  let deletePromise;
 
   try {
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
+
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       [
         {
@@ -123,9 +97,11 @@ export const deleteMonitor = async ({
       savedObjectsClient,
       spaceId
     );
-    const deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
 
-    const [errors] = await Promise.all([deleteSyncPromise, deletePromise]);
+    const [errors] = await Promise.all([deleteSyncPromise, deletePromise]).catch((e) => {
+      server.logger.error(e);
+      throw e;
+    });
 
     sendTelemetryEvents(
       logger,
@@ -141,6 +117,13 @@ export const deleteMonitor = async ({
 
     return errors;
   } catch (e) {
+    if (deletePromise) {
+      await deletePromise;
+    }
+    server.logger.error(
+      `Unable to delete Synthetics monitor ${monitor.attributes[ConfigKey.NAME]}`
+    );
+
     if (monitorWithSecret) {
       await restoreDeletedMonitor({
         monitorId,

@@ -24,6 +24,14 @@ export const IconButtonGroupStyles = ({ euiTheme }: UseEuiTheme) => {
           borderTopRightRadius: `${euiTheme.border.radius.medium} !important`,
           borderBottomRightRadius: `${euiTheme.border.radius.medium} !important`,
         },
+        ':not(:first-child):not(.euiButtonGroupButton-isSelected):not(:disabled)': {
+          boxShadow: 'unset',
+        },
+      },
+    },
+    buttonGroup: {
+      '.euiButtonGroup__buttons': {
+        borderRadius: `${euiTheme.border.radius.medium}`,
       },
     },
   };

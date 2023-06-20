@@ -10,33 +10,31 @@ import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import { useKibana } from '../../utils/kibana_react';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useToasts } from '../../hooks/use_toast';
-import { ObservabilityAlertSearchBar } from '../../components/shared/alert_search_bar';
 import { LoadingObservability } from '../../components/loading_observability';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
+import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
 import {
   alertSearchBarStateContainer,
   Provider,
   useAlertSearchBarStateContainer,
-} from '../../components/shared/alert_search_bar/containers';
+} from '../../components/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
-import { getNoDataConfig } from '../../utils/no_data_config';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
-import type { ObservabilityAppServices } from '../../application/types';
+import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
 const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
-const URL_STORAGE_KEY = '_a';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
@@ -49,7 +47,6 @@ function InternalAlertsPage() {
         timefilter: { timefilter: timeFilterService },
       },
     },
-    docLinks,
     http,
     notifications: { toasts },
     triggersActionsUi: {
@@ -58,9 +55,9 @@ function InternalAlertsPage() {
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
     },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
-  const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY, {
+  const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
 
@@ -162,25 +159,14 @@ function InternalAlertsPage() {
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
-  // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
-  const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
-
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
 
-  const noDataConfig = getNoDataConfig({
-    hasData,
-    basePath: http.basePath,
-    docsLink: docLinks.links.observability.guide,
-  });
-
   return (
     <Provider value={alertSearchBarStateContainer}>
       <ObservabilityPageTemplate
-        noDataConfig={noDataConfig}
-        isPageDataLoaded={isAllRequestsComplete}
-        data-test-subj={noDataConfig ? 'noDataPage' : 'alertsPageWithData'}
+        data-test-subj="alertsPageWithData"
         pageHeader={{
           pageTitle: (
             <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>

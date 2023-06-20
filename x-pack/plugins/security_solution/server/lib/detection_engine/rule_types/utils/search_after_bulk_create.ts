@@ -19,6 +19,7 @@ import {
   mergeSearchResults,
   getSafeSortIds,
   addToSearchAfterReturn,
+  getMaxSignalsWarning,
 } from './utils';
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -44,6 +45,7 @@ export const searchAfterAndBulkCreate = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
+  additionalFilters,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
@@ -60,7 +62,7 @@ export const searchAfterAndBulkCreate = async ({
       });
     }
 
-    while (toReturn.createdSignalsCount < tuple.maxSignals) {
+    while (toReturn.createdSignalsCount <= tuple.maxSignals) {
       try {
         let mergedSearchResults = createSearchResultReturnType();
         ruleExecutionLogger.debug(`sortIds: ${sortIds}`);
@@ -80,6 +82,7 @@ export const searchAfterAndBulkCreate = async ({
             secondaryTimestamp,
             trackTotalHits,
             sortOrder,
+            additionalFilters,
           });
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
           toReturn = mergeReturns([
@@ -136,22 +139,22 @@ export const searchAfterAndBulkCreate = async ({
         // skip the call to bulk create and proceed to the next search_after,
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
-          // make sure we are not going to create more signals than maxSignals allows
-          const limitedEvents = includedEvents.slice(
-            0,
-            tuple.maxSignals - toReturn.createdSignalsCount
-          );
-          const enrichedEvents = await enrichment(limitedEvents);
+          const enrichedEvents = await enrichment(includedEvents);
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
           const bulkCreateResult = await bulkCreate(
             wrappedDocs,
-            undefined,
+            tuple.maxSignals - toReturn.createdSignalsCount,
             createEnrichEventsFunction({
               services,
               logger: ruleExecutionLogger,
             })
           );
+
+          if (bulkCreateResult.alertsWereTruncated) {
+            toReturn.warningMessages.push(getMaxSignalsWarning());
+            break;
+          }
 
           addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
 

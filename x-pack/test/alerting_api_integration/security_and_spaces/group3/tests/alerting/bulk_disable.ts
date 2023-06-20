@@ -19,6 +19,7 @@ const getDefaultRules = (response: any) => ({
   consumer: 'alertsFixture',
   throttle: '1m',
   alertTypeId: 'test.noop',
+  apiKeyCreatedByUser: false,
   apiKeyOwner: response.body.rules[0].apiKeyOwner,
   createdBy: 'elastic',
   updatedBy: response.body.rules[0].updatedBy,

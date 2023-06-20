@@ -44,7 +44,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      verifyActionResult(1);
+      await verifyActionResult(1);
     });
 
     it('/agents/bulk_request_diagnostics should work for multiple agents by id', async () => {
@@ -55,7 +55,7 @@ export default function (providerContext: FtrProviderContext) {
           agents: ['agent2', 'agent3'],
         });
 
-      verifyActionResult(2);
+      await verifyActionResult(2);
     });
 
     it('/agents/bulk_request_diagnostics should work for multiple agents by kuery', async () => {
@@ -67,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      verifyActionResult(4);
+      await verifyActionResult(4);
     });
 
     it('/agents/bulk_request_diagnostics should work for multiple agents by kuery in batches async', async () => {

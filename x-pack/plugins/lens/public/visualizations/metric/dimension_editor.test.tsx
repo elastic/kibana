@@ -27,7 +27,7 @@ import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/c
 import { createMockFramePublicAPI } from '../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
-import { DebouncedInput } from '../../shared_components/debounced_input';
+import { DebouncedInput } from '@kbn/visualization-ui-components/public';
 import { DatasourcePublicAPI } from '../..';
 import { CollapseFunction } from '../../../common/expressions';
 
@@ -74,6 +74,7 @@ describe('dimension editor', () => {
     maxCols: 5,
     color: 'static-color',
     palette,
+    icon: 'tag',
     showBar: true,
     trendlineLayerId: 'second',
     trendlineLayerType: 'metricTrendline',

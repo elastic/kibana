@@ -24,7 +24,7 @@ export function getJobsObservable(
     switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds)),
     map((jobs) => {
       const explorerJobs: ExplorerJob[] = jobs.map((job) => {
-        const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+        const bucketSpan = parseInterval(job.analysis_config.bucket_span!);
         return {
           id: job.job_id,
           selected: true,

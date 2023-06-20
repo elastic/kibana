@@ -8,25 +8,45 @@
 import React from 'react';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { SetAnalyticsChrome } from '../../../shared/kibana_chrome';
-import {
-  EnterpriseSearchPageTemplateWrapper,
-  PageTemplateProps,
-  useEnterpriseSearchNav,
-} from '../../../shared/layout';
-import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
+import { generateEncodedPath } from '../../../shared/encode_path_params';
 
-export const EnterpriseSearchAnalyticsPageTemplate: React.FC<PageTemplateProps> = ({
-  children,
-  pageChrome,
-  pageViewTelemetry,
-  ...pageTemplateProps
-}) => {
+import { SetAnalyticsChrome } from '../../../shared/kibana_chrome';
+import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
+import { useEnterpriseSearchAnalyticsNav } from '../../../shared/layout/nav';
+import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
+import {
+  COLLECTION_EXPLORER_PATH,
+  COLLECTION_INTEGRATE_PATH,
+  COLLECTION_OVERVIEW_PATH,
+} from '../../routes';
+
+interface EnterpriseSearchAnalyticsPageTemplateProps extends PageTemplateProps {
+  analyticsName?: string;
+}
+
+export const EnterpriseSearchAnalyticsPageTemplate: React.FC<
+  EnterpriseSearchAnalyticsPageTemplateProps
+> = ({ children, analyticsName, pageChrome, pageViewTelemetry, ...pageTemplateProps }) => {
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        items: useEnterpriseSearchNav(),
+        items: useEnterpriseSearchAnalyticsNav(
+          analyticsName,
+          analyticsName
+            ? {
+                explorer: generateEncodedPath(COLLECTION_EXPLORER_PATH, {
+                  name: analyticsName,
+                }),
+                integration: generateEncodedPath(COLLECTION_INTEGRATE_PATH, {
+                  name: analyticsName,
+                }),
+                overview: generateEncodedPath(COLLECTION_OVERVIEW_PATH, {
+                  name: analyticsName,
+                }),
+              }
+            : undefined
+        ),
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       setPageChrome={pageChrome && <SetAnalyticsChrome trail={pageChrome} />}

@@ -120,6 +120,7 @@ describe('Add/edit exception from rule details', () => {
         });
       });
 
+      login();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToExceptionsTab();
@@ -258,6 +259,7 @@ describe('Add/edit exception from rule details', () => {
           rule_id: 'rule_testing',
         })
       );
+      login();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToExceptionsTab();

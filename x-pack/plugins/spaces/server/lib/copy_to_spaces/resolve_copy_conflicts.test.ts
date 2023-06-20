@@ -185,6 +185,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const importOptions = {
       createNewCopies: false,
+      compatibilityMode: undefined,
       readStream: expect.any(Readable),
     };
     expect(savedObjectsImporter.resolveImportErrors).toHaveBeenNthCalledWith(1, {
@@ -197,6 +198,40 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
       namespace: 'destination2',
       retries: [{ ...retries.destination2[0], replaceReferences: [] }],
     });
+  });
+
+  it('properly forwards compatibility mode setting', async () => {
+    const { savedObjects, savedObjectsImporter } = setup({
+      objects: mockExportResults,
+    });
+
+    const request = httpServerMock.createKibanaRequest();
+
+    const resolveCopySavedObjectsToSpacesConflicts =
+      resolveCopySavedObjectsToSpacesConflictsFactory(savedObjects, request);
+
+    const namespace = 'sourceSpace';
+    const objects = [{ type: 'dashboard', id: 'my-dashboard' }];
+    const retries = {
+      destination1: [{ type: 'visualization', id: 'my-visualization', overwrite: true }],
+      destination2: [{ type: 'visualization', id: 'my-visualization', overwrite: false }],
+    };
+    await resolveCopySavedObjectsToSpacesConflicts(namespace, {
+      includeReferences: true,
+      objects,
+      retries,
+      createNewCopies: false,
+      compatibilityMode: true,
+    });
+
+    expect(savedObjectsImporter.resolveImportErrors).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ compatibilityMode: true })
+    );
+    expect(savedObjectsImporter.resolveImportErrors).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ compatibilityMode: true })
+    );
   });
 
   it(`doesn't stop resolution if some spaces fail`, async () => {

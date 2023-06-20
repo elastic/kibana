@@ -37,6 +37,7 @@ export enum ReadOperations {
   GetAllComments = 'getAllComments',
   FindComments = 'findComments',
   GetTags = 'getTags',
+  GetCategories = 'getCategories',
   GetReporters = 'getReporters',
   FindConfigurations = 'findConfigurations',
   FindUserActions = 'findUserActions',
@@ -47,7 +48,6 @@ export enum ReadOperations {
   GetCaseMetrics = 'getCaseMetrics',
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
-  GetUserActionStats = 'getUserActionStats',
   GetUserActionUsers = 'getUserActionUsers',
 }
 

@@ -18,6 +18,7 @@ import {
   EuiOutsideClickDetector,
   EuiFilterButton,
   EuiPopoverTitle,
+  EuiFilterButtonProps,
 } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,14 +28,15 @@ import './field_type_filter.scss';
 export interface Props {
   onFieldTypesChange: (value: string[]) => void;
   fieldTypesValue: string[];
-
   availableFieldTypes: string[];
+  buttonProps?: Partial<EuiFilterButtonProps>;
 }
 
 export function FieldTypeFilter({
   onFieldTypesChange,
   fieldTypesValue,
   availableFieldTypes,
+  buttonProps,
 }: Props) {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
@@ -44,6 +46,7 @@ export function FieldTypeFilter({
 
   const buttonContent = (
     <EuiFilterButton
+      {...buttonProps}
       data-test-subj="toggleFieldFilterButton"
       iconType="arrowDown"
       isSelected={fieldTypesValue.length > 0}
@@ -61,7 +64,7 @@ export function FieldTypeFilter({
 
   return (
     <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-      <EuiFilterGroup>
+      <EuiFilterGroup fullWidth>
         <EuiPopover
           panelClassName="euiFilterGroup__popoverPanel presFilterByType__panel"
           panelPaddingSize="none"

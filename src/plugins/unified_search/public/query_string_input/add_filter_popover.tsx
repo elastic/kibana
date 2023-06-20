@@ -36,6 +36,7 @@ interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   isDisabled?: boolean;
   buttonProps?: Partial<EuiButtonIconProps>;
@@ -45,6 +46,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   indexPatterns,
   filters,
   timeRangeForSuggestionsOverride,
+  filtersForSuggestions,
   onFiltersUpdated,
   buttonProps,
   isDisabled,
@@ -96,6 +98,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
           indexPatterns={indexPatterns}
           filters={filters}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filtersForSuggestions={filtersForSuggestions}
           onFiltersUpdated={onFiltersUpdated}
           onLocalFilterUpdate={onLocalFilterUpdate}
           onLocalFilterCreate={onLocalFilterCreate}

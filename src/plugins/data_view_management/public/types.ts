@@ -26,12 +26,14 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { IndexPatternManagementStart } from '.';
 
 export interface IndexPatternManagmentContext {
   application: ApplicationStart;
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
   notifications: NotificationsStart;
   overlays: OverlayStart;
   http: HttpSetup;

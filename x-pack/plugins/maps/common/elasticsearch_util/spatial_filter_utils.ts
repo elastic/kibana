@@ -34,7 +34,7 @@ function createMultiGeoFieldFilter(
     return {
       meta: {
         ...meta,
-        key: geoFieldNames[0],
+        isMultiIndex: true,
       },
       query: {
         bool: {
@@ -54,7 +54,6 @@ function createMultiGeoFieldFilter(
   return {
     meta: {
       ...meta,
-      key: undefined,
       isMultiIndex: true,
     },
     query: {
@@ -114,7 +113,6 @@ export function buildGeoShapeFilter({
   const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
-    key: geoFieldNames.length === 1 ? geoFieldNames[0] : undefined,
     alias: `${getEsSpatialRelationLabel(relation)} ${geometryLabel}`,
     disabled: false,
   };
@@ -159,7 +157,6 @@ export function buildGeoGridFilter({
     {
       type: SPATIAL_FILTER_TYPE,
       negate: false,
-      key: geoFieldNames.length === 1 ? geoFieldNames[0] : undefined,
       alias: i18n.translate('xpack.maps.common.esSpatialRelation.clusterFilterLabel', {
         defaultMessage: 'intersects cluster {gridId}',
         values: { gridId },
@@ -236,18 +233,13 @@ export function extractFeaturesFromFilters(filters: GeoFilter[]): Feature[] {
     })
     .forEach((filter) => {
       let geometry: Geometry | undefined;
-      if (filter.meta.isMultiIndex) {
-        const geoFieldName = filter?.query?.bool?.should?.[0]?.bool?.must?.[0]?.exists?.field;
-        const spatialClause = filter?.query?.bool?.should?.[0]?.bool?.must?.[1];
-        if (geoFieldName && spatialClause) {
-          geometry = extractGeometryFromFilter(geoFieldName, spatialClause);
-        }
-      } else {
-        const geoFieldName = filter.meta.key;
-        const spatialClause = filter?.query?.bool?.must?.[1];
-        if (geoFieldName && spatialClause) {
-          geometry = extractGeometryFromFilter(geoFieldName, spatialClause);
-        }
+      const must = filter?.query?.bool?.should?.length
+        ? filter?.query?.bool?.should?.[0]?.bool?.must
+        : filter?.query?.bool?.must;
+      const geoFieldName = must?.[0]?.exists?.field;
+      const spatialClause = must?.[1];
+      if (geoFieldName && spatialClause) {
+        geometry = extractGeometryFromFilter(geoFieldName, spatialClause);
       }
 
       if (geometry) {

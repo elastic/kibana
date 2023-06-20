@@ -11,6 +11,10 @@ import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
 import { rulesSettingsClientMock, RulesSettingsClientMock } from '../rules_settings_client.mock';
+import {
+  maintenanceWindowClientMock,
+  MaintenanceWindowClientMock,
+} from '../maintenance_window_client.mock';
 import { AlertsHealth, RuleType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
 
@@ -18,12 +22,14 @@ export function mockHandlerArguments(
   {
     rulesClient = rulesClientMock.create(),
     rulesSettingsClient = rulesSettingsClientMock.create(),
+    maintenanceWindowClient = maintenanceWindowClientMock.create(),
     listTypes: listTypesRes = [],
     getFrameworkHealth,
     areApiKeysEnabled,
   }: {
     rulesClient?: RulesClientMock;
     rulesSettingsClient?: RulesSettingsClientMock;
+    maintenanceWindowClient?: MaintenanceWindowClientMock;
     listTypes?: RuleType[];
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
@@ -46,6 +52,9 @@ export function mockHandlerArguments(
         },
         getRulesSettingsClient() {
           return rulesSettingsClient || rulesSettingsClientMock.create();
+        },
+        getMaintenanceWindowClient() {
+          return maintenanceWindowClient || maintenanceWindowClientMock.create();
         },
         getFrameworkHealth,
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),

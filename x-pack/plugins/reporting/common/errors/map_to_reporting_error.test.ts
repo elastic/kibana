@@ -13,7 +13,7 @@ import {
   BrowserUnexpectedlyClosedError,
   BrowserScreenshotError,
   InvalidLayoutParametersError,
-} from '.';
+} from '@kbn/reporting-common';
 
 describe('mapToReportingError', () => {
   test('Non-Error values', () => {

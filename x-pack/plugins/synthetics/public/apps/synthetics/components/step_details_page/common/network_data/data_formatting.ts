@@ -8,6 +8,7 @@
 import { euiPaletteColorBlind } from '@elastic/eui';
 import moment from 'moment';
 
+import { MarkerItems } from '../../step_waterfall_chart/waterfall/context/waterfall_context';
 import { NetworkEvent } from '../../../../../../../common/runtime_types';
 import { WaterfallData, WaterfallMetadata } from './types';
 import {
@@ -55,7 +56,7 @@ const getFriendlyTooltipValue = ({
     const formattedMimeType: MimeType = MimeTypesMap[mimeType];
     label += ` (${FriendlyMimetypeLabels[formattedMimeType] || mimeType})`;
   }
-  return `${label}: ${formatValueForDisplay(value)}ms`;
+  return `${label}: ${formatValueForDisplay(value, value > 1 ? 0 : 1)}ms`;
 };
 export const isHighlightedItem = (
   item: NetworkEvent,
@@ -128,7 +129,8 @@ export const getSeriesAndDomain = (
   items: NetworkEvent[],
   onlyHighlighted = false,
   query?: string,
-  activeFilters?: string[]
+  activeFilters?: string[],
+  markerItems?: MarkerItems
 ) => {
   const getValueForOffset = (item: NetworkEvent) => {
     return item.requestSentTime;
@@ -243,6 +245,12 @@ export const getSeriesAndDomain = (
   let filteredSeries = series;
   if (onlyHighlighted) {
     filteredSeries = series.filter((item) => item.config.isHighlighted);
+  }
+
+  if (markerItems && markerItems.length > 0) {
+    // set domain to include marker items, whichever has higher time value
+    const highestMarkerTime = Math.max(...markerItems.map((item) => item.offset));
+    domain.max = Math.max(domain.max, highestMarkerTime);
   }
 
   return { series: filteredSeries, domain, metadata, totalHighlightedRequests };

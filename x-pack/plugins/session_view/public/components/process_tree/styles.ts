@@ -23,8 +23,6 @@ export const useStyles = () => {
       overflow: 'auto',
       height: '100%',
       backgroundColor: euiVars.euiColorLightestShade,
-      paddingTop: size.base,
-      paddingLeft: size.s,
     };
 
     const selectionArea: CSSObject = {

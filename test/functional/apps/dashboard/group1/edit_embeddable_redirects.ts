@@ -43,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('redirects via save as button after edit, renaming itself', async () => {
       const newTitle = 'wowee, looks like I have a new title';
-      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
@@ -60,8 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('redirects via save as button after edit, adding a new panel', async () => {
       const newTitle = 'wowee, my title just got cooler';
-      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {

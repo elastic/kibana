@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
+import { statusColors } from '../../../common/constants';
 import type { Evaluation } from '../../../../common/types';
 
 interface Props {
@@ -71,14 +72,14 @@ const PassedFailedCounters = ({ passed, failed }: Pick<Props, 'passed' | 'failed
         label={i18n.translate('xpack.csp.findings.distributionBar.totalPassedLabel', {
           defaultMessage: 'Passed Findings',
         })}
-        color={euiTheme.colors.success}
+        color={statusColors.passed}
         value={passed}
       />
       <Counter
         label={i18n.translate('xpack.csp.findings.distributionBar.totalFailedLabel', {
           defaultMessage: 'Failed Findings',
         })}
-        color={euiTheme.colors.danger}
+        color={statusColors.failed}
         value={failed}
       />
     </div>
@@ -122,7 +123,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
     >
       <DistributionBarPart
         value={passed}
-        color={euiTheme.colors.success}
+        color={statusColors.passed}
         distributionOnClick={() => {
           distributionOnClick(RULE_PASSED);
         }}
@@ -130,7 +131,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
       />
       <DistributionBarPart
         value={failed}
-        color={euiTheme.colors.danger}
+        color={statusColors.failed}
         distributionOnClick={() => {
           distributionOnClick(RULE_FAILED);
         }}

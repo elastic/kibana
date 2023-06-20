@@ -154,7 +154,6 @@ export async function validateActions(
         ) {
           actionWithInvalidTimeframe.push(action);
         }
-        // alertsFilter time range filter's start time can't be before end time
         if (alertsFilter.timeframe.hours) {
           if (
             validateHours(alertsFilter.timeframe.hours.start) ||
@@ -176,7 +175,7 @@ export async function validateActions(
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidThrottles', {
         defaultMessage:
-          'Action throttle cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
+          'Action frequency cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
         values: {
           scheduleIntervalText: data.schedule.interval,
           groups: actionsWithInvalidThrottles

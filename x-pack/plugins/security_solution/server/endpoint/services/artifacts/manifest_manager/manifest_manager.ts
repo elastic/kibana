@@ -7,8 +7,7 @@
 
 import pMap from 'p-map';
 import semver from 'semver';
-import type LRU from 'lru-cache';
-import { isEqual, isEmpty, keyBy } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -90,7 +89,6 @@ export interface ManifestManagerContext {
   exceptionListClient: ExceptionListClient;
   packagePolicyService: PackagePolicyClient;
   logger: Logger;
-  cache: LRU<string, Buffer>;
   experimentalFeatures: ExperimentalFeatures;
 }
 
@@ -108,7 +106,6 @@ export class ManifestManager {
   protected packagePolicyService: PackagePolicyClient;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
-  protected cache: LRU<string, Buffer>;
   protected schemaVersion: ManifestSchemaVersion;
   protected experimentalFeatures: ExperimentalFeatures;
 
@@ -118,7 +115,6 @@ export class ManifestManager {
     this.packagePolicyService = context.packagePolicyService;
     this.savedObjectsClient = context.savedObjectsClient;
     this.logger = context.logger;
-    this.cache = context.cache;
     this.schemaVersion = 'v1';
     this.experimentalFeatures = context.experimentalFeatures;
   }
@@ -365,13 +361,16 @@ export class ManifestManager {
     }
 
     if (fleetArtifacts) {
-      const fleetArtfactsByIdentifier = keyBy(fleetArtifacts, 'identifier');
+      const fleetArtfactsByIdentifier: { [key: string]: InternalArtifactCompleteSchema } = {};
+      fleetArtifacts.forEach((fleetArtifact) => {
+        fleetArtfactsByIdentifier[getArtifactId(fleetArtifact)] = fleetArtifact;
+      });
       artifactsToCreate.forEach((artifact) => {
-        const fleetArtifact = fleetArtfactsByIdentifier[artifact.identifier];
-        if (!fleetArtifact) return;
         const artifactId = getArtifactId(artifact);
-        // Cache the compressed body of the artifact
-        this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
+        const fleetArtifact = fleetArtfactsByIdentifier[artifactId];
+
+        if (!fleetArtifact) return;
+
         newManifest.replaceArtifact(fleetArtifact);
       });
     }
@@ -381,8 +380,6 @@ export class ManifestManager {
 
   /**
    * Deletes outdated artifact SOs.
-   *
-   * The artifact may still remain in the cache.
    *
    * @param artifactIds The IDs of the artifact to delete..
    * @returns {Promise<Error[]>} Any errors encountered.

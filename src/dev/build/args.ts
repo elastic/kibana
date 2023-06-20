@@ -31,6 +31,7 @@ export function readCliArgs(argv: string[]) {
       'skip-docker-ubi',
       'skip-docker-ubuntu',
       'skip-docker-cloud',
+      'skip-docker-serverless',
       'release',
       'skip-node-download',
       'skip-cloud-dependencies-download',
@@ -136,6 +137,8 @@ export function readCliArgs(argv: string[]) {
     createDockerUbuntu:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
+    createDockerServerless:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless']),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),

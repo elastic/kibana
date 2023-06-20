@@ -9,6 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { App } from './app';
 import { AppProviders } from './app_providers';
@@ -26,9 +27,16 @@ const AppWithRouter = ({ history }: AppWithRouterProps) => (
 
 export const renderApp = (elem: Element, dependencies: AppDependencies) => {
   render(
-    <AppProviders appDependencies={dependencies}>
-      <AppWithRouter history={dependencies.services.history} />
-    </AppProviders>,
+    <KibanaContextProvider
+      services={{
+        uiSettings: dependencies.services.uiSettings,
+        settings: dependencies.services.settings,
+      }}
+    >
+      <AppProviders appDependencies={dependencies}>
+        <AppWithRouter history={dependencies.services.history} />
+      </AppProviders>
+    </KibanaContextProvider>,
     elem
   );
 

@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
-import { SnapshotNode } from '../../../../../../../common/http_api';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -17,6 +16,7 @@ import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state'
 import { LogsLinkToStream } from './logs_link_to_stream';
 import { LogsSearchBar } from './logs_search_bar';
 import { createHostsFilter } from '../../../utils';
+import { useLogViewReference } from '../../../hooks/use_log_view_reference';
 
 export const LogsTabContent = () => {
   const [filterQuery] = useLogsSearchUrlState();
@@ -24,10 +24,18 @@ export const LogsTabContent = () => {
   const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
   const { hostNodes, loading } = useHostsViewContext();
 
-  const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);
+  const hostsFilterQuery = useMemo(
+    () => createHostsFilter(hostNodes.map((p) => p.name)),
+    [hostNodes]
+  );
+
+  const { logViewReference: logView, loading: logViewLoading } = useLogViewReference({
+    id: 'hosts-logs-view',
+    extraFields: ['host.name'],
+  });
 
   const logsLinkToStreamQuery = useMemo(() => {
-    const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes);
+    const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes.map((p) => p.name));
 
     if (filterQuery.query && hostsFilterQueryParam) {
       return `${filterQuery.query} and ${hostsFilterQueryParam}`;
@@ -36,7 +44,7 @@ export const LogsTabContent = () => {
     return filterQuery.query || hostsFilterQueryParam;
   }, [filterQuery.query, hostNodes]);
 
-  if (loading) {
+  if (loading || logViewLoading || !logView) {
     return (
       <EuiFlexGroup style={{ height: 300 }} direction="column" alignItems="stretch">
         <EuiFlexItem grow>
@@ -62,30 +70,36 @@ export const LogsTabContent = () => {
           <LogsSearchBar />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LogsLinkToStream startTimestamp={from} endTimestamp={to} query={logsLinkToStreamQuery} />
+          <LogsLinkToStream
+            startTime={from}
+            endTime={to}
+            query={logsLinkToStreamQuery}
+            logView={logView}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiFlexItem>
         <LogStream
           height={500}
-          logView={{ type: 'log-view-reference', logViewId: 'default' }}
+          logView={logView}
           startTimestamp={from}
           endTimestamp={to}
           filters={[hostsFilterQuery]}
           query={filterQuery}
+          showFlyoutAction
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-const createHostsFilterQueryParam = (hostNodes: SnapshotNode[]): string => {
+const createHostsFilterQueryParam = (hostNodes: string[]): string => {
   if (!hostNodes.length) {
     return '';
   }
 
-  const joinedHosts = hostNodes.map((p) => p.name).join(' or ');
+  const joinedHosts = hostNodes.join(' or ');
   const hostsQueryParam = `host.name:(${joinedHosts})`;
 
   return hostsQueryParam;

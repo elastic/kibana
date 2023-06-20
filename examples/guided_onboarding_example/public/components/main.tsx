@@ -345,6 +345,14 @@ export const Main = (props: MainProps) => {
               />
             </EuiButton>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={() => history.push('stepFour')}>
+              <FormattedMessage
+                id="guidedOnboardingExample.main.examplePages.stepFour.link"
+                defaultMessage="Step 4"
+              />
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageContentBody>
     </>

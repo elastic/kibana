@@ -10,7 +10,6 @@ import * as i18n from './translations';
 import { UsersTableType } from '../store/model';
 import type { UsersNavTab } from './navigation/types';
 import { USERS_PATH } from '../../../../common/constants';
-import { TECHNICAL_PREVIEW } from '../../../overview/pages/translations';
 
 const getTabsOnUsersUrl = (tabName: UsersTableType) => `${USERS_PATH}/${tabName}`;
 
@@ -50,10 +49,6 @@ export const navTabsUsers = (
       name: i18n.NAVIGATION_RISK_TITLE,
       href: getTabsOnUsersUrl(UsersTableType.risk),
       disabled: false,
-      isBeta: true,
-      betaOptions: {
-        text: TECHNICAL_PREVIEW,
-      },
     },
   };
 

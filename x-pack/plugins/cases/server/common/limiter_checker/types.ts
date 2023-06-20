@@ -6,11 +6,10 @@
  */
 
 import type { CommentRequest } from '../../../common/api';
-import type { AttachmentService } from '../../services';
 
 export interface Limiter {
   readonly limit: number;
   readonly errorMessage: string;
-  countOfItemsWithinCase(attachmentService: AttachmentService, caseId: string): Promise<number>;
+  countOfItemsWithinCase(caseId: string): Promise<number>;
   countOfItemsInRequest: (requests: CommentRequest[]) => number;
 }

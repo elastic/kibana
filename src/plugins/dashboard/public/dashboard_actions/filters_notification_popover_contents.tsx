@@ -9,7 +9,7 @@
 import React, { useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
-import { EuiCodeBlock, EuiFlexGroup, EuiForm, EuiFormRow, EuiLoadingContent } from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiForm, EuiFormRow, EuiSkeletonText } from '@elastic/eui';
 import { FilterableEmbeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { css } from '@emotion/react';
@@ -60,41 +60,37 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
   });
 
   return (
-    <>
-      {isLoading ? (
-        <EuiLoadingContent lines={3} />
-      ) : (
-        <EuiForm
-          component="div"
-          css={css`
-            min-width: 300px;
-          `}
-        >
-          {queryString !== '' && (
-            <EuiFormRow
-              label={dashboardFilterNotificationActionStrings.getQueryTitle()}
-              display="rowCompressed"
+    <EuiForm
+      component="div"
+      css={css`
+        min-width: 300px;
+      `}
+    >
+      <EuiSkeletonText isLoading={isLoading} lines={3}>
+        {queryString !== '' && (
+          <EuiFormRow
+            label={dashboardFilterNotificationActionStrings.getQueryTitle()}
+            display="rowCompressed"
+          >
+            <EuiCodeBlock
+              language={queryLanguage}
+              paddingSize="none"
+              transparentBackground
+              aria-labelledby={`${dashboardFilterNotificationActionStrings.getQueryTitle()}: ${queryString}`}
+              tabIndex={0} // focus so that keyboard controls will not skip over the code block
             >
-              <EuiCodeBlock
-                language={queryLanguage}
-                paddingSize="none"
-                transparentBackground
-                aria-labelledby={`${dashboardFilterNotificationActionStrings.getQueryTitle()}: ${queryString}`}
-                tabIndex={0} // focus so that keyboard controls will not skip over the code block
-              >
-                {queryString}
-              </EuiCodeBlock>
-            </EuiFormRow>
-          )}
-          {filters && filters.length > 0 && (
-            <EuiFormRow label={dashboardFilterNotificationActionStrings.getFiltersTitle()}>
-              <EuiFlexGroup wrap={true} gutterSize="xs">
-                <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
-              </EuiFlexGroup>
-            </EuiFormRow>
-          )}
-        </EuiForm>
-      )}
-    </>
+              {queryString}
+            </EuiCodeBlock>
+          </EuiFormRow>
+        )}
+        {filters && filters.length > 0 && (
+          <EuiFormRow label={dashboardFilterNotificationActionStrings.getFiltersTitle()}>
+            <EuiFlexGroup wrap={true} gutterSize="xs">
+              <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
+            </EuiFlexGroup>
+          </EuiFormRow>
+        )}
+      </EuiSkeletonText>
+    </EuiForm>
   );
 }

@@ -7,6 +7,7 @@
  */
 
 import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import { VIEW_MODE } from '.';
 
 export interface DiscoverGridSettings {
@@ -37,7 +38,7 @@ export interface SavedSearchAttributes {
   rowHeight?: number;
 
   timeRestore?: boolean;
-  timeRange?: TimeRange;
+  timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;
 
   rowsPerPage?: number;
@@ -73,4 +74,5 @@ export interface SavedSearch {
 
   rowsPerPage?: number;
   breakdownField?: string;
+  references?: SavedObjectReference[];
 }

@@ -64,6 +64,14 @@ export const setupFleetForEndpoint = async (kbnClient: KbnClient): Promise<void>
     log.error(error);
     throw error;
   }
+
+  // Install/upgrade the endpoint package
+  try {
+    await installOrUpgradeEndpointFleetPackage(kbnClient);
+  } catch (error) {
+    log.error(error);
+    throw error;
+  }
 };
 
 /**

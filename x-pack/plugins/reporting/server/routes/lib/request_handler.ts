@@ -21,8 +21,8 @@ export const handleUnavailable = (res: KibanaResponseFactory) => {
 };
 
 const getDownloadBaseUrl = (reporting: ReportingCore) => {
-  const config = reporting.getConfig();
-  return config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
+  const { basePath } = reporting.getServerInfo();
+  return basePath + `${API_BASE_URL}/jobs/download`;
 };
 
 /**
@@ -39,7 +39,7 @@ export class RequestHandler {
   ) {}
 
   private async encryptHeaders() {
-    const encryptionKey = this.reporting.getConfig().get('encryptionKey');
+    const { encryptionKey } = this.reporting.getConfig();
     const crypto = cryptoFactory(encryptionKey);
     return await crypto.encrypt(this.req.headers);
   }

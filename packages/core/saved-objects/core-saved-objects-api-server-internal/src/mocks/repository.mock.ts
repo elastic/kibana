@@ -32,6 +32,7 @@ const createRepositoryMock = () => {
     removeReferencesTo: jest.fn(),
     collectMultiNamespaceReferences: jest.fn(),
     updateObjectsSpaces: jest.fn(),
+    getCurrentNamespace: jest.fn(),
   };
 
   return mock;

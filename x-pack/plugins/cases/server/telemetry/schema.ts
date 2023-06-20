@@ -51,6 +51,13 @@ const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
     averageSize: long,
     maxOnACase: long,
     total: long,
+    topMimeTypes: {
+      type: 'array',
+      items: {
+        count: long,
+        name: string,
+      },
+    },
   },
 };
 

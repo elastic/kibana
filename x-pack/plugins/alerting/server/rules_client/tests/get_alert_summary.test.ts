@@ -48,6 +48,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -122,14 +124,14 @@ describe('getAlertSummary()', () => {
     const eventsFactory = new EventsFactory(mockedDateString);
     const events = eventsFactory
       .addExecute()
-      .addNewAlert('alert-currently-active')
-      .addNewAlert('alert-previously-active')
-      .addActiveAlert('alert-currently-active', 'action group A')
-      .addActiveAlert('alert-previously-active', 'action group B')
+      .addNewAlert('alert-currently-active', 'uuid-1')
+      .addNewAlert('alert-previously-active', 'uuid-2')
+      .addActiveAlert('alert-currently-active', 'action group A', 'uuid-1')
+      .addActiveAlert('alert-previously-active', 'action group B', 'uuid-2')
       .advanceTime(10000)
       .addExecute()
-      .addRecoveredAlert('alert-previously-active')
-      .addActiveAlert('alert-currently-active', 'action group A', true)
+      .addRecoveredAlert('alert-previously-active', 'uuid-2')
+      .addActiveAlert('alert-currently-active', 'action group A', 'uuid-1', true)
       .getEvents();
     const eventsResult = {
       ...AlertSummaryFindEventsResult,
@@ -161,6 +163,7 @@ describe('getAlertSummary()', () => {
             "flapping": true,
             "muted": false,
             "status": "Active",
+            "uuid": "uuid-1",
           },
           "alert-muted-no-activity": Object {
             "actionGroupId": undefined,
@@ -168,6 +171,7 @@ describe('getAlertSummary()', () => {
             "flapping": false,
             "muted": true,
             "status": "OK",
+            "uuid": undefined,
           },
           "alert-previously-active": Object {
             "actionGroupId": undefined,
@@ -175,6 +179,7 @@ describe('getAlertSummary()', () => {
             "flapping": false,
             "muted": false,
             "status": "OK",
+            "uuid": "uuid-2",
           },
         },
         "consumer": "rule-consumer",
@@ -184,6 +189,7 @@ describe('getAlertSummary()', () => {
         "lastRun": "2019-02-12T21:01:32.479Z",
         "muteAll": false,
         "name": "rule-name",
+        "revision": 0,
         "ruleTypeId": "123",
         "status": "Active",
         "statusEndDate": "2019-02-12T21:01:22.479Z",

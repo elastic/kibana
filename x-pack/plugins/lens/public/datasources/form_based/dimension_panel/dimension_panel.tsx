@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -29,7 +29,6 @@ export type FormBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<FormBasedPrivateState> & {
     uiSettings: IUiSettingsClient;
     storage: IStorageWrapper;
-    savedObjectsClient: SavedObjectsClientContract;
     layerId: string;
     http: HttpSetup;
     data: DataPublicPluginStart;
@@ -38,6 +37,7 @@ export type FormBasedDimensionEditorProps =
     dataViews: DataViewsPublicPluginStart;
     uniqueLabel: string;
     dateRange: DateRange;
+    notifications: NotificationsStart;
   };
 
 export const FormBasedDimensionEditorComponent = function FormBasedDimensionPanel(

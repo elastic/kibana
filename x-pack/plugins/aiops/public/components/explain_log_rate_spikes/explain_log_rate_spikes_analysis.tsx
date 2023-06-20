@@ -6,15 +6,18 @@
  */
 
 import React, { useEffect, useMemo, useState, FC } from 'react';
-import { isEqual } from 'lodash';
+import { isEqual, uniq } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiButton,
+  EuiButtonGroup,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 
@@ -24,12 +27,11 @@ import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Query } from '@kbn/es-query';
+import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
-
 import {
   getGroupTableItems,
   SpikeAnalysisTable,
@@ -38,10 +40,12 @@ import {
 import {} from '../spike_analysis_table';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 
+import { FieldFilterPopover } from './field_filter_popover';
+
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
   {
-    defaultMessage: 'Group results',
+    defaultMessage: 'Smart grouping',
   }
 );
 const groupResultsHelpMessage = i18n.translate(
@@ -50,6 +54,25 @@ const groupResultsHelpMessage = i18n.translate(
     defaultMessage: 'Items which are unique to a group are marked by an asterisk (*).',
   }
 );
+const groupResultsOffMessage = i18n.translate(
+  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResultsOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+const groupResultsOnMessage = i18n.translate(
+  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResultsOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+const resultsGroupedOffId = 'aiopsExplainLogRateSpikesGroupingOff';
+const resultsGroupedOnId = 'aiopsExplainLogRateSpikesGroupingOn';
+
+export interface ExplainLogRateSpikesAnalysisResults {
+  significantTerms: SignificantTerm[];
+  significantTermsGroups: SignificantTermGroup[];
+}
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -61,18 +84,38 @@ interface ExplainLogRateSpikesAnalysisProps {
   earliest: number;
   /** End timestamp filter */
   latest: number;
+  isBrushCleared: boolean;
+  /** Option to make main histogram sticky */
+  stickyHistogram?: boolean;
+  /** Callback for resetting the analysis */
+  onReset: () => void;
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
   /** The search query to be applied to the analysis as a filter */
-  searchQuery: Query['query'];
+  searchQuery: estypes.QueryDslQueryContainer;
+  /** Sample probability to be applied to random sampler aggregations */
+  sampleProbability: number;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
+  /** Optional callback that exposes data of the completed analysis */
+  onAnalysisCompleted?: (d: ExplainLogRateSpikesAnalysisResults) => void;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
   dataView,
   earliest,
+  isBrushCleared,
   latest,
+  stickyHistogram,
+  onReset,
   windowParameters,
   searchQuery,
+  sampleProbability,
+  barColorOverride,
+  barHighlightColorOverride,
+  onAnalysisCompleted,
 }) => {
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
@@ -83,16 +126,31 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     WindowParameters | undefined
   >();
   const [groupResults, setGroupResults] = useState<boolean>(false);
+  const [groupSkipFields, setGroupSkipFields] = useState<string[]>([]);
+  const [uniqueFieldNames, setUniqueFieldNames] = useState<string[]>([]);
   const [overrides, setOverrides] = useState<
     ApiExplainLogRateSpikes['body']['overrides'] | undefined
   >(undefined);
   const [shouldStart, setShouldStart] = useState(false);
+  const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
 
-  const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
-    setGroupResults(e.target.checked);
+  const onGroupResultsToggle = (optionId: string) => {
+    setToggleIdSelected(optionId);
+    setGroupResults(optionId === resultsGroupedOnId);
 
     // When toggling the group switch, clear all row selections
     clearAllRowState();
+  };
+
+  const onFieldsFilterChange = (skippedFields: string[]) => {
+    setGroupSkipFields(skippedFields);
+    setOverrides({
+      loaded: 0,
+      remainingFieldCandidates: [],
+      significantTerms: data.significantTerms.filter((d) => !skippedFields.includes(d.fieldName)),
+      regroupOnly: true,
+    });
+    startHandler(true, false);
   };
 
   const {
@@ -103,6 +161,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     errors: streamErrors,
   } = useFetchStream<ApiExplainLogRateSpikes, typeof basePath>(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
+    '1',
     {
       start: earliest,
       end: latest,
@@ -114,8 +173,15 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       flushFix: true,
       ...windowParameters,
       overrides,
+      sampleProbability,
     },
     { reducer: streamReducer, initialState }
+  );
+
+  const { significantTerms } = data;
+  useEffect(
+    () => setUniqueFieldNames(uniq(significantTerms.map((d) => d.fieldName)).sort()),
+    [significantTerms]
   );
 
   useEffect(() => {
@@ -130,6 +196,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         setOverrides({ loaded, remainingFieldCandidates, significantTerms: data.significantTerms });
       } else {
         setOverrides(undefined);
+        if (onAnalysisCompleted) {
+          onAnalysisCompleted({
+            significantTerms: data.significantTerms,
+            significantTermsGroups: data.significantTermsGroups,
+          });
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -139,14 +211,18 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
 
   // Start handler clears possibly hovered or pinned
   // significant terms on analysis refresh.
-  function startHandler(continueAnalysis = false) {
+  function startHandler(continueAnalysis = false, resetGroupButton = true) {
     if (!continueAnalysis) {
       setOverrides(undefined);
+      setUniqueFieldNames([]);
     }
 
     // Reset grouping to false and clear all row selections when restarting the analysis.
-    setGroupResults(false);
-    clearAllRowState();
+    if (resetGroupButton) {
+      setGroupResults(false);
+      setToggleIdSelected(resultsGroupedOffId);
+      clearAllRowState();
+    }
 
     setCurrentAnalysisWindowParameters(windowParameters);
 
@@ -186,17 +262,68 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     return p + c.groupItemsSortedByUniqueness.length;
   }, 0);
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
+  const timeRangeMs = { from: earliest, to: latest };
+
+  // Disable the grouping switch toggle only if no groups were found,
+  // the toggle wasn't enabled already and no fields were selected to be skipped.
+  const disabledGroupResultsSwitch = !foundGroups && !groupResults && groupSkipFields.length === 0;
+
+  const toggleButtons = [
+    {
+      id: resultsGroupedOffId,
+      label: groupResultsOffMessage,
+      'data-test-subj': 'aiopsExplainLogRateSpikesGroupSwitchOff',
+    },
+    {
+      id: resultsGroupedOnId,
+      label: groupResultsOnMessage,
+      'data-test-subj': 'aiopsExplainLogRateSpikesGroupSwitchOn',
+    },
+  ];
 
   return (
     <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
       <ProgressControls
+        isBrushCleared={isBrushCleared}
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
         isRunning={isRunning}
         onRefresh={() => startHandler(false)}
         onCancel={cancel}
+        onReset={onReset}
         shouldRerunAnalysis={shouldRerunAnalysis}
-      />
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFormRow display="columnCompressedSwitch">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">{groupResultsMessage}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${
+                    groupResults ? ' checked' : ''
+                  }`}
+                  buttonSize="s"
+                  isDisabled={disabledGroupResultsSwitch}
+                  legend="Smart grouping"
+                  options={toggleButtons}
+                  idSelected={toggleIdSelected}
+                  onChange={onGroupResultsToggle}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FieldFilterPopover
+            disabled={!groupResults || isRunning}
+            disabledApplyButton={isRunning}
+            uniqueFieldNames={uniqueFieldNames}
+            onChange={onFieldsFilterChange}
+          />
+        </EuiFlexItem>
+      </ProgressControls>
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
@@ -235,24 +362,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           <EuiSpacer size="xs" />
         </>
       ) : null}
-      {showSpikeAnalysisTable && foundGroups && (
+      {showSpikeAnalysisTable && groupResults && foundGroups && (
         <>
           <EuiSpacer size="xs" />
-          <EuiFormRow
-            display="columnCompressedSwitch"
-            helpText={groupResults ? groupResultsHelpMessage : undefined}
-          >
-            <EuiSwitch
-              data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${
-                groupResults ? ' checked' : ''
-              }`}
-              showLabel={true}
-              label={groupResultsMessage}
-              checked={groupResults}
-              onChange={onSwitchToggle}
-              compressed
-            />
-          </EuiFormRow>
+          <EuiText size="xs">{groupResults ? groupResultsHelpMessage : undefined}</EuiText>
         </>
       )}
       <EuiSpacer size="xs" />
@@ -278,21 +391,43 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           }
         />
       )}
-      {showSpikeAnalysisTable && groupResults && foundGroups ? (
-        <SpikeAnalysisGroupsTable
-          significantTerms={data.significantTerms}
-          groupTableItems={groupTableItems}
-          loading={isRunning}
-          dataViewId={dataView.id}
-        />
-      ) : null}
-      {showSpikeAnalysisTable && (!groupResults || !foundGroups) ? (
-        <SpikeAnalysisTable
-          significantTerms={data.significantTerms}
-          loading={isRunning}
-          dataViewId={dataView.id}
-        />
-      ) : null}
+      {/* Using inline style as Eui Table overwrites overflow settings  */}
+      <div
+        style={
+          stickyHistogram
+            ? {
+                height: '500px',
+                overflowX: 'hidden',
+                overflowY: 'auto',
+                paddingTop: '20px',
+              }
+            : undefined
+        }
+      >
+        {showSpikeAnalysisTable && groupResults ? (
+          <SpikeAnalysisGroupsTable
+            significantTerms={data.significantTerms}
+            groupTableItems={groupTableItems}
+            loading={isRunning}
+            dataView={dataView}
+            timeRangeMs={timeRangeMs}
+            searchQuery={searchQuery}
+            barColorOverride={barColorOverride}
+            barHighlightColorOverride={barHighlightColorOverride}
+          />
+        ) : null}
+        {showSpikeAnalysisTable && !groupResults ? (
+          <SpikeAnalysisTable
+            significantTerms={data.significantTerms}
+            loading={isRunning}
+            dataView={dataView}
+            timeRangeMs={timeRangeMs}
+            searchQuery={searchQuery}
+            barColorOverride={barColorOverride}
+            barHighlightColorOverride={barHighlightColorOverride}
+          />
+        ) : null}
+      </div>
     </div>
   );
 };

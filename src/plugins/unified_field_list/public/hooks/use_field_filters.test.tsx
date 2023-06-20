@@ -68,6 +68,33 @@ describe('UnifiedFieldList useFieldFilters()', () => {
     expect(result.current.onFilterField!(dataView.getFieldByName('bytes')!)).toBe(false);
   });
 
+  it('should update correctly on search by name which has a wildcard', async () => {
+    const props: FieldFiltersParams<DataViewField> = {
+      allFields: dataView.fields,
+      services: mockedServices,
+    };
+    const { result } = renderHook(useFieldFilters, {
+      initialProps: props,
+    });
+
+    expect(result.current.fieldSearchHighlight).toBe('');
+    expect(result.current.onFilterField).toBeUndefined();
+
+    act(() => {
+      result.current.fieldListFiltersProps.onChangeNameFilter('message*me1');
+    });
+
+    expect(result.current.fieldSearchHighlight).toBe('message*me1');
+    expect(result.current.onFilterField).toBeDefined();
+    expect(result.current.onFilterField!({ displayName: 'test' } as DataViewField)).toBe(false);
+    expect(result.current.onFilterField!({ displayName: 'message' } as DataViewField)).toBe(false);
+    expect(result.current.onFilterField!({ displayName: 'message.name1' } as DataViewField)).toBe(
+      true
+    );
+    expect(result.current.onFilterField!({ name: 'messagename10' } as DataViewField)).toBe(false);
+    expect(result.current.onFilterField!({ name: 'message.test' } as DataViewField)).toBe(false);
+  });
+
   it('should update correctly on filter by type', async () => {
     const props: FieldFiltersParams<DataViewField> = {
       allFields: dataView.fields,

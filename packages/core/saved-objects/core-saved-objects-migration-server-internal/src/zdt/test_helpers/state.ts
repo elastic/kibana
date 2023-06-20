@@ -18,7 +18,8 @@ export const createPostInitState = (): PostInitState => ({
   aliasActions: [],
   previousMappings: { properties: {} },
   currentIndexMeta: {},
-  newIndexCreation: false,
+  skipDocumentMigration: false,
+  previousAlgorithm: 'zdt',
 });
 
 export const createPostDocInitState = (): PostDocInitState => ({

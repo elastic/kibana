@@ -6,20 +6,24 @@
  * Side Public License, v 1.
  */
 
-// copied from common/search_strategy/common
 export interface GenericBuckets {
   key: string | string[];
   key_as_string?: string; // contains, for example, formatted dates
   doc_count: number;
 }
-
 export const NONE_GROUP_KEY = 'none';
 
 export type RawBucket<T> = GenericBuckets & T;
 
+export type GroupingBucket<T> = RawBucket<T> & {
+  key: string[];
+  key_as_string: string;
+  selectedGroup: string;
+  isNullGroup?: boolean;
+};
+
 /** Defines the shape of the aggregation returned by Elasticsearch */
-// TODO: write developer docs for these fields
-export interface GroupingAggregation<T> {
+export interface RootAggregation<T> {
   groupByFields?: {
     buckets?: Array<RawBucket<T>>;
   };
@@ -29,7 +33,16 @@ export interface GroupingAggregation<T> {
   unitsCount?: {
     value?: number | null;
   };
+  unitsCountWithoutNull?: {
+    value?: number | null;
+  };
 }
+
+export type ParsedRootAggregation<T> = RootAggregation<T> & {
+  groupByFields?: {
+    buckets?: Array<GroupingBucket<T>>;
+  };
+};
 
 export type GroupingFieldTotalAggregation<T> = Record<
   string,
@@ -38,6 +51,10 @@ export type GroupingFieldTotalAggregation<T> = Record<
     buckets?: Array<RawBucket<T>>;
   }
 >;
+
+export type GroupingAggregation<T> = RootAggregation<T> & GroupingFieldTotalAggregation<T>;
+export type ParsedGroupingAggregation<T> = ParsedRootAggregation<T> &
+  GroupingFieldTotalAggregation<T>;
 
 export interface BadgeMetric {
   value: number;
@@ -58,7 +75,8 @@ export type GroupStatsRenderer<T> = (
 
 export type GroupPanelRenderer<T> = (
   selectedGroup: string,
-  fieldBucket: RawBucket<T>
+  fieldBucket: RawBucket<T>,
+  nullGroupMessage?: string
 ) => JSX.Element | undefined;
 
 export type OnGroupToggle = (params: {
@@ -67,3 +85,5 @@ export type OnGroupToggle = (params: {
   groupNumber: number;
   groupingId: string;
 }) => void;
+
+export type { GroupingProps } from './grouping';

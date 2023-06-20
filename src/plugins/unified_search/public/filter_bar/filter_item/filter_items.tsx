@@ -35,6 +35,8 @@ export interface FilterItemsProps {
   intl: InjectedIntl;
   /** Controls whether or not filter suggestions are influenced by the global time */
   timeRangeForSuggestionsOverride?: boolean;
+  /** adds additional filters to be used for suggestions */
+  filtersForSuggestions?: Filter[];
   /** Array of panel options that controls the styling of each filter pill */
   hiddenPanelOptions?: FilterItemProps['hiddenPanelOptions'];
 }
@@ -42,7 +44,7 @@ export interface FilterItemsProps {
 const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { appName, usageCollection, uiSettings } = kibana.services;
+  const { appName, usageCollection, uiSettings, docLinks } = kibana.services;
   const { readOnly = false } = props;
 
   if (!uiSettings) return null;
@@ -72,8 +74,10 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}
+          docLinks={docLinks}
           hiddenPanelOptions={props.hiddenPanelOptions}
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+          filtersForSuggestions={props.filtersForSuggestions}
           readOnly={readOnly}
         />
       </EuiFlexItem>

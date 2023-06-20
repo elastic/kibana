@@ -395,3 +395,84 @@ describe('#validate', () => {
     });
   });
 });
+
+describe('#extendsDeep', () => {
+  describe('#equalType', () => {
+    const type = schema.object({
+      foo: schema.string(),
+      test: schema.conditional(
+        schema.siblingRef('foo'),
+        'test',
+        schema.object({
+          bar: schema.string(),
+        }),
+        schema.string()
+      ),
+    });
+
+    test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
+      const result = type
+        .extendsDeep({ unknowns: 'allow' })
+        .validate({ foo: 'test', test: { bar: 'test', baz: 'test' } });
+      expect(result).toEqual({
+        foo: 'test',
+        test: { bar: 'test', baz: 'test' },
+      });
+    });
+
+    test('objects with unknown attributes are dropped when extending with unknowns=ignore', () => {
+      const result = type
+        .extendsDeep({ unknowns: 'ignore' })
+        .validate({ foo: 'test', test: { bar: 'test', baz: 'test' } });
+      expect(result).toEqual({
+        foo: 'test',
+        test: { bar: 'test' },
+      });
+    });
+    test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
+      expect(() =>
+        type
+          .extendsDeep({ unknowns: 'forbid' })
+          .validate({ foo: 'test', test: { bar: 'test', baz: 'test' } })
+      ).toThrowErrorMatchingInlineSnapshot(`"[test.baz]: definition for this key is missing"`);
+    });
+  });
+
+  describe('#notEqualType', () => {
+    const type = schema.object({
+      foo: schema.string(),
+      test: schema.conditional(
+        schema.siblingRef('foo'),
+        'test',
+        schema.string(),
+        schema.object({
+          bar: schema.string(),
+        })
+      ),
+    });
+
+    test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
+      const allowSchema = type.extendsDeep({ unknowns: 'allow' });
+      const result = allowSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } });
+      expect(result).toEqual({
+        foo: 'not-test',
+        test: { bar: 'test', baz: 'test' },
+      });
+    });
+
+    test('objects with unknown attributes are dropped when extending with unknowns=ignore', () => {
+      const ignoreSchema = type.extendsDeep({ unknowns: 'ignore' });
+      const result = ignoreSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } });
+      expect(result).toEqual({
+        foo: 'not-test',
+        test: { bar: 'test' },
+      });
+    });
+    test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
+      const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
+      expect(() =>
+        forbidSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } })
+      ).toThrowErrorMatchingInlineSnapshot(`"[test.baz]: definition for this key is missing"`);
+    });
+  });
+});

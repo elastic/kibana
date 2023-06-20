@@ -30,6 +30,8 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
     'enterpriseSearch',
     'enterpriseSearchContent',
     'enterpriseSearchAnalytics',
+    'enterpriseSearchApplications',
+    'enterpriseSearchEsre',
     'elasticsearch',
     'appSearch',
     'workplaceSearch',

@@ -6,7 +6,7 @@
  */
 
 import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
+import type { Filter, EsQueryConfig, DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type {
@@ -20,15 +20,17 @@ export const getQueryFilter = ({
   filters,
   index,
   exceptionFilter,
+  fields = [],
 }: {
   query: RuleQuery;
   language: Language;
   filters: unknown;
   index: IndexPatternArray;
   exceptionFilter: Filter | undefined;
+  fields?: DataViewFieldBase[];
 }): ESBoolQuery => {
   const indexPattern: DataViewBase = {
-    fields: [],
+    fields,
     title: index.join(),
   };
 

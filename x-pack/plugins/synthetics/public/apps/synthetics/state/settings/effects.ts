@@ -11,15 +11,21 @@ import { i18n } from '@kbn/i18n';
 import { updateDefaultAlertingAction } from '../alert_rules';
 import { DynamicSettings } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
-import { getConnectorsAction, setDynamicSettingsAction, getDynamicSettingsAction } from './actions';
+import {
+  getConnectorsAction,
+  setDynamicSettingsAction,
+  getDynamicSettingsAction,
+  syncGlobalParamsAction,
+  getLocationMonitorsAction,
+} from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   fetchConnectors,
   setDynamicSettings,
   syncGlobalParamsAPI,
   getDynamicSettings,
+  fetchLocationMonitors,
 } from './api';
-import { syncGlobalParamsAction } from './actions';
 
 export function* syncGlobalParamsEffect() {
   yield takeLeading(
@@ -30,6 +36,17 @@ export function* syncGlobalParamsEffect() {
       syncGlobalParamsAction.fail,
       successMessage,
       failureMessage
+    )
+  );
+}
+
+export function* fetchLocationMonitorsEffect() {
+  yield takeLeading(
+    String(getLocationMonitorsAction.get),
+    fetchEffectFactory(
+      fetchLocationMonitors,
+      getLocationMonitorsAction.success,
+      getLocationMonitorsAction.fail
     )
   );
 }

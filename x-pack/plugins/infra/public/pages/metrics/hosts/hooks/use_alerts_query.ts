@@ -7,9 +7,9 @@
 import { useCallback, useMemo, useState } from 'react';
 import createContainer from 'constate';
 import { getTime } from '@kbn/data-plugin/common';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { BoolQuery, buildEsQuery, Filter } from '@kbn/es-query';
-import { SnapshotNode } from '../../../../../common/http_api';
+import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { HostsState } from './use_unified_search_url_state';
 import { useHostsViewContext } from './use_hosts_view';
@@ -63,13 +63,13 @@ const createAlertsEsQuery = ({
   status,
 }: {
   dateRange: HostsState['dateRange'];
-  hostNodes: SnapshotNode[];
+  hostNodes: InfraAssetMetricsItem[];
   status?: AlertStatus;
 }): AlertsEsQuery => {
   const alertStatusFilter = createAlertStatusFilter(status);
 
   const dateFilter = createDateFilter(dateRange);
-  const hostsFilter = createHostsFilter(hostNodes);
+  const hostsFilter = createHostsFilter(hostNodes.map((p) => p.name));
 
   const filters = [alertStatusFilter, dateFilter, hostsFilter].filter(Boolean) as Filter[];
 
@@ -77,7 +77,7 @@ const createAlertsEsQuery = ({
 };
 
 const createDateFilter = (date: HostsState['dateRange']) =>
-  getTime(undefined, date, { fieldName: TIMESTAMP });
+  getTime(undefined, date, { fieldName: ALERT_TIME_RANGE });
 
 const createAlertStatusFilter = (status: AlertStatus = 'all'): Filter | null =>
   ALERT_STATUS_QUERY[status] ? { query: ALERT_STATUS_QUERY[status], meta: {} } : null;

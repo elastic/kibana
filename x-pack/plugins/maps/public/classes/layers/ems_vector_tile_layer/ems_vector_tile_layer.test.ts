@@ -74,34 +74,4 @@ describe('EmsVectorTileLayer', () => {
       expect(layer.getLocale()).toBe('xx');
     });
   });
-
-  describe('isInitialDataLoadComplete', () => {
-    test('should return false when tile loading has not started', () => {
-      const layer = new EmsVectorTileLayer({
-        source: {} as unknown as EMSTMSSource,
-        layerDescriptor: {} as unknown as EMSVectorTileLayerDescriptor,
-      });
-      expect(layer.isInitialDataLoadComplete()).toBe(false);
-    });
-
-    test('should return false when tiles are loading', () => {
-      const layer = new EmsVectorTileLayer({
-        source: {} as unknown as EMSTMSSource,
-        layerDescriptor: {
-          __areTilesLoaded: false,
-        } as unknown as EMSVectorTileLayerDescriptor,
-      });
-      expect(layer.isInitialDataLoadComplete()).toBe(false);
-    });
-
-    test('should return true when tiles are loaded', () => {
-      const layer = new EmsVectorTileLayer({
-        source: {} as unknown as EMSTMSSource,
-        layerDescriptor: {
-          __areTilesLoaded: true,
-        } as unknown as EMSVectorTileLayerDescriptor,
-      });
-      expect(layer.isInitialDataLoadComplete()).toBe(true);
-    });
-  });
 });

@@ -48,5 +48,7 @@ export const getSLOTransformTemplate = (
   },
   _meta: {
     version: 1,
+    managed: true,
+    managed_by: 'observability',
   },
 });

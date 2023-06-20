@@ -116,6 +116,9 @@ export function getBeforeSetup(
       return { state: {} };
     },
     producer: 'alerts',
+    validate: {
+      params: { validate: (params) => params },
+    },
   }));
   rulesClientParams.getEventLogClient.mockResolvedValue(
     eventLogClient ?? eventLogClientMock.create()

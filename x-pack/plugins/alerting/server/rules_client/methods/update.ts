@@ -6,9 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual, omit } from 'lodash';
+import { isEqual } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { ShouldIncrementRevision } from './bulk_edit';
 import {
   PartialRule,
@@ -32,8 +31,9 @@ import {
   getPartialRuleFromRaw,
   addGeneratedActionValues,
   incrementRevision,
+  createNewAPIKeySet,
+  migrateLegacyActions,
 } from '../lib';
-import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
@@ -115,14 +115,28 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
+  const migratedActions = await migrateLegacyActions(context, {
+    ruleId: id,
+    attributes: alertSavedObject.attributes,
+  });
+
   const updateResult = await updateAlert<Params>(
     context,
     { id, data, allowMissingConnectorSecrets, shouldIncrementRevision },
-    alertSavedObject
+    migratedActions.hasLegacyActions
+      ? {
+          ...alertSavedObject,
+          attributes: {
+            ...alertSavedObject.attributes,
+            notifyWhen: undefined,
+            throttle: undefined,
+          },
+        }
+      : alertSavedObject
   );
 
   await Promise.all([
-    alertSavedObject.attributes.apiKey
+    alertSavedObject.attributes.apiKey && !alertSavedObject.attributes.apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
           { apiKeys: [alertSavedObject.attributes.apiKey] },
           context.logger,
@@ -171,19 +185,8 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
-  // TODO https://github.com/elastic/kibana/issues/148414
-  // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-  const firstFrequency = data.actions[0]?.frequency;
-  if (attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
-    data.actions = data.actions.map((action) => omit(action, 'frequency'));
-    if (!attributes.notifyWhen) {
-      attributes.notifyWhen = firstFrequency.notifyWhen;
-      attributes.throttle = firstFrequency.throttle;
-    }
-  }
-
   // Validate
-  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
+  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
@@ -206,16 +209,13 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   const username = await context.getUserName();
 
-  let createdAPIKey = null;
-  try {
-    createdAPIKey = attributes.enabled
-      ? await context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
-      : null;
-  } catch (error) {
-    throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);
-  }
-
-  const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username);
+  const apiKeyAttributes = await createNewAPIKeySet(context, {
+    id: ruleType.id,
+    ruleName: data.name,
+    username,
+    shouldUpdateApiKey: attributes.enabled,
+    errorMessage: 'Error updating rule: could not create API key',
+  });
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
   // Increment revision if applicable field has changed
@@ -260,7 +260,12 @@ async function updateAlert<Params extends RuleTypeParams>(
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: createAttributes.apiKey ? [createAttributes.apiKey] : [] },
+      {
+        apiKeys:
+          createAttributes.apiKey && !createAttributes.apiKeyCreatedByUser
+            ? [createAttributes.apiKey]
+            : [],
+      },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

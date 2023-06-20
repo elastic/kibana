@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type {
-  FieldStatsResponse,
-  NumberStatsResult,
-  TopValuesResult,
-  BucketedAggregation,
-} from './stats';
+export type { FieldStatsResponse, BucketedAggregation, NumberSummary } from './stats';

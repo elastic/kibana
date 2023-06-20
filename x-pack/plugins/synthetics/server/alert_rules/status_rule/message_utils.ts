@@ -17,6 +17,7 @@ import {
   URL_FULL,
   ERROR_MESSAGE,
   AGENT_NAME,
+  STATE_ID,
 } from '../../../common/field_names';
 import { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
@@ -31,6 +32,7 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule
   [ERROR_MESSAGE]: monitorSummary.lastErrorMessage,
   [AGENT_NAME]: monitorSummary.hostName,
   [ALERT_REASON]: monitorSummary.reason,
+  [STATE_ID]: monitorSummary.stateId,
   'location.id': monitorSummary.locationId,
   configId: monitorSummary.configId,
 });
@@ -39,24 +41,44 @@ export const getMonitorSummary = (
   monitorInfo: OverviewPing,
   statusMessage: string,
   locationId: string,
-  configId: string
+  configId: string,
+  dateFormat: string,
+  tz: string
 ): MonitorSummaryStatusRule => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
-  const checkedAt = moment(monitorInfo['@timestamp']).format('LLL');
+  const checkedAt = moment(monitorInfo['@timestamp']).tz(tz).format(dateFormat);
+  const typeToLabelMap: Record<string, string> = {
+    http: 'HTTP',
+    tcp: 'TCP',
+    icmp: 'ICMP',
+    browser: i18n.translate('xpack.synthetics.alertRules.monitorStatus.browser.label', {
+      defaultMessage: 'browser',
+    }),
+  };
+  const typeToUrlLabelMap: Record<string, string> = {
+    http: 'URL',
+    tcp: HOST_LABEL,
+    icmp: HOST_LABEL,
+    browser: 'URL',
+  };
+  const monitorType = monitorInfo.monitor?.type;
+  const stateId = monitorInfo.state?.id || null;
 
   return {
     checkedAt,
     locationId,
     configId,
-    monitorUrl: monitorInfo.url?.full!,
+    monitorUrl: monitorInfo.url?.full || UNAVAILABLE_LABEL,
+    monitorUrlLabel: typeToUrlLabelMap[monitorType] || 'URL',
     monitorId: monitorInfo.monitor?.id,
-    monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
-    monitorType: monitorInfo.monitor?.type,
+    monitorName,
+    monitorType: typeToLabelMap[monitorInfo.monitor?.type] || monitorInfo.monitor?.type,
     lastErrorMessage: monitorInfo.error?.message!,
     locationName: monitorInfo.observer?.geo?.name!,
     hostName: monitorInfo.agent?.name!,
     status: statusMessage,
+    stateId,
     [ALERT_REASON_MSG]: getReasonMessage({
       name: monitorName,
       location: observerLocation,
@@ -92,4 +114,15 @@ export const getReasonMessage = ({
 
 export const DOWN_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.downLabel', {
   defaultMessage: `down`,
+});
+
+export const UNAVAILABLE_LABEL = i18n.translate(
+  'xpack.synthetics.alertRules.monitorStatus.unavailableUrlLabel',
+  {
+    defaultMessage: `(unavailable)`,
+  }
+);
+
+export const HOST_LABEL = i18n.translate('xpack.synthetics.alertRules.monitorStatus.host.label', {
+  defaultMessage: 'Host',
 });

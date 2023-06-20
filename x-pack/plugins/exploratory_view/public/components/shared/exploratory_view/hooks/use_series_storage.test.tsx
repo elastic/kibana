@@ -14,7 +14,7 @@ import { UrlStorageContextProvider, useSeriesStorage, reportTypeKey } from './us
 import { getHistoryFromUrl } from '../rtl_helpers';
 import type { AppDataType } from '../types';
 import { ReportTypes } from '../configurations/constants';
-import * as useTrackMetric from '../../../../hooks/use_track_metric';
+import * as useTrackMetric from '@kbn/observability-shared-plugin/public/hooks/use_track_metric';
 
 const mockSingleSeries = [
   {

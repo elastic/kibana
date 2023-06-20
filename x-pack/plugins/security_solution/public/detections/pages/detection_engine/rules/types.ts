@@ -33,6 +33,7 @@ import type {
   RuleNameOverride,
   SetupGuide,
   TimestampOverride,
+  AlertSuppressionMissingFields,
 } from '../../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -70,33 +71,11 @@ export type RuleStepsOrder = [
   RuleStep.ruleActions
 ];
 
-export interface RuleStepsData {
-  [RuleStep.defineRule]: DefineStepRule;
-  [RuleStep.aboutRule]: AboutStepRule;
-  [RuleStep.scheduleRule]: ScheduleStepRule;
-  [RuleStep.ruleActions]: ActionsStepRule;
-}
-
-export type RuleStepsFormData = {
-  [K in keyof RuleStepsData]: {
-    data: RuleStepsData[K] | undefined;
-    isValid: boolean;
-  };
-};
-
-export type RuleStepsFormHooks = {
-  [K in keyof RuleStepsData]: () => Promise<RuleStepsFormData[K] | undefined>;
-};
-
 export interface RuleStepProps {
-  addPadding?: boolean;
-  descriptionColumns?: 'multi' | 'single' | 'singleSplit';
-  isReadOnlyView: boolean;
   isUpdateView?: boolean;
   isLoading: boolean;
   onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
-  setForm?: <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => void;
   kibanaDataViews?: { [x: string]: DataViewListItem };
 }
 
@@ -176,6 +155,19 @@ export interface DefineStepRule {
   groupByFields: string[];
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
+  suppressionMissingFields?: AlertSuppressionMissingFields;
+}
+
+export interface QueryDefineStep {
+  ruleType: 'query' | 'saved_query';
+  index: string[];
+  indexPattern?: DataViewBase;
+  queryBar: FieldValueQueryBar;
+  dataViewId?: string;
+  dataViewTitle?: string;
+  timeline: FieldValueTimeline;
+  dataSourceType: DataSourceType;
+  shouldLoadQueryDynamically: boolean;
 }
 
 export interface Duration {
@@ -194,7 +186,6 @@ export interface ActionsStepRule {
   responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
-  throttle?: string | null;
 }
 
 export interface DefineStepRuleJson {

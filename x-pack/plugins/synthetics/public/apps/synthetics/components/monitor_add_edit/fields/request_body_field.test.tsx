@@ -10,9 +10,12 @@ import 'jest-canvas-mock';
 import React, { useState, useCallback } from 'react';
 import userEvent from '@testing-library/user-event';
 import { fireEvent, waitFor } from '@testing-library/react';
+import { mockGlobals } from '../../../utils/testing';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { RequestBodyField } from './request_body_field';
-import { Mode } from '../types';
+import { CodeEditorMode } from '../types';
+
+mockGlobals();
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
@@ -37,7 +40,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 describe('<RequestBodyField />', () => {
-  const defaultMode = Mode.PLAINTEXT;
+  const defaultMode = CodeEditorMode.PLAINTEXT;
   const defaultValue = 'sample value';
   const WrappedComponent = ({ readOnly }: { readOnly?: boolean }) => {
     const [config, setConfig] = useState({
@@ -52,7 +55,7 @@ describe('<RequestBodyField />', () => {
           type: config.type,
         }}
         onChange={useCallback(
-          (code) => setConfig({ type: code.type as Mode, value: code.value }),
+          (code) => setConfig({ type: code.type as CodeEditorMode, value: code.value }),
           [setConfig]
         )}
         readOnly={readOnly}

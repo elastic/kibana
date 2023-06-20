@@ -15,23 +15,40 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import {
+  ElasticApmAgentLatestVersion,
+  OtelAgentLatestVersion,
+} from '../../../../../common/agent_explorer';
+import { isOpenTelemetryAgentName } from '../../../../../common/agent_name';
 import {
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
 } from '../../../../../common/es_fields/apm';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { BetaBadge } from '../../../shared/beta_badge';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
-import { KueryBar } from '../../../shared/kuery_bar';
+import { UnifiedSearchBar } from '../../../shared/unified_search_bar';
+
 import * as urlHelpers from '../../../shared/links/url_helpers';
 import { SuggestionsSelect } from '../../../shared/suggestions_select';
-import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { AgentList } from './agent_list';
+
+const getOtelLatestAgentVersion = (
+  agentTelemetryAutoVersion: string[],
+  otelLatestVersion?: OtelAgentLatestVersion
+) => {
+  return agentTelemetryAutoVersion.length > 0
+    ? otelLatestVersion?.auto_latest_version
+    : otelLatestVersion?.sdk_latest_version;
+};
 
 function useAgentExplorerFetcher({
   start,
@@ -63,6 +80,17 @@ function useAgentExplorerFetcher({
   );
 }
 
+function useLatestAgentVersionsFetcher(latestAgentVersionEnabled: boolean) {
+  return useFetcher(
+    (callApmApi) => {
+      if (latestAgentVersionEnabled) {
+        return callApmApi('GET /internal/apm/get_latest_agent_versions');
+      }
+    },
+    [latestAgentVersionEnabled]
+  );
+}
+
 export function AgentExplorer() {
   const history = useHistory();
 
@@ -74,9 +102,30 @@ export function AgentExplorer() {
   const rangeTo = 'now';
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { config } = useApmPluginContext();
+  const latestAgentVersionEnabled = !isEmpty(config.latestAgentVersionsUrl);
+
   const agents = useAgentExplorerFetcher({ start, end });
+  const { data: latestAgentVersions, status: latestAgentVersionsStatus } =
+    useLatestAgentVersionsFetcher(latestAgentVersionEnabled);
 
   const isLoading = agents.status === FETCH_STATUS.LOADING;
+  const isLatestAgentVersionsLoading =
+    latestAgentVersionsStatus === FETCH_STATUS.LOADING;
+
+  const agentItems = (agents.data?.items ?? []).map((agent) => ({
+    ...agent,
+    latestVersion: isOpenTelemetryAgentName(agent.agentName)
+      ? getOtelLatestAgentVersion(
+          agent.agentTelemetryAutoVersion,
+          latestAgentVersions?.data?.[agent.agentName] as OtelAgentLatestVersion
+        )
+      : (
+          latestAgentVersions?.data?.[
+            agent.agentName
+          ] as ElasticApmAgentLatestVersion
+        )?.latest_version,
+  }));
 
   const noItemsMessage = (
     <EuiEmptyPrompt
@@ -94,15 +143,6 @@ export function AgentExplorer() {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiText color="subdued">
-          {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
-            defaultMessage:
-              'Agent Explorer Technical Preview provides an inventory and details of deployed Agents.',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiSpacer size="s" />
-      <EuiFlexItem grow={false}>
         <EuiTitle>
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -113,14 +153,27 @@ export function AgentExplorer() {
               </h2>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <TechnicalPreviewBadge icon="beaker" />
+              <BetaBadge icon="beta" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTitle>
       </EuiFlexItem>
+      <EuiSpacer size="s" />
+      <EuiFlexItem grow={false}>
+        <EuiText color="subdued">
+          {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
+            defaultMessage:
+              'Agent Explorer Technical Preview provides an inventory and details of deployed Agents.',
+          })}
+        </EuiText>
+      </EuiFlexItem>
       <EuiSpacer />
       <EuiFlexItem grow={false}>
-        <KueryBar />
+        <UnifiedSearchBar
+          showDatePicker={false}
+          showSubmitButton={false}
+          isClearable={false}
+        />
       </EuiFlexItem>
       <EuiSpacer size="xs" />
       <EuiFlexItem>
@@ -190,7 +243,7 @@ export function AgentExplorer() {
         <EuiCallOut
           size="s"
           title={i18n.translate('xpack.apm.agentExplorer.callout.24hoursData', {
-            defaultMessage: 'Information based on the lastest 24h',
+            defaultMessage: 'Information based on the last 24h',
           })}
           iconType="clock"
         />
@@ -199,8 +252,10 @@ export function AgentExplorer() {
       <EuiFlexItem>
         <AgentList
           isLoading={isLoading}
-          items={agents.data?.items ?? []}
+          items={agentItems}
           noItemsMessage={noItemsMessage}
+          isLatestVersionsLoading={isLatestAgentVersionsLoading}
+          latestVersionsFailed={!!latestAgentVersions?.error}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
