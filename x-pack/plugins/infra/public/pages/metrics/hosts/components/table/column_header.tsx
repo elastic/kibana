@@ -7,6 +7,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { EuiPopover, EuiIcon, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useBoolean } from '../../../../../hooks/use_boolean';
 import { useKibanaHeader } from '../../../../../hooks/use_kibana_header';
 import { TooltipContent } from '../metric_explanation/tooltip_content';
 
@@ -23,8 +24,8 @@ const ANCHOR_SPACING = 10;
 export const ColumnHeader = React.memo(
   ({ label, toolTip, formula, popoverContainerRef }: Props) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [offset, setOffset] = useState(0);
+    const [isPopoverOpen, { on: openPopover, off: closePopover }] = useBoolean(false);
 
     const { euiTheme } = useEuiTheme();
     const { headerHeight } = useKibanaHeader();
@@ -38,12 +39,10 @@ export const ColumnHeader = React.memo(
           (containerRef.current?.getBoundingClientRect().y ?? 0) - SEARCH_BAR_OFFSET - headerHeight;
 
         setOffset(headerHeight * (scrollPosition <= 0 ? -1 : 1) + ANCHOR_SPACING);
-        setIsPopoverOpen((value) => !value);
+        openPopover();
       },
-      [headerHeight]
+      [headerHeight, openPopover]
     );
-
-    const closePopover = () => setIsPopoverOpen(false);
 
     return (
       <EuiFlexGroup gutterSize="xs" ref={containerRef}>
