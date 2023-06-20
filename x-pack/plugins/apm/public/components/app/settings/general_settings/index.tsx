@@ -40,7 +40,7 @@ const apmSettingsKeys = [
 ];
 
 export function GeneralSettings() {
-  const { docLinks, notifications, application } = useApmPluginContext().core;
+  const { docLinks, notifications } = useApmPluginContext().core;
   const {
     handleFieldChange,
     settingsEditableConfig,
