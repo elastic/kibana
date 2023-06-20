@@ -32,6 +32,7 @@ export {
   EmptyDimensionButton,
   LineStyleSettings,
   TextDecorationSetting,
+  emptyTitleText,
 } from './components';
 
 export { isFieldLensCompatible } from './util';
