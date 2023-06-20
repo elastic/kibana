@@ -21,8 +21,8 @@ export const CoverageOverviewUnmappedRuleData = t.type({
   name: t.string,
 });
 
-export type MitreCoverageResponse = t.TypeOf<typeof MitreCoverageResponse>;
-export const MitreCoverageResponse = t.exact(
+export type CoverageOverviewResponse = t.TypeOf<typeof CoverageOverviewResponse>;
+export const CoverageOverviewResponse = t.exact(
   t.type({
     coverage: t.record(t.string, NonEmptyArray(t.string)),
     rules_data: t.record(t.string, NonEmptyArray(CoverageOverviewRuleData)),
