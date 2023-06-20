@@ -13,12 +13,7 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { License } from '@kbn/licensing-plugin/common/license';
 import type { AwaitedProperties } from '@kbn/utility-types';
-import type {
-  KibanaRequest,
-  KibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from '@kbn/core/server';
+import type { KibanaRequest, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -59,6 +54,7 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import { legacyMetadataSearchResponseMock } from '../metadata/support/test_support';
 import { registerResponseActionRoutes } from './response_actions';
@@ -74,6 +70,8 @@ interface CallRouteInterface {
   mockUser?: any;
   license?: License;
   authz?: Partial<EndpointAuthz>;
+  /** Api version if any */
+  version?: string;
 }
 
 const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -143,7 +141,15 @@ describe('Response actions', () => {
       // it returns the requestContext mock used in the call, to assert internal calls (e.g. the indexed document)
       callRoute = async (
         routePrefix: string,
-        { body, idxResponse, searchResponse, mockUser, license, authz = {} }: CallRouteInterface,
+        {
+          body,
+          idxResponse,
+          searchResponse,
+          mockUser,
+          license,
+          authz = {},
+          version,
+        }: CallRouteInterface,
         indexExists?: { endpointDsExists: boolean }
       ): Promise<AwaitedProperties<SecuritySolutionRequestHandlerContextMock>> => {
         const asUser = mockUser ? mockUser : superUser;
@@ -188,10 +194,9 @@ describe('Response actions', () => {
         licenseEmitter.next(withLicense);
 
         const mockRequest = httpServerMock.createKibanaRequest({ body });
-        const [, routeHandler]: [
-          RouteConfig<any, any, any, any>,
-          RequestHandler<any, any, any, any>
-        ] = routerMock.post.mock.calls.find(([{ path }]) => path.startsWith(routePrefix))!;
+        const routeHandler: RequestHandler<any, any, any, any> = version
+          ? getRegisteredVersionedRouteMock(routerMock, 'post', routePrefix, version).routeHandler
+          : routerMock.post.mock.calls.find(([{ path }]) => path.startsWith(routePrefix))![1];
 
         await routeHandler(ctx, mockRequest, mockResponse);
 
@@ -408,6 +413,7 @@ describe('Response actions', () => {
     it('sends the `execute` command payload from the execute route', async () => {
       const ctx = await callRoute(EXECUTE_ROUTE, {
         body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al' } },
+        version: '2023-10-31',
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -589,6 +595,7 @@ describe('Response actions', () => {
           EXECUTE_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al', timeout: 1000 } },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -619,6 +626,7 @@ describe('Response actions', () => {
           EXECUTE_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al' } },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -761,6 +769,7 @@ describe('Response actions', () => {
         await callRoute(EXECUTE_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canWriteExecuteOperations: false },
+          version: '2023-10-31',
         });
         expect(mockResponse.forbidden).toBeCalled();
       });

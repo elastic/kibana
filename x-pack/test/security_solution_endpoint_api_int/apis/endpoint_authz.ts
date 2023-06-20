@@ -131,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'post',
         path: EXECUTE_ROUTE,
+        version: '2023-10-31',
         body: { endpoint_ids: ['one'], parameters: { command: 'ls -la' } },
       },
     ];
