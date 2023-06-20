@@ -65,11 +65,14 @@ export function useEsDocSearch({
         setStatus(ElasticRequestState.Error);
       }
     }
-    const singleDocFetchingDuration = window.performance.now() - singleDocFetchingStartTime;
-    reportPerformanceMetricEvent(analytics, {
-      eventName: 'discoverSingleDocFetch',
-      duration: singleDocFetchingDuration,
-    });
+
+    if (analytics) {
+      const singleDocFetchingDuration = window.performance.now() - singleDocFetchingStartTime;
+      reportPerformanceMetricEvent(analytics, {
+        eventName: 'discoverSingleDocFetch',
+        duration: singleDocFetchingDuration,
+      });
+    }
   }, [analytics, data.search, dataView, id, index, useNewFieldsApi, requestSource]);
 
   useEffect(() => {
