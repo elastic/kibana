@@ -347,7 +347,7 @@ export class FileDataVisualizerView extends Component {
               fileUpload={this.props.fileUpload}
               getAdditionalLinks={this.props.getAdditionalLinks}
               capabilities={this.props.capabilities}
-              mode={MODE.IMPORT}
+              mode={mode}
               onChangeMode={this.changeMode}
               onCancel={this.onCancel}
             />
