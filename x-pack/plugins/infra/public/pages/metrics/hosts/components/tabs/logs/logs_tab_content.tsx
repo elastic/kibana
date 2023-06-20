@@ -90,7 +90,7 @@ export const LogsTabContent = () => {
     return filterQuery.query || hostsFilterQueryParam;
   }, [filterQuery.query, hostNodes]);
 
-  if (loading || logViewIndices === undefined) {
+  if (loading || !logViewIndices) {
     return (
       <EuiFlexGroup style={{ height: 300 }} direction="column" alignItems="stretch">
         <EuiFlexItem grow>
