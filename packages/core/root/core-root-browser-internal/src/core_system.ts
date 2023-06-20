@@ -242,7 +242,7 @@ export class CoreSystem {
       const notifications = this.notifications.setup({ uiSettings });
       const customBranding = this.customBranding.setup({ injectedMetadata });
 
-      const application = this.application.setup({ http });
+      const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {

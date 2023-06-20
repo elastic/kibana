@@ -5682,9 +5682,6 @@
               "created_at": {
                 "type": "date"
               },
-              "created_by": {
-                "type": "keyword"
-              },
               "agent_count": {
                 "type": "long"
               }

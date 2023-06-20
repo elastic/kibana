@@ -103,5 +103,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.context).to.have.property('page_title');
       expect(event.context.page_title).to.be.a('string');
     });
+
+    it('should have the properties provided by the "page url" context provider', () => {
+      expect(event.context).to.have.property('page_url');
+      expect(event.context.page_url).to.be.a('string');
+    });
   });
 }
