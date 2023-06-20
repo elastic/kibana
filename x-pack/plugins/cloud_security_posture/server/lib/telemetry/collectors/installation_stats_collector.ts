@@ -8,8 +8,8 @@ import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/se
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AgentPolicy,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
@@ -38,22 +38,25 @@ export const getInstallationStats = async (
     packagePolicies: PackagePolicy[],
     agentPolicies: AgentPolicy[]
   ) => {
-    return packagePolicies.map((packagePolicy: PackagePolicy): CloudSecurityInstallationStats => {
-      const agentCounts =
-        agentPolicies?.find((agentPolicy) => agentPolicy?.id === packagePolicy.policy_id)?.agents ??
-        0;
+    const installationStats = await packagePolicies.map(
+      (packagePolicy: PackagePolicy): CloudSecurityInstallationStats => {
+        const agentCounts =
+          agentPolicies?.find((agentPolicy) => agentPolicy?.id === packagePolicy.policy_id)
+            ?.agents ?? 0;
 
-      return {
-        package_policy_id: packagePolicy.id,
-        feature: packagePolicy.vars?.posture?.value as string,
-        deployment_mode: packagePolicy.vars?.deployment?.value as string,
-        package_version: packagePolicy.package?.version as string,
-        created_at: packagePolicy.created_at,
-        created_by: packagePolicy.created_by,
-        agent_policy_id: packagePolicy.policy_id,
-        agent_count: agentCounts,
-      };
-    });
+        return {
+          package_policy_id: packagePolicy.id,
+          feature: packagePolicy.vars?.posture?.value as string,
+          deployment_mode: packagePolicy.vars?.deployment?.value as string,
+          package_version: packagePolicy.package?.version as string,
+          created_at: packagePolicy.created_at,
+          created_by: packagePolicy.created_by,
+          agent_policy_id: packagePolicy.policy_id,
+          agent_count: agentCounts,
+        };
+      }
+    );
+    return installationStats;
   };
 
   const packagePolicies = await cspContext.packagePolicyService.list(soClient, {
@@ -69,7 +72,7 @@ export const getInstallationStats = async (
   });
   if (!packagePolicies) return [];
 
-  const installationStats: CloudSecurityInstallationStats[] = getInstalledPackagePolicies(
+  const installationStats: CloudSecurityInstallationStats[] = await getInstalledPackagePolicies(
     packagePolicies.items,
     agentPolicies?.items || []
   );
