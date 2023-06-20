@@ -34,7 +34,7 @@ NOTE: There are limitations in *Watcher* that affect {kib}. For information, ref
 === Watcher security
 
 To use Watcher in {kib}, you must have the built-in `kibana_admin` role
-and either of these watcher roles:
+and either of these Watcher roles:
 
 * `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
 * `watcher_user`. You can view watches, but not create or edit them.
