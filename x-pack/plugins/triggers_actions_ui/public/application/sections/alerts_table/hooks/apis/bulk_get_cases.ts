@@ -7,7 +7,6 @@
 
 import { CaseStatuses } from '@kbn/cases-components';
 import { HttpStart } from '@kbn/core-http-browser';
-
 const INTERNAL_BULK_GET_CASES_URL = '/internal/cases/_bulk_get';
 
 export interface Case {
