@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 type SloId = string;
 
@@ -48,7 +49,7 @@ export function useFetchActiveAlerts({ sloIds = [] }: Params): UseFetchActiveAle
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: ['fetchActiveAlerts', sloIds],
+    queryKey: sloKeys.activeAlert(sloIds),
     queryFn: async ({ signal }) => {
       try {
         const response = await http.post<FindApiResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
@@ -61,7 +62,7 @@ export function useFetchActiveAlerts({ sloIds = [] }: Params): UseFetchActiveAle
                   {
                     range: {
                       '@timestamp': {
-                        gte: 'now-15m/m',
+                        gte: 'now-5m/m',
                       },
                     },
                   },

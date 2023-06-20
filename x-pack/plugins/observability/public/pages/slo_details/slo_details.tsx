@@ -13,10 +13,10 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
@@ -25,7 +25,6 @@ import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
 import { paths } from '../../config/paths';
 import type { SloDetailsPathParams } from './types';
-import type { ObservabilityAppServices } from '../../application/types';
 import { AutoRefreshButton } from '../slos/components/auto_refresh_button';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 
@@ -33,7 +32,7 @@ export function SloDetailsPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { hasAtLeast } = useLicense();

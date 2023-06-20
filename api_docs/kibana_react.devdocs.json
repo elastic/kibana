@@ -1233,18 +1233,6 @@
             "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
           },
           {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
           },
@@ -1525,7 +1513,7 @@
         "signature": [
           "({ children, component: Component, render, ...rest }: ",
           "RouteProps",
-          ") => JSX.Element"
+          "<string, { [x: string]: string | undefined; }>) => JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/router/router.tsx",
         "deprecated": false,
@@ -1539,7 +1527,8 @@
             "label": "{ children, component: Component, render, ...rest }",
             "description": [],
             "signature": [
-              "RouteProps"
+              "RouteProps",
+              "<string, { [x: string]: string | undefined; }>"
             ],
             "path": "src/plugins/kibana_react/public/router/router.tsx",
             "deprecated": false,
@@ -2538,7 +2527,7 @@
               {
                 "parentPluginId": "kibanaReact",
                 "id": "def-public.KibanaReactOverlays.openFlyout.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
@@ -3398,6 +3387,21 @@
           "\"hjson\""
         ],
         "path": "src/plugins/kibana_react/public/code_editor/languages/hjson/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.LANG",
+        "type": "string",
+        "tags": [],
+        "label": "LANG",
+        "description": [],
+        "signature": [
+          "\"grok\""
+        ],
+        "path": "src/plugins/kibana_react/public/code_editor/languages/grok/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

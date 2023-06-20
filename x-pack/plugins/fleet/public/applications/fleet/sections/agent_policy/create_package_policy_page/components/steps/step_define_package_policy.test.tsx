@@ -73,6 +73,7 @@ describe('StepDefinePackagePolicy', () => {
     updated_by: '',
     revision: 1,
     package_policies: [],
+    is_protected: false,
   };
   let packagePolicy: NewPackagePolicy;
   const mockUpdatePackagePolicy = jest.fn().mockImplementation((val: any) => {

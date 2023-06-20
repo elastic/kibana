@@ -22,14 +22,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { CaseUI } from '../../../../common';
+import type { CasesUI } from '../../../../common';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { EditTagsSelectable } from './edit_tags_selectable';
 import * as i18n from './translations';
 import type { ItemsSelectionState } from '../types';
 
 interface Props {
-  selectedCases: CaseUI[];
+  selectedCases: CasesUI;
   onClose: () => void;
   onSaveTags: (args: ItemsSelectionState) => void;
 }

@@ -9,7 +9,7 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import type { RuleSnoozeSettings } from '../../logic';
+import type { RulesSnoozeSettingsMap } from '../../logic';
 import { fetchRulesSnoozeSettings } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
@@ -25,7 +25,7 @@ const FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY = ['GET', INTERNAL_ALERTING_API_FIND_
  */
 export const useFetchRulesSnoozeSettings = (
   ids: string[],
-  queryOptions?: UseQueryOptions<RuleSnoozeSettings[], Error, RuleSnoozeSettings[], string[]>
+  queryOptions?: UseQueryOptions<RulesSnoozeSettingsMap, Error, RulesSnoozeSettingsMap, string[]>
 ) => {
   return useQuery(
     [...FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY, ...ids],
@@ -51,7 +51,7 @@ export const useInvalidateFetchRulesSnoozeSettingsQuery = () => {
      * Invalidate all queries that start with FIND_RULES_QUERY_KEY. This
      * includes the in-memory query cache and paged query cache.
      */
-    queryClient.invalidateQueries(FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY, {
+    return queryClient.invalidateQueries(FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY, {
       refetchType: 'active',
     });
   }, [queryClient]);

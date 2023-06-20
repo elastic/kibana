@@ -34,7 +34,6 @@ export interface DeleteCaseArgs extends GetCaseArgs, IndexRefresh {}
 
 export interface GetCasesArgs {
   caseIds: string[];
-  fields?: string[];
 }
 
 export interface FindCommentsArgs {
@@ -78,6 +77,11 @@ export interface GetTagsArgs {
 }
 
 export interface GetReportersArgs {
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  filter?: KueryNode;
+}
+
+export interface GetCategoryArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   filter?: KueryNode;
 }

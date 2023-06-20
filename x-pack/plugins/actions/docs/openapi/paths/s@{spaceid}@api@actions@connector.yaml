@@ -8,15 +8,6 @@ post:
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/space_id.yaml'
-    - in: path
-      name: id
-      description: >
-        An UUID v1 or v4 identifier for the connector. If you omit this parameter,
-        an identifier is randomly generated.
-      required: true
-      schema:
-        type: string
-        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   requestBody:
     required: true
     content:
@@ -36,7 +27,8 @@ post:
             - $ref: '../components/schemas/create_connector_request_servicenow.yaml'
             - $ref: '../components/schemas/create_connector_request_servicenow_itom.yaml'
             - $ref: '../components/schemas/create_connector_request_servicenow_sir.yaml'
-            - $ref: '../components/schemas/create_connector_request_slack.yaml'
+            - $ref: '../components/schemas/create_connector_request_slack_api.yaml'
+            - $ref: '../components/schemas/create_connector_request_slack_webhook.yaml'
             - $ref: '../components/schemas/create_connector_request_swimlane.yaml'
             - $ref: '../components/schemas/create_connector_request_teams.yaml'
             - $ref: '../components/schemas/create_connector_request_tines.yaml'

@@ -30,7 +30,3 @@ const findMetricsExplorerViewResponseRT = rt.exact(
 export const findMetricsExplorerViewResponsePayloadRT = rt.type({
   data: rt.array(findMetricsExplorerViewResponseRT),
 });
-
-export type FindMetricsExplorerViewResponsePayload = rt.TypeOf<
-  typeof findMetricsExplorerViewResponsePayloadRT
->;

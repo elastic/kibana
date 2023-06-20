@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { NameLogs } from './name_logs';
 import { ConfigureLogs } from './configure_logs';
+import { SelectLogs } from './select_logs';
 import { InstallElasticAgent } from './install_elastic_agent';
 import { createWizardContext } from '../../../../context/create_wizard_context';
-import { ImportData } from './import_data';
 import { Inspect } from './inspect';
 
 interface WizardState {
   datasetName: string;
+  serviceName: string;
+  logFilePaths: string[];
+  namespace: string;
+  customConfigurations: string;
   logsType?:
     | 'system'
     | 'sys'
@@ -24,33 +27,30 @@ interface WizardState {
     | 'service';
   uploadType?: 'log-file' | 'api-key';
   elasticAgentPlatform: 'linux-tar' | 'macos' | 'windows' | 'deb' | 'rpm';
-  alternativeShippers: {
-    filebeat: boolean;
-    fluentbit: boolean;
-    logstash: boolean;
-    fluentd: boolean;
-  };
+  autoDownloadConfig: boolean;
+  apiKeyEncoded: string;
+  onboardingId: string;
 }
 
 const initialState: WizardState = {
   datasetName: '',
+  serviceName: '',
+  logFilePaths: [''],
+  namespace: 'default',
+  customConfigurations: '',
   elasticAgentPlatform: 'linux-tar',
-  alternativeShippers: {
-    filebeat: false,
-    fluentbit: false,
-    logstash: false,
-    fluentd: false,
-  },
+  autoDownloadConfig: false,
+  apiKeyEncoded: '',
+  onboardingId: '',
 };
 
 const { Provider, Step, useWizard } = createWizardContext({
   initialState,
-  initialStep: 'nameLogs',
+  initialStep: 'selectLogs',
   steps: {
-    nameLogs: NameLogs,
+    selectLogs: SelectLogs,
     configureLogs: ConfigureLogs,
     installElasticAgent: InstallElasticAgent,
-    importData: ImportData,
     inspect: Inspect,
   },
 });

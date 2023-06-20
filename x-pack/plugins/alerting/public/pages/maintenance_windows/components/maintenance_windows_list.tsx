@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback, useMemo } from 'react';
 import {
   formatDate,
   EuiInMemoryTable,
@@ -15,6 +15,7 @@ import {
   SearchFilterConfig,
   EuiBadge,
   useEuiTheme,
+  EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MaintenanceWindowFindResponse, SortDirection } from '../types';
@@ -45,6 +46,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
   {
     field: 'status',
     name: i18n.TABLE_STATUS,
+    'data-test-subj': 'maintenance-windows-column-status',
     render: (status: MaintenanceWindowStatus) => {
       return (
         <EuiBadge color={STATUS_DISPLAY[status].color}>{STATUS_DISPLAY[status].label}</EuiBadge>
@@ -59,7 +61,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     render: (startDate: string, item: MaintenanceWindowFindResponse) => {
       return (
         <EuiFlexGroup responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>{formatDate(startDate, 'MM/DD/YY HH:mm A')}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{formatDate(startDate, 'MM/DD/YY hh:mm A')}</EuiFlexItem>
           {item.events.length > 1 ? (
             <EuiFlexItem grow={false}>
               <UpcomingEventsPopover maintenanceWindowFindResponse={item} />
@@ -74,7 +76,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     field: 'eventEndTime',
     name: i18n.TABLE_END_TIME,
     dataType: 'date',
-    render: (endDate: string) => formatDate(endDate, 'MM/DD/YY HH:mm A'),
+    render: (endDate: string) => formatDate(endDate, 'MM/DD/YY hh:mm A'),
   },
 ];
 
@@ -90,17 +92,21 @@ const rowProps = (item: MaintenanceWindowFindResponse) => ({
   'data-test-subj': 'list-item',
 });
 
-const search: { filters: SearchFilterConfig[] } = {
-  filters: [
-    {
-      type: 'custom_component',
-      component: StatusFilter,
-    },
-  ],
-};
-
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
   ({ loading, items, readOnly, refreshData }) => {
+    const search: { filters: SearchFilterConfig[]; toolsRight: ReactElement } = {
+      filters: [
+        {
+          type: 'custom_component',
+          component: StatusFilter,
+        },
+      ],
+      toolsRight: (
+        <EuiButton data-test-subj="refresh-button" iconType="refresh" onClick={refreshData}>
+          {i18n.REFRESH}
+        </EuiButton>
+      ),
+    };
     const { euiTheme } = useEuiTheme();
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const onEdit = useCallback(
@@ -168,7 +174,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
 
     return (
       <EuiInMemoryTable
-        data-test-subj="mw-table"
+        data-test-subj="maintenance-windows-table"
         css={tableCss}
         itemId="id"
         loading={loading || isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive}

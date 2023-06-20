@@ -8,12 +8,12 @@
 import type { EuiSelectableOption, IconType } from '@elastic/eui';
 import { assertNever } from '@elastic/eui';
 import { useCallback, useReducer, useMemo } from 'react';
-import type { CaseUI } from '../../../common';
+import type { CasesUI, CaseUI } from '../../../common';
 import type { ItemSelectableOption, ItemsSelectionState } from './types';
 
 interface UseItemsStateProps {
   items: string[];
-  selectedCases: CaseUI[];
+  selectedCases: CasesUI;
   itemToSelectableOption: <T>(item: Payload[number]) => EuiSelectableOption<T>;
   fieldSelector: (theCase: CaseUI) => string[];
   onChangeItems: (args: ItemsSelectionState) => void;
@@ -153,7 +153,7 @@ const getInitialItemsState = ({
   fieldSelector,
 }: {
   items: string[];
-  selectedCases: CaseUI[];
+  selectedCases: CasesUI;
   fieldSelector: UseItemsStateProps['fieldSelector'];
 }): State => {
   const itemCounterMap = createItemsCounterMapping({ selectedCases, fieldSelector });
@@ -183,7 +183,7 @@ const createItemsCounterMapping = ({
   selectedCases,
   fieldSelector,
 }: {
-  selectedCases: CaseUI[];
+  selectedCases: CasesUI;
   fieldSelector: UseItemsStateProps['fieldSelector'];
 }) => {
   const counterMap = new Map<string, number>();

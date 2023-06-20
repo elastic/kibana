@@ -88,7 +88,14 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
     validations: [],
   },
+  // TODO: populate the dataViewTitle in a better way
   dataViewId: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
+      {
+        defaultMessage: 'Data View',
+      }
+    ),
     fieldsToValidateOnChange: ['dataViewId'],
     validations: [
       {
@@ -626,7 +633,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
       {
-        defaultMessage: 'If “Suppress by” field does not exist',
+        defaultMessage: 'If a suppression field is missing',
       }
     ),
   },

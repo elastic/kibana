@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getDataTestSubjectSelector } from '../../helpers/common';
+
 export const FILTER_GROUP_LOADING = '[data-test-subj="filter-group__loading"]';
 export const FILTER_GROUP_ITEMS = '[data-test-subj="filter-group__items"]';
 export const FILTER_GROUP_CLEAR = '[data-test-subj="filter-group__clear"]';
@@ -67,6 +69,14 @@ export const FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS = {
   FIELD_PICKER: (fieldName: string) => `[data-test-subj="field-picker-select-${fieldName}"]`,
   FIELD_LABEL: '[data-test-subj="control-editor-title-input"]',
   SAVE: '[data-test-subj="control-editor-save"]',
+  CANCEL: getDataTestSubjectSelector('control-editor-cancel'),
+  FILTER_FIELD_TYPE: getDataTestSubjectSelector('toggleFieldFilterButton'),
+  FIELD_TYPES: {
+    STRING: getDataTestSubjectSelector('typeFilter-string'),
+    BOOLEAN: getDataTestSubjectSelector('typeFilter-boolean'),
+    IP: getDataTestSubjectSelector('typeFilter-ip'),
+    NUMBER: getDataTestSubjectSelector('typeFilter-number'),
+  },
 };
 
 export const FILTER_GROUP_CONTROL_ACTION_DELETE = (idx: number) => {

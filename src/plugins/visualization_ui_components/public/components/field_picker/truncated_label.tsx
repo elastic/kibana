@@ -7,8 +7,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiMark } from '@elastic/eui';
-import { EuiHighlight } from '@elastic/eui';
+import { EuiMark, EuiHighlight } from '@elastic/eui';
 
 const createContext = () =>
   document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D;

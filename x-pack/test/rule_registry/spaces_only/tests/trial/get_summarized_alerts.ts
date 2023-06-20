@@ -15,7 +15,6 @@ import {
   AlertConsumers,
   ALERT_REASON,
   ALERT_INSTANCE_ID,
-  ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   createLifecycleExecutor,
@@ -382,7 +381,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       expect(get(summarizedAlertsExcludingId2.new.data[0], ALERT_INSTANCE_ID)).to.eql(id1);
     });
 
-    it('should return new, ongoing, and recovered alerts if there are active maintenance windows', async () => {
+    it('should not trigger new, ongoing, and recovered alerts if there are active maintenance windows', async () => {
       const id = 'host-01';
       const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
 
@@ -466,12 +465,9 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         spaceId: 'default',
         excludedAlertInstanceIds: [],
       });
-      expect(execution1SummarizedAlerts.new.count).to.eql(1);
+      expect(execution1SummarizedAlerts.new.count).to.eql(0);
       expect(execution1SummarizedAlerts.ongoing.count).to.eql(0);
       expect(execution1SummarizedAlerts.recovered.count).to.eql(0);
-      expect(get(execution1SummarizedAlerts.new.data[0], ALERT_MAINTENANCE_WINDOW_IDS)).to.eql(
-        maintenanceWindowIds
-      );
 
       // Execute again to update the existing alert
       const execution2Uuid = uuidv4();
@@ -489,11 +485,8 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         excludedAlertInstanceIds: [],
       });
       expect(execution2SummarizedAlerts.new.count).to.eql(0);
-      expect(execution2SummarizedAlerts.ongoing.count).to.eql(1);
+      expect(execution2SummarizedAlerts.ongoing.count).to.eql(0);
       expect(execution2SummarizedAlerts.recovered.count).to.eql(0);
-      expect(get(execution2SummarizedAlerts.ongoing.data[0], ALERT_MAINTENANCE_WINDOW_IDS)).to.eql(
-        maintenanceWindowIds
-      );
 
       // Execute again to recover the alert
       const execution3Uuid = uuidv4();
@@ -512,10 +505,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       });
       expect(execution3SummarizedAlerts.new.count).to.eql(0);
       expect(execution3SummarizedAlerts.ongoing.count).to.eql(0);
-      expect(execution3SummarizedAlerts.recovered.count).to.eql(1);
-      expect(
-        get(execution3SummarizedAlerts.recovered.data[0], ALERT_MAINTENANCE_WINDOW_IDS)
-      ).to.eql(maintenanceWindowIds);
+      expect(execution3SummarizedAlerts.recovered.count).to.eql(0);
     });
   });
 }

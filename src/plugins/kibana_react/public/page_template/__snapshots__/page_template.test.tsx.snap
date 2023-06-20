@@ -34,7 +34,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
             >
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -205,7 +205,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
       >
         <div
           aria-label="Solution"
-          class="euiAvatar euiAvatar--m euiAvatar--user kbnPageTemplateSolutionNavAvatar emotion-euiAvatar-m-user-plain"
+          class="euiAvatar euiAvatar--m euiAvatar--user kbnPageTemplateSolutionNavAvatar emotion-euiAvatar-user-m-uppercase-plain"
           role="img"
           title="Solution"
         >
@@ -414,7 +414,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"

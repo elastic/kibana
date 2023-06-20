@@ -71,7 +71,7 @@ export const AddComment = React.memo(
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
       const { permissions, owner, appId } = useCasesContext();
-      const { isLoading, createAttachments } = useCreateAttachments();
+      const { isLoading, mutate: createAttachments } = useCreateAttachments();
       const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
 
       const { form } = useForm<AddCommentFormSchema>({
@@ -113,15 +113,23 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          createAttachments({
-            caseId,
-            caseOwner: owner[0],
-            data: [{ ...data, type: CommentType.user }],
-            updateCase: onCommentPosted,
-          });
+
+          createAttachments(
+            {
+              caseId,
+              caseOwner: owner[0],
+              attachments: [{ ...data, type: CommentType.user }],
+            },
+            {
+              onSuccess: (theCase) => {
+                onCommentPosted(theCase);
+              },
+            }
+          );
 
           reset({ defaultValue: {} });
         }
+
         removeItemFromSessionStorage(draftStorageKey);
       }, [
         submit,

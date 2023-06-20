@@ -1412,6 +1412,44 @@ describe('config schema', () => {
     });
   });
 
+  describe('ui', () => {
+    it('should not allow xpack.security.ui.* to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            ui: {
+              userManagementEnabled: false,
+              roleManagementEnabled: false,
+              roleMappingManagementEnabled: false,
+            },
+          },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(`"[ui]: a value wasn't expected to be present"`);
+    });
+
+    it('should allow xpack.security.ui.* to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            ui: {
+              userManagementEnabled: false,
+              roleManagementEnabled: false,
+              roleMappingManagementEnabled: false,
+            },
+          },
+          { serverless: true }
+        ).ui
+      ).toMatchInlineSnapshot(`
+        Object {
+          "roleManagementEnabled": false,
+          "roleMappingManagementEnabled": false,
+          "userManagementEnabled": false,
+        }
+      `);
+    });
+  });
+
   describe('session', () => {
     it('should throw error if xpack.security.session.cleanupInterval is less than 10 seconds', () => {
       expect(() => ConfigSchema.validate({ session: { cleanupInterval: '9s' } })).toThrow(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
 import { getUnallowedValueRequestItems } from '../../../allowed_values/helpers';
 import {
   getMappingsProperties,
@@ -27,6 +28,7 @@ export async function checkIndex({
   ecsMetadata,
   formatBytes,
   formatNumber,
+  httpFetch,
   indexName,
   onCheckCompleted,
   pattern,
@@ -36,13 +38,18 @@ export async function checkIndex({
   ecsMetadata: Record<string, EcsMetadata> | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
+  httpFetch: HttpHandler;
   indexName: string;
   onCheckCompleted: OnCheckCompleted;
   pattern: string;
   version: string;
 }) {
   try {
-    const indexes = await fetchMappings({ abortController, patternOrIndexName: indexName });
+    const indexes = await fetchMappings({
+      abortController,
+      httpFetch,
+      patternOrIndexName: indexName,
+    });
 
     const requestItems = getUnallowedValueRequestItems({
       ecsMetadata,
@@ -51,6 +58,7 @@ export async function checkIndex({
 
     const searchResults = await fetchUnallowedValues({
       abortController,
+      httpFetch,
       indexName,
       requestItems,
     });
@@ -87,7 +95,7 @@ export async function checkIndex({
   } catch (error) {
     if (!abortController.signal.aborted) {
       onCheckCompleted({
-        error: error != null ? error.toString() : i18n.AN_ERROR_OCCURRED_CHECKING_INDEX(indexName),
+        error: error != null ? error.message : i18n.AN_ERROR_OCCURRED_CHECKING_INDEX(indexName),
         formatBytes,
         formatNumber,
         indexName,

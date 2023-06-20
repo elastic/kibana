@@ -15,7 +15,8 @@ import {
   Query,
   toElasticsearchQuery,
 } from '@kbn/es-query';
-import { useMlContext } from '../../../../../contexts/ml';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { useDataSource } from '../../../../../contexts/ml';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 
 // `undefined` is used for a non-initialized state
@@ -33,8 +34,11 @@ export function useSavedSearch() {
   const [savedSearchQuery, setSavedSearchQuery] = useState<SavedSearchQuery>(undefined);
   const [savedSearchQueryStr, setSavedSearchQueryStr] = useState<SavedSearchQueryStr>(undefined);
 
-  const mlContext = useMlContext();
-  const { currentDataView, kibanaConfig, selectedSavedSearch } = mlContext;
+  const {
+    services: { uiSettings },
+  } = useMlKibana();
+
+  const { selectedDataView, selectedSavedSearch } = useDataSource();
 
   const getQueryData = () => {
     let qry: any = {};
@@ -49,8 +53,8 @@ export function useSavedSearch() {
 
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
         const ast = fromKueryExpression(qryString);
-        qry = toElasticsearchQuery(ast, currentDataView);
-        const filterQuery = buildQueryFromFilters(filter, currentDataView);
+        qry = toElasticsearchQuery(ast, selectedDataView);
+        const filterQuery = buildQueryFromFilters(filter, selectedDataView);
         if (qry.bool === undefined) {
           qry.bool = {};
           // toElasticsearchQuery may add a single match_all item to the
@@ -74,8 +78,8 @@ export function useSavedSearch() {
         qry.bool.filter = [...qry.bool.filter, ...filterQuery.filter];
         qry.bool.must_not = [...qry.bool.must_not, ...filterQuery.must_not];
       } else {
-        qry = buildEsQuery(currentDataView, [query], filter);
-        decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+        qry = buildEsQuery(selectedDataView, [query], filter);
+        decorateQuery(qry, uiSettings.get('query:queryString:options'));
       }
 
       setSavedSearchQuery(qry);

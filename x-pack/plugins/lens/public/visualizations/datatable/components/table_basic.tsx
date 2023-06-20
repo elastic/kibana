@@ -388,10 +388,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         formatters,
         columnConfig,
         DataContext,
-        props.uiSettings,
+        props.theme,
         props.args.fitRowToContent
       ),
-    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
+    [formatters, columnConfig, props.theme, props.args.fitRowToContent]
   );
 
   const columnVisibility = useMemo(

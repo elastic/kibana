@@ -8,7 +8,7 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { casesQueriesKeys, DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
-import type { CasesUI, FilterOptions, QueryParams } from './types';
+import type { CasesFindResponseUI, FilterOptions, QueryParams } from './types';
 import { SortFieldCase, StatusAll, SeverityAll } from './types';
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
@@ -26,6 +26,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   status: StatusAll,
   tags: [],
   owner: [],
+  category: [],
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
@@ -35,7 +36,7 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
   sortOrder: 'desc',
 };
 
-export const initialData: CasesUI = {
+export const initialData: CasesFindResponseUI = {
   cases: [],
   countClosedCases: 0,
   countInProgressCases: 0,
@@ -50,7 +51,7 @@ export const useGetCases = (
     queryParams?: Partial<QueryParams>;
     filterOptions?: Partial<FilterOptions>;
   } = {}
-): UseQueryResult<CasesUI> => {
+): UseQueryResult<CasesFindResponseUI> => {
   const toasts = useToasts();
   return useQuery(
     casesQueriesKeys.cases(params),

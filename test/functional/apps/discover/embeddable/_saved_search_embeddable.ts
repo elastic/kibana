@@ -139,5 +139,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('embeddableError');
       expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
     });
+
+    it('should not show the full screen button', async () => {
+      await addSearchEmbeddableToDashboard();
+      await testSubjects.missingOrFail('dataGridFullScreenButton');
+    });
   });
 }

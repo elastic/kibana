@@ -46,7 +46,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
       );
 
       return response.ok({
-        body: { data: savedQuery },
+        body: { data: { ...savedQuery.attributes, saved_object_id: savedQuery.id } },
       });
     }
   );

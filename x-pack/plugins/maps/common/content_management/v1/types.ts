@@ -31,34 +31,3 @@ export type MapAttributes = {
   layerListJSON?: string;
   uiStateJSON?: string;
 };
-
-export type MapItem = MapCrudTypes['Item'];
-export type PartialMapItem = MapCrudTypes['PartialItem'];
-
-// ----------- GET --------------
-
-export type MapGetIn = MapCrudTypes['GetIn'];
-export type MapGetOut = MapCrudTypes['GetOut'];
-
-// ----------- CREATE --------------
-
-export type MapCreateIn = MapCrudTypes['CreateIn'];
-export type MapCreateOut = MapCrudTypes['CreateOut'];
-export type MapCreateOptions = MapCrudTypes['CreateOptions'];
-
-// ----------- UPDATE --------------
-
-export type MapUpdateIn = MapCrudTypes['UpdateIn'];
-export type MapUpdateOut = MapCrudTypes['UpdateOut'];
-export type MapUpdateOptions = MapCrudTypes['UpdateOptions'];
-
-// ----------- DELETE --------------
-
-export type MapDeleteIn = MapCrudTypes['DeleteIn'];
-export type MapDeleteOut = MapCrudTypes['DeleteOut'];
-
-// ----------- SEARCH --------------
-
-export type MapSearchIn = MapCrudTypes['SearchIn'];
-export type MapSearchOut = MapCrudTypes['SearchOut'];
-export type MapSearchOptions = MapCrudTypes['SearchOptions'];

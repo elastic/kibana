@@ -39,6 +39,7 @@ describe('Configuration Statistics Aggregator', () => {
       },
       unsafe: {
         exclude_task_types: [],
+        authenticate_background_task_utilization: true,
       },
       event_loop_delay: {
         monitor: true,

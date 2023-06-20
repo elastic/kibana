@@ -38,7 +38,9 @@ import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import {
+  KibanaServices,
   useGetUserCasesPermissions,
   useKibana,
   useToasts,
@@ -127,6 +129,8 @@ const renderOption = (
 );
 
 const DataQualityComponent: React.FC = () => {
+  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  const httpFetch = KibanaServices.get().http.fetch;
   const theme = useTheme();
   const toasts = useToasts();
   const addSuccessToast = useCallback(
@@ -200,46 +204,47 @@ const DataQualityComponent: React.FC = () => {
     [createCaseFlyout]
   );
 
+  if (isSourcererLoading || isSignalIndexNameLoading) {
+    return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
+  }
+
   return (
     <>
       {indicesExist ? (
-        <>
-          <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
-            <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
-              <EuiToolTip content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
-                <FormControlLayout prepend={ilmFormLabel}>
-                  <EuiComboBox
-                    id={labelInputId}
-                    placeholder={SELECT_ONE_OR_MORE_ILM_PHASES}
-                    renderOption={renderOption}
-                    selectedOptions={selectedOptions}
-                    style={comboBoxStyle}
-                    options={options}
-                    onChange={setSelectedOptions}
-                  />
-                </FormControlLayout>
-              </EuiToolTip>
-            </HeaderPage>
+        <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
+          <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
+            <EuiToolTip content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
+              <FormControlLayout prepend={ilmFormLabel}>
+                <EuiComboBox
+                  id={labelInputId}
+                  data-test-subj="selectIlmPhases"
+                  placeholder={SELECT_ONE_OR_MORE_ILM_PHASES}
+                  renderOption={renderOption}
+                  selectedOptions={selectedOptions}
+                  style={comboBoxStyle}
+                  options={options}
+                  onChange={setSelectedOptions}
+                />
+              </FormControlLayout>
+            </EuiToolTip>
+          </HeaderPage>
 
-            {isSourcererLoading || isSignalIndexNameLoading ? (
-              <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />
-            ) : (
-              <DataQualityPanel
-                addSuccessToast={addSuccessToast}
-                canUserCreateAndReadCases={canUserCreateAndReadCases}
-                defaultBytesFormat={defaultBytesFormat}
-                defaultNumberFormat={defaultNumberFormat}
-                getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-                ilmPhases={ilmPhases}
-                lastChecked={lastChecked}
-                openCreateCaseFlyout={openCreateCaseFlyout}
-                patterns={alertsAndSelectedPatterns}
-                setLastChecked={setLastChecked}
-                theme={theme}
-              />
-            )}
-          </SecuritySolutionPageWrapper>
-        </>
+          <DataQualityPanel
+            addSuccessToast={addSuccessToast}
+            canUserCreateAndReadCases={canUserCreateAndReadCases}
+            defaultBytesFormat={defaultBytesFormat}
+            defaultNumberFormat={defaultNumberFormat}
+            getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+            httpFetch={httpFetch}
+            ilmPhases={ilmPhases}
+            isAssistantEnabled={isAssistantEnabled}
+            lastChecked={lastChecked}
+            openCreateCaseFlyout={openCreateCaseFlyout}
+            patterns={alertsAndSelectedPatterns}
+            setLastChecked={setLastChecked}
+            theme={theme}
+          />
+        </SecuritySolutionPageWrapper>
       ) : (
         <LandingPageComponent />
       )}

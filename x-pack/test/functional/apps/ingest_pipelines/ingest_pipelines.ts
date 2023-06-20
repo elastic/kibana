@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { IngestDeletePipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
 import path from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+const TEST_PIPELINE_NAME = 'test';
 
 const PIPELINE = {
   name: 'test_pipeline',
@@ -26,21 +28,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const security = getService('security');
 
-  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/155914
-  describe.skip('Ingest Pipelines', function () {
+  describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
       await security.testUser.setRoles(['ingest_pipelines_user']);
-      // Delete all existing pipelines
-      await es.ingest.deletePipeline({ id: '*' } as IngestDeletePipelineRequest);
+      // Create a test pipeline
+      await es.ingest.putPipeline({
+        id: TEST_PIPELINE_NAME,
+        body: { processors: [] },
+      } as IngestPutPipelineRequest);
       await pageObjects.common.navigateToApp('ingestPipelines');
     });
 
     it('Loads the app', async () => {
       log.debug('Checking for section heading to say Ingest Pipelines.');
 
-      const headingText = await pageObjects.ingestPipelines.emptyStateHeaderText();
-      expect(headingText).to.be('Start by creating a pipeline');
+      const headingText = await pageObjects.ingestPipelines.sectionHeadingText();
+      expect(headingText).to.be('Ingest Pipelines');
+    });
+
+    it('Displays the test pipeline in the list of pipelines', async () => {
+      const pipelines = await pageObjects.ingestPipelines.getPipelinesList();
+      expect(pipelines).to.contain(TEST_PIPELINE_NAME);
     });
 
     describe('create pipeline', () => {
@@ -79,6 +88,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await es.ingest.deletePipeline({ id: PIPELINE.name });
         await security.testUser.restoreDefaults();
       });
+    });
+
+    after(async () => {
+      // Delete the test pipeline
+      await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
     });
   });
 };

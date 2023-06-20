@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import chroma from 'chroma-js';
 import { VisualizationUiComponentsPlugin } from './plugin';
-
-export { chroma };
 
 export {
   FieldPicker,
@@ -31,7 +28,14 @@ export {
   isQueryValid,
   DimensionEditorSection,
   DimensionButton,
+  DimensionTrigger,
+  EmptyDimensionButton,
+  LineStyleSettings,
+  TextDecorationSetting,
+  emptyTitleText,
 } from './components';
+
+export { isFieldLensCompatible } from './util';
 
 export type {
   DataType,
@@ -39,7 +43,10 @@ export type {
   FieldOption,
   IconSet,
   AccessorConfig,
+  QueryInputServices,
 } from './components';
+
+export type { FormatFactory } from './types';
 
 export function plugin() {
   return new VisualizationUiComponentsPlugin();

@@ -36,14 +36,15 @@ export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate
 
 export const PageTitle: React.FC = ({ children }) => (
   <EuiTitle size="l">
-    <div>
-      {children}
-      <EuiSpacer />
-    </div>
+    <div>{children}</div>
   </EuiTitle>
 );
 
-export const PageTitleText = ({ title }: { title: React.ReactNode }) => <h2>{title}</h2>;
+export const PageTitleText = ({ title }: { title: React.ReactNode }) => (
+  <EuiText grow={false} size="s">
+    <h1>{title}</h1>
+  </EuiText>
+);
 
 export const getExpandColumn = <T extends unknown>({
   onClick,

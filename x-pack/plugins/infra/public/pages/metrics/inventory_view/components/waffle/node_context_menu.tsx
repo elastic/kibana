@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { useMemo, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import {
   Section,
@@ -20,15 +19,15 @@ import {
   SectionLinks,
   SectionLink,
   ActionMenuDivider,
-} from '@kbn/observability-plugin/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+  useLinkProps,
+} from '@kbn/observability-shared-plugin/public';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
-import { getNodeDetailUrl, getNodeLogsUrl } from '../../../../link_to';
+import { getNodeDetailUrl } from '../../../../link_to';
 import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
-import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -42,8 +41,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
-    const { application, share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>()
-      .services;
+    const { services } = useKibanaContextForPlugin();
+    const { application, share, locators } = services;
     const uiCapabilities = application?.capabilities;
     // Due to the changing nature of the fields between APM and this UI,
     // We need to have some exceptions until 7.0 & ECS is finalized. Reference
@@ -76,13 +75,6 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       return { label: '', value: '' };
     }, [nodeType, node.ip, node.id]);
 
-    const nodeLogsMenuItemLinkProps = useLinkProps(
-      getNodeLogsUrl({
-        nodeType,
-        nodeId: node.id,
-        time: currentTime,
-      })
-    );
     const nodeDetailMenuItemLinkProps = useLinkProps({
       ...getNodeDetailUrl({
         nodeType,
@@ -104,7 +96,11 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} logs',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      ...nodeLogsMenuItemLinkProps,
+      href: locators.nodeLogsLocator.getRedirectUrl({
+        nodeType,
+        nodeId: node.id,
+        time: currentTime,
+      }),
       'data-test-subj': 'viewLogsContextMenuItem',
       isDisabled: !showLogsLink,
     };

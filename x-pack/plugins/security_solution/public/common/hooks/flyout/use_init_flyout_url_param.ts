@@ -42,7 +42,7 @@ export const useInitFlyoutFromUrlParam = () => {
     const { initialized, isLoading, totalCount, additionalFilters } = dataTableCurrent;
     const isTableLoaded = initialized && !isLoading && totalCount > 0;
     if (urlDetails) {
-      if (!additionalFilters.showBuildingBlockAlerts) {
+      if (!additionalFilters || !additionalFilters.showBuildingBlockAlerts) {
         // We want to show building block alerts when loading the flyout in case the alert is a building block alert
         dispatch(
           dataTableActions.updateShowBuildingBlockAlertsFilter({

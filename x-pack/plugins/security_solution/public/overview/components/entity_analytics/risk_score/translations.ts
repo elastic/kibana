@@ -41,3 +41,19 @@ export const LEARN_MORE = i18n.translate(
     defaultMessage: 'Learn more',
   }
 );
+
+export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.riskDashboard.hostsTableTooltip',
+  {
+    defaultMessage:
+      'The Host Risk Score panel displays the list of risky hosts and their latest risk score. You may filter this list using global filters in the KQL search bar. The time-range picker filter will display Alerts within the selected time range only and does not filter the list of risky hosts.',
+  }
+);
+
+export const USER_RISK_TABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.riskDashboard.usersTableTooltip',
+  {
+    defaultMessage:
+      'The User Risk Score panel displays the list of risky users and their latest risk score. You may filter this list using global filters in the KQL search bar. The time-range picker filter will display Alerts within the selected time range only and does not filter the list of risky users.',
+  }
+);

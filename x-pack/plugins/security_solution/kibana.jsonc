@@ -43,6 +43,7 @@
       "controls",
       "dataViews",
       "savedObjectsManagement",
+      "stackConnectors",
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -67,7 +68,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "cloudChat"
     ],
     "extraPublicDirs": [
       "common"

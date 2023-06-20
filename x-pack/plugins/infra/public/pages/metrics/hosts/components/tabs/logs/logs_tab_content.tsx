@@ -16,6 +16,7 @@ import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state'
 import { LogsLinkToStream } from './logs_link_to_stream';
 import { LogsSearchBar } from './logs_search_bar';
 import { createHostsFilter } from '../../../utils';
+import { useLogViewReference } from '../../../hooks/use_log_view_reference';
 
 export const LogsTabContent = () => {
   const [filterQuery] = useLogsSearchUrlState();
@@ -28,6 +29,11 @@ export const LogsTabContent = () => {
     [hostNodes]
   );
 
+  const { logViewReference: logView, loading: logViewLoading } = useLogViewReference({
+    id: 'hosts-logs-view',
+    extraFields: ['host.name'],
+  });
+
   const logsLinkToStreamQuery = useMemo(() => {
     const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes.map((p) => p.name));
 
@@ -38,7 +44,7 @@ export const LogsTabContent = () => {
     return filterQuery.query || hostsFilterQueryParam;
   }, [filterQuery.query, hostNodes]);
 
-  if (loading) {
+  if (loading || logViewLoading || !logView) {
     return (
       <EuiFlexGroup style={{ height: 300 }} direction="column" alignItems="stretch">
         <EuiFlexItem grow>
@@ -64,18 +70,24 @@ export const LogsTabContent = () => {
           <LogsSearchBar />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LogsLinkToStream startTimestamp={from} endTimestamp={to} query={logsLinkToStreamQuery} />
+          <LogsLinkToStream
+            startTime={from}
+            endTime={to}
+            query={logsLinkToStreamQuery}
+            logView={logView}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiFlexItem>
         <LogStream
           height={500}
-          logView={{ type: 'log-view-reference', logViewId: 'default' }}
+          logView={logView}
           startTimestamp={from}
           endTimestamp={to}
           filters={[hostsFilterQuery]}
           query={filterQuery}
+          showFlyoutAction
         />
       </EuiFlexItem>
     </EuiFlexGroup>

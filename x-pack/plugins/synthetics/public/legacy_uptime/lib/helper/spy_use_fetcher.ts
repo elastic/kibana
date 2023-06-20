@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as observabilityPublic from '@kbn/observability-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 
-jest.mock('@kbn/observability-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/observability-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/observability-shared-plugin/public');
 
   return {
     ...originalModule,
@@ -22,9 +22,9 @@ jest.mock('@kbn/observability-plugin/public', () => {
 
 export function spyOnUseFetcher(
   payload: unknown,
-  status = observabilityPublic.FETCH_STATUS.SUCCESS
+  status = observabilitySharedPublic.FETCH_STATUS.SUCCESS
 ) {
-  return jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+  return jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
     status,
     data: payload,
     refetch: () => null,

@@ -121,15 +121,6 @@ export const javascriptClientEmbedSteps = (analyticsConfig: AnalyticsConfig) => 
         <EuiText grow={false}>
           <p>
             {i18n.translate(
-              'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.description',
-              {
-                defaultMessage:
-                  'Once you have called createTracker, you can use the tracker methods such as trackPageView to send events to Behavioral Analytics.',
-              }
-            )}
-          </p>
-          <p>
-            {i18n.translate(
               'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.descriptionTwo',
               {
                 defaultMessage:
@@ -173,15 +164,26 @@ const SearchResult = ({ hit }) => {
   const clickHandler = () => {
     trackSearchClick({
       document: { id: hit.id, index: "products" },
+      page: {
+        url: "http://my-website.com/products/123"
+      },
       search: {
         query: "search term",
-        filters: [],
+        filters: {},
         page: { current: 1, size: 10 },
-        results: { 
+        results: {
           items: [
-            { id: "123", index: "products" }
+            {
+              document: {
+                id: "123",
+                index: "products",
+              },
+              page: {
+                url: "http://my-website.com/products/123",
+              },
+            },
           ],
-          total_results: 10 
+          total_results: 10
         },
         sort: {
           name: "relevance",

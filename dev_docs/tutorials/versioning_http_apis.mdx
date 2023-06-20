@@ -212,17 +212,45 @@ The changes are:
 
 ### 4. Adhere to the HTTP versioning specification
 
-#### Choosing the right version
 
-##### Public endpoints
+We categorize our endpoints based on their intended audience: `public` or `internal`. Different versioning practices apply to each.
+
+#### Public endpoints
 Public endpoints include any endpoint that is intended for users to directly integrate with via HTTP.
+
+<DocCallOut title="Version all public endpoints">
+  All Kibana's public endpoints must be versioned using the format described below.
+</DocCallOut>
+
+##### Version lifecycle
+
+Introducing a new version or moving a current version into deprecation to eventually be deleted must
+follow [this process](https://github.com/elastic/dev/issues/new?assignees=&labels=breaking-change-proposal&projects=&template=breaking-change.md).
+
+##### Version format
 
 Choose a date string in the format `YYYY-MM-DD`. This date should be the date that a (group) of APIs was made available.
 
-##### Internal endpoints
-Internal endpoints are all non-public endpoints (see definition above).
+--------
 
-If you need to maintain backwards-compatibility for an internal endpoint use a single, larger-than-zero number. Ex. `1`.
+#### Internal endpoints
+Internal endpoints are all non-public endpoints (see definition above). Note: these endpoints do not need to be versioned,
+but versioning can be leveraged to maintain BWC with existing clients.
+
+##### Version lifecycle
+
+Introducing/removing a version is up to the team who owns the HTTP API. Consider how introduction or removal might
+affect client code when being rolled out.
+
+<DocCallOut title="Keep internal versions to a minimum">
+  To keep maintenance light it is **highly** recommended to reduce the number of versions you have for internal endpoints. In your code it is possible to
+  centrally define and share internal versions through code that is `common` to your browser- and server-side plugin code.
+</DocCallOut>
+
+
+##### Version format
+
+If you need to version an internal endpoint use a single, larger-than-zero major version. Ex. `1`.
 
 
 #### Use the versioned router
@@ -238,7 +266,7 @@ Core exposes a versioned router that ensures your endpoint's behaviour and forma
     })
     .addVersion(
       {
-        version: '2023-01-01', // The public version of this API
+        version: '2023-10-31', // The public version of this API
         validate: {
           request: {
             query: schema.object({
@@ -264,7 +292,7 @@ Core exposes a versioned router that ensures your endpoint's behaviour and forma
     // BREAKING CHANGE: { foo: string } => { fooString: string } in response body
     .addVersion(
       {
-        version: '2023-02-01',
+        version: '2024-10-31',
         validate: {
           request: {
             query: schema.object({
@@ -290,7 +318,7 @@ Core exposes a versioned router that ensures your endpoint's behaviour and forma
     // BREAKING CHANGES: Enforce min/max length on fooString
     .addVersion(
       {
-        version: '2023-03-01',
+        version: '2025-03-01',
         validate: {
           request: {
             query: schema.object({
@@ -314,5 +342,26 @@ Core exposes a versioned router that ensures your endpoint's behaviour and forma
       }
 ```
 
+#### Use `http.fetch` to send a version
+
+Core's `http.fetch` (and helpers like `http.get`) accept an optional `version` parameter. The `version` parameter can be used to send your request to the corresponding handler of the route.
+
+```ts
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+
+export class MyPlugin implements Plugin {
+  setup(core: CoreSetup): FilesSetup {
+    // Example call using core's http.fetch
+    core.http.post('/api/my-app/foo/1', {
+      version: '2023-10-31',
+      headers: { 'content-type': 'application/json' },
+      query: { name: 'example' },
+      body: JSON.stringify({ fooString: 'string' }),
+    });
+  }
+}
+```
+
 #### Additional reading
-For a more details on the versioning specification see [this document](https://docs.google.com/document/d/1YpF6hXIHZaHvwNaQAxWFzexUF1nbqACTtH2IfDu0ldA/edit?usp=sharing).
+
+For more details on the versioning specification see [this document](https://docs.google.com/document/d/1YpF6hXIHZaHvwNaQAxWFzexUF1nbqACTtH2IfDu0ldA/edit?usp=sharing).

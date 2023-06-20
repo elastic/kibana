@@ -73,6 +73,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
           <EuiSpacer size="s" />
           <AlertsSearchBar
             appName="siem"
+            disableQueryLanguageSwitcher={true}
             featureIds={['siem']}
             query={query.kql}
             filters={query.filters ?? []}

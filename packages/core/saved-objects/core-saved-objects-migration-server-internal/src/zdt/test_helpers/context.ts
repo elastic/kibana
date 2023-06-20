@@ -11,7 +11,10 @@ import {
   ElasticsearchClientMock,
   elasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  SavedObjectTypeRegistry,
+  type SavedObjectsMigrationConfigType,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { MigratorContext } from '../context';
@@ -21,6 +24,24 @@ export type MockedMigratorContext = Omit<MigratorContext, 'elasticsearchClient'>
   elasticsearchClient: ElasticsearchClientMock;
   typeRegistry: SavedObjectTypeRegistry;
 };
+
+export const createMigrationConfigMock = (
+  parts: Partial<SavedObjectsMigrationConfigType> = {}
+): SavedObjectsMigrationConfigType => ({
+  algorithm: 'zdt',
+  batchSize: 1000,
+  maxBatchSizeBytes: new ByteSizeValue(1e8),
+  maxReadBatchSizeBytes: new ByteSizeValue(1e6),
+  pollInterval: 0,
+  scrollDuration: '0s',
+  skip: false,
+  retryAttempts: 5,
+  zdt: {
+    metaPickupSyncDelaySec: 120,
+    runOnNonMigratorNodes: false,
+  },
+  ...parts,
+});
 
 export const createContextMock = (
   parts: Partial<MockedMigratorContext> = {}
@@ -36,25 +57,16 @@ export const createContextMock = (
       bar: '10.2.0',
     },
     documentMigrator: createDocumentMigrator(),
-    migrationConfig: {
-      algorithm: 'zdt',
-      batchSize: 1000,
-      maxBatchSizeBytes: new ByteSizeValue(1e8),
-      pollInterval: 0,
-      scrollDuration: '0s',
-      skip: false,
-      retryAttempts: 5,
-      zdt: {
-        metaPickupSyncDelaySec: 120,
-      },
-    },
+    migrationConfig: createMigrationConfigMock(),
     elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
     maxRetryAttempts: 15,
     migrationDocLinks: docLinksServiceMock.createSetupContract().links.kibanaUpgradeSavedObjects,
     typeRegistry,
     serializer: serializerMock.create(),
     deletedTypes: ['deleted-type'],
+    batchSize: 1000,
     discardCorruptObjects: false,
+    nodeRoles: { migrator: true, ui: false, backgroundTasks: false },
     ...parts,
   };
 };

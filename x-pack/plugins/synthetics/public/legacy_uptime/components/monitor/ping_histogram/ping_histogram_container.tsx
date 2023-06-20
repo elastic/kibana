@@ -7,7 +7,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTimeZone } from '@kbn/observability-plugin/public';
+import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { PingHistogramComponent } from '../../common/charts';
 import { getPingHistogram } from '../../../state/actions';
 import { esKuerySelector, selectPingHistogram } from '../../../state/selectors';

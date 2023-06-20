@@ -75,7 +75,10 @@ export class ManagementPlugin
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { home, share }: ManagementSetupDependencies) {
+  public setup(
+    core: CoreSetup<ManagementStartDependencies>,
+    { home, share }: ManagementSetupDependencies
+  ) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
     const managementPlugin = this;

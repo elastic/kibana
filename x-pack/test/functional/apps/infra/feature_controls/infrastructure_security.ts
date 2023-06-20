@@ -18,7 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
-  describe('infrastructure security', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/156511
+  describe.skip('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
       before(async () => {
         await security.role.create('global_infrastructure_all_role', {

@@ -70,8 +70,8 @@ export type SelectorCondition =
   | 'kubernetesClusterId'
   | 'kubernetesClusterName'
   | 'kubernetesNamespace'
-  | 'kubernetesResourceLabel'
-  | 'kubernetesResourceName'
+  | 'kubernetesPodLabel'
+  | 'kubernetesPodName'
   | 'targetFilePath'
   | 'ignoreVolumeFiles'
   | 'ignoreVolumeMounts'
@@ -104,24 +104,24 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
   containerImageFullName: {
     type: 'stringArray',
     pattern:
-      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$',
+      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)+$',
     patternError: i18n.errorInvalidFullContainerImageName,
     not: ['containerImageName'],
   },
   containerImageName: {
     type: 'stringArray',
-    pattern: '^[a-z0-9]+$',
+    pattern: '^([a-z0-9]+(?:[._-][a-z0-9]+)*)$',
     not: ['containerImageFullName'],
   },
   containerImageTag: { type: 'stringArray' },
   kubernetesClusterId: { type: 'stringArray' },
   kubernetesClusterName: { type: 'stringArray' },
   kubernetesNamespace: { type: 'stringArray' },
-  kubernetesResourceName: { type: 'stringArray' },
-  kubernetesResourceLabel: {
+  kubernetesPodName: { type: 'stringArray' },
+  kubernetesPodLabel: {
     type: 'stringArray',
     pattern: '^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$',
-    patternError: i18n.errorInvalidResourceLabel,
+    patternError: i18n.errorInvalidPodLabel,
   },
   operation: {
     type: 'stringArray',
@@ -134,11 +134,24 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
     selectorType: 'file',
     type: 'stringArray',
     maxValueBytes: 255,
+    pattern: '^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$',
+    patternError: i18n.errorInvalidTargetFilePath,
   },
   ignoreVolumeFiles: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeMounts'] },
   ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
-  processExecutable: { selectorType: 'process', type: 'stringArray', not: ['processName'] },
-  processName: { selectorType: 'process', type: 'stringArray', not: ['processExecutable'] },
+  processExecutable: {
+    selectorType: 'process',
+    type: 'stringArray',
+    not: ['processName'],
+    pattern: '^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$',
+    patternError: i18n.errorInvalidProcessExecutable,
+  },
+  processName: {
+    selectorType: 'process',
+    type: 'stringArray',
+    not: ['processExecutable'],
+    maxValueBytes: 15,
+  },
   sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
 };
 
@@ -153,8 +166,8 @@ export interface Selector {
   kubernetesClusterId?: string[];
   kubernetesClusterName?: string[];
   kubernetesNamespace?: string[];
-  kubernetesResourceLabel?: string[];
-  kubernetesResourceName?: string[];
+  kubernetesPodLabel?: string[];
+  kubernetesPodName?: string[];
 
   // selector properties
   targetFilePath?: string[];

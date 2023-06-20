@@ -29,7 +29,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     >
       <DataGridMemoized
         {...props}
-        setExpandedDoc={!props.isPlainRecord ? setExpandedDoc : undefined}
+        setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
         DocumentView={DiscoverGridFlyout}
       />

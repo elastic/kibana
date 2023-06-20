@@ -8632,7 +8632,7 @@
         "label": "MapEvent",
         "description": [],
         "signature": [
-          "\"error\" | \"remove\" | \"data\" | \"move\" | \"rotate\" | \"render\" | \"resize\" | \"zoom\" | \"idle\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"load\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"dataabort\" | \"sourcedataabort\""
+          "\"error\" | \"remove\" | \"data\" | \"move\" | \"render\" | \"rotate\" | \"resize\" | \"zoom\" | \"idle\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"load\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"dataabort\" | \"sourcedataabort\""
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
@@ -8713,6 +8713,21 @@
         "signature": [
           "[number, number] | ",
           "node_modules/@types/mapbox__point-geometry/index"
+        ],
+        "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mapbox-gl",
+        "id": "def-common.SourceSpecification",
+        "type": "Type",
+        "tags": [],
+        "label": "SourceSpecification",
+        "description": [],
+        "signature": [
+          "maplibregl.VectorSourceSpecification | maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification | maplibregl.GeoJSONSourceSpecification | maplibregl.VideoSourceSpecification | maplibregl.ImageSourceSpecification"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,

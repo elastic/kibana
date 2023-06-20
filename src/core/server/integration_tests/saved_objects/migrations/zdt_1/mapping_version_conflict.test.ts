@@ -8,9 +8,9 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../jest_matchers';
-import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
 import {
   getBaseMigratorParams,
@@ -24,19 +24,7 @@ export const logFilePath = Path.join(__dirname, 'mapping_version_conflict.test.l
 describe('ZDT upgrades - mapping model version conflict', () => {
   let esServer: TestElasticsearchUtils['es'];
 
-  const startElasticsearch = async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-        },
-      },
-    });
-    return await startES();
-  };
-
-  const baseMigratorParams = getBaseMigratorParams();
+  const baseMigratorParams = getBaseMigratorParams({ kibanaVersion: '8.8.0' });
 
   beforeAll(async () => {
     await fs.unlink(logFilePath).catch(() => {});
@@ -117,7 +105,7 @@ describe('ZDT upgrades - mapping model version conflict', () => {
 
     const records = await parseLogFile(logFilePath);
 
-    expect(records).toContainLogEntry('Mappings model version check result: conflict');
+    expect(records).toContainLogEntry('INIT: mapping version check result: conflict');
     expect(records).toContainLogEntry('INIT -> FATAL');
   });
 });

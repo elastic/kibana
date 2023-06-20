@@ -64,7 +64,9 @@ export async function add(keystore, key, options = {}) {
 export function addCli(program, keystore) {
   program
     .command('add <key>')
-    .description('Add a string setting to the keystore')
+    .description(
+      'Add a setting to the keystore. Note: The value will be JSON parsed. Use quotes to force string inputs.'
+    )
     .option('-f, --force', 'overwrite existing setting without prompting')
     .option('-x, --stdin', 'read setting value from stdin')
     .option('-s, --silent', 'prevent all logging')

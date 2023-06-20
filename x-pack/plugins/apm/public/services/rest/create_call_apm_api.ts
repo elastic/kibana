@@ -64,7 +64,7 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
       params?: Partial<Record<string, any>>;
     };
 
-    const { method, pathname } = formatRequest(endpoint, params?.path);
+    const { method, pathname, version } = formatRequest(endpoint, params?.path);
 
     return callApi(core, {
       ...options,
@@ -72,6 +72,7 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
       pathname,
       body: params?.body,
       query: params?.query,
+      version,
     } as unknown as Parameters<CallApi>[1]);
   }) as APMClient;
 }

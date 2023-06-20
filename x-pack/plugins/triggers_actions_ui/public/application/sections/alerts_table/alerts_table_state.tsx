@@ -16,6 +16,7 @@ import {
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
@@ -68,6 +69,7 @@ export type AlertsTableStateProps = {
   showExpandToDetails: boolean;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
+  runtimeMappings?: MappingRuntimeFields;
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
@@ -140,6 +142,7 @@ const AlertsTableStateWithQueryProvider = ({
   gridStyle,
   browserFields: propBrowserFields,
   onUpdate,
+  runtimeMappings,
   showAlertStatusWithFlapping,
   toolbarVisibility,
   shouldHighlightRow,
@@ -216,6 +219,10 @@ const AlertsTableStateWithQueryProvider = ({
     initialBrowserFields: propBrowserFields,
   });
 
+  const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
+    setPagination(_pagination);
+  }, []);
+
   const [
     isLoading,
     {
@@ -233,6 +240,8 @@ const AlertsTableStateWithQueryProvider = ({
     featureIds,
     query,
     pagination,
+    onPageChange,
+    runtimeMappings,
     sort,
     skip: false,
   });
@@ -256,10 +265,6 @@ const AlertsTableStateWithQueryProvider = ({
     Array.from(caseIds.values()),
     fetchCases
   );
-
-  const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
-    setPagination(_pagination);
-  }, []);
 
   const initialBulkActionsState = useReducer(bulkActionsReducer, {
     rowSelection: new Map<number, RowSelectionState>(),
@@ -314,7 +319,7 @@ const AlertsTableStateWithQueryProvider = ({
     oldAlertsData,
     onPageChange,
     onSortChange,
-    pagination.pageIndex,
+    pagination,
     refresh,
     sort,
     updatedAt,
@@ -370,7 +375,7 @@ const AlertsTableStateWithQueryProvider = ({
       memoizedCases,
       columns,
       flyoutSize,
-      pagination.pageSize,
+      pagination,
       id,
       leadingControlColumns,
       showExpandToDetails,

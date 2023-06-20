@@ -18,15 +18,6 @@ export const TAKE_ACTION = i18n.translate('grouping.additionalActions.takeAction
   defaultMessage: 'Take actions',
 });
 
-export const BETA = i18n.translate('grouping.betaLabel', {
-  defaultMessage: 'Beta',
-});
-
-export const BETA_TOOL_TIP = i18n.translate('grouping.betaToolTip', {
-  defaultMessage:
-    'Grouping may show only a subset of alerts while in beta. To see all alerts, use the list view by selecting "None"',
-});
-
 export const GROUP_BY = i18n.translate('grouping.alerts.label', {
   defaultMessage: 'Group alerts by',
 });

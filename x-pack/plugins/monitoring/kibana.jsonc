@@ -6,15 +6,14 @@
     "id": "monitoring",
     "server": true,
     "browser": true,
-    "configPath": [
-      "monitoring"
-    ],
+    "configPath": ["monitoring"],
     "requiredPlugins": [
       "licensing",
       "features",
       "data",
       "navigation",
       "observability",
+      "observabilityShared",
       "dataViews",
       "unifiedSearch"
     ],
@@ -30,10 +29,6 @@
       "dashboard",
       "fleet"
     ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "alerting",
-      "kibanaReact"
-    ]
+    "requiredBundles": ["kibanaUtils", "alerting", "kibanaReact"]
   }
 }

@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import * as observabilityPublic from '@kbn/observability-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { screen } from '@testing-library/react';
 import { ProjectAPIKeys } from './project_api_keys';
 import { makeUptimePermissionsCore, render } from '../../../utils/testing';
 
-jest.mock('@kbn/observability-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public');
 
 describe('<ProjectAPIKeys />', () => {
   const state = {
@@ -23,17 +23,17 @@ describe('<ProjectAPIKeys />', () => {
   };
 
   beforeAll(() => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       data: undefined,
-      status: observabilityPublic.FETCH_STATUS.SUCCESS,
+      status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       refetch: () => {},
     });
   });
 
   it('shows the button', () => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       data: undefined,
-      status: observabilityPublic.FETCH_STATUS.SUCCESS,
+      status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       refetch: () => {},
     });
     render(<ProjectAPIKeys />);

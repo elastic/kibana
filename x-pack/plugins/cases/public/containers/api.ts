@@ -16,6 +16,7 @@ import type {
   CaseUserActionTypeWithAll,
   CaseUserActionsStats,
   CaseUsers,
+  CasesFindResponseUI,
   CasesUI,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
@@ -52,6 +53,7 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -126,6 +128,18 @@ export const getTags = async (signal: AbortSignal, owner: string[]): Promise<str
     signal,
     query: { ...(owner.length > 0 ? { owner } : {}) },
   });
+  return response ?? [];
+};
+
+export const getCategories = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {
+  const response = await KibanaServices.get().http.fetch<string[]>(
+    INTERNAL_GET_CASE_CATEGORIES_URL,
+    {
+      method: 'GET',
+      signal,
+      query: { ...(owner.length > 0 ? { owner } : {}) },
+    }
+  );
   return response ?? [];
 };
 
@@ -215,6 +229,7 @@ export const getCases = async ({
     status: StatusAll,
     tags: [],
     owner: [],
+    category: [],
   },
   queryParams = {
     page: 1,
@@ -223,7 +238,7 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
-}: FetchCasesProps): Promise<CasesUI> => {
+}: FetchCasesProps): Promise<CasesFindResponseUI> => {
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
@@ -233,6 +248,7 @@ export const getCases = async ({
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
+    ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...queryParams,
   };
 
@@ -246,9 +262,13 @@ export const getCases = async ({
 };
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<CaseUI> => {
+  const theCase = {
+    ...newCase,
+    ...(newCase.category != null ? { category: newCase.category } : { category: null }),
+  };
   const response = await KibanaServices.get().http.fetch<Case>(CASES_URL, {
     method: 'POST',
-    body: JSON.stringify(newCase),
+    body: JSON.stringify(theCase),
     signal,
   });
   return convertCaseToCamelCase(decodeCaseResponse(response));
@@ -262,7 +282,7 @@ export const patchCase = async (
   >,
   version: string,
   signal: AbortSignal
-): Promise<CaseUI[]> => {
+): Promise<CasesUI> => {
   const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases: [{ ...updatedCase, id: caseId, version }] }),
@@ -274,7 +294,7 @@ export const patchCase = async (
 export const updateCases = async (
   cases: CaseUpdateRequest[],
   signal: AbortSignal
-): Promise<CaseUI[]> => {
+): Promise<CasesUI> => {
   if (cases.length === 0) {
     return [];
   }
@@ -440,17 +460,14 @@ export const getCaseConnectors = async (
     }
   );
 
-  return Object.keys(res).reduce(
-    (acc, connectorId) => ({
-      ...acc,
-      [connectorId]: {
-        ...convertToCamelCase<GetCaseConnectorsResponse[string], CaseConnectors[string]>(
-          res[connectorId]
-        ),
-      },
-    }),
-    {}
-  );
+  return Object.keys(res).reduce<CaseConnectors>((acc, connectorId) => {
+    acc[connectorId] = {
+      ...convertToCamelCase<GetCaseConnectorsResponse[string], CaseConnectors[string]>(
+        res[connectorId]
+      ),
+    };
+    return acc;
+  }, {});
 };
 
 export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> => {

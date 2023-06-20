@@ -42,6 +42,7 @@ import { Severity } from './severity';
 import { Assignees } from './assignees';
 import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
+import { Category } from './category';
 
 interface ContainerProps {
   big?: boolean;
@@ -72,7 +73,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   onSuccess: (theCase: CaseUI) => void;
   afterCaseCreated?: (
     theCase: CaseUI,
-    createAttachments: UseCreateAttachments['createAttachments']
+    createAttachments: UseCreateAttachments['mutate']
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
@@ -101,6 +102,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             ) : null}
             <Container>
               <Tags isLoading={isSubmitting} />
+            </Container>
+            <Container>
+              <Category isLoading={isSubmitting} />
             </Container>
             <Container>
               <Severity isLoading={isSubmitting} />

@@ -16,3 +16,8 @@ export interface AlertListItem {
   flapping: boolean;
   maintenanceWindowIds?: string[];
 }
+
+export interface RefreshToken {
+  resolve: () => void;
+  reject: () => void;
+}

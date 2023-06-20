@@ -56,7 +56,7 @@ export interface CreateTestEsClusterOptions {
   clusterName?: string;
   /**
    * Path to data archive snapshot to run Elasticsearch with.
-   * To prepare the the snapshot:
+   * To prepare the snapshot:
    * - run Elasticsearch server
    * - index necessary data
    * - stop Elasticsearch server

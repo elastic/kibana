@@ -5,13 +5,26 @@
  * 2.0.
  */
 
+import type {
+  ChromeProjectBreadcrumb,
+  ChromeProjectNavigation,
+  ChromeSetProjectBreadcrumbsParams,
+  SideNavComponent,
+} from '@kbn/core-chrome-browser';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessPluginStart {}
+export interface ServerlessPluginStart {
+  setBreadcrumbs: (
+    breadcrumbs: ChromeProjectBreadcrumb | ChromeProjectBreadcrumb[],
+    params?: Partial<ChromeSetProjectBreadcrumbsParams>
+  ) => void;
+  setNavigation(projectNavigation: ChromeProjectNavigation): void;
+  setProjectHome(homeHref: string): void;
+  setSideNavComponent: (navigation: SideNavComponent) => void;
+}
 
 export interface ServerlessPluginSetupDependencies {
   management: ManagementSetup;

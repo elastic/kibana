@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { NotificationsService } from '../models/notifications_service';
 import {
   getNotificationsCountQuerySchema,
@@ -17,16 +18,14 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
   /**
    * @apiGroup Notifications
    *
-   * @api {get} /api/ml/notifications Get notifications
+   * @api {get} /internal/ml/notifications Get notifications
    * @apiName GetNotifications
    * @apiDescription Retrieves notifications based on provided criteria.
    */
-  router.get(
-    {
-      path: '/api/ml/notifications',
-      validate: {
-        query: getNotificationsQuerySchema,
-      },
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/notifications`,
+      access: 'internal',
       options: {
         tags: [
           'access:ml:canGetJobs',
@@ -34,35 +33,44 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
           'access:ml:canGetTrainedModels',
         ],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, mlSavedObjectService }) => {
-      try {
-        const notificationsService = new NotificationsService(client, mlSavedObjectService);
-
-        const results = await notificationsService.searchMessages(request.query);
-
-        return response.ok({
-          body: results,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: getNotificationsQuerySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, request, response, mlSavedObjectService }) => {
+          try {
+            const notificationsService = new NotificationsService(client, mlSavedObjectService);
+
+            const results = await notificationsService.searchMessages(request.query);
+
+            return response.ok({
+              body: results,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
 
   /**
    * @apiGroup Notifications
    *
-   * @api {get} /api/ml/notifications/count Get notification counts
+   * @api {get} /internal/ml/notifications/count Get notification counts
    * @apiName GetNotificationCounts
    * @apiDescription Counts notifications by level.
    */
-  router.get(
-    {
-      path: '/api/ml/notifications/count',
-      validate: {
-        query: getNotificationsCountQuerySchema,
-      },
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/notifications/count`,
+      access: 'internal',
       options: {
         tags: [
           'access:ml:canGetJobs',
@@ -70,19 +78,30 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
           'access:ml:canGetTrainedModels',
         ],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlSavedObjectService, request, response }) => {
-      try {
-        const notificationsService = new NotificationsService(client, mlSavedObjectService);
-
-        const results = await notificationsService.countMessages(request.query);
-
-        return response.ok({
-          body: results,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: getNotificationsCountQuerySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlSavedObjectService, request, response }) => {
+          try {
+            const notificationsService = new NotificationsService(client, mlSavedObjectService);
+
+            const results = await notificationsService.countMessages(request.query);
+
+            return response.ok({
+              body: results,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
 }

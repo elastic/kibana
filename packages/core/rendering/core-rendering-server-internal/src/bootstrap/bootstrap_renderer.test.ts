@@ -25,6 +25,7 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   branch: 'master',
   buildNum: 42,
   buildSha: 'buildSha',
+  buildDate: new Date('2023-05-15T23:12:09.000Z'),
   dist: false,
   version: '8.0.0',
   ...parts,

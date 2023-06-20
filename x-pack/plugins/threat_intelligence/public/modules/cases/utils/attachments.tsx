@@ -13,9 +13,9 @@ import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CASE_ATTACHMENT_TYPE_ID } from '../../../../common/constants';
-import { EMPTY_VALUE } from '../../../common/constants';
+import { EMPTY_VALUE } from '../../../constants/common';
 import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { getIndicatorFieldAndValue } from '../../indicators';
+import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 /**
  * Indicator name, type, feed name and first seen values,
@@ -27,9 +27,7 @@ export interface AttachmentMetadata {
   indicatorFeedName: string;
 }
 
-const AttachmentChildrenLazy = React.lazy(
-  () => import('../components/attachment_children/attachment_children')
-);
+const AttachmentChildrenLazy = React.lazy(() => import('../components/attachment_children'));
 
 /**
  * Create an {@link ExternalReferenceAttachmentType} object used to register an external reference

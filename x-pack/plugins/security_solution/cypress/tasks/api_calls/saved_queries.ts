@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import { SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common/constants';
+import { rootRequest } from '../common';
+
 export const createSavedQuery = (
   title: string,
   query: string,
   filterKey: string = 'agent.hostname'
 ) =>
-  cy.request({
+  rootRequest<SavedQuery>({
     method: 'POST',
-    url: '/api/saved_query/_create',
+    url: `${SAVED_QUERY_BASE_URL}/_create`,
     body: {
       title,
       description: '',
@@ -31,21 +36,25 @@ export const createSavedQuery = (
         },
       ],
     },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', [ELASTIC_HTTP_VERSION_HEADER]: '1' },
   });
 
 export const deleteSavedQueries = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'query',
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'query',
+              },
             },
-          },
-        ],
+          ],
+        },
       },
     },
   });

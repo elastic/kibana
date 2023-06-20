@@ -32,7 +32,9 @@
     "@kbn/es-types",
     "@kbn/data-views-plugin",
     "@kbn/utility-types",
-    "@kbn/utility-types-jest"
+    "@kbn/utility-types-jest",
+    "@kbn/kubernetes-security-plugin",
+    "@kbn/core-http-router-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

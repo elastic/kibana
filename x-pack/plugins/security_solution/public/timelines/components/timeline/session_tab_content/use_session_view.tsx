@@ -75,7 +75,12 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
+        <EuiButtonEmpty
+          iconType="cross"
+          onClick={onCloseOverlay}
+          size="xs"
+          data-test-subj="close-overlay"
+        >
           {title()}
         </EuiButtonEmpty>
       </EuiFlexItem>

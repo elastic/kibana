@@ -13,15 +13,13 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -54,12 +52,7 @@ describe('Action List Handler', () => {
     endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
     mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(true);
 
-    registerActionListRoutes(routerMock, {
-      logFactory: loggingSystemMock.create(),
-      service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
-      experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-    });
+    registerActionListRoutes(routerMock, createMockEndpointAppContext());
 
     actionListHandler = async (
       query?: EndpointActionListRequestQuery
@@ -96,7 +89,7 @@ describe('Action List Handler', () => {
   });
 
   describe('Internals', () => {
-    const defaultParams = { pageSize: 10, page: 1, withAutomatedActions: true };
+    const defaultParams = { pageSize: 10, page: 1 };
     it('should return `notFound` when actions index does not exist', async () => {
       mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
       await actionListHandler(defaultParams);
@@ -124,7 +117,6 @@ describe('Action List Handler', () => {
         commands: 'running-processes',
         statuses: 'failed',
         userIds: 'userX',
-        withAutomatedActions: true,
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({

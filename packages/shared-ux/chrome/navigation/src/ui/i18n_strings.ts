@@ -9,22 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const getI18nStrings = () => ({
-  headerLogoAriaLabel: i18n.translate(
-    'sharedUXPackages.chrome.sideNavigation.headerLogo.ariaLabel',
+  recentlyAccessed: i18n.translate(
+    'sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title',
     {
-      defaultMessage: 'Go to home page',
-    }
-  ),
-  linkToCloudProjects: i18n.translate(
-    'sharedUXPackages.chrome.sideNavigation.linkToCloud.projects',
-    {
-      defaultMessage: 'My projects',
-    }
-  ),
-  linkToCloudDeployments: i18n.translate(
-    'sharedUXPackages.chrome.sideNavigation.linkToCloud.deployments',
-    {
-      defaultMessage: 'My deployments',
+      defaultMessage: 'Recent',
     }
   ),
 });

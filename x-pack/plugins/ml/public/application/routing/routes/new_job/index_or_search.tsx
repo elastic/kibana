@@ -6,20 +6,14 @@
  */
 
 import React, { FC } from 'react';
-
 import { i18n } from '@kbn/i18n';
-
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
-
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { checkBasicLicense } from '../../../license';
-import { cacheDataViewsContract } from '../../../util/index_utils';
-import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 
 enum MODE {
   NEW_JOB,
@@ -180,34 +174,25 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
-const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
+const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
   const {
     services: {
       http: { basePath },
       application: { navigateToUrl },
+      data: { dataViews: dataViewsService },
     },
   } = useMlKibana();
 
-  const { redirectToMlAccessDeniedPage } = deps;
-
   const newJobResolvers = {
-    ...basicResolvers(deps),
+    ...basicResolvers(),
     preConfiguredJobRedirect: () =>
-      preConfiguredJobRedirect(deps.dataViewsContract, basePath.get(), navigateToUrl),
-  };
-  const dataVizResolvers = {
-    checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+      preConfiguredJobRedirect(dataViewsService, basePath.get(), navigateToUrl),
   };
 
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    mode === MODE.NEW_JOB ? newJobResolvers : dataVizResolvers
+  const { context } = useRouteResolver(
+    mode === MODE.NEW_JOB ? 'full' : 'basic',
+    mode === MODE.NEW_JOB ? ['canCreateJob'] : [],
+    mode === MODE.NEW_JOB ? newJobResolvers : {}
   );
   return (
     <PageLoader context={context}>

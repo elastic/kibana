@@ -281,13 +281,6 @@ export const ADD_TO_NEW_CASE = i18n.translate(
   }
 );
 
-export const ADD_TO_CASE_DISABLED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addToCaseDisabled',
-  {
-    defaultMessage: 'Add to case is not supported for this selection',
-  }
-);
-
 export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
   {
@@ -387,32 +380,6 @@ export const STATS_GROUP_SEVERITY_MEDIUM = i18n.translate(
   'xpack.securitySolution.detectionEngine.groups.stats.severity.medium',
   {
     defaultMessage: 'Medium',
-  }
-);
-
-export const ruleName = i18n.translate('xpack.securitySolution.selector.groups.ruleName.label', {
-  defaultMessage: 'Rule name',
-});
-export const userName = i18n.translate('xpack.securitySolution.selector.grouping.userName.label', {
-  defaultMessage: 'User name',
-});
-export const hostName = i18n.translate('xpack.securitySolution.selector.grouping.hostName.label', {
-  defaultMessage: 'Host name',
-});
-export const sourceIP = i18n.translate('xpack.securitySolution.selector.grouping.sourceIP.label', {
-  defaultMessage: 'Source IP',
-});
-export const sourceAddress = i18n.translate(
-  'xpack.securitySolution.selector.groups.sourceAddress.label',
-  {
-    defaultMessage: 'Source address',
-  }
-);
-
-export const destinationAddress = i18n.translate(
-  'xpack.securitySolution.selector.groups.destinationAddress.label',
-  {
-    defaultMessage: 'Destination address',
   }
 );
 

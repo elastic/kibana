@@ -23,6 +23,7 @@ import {
   ObservabilityOnboardingPluginStartDependencies,
 } from './types';
 import { ObservabilityOnboardingConfig } from '.';
+import { observabilityOnboardingState } from './saved_objects/observability_onboarding_status';
 
 export class ObservabilityOnboardingPlugin
   implements
@@ -47,6 +48,8 @@ export class ObservabilityOnboardingPlugin
   ) {
     this.logger.debug('observability_onboarding: Setup');
 
+    core.savedObjects.registerType(observabilityOnboardingState);
+
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
@@ -60,11 +63,13 @@ export class ObservabilityOnboardingPlugin
       };
     }) as ObservabilityOnboardingRouteHandlerResources['plugins'];
 
+    const config = this.initContext.config.get<ObservabilityOnboardingConfig>();
     registerRoutes({
       core,
       logger: this.logger,
       repository: getObservabilityOnboardingServerRouteRepository(),
       plugins: resourcePlugins,
+      config,
     });
 
     return {};

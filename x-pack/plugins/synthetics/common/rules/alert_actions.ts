@@ -58,6 +58,13 @@ export function populateAlertActions({
       id: aId.id,
       group: groupId,
       params: {},
+      frequency: !isLegacy
+        ? {
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+            summary: false,
+          }
+        : undefined,
     };
 
     const recoveredAction: RuleAction = {
@@ -66,6 +73,13 @@ export function populateAlertActions({
       params: {
         message: translations.defaultRecoveryMessage,
       },
+      frequency: !isLegacy
+        ? {
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+            summary: false,
+          }
+        : undefined,
     };
 
     switch (aId.actionTypeId) {
@@ -286,6 +300,7 @@ function getEmailActionParams(
     to: defaultEmail.to,
     subject: isRecovery ? defaultRecoverySubjectMessage : defaultSubjectMessage,
     message: isRecovery ? defaultRecoveryMessage : defaultActionMessage,
+    messageHTML: null,
     cc: defaultEmail.cc ?? [],
     bcc: defaultEmail.bcc ?? [],
     kibanaFooterLink: {

@@ -61,7 +61,7 @@ import { RulesClientFactory } from './rules_client_factory';
 import { RulesSettingsClientFactory } from './rules_settings_client_factory';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
-import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
+import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID, RuleAlertData } from './types';
 import { defineRoutes } from './routes';
 import {
   AlertInstanceContext,
@@ -119,7 +119,8 @@ export interface PluginSetupContract {
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = never,
-    RecoveryActionGroupId extends string = never
+    RecoveryActionGroupId extends string = never,
+    AlertData extends RuleAlertData = never
   >(
     ruleType: RuleType<
       Params,
@@ -128,7 +129,8 @@ export interface PluginSetupContract {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >
   ): void;
 
@@ -141,6 +143,7 @@ export interface PluginStartContract {
   listTypes: RuleTypeRegistry['list'];
 
   getAllTypes: RuleTypeRegistry['getAllTypes'];
+  getType: RuleTypeRegistry['get'];
 
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
@@ -351,7 +354,8 @@ export class AlertingPlugin {
         InstanceState extends AlertInstanceState = never,
         InstanceContext extends AlertInstanceContext = never,
         ActionGroupIds extends string = never,
-        RecoveryActionGroupId extends string = never
+        RecoveryActionGroupId extends string = never,
+        AlertData extends RuleAlertData = never
       >(
         ruleType: RuleType<
           Params,
@@ -360,7 +364,8 @@ export class AlertingPlugin {
           InstanceState,
           InstanceContext,
           ActionGroupIds,
-          RecoveryActionGroupId
+          RecoveryActionGroupId,
+          AlertData
         >
       ) => {
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
@@ -546,6 +551,7 @@ export class AlertingPlugin {
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
+      getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
       getAllTypes: ruleTypeRegistry!.getAllTypes.bind(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,

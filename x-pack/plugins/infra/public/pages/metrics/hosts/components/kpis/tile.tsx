@@ -27,6 +27,7 @@ import { LensWrapper } from '../chart/lens_wrapper';
 import { createHostsFilter } from '../../utils';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
+import { TooltipContent } from '../metric_explanation/tooltip_content';
 
 export interface KPIChartProps {
   title: string;
@@ -34,6 +35,7 @@ export interface KPIChartProps {
   trendLine?: boolean;
   backgroundColor: string;
   type: HostsLensMetricChartFormulas;
+  decimals?: number;
   toolTip: string;
 }
 
@@ -44,6 +46,7 @@ export const Tile = ({
   type,
   backgroundColor,
   toolTip,
+  decimals = 1,
   trendLine = false,
 }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
@@ -64,15 +67,16 @@ export const Tile = ({
         });
   };
 
-  const { attributes, getExtraActions, error } = useLensAttributes({
+  const { formula, attributes, getExtraActions, error } = useLensAttributes({
     type,
     dataView,
     options: {
-      title,
-      subtitle: getSubtitle(),
       backgroundColor,
+      decimals,
+      subtitle: getSubtitle(),
       showTrendLine: trendLine,
       showTitle: false,
+      title,
     },
     visualizationType: 'metricChart',
   });
@@ -115,7 +119,7 @@ export const Tile = ({
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
       style={{ minHeight: MIN_HEIGHT }}
-      data-test-subj={`hostsView-metricsTrend-${type}`}
+      data-test-subj={`hostsViewKPI-${type}`}
     >
       {error ? (
         <EuiFlexGroup
@@ -139,13 +143,12 @@ export const Tile = ({
         </EuiFlexGroup>
       ) : (
         <EuiToolTip
-          className="eui-fullWidth"
           delay="regular"
-          content={toolTip}
+          content={<TooltipContent formula={formula} description={toolTip} />}
           anchorClassName="eui-fullWidth"
         >
           <LensWrapper
-            id={`hostViewKPIChart-${type}`}
+            id={`hostsViewKPIGrid${type}Tile`}
             attributes={afterLoadedState.attributes}
             style={{ height: MIN_HEIGHT }}
             extraActions={[extraActionOptions.openInLens]}

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useParams } from 'react-router-dom';

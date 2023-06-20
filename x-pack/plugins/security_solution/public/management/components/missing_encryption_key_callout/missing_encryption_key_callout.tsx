@@ -6,14 +6,16 @@
  */
 
 import React, { memo, useState, useCallback } from 'react';
-import { EuiCallOut, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useGetActionState } from '../../hooks';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const MissingEncryptionKeyCallout = memo(() => {
   const { data: encryptionKeyState } = useGetActionState();
   const [calloutDismiss, setCalloutDismiss] = useState(false);
+  const { docLinks } = useKibana().services;
 
   const onClickDismissButton = useCallback(() => setCalloutDismiss(true), []);
 
@@ -41,7 +43,17 @@ export const MissingEncryptionKeyCallout = memo(() => {
         <div>
           <FormattedMessage
             id="xpack.securitySolution.responder.missingEncryptionKey.callout.body"
-            defaultMessage="Encryption key will make your environment more secure"
+            defaultMessage="We recommend encryption keys be configured to protect sensitive information and make your environment more secure. Without encryption keys configured, some features may not perform as intended. {viewMore}."
+            values={{
+              viewMore: (
+                <EuiLink href={docLinks.links.kibana.secureSavedObject} target="_blank">
+                  <FormattedMessage
+                    id="xpack.securitySolution.responder.missingEncryptionKey.docsLink"
+                    defaultMessage="View more information"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
         </div>
 

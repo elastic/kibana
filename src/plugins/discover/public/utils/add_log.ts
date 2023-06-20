@@ -14,8 +14,15 @@
 
 export const addLog = (message: string, payload?: unknown) => {
   // @ts-expect-error
-  if (window?.ELASTIC_DISCOVER_LOGGER) {
-    // eslint-disable-next-line no-console
-    console.log(`[Discover] ${message}`, payload);
+  const logger = window?.ELASTIC_DISCOVER_LOGGER;
+
+  if (logger) {
+    if (logger === 'debug') {
+      // eslint-disable-next-line no-console
+      console.log(`[Discover] ${message}`, payload);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(`[Discover] ${message}`);
+    }
   }
 };

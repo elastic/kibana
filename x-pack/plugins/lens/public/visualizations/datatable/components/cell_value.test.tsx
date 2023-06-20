@@ -11,7 +11,7 @@ import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { IUiSettingsClient } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { DatatableArgs, ColumnConfigArg } from '../../../../common/expressions';
@@ -33,13 +33,14 @@ describe('datatable cell renderer', () => {
     ],
     rows: [{ a: 123 }],
   };
+  const { theme: setUpMockTheme } = coreMock.createSetup();
   const CellRenderer = createGridCell(
     {
       a: { convert: (x) => `formatted ${x}` } as FieldFormat,
     },
     { columns: [], sortingColumnId: '', sortingDirection: 'none' },
     DataContext,
-    { get: jest.fn() } as unknown as IUiSettingsClient
+    setUpMockTheme
   );
 
   it('renders formatted value', () => {
@@ -121,7 +122,7 @@ describe('datatable cell renderer', () => {
       },
       { columns: [], sortingColumnId: '', sortingDirection: 'none' },
       DataContext,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      setUpMockTheme,
       true
     );
     const cell = mountWithIntl(
@@ -164,7 +165,7 @@ describe('datatable cell renderer', () => {
         sortingDirection: 'none',
       },
       DataContext,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      setUpMockTheme,
       true
     );
     const cell = mountWithIntl(
@@ -202,7 +203,7 @@ describe('datatable cell renderer', () => {
         },
         columnConfig,
         DataContext,
-        { get: jest.fn() } as unknown as IUiSettingsClient
+        setUpMockTheme
       );
     }
     function getColumnConfiguration(): DatatableArgs {

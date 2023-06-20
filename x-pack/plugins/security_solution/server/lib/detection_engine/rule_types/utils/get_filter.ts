@@ -16,7 +16,7 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import type {
   IndexPatternArray,
@@ -37,6 +37,7 @@ interface GetFilterArgs {
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexPatternArray | undefined;
   exceptionFilter: Filter | undefined;
+  fields?: DataViewFieldBase[];
 }
 
 interface QueryAttributes {
@@ -57,6 +58,7 @@ export const getFilter = async ({
   type,
   query,
   exceptionFilter,
+  fields = [],
 }: GetFilterArgs): Promise<ESBoolQuery> => {
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
@@ -66,6 +68,7 @@ export const getFilter = async ({
         filters: filters || [],
         index,
         exceptionFilter,
+        fields,
       });
     } else {
       throw new BadRequestError('query, filters, and index parameter should be defined');
@@ -85,6 +88,7 @@ export const getFilter = async ({
           filters: savedObject.attributes.filters,
           index,
           exceptionFilter,
+          fields,
         });
       } catch (err) {
         // saved object does not exist, so try and fall back if the user pushed
@@ -96,6 +100,7 @@ export const getFilter = async ({
             filters: filters || [],
             index,
             exceptionFilter,
+            fields,
           });
         } else {
           // user did not give any additional fall back mechanism for generating a rule

@@ -122,10 +122,8 @@ async function createSetupSideEffects(
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
-  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
-    logger.debug('Setting up Fleet Elasticsearch assets');
-    await ensureFleetGlobalEsAssets(soClient, esClient);
-  }
+  logger.debug('Setting up Fleet Elasticsearch assets');
+  await ensureFleetGlobalEsAssets(soClient, esClient);
 
   await ensureFleetFileUploadIndices(soClient, esClient);
   // Ensure that required packages are always installed even if they're left out of the config
@@ -176,6 +174,19 @@ async function createSetupSideEffects(
     );
   }
   await appContextService.getMessageSigningService()?.generateKeyPair();
+
+  logger.debug('Generating Agent uninstall tokens');
+  if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+    logger.warn(
+      'xpack.encryptedSavedObjects.encryptionKey is not configured, agent uninstall tokens are being stored in plain text'
+    );
+  }
+  await appContextService.getUninstallTokenService()?.generateTokensForAllPolicies();
+
+  if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+    logger.debug('Checking for and encrypting plain text uninstall tokens');
+    await appContextService.getUninstallTokenService()?.encryptTokens();
+  }
 
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);

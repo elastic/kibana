@@ -63,6 +63,8 @@ export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
 
 export const LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN = '[data-test-subj="loadPrebuiltRulesBtn"]';
 
+export const INSTALL_ALL_RULES_BUTTON = '[data-test-subj="installAllRulesButton"]';
+
 export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
 
@@ -130,6 +132,8 @@ export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj=
 
 export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
+export const TOASTER_CLOSE_ICON = '[data-test-subj="toastCloseButton"]';
+
 export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="importDataModalCheckboxLabel"]';
 
 export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
@@ -146,7 +150,7 @@ export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-butto
 
 export const RULES_TAGS_FILTER_POPOVER = '[data-test-subj="tags-filter-popover"]';
 
-export const RULES_SELECTED_TAG = '.euiSelectableListItem[data-test-selected="true"]';
+export const RULES_SELECTED_TAG = '.euiSelectableListItem[aria-checked="true"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 

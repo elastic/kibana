@@ -480,4 +480,19 @@ describe('getEventsHistogramLensAttributes', () => {
       })
     );
   });
+
+  it('should render values in legend', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state?.visualization).toEqual(
+      expect.objectContaining({ valuesInLegend: true })
+    );
+  });
 });

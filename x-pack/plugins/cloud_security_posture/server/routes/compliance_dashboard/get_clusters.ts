@@ -41,6 +41,8 @@ interface ClustersQueryResult {
 
 export type ClusterWithoutTrend = Omit<Cluster, 'trend'>;
 
+const MAX_CLUSTERS = 500;
+
 export const getClustersQuery = (
   query: QueryDslQueryContainer,
   pitId: string,
@@ -54,6 +56,7 @@ export const getClustersQuery = (
   aggs: {
     aggs_by_asset_identifier: {
       terms: {
+        size: MAX_CLUSTERS,
         field: 'asset_identifier',
       },
       aggs: {

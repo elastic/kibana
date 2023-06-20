@@ -5,10 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import moment from 'moment';
 
-const VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+const PUBLIC_VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
+
+/**
+ * To bring all of Kibana's first public API versions in-sync with an initial
+ * release date we only allow one public version temporarily.
+ * @internal
+ */
+const ALLOWED_PUBLIC_VERSION = '2023-10-31';
+
+export function isAllowedPublicVersion(version: string): undefined | string {
+  if (ALLOWED_PUBLIC_VERSION !== version) {
+    return `Invalid public version, for now please use "${ALLOWED_PUBLIC_VERSION}" as the version for all public routes. Received "${version}".}"`;
+  }
+}
 
 /**
  * For public routes we must check that the version is a string that is YYYY-MM-DD.
@@ -17,12 +30,11 @@ const VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
  */
 export function isValidRouteVersion(isPublicApi: boolean, version: string): undefined | string {
   if (isPublicApi) {
-    return VERSION_REGEX.test(version) && moment(version, 'YYYY-MM-DD').isValid()
+    return PUBLIC_VERSION_REGEX.test(version) && moment(version, 'YYYY-MM-DD').isValid()
       ? undefined
       : `Invalid version. Received "${version}", expected a valid date string formatted as YYYY-MM-DD.`;
   }
-  const float = parseFloat(version);
-  return isFinite(float) && !isNaN(float) && float > 0 && Math.round(float) === float
+  return INTERNAL_VERSION_REGEX.test(version) && version !== '0'
     ? undefined
-    : `Invalid version number. Received "${version}", expected any finite, whole number greater than 0.`;
+    : `Invalid version number. Received "${version}", expected a string containing _only_ a finite, whole number greater than 0.`;
 }

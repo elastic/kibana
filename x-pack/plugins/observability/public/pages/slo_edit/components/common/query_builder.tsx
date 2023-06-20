@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { Control, Controller, FieldPath } from 'react-hook-form';
+import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
@@ -14,26 +14,28 @@ import { useKibana } from '../../../../utils/kibana_react';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 
 export interface Props {
-  control: Control<CreateSLOInput>;
   dataTestSubj: string;
   indexPatternString: string | undefined;
   label: string;
   name: FieldPath<CreateSLOInput>;
   placeholder: string;
+  required?: boolean;
   tooltip?: ReactNode;
 }
 
 export function QueryBuilder({
-  control,
   dataTestSubj,
   indexPatternString,
   label,
   name,
   placeholder,
+  required,
   tooltip,
 }: Props) {
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
+
+  const { control, getFieldState } = useFormContext<CreateSLOInput>();
 
   const { dataView } = useCreateDataView({ indexPatternString });
 
@@ -48,6 +50,7 @@ export function QueryBuilder({
           label
         )
       }
+      isInvalid={getFieldState(name).invalid}
       fullWidth
     >
       <Controller
@@ -55,7 +58,10 @@ export function QueryBuilder({
         defaultValue=""
         name={name}
         control={control}
-        render={({ field }) => (
+        rules={{
+          required: Boolean(required),
+        }}
+        render={({ field, fieldState }) => (
           <QueryStringInput
             appName="Observability"
             bubbleSubmitEvent={false}
@@ -74,6 +80,7 @@ export function QueryBuilder({
             disableLanguageSwitcher
             indexPatterns={dataView ? [dataView] : []}
             isDisabled={!indexPatternString}
+            isInvalid={fieldState.invalid}
             languageSwitcherPopoverAnchorPosition="rightDown"
             placeholder={placeholder}
             query={{ query: String(field.value), language: 'kuery' }}

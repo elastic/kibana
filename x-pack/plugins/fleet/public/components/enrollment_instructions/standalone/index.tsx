@@ -38,6 +38,5 @@ cd elastic-agent-${kibanaVersion}-windows-x86_64
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
-    cloudFormation: '',
   };
 };
