@@ -80,12 +80,12 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
           }
         );
         if (!ignore) {
+          setTableLoading(false);
           onSuccess();
           if (response.version_conflicts && ids.length === 1) {
             throw new Error(i18n.BULK_ACTION_FAILED_SINGLE_ALERT);
           }
           setIsLoading(false);
-          setTableLoading(false);
           onUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0);
         }
       } catch (error) {

@@ -35,9 +35,7 @@ const mockTagItems = [
   addSuccess: jest.fn(),
   addWarning: jest.fn(),
 });
-(useSetAlertTags as jest.Mock).mockReturnValue({
-  setAlertTags: jest.fn(),
-});
+(useSetAlertTags as jest.Mock).mockReturnValue([false, jest.fn()]);
 (getUpdateAlertsQuery as jest.Mock).mockReturnValue({ query: {} });
 
 describe('BulkAlertTagsPanel', () => {

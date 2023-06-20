@@ -199,3 +199,5 @@ export const SELECTED_ALERT_TAG = '[data-test-subj="selected-alert-tag"]';
 export const MIXED_ALERT_TAG = '[data-test-subj="mixed-alert-tag"]';
 
 export const UNSELECTED_ALERT_TAG = '[data-test-subj="unselected-alert-tag"]';
+
+export const ALERTS_TABLE_ROW_LOADER = '[data-test-subj="row-loader"]';

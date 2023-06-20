@@ -6,7 +6,7 @@
  */
 
 import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 
@@ -61,12 +61,15 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
     }
   }, [onClearSelection, onSelectAll, showClearSelection]);
 
-  const panels = [
-    {
-      id: 0,
-      items: bulkActionItems,
-    },
-  ];
+  const panels = useMemo(
+    () => [
+      {
+        id: 0,
+        items: bulkActionItems,
+      },
+    ],
+    [bulkActionItems]
+  );
 
   return (
     <BulkActionsContainer

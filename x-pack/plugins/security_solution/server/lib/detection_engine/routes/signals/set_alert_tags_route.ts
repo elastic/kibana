@@ -62,7 +62,7 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
       try {
         const body = await esClient.updateByQuery({
           index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-          refresh: true,
+          refresh: false,
           body: {
             script: {
               params: { tagsToAdd, tagsToRemove },
