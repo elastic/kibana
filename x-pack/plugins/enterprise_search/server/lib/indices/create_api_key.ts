@@ -17,9 +17,8 @@ export const createApiKey = async (
   indexName: string,
   keyName: string
 ) => {
-  const aclIndexName = indexName.startsWith('search-')
-    ? `.search-acl-filter-${indexName.slice(7)}`
-    : `.search-acl-filter-${indexName}`;
+  // removes the "search-" prefix if present, and applies the new prefix
+  const aclIndexName = indexName.replace(/^(?:search-)?(.*)$/, '.search-acl-filter-$1');
 
   return await security.authc.apiKeys.create(request, {
     name: keyName,
