@@ -302,6 +302,7 @@ export function getFieldsByValidationState(
       newField &&
       supportedTypes.has(newField.type) &&
       newField.aggregatable &&
+      newField.timeSeriesMetric !== 'counter' &&
       (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms) &&
       (canAcceptScripted || !isScriptedField(newField));
 

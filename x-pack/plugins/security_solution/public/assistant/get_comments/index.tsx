@@ -16,23 +16,41 @@ import * as i18n from './translations';
 export const getComments = ({
   currentConversation,
   lastCommentRef,
+  showAnonymizedValues,
 }: {
   currentConversation: Conversation;
   lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+  showAnonymizedValues: boolean;
 }): EuiCommentProps[] =>
   currentConversation.messages.map((message, index) => {
     const isUser = message.role === 'user';
+    const replacements = currentConversation.replacements;
+    const messageContentWithReplacements =
+      replacements != null
+        ? Object.keys(replacements).reduce(
+            (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
+            message.content
+          )
+        : message.content;
+    const transformedMessage = {
+      ...message,
+      content: messageContentWithReplacements,
+    };
 
     return {
-      actions: <CommentActions message={message} />,
+      actions: <CommentActions message={transformedMessage} />,
       children:
         index !== currentConversation.messages.length - 1 ? (
           <EuiText>
-            <EuiMarkdownFormat className={`message-${index}`}>{message.content}</EuiMarkdownFormat>
+            <EuiMarkdownFormat className={`message-${index}`}>
+              {showAnonymizedValues ? message.content : transformedMessage.content}
+            </EuiMarkdownFormat>
           </EuiText>
         ) : (
           <EuiText>
-            <EuiMarkdownFormat className={`message-${index}`}>{message.content}</EuiMarkdownFormat>
+            <EuiMarkdownFormat className={`message-${index}`}>
+              {showAnonymizedValues ? message.content : transformedMessage.content}
+            </EuiMarkdownFormat>
             <span ref={lastCommentRef} />
           </EuiText>
         ),

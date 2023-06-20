@@ -444,8 +444,12 @@ export class ExecutionHandler<
       : `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`;
 
     try {
+      const basePathname = new URL(this.taskRunnerContext.kibanaBaseUrl).pathname;
+      const basePathnamePrefix = basePathname !== '/' ? `${basePathname}` : '';
+      const spaceIdSegment = spaceId !== 'default' ? `/s/${spaceId}` : '';
+
       const ruleUrl = new URL(
-        `${spaceId !== 'default' ? `/s/${spaceId}` : ''}${relativePath}`,
+        [basePathnamePrefix, spaceIdSegment, relativePath].join(''),
         this.taskRunnerContext.kibanaBaseUrl
       );
 

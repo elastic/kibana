@@ -15,7 +15,7 @@ export const INDEX_TRACES = 'profiling-stacktraces';
 export const INDEX_FRAMES = 'profiling-stackframes';
 export const INDEX_EXECUTABLES = 'profiling-executables';
 
-const BASE_ROUTE_PATH = '/api/profiling/v1';
+const BASE_ROUTE_PATH = '/internal/profiling';
 
 export function getRoutePaths() {
   return {
