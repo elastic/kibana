@@ -33,6 +33,7 @@ export interface BurnRateWindowParams {
     sli: number | null;
   };
   isLoading?: boolean;
+  size?: 'xxxs' | 'xxs' | 'xs' | 's' | 'm' | 'l';
 }
 
 const SUBDUED = 'subdued';
@@ -56,6 +57,7 @@ export function BurnRateWindow({
   longWindow,
   shortWindow,
   isLoading,
+  size = 's',
 }: BurnRateWindowParams) {
   const longWindowColor = getColorBasedOnBurnRate(target, longWindow.burnRate);
   const shortWindowColor = getColorBasedOnBurnRate(target, shortWindow.burnRate);
@@ -88,7 +90,7 @@ export function BurnRateWindow({
           <EuiStat
             title={longWindow.burnRate ? `${numeral(longWindow.burnRate).format('0.[00]')}x` : '--'}
             titleColor={longWindowColor}
-            titleSize="m"
+            titleSize={size}
             textAlign="left"
             isLoading={isLoading}
             description={
@@ -104,7 +106,7 @@ export function BurnRateWindow({
               shortWindow.burnRate ? `${numeral(shortWindow.burnRate).format('0.[00]')}x` : '--'
             }
             titleColor={shortWindowColor}
-            titleSize="m"
+            titleSize={size}
             textAlign="left"
             isLoading={isLoading}
             description={
