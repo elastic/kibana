@@ -38,7 +38,7 @@ export const guideCards: GuideCardConstants[] = [
       defaultMessage: 'Set up vector search',
     }),
     navigateTo: {
-      appId: 'enterpriseSearch',
+      appId: 'enterpriseSearchVectorSearch',
     },
     telemetryId: 'onboarding--search--vector',
     order: 1,
@@ -46,7 +46,7 @@ export const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
     icon: 'magnifyWithPlus',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.esreSearch.title', {
       defaultMessage: 'Build a semantic search experience',
     }),
     navigateTo: {
