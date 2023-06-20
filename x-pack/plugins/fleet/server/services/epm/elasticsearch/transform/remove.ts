@@ -34,9 +34,6 @@ export const deleteTransforms = async (
   }
   await Promise.all(
     transformIds.map(async (transformId) => {
-      // get the index the transform
-      await esClient.transform.getTransform({ transform_id: transformId }, { ignore: [404] });
-
       await stopTransforms([transformId], esClient);
       await esClient.transform.deleteTransform(
         {
