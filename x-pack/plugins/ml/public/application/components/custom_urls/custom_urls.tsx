@@ -168,7 +168,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     const dataViewId = this.state?.editorSettings?.kibanaSettings?.discoverIndexPatternId;
     const job = this.props.job;
 
-     dataViews
+    dataViews
       .get(dataViewId ?? '')
       .catch((error) => {
         // We still want to try to get the test URL as not all custom urls require a timefield to be passed.
@@ -177,7 +177,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
       })
       .then((dataView) => {
         const timefieldName = dataView?.timeFieldName ?? null;
-        buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings).then(
+        buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings).then(
           (customUrl) => {
             getTestUrl(job, customUrl, timefieldName, this.props.currentTimeFilter)
               .then((testUrl) => {
