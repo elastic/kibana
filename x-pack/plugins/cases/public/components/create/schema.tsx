@@ -98,4 +98,5 @@ export const schema: FormSchema<FormProps> = {
     defaultValue: true,
   },
   assignees: {},
+  category: {},
 };
