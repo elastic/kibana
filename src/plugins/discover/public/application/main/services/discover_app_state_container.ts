@@ -189,7 +189,7 @@ export const getDiscoverAppStateContainer = ({
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
-    const { data, filterManager } = services;
+    const { data } = services;
     const dataView = currentSavedSearch.searchSource.getField('index');
 
     if (appStateContainer.getState().index !== dataView?.id) {
@@ -198,10 +198,7 @@ export const getDiscoverAppStateContainer = ({
     }
     // syncs `_a` portion of url with query services
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
-      {
-        ...data.query,
-        filterManager,
-      },
+      data.query,
       appStateContainer,
       {
         filters: FilterStateStore.APP_STATE,

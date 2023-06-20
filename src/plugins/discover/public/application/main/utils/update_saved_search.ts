@@ -8,7 +8,6 @@
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
-import { addLog } from '../../../utils/add_log';
 import { isTextBasedQuery } from './is_text_based_query';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -42,15 +41,10 @@ export function updateSavedSearch(
     savedSearch.usesAdHocDataView = !dataView.isPersisted();
   }
   if (useFilterAndQueryServices) {
-    addLog('[updateSavedSearch] update with FilterQueryServices', {
-      query: services.data.query.queryString.getQuery(),
-      filter: services.filterManager.getFilters(),
-    });
     savedSearch.searchSource
       .setField('query', services.data.query.queryString.getQuery())
-      .setField('filter', services.filterManager.getFilters());
+      .setField('filter', services.data.query.filterManager.getFilters());
   } else if (state) {
-    addLog('[updateSavedSearch] update with state', state);
     savedSearch.searchSource
       .setField('query', state.query ?? undefined)
       .setField('filter', state.filters ? cloneDeep(state.filters) : []);
