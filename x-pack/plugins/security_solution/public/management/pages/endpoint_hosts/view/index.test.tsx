@@ -206,6 +206,7 @@ describe('when on the endpoint list page', () => {
 
   describe('when there are policies, but no hosts', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
+    let firstPolicyId: string;
     beforeEach(async () => {
       const policyData = mockPolicyResultList({ total: 3 }).items;
       setEndpointListApiMockImplementation(coreStart.http, {
