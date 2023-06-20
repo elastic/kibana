@@ -153,23 +153,29 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   setHeaderActionMenu,
   store,
   theme$,
-}) => (
-  <KibanaContextProvider
-    services={{
-      appName: APP_NAME,
-      ...services,
-    }}
-  >
-    <StartApp
-      history={history}
-      onAppLeave={onAppLeave}
-      setHeaderActionMenu={setHeaderActionMenu}
-      store={store}
-      theme$={theme$}
+}) => {
+  const CloudProvider = services.cloud?.CloudContextProvider ?? React.Fragment;
+
+  return (
+    <KibanaContextProvider
+      services={{
+        appName: APP_NAME,
+        ...services,
+      }}
     >
-      {children}
-    </StartApp>
-  </KibanaContextProvider>
-);
+      <CloudProvider>
+        <StartApp
+          history={history}
+          onAppLeave={onAppLeave}
+          setHeaderActionMenu={setHeaderActionMenu}
+          store={store}
+          theme$={theme$}
+        >
+          {children}
+        </StartApp>
+      </CloudProvider>
+    </KibanaContextProvider>
+  );
+};
 
 export const SecurityApp = memo(SecurityAppComponent);
