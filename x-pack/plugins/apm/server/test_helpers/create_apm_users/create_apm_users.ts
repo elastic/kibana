@@ -27,6 +27,8 @@ export async function createApmUsers({
   kibana: Kibana;
   elasticsearch: Elasticsearch;
 }) {
+  console.log(kibana);
+  console.log(elasticsearch);
   const isCredentialsValid = await getIsCredentialsValid({
     elasticsearch,
     kibana,

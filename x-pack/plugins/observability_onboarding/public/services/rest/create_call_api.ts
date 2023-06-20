@@ -7,6 +7,7 @@
 
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import type {
+  ClientRequestParamsOf,
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
@@ -39,6 +40,12 @@ export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   ObservabilityOnboardingServerRouteRepository,
   TEndpoint
 >;
+
+export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
+  ClientRequestParamsOf<
+    ObservabilityOnboardingServerRouteRepository,
+    TEndpoint
+  >;
 
 export let callObservabilityOnboardingApi: ObservabilityOnboardingClient =
   () => {
