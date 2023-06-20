@@ -24,6 +24,7 @@ import {
   MANAGEMENT_BREADCRUMB,
   MANAGEMENT_BREADCRUMB_NO_HREF,
 } from '../../utils';
+import { AppContextProvider } from './management_context';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
 import { SectionsServiceStart } from '../../types';
@@ -104,29 +105,35 @@ export const ManagementApp = ({
       }
     : undefined;
 
+  const contextDependencies = {
+    appBasePath,
+    sections,
+    kibanaVersion: dependencies.kibanaVersion,
+    showNavigationCards,
+  };
+
   return (
     <RedirectAppLinks coreStart={dependencies.coreStart}>
       <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaPageTemplate
-            restrictWidth={false}
-            solutionNav={solution}
-            // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
-            // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
-            mainProps={{ paddingSize: 'l' }}
-          >
-            <ManagementRouter
-              history={history}
-              theme$={theme$}
-              setBreadcrumbs={setBreadcrumbsScoped}
-              onAppMounted={onAppMounted}
-              sections={sections}
-              appBasePath={appBasePath}
-              dependencies={dependencies}
-              showNavigationCards={showNavigationCards}
-            />
-          </KibanaPageTemplate>
-        </KibanaThemeProvider>
+        <AppContextProvider value={contextDependencies}>
+          <KibanaThemeProvider theme$={theme$}>
+            <KibanaPageTemplate
+              restrictWidth={false}
+              solutionNav={solution}
+              // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
+              // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
+              mainProps={{ paddingSize: 'l' }}
+            >
+              <ManagementRouter
+                history={history}
+                theme$={theme$}
+                setBreadcrumbs={setBreadcrumbsScoped}
+                onAppMounted={onAppMounted}
+                sections={sections}
+              />
+            </KibanaPageTemplate>
+          </KibanaThemeProvider>
+        </AppContextProvider>
       </I18nProvider>
     </RedirectAppLinks>
   );

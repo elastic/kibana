@@ -12,30 +12,18 @@ import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
-import { ManagementAppDependencies } from './management_app';
 import { ManagementSection } from '../../utils';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];
   theme$: AppMountParameters['theme$'];
-  dependencies: ManagementAppDependencies;
-  appBasePath: string;
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
-  showNavigationCards?: boolean;
 }
 
 export const ManagementRouter = memo(
-  ({
-    dependencies,
-    appBasePath,
-    history,
-    setBreadcrumbs,
-    onAppMounted,
-    sections,
-    theme$,
-  }: ManagementRouterProps) => (
+  ({ history, setBreadcrumbs, onAppMounted, sections, theme$ }: ManagementRouterProps) => (
     <Router history={history}>
       <Switch>
         {sections.map((section) =>
@@ -65,14 +53,7 @@ export const ManagementRouter = memo(
         <Route
           path={'/'}
           component={() => (
-            <ManagementLandingPage
-              version={dependencies.kibanaVersion}
-              sections={sections}
-              appBasePath={appBasePath}
-              setBreadcrumbs={setBreadcrumbs}
-              onAppMounted={onAppMounted}
-              showNavigationCards={dependencies.showNavigationCards}
-            />
+            <ManagementLandingPage setBreadcrumbs={setBreadcrumbs} onAppMounted={onAppMounted} />
           )}
         />
       </Switch>

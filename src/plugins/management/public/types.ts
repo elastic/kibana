@@ -82,3 +82,9 @@ export interface CreateManagementItemArgs {
 export interface ManagementPublicConfig {
   showNavigationCards?: boolean;
 }
+export interface AppDependencies {
+  appBasePath: string;
+  kibanaVersion: string;
+  sections: ManagementSection[];
+  showNavigationCards?: boolean;
+}

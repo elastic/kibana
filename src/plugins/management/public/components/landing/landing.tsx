@@ -8,25 +8,19 @@
 
 import React, { useEffect } from 'react';
 import { BasicPage, WithCardNavigationPage } from './pages';
-import { ManagementSection } from '../../utils';
+import { useAppContext } from '../management_app/management_context';
 
 interface ManagementLandingPageProps {
-  version: string;
-  appBasePath: string;
   onAppMounted: (id: string) => void;
   setBreadcrumbs: () => void;
-  sections: ManagementSection[];
-  showNavigationCards?: boolean;
 }
 
 export const ManagementLandingPage = ({
-  version,
-  sections,
   setBreadcrumbs,
-  appBasePath,
   onAppMounted,
-  showNavigationCards,
 }: ManagementLandingPageProps) => {
+  const { appBasePath, sections, kibanaVersion, showNavigationCards } = useAppContext();
+
   setBreadcrumbs();
 
   useEffect(() => {
@@ -37,5 +31,5 @@ export const ManagementLandingPage = ({
     return <WithCardNavigationPage appBasePath={appBasePath} sections={sections} />;
   }
 
-  return <BasicPage version={version} />;
+  return <BasicPage version={kibanaVersion} />;
 };
