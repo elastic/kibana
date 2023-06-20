@@ -42,7 +42,7 @@ const SUCCESS = 'success';
 const WARNING = 'warning';
 
 function getColorBasedOnBurnRate(target: number, burnRate: number | null, sli: number | null) {
-  if (burnRate === null || sli === -1) {
+  if (burnRate === null || sli === null || sli < 0) {
     return SUBDUED;
   }
   if (burnRate > target) {
@@ -72,10 +72,10 @@ export function BurnRateWindow({
       : SUCCESS;
 
   const isLongWindowValid =
-    longWindow.burnRate != null && longWindow.sli != null && longWindow.sli > 0;
+    longWindow.burnRate != null && longWindow.sli != null && longWindow.sli >= 0;
 
   const isShortWindowValid =
-    shortWindow.burnRate != null && shortWindow.sli != null && shortWindow.sli > 0;
+    shortWindow.burnRate != null && shortWindow.sli != null && shortWindow.sli >= 0;
 
   return (
     <EuiPanel color={overallColor}>
