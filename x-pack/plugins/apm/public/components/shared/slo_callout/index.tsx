@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { encode } from '@kbn/rison';
@@ -48,8 +54,8 @@ export function SloCallout({
       },
     },
   };
-
   const sloParams = `?_a=${encode(sloInput)}`;
+
   return (
     <EuiCallOut
       title={i18n.translate('xpack.apm.slo.callout.title', {
@@ -69,16 +75,23 @@ export function SloCallout({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiButton
-                data-test-subj="apmCreateSloButton"
+              <EuiLink
+                data-test-subj="apmCreateSloLink"
                 href={basePath.prepend(
                   `/app/observability/slos/create${sloParams}`
                 )}
               >
-                {i18n.translate('xpack.apm.slo.callout.createButton', {
-                  defaultMessage: 'Create SLO',
-                })}
-              </EuiButton>
+                <EuiButton
+                  data-test-subj="apmSloCalloutCreateSloButton"
+                  onClick={() => {
+                    dismissCallout();
+                  }}
+                >
+                  {i18n.translate('xpack.apm.slo.callout.createButton', {
+                    defaultMessage: 'Create SLO',
+                  })}
+                </EuiButton>
+              </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
