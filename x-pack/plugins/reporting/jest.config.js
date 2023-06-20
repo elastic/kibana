@@ -11,7 +11,13 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/reporting'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/reporting',
   coverageReporters: ['text', 'html'],
+  coveragePathIgnorePatterns: [
+    '<rootDir>/x-pack/plugins/reporting/server/export_types/csv_searchsource/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/reporting/server/export_types/png*/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/reporting/server/export_types/png*/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/reporting/server/export_types/printable_pdf/**/*.{js,ts,tsx}',
+  ],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/reporting/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/reporting/{cmmon,public, server}/**/*.{js,ts,tsx}',
   ],
 };
