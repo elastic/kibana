@@ -7,7 +7,7 @@
 
 import { random } from 'lodash';
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
+import { createSkipError, throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
 import {
@@ -16,7 +16,11 @@ import {
   ConcreteTaskInstance,
   EphemeralTask,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
+import {
+  DEFAULT_MAX_WORKERS,
+  RequeueInvalidTasksConfig,
+} from '@kbn/task-manager-plugin/server/config';
+import { schema } from '@kbn/config-schema';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -152,6 +156,63 @@ export class SampleTaskManagerFixturePlugin
           async run() {
             throwRetryableError(new Error('Error'), new Date(Date.now() + random(2, 5) * 1000));
           },
+        }),
+      },
+      sampleRecurringTaskSkipError: {
+        title: 'Sample Recurring Task that returns SkipError',
+        description:
+          'A sample task that returns a SkipError as much as requeueInvalidTasksConfig.max_attempts then success',
+        maxAttempts: 1,
+        createTaskRunner: ({
+          taskInstance,
+          requeueInvalidTasksConfig,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
+        }) => ({
+          async run() {
+            if (
+              (taskInstance.requeueInvalidTask?.attempts || 0) <
+              requeueInvalidTasksConfig.max_attempts
+            ) {
+              return { state: {}, error: createSkipError(new Error('Skip')) };
+            }
+            return { state: {}, schedule: { interval: '1s' }, hasError: true };
+          },
+        }),
+      },
+      sampleOneTimeTaskSkipError: {
+        title: 'Sample One Time Task that returns SkipError',
+        description:
+          'A sample task that returns a SkipError as much as requeueInvalidTasksConfig.max_attempts then retryable error',
+        maxAttempts: 1,
+        createTaskRunner: ({
+          taskInstance,
+          requeueInvalidTasksConfig,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
+        }) => ({
+          async run() {
+            if (
+              (taskInstance.requeueInvalidTask?.attempts || 0) <
+              requeueInvalidTasksConfig.max_attempts
+            ) {
+              return { state: {}, error: createSkipError(new Error('Skip')) };
+            }
+            throwRetryableError(new Error('Retry'), true);
+          },
+        }),
+      },
+      sampleTaskWithParamsSchema: {
+        title: 'Sample Task That has paramsSchema',
+        description: 'A sample task that has paramsSchema to validate params',
+        maxAttempts: 1,
+        paramsSchema: schema.object({
+          param: schema.string(),
+        }),
+        createTaskRunner: () => ({
+          async run() {},
         }),
       },
     });

@@ -31,6 +31,10 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTask',
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
+    'sampleRecurringTaskSkipError',
+    'sampleOneTimeTaskSkipError',
+    'sampleTaskWithParamsSchema',
+    'sampleTaskWithParamsSchemaFailingOneTime',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.

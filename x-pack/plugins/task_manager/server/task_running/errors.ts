@@ -65,7 +65,7 @@ export function isSkipError(error: Error | DecoratedError) {
   return false;
 }
 
-export function createSkipError(error: Error) {
+export function createSkipError(error: Error): DecoratedError {
   (error as DecoratedError)[code] = CODE_SKIP;
   return error;
 }
