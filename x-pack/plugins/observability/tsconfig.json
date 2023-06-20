@@ -77,9 +77,9 @@
     "@kbn/field-types",
     "@kbn/safer-lodash-set",
     "@kbn/core-http-server",
-    "@kbn/actions-plugin"
+    "@kbn/actions-plugin",
+    "@kbn/cloud-chat-plugin",
+    "@kbn/cloud-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

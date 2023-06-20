@@ -6,6 +6,7 @@
  */
 
 // import { isEqual } from 'lodash';
+import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
@@ -15,12 +16,22 @@ import {
   usePerformUpgradeSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
+import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
+import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
    * Rules available to be updated
    */
   rules: RuleUpgradeInfoForReview[];
+  /**
+   * Rules to display in table after applying filters
+   */
+  filteredRules: RuleUpgradeInfoForReview[];
+  /**
+   * Currently selected table filter
+   */
+  filterOptions: UpgradePrebuiltRulesTableFilterOptions;
   /**
    * All unique tags for all rules
    */
@@ -57,6 +68,7 @@ export interface UpgradePrebuiltRulesTableActions {
   upgradeOneRule: (ruleId: string) => void;
   upgradeSelectedRules: () => void;
   upgradeAllRules: () => void;
+  setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleUpgradeInfoForReview[]) => void;
 }
 
@@ -78,6 +90,11 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 }: UpgradePrebuiltRulesTableContextProviderProps) => {
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleUpgradeInfoForReview[]>([]);
+
+  const [filterOptions, setFilterOptions] = useState<UpgradePrebuiltRulesTableFilterOptions>({
+    filter: '',
+    tags: [],
+  });
 
   const {
     data: { rules, stats: { tags } } = {
@@ -103,14 +120,17 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       invariant(rule, `Rule with id ${ruleId} not found`);
 
       setLoadingRules((prev) => [...prev, ruleId]);
-      await upgradeSpecificRulesRequest([
-        {
-          rule_id: ruleId,
-          version: rule.diff.fields.version?.target_version ?? rule.rule.version,
-          revision: rule.revision,
-        },
-      ]);
-      setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
+      try {
+        await upgradeSpecificRulesRequest([
+          {
+            rule_id: ruleId,
+            version: rule.diff.fields.version?.target_version ?? rule.rule.version,
+            revision: rule.revision,
+          },
+        ]);
+      } finally {
+        setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
+      }
     },
     [rules, upgradeSpecificRulesRequest]
   );
@@ -122,17 +142,23 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       revision: rule.revision,
     }));
     setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
-    await upgradeSpecificRulesRequest(rulesToUpgrade);
-    setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
-    setSelectedRules([]);
+    try {
+      await upgradeSpecificRulesRequest(rulesToUpgrade);
+    } finally {
+      setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
+      setSelectedRules([]);
+    }
   }, [selectedRules, upgradeSpecificRulesRequest]);
 
   const upgradeAllRules = useCallback(async () => {
     // Unselect all rules so that the table doesn't show the "bulk actions" bar
     setLoadingRules((prev) => [...prev, ...rules.map((r) => r.rule_id)]);
-    await upgradeAllRulesRequest();
-    setLoadingRules((prev) => prev.filter((id) => !rules.some((r) => r.rule_id === id)));
-    setSelectedRules([]);
+    try {
+      await upgradeAllRulesRequest();
+    } finally {
+      setLoadingRules([]);
+      setSelectedRules([]);
+    }
   }, [rules, upgradeAllRulesRequest]);
 
   const actions = useMemo<UpgradePrebuiltRulesTableActions>(
@@ -141,15 +167,20 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       upgradeOneRule,
       upgradeSelectedRules,
       upgradeAllRules,
+      setFilterOptions,
       selectRules: setSelectedRules,
     }),
     [refetch, upgradeAllRules, upgradeOneRule, upgradeSelectedRules]
   );
 
+  const filteredRules = useFilterPrebuiltRulesToUpgrade({ filterOptions, rules });
+
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(() => {
     return {
       state: {
         rules,
+        filteredRules,
+        filterOptions,
         tags,
         isFetched,
         isLoading,
@@ -162,6 +193,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     };
   }, [
     rules,
+    filteredRules,
+    filterOptions,
     tags,
     isFetched,
     isLoading,

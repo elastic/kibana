@@ -4736,7 +4736,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"monitoring\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"monitoring\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -5100,6 +5100,26 @@
                 "docId": "kibDataViewEditorPluginApi",
                 "section": "def-public.PluginStart",
                 "text": "PluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.dashboard",
+            "type": "Object",
+            "tags": [],
+            "label": "dashboard",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dashboard",
+                "scope": "public",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-public.DashboardStart",
+                "text": "DashboardStart"
               }
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -8075,7 +8095,7 @@
         "label": "CoreQueryParams",
         "description": [],
         "signature": [
-          "{ readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly filterKuery?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
+          "{ readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly filterKuery?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
@@ -8132,7 +8152,7 @@
         "label": "TimeSeriesQuery",
         "description": [],
         "signature": [
-          "{ readonly interval?: string | undefined; readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly filterKuery?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
+          "{ readonly interval?: string | undefined; readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly filterKuery?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts",
         "deprecated": false,
