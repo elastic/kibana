@@ -465,11 +465,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
                   style={{
                     line: {
                       strokeWidth: 3,
-                      stroke: 'red',
+                      stroke: '#bd271e',
                       opacity: 1,
                     },
                   }}
-                  marker={<EuiIcon type="warning" color={'red'} />}
+                  marker={<EuiIcon type="warning" color={'#bd271e'} />}
                   markerPosition={Position.Bottom}
                 />,
               ]}

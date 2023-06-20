@@ -101,11 +101,11 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     alert.fields['kibana.alert.rule.parameters'] &&
     alert.fields['kibana.alert.rule.parameters'].timeSize &&
     alert.fields['kibana.alert.rule.parameters'].timeUnit
-    ? moment.duration(
-        alert.fields['kibana.alert.rule.parameters'].timeSize as number,
-        alert.fields['kibana.alert.rule.parameters'].timeUnit as any
-      )
-    : moment.duration(1, 'm');
+      ? moment.duration(
+          alert.fields['kibana.alert.rule.parameters'].timeSize as number,
+          alert.fields['kibana.alert.rule.parameters'].timeUnit as any
+        )
+      : moment.duration(1, 'm');
   const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
 
   const alertStart = moment(alert.start);
@@ -187,6 +187,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
             initialAnalysisStart={initialAnalysisStart}
             annotations={alert}
             barColorOverride={colorTransformer(Color.color0)}
+            barHighlightColorOverride={colorTransformer(Color.color1)}
             onAnalysisCompleted={onAnalysisCompleted}
             appDependencies={pick(services, [
               'application',
