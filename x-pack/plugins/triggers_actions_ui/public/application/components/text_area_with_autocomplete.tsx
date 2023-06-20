@@ -87,6 +87,8 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const parentRef = useRef<any>(null);
   const [caretPosition, setCaretPosition] = useState({ top: 0, left: 0, height: 0 });
+  const [isListOpen, setListOpen] = useState(false);
+
   const optionsToShow: EuiSelectableOption[] = useMemo(() => {
     return matches?.map((variable) => ({
       label: variable,
@@ -116,10 +118,11 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
         textAreaRef.current &&
         getCaretCoordinates(textAreaRef.current, textAreaRef.current.selectionStart);
 
+      const parentTop = parentRef.current?.getBoundingClientRect().top;
       const top = textAreaRef.current?.getBoundingClientRect().top;
 
       setCaretPosition({
-        top: top + newCaretPosition?.top + newCaretPosition.height,
+        top: top + newCaretPosition?.top + newCaretPosition.height - parentTop,
         left: newCaretPosition.left,
         height: newCaretPosition.height,
       });
@@ -161,7 +164,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <div style={{}} ref={parentRef}>
+    <div style={{ position: 'relative' }} ref={parentRef}>
       <EuiFormRow
         fullWidth
         error={errors}
@@ -187,22 +190,30 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
           onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
             setCurrentTextElement(e.target);
+            setListOpen(true);
+          }}
+          // onKeyDown={}
+          // onMouseLeave={}
+          // onMouseOut={}
+          onWheel={() => {
+            // setListOpen(false);
           }}
           onBlur={() => {
+            // setListOpen(false);
             if (!inputTargetValue) {
               editAction(paramsProperty, '', index);
             }
           }}
         />
       </EuiFormRow>
-      {matches.length > 0 && (
+      {matches.length > 0 && isListOpen && (
         <EuiSelectable
           style={{
-            position: 'fixed',
+            position: 'absolute',
             top: caretPosition.top,
-            width: 200,
-            border: '2px solid grey',
-            background: 'white',
+            width: '100%',
+            border: '1px solid rgb(211, 218, 230)',
+            background: '#fbfcfd',
           }}
           options={optionsToShow}
           onChange={onOptionPick}
