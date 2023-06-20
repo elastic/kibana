@@ -25,8 +25,8 @@ import { CategoryFormField } from '../../category/category_form_field';
 
 export interface EditCategoryProps {
   isLoading: boolean;
-  onSubmit: (category: string | null | undefined) => void;
-  category: string | null | undefined;
+  onSubmit: (category?: string | null) => void;
+  category?: string | null;
 }
 
 export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditCategoryProps) => {
