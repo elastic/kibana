@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { CoverageOverviewRuleData } from './coverage_overview_rule_data';
-import type { MitreTechnique } from './mitre_technique';
+import type { CoverageOverviewRuleData } from './rule_data';
+import type { CoverageOverviewMitreTechnique } from './mitre_technique';
 
-export interface MitreTactic {
+export interface CoverageOverviewMitreTactic {
   name: string;
   reference: string;
-  techniques: MitreTechnique[];
+  techniques: CoverageOverviewMitreTechnique[];
   enabledRules: CoverageOverviewRuleData[];
   disabledRules: CoverageOverviewRuleData[];
   availableRules: CoverageOverviewRuleData[];

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoverageOverviewRuleData } from './coverage_overview_rule_data';
+import type { CoverageOverviewRuleData } from './rule_data';
 
-export interface MitreTechnique {
+export interface CoverageOverviewMitreTechnique {
   name: string;
   reference: string;
   numOfCoveredSubtechniques: number;
