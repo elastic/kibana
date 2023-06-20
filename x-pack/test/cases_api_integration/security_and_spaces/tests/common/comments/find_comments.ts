@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(caseComments.comments[0].type).to.eql(CommentType.user);
     });
 
-    describe.only('unhappy paths', () => {
+    describe('unhappy paths', () => {
       for (const errorScenario of [
         { name: 'field is wrong type', queryParams: { perPage: true } },
         { name: 'field is unknown', queryParams: { foo: 'bar' } },
