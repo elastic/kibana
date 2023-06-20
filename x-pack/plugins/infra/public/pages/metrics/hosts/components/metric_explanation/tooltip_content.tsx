@@ -26,27 +26,24 @@ export const TooltipContent = ({
   return (
     <EuiText size="xs" style={style}>
       <p>{description}</p>
-
-      <p>
-        <strong>
-          <FormattedMessage
-            id="xpack.infra.hostsViewPage.table.tooltip.formula"
-            defaultMessage="Formula Calculation:"
-          />
-        </strong>
-        {formula && (
-          <>
-            <br />
-            <code
-              css={css`
-                word-break: break-word;
-              `}
-            >
-              {formula}
-            </code>
-          </>
-        )}
-      </p>
+      {formula && (
+        <p>
+          <strong>
+            <FormattedMessage
+              id="xpack.infra.hostsViewPage.table.tooltip.formula"
+              defaultMessage="Formula Calculation:"
+            />
+          </strong>
+          <br />
+          <code
+            css={css`
+              word-break: break-word;
+            `}
+          >
+            {formula}
+          </code>
+        </p>
+      )}
       {showDocumentationLink && (
         <p>
           <FormattedMessage
