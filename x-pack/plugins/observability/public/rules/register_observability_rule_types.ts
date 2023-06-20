@@ -83,7 +83,8 @@ export const registerObservabilityRuleTypes = (
       description: i18n.translate(
         'xpack.observability.threshold.rule.alertFlyout.alertDescription',
         {
-          defaultMessage: 'Alert when threshold breached.',
+          defaultMessage:
+            'Alert when either the latency, throughput, or failed transaction rate of a service is anomalous.',
         }
       ),
       iconClass: 'bell',
