@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
   interface ApiCallsInterface {
     method: keyof Pick<typeof supertest, 'post' | 'get'>;
     path: string;
-    version?: string | number;
+    version?: string;
     body: Record<string, unknown> | undefined;
   }
 
@@ -83,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'get',
         path: BASE_ENDPOINT_ACTION_ROUTE,
         body: undefined,
+        version: '2023-10-31',
       },
     ];
 
