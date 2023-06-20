@@ -443,7 +443,7 @@ describe('StepAboutRuleComponent', () => {
     });
 
     mount(
-    <StepAboutRule
+      <StepAboutRule
         addPadding={true}
         defaultValues={stepAboutDefaultValue}
         defineRuleData={stepDefineStepMLRule}
