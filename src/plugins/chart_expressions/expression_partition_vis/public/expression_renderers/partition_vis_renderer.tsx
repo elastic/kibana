@@ -21,7 +21,11 @@ import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import {
+  extractContainerType,
+  extractVisualizationType,
+  isOnAggBasedEditor,
+} from '@kbn/chart-expressions-common';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { CellValueAction, GetCompatibleCellValueActions } from '../types';
@@ -110,6 +114,8 @@ export const getPartitionVisRenderer: (
       plugins.charts.palettes.getPalettes(),
     ]);
 
+    const hasOpenedOnAggBasedEditor = isOnAggBasedEditor(handlers.getExecutionContext());
+
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -128,6 +134,7 @@ export const getPartitionVisRenderer: (
               syncColors={syncColors}
               columnCellValueActions={columnCellValueActions}
               overrides={overrides}
+              hasOpenedOnAggBasedEditor={hasOpenedOnAggBasedEditor}
             />
           </div>
         </KibanaThemeProvider>

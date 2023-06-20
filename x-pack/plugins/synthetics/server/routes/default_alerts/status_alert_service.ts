@@ -66,7 +66,6 @@ export class StatusAlertService {
         consumer: 'uptime',
         alertTypeId: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
         schedule: { interval: '1m' },
-        notifyWhen: 'onActionGroupChange',
         tags: ['SYNTHETICS_DEFAULT_ALERT'],
         name: `Synthetics internal alert`,
         enabled: true,

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -18,6 +19,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { ChromeService } from './chrome_service';
@@ -84,20 +86,38 @@ async function start({
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
   }
 
+  await service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
+  const chromeStart = await service.start(startDeps);
+
   return {
     service,
     startDeps,
-    chrome: await service.start(startDeps),
+    chrome: chromeStart,
   };
 }
 
 beforeEach(() => {
   store.clear();
+  registerAnalyticsContextProviderMock.mockReset();
   window.history.pushState(undefined, '', '#/home?a=b');
 });
 
 afterAll(() => {
   (window as any).localStorage = originalLocalStorage;
+});
+
+describe('setup', () => {
+  it('calls registerAnalyticsContextProvider with the correct parameters', async () => {
+    const service = new ChromeService(defaultStartTestOptions({}));
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+    await service.setup({ analytics });
+
+    expect(registerAnalyticsContextProviderMock).toHaveBeenCalledTimes(1);
+    expect(registerAnalyticsContextProviderMock).toHaveBeenCalledWith(
+      analytics,
+      expect.any(Object)
+    );
+  });
 });
 
 describe('start', () => {

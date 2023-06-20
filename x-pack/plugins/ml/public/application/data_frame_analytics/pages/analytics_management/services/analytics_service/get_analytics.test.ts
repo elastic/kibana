@@ -67,7 +67,7 @@ describe('get_analytics', () => {
     // act and assert
     expect(getAnalyticsJobsStats(mockResponse)).toEqual({
       total: {
-        label: 'Total analytics jobs',
+        label: 'Total',
         value: 2,
         show: true,
       },

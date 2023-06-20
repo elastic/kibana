@@ -169,7 +169,7 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The category of the case.
        */
-      category: rt.string,
+      category: rt.union([rt.string, rt.null]),
     })
   ),
 ]);
