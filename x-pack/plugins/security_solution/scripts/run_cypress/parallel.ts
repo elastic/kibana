@@ -179,9 +179,10 @@ export const cli = () => {
                   }
                   return element.value as string;
                 });
+              } else if (property.value.type === 'StringLiteral') {
+                value = property.value.value;
               }
               if (key && value) {
-                // @ts-expect-error
                 acc[key] = value;
               }
               return acc;
@@ -280,16 +281,22 @@ export const cli = () => {
                   );
                 }
 
+                if (configFromTestFile?.license) {
+                  vars.esTestCluster.license = configFromTestFile.license;
+                }
+
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
                   );
                 }
 
+                console.log('RESULT', vars.esTestCluster);
                 return vars;
               }
             );
 
+            console.log({ config });
             const lifecycle = new Lifecycle(log);
 
             const providers = new ProviderCollection(log, [

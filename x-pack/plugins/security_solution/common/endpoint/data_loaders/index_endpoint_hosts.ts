@@ -90,6 +90,7 @@ export async function indexEndpointHostDocs({
   generator,
   withResponseActions = true,
   numResponseActions,
+  alertIds,
 }: {
   numDocs: number;
   client: Client;
@@ -102,6 +103,7 @@ export async function indexEndpointHostDocs({
   generator: EndpointDocGenerator;
   withResponseActions?: boolean;
   numResponseActions?: IndexEndpointAndFleetActionsForHostOptions['numResponseActions'];
+  alertIds?: string[];
 }): Promise<IndexedHostsResponse> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
@@ -203,6 +205,7 @@ export async function indexEndpointHostDocs({
           hostMetadata,
           undefined,
           {
+            alertIds,
             numResponseActions,
           }
         );

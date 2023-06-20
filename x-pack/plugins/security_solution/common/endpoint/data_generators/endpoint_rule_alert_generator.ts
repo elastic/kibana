@@ -279,6 +279,15 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
               value: '',
             },
           ],
+          response_actions: [
+            {
+              action_type_id: 'endpoint',
+              params: {
+                command: 'isolate',
+                comment: 'test',
+              },
+            },
+          ],
           rule_id: ELASTIC_SECURITY_RULE_ID,
           rule_name_override: 'message',
           severity: 'medium',
