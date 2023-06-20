@@ -19,8 +19,8 @@ import {
   SearchApplicationViewTabs,
 } from '../../routes';
 
-import { EngineView } from './engine_view';
 import { SearchApplicationNameLogic } from './search_application_name_logic';
+import { EngineView } from './search_application_view';
 
 export const SearchApplicationRouter: React.FC = () => {
   const searchApplicationName = decodeURIComponent(
