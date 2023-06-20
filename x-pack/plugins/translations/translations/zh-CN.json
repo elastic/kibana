@@ -32641,7 +32641,6 @@
     "xpack.securitySolution.markdown.insight.modalCancelButtonLabel": "取消",
     "xpack.securitySolution.markdown.insight.relativeTimerange": "相对时间范围",
     "xpack.securitySolution.markdown.insight.relativeTimerangeText": "选择相对于告警创建时间的时间范围（可选）以限制查询。",
-    "xpack.securitySolution.markdown.insight.technicalPreview": "技术预览",
     "xpack.securitySolution.markdown.osquery.addModalConfirmButtonLabel": "添加查询",
     "xpack.securitySolution.markdown.osquery.addModalTitle": "添加查询",
     "xpack.securitySolution.markdown.osquery.editModalConfirmButtonLabel": "保存更改",
