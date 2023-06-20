@@ -14,8 +14,6 @@ import { useGetSecuritySolutionLinkProps } from '../../../../common/components/l
 import { SecurityPageName } from '../../../../../common';
 import { usePrebuiltRulesStatus } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
-// TODO: Still need to load timeline templates
-
 interface LoadPrePackagedRulesButtonProps {
   'data-test-subj'?: string;
   fill?: boolean;

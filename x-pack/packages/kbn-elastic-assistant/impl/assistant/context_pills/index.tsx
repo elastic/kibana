@@ -11,22 +11,29 @@ import React, { useCallback, useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
-import type { PromptContext } from '../prompt_context/types';
+import { getNewSelectedPromptContext } from '../../data_anonymization/get_new_selected_prompt_context';
+import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 
 const PillButton = styled(EuiButton)`
   margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 interface Props {
+  defaultAllow: string[];
+  defaultAllowReplacement: string[];
   promptContexts: Record<string, PromptContext>;
-  selectedPromptContextIds: string[];
-  setSelectedPromptContextIds: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedPromptContexts: Record<string, SelectedPromptContext>;
+  setSelectedPromptContexts: React.Dispatch<
+    React.SetStateAction<Record<string, SelectedPromptContext>>
+  >;
 }
 
 const ContextPillsComponent: React.FC<Props> = ({
+  defaultAllow,
+  defaultAllowReplacement,
   promptContexts,
-  selectedPromptContextIds,
-  setSelectedPromptContextIds,
+  selectedPromptContexts,
+  setSelectedPromptContexts,
 }) => {
   const sortedPromptContexts = useMemo(
     () => sortBy('description', Object.values(promptContexts)),
@@ -34,12 +41,27 @@ const ContextPillsComponent: React.FC<Props> = ({
   );
 
   const selectPromptContext = useCallback(
-    (id: string) => {
-      if (!selectedPromptContextIds.includes(id)) {
-        setSelectedPromptContextIds((prev) => [...prev, id]);
+    async (id: string) => {
+      if (selectedPromptContexts[id] == null && promptContexts[id] != null) {
+        const newSelectedPromptContext = await getNewSelectedPromptContext({
+          defaultAllow,
+          defaultAllowReplacement,
+          promptContext: promptContexts[id],
+        });
+
+        setSelectedPromptContexts((prev) => ({
+          ...prev,
+          [id]: newSelectedPromptContext,
+        }));
       }
     },
-    [selectedPromptContextIds, setSelectedPromptContextIds]
+    [
+      defaultAllow,
+      defaultAllowReplacement,
+      promptContexts,
+      selectedPromptContexts,
+      setSelectedPromptContexts,
+    ]
   );
 
   return (
@@ -49,7 +71,7 @@ const ContextPillsComponent: React.FC<Props> = ({
           <EuiToolTip content={tooltip}>
             <PillButton
               data-test-subj={`pillButton-${id}`}
-              disabled={selectedPromptContextIds.includes(id)}
+              disabled={selectedPromptContexts[id] != null}
               iconSide="left"
               iconType="plus"
               onClick={() => selectPromptContext(id)}
