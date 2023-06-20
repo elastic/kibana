@@ -3489,22 +3489,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/scripts/route.ts"
               },
               {
@@ -6535,34 +6519,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/kql_telemetry/route.ts"
               },
               {
@@ -7258,6 +7214,10 @@
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/routes/live_query/create_live_query_route.ts"
               },
@@ -7400,6 +7360,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/dashboards/routes/get_dashboards_by_tags.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_preview_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8884,14 +8848,6 @@
                 "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/update.ts"
               },
@@ -10062,14 +10018,6 @@
               {
                 "plugin": "bfetch",
                 "path": "src/plugins/bfetch/server/plugin.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
               },
               {
                 "plugin": "share",
@@ -14163,6 +14111,22 @@
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/has_data_views.ts"
               },
               {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/json_schema.ts"
               },
@@ -14532,6 +14496,14 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
@@ -14641,6 +14613,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
               },
               {
                 "plugin": "ml",
@@ -14804,7 +14784,35 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/search.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
               },
               {
                 "plugin": "aiops",
@@ -15364,7 +15372,15 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/search.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
               },
               {
                 "plugin": "ml",
