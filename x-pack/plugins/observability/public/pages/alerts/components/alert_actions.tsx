@@ -22,7 +22,7 @@ import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { EuiButton } from '@elastic/eui/src/components/button/button';
+
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
@@ -208,9 +208,10 @@ export function AlertActions({
       {/* Hide the View In App for the Threshold alerts, temporarily https://github.com/elastic/kibana/pull/159915  */}
       {alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID ? (
         <EuiFlexItem>
-          <EuiButton
-            data-test-subj="o11yAlertActionsButtonThresholdRuleDisabled"
+          <EuiButtonIcon
+            iconType=""
             disabled
+            data-test-subj="o11yAlertActionsButtonThresholdRuleDisabled"
             size="s"
           />
         </EuiFlexItem>
