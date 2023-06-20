@@ -142,11 +142,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               serviceName,
               transactionType: 'request',
               transactionName: 'GET /api/request/avg',
-              windowSize: 99,
+              windowSize: 5,
               windowUnit: 'h',
               threshold: 99,
               aggregationType: AggregationType.Avg,
               environment: 'production',
+              groupBy: [
+                'service.name',
+                'service.environment',
+                'transaction.type',
+                'transaction.name',
+              ],
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
           });
@@ -213,6 +219,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               threshold: 10,
               aggregationType: AggregationType.P99,
               environment: 'production',
+              groupBy: [
+                'service.name',
+                'service.environment',
+                'transaction.type',
+                'transaction.name',
+              ],
             },
             ruleTypeId: ApmRuleType.TransactionDuration,
           });
@@ -281,6 +293,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               windowUnit: 'h',
               threshold: 5,
               environment: 'production',
+              groupBy: [
+                'service.name',
+                'service.environment',
+                'transaction.type',
+                'transaction.name',
+              ],
             },
             ruleTypeId: ApmRuleType.TransactionErrorRate,
           });

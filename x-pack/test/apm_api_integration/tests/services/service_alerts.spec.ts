@@ -49,11 +49,12 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       params: {
         serviceName: goService,
         transactionType: undefined,
-        windowSize: 99,
-        windowUnit: 'y',
+        windowSize: 5,
+        windowUnit: 'h',
         threshold: 100,
         aggregationType: AggregationType.Avg,
         environment: 'testing',
+        groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
       },
       ruleTypeId: ApmRuleType.TransactionDuration,
     });
