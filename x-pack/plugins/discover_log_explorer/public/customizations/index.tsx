@@ -11,6 +11,5 @@ import { CustomDatasetSelectorBuilderProps } from './custom_dataset_selector';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 
-export const createLazyCustomDatasetSelector =
-  (props: CustomDatasetSelectorBuilderProps) => () =>
-    <LazyCustomDatasetSelector {...props} />;
+export const createLazyCustomDatasetSelector = (props: CustomDatasetSelectorBuilderProps) => () =>
+  <LazyCustomDatasetSelector {...props} />;
