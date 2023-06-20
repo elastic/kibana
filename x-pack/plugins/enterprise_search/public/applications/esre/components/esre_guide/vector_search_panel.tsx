@@ -38,7 +38,12 @@ const steps: EuiContainedStepProps[] = [
     children: (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiLink href={docLinks.trainedModels} target="_blank" external>
+          <EuiLink
+            data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchPanel-trainedModelsLink"
+            href={docLinks.trainedModels}
+            target="_blank"
+            external
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.esre.vectorSearchPanel.step1.guideToTrainedModelsLinkText',
               { defaultMessage: 'Guide to trained models' }
@@ -46,7 +51,11 @@ const steps: EuiContainedStepProps[] = [
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiLinkTo to={generatePath(ML_MANAGE_TRAINED_MODELS_PATH)} shouldNotCreateHref>
+          <EuiLinkTo
+            data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchPanel-trainedModelsButton"
+            to={generatePath(ML_MANAGE_TRAINED_MODELS_PATH)}
+            shouldNotCreateHref
+          >
             <EuiButton iconType="eye">
               {i18n.translate('xpack.enterpriseSearch.esre.vectorSearchPanel.step1.buttonLabel', {
                 defaultMessage: 'View trained models',
@@ -67,7 +76,10 @@ const steps: EuiContainedStepProps[] = [
         to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
         shouldNotCreateHref
       >
-        <EuiButton iconType="plusInCircle">
+        <EuiButton
+          data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchPanel-createIndexButton"
+          iconType="plusInCircle"
+        >
           {i18n.translate('xpack.enterpriseSearch.esre.vectorSearchPanel.step2.buttonLabel', {
             defaultMessage: 'Create an index',
           })}
@@ -120,7 +132,12 @@ export const VectorSearchPanel: React.FC = () => (
               defaultMessage="Use {vectorDbCapabilities} by adding embeddings from your ML models. Deploy trained models on Elastic ML nodes and set up inference pipelines to automatically add embeddings when you ingest documents, so you can use the kNN vector search method in _search."
               values={{
                 vectorDbCapabilities: (
-                  <EuiLink target="_blank" href={docLinks.knnSearch} external={false}>
+                  <EuiLink
+                    data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchPanel-knnSearchLink"
+                    target="_blank"
+                    href={docLinks.knnSearch}
+                    external={false}
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.esre.vectorSearchPanel.description.vectorDbCapabilitiesLinkText',
                       {
