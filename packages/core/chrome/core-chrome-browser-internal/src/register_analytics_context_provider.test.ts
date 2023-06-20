@@ -7,7 +7,7 @@
  */
 
 import { firstValueFrom, of, ReplaySubject } from 'rxjs';
-import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
 describe('registerAnalyticsContextProvider', () => {
