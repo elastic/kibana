@@ -63,7 +63,7 @@ export function BurnRateWindow({
   const overallColor =
     longWindowColor === DANGER && shortWindowColor === DANGER
       ? DANGER
-      : longWindowColor !== shortWindowColor
+      : [longWindowColor, shortWindowColor].includes(DANGER)
       ? WARNING
       : longWindowColor === SUBDUED && shortWindowColor === SUBDUED
       ? SUBDUED
