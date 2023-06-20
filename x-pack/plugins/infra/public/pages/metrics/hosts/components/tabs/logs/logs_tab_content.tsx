@@ -90,7 +90,7 @@ export const LogsTabContent = () => {
     return filterQuery.query || hostsFilterQueryParam;
   }, [filterQuery.query, hostNodes]);
 
-  if (loading) {
+  if (loading || logViewIndices === undefined) {
     return (
       <EuiFlexGroup style={{ height: 300 }} direction="column" alignItems="stretch">
         <EuiFlexItem grow>
@@ -109,7 +109,7 @@ export const LogsTabContent = () => {
     );
   }
 
-  return logViewIndices ? (
+  return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
       <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
         <EuiFlexItem>
@@ -136,7 +136,7 @@ export const LogsTabContent = () => {
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : null;
+  );
 };
 
 const createHostsFilterQueryParam = (hostNodes: string[]): string => {
