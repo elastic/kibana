@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
+import { isEmpty } from 'lodash/fp';
 import type {
   RuleFilterArray,
   TimestampOverride,
@@ -89,7 +90,13 @@ export const buildEqlSearchRequest = ({
       runtime_mappings: runtimeMappings,
       timestamp_field: timestampField,
       event_category_field: eventCategoryOverride,
-      tiebreaker_field: tiebreakerField,
+      ...(!isEmpty(tiebreakerField)
+        ? {
+            tiebreaker_field: tiebreakerField,
+          }
+        : {
+            tiebreaker_field: undefined,
+          }),
       fields,
     },
   };

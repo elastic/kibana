@@ -429,4 +429,42 @@ describe('buildEqlSearchRequest', () => {
       },
     });
   });
+
+  describe('handles the tiebreaker field', () => {
+    test('should pass a tiebreaker field with a valid value', async () => {
+      const request = buildEqlSearchRequest({
+        query: 'process where true',
+        index: ['testindex1', 'testindex2'],
+        from: 'now-5m',
+        to: 'now',
+        size: 100,
+        filters: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+        runtimeMappings: undefined,
+        tiebreakerField: 'host.name',
+        eventCategoryOverride: undefined,
+        exceptionFilter: undefined,
+      });
+      expect(request?.body?.tiebreaker_field).toEqual(`host.name`);
+    });
+
+    test('should not pass a tiebreaker field with a valid value', async () => {
+      const request = buildEqlSearchRequest({
+        query: 'process where true',
+        index: ['testindex1', 'testindex2'],
+        from: 'now-5m',
+        to: 'now',
+        size: 100,
+        filters: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+        runtimeMappings: undefined,
+        tiebreakerField: '',
+        eventCategoryOverride: undefined,
+        exceptionFilter: undefined,
+      });
+      expect(request?.body?.tiebreaker_field).toEqual(undefined);
+    });
+  });
 });
