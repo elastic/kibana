@@ -34,7 +34,7 @@ export interface DefaultPackagesInstallationError {
 }
 
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
-export type InstallSource = 'registry' | 'upload' | 'bundled';
+export type InstallSource = 'registry' | 'upload' | 'bundled' | 'custom';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 

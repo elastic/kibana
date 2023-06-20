@@ -66,6 +66,8 @@ import {
   unpackBufferToCache,
   deleteVerificationResult,
   getArchiveFilelist,
+  setArchiveFilelist,
+  setArchiveEntry,
 } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
@@ -285,6 +287,18 @@ interface InstallRegistryPackageParams {
   prerelease?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
 }
+
+interface InstallCustomPackageParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  title: string;
+  description: string;
+  dataset: string;
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  force?: boolean;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
+}
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -421,7 +435,7 @@ function getElasticSubscription(packageInfo: ArchivePackage) {
 async function installPackageCommon(options: {
   pkgName: string;
   pkgVersion: string;
-  installSource: 'registry' | 'upload';
+  installSource: 'registry' | 'upload' | 'custom';
   installedPkg?: SavedObject<Installation>;
   installType: InstallType;
   savedObjectsClient: SavedObjectsClientContract;
@@ -717,6 +731,121 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
     return response;
   }
   throw new Error(`Unknown installSource: ${args.installSource}`);
+}
+
+export async function installCustomPackage(
+  args: InstallCustomPackageParams
+): Promise<InstallResult> {
+  const {
+    savedObjectsClient,
+    esClient,
+    spaceId,
+    pkgName,
+    title,
+    description,
+    force,
+    authorizationHeader,
+    dataset,
+  } = args;
+
+  const version = '1.0.0';
+
+  // Compose a packageInfo
+  const packageInfo = {
+    format_version: version,
+    name: pkgName,
+    title,
+    description,
+    version,
+    owner: { github: 'elastic' }, // TODO: what to use here?
+    type: 'integration' as const,
+    data_streams: [
+      {
+        type: 'logs',
+        dataset,
+        title: `Data stream for the ${pkgName} custom integration`,
+        package: pkgName,
+        path: dataset,
+        release: 'ga' as const,
+      },
+    ],
+  };
+
+  // Mimic the use of an archive buffer via the same naming conventions
+  const assets = [
+    {
+      path: `${pkgName}-${version}/data_stream/${dataset}/fields/base-fields.yml`,
+      content: Buffer.from(
+        `
+      - name: data_stream.type
+        type: constant_keyword
+        description: Data stream type.
+      - name: data_stream.dataset
+        type: constant_keyword
+        description: Data stream dataset.
+      - name: data_stream.namespace
+        type: constant_keyword
+        description: Data stream namespace.
+      - name: '@timestamp'
+        type: date
+        description: Event timestamp.
+      `
+      ),
+    },
+    {
+      path: `${pkgName}-${version}/manifest.yml`,
+      content: Buffer.from(
+        `
+        format_version: ${version}
+        name: ${pkgName}
+        title: ${title}
+        description: >-
+          ${description}
+        type: integration
+        version: ${version}
+        owner:
+          github: elastic
+        `
+      ),
+    },
+    {
+      path: `${pkgName}-${version}/data_stream/${dataset}/manifest.yml`,
+      content: Buffer.from(
+        `
+        format_version: ${version}
+        name: ${pkgName}
+        title: ${dataset} manifest
+        type: integration
+        version: ${version}
+        owner:
+          github: elastic
+        `
+      ),
+    },
+  ];
+
+  const paths = assets.map((asset) => asset.path);
+
+  // Cache asset buffers
+  setArchiveFilelist({ name: pkgName, version }, paths);
+
+  assets.forEach((asset) => {
+    setArchiveEntry(asset.path, asset.content);
+  });
+
+  return await installPackageCommon({
+    pkgName,
+    pkgVersion: version,
+    installSource: 'custom',
+    installType: 'install',
+    savedObjectsClient,
+    esClient,
+    spaceId,
+    force,
+    packageInfo,
+    paths,
+    authorizationHeader,
+  });
 }
 
 export const updateVersion = async (

@@ -84,6 +84,7 @@ import type {
   InstallationInfo,
 } from '../../types';
 import { getDataStreams } from '../../services/epm/data_streams';
+import { installCustomPackage } from '../../services/epm/packages/install';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -416,9 +417,23 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const spaceId = fleetContext.spaceId;
+  const { name, title, description, force, dataset } = request.body;
+
+  const res = await installCustomPackage({
+    savedObjectsClient,
+    pkgName: name,
+    title,
+    description,
+    dataset,
+    esClient,
+    spaceId,
+    force,
+    authorizationHeader,
+  });
+
   return response.ok({
     body: {
-      working: true,
+      package: res,
     },
   });
 };
