@@ -38,7 +38,6 @@ import { filter, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { createConfig, ReportingConfigType } from './config';
 import { CsvSearchsourceExportType } from './export_types/csv_searchsource';
-import { CsvV2ExportType } from './export_types/csv_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -99,7 +98,6 @@ export class ReportingCore {
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  private csvV2Export: CsvV2ExportType;
   private csvSearchsourceExport: CsvSearchsourceExportType;
   private exportTypesRegistry = new ExportTypesRegistry();
 
@@ -116,14 +114,12 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
-    this.csvV2Export = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
     this.csvSearchsourceExport = new CsvSearchsourceExportType(
       this.core,
       this.config,
       this.logger,
       this.context
     );
-    this.exportTypesRegistry.register(this.csvV2Export);
     this.exportTypesRegistry.register(this.csvSearchsourceExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
@@ -149,7 +145,6 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    this.csvV2Export.setup(setupDeps);
     this.csvSearchsourceExport.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
@@ -165,7 +160,6 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    this.csvV2Export.start(startDeps);
     this.csvSearchsourceExport.start(startDeps);
 
     await this.assertKibanaIsAvailable();

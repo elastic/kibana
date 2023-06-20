@@ -22,13 +22,13 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { CancellationToken } from '@kbn/reporting-common';
 import { Writable } from 'stream';
+import { CSV_JOB_TYPE } from '../../../common/constants';
 import {
   LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_ENTERPRISE,
-  CSV_REPORT_TYPE_V2,
 } from '../../../common/constants';
 import { ReportingConfigType } from '../../config';
 import { getFieldFormats } from '../../services';
@@ -63,9 +63,9 @@ export class CsvSearchsourceExportType
     >
 {
   private http: HttpServiceSetup;
+  id = 'csv_searchsource';
+  name = CSV_JOB_TYPE;
 
-  id = CSV_REPORT_TYPE_V2;
-  name = 'CSV'; // CSV_SEARCHSOURCE?
   validLicenses: LicenseType[] = [
     LICENSE_TYPE_TRIAL,
     LICENSE_TYPE_CLOUD_STANDARD,
@@ -165,7 +165,7 @@ export class CsvSearchsourceExportType
   }
 
   public async createJob(jobParams: JobParamsCSV) {
-    return jobParams;
+    return { searchsource: jobParams.searchSource, ...jobParams };
   }
 
   public async runTask(
