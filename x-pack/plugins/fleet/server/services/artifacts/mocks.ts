@@ -46,7 +46,7 @@ export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterfac
   };
 };
 
-export const generateArtifactMock = (): Artifact => {
+export const generateArtifactMock = (overrides?: Partial<Artifact>): Artifact => {
   return {
     id: '123',
     type: 'trustlist',
@@ -61,6 +61,7 @@ export const generateArtifactMock = (): Artifact => {
     encodedSize: 22,
     body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
     created: '2021-03-08T14:47:13.714Z',
+    ...overrides,
   };
 };
 

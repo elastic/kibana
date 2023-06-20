@@ -19,3 +19,4 @@ export * from './title';
 export * from './assignees';
 export * from './operations';
 export * from './response';
+export * from './category';
