@@ -13,7 +13,7 @@ get:
               items:
                 type: array
                 items:
-                  $ref: ../components/schemas/output.yaml
+                  $ref: ../components/schemas/output_create_request.yaml
               total:
                 type: integer
               page:
@@ -36,7 +36,7 @@ post:
             type: object
             properties:
               item:
-                $ref: ../components/schemas/output.yaml
+                $ref: ../components/schemas/output_create_request.yaml
     '400':
       $ref: ../components/responses/error.yaml
   requestBody:
@@ -44,5 +44,5 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/output.yaml
+          $ref: ../components/schemas/output_create_request.yaml
   operationId: post-outputs

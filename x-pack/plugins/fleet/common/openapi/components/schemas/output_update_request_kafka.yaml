@@ -1,4 +1,4 @@
-title: elasticsearch
+title: kafka
 type: object
 properties:
   id:
@@ -11,7 +11,7 @@ properties:
     type: string
   type:
     type: string
-    enum: ['elasticsearch']
+    enum: ['kafka']
   hosts:
     type: array
     items:
@@ -54,6 +54,56 @@ properties:
         type: number
       loadbalance:
         type: boolean
+  version:
+    type: string
+  key:
+    type: string
+  compression:
+    type: string
+  compression_level:
+    type: number
+  client_id:
+    type: string
+  auth_type:
+    type: string
+  username:
+    type: string
+  password:
+    type: string
+  sasl:
+    type: object
+    properties:
+      mechanism:
+        type: string
+  partition:
+    type: string
+  random:
+    type: object
+    properties:
+      group_events:
+        type: number
+  round_robin:
+    type: object
+    properties:
+      group_events:
+        type: number
+  topics:
+    type: array
+    items:
+      type: object
+      properties:
+        topic:
+          type: string
+        when:
+          type: object
+          properties:
+            type:
+              type: string
+            condition:
+              type: string
+  timeout:
+    type: number
+  broker_timeout:
+    type: number
 required:
   - name
-  - type
