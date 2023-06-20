@@ -1429,7 +1429,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           const nonTypeFields = res.right.updatedHashes.filter(
             (field) => !typeFields.includes(field)
           );
-          console.log('TYPE vs NON_TYPE', typeFields, nonTypeFields);
+
           if (nonTypeFields.length) {
             return {
               ...stateP,

@@ -11,6 +11,8 @@ import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   clearLog,
   createBaseline,
+  currentVersion,
+  defaultKibanaIndex,
   defaultLogFilePath,
   getCompatibleMappingsMigrator,
   getIncompatibleMappingsMigrator,
@@ -18,6 +20,7 @@ import {
 } from '../kibana_migrator_test_kit';
 import '../jest_matchers';
 import { delay, parseLogFile } from '../test_utils';
+import { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 
 export const logFilePath = Path.join(__dirname, 'pickup_updated_types_only.test.log');
 
@@ -57,6 +60,29 @@ describe('pickupUpdatedMappings', () => {
 
       expect(logs).toContainLogEntry(
         'Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings: complex.'
+      );
+    });
+
+    it('should pickup ALL documents if any root fields have been updated', async () => {
+      const { runMigrations, client } = await getCompatibleMappingsMigrator();
+
+      // we tamper the baseline mappings to simulate some root fields changes
+      const baselineMappings = await client.indices.getMapping({ index: defaultKibanaIndex });
+      const _meta = baselineMappings[`${defaultKibanaIndex}_${currentVersion}_001`].mappings
+        ._meta as IndexMappingMeta;
+      _meta.migrationMappingPropertyHashes!.namespace =
+        _meta.migrationMappingPropertyHashes!.namespace + '_tampered';
+      await client.indices.putMapping({ index: defaultKibanaIndex, _meta });
+
+      await runMigrations();
+
+      const logs = await parseLogFile(defaultLogFilePath);
+
+      expect(logs).toContainLogEntry(
+        'Kibana is performing a compatible update and some root fields have been updated. All SO documents must be updated. Updated root fields: namespace.'
+      );
+      expect(logs).not.toContainLogEntry(
+        'Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings'
       );
     });
   });
