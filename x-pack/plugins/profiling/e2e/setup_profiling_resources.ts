@@ -6,19 +6,16 @@
  */
 
 import axios from 'axios';
-import { getRoutePaths } from '../common';
 
 export async function setupProfilingResources({
   kibanaUrlWithAuth,
 }: {
   kibanaUrlWithAuth: string;
 }) {
-  const paths = getRoutePaths();
-
   // eslint-disable-next-line no-console
   console.log('Setting up Universal profiling resources...');
   await axios.post(
-    `${kibanaUrlWithAuth}/${paths.HasSetupESResources}`,
+    `${kibanaUrlWithAuth}/internal/profiling/setup/es_resources`,
     {},
     { headers: { 'kbn-xsrf': true } }
   );

@@ -9,7 +9,6 @@ import axios from 'axios';
 import cypress from 'cypress';
 import path from 'path';
 import Url from 'url';
-import { getRoutePaths } from '../common';
 import { FtrProviderContext } from './ftr_provider_context';
 import { loadProfilingData } from './load_profiling_data';
 import { setupProfilingResources } from './setup_profiling_resources';
@@ -45,9 +44,8 @@ export async function cypressTestRunner({
   // Ensure Fleet setup is complete
   await axios.post(`${kibanaUrlWithAuth}/api/fleet/setup`, {}, { headers: { 'kbn-xsrf': true } });
 
-  const paths = getRoutePaths();
   const profilingResources = await axios.get<{ has_setup: boolean; has_data: boolean }>(
-    `${kibanaUrlWithAuth}/${paths.HasSetupESResources}`,
+    `${kibanaUrlWithAuth}/internal/profiling/setup/es_resources`,
     { headers: { 'kbn-xsrf': true } }
   );
 
