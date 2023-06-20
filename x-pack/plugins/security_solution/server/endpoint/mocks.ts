@@ -242,6 +242,12 @@ export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
   getRegisteredRouteHandler: (method: RouterMethod, path: string) => RequestHandler;
   /** Retrieves the route handler configuration that was registered with the router */
   getRegisteredRouteConfig: (method: RouterMethod, path: string) => RouteConfig<any, any, any, any>;
+  /** Get a registered versioned route */
+  getRegisteredVersionedRoute: (
+    method: RouterMethod,
+    path: string,
+    version: string
+  ) => RegisteredVersionedRoute;
 }
 
 /**
@@ -315,6 +321,8 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
 
     getRegisteredRouteHandler,
     getRegisteredRouteConfig,
+
+    getRegisteredVersionedRoute: getRegisteredVersionedRouteMock.bind(null, routerMock),
   };
 };
 
