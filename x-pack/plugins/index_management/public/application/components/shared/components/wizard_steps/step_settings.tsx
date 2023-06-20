@@ -100,7 +100,7 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
           error={error}
           fullWidth
         >
-          <CodeEditor
+          <CodeEditor // TODO theme provided in context by x-pack/plugins/index_management/public/application/index.tsx
             languageId="json"
             value={jsonContent}
             data-test-subj="settingsEditor"

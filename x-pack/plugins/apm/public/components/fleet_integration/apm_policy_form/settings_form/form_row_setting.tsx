@@ -125,7 +125,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
     case 'yaml': {
       return (
         <FixedHeightDiv>
-          <CodeEditor
+          <CodeEditor // TODO Unable to find context that provides theme. Need CODEOWNER Input
             languageId="yaml"
             width="100%"
             height="300px"

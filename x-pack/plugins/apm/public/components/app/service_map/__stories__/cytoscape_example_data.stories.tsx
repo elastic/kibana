@@ -105,7 +105,7 @@ export const GenerateMap: Story<{}> = () => {
       </Cytoscape>
 
       {json && (
-        <CodeEditor
+        <CodeEditor // TODO Unable to find context that provides theme. Need CODEOWNER Input
           languageId="json"
           value={json}
           height="200px"
@@ -152,7 +152,7 @@ export const MapFromJSON: Story<{}> = () => {
       <EuiForm isInvalid={error !== undefined} error={error}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CodeEditor
+            <CodeEditor // TODO Unable to find context that provides theme. Need CODEOWNER Input
               languageId="json"
               value={json}
               options={{ fontFamily: 'monospace' }}
