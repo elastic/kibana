@@ -23,10 +23,6 @@ import {
 } from '../../mocks/src/default_navigation.test.helpers';
 import { navLinksMock } from '../../mocks/src/navlinks';
 
-const defaultProps = {
-  homeRef: 'https://elastic.co',
-};
-
 describe('<DefaultNavigation />', () => {
   const services = getServicesMock();
 
@@ -77,12 +73,7 @@ describe('<DefaultNavigation />', () => {
 
       const { findByTestId } = render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <DefaultNavigation
-            {...defaultProps}
-            navigationTree={{
-              body: navigationBody,
-            }}
-          />
+          <DefaultNavigation navigationTree={{ body: navigationBody }} />
         </NavigationProvider>
       );
 
@@ -103,7 +94,6 @@ describe('<DefaultNavigation />', () => {
       const [navTreeGenerated] = lastCall;
 
       expect(navTreeGenerated).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'group1',
@@ -202,12 +192,7 @@ describe('<DefaultNavigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <DefaultNavigation
-            {...defaultProps}
-            navigationTree={{
-              body: navigationBody,
-            }}
-          />
+          <DefaultNavigation navigationTree={{ body: navigationBody }} />
         </NavigationProvider>
       );
 
@@ -217,7 +202,6 @@ describe('<DefaultNavigation />', () => {
       const [navTreeGenerated] = lastCall;
 
       expect(navTreeGenerated).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'root',
@@ -285,12 +269,7 @@ describe('<DefaultNavigation />', () => {
 
       render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <DefaultNavigation
-            {...defaultProps}
-            navigationTree={{
-              body: navigationBody,
-            }}
-          />
+          <DefaultNavigation navigationTree={{ body: navigationBody }} />
         </NavigationProvider>
       );
 
@@ -300,7 +279,6 @@ describe('<DefaultNavigation />', () => {
       const [navTreeGenerated] = lastCall;
 
       expect(navTreeGenerated).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'root',
@@ -358,12 +336,7 @@ describe('<DefaultNavigation />', () => {
       const expectToThrow = () => {
         render(
           <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-            <DefaultNavigation
-              {...defaultProps}
-              navigationTree={{
-                body: navigationBody,
-              }}
-            />
+            <DefaultNavigation navigationTree={{ body: navigationBody }} />
           </NavigationProvider>
         );
       };
@@ -372,43 +345,6 @@ describe('<DefaultNavigation />', () => {
       // @ts-expect-error we're mocking the console so "mockImplementation" exists
       // eslint-disable-next-line no-console
       console.error.mockRestore();
-    });
-
-    test('should render cloud link', async () => {
-      const navigationBody: RootNavigationItemDefinition[] = [
-        {
-          type: 'cloudLink',
-          preset: 'deployments',
-        },
-        {
-          type: 'cloudLink',
-          preset: 'projects',
-        },
-        {
-          type: 'cloudLink',
-          href: 'https://foo.com',
-          icon: 'myIcon',
-          title: 'Custom link',
-        },
-      ];
-
-      const { findByTestId } = render(
-        <NavigationProvider {...services}>
-          <DefaultNavigation
-            {...defaultProps}
-            navigationTree={{
-              body: navigationBody,
-            }}
-          />
-        </NavigationProvider>
-      );
-
-      expect(await findByTestId('nav-header-link-to-projects')).toBeVisible();
-      expect(await findByTestId('nav-header-link-to-deployments')).toBeVisible();
-      expect(await findByTestId('nav-header-link-to-cloud')).toBeVisible();
-      expect(await (await findByTestId('nav-header-link-to-cloud')).textContent).toBe(
-        'Custom link'
-      );
     });
 
     test('should render recently accessed items', async () => {
@@ -425,17 +361,12 @@ describe('<DefaultNavigation />', () => {
 
       const { findByTestId } = render(
         <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
-          <DefaultNavigation
-            {...defaultProps}
-            navigationTree={{
-              body: navigationBody,
-            }}
-          />
+          <DefaultNavigation navigationTree={{ body: navigationBody }} />
         </NavigationProvider>
       );
 
       expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
-      expect(await (await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
+      expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
         'RecentThis is an exampleAnother example'
       );
     });
@@ -489,7 +420,7 @@ describe('<DefaultNavigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <DefaultNavigation {...defaultProps} projectNavigationTree={projectNavigationTree} />
+          <DefaultNavigation projectNavigationTree={projectNavigationTree} />
         </NavigationProvider>
       );
 
@@ -499,7 +430,6 @@ describe('<DefaultNavigation />', () => {
       const [navTreeGenerated] = lastCall;
 
       expect(navTreeGenerated).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: expect.any(Array),
       });
 
