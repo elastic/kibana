@@ -27,7 +27,7 @@ import { CloudDetails, useCloudDetails } from '../../../../shared/cloud_details/
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import { EngineViewLogic } from '../search_application_view_logic';
+import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { EngineApiIntegrationStage } from './engine_api_integration';
 import { EngineApiLogic } from './engine_api_logic';
@@ -40,7 +40,7 @@ export const elasticsearchUrl = (cloudContext: CloudDetails): string => {
 };
 
 export const SearchApplicationAPI = () => {
-  const { searchApplicationName } = useValues(EngineViewLogic);
+  const { searchApplicationName } = useValues(SearchApplicationViewLogic);
   const { isGenerateModalOpen } = useValues(EngineApiLogic);
   const { openGenerateModal, closeGenerateModal } = useActions(EngineApiLogic);
   const cloudContext = useCloudDetails();

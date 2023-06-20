@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
-import { EngineViewLogic } from '../search_application_view_logic';
+import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { EngineApiLogic } from './engine_api_logic';
 
@@ -88,7 +88,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
     share: { url },
   } = useValues(KibanaLogic);
   const [selectedTab, setSelectedTab] = React.useState<TabId>('apirequest');
-  const { searchApplicationName: engineName } = useValues(EngineViewLogic);
+  const { searchApplicationName: engineName } = useValues(SearchApplicationViewLogic);
   const { apiKey } = useValues(EngineApiLogic);
   const cloudContext = useCloudDetails();
 

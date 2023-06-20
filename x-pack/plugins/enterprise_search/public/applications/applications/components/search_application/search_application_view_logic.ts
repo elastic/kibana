@@ -27,40 +27,42 @@ import {
 
 import { SearchApplicationNameLogic } from './search_application_name_logic';
 
-export interface EngineViewActions {
-  closeDeleteEngineModal(): void;
+export interface SearchApplicationViewActions {
+  closeDeleteSearchApplicationModal(): void;
   deleteSuccess: SearchApplicationsListActions['deleteSuccess'];
-  fetchEngine: FetchSearchApplicationApiLogicActions['makeRequest'];
-  fetchEngineSchema: FetchSearchApplicationApiLogicActions['makeRequest'];
-  openDeleteEngineModal(): void;
+  fetchSearchApplication: FetchSearchApplicationApiLogicActions['makeRequest'];
+  fetchSearchApplicationSchema: FetchSearchApplicationApiLogicActions['makeRequest'];
+  openDeleteSearchApplicationModal(): void;
 }
 
-export interface EngineViewValues {
-  engineData: typeof FetchSearchApplicationApiLogic.values.data;
-  engineSchemaData: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.data;
-  fetchEngineApiError?: typeof FetchSearchApplicationApiLogic.values.error;
-  fetchEngineApiStatus: typeof FetchSearchApplicationApiLogic.values.status;
-  fetchEngineSchemaApiError?: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.error;
-  fetchEngineSchemaApiStatus: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.status;
+export interface SearchApplicationViewValues {
+  fetchSearchApplicationApiError?: typeof FetchSearchApplicationApiLogic.values.error;
+  fetchSearchApplicationApiStatus: typeof FetchSearchApplicationApiLogic.values.status;
+  fetchSearchApplicationSchemaApiError?: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.error;
+  fetchSearchApplicationSchemaApiStatus: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.status;
   hasSchemaConflicts: boolean;
   isDeleteModalVisible: boolean;
-  isLoadingEngine: boolean;
-  isLoadingEngineSchema: boolean;
+  isLoadingSearchApplication: boolean;
+  isLoadingSearchApplicationSchema: boolean;
   schemaFields: SchemaField[];
+  searchApplicationData: typeof FetchSearchApplicationApiLogic.values.data;
   searchApplicationName: typeof SearchApplicationNameLogic.values.searchApplicationName;
+  searchApplicationSchemaData: typeof FetchSearchApplicationFieldCapabilitiesApiLogic.values.data;
 }
 
-export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewActions>>({
+export const SearchApplicationViewLogic = kea<
+  MakeLogicType<SearchApplicationViewValues, SearchApplicationViewActions>
+>({
   actions: {
-    closeDeleteEngineModal: true,
-    openDeleteEngineModal: true,
+    closeDeleteSearchApplicationModal: true,
+    openDeleteSearchApplicationModal: true,
   },
   connect: {
     actions: [
       FetchSearchApplicationApiLogic,
-      ['makeRequest as fetchEngine'],
+      ['makeRequest as fetchSearchApplication'],
       FetchSearchApplicationFieldCapabilitiesApiLogic,
-      ['makeRequest as fetchEngineSchema'],
+      ['makeRequest as fetchSearchApplicationSchema'],
       SearchApplicationsListLogic,
       ['deleteSuccess'],
     ],
@@ -68,22 +70,26 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       SearchApplicationNameLogic,
       ['searchApplicationName'],
       FetchSearchApplicationApiLogic,
-      ['data as engineData', 'status as fetchEngineApiStatus', 'error as fetchEngineApiError'],
+      [
+        'data as searchApplicationData',
+        'status as fetchSearchApplicationApiStatus',
+        'error as fetchSearchApplicationApiError',
+      ],
       FetchSearchApplicationFieldCapabilitiesApiLogic,
       [
-        'data as engineSchemaData',
-        'status as fetchEngineSchemaApiStatus',
-        'error as fetchEngineSchemaApiError',
+        'data as searchApplicationSchemaData',
+        'status as fetchSearchApplicationSchemaApiStatus',
+        'error as fetchSearchApplicationSchemaApiError',
       ],
     ],
   },
   listeners: ({ actions }) => ({
     deleteSuccess: () => {
-      actions.closeDeleteEngineModal();
+      actions.closeDeleteSearchApplicationModal();
       KibanaLogic.values.navigateToUrl(SEARCH_APPLICATIONS_PATH);
     },
-    fetchEngine: ({ name }) => {
-      actions.fetchEngineSchema({ name });
+    fetchSearchApplication: ({ name }) => {
+      actions.fetchSearchApplicationSchema({ name });
     },
   }),
   path: ['enterprise_search', 'content', 'engine_view_logic'],
@@ -91,30 +97,34 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
     isDeleteModalVisible: [
       false,
       {
-        closeDeleteEngineModal: () => false,
-        openDeleteEngineModal: () => true,
+        closeDeleteSearchApplicationModal: () => false,
+        openDeleteSearchApplicationModal: () => true,
       },
     ],
   }),
   selectors: ({ selectors }) => ({
     hasSchemaConflicts: [
       () => [selectors.schemaFields],
-      (data: EngineViewValues['schemaFields']) => data.some((f) => f.type === 'conflict'),
+      (data: SearchApplicationViewValues['schemaFields']) =>
+        data.some((f) => f.type === 'conflict'),
     ],
-    isLoadingEngine: [
-      () => [selectors.fetchEngineApiStatus, selectors.engineData],
-      (status: EngineViewValues['fetchEngineApiStatus'], data: EngineViewValues['engineData']) => {
+    isLoadingSearchApplication: [
+      () => [selectors.fetchSearchApplicationApiStatus, selectors.searchApplicationData],
+      (
+        status: SearchApplicationViewValues['fetchSearchApplicationApiStatus'],
+        data: SearchApplicationViewValues['searchApplicationData']
+      ) => {
         return status === Status.IDLE || (!data && status === Status.LOADING);
       },
     ],
-    isLoadingEngineSchema: [
-      () => [selectors.fetchEngineSchemaApiStatus],
-      (status: EngineViewValues['fetchEngineSchemaApiStatus']) =>
+    isLoadingSearchApplicationSchema: [
+      () => [selectors.fetchSearchApplicationSchemaApiStatus],
+      (status: SearchApplicationViewValues['fetchSearchApplicationSchemaApiStatus']) =>
         [Status.LOADING, Status.IDLE].includes(status),
     ],
     schemaFields: [
-      () => [selectors.engineSchemaData],
-      (data: EngineViewValues['engineSchemaData']) => data?.fields || [],
+      () => [selectors.searchApplicationSchemaData],
+      (data: SearchApplicationViewValues['searchApplicationSchemaData']) => data?.fields || [],
     ],
   }),
 });

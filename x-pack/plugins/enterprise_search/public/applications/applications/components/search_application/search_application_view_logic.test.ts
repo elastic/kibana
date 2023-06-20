@@ -14,25 +14,28 @@ import { DeleteSearchApplicationApiLogicResponse } from '../../api/search_applic
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 import { SearchApplicationsListLogic } from '../search_applications/search_applications_list_logic';
 
-import { EngineViewLogic, EngineViewValues } from './search_application_view_logic';
+import {
+  SearchApplicationViewLogic,
+  SearchApplicationViewValues,
+} from './search_application_view_logic';
 
-const DEFAULT_VALUES: EngineViewValues = {
-  engineData: undefined,
-  engineSchemaData: undefined,
-  fetchEngineApiError: undefined,
-  fetchEngineApiStatus: Status.IDLE,
-  fetchEngineSchemaApiError: undefined,
-  fetchEngineSchemaApiStatus: Status.IDLE,
+const DEFAULT_VALUES: SearchApplicationViewValues = {
+  fetchSearchApplicationApiError: undefined,
+  fetchSearchApplicationApiStatus: Status.IDLE,
+  fetchSearchApplicationSchemaApiError: undefined,
+  fetchSearchApplicationSchemaApiStatus: Status.IDLE,
   hasSchemaConflicts: false,
   isDeleteModalVisible: false,
-  isLoadingEngine: true,
-  isLoadingEngineSchema: true,
+  isLoadingSearchApplication: true,
+  isLoadingSearchApplicationSchema: true,
   schemaFields: [],
+  searchApplicationData: undefined,
   searchApplicationName: 'my-test-search-application',
+  searchApplicationSchemaData: undefined,
 };
 
-describe('EngineViewLogic', () => {
-  const { mount } = new LogicMounter(EngineViewLogic);
+describe('SearchApplicationViewLogic', () => {
+  const { mount } = new LogicMounter(SearchApplicationViewLogic);
   const { mount: mountEnginesListLogic } = new LogicMounter(SearchApplicationsListLogic);
   beforeEach(() => {
     jest.clearAllMocks();
@@ -46,13 +49,13 @@ describe('EngineViewLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(EngineViewLogic.values).toEqual(DEFAULT_VALUES);
+    expect(SearchApplicationViewLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('listeners', () => {
     describe('deleteSuccess', () => {
       it('should navigate to the engines list when an engine is deleted', () => {
-        jest.spyOn(EngineViewLogic.actions, 'deleteSuccess');
+        jest.spyOn(SearchApplicationViewLogic.actions, 'deleteSuccess');
         jest
           .spyOn(KibanaLogic.values, 'navigateToUrl')
           .mockImplementationOnce(() => Promise.resolve());

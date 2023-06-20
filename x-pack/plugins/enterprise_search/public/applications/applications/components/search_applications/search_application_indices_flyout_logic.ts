@@ -9,22 +9,22 @@ import { kea, MakeLogicType } from 'kea';
 import { Status } from '../../../../../common/types/api';
 import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 import {
-  EngineViewActions,
-  EngineViewLogic,
-  EngineViewValues,
+  SearchApplicationViewActions,
+  SearchApplicationViewLogic,
+  SearchApplicationViewValues,
 } from '../search_application/search_application_view_logic';
 
 export interface SearchApplicationIndicesFlyoutValues {
-  fetchSearchApplicationApiError?: EngineViewValues['fetchEngineApiError'];
-  fetchSearchApplicationApiStatus: EngineViewValues['fetchEngineApiStatus'];
+  fetchSearchApplicationApiError?: SearchApplicationViewValues['fetchSearchApplicationApiError'];
+  fetchSearchApplicationApiStatus: SearchApplicationViewValues['fetchSearchApplicationApiStatus'];
   isFlyoutVisible: boolean;
-  isSearchApplicationLoading: EngineViewValues['isLoadingEngine'];
-  searchApplicationData: EngineViewValues['engineData']; // data from fetchSearchApplication API
+  isSearchApplicationLoading: SearchApplicationViewValues['isLoadingSearchApplication'];
+  searchApplicationData: SearchApplicationViewValues['searchApplicationData']; // data from fetchSearchApplication API
   searchApplicationName: string | null;
 }
 export interface SearchApplicationIndicesFlyoutActions {
   closeFlyout(): void;
-  fetchSearchApplication: EngineViewActions['fetchEngine'] | null;
+  fetchSearchApplication: SearchApplicationViewActions['fetchSearchApplication'] | null;
   openFlyout: (name: string) => { name: string };
 }
 
@@ -36,13 +36,13 @@ export const SearchApplicationIndicesFlyoutLogic = kea<
     openFlyout: (name) => ({ name }),
   },
   connect: {
-    actions: [EngineViewLogic, ['fetchEngine as fetchSearchApplication']],
+    actions: [SearchApplicationViewLogic, ['fetchSearchApplication']],
     values: [
-      EngineViewLogic,
+      SearchApplicationViewLogic,
       [
-        'engineData as searchApplicationData',
-        'fetchEngineApiError as fetchSearchApplicationApiError',
-        'fetchEngineApiStatus as fetchSearchApplicationApiStatus',
+        'searchApplicationData',
+        'fetchSearchApplicationApiError',
+        'fetchSearchApplicationApiStatus',
       ],
     ],
   },

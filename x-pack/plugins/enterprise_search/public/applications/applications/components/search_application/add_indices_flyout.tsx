@@ -36,14 +36,14 @@ import {
 } from '../search_applications/components/indices_select_combobox';
 
 import { AddIndicesLogic } from './add_indices_logic';
-import { EngineViewLogic } from './search_application_view_logic';
+import { SearchApplicationViewLogic } from './search_application_view_logic';
 
 export interface AddIndicesFlyoutProps {
   onClose: () => void;
 }
 
 export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) => {
-  const { engineData } = useValues(EngineViewLogic);
+  const { searchApplicationData: engineData } = useValues(SearchApplicationViewLogic);
   const { selectedIndices, updateEngineStatus, updateEngineError } = useValues(AddIndicesLogic);
   const { setSelectedIndices, submitSelectedIndices } = useActions(AddIndicesLogic);
 

@@ -40,7 +40,7 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
 import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
 
-import { EngineViewLogic } from '../search_application_view_logic';
+import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { convertResultToFieldsAndIndex, ConvertedResult, FieldValue } from './convert_results';
 import { useSelectedDocument } from './document_context';
@@ -53,7 +53,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
 const RESULT_FIELDS_TRUNCATE_AT = 4;
 
 export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
-  const { engineData } = useValues(EngineViewLogic);
+  const { searchApplicationData: engineData } = useValues(SearchApplicationViewLogic);
   const { setSelectedDocument } = useSelectedDocument();
 
   const { fields, index } = convertResultToFieldsAndIndex(result);

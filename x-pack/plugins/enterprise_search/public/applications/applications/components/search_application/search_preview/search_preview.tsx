@@ -61,7 +61,7 @@ import {
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
 import { EngineIndicesLogic } from '../engine_indices_logic';
-import { EngineViewLogic } from '../search_application_view_logic';
+import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
@@ -128,8 +128,8 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
   showConfiguration,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
-  const { engineData } = useValues(EngineViewLogic);
-  const { openDeleteEngineModal } = useActions(EngineViewLogic);
+  const { searchApplicationData } = useValues(SearchApplicationViewLogic);
+  const { openDeleteSearchApplicationModal } = useActions(SearchApplicationViewLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const [isTourClosed, setTourClosed] = useLocalStorage<boolean>(
     'search-application-tour-closed',
@@ -320,8 +320,8 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             key="delete"
             icon={<EuiIcon type="trash" color="danger" />}
             onClick={() => {
-              if (engineData) {
-                openDeleteEngineModal();
+              if (searchApplicationData) {
+                openDeleteSearchApplicationModal();
                 sendEnterpriseSearchTelemetry({
                   action: 'clicked',
                   metric: 'entSearchApplications-engineView-deleteEngine',
@@ -350,9 +350,11 @@ export const SearchApplicationSearchPreview: React.FC = () => {
   // const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);    Uncomment when view this API call is needed
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
   // const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null); Uncomment when view this API call is needed
-  const { searchApplicationName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
+  const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
+    SearchApplicationViewLogic
+  );
   const { resultFields, sortableFields } = useValues(SearchApplicationSearchPreviewLogic);
-  const { engineData } = useValues(EngineIndicesLogic);
+  const { searchApplicationData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
     const transporter = new InternalSearchApplicationTransporter(http, searchApplicationName);
@@ -368,7 +370,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
     };
   }, [http, searchApplicationName, resultFields]);
 
-  if (!engineData) return null;
+  if (!searchApplicationData) return null;
 
   return (
     <EnterpriseSearchApplicationsPageTemplate
@@ -379,7 +381,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
         }),
       ]}
       pageViewTelemetry={SearchApplicationViewTabs.PREVIEW}
-      isLoading={isLoadingEngine}
+      isLoading={isLoadingSearchApplication}
       pageHeader={{
         bottomBorder: false,
         className: 'searchApplicationHeaderBackgroundColor',

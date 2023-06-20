@@ -14,9 +14,9 @@ import { EngineIndicesLogic, EngineIndicesLogicValues } from './engine_indices_l
 
 const DEFAULT_VALUES: EngineIndicesLogicValues = {
   addIndicesFlyoutOpen: false,
-  engineData: undefined,
+  isLoadingSearchApplication: true,
+  searchApplicationData: undefined,
   searchApplicationName: 'my-test-engine',
-  isLoadingEngine: true,
 };
 
 const mockEngineData: EnterpriseSearchApplicationDetails = {
@@ -43,7 +43,7 @@ const mockEngineData: EnterpriseSearchApplicationDetails = {
   updated_at_millis: 1679501369566,
 };
 
-describe('EngineViewLogic', () => {
+describe('SearchApplicationViewLogic', () => {
   const { mount } = new LogicMounter(EngineIndicesLogic);
   const { mount: mountFetchSearchApplicationApiLogic } = new LogicMounter(
     FetchSearchApplicationApiLogic
@@ -73,20 +73,20 @@ describe('EngineViewLogic', () => {
       FetchSearchApplicationApiLogic.actions.apiSuccess(mockEngineData);
     });
     it('has engine data', () => {
-      expect(EngineIndicesLogic.values.engineData).toEqual(mockEngineData);
+      expect(EngineIndicesLogic.values.searchApplicationData).toEqual(mockEngineData);
     });
 
     describe('engineUpdated', () => {
       it('fetches new engine details', () => {
-        jest.spyOn(EngineIndicesLogic.actions, 'fetchEngine');
+        jest.spyOn(EngineIndicesLogic.actions, 'fetchSearchApplication');
 
         EngineIndicesLogic.actions.engineUpdated({
           ...mockEngineData,
           indices: mockEngineData.indices.map((index) => index.name),
         });
 
-        expect(EngineIndicesLogic.actions.fetchEngine).toHaveBeenCalledTimes(1);
-        expect(EngineIndicesLogic.actions.fetchEngine).toHaveBeenCalledWith({
+        expect(EngineIndicesLogic.actions.fetchSearchApplication).toHaveBeenCalledTimes(1);
+        expect(EngineIndicesLogic.actions.fetchSearchApplication).toHaveBeenCalledWith({
           name: DEFAULT_VALUES.searchApplicationName,
         });
       });

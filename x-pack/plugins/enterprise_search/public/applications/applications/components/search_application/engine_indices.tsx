@@ -38,7 +38,7 @@ import { EngineIndicesLogic } from './engine_indices_logic';
 export const EngineIndices: React.FC = () => {
   const subduedBackground = useEuiBackgroundColor('subdued');
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
-  const { engineData } = useValues(EngineIndicesLogic);
+  const { searchApplicationData: engineData } = useValues(EngineIndicesLogic);
   const { removeIndexFromEngine } = useActions(EngineIndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
   const [removeIndexConfirm, setConfirmRemoveIndex] = useState<string | null>(null);

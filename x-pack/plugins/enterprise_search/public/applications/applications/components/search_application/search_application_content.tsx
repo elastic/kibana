@@ -29,7 +29,7 @@ import { EngineError } from './engine_error';
 import { EngineIndices } from './engine_indices';
 import { EngineIndicesLogic } from './engine_indices_logic';
 import { EngineSchema } from './engine_schema';
-import { EngineViewLogic } from './search_application_view_logic';
+import { SearchApplicationViewLogic } from './search_application_view_logic';
 import './search_application_layout.scss';
 
 const pageTitle = i18n.translate(
@@ -65,7 +65,9 @@ const getTabBreadCrumb = (tabId: string) => {
 const ContentTabs: string[] = Object.values(SearchApplicationContentTabs);
 
 export const SearchApplicationContent = () => {
-  const { searchApplicationName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
+  const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
+    SearchApplicationViewLogic
+  );
   const { addIndicesFlyoutOpen } = useValues(EngineIndicesLogic);
   const { closeAddIndicesFlyout, openAddIndicesFlyout } = useActions(EngineIndicesLogic);
   const { contentTabId = SearchApplicationContentTabs.INDICES } = useParams<{
@@ -77,7 +79,7 @@ export const SearchApplicationContent = () => {
       <EnterpriseSearchApplicationsPageTemplate
         pageChrome={[searchApplicationName, pageTitle]}
         pageViewTelemetry={SearchApplicationViewTabs.CONTENT}
-        isLoading={isLoadingEngine}
+        isLoading={isLoadingSearchApplication}
         pageHeader={{
           bottomBorder: false,
           className: 'searchApplicationHeaderBackgroundColor',
@@ -105,7 +107,7 @@ export const SearchApplicationContent = () => {
     <EnterpriseSearchApplicationsPageTemplate
       pageChrome={[searchApplicationName, pageTitle, getTabBreadCrumb(contentTabId)]}
       pageViewTelemetry={SearchApplicationViewTabs.CONTENT}
-      isLoading={isLoadingEngine}
+      isLoading={isLoadingSearchApplication}
       pageHeader={{
         bottomBorder: false,
         breadcrumbs: [

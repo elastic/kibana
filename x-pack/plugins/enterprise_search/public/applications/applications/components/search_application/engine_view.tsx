@@ -31,18 +31,20 @@ import { EngineConnect } from './engine_connect/engine_connect';
 import { EngineError } from './engine_error';
 import { EngineHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
-import { EngineViewLogic } from './search_application_view_logic';
+import { SearchApplicationViewLogic } from './search_application_view_logic';
 import { SearchApplicationSearchPreview } from './search_preview/search_preview';
 
 export const EngineView: React.FC = () => {
-  const { fetchEngine, closeDeleteEngineModal } = useActions(EngineViewLogic);
+  const { fetchSearchApplication, closeDeleteSearchApplicationModal } = useActions(
+    SearchApplicationViewLogic
+  );
   const {
     searchApplicationName,
-    fetchEngineApiError,
-    fetchEngineApiStatus,
+    fetchSearchApplicationApiError,
+    fetchSearchApplicationApiStatus,
     hasSchemaConflicts,
     isDeleteModalVisible,
-  } = useValues(EngineViewLogic);
+  } = useValues(SearchApplicationViewLogic);
   const { tabId = SearchApplicationViewTabs.PREVIEW } = useParams<{
     tabId?: string;
   }>();
@@ -57,10 +59,10 @@ export const EngineView: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchEngine({ name: searchApplicationName });
+    fetchSearchApplication({ name: searchApplicationName });
   }, [searchApplicationName]);
 
-  if (fetchEngineApiStatus === Status.ERROR) {
+  if (fetchSearchApplicationApiStatus === Status.ERROR) {
     return (
       <EnterpriseSearchApplicationsPageTemplate
         isEmptyState
@@ -72,7 +74,7 @@ export const EngineView: React.FC = () => {
           rightSideItems: [],
         }}
         searchApplicationName={searchApplicationName}
-        emptyState={<EngineError error={fetchEngineApiError} />}
+        emptyState={<EngineError error={fetchSearchApplicationApiError} />}
         hasSchemaConflicts={hasSchemaConflicts}
       />
     );
@@ -83,7 +85,7 @@ export const EngineView: React.FC = () => {
       {isDeleteModalVisible ? (
         <DeleteSearchApplicationModal
           searchApplicationName={searchApplicationName}
-          onClose={closeDeleteEngineModal}
+          onClose={closeDeleteSearchApplicationModal}
         />
       ) : null}
       <Switch>

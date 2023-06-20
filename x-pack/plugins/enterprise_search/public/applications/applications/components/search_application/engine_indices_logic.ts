@@ -13,16 +13,16 @@ import {
 } from '../../api/search_applications/update_search_application_api_logic';
 
 import {
-  EngineViewActions,
-  EngineViewLogic,
-  EngineViewValues,
+  SearchApplicationViewActions,
+  SearchApplicationViewLogic,
+  SearchApplicationViewValues,
 } from './search_application_view_logic';
 
 export interface EngineIndicesLogicActions {
   addIndicesToEngine: (indices: string[]) => { indices: string[] };
   closeAddIndicesFlyout: () => void;
   engineUpdated: UpdateSearchApplicationApiLogicActions['apiSuccess'];
-  fetchEngine: EngineViewActions['fetchEngine'];
+  fetchSearchApplication: SearchApplicationViewActions['fetchSearchApplication'];
   openAddIndicesFlyout: () => void;
   removeIndexFromEngine: (indexName: string) => { indexName: string };
   updateEngineRequest: UpdateSearchApplicationApiLogicActions['makeRequest'];
@@ -30,9 +30,9 @@ export interface EngineIndicesLogicActions {
 
 export interface EngineIndicesLogicValues {
   addIndicesFlyoutOpen: boolean;
-  engineData: EngineViewValues['engineData'];
-  isLoadingEngine: EngineViewValues['isLoadingEngine'];
-  searchApplicationName: EngineViewValues['searchApplicationName'];
+  isLoadingSearchApplication: SearchApplicationViewValues['isLoadingSearchApplication'];
+  searchApplicationData: SearchApplicationViewValues['searchApplicationData'];
+  searchApplicationName: SearchApplicationViewValues['searchApplicationName'];
 }
 
 export const EngineIndicesLogic = kea<
@@ -46,17 +46,20 @@ export const EngineIndicesLogic = kea<
   },
   connect: {
     actions: [
-      EngineViewLogic,
-      ['fetchEngine'],
+      SearchApplicationViewLogic,
+      ['fetchSearchApplication'],
       UpdateSearchApplicationApiLogic,
       ['makeRequest as updateEngineRequest', 'apiSuccess as engineUpdated'],
     ],
-    values: [EngineViewLogic, ['engineData', 'searchApplicationName', 'isLoadingEngine']],
+    values: [
+      SearchApplicationViewLogic,
+      ['searchApplicationData', 'searchApplicationName', 'isLoadingSearchApplication'],
+    ],
   },
   listeners: ({ actions, values }) => ({
     addIndicesToEngine: ({ indices }) => {
-      if (!values.engineData) return;
-      const existingIndicesNames = values.engineData.indices.map((index) => index.name);
+      if (!values.searchApplicationData) return;
+      const existingIndicesNames = values.searchApplicationData.indices.map((index) => index.name);
       const updatedIndices = Array.from(new Set([...existingIndicesNames, ...indices]));
       actions.updateEngineRequest({
         name: values.searchApplicationName,
@@ -64,11 +67,11 @@ export const EngineIndicesLogic = kea<
       });
     },
     engineUpdated: () => {
-      actions.fetchEngine({ name: values.searchApplicationName });
+      actions.fetchSearchApplication({ name: values.searchApplicationName });
     },
     removeIndexFromEngine: ({ indexName }) => {
-      if (!values.engineData) return;
-      const updatedIndices = values.engineData.indices
+      if (!values.searchApplicationData) return;
+      const updatedIndices = values.searchApplicationData.indices
         .filter((index) => index.name !== indexName)
         .map((index) => index.name);
       actions.updateEngineRequest({

@@ -22,7 +22,7 @@ import {
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
 import { EngineError } from '../engine_error';
-import { EngineViewLogic } from '../search_application_view_logic';
+import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { SearchApplicationAPI } from './search_application_api';
 
@@ -60,7 +60,9 @@ const getTabBreadCrumb = (tabId: string) => {
 };
 
 export const EngineConnect: React.FC = () => {
-  const { searchApplicationName, isLoadingEngine, hasSchemaConflicts } = useValues(EngineViewLogic);
+  const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
+    SearchApplicationViewLogic
+  );
   const { connectTabId = SearchApplicationConnectTabs.SEARCHAPI } = useParams<{
     connectTabId?: string;
   }>();
@@ -79,7 +81,7 @@ export const EngineConnect: React.FC = () => {
       <EnterpriseSearchApplicationsPageTemplate
         pageChrome={[searchApplicationName, pageTitle]}
         pageViewTelemetry={SearchApplicationViewTabs.CONNECT}
-        isLoading={isLoadingEngine}
+        isLoading={isLoadingSearchApplication}
         pageHeader={{
           bottomBorder: false,
           className: 'searchApplicationHeaderBackgroundColor',
@@ -98,7 +100,7 @@ export const EngineConnect: React.FC = () => {
     <EnterpriseSearchApplicationsPageTemplate
       pageChrome={[searchApplicationName, pageTitle, getTabBreadCrumb(connectTabId)]}
       pageViewTelemetry={SearchApplicationViewTabs.CONNECT}
-      isLoading={isLoadingEngine}
+      isLoading={isLoadingSearchApplication}
       pageHeader={{
         bottomBorder: false,
         className: 'searchApplicationHeaderBackgroundColor',

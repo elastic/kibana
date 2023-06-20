@@ -45,7 +45,7 @@ import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
-import { EngineViewLogic } from './search_application_view_logic';
+import { SearchApplicationViewLogic } from './search_application_view_logic';
 
 const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaField }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
@@ -154,7 +154,9 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
 
 export const EngineSchema: React.FC = () => {
   const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
-  const { isLoadingEngineSchema, schemaFields, hasSchemaConflicts } = useValues(EngineViewLogic);
+  const { isLoadingSearchApplicationSchema, schemaFields, hasSchemaConflicts } = useValues(
+    SearchApplicationViewLogic
+  );
 
   const [isFilterByPopoverOpen, setIsFilterByPopoverOpen] = useState<boolean>(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
@@ -434,7 +436,7 @@ export const EngineSchema: React.FC = () => {
         <EuiBasicTable
           items={filteredSchemaFields}
           columns={columns}
-          loading={isLoadingEngineSchema}
+          loading={isLoadingSearchApplicationSchema}
           itemId="name"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isExpandable
