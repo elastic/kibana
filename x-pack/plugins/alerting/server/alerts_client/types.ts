@@ -102,7 +102,8 @@ export interface PublicAlertsClient<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string
 > {
-  create(alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>): void;
+  report(alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>): void;
+  setAlertData(alert: UpdateableAlert<AlertData, State, Context, ActionGroupIds>): void;
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;
   getRecoveredAlerts: () => Array<LegacyAlert<State, Context, ActionGroupIds>>;
@@ -120,3 +121,10 @@ export interface ReportedAlert<
   context?: Context;
   payload?: AlertData;
 }
+
+export type UpdateableAlert<
+  AlertData extends RuleAlertData,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> = Pick<ReportedAlert<AlertData, State, Context, ActionGroupIds>, 'id' | 'context' | 'payload'>;
