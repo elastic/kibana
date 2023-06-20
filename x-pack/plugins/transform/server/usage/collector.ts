@@ -6,6 +6,7 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { getResultTestConfig } from '../../common/utils/alerts';
 import { TransformHealthRuleParams } from '../../common/types/alerting';
 import { TRANSFORM_RULE_TYPE } from '../../common';
 
@@ -90,9 +91,11 @@ export function registerCollector(usageCollection: UsageCollectionSetup, alertIn
             },
           } = doc;
 
-          acc.notStarted += testsConfig?.notStarted?.enabled ? 1 : 0;
-          acc.errorMessages += testsConfig?.errorMessages?.enabled ? 1 : 0;
-          acc.healthCheck += testsConfig?.healthCheck?.enabled ? 1 : 0;
+          const resultConfig = getResultTestConfig(testsConfig);
+
+          acc.notStarted += resultConfig?.notStarted?.enabled ? 1 : 0;
+          acc.errorMessages += resultConfig?.errorMessages?.enabled ? 1 : 0;
+          acc.healthCheck += resultConfig?.healthCheck?.enabled ? 1 : 0;
 
           return acc;
         },
