@@ -51,11 +51,14 @@ async function updateWithOCC(
   const { id, title, enabled, duration, rRule } = params;
 
   try {
-    const { attributes, id: fetchedId, version } =
-      await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
-        MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        id
-      );
+    const {
+      attributes,
+      id: fetchedId,
+      version,
+    } = await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      id
+    );
 
     if (moment.utc(attributes.expirationDate).isBefore(new Date())) {
       throw Boom.badRequest('Cannot edit archived maintenance windows');

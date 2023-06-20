@@ -106,7 +106,7 @@ describe('MaintenanceWindowClient - update', () => {
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
       },
-      { 
+      {
         id: 'test-id',
         overwrite: true,
         version: '123',
@@ -164,7 +164,7 @@ describe('MaintenanceWindowClient - update', () => {
       expect.objectContaining({
         events: [...modifiedEvents, expect.any(Object), expect.any(Object), expect.any(Object)],
       }),
-      { 
+      {
         id: 'test-id',
         overwrite: true,
         version: '123',
@@ -190,7 +190,7 @@ describe('MaintenanceWindowClient - update', () => {
           { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-02T00:00:00.000Z' },
         ],
       }),
-      { 
+      {
         id: 'test-id',
         overwrite: true,
         version: '123',
