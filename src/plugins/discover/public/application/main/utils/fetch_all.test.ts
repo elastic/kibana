@@ -266,7 +266,7 @@ describe('test fetchAll', () => {
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'plain', query },
       {
-        fetchStatus: FetchStatus.COMPLETE,
+        fetchStatus: FetchStatus.PARTIAL,
         recordRawType: 'plain',
         result: documents,
         textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
