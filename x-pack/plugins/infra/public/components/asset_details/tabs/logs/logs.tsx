@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import useDebounce from 'react-use/lib/useDebounce';
-import { LogViewReference } from '../../../../../common/log_views';
+import type { LogViewReference } from '../../../../../common/log_views';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { LogStream } from '../../../log_stream';
@@ -88,12 +88,12 @@ export const Logs = ({
   );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiFieldSearch
-              data-test-subj="infraTabComponentFieldSearch"
+              data-test-subj="infraAssetDetailsLogsTabFieldSearch"
               fullWidth
               placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
                 defaultMessage: 'Search for log entries...',
@@ -106,7 +106,7 @@ export const Logs = ({
           <EuiFlexItem grow={false}>
             <RedirectAppLinks coreStart={services}>
               <EuiButtonEmpty
-                data-test-subj="infraTabComponentOpenInLogsButton"
+                data-test-subj="iinfraAssetDetailsLogsTabOpenInLogsButton"
                 size="xs"
                 flush="both"
                 iconType="popout"

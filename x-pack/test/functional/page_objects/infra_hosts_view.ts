@@ -32,6 +32,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-tabs-processes');
     },
 
+    async clickLogsFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-logs');
+    },
+
     async clickProcessesTableExpandButton() {
       return testSubjects.click('infraProcessRowButton');
     },
