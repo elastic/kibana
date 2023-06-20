@@ -7,12 +7,13 @@
 
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '../..';
-// TODO: change
-export const LINK_TO_METRICS_EXPLORER = '/app/metrics/explorer';
+
+// Putting undefined value in the link will hide the View In App button as requested in to https://github.com/elastic/kibana/issues/159782
+export const LINK_TO_THRESHOLD_EXPLORER = undefined;
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '-';
-  const link = LINK_TO_METRICS_EXPLORER; // TODO https://github.com/elastic/kibana/issues/106497 & https://github.com/elastic/kibana/issues/106958
+  const link = LINK_TO_THRESHOLD_EXPLORER;
 
   return {
     reason,
