@@ -8,15 +8,12 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
-servers:
-  - url: http://localhost:5601
-    description: local
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
 tags:
   - name: cases
     description: Case APIs enable you to open and track issues.
+servers:
+  - url: http://localhost:5601
+    description: local
 paths:
   /s/{spaceId}/api/cases:
     post:
@@ -1156,6 +1153,7 @@ paths:
           schema:
             type: integer
             default: 20
+            maximum: 100
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/space_id'
       responses:
@@ -3603,3 +3601,6 @@ components:
                 uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             version: WzM1ODg4LDFb
             type: assignees
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
