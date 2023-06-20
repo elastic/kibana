@@ -13,7 +13,7 @@ import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_ta
 export const UpgradePrebuiltRulesTableButtons = () => {
   const {
     state: { rules, selectedRules, loadingRules },
-    actions: { upgradeSelectedRules, upgradeAllRules },
+    actions: { upgradeAllRules, upgradeSelectedRules },
   } = useUpgradePrebuiltRulesTableContext();
 
   const isRulesAvailableForUpgrade = rules.length > 0;
@@ -23,30 +23,28 @@ export const UpgradePrebuiltRulesTableButtons = () => {
   const isRuleUpgrading = loadingRules.length > 0;
 
   return (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-        {shouldDisplayUpgradeSelectedRulesButton ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={upgradeSelectedRules} disabled={isRuleUpgrading}>
-              <>
-                {i18n.UPDATE_SELECTED_RULES(numberOfSelectedRules)}
-                {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
-              </>
-            </EuiButton>
-          </EuiFlexItem>
-        ) : null}
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+      {shouldDisplayUpgradeSelectedRulesButton ? (
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            onClick={upgradeAllRules}
-            disabled={!isRulesAvailableForUpgrade || isRuleUpgrading}
-          >
-            {i18n.UPDATE_ALL}
-            {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
+          <EuiButton onClick={upgradeSelectedRules} disabled={isRuleUpgrading}>
+            <>
+              {i18n.UPDATE_SELECTED_RULES(numberOfSelectedRules)}
+              {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
+            </>
           </EuiButton>
         </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          fill
+          iconType="plusInCircle"
+          onClick={upgradeAllRules}
+          disabled={!isRulesAvailableForUpgrade || isRuleUpgrading}
+        >
+          {i18n.UPDATE_ALL}
+          {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
