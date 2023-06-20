@@ -38,8 +38,9 @@ export const geoLineLayerWizardConfig: LayerWizard = {
       sourceConfig: {
         indexPatternId: string;
         geoField: string;
-        splitField: string;
-        sortField: string;
+        groupByTimeseries: boolean;
+        splitField?: string;
+        sortField?: string;
       } | null
     ) => {
       if (!sourceConfig) {
