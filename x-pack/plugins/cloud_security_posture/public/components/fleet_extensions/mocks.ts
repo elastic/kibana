@@ -50,6 +50,34 @@ export const getMockPackageInfoVulnMgmtAWS = () => {
   } as PackageInfo;
 };
 
+export const getMockPackageInfoCspmAWS = () => {
+  return {
+    name: 'cspm',
+    policy_templates: [
+      {
+        title: '',
+        description: '',
+        name: 'cspm',
+        inputs: [
+          {
+            type: CLOUDBEAT_AWS,
+            title: '',
+            description: '',
+            vars: [
+              {
+                type: 'text',
+                name: 'cloud_formation_template',
+                default: 's3_url',
+                show_user: false,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  } as PackageInfo;
+};
+
 const getPolicyMock = (
   type: PostureInput,
   posture: string,
