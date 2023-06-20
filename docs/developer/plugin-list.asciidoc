@@ -674,7 +674,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/profiling/README.md[profiling]
-|undefined
+|Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/remote_clusters/README.md[remoteClusters]

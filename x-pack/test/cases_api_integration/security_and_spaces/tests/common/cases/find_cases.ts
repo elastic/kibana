@@ -92,6 +92,29 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('can filter by reserved kql characters in tags', async () => {
+        const tagsColon = ['super:bad:case'];
+        const tagsSlashQuote = ['awesome\\"'];
+
+        const postedCase1 = await createCase(supertest, { ...postCaseReq, tags: tagsSlashQuote });
+        const postedCase2 = await createCase(supertest, {
+          ...postCaseReq,
+          tags: tagsColon,
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { tags: [...tagsColon, ...tagsSlashQuote] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [postedCase1, postedCase2],
+          count_open_cases: 2,
+        });
+      });
+
       it('filters by status', async () => {
         await createCase(supertest, postCaseReq);
         const toCloseCase = await createCase(supertest, postCaseReq);
