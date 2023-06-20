@@ -72,6 +72,8 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
+import type { CustomizationCallback } from './customizations';
+import { createCustomizeFunction, createProfileRegistry } from './customizations/profile_registry';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 
 const DocViewerLegacyTable = React.lazy(
@@ -157,6 +159,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
+  readonly customize: (profileName: string, callback: CustomizationCallback) => void;
 }
 
 /**
@@ -212,6 +215,7 @@ export class DiscoverPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
+  private profileRegistry = createProfileRegistry();
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
@@ -219,12 +223,14 @@ export class DiscoverPlugin
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
     const isDev = this.initializerContext.env.mode.dev;
+
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
+
+      // Create locators for external use without profile-awareness
       this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl })
       );
-
       this.contextLocator = plugins.share.url.locators.create(
         new DiscoverContextAppLocatorDefinition({ useHash })
       );
@@ -320,13 +326,19 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
+        const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+          locator: this.locator!,
+          contextLocator: this.contextLocator!,
+          singleDocLocator: this.singleDocLocator!,
+        });
+
         const services = buildServices(
           coreStart,
           discoverStartPlugins,
           this.initializerContext,
-          this.locator!,
-          this.contextLocator!,
-          this.singleDocLocator!
+          locator,
+          contextLocator,
+          singleDocLocator
         );
 
         // make sure the data view list is up to date
@@ -336,7 +348,12 @@ export class DiscoverPlugin
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element, services, isDev);
+        const unmount = renderApp({
+          element: params.element,
+          services,
+          profileRegistry: this.profileRegistry,
+          isDev,
+        });
         return () => {
           unlistenParentHistory();
           unmount();
@@ -399,6 +416,7 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
+      customize: createCustomizeFunction(this.profileRegistry),
     };
   }
 
@@ -419,13 +437,19 @@ export class DiscoverPlugin
 
     const getDiscoverServices = async () => {
       const [coreStart, discoverStartPlugins] = await core.getStartServices();
+      const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+        locator: this.locator!,
+        contextLocator: this.contextLocator!,
+        singleDocLocator: this.singleDocLocator!,
+      });
+
       return buildServices(
         coreStart,
         discoverStartPlugins,
         this.initializerContext,
-        this.locator!,
-        this.contextLocator!,
-        this.singleDocLocator!
+        locator,
+        contextLocator,
+        singleDocLocator
       );
     };
 
@@ -433,3 +457,24 @@ export class DiscoverPlugin
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }
+
+/**
+ * Create profile-aware locators for internal use
+ */
+const getProfileAwareLocators = async ({
+  locator,
+  contextLocator,
+  singleDocLocator,
+}: {
+  locator: DiscoverAppLocator;
+  contextLocator: DiscoverContextAppLocator;
+  singleDocLocator: DiscoverSingleDocLocator;
+}) => {
+  const { ProfileAwareLocator } = await import('./customizations/profile_aware_locator');
+
+  return {
+    locator: new ProfileAwareLocator(locator),
+    contextLocator: new ProfileAwareLocator(contextLocator),
+    singleDocLocator: new ProfileAwareLocator(singleDocLocator),
+  };
+};

@@ -337,6 +337,14 @@ function getExpressionForLayer(
             format?.params && 'suffix' in format.params && format.params.suffix
               ? [format.params.suffix]
               : [],
+          compact:
+            format?.params && 'compact' in format.params && format.params.compact
+              ? [format.params.compact]
+              : [],
+          pattern:
+            format?.params && 'pattern' in format.params && format.params.pattern
+              ? [format.params.pattern]
+              : [],
           parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
         },
       };

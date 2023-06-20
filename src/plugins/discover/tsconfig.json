@@ -51,7 +51,8 @@
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/shared-ux-router",
-    "@kbn/dom-drag-drop",
+    "@kbn/dom-drag-drop",    
+    "@kbn/core-saved-objects-api-server",
     "@kbn/cell-actions",
   ],
   "exclude": [
