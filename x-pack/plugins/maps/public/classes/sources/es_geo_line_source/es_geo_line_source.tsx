@@ -114,8 +114,8 @@ export class ESGeoLineSource extends AbstractESAggSource {
         onChange={onChange}
         metrics={this._descriptor.metrics}
         groupByTimeseries={this._descriptor.groupByTimeseries}
-        splitField={this._descriptor.splitField}
-        sortField={this._descriptor.sortField}
+        splitField={this._descriptor.splitField ?? ''}
+        sortField={this._descriptor.sortField ?? ''}
       />
     );
   }

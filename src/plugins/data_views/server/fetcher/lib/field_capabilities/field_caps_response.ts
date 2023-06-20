@@ -148,7 +148,9 @@ export function readFieldCapsResponse(
         timeSeriesDimension: capsByType[types[0]].time_series_dimension,
       };
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
+      // @ts-expect-error MappingTimeSeriesMetricType does not contain 'position'
       agg.array.push(field);
+      // @ts-expect-error MappingTimeSeriesMetricType does not contain 'position'
       agg.hash[fieldName] = field;
       return agg;
     },

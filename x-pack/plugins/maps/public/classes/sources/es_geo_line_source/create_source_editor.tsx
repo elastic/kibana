@@ -11,18 +11,13 @@ import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { EuiPanel } from '@elastic/eui';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { GeoFieldSelect } from '../../../components/geo_field_select';
-
+import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
 import { getGeoPointFields, getIsTimeseries } from '../../../index_pattern_util';
 import { GeoLineForm } from './geo_line_form';
 
 interface Props {
   onSourceConfigChange: (
-    sourceConfig: {
-      indexPatternId: string;
-      geoField: string;
-      splitField: string;
-      sortField: string;
-    } | null
+    sourceConfig: Partial<ESGeoLineSourceDescriptor> | null
   ) => void;
 }
 

@@ -19,7 +19,7 @@ import type { OnSourceChangeArgs } from '../source';
 interface Props {
   bucketsName: string;
   indexPatternId: string;
-  groupByTimeSeries: boolean;
+  groupByTimeseries: boolean;
   splitField: string;
   sortField: string;
   metrics: AggDescriptor[];
