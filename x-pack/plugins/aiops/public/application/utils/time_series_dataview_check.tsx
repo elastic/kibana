@@ -35,7 +35,7 @@ export function timeSeriesDataViewWarning(
     });
   }
 
-  return !dataView.isTimeBased() ? (
+  return (
     <EuiCallOut
       title={i18n.translate('xpack.aiops.dataViewNotBasedOnTimeSeriesWarning.title', {
         defaultMessage: 'The data view "{dataViewTitle}" is not based on a time series.',
@@ -46,5 +46,5 @@ export function timeSeriesDataViewWarning(
     >
       <p>{description}</p>
     </EuiCallOut>
-  ) : null;
+  );
 }
