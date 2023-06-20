@@ -11,7 +11,7 @@ import path from 'path';
 import globby from 'globby';
 import { safeLoad } from 'js-yaml';
 
-import { getField, processFields, addTimeSeriesFields } from './field';
+import { getField, processFields, processFieldsWithWildcard } from './field';
 import type { Field, Fields } from './field';
 
 // Add our own serialiser to just do JSON.stringify
@@ -671,8 +671,8 @@ describe('processFields', () => {
     `);
   });
 
-  describe('addTimeSeriesFields', () => {
-    const literalYml = `
+  describe('processFieldsWithWildcard', () => {
+    const wildcardYml = `
     - name: a.*.b
       type: long
       format: bytes
@@ -681,8 +681,16 @@ describe('processFields', () => {
       description: |
         Total swap memory.
 `;
-
-    const fields: Field[] = safeLoad(literalYml);
+    const wildcardWithObjectTypeYml = `
+    - name: a.*.b
+      type: long
+      format: bytes
+      unit: byte
+      object_type: scaled_float
+      metric_type: gauge
+      description: |
+        Total swap memory.
+`;
 
     const noWildcardYml = `
     - name: test
@@ -695,40 +703,58 @@ describe('processFields', () => {
 `;
 
     const noWildcardFields: Field[] = safeLoad(noWildcardYml);
+    const wildcardFields: Field[] = safeLoad(wildcardYml);
+    const wildcardWithObjectTypeFields: Field[] = safeLoad(wildcardWithObjectTypeYml);
 
-    test('Copies metric_type to time_series_metric field when tsds is enabled and name has wildcard', () => {
-      expect(addTimeSeriesFields(fields, true)).toMatchInlineSnapshot(`
+    test('Does not add object type when object_type field when is alraedy defined and name has wildcard', () => {
+      expect(processFieldsWithWildcard(wildcardWithObjectTypeFields, false)).toMatchInlineSnapshot(`
         [
           {
             "name": "a.*.b",
             "type": "long",
             "format": "bytes",
             "unit": "byte",
-            "metric_type": "gauge",
-            "description": "Total swap memory.\\n",
-            "time_series_metric": "gauge"
-          }
-        ]
-      `);
-    });
-
-    test('Returns input fields when tsds is disabled', () => {
-      expect(addTimeSeriesFields(fields, false)).toMatchInlineSnapshot(`
-        [
-          {
-            "name": "a.*.b",
-            "type": "long",
-            "format": "bytes",
-            "unit": "byte",
+            "object_type": "scaled_float",
             "metric_type": "gauge",
             "description": "Total swap memory.\\n"
           }
         ]
       `);
     });
+    test('Replaces metric_type with time_series_metric field when tsds is enabled and name has wildcard', () => {
+      expect(processFieldsWithWildcard(wildcardFields, true)).toMatchInlineSnapshot(`
+        [
+          {
+            "name": "a.*.b",
+            "type": "object",
+            "format": "bytes",
+            "unit": "byte",
+            "description": "Total swap memory.\\n",
+            "object_type": "long",
+            "time_series_metric": "gauge"
+          }
+        ]
+      `);
+    });
+
+    test('Returns metric_type input field when tsds is disabled', () => {
+      expect(processFieldsWithWildcard(wildcardFields, false)).toMatchInlineSnapshot(`
+        [
+          {
+            "name": "a.*.b",
+            "type": "object",
+            "format": "bytes",
+            "unit": "byte",
+            "metric_type": "gauge",
+            "description": "Total swap memory.\\n",
+            "object_type": "long"
+          }
+        ]
+      `);
+    });
 
     test('Returns input fields when name has no wildcard', () => {
-      expect(addTimeSeriesFields(noWildcardFields, true)).toMatchInlineSnapshot(`
+      expect(processFieldsWithWildcard(noWildcardFields, true)).toMatchInlineSnapshot(`
         [
           {
             "name": "test",

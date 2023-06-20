@@ -6,6 +6,7 @@
  */
 
 import { safeLoad } from 'js-yaml';
+import { omit } from 'lodash';
 
 import type { PackageInfo } from '../../../types';
 import { getAssetsData } from '../packages/assets';
@@ -253,41 +254,43 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
   return undefined;
 };
 
-export function processFieldsWithWildcard(fields: Fields): Fields {
-  const newFields: Fields = [];
-  for (const field of fields) {
-    const hasWildcard = field.name.includes('*');
-    const hasObjectType = field.object_type;
-    if (hasWildcard && !hasObjectType) {
-      newFields.push({ ...field, type: 'object', object_type: field.type });
-    } else {
-      newFields.push({ ...field });
-    }
-  }
-  return newFields;
-}
-
-export function addTimeSeriesFields(
+export function processFieldsWithWildcard(
   fields: Fields,
   isIndexModeTimeSeries: boolean | undefined
 ): Fields {
   const newFields: Fields = [];
-  if (!isIndexModeTimeSeries) return fields;
-
   for (const field of fields) {
-    if (field.name.includes('*') && 'metric_type' in field) {
-      newFields.push({ ...field, time_series_metric: field.metric_type });
-    } else {
-      newFields.push({ ...field });
-    }
+    const objectTypeField = processFieldWithoutObjectType(field);
+    const processedField = processFieldWithTimeSeries(objectTypeField, isIndexModeTimeSeries);
+    newFields.push({ ...processedField });
   }
   return newFields;
 }
 
+export function processFieldWithoutObjectType(field: Field): Field {
+  const hasWildcard = field.name.includes('*');
+  const hasObjectType = field.object_type;
+  if (hasWildcard && !hasObjectType) {
+    return { ...field, type: 'object', object_type: field.type };
+  } else {
+    return { ...field };
+  }
+}
+
+export function processFieldWithTimeSeries(
+  field: Field,
+  isIndexModeTimeSeries: boolean | undefined
+): Field {
+  if (isIndexModeTimeSeries && field.name.includes('*') && 'metric_type' in field) {
+    return { ...omit(field, 'metric_type'), type: 'object', time_series_metric: field.metric_type };
+  } else {
+    return { ...field };
+  }
+}
+
 export function processFields(fields: Fields, isIndexModeTimeSeries?: boolean): Fields {
-  const processedFields = processFieldsWithWildcard(fields);
-  const addedFields = addTimeSeriesFields(processedFields, isIndexModeTimeSeries);
-  const expandedFields = expandFields(addedFields);
+  const processedFields = processFieldsWithWildcard(fields, isIndexModeTimeSeries);
+  const expandedFields = expandFields(processedFields);
   const dedupedFields = dedupFields(expandedFields);
 
   return validateFields(dedupedFields, dedupedFields);
