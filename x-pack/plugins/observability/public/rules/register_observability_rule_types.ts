@@ -84,7 +84,7 @@ export const registerObservabilityRuleTypes = (
         'xpack.observability.threshold.rule.alertFlyout.alertDescription',
         {
           defaultMessage:
-            'Alert when either the latency, throughput, or failed transaction rate of a service is anomalous.',
+            'Alert when any Observability data type reaches or exceeds a given value.',
         }
       ),
       iconClass: 'bell',
