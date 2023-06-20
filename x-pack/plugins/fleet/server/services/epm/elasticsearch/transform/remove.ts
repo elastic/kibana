@@ -39,7 +39,12 @@ export const deleteTransforms = async (
 
       await stopTransforms([transformId], esClient);
       await esClient.transform.deleteTransform(
-        { force: true, transform_id: transformId, delete_dest_index: deleteDestinationIndices },
+        {
+          force: true,
+          transform_id: transformId,
+          // @ts-expect-error ES type needs to be updated
+          delete_dest_index: deleteDestinationIndices,
+        },
         { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
       );
       logger.info(`Deleted: ${transformId}`);
