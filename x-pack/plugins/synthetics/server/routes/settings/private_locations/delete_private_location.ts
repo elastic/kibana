@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getAllPrivateLocations } from './get_private_locations';
+import { getAllPrivateLocationsAttributes } from './get_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import {
@@ -26,7 +26,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory = () => (
   handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
     const { locationId } = request.params as { locationId: string };
 
-    const { locations } = await getAllPrivateLocations(savedObjectsClient);
+    const { locations } = await getAllPrivateLocationsAttributes(savedObjectsClient);
     const remainingLocations = locations.filter((loc) => loc.id !== locationId);
 
     const result = await savedObjectsClient.create(
