@@ -78,3 +78,7 @@ export interface CreateManagementItemArgs {
   capabilitiesId?: string; // overrides app id
   redirectFrom?: string; // redirects from an old app id to the current app id
 }
+
+export interface ManagementPublicConfig {
+  showNavigationCards?: boolean;
+}

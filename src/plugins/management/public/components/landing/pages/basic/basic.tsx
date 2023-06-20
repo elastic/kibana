@@ -15,7 +15,7 @@ interface ManagementLandingPageProps {
   version: string;
 }
 
-export const DefaultLandingPage = ({ version }: ManagementLandingPageProps) => {
+export const BasicPage = ({ version }: ManagementLandingPageProps) => {
   return (
     <KibanaPageTemplate.EmptyPrompt
       data-test-subj="managementHome"

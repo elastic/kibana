@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ServerlessLandingPage } from './serverless';
+export { BasicPage } from './basic';
+export { WithCardNavigationPage } from './with_card_navigation';

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DefaultLandingPage } from './default';
+export { WithCardNavigationPage } from './with_card_navigation';

@@ -7,8 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { DefaultLandingPage } from './default';
-import { ServerlessLandingPage } from './serverless';
+import { BasicPage, WithCardNavigationPage } from './pages';
 import { ManagementSection } from '../../utils';
 
 interface ManagementLandingPageProps {
@@ -17,6 +16,7 @@ interface ManagementLandingPageProps {
   onAppMounted: (id: string) => void;
   setBreadcrumbs: () => void;
   sections: ManagementSection[];
+  showNavigationCards?: boolean;
 }
 
 export const ManagementLandingPage = ({
@@ -25,17 +25,17 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   appBasePath,
   onAppMounted,
+  showNavigationCards,
 }: ManagementLandingPageProps) => {
-  const isServerless = true;
   setBreadcrumbs();
 
   useEffect(() => {
     onAppMounted('');
   }, [onAppMounted]);
 
-  if (isServerless) {
-    return <ServerlessLandingPage appBasePath={appBasePath} sections={sections} />;
+  if (showNavigationCards) {
+    return <WithCardNavigationPage appBasePath={appBasePath} sections={sections} />;
   }
 
-  return <DefaultLandingPage version={version} />;
+  return <BasicPage version={version} />;
 };

@@ -22,7 +22,7 @@ import {
   AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
-import { ManagementSetup, ManagementStart } from './types';
+import { ManagementSetup, ManagementStart, ManagementPublicConfig } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
@@ -79,6 +79,7 @@ export class ManagementPlugin
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
     const managementPlugin = this;
+    const { showNavigationCards } = this.initializerContext.config.get<ManagementPublicConfig>();
 
     if (home) {
       home.featureCatalogue.register({
@@ -116,6 +117,7 @@ export class ManagementPlugin
           coreStart,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
+          showNavigationCards,
         });
       },
     });

@@ -70,6 +70,7 @@ export const ManagementRouter = memo(
               appBasePath={appBasePath}
               setBreadcrumbs={setBreadcrumbs}
               onAppMounted={onAppMounted}
+              showNavigationCards={dependencies.showNavigationCards}
             />
           )}
         />

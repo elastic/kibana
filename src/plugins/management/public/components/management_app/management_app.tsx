@@ -41,6 +41,7 @@ export interface ManagementAppDependencies {
   coreStart: CoreStart;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
+  showNavigationCards?: boolean;
 }
 
 export const ManagementApp = ({
@@ -49,7 +50,7 @@ export const ManagementApp = ({
   history,
   theme$,
 }: ManagementAppProps) => {
-  const { setBreadcrumbs, isSidebarEnabled$ } = dependencies;
+  const { setBreadcrumbs, isSidebarEnabled$, showNavigationCards } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
   const isSidebarEnabled = useObservable(isSidebarEnabled$);
@@ -122,6 +123,7 @@ export const ManagementApp = ({
               sections={sections}
               appBasePath={appBasePath}
               dependencies={dependencies}
+              showNavigationCards={showNavigationCards}
             />
           </KibanaPageTemplate>
         </KibanaThemeProvider>

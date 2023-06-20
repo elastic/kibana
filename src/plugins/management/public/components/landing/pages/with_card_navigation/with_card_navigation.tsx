@@ -21,7 +21,7 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { ManagementSection, ManagementApp } from '../../../utils';
+import { ManagementSection, ManagementApp } from '../../../../utils';
 
 interface ManagementLandingPageProps {
   sections: ManagementSection[];
@@ -48,78 +48,124 @@ const getEnabledAppsByCategory = (sections: ManagementSection[]) => {
   return [
     {
       id: 'data',
-      title: 'Data',
+      title: i18n.translate('management.landing.withCardNavigation.dataTitle', {
+        defaultMessage: 'Data',
+      }),
       apps: [
         {
           ...getDataFromManagementApp(filteredApps.ingest_pipelines),
-          description:
-            'Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing.',
+          description: i18n.translate(
+            'management.landing.withCardNavigation.ingestPipelinesDescription',
+            {
+              defaultMessage:
+                'Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing.',
+            }
+          ),
           icon: <EuiIcon size="l" type="managementApp" />,
         },
         {
           ...getDataFromManagementApp(filteredApps.pipelines),
-          description: 'Manage Logstash event processing and see the result visually.',
+          description: i18n.translate('management.landing.withCardNavigation.ingestDescription', {
+            defaultMessage: 'Manage Logstash event processing and see the result visually.',
+          }),
           icon: <EuiIcon size="l" type="logsApp" />,
         },
         {
           ...getDataFromManagementApp(filteredApps.index_management),
-          description: 'Update your Elasticsearch indices individually or in bulk.',
+          description: i18n.translate(
+            'management.landing.withCardNavigation.indexmanagementDescription',
+            {
+              defaultMessage: 'Update your Elasticsearch indices individually or in bulk.',
+            }
+          ),
           icon: <EuiIcon size="l" type="indexManagementApp" />,
         },
         {
           ...getDataFromManagementApp(filteredApps.transform),
-          description:
-            'Transforms pivot indices into summarized, entity-centric indices, or create an indexed view of the latest documents.',
+          description: i18n.translate(
+            'management.landing.withCardNavigation.transformDescription',
+            {
+              defaultMessage:
+                'Transforms pivot indices into summarized, entity-centric indices, or create an indexed view of the latest documents.',
+            }
+          ),
           icon: <EuiIcon size="l" type="managementApp" />,
         },
         {
           ...getDataFromManagementApp(filteredApps.jobsListLink),
-          description:
-            'View, export, and import machine learning analytics and anomaly detection items.',
+          description: i18n.translate('management.landing.withCardNavigation.mlDescription', {
+            defaultMessage:
+              'View, export, and import machine learning analytics and anomaly detection items.',
+          }),
           icon: <EuiIcon size="l" type="machineLearningApp" />,
         },
         {
           ...getDataFromManagementApp(filteredApps.dataViews),
-          description:
-            'Create and manage the data views that help you retrieve your data from Elasticsearch.',
+          description: i18n.translate(
+            'management.landing.withCardNavigation.dataViewsDescription',
+            {
+              defaultMessage:
+                'Create and manage the data views that help you retrieve your data from Elasticsearch.',
+            }
+          ),
           icon: <EuiIcon size="l" type="managementApp" />,
         },
       ],
     },
     {
       id: 'content',
-      title: 'Content',
+      title: i18n.translate('management.landing.withCardNavigation.contentTitle', {
+        defaultMessage: 'Content',
+      }),
       apps: [
         {
           ...getDataFromManagementApp(filteredApps.objects),
-          description:
-            'Manage and share your saved objects. To edit the underlying data of an object, go to its associated application.',
+          description: i18n.translate('management.landing.withCardNavigation.objectsDescription', {
+            defaultMessage:
+              'Manage and share your saved objects. To edit the underlying data of an object, go to its associated application.',
+          }),
           icon: <EuiIcon size="l" type="savedObjectsApp" />,
         },
         {
           ...getDataFromManagementApp(filteredApps.tags),
-          description: 'Use tags to categorize and easily find your objects.',
+          description: i18n.translate('management.landing.withCardNavigation.tagsDescription', {
+            defaultMessage: 'Use tags to categorize and easily find your objects.',
+          }),
           icon: <EuiIcon size="l" type="managementApp" />,
         },
         {
           ...getDataFromManagementApp(filteredApps.filesManagement),
-          description: 'Any files created will be listed here.',
+          description: i18n.translate(
+            'management.landing.withCardNavigation.fileManagementDescription',
+            {
+              defaultMessage: 'Any files created will be listed here.',
+            }
+          ),
           icon: <EuiIcon size="l" type="indexManagementApp" />,
         },
       ],
     },
     {
       id: 'other',
-      title: 'Other',
+      title: i18n.translate('management.landing.withCardNavigation.otherTitle', {
+        defaultMessage: 'Other',
+      }),
       apps: [
         {
           ...getDataFromManagementApp(filteredApps.api_keys),
-          description: 'Allow applications to access Elastic on your behalf.',
+          description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
+            defaultMessage: 'Allow applications to access Elastic on your behalf.',
+          }),
           icon: <EuiIcon size="l" type="managementApp" />,
         },
         {
           ...getDataFromManagementApp(filteredApps.settings),
-          description: 'Settings intended for advanced users.',
+          description: i18n.translate(
+            'management.landing.withCardNavigation.advancedSettingsDescription',
+            {
+              defaultMessage: 'Settings intended for advanced users.',
+            }
+          ),
           icon: <EuiIcon size="l" type="logsApp" />,
         },
       ],
@@ -127,7 +173,7 @@ const getEnabledAppsByCategory = (sections: ManagementSection[]) => {
   ];
 };
 
-export const ServerlessLandingPage = ({ sections, appBasePath }: ManagementLandingPageProps) => {
+export const WithCardNavigationPage = ({ sections, appBasePath }: ManagementLandingPageProps) => {
   const appsByCategory = getEnabledAppsByCategory(sections);
 
   return (
@@ -135,10 +181,10 @@ export const ServerlessLandingPage = ({ sections, appBasePath }: ManagementLandi
       <EuiPageSection color="transparent" paddingSize="none">
         <EuiPageHeader
           bottomBorder
-          pageTitle={i18n.translate('management.landing.serverless.pageTitle', {
+          pageTitle={i18n.translate('management.landing.withCardNavigation.pageTitle', {
             defaultMessage: 'Management',
           })}
-          description={i18n.translate('management.landing.serverless.pageDescription', {
+          description={i18n.translate('management.landing.withCardNavigation.pageDescription', {
             defaultMessage: 'Manage your indices, data views, saved objects, settings, and more.',
           })}
         />
