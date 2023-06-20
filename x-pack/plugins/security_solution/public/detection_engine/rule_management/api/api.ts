@@ -10,6 +10,9 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
+import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
+import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
@@ -236,6 +239,21 @@ export const fetchRulesSnoozeSettings = async ({
     return result;
   }, {} as RulesSnoozeSettingsMap);
 };
+
+export const fetchConnectors = (
+  signal?: AbortSignal
+): Promise<Array<AsApiContract<ActionResult>>> =>
+  KibanaServices.get().http.fetch(`${BASE_ACTION_API_PATH}/connectors`, { method: 'GET', signal });
+
+export const fetchConnectorTypes = (signal?: AbortSignal): Promise<ActionType[]> =>
+  KibanaServices.get().http.fetch(`${BASE_ACTION_API_PATH}/connector_types`, {
+    method: 'GET',
+    signal,
+    query: {
+      feature_id: 'siem',
+    },
+  });
+
 export interface BulkActionSummary {
   failed: number;
   skipped: number;

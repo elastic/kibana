@@ -12,3 +12,5 @@ export const DEFAULT_QUERY_LANGUAGE = 'kuery';
 export const KIBANA_USER_QUERY_LANGUAGE_KEY = 'kibana.userQueryLanguage';
 
 export type ValueSuggestionsMethod = 'terms_enum' | 'terms_agg';
+
+export const SAVED_QUERY_BASE_URL = '/internal/saved_query';
