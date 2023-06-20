@@ -29,9 +29,9 @@ import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useMetricsDataViewContext } from './use_data_view';
-import { buildCombinedHostsFilter } from '../helpers';
 import { ColumnHeader } from '../components/table/column_header';
 import { TOOLTIP, TABLE_COLUMN_LABEL } from '../translations';
+import { createHostsFilter } from '../utils';
 
 /**
  * Columns and items types
@@ -154,11 +154,7 @@ export const useHostsTable = () => {
       return [];
     }
     const selectedHostNames = selectedItems.map(({ name }) => name);
-    const newFilter = buildCombinedHostsFilter({
-      field: 'host.name',
-      values: selectedHostNames,
-      dataView,
-    });
+    const newFilter = createHostsFilter(selectedHostNames, dataView);
 
     if (newFilter) {
       filterManagerService.addFilters(newFilter);
