@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import { DashboardTopNav, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
@@ -14,9 +14,10 @@ import { useParams } from 'react-router-dom';
 
 import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { useCapabilities } from '../../../common/lib/kibana';
+import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
 import { DashboardRenderer } from '../../components/dashboard_renderer';
 import { StatusPrompt } from '../../components/status_prompt';
@@ -30,13 +31,19 @@ import { DASHBOARD_NOT_FOUND_TITLE } from './translations';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useDashboardActions } from '../../hooks/use_dashboard_actions';
-import { EditDashboardButton } from '../../components/edit_dashboard_button';
+import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
 
 type DashboardDetails = Record<string, string>;
 
+interface DashboardViewProps {
+  initialViewMode: ViewMode;
+}
+
 const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 
-const DashboardViewComponent: React.FC = () => {
+const DashboardViewComponent: React.FC<DashboardViewProps> = ({
+  initialViewMode,
+}: DashboardViewProps) => {
   const { fromStr, toStr, from, to } = useDeepEqualSelector((state) =>
     pick(['fromStr', 'toStr', 'from', 'to'], inputsSelectors.globalTimeRangeSelector(state))
   );
@@ -60,6 +67,7 @@ const DashboardViewComponent: React.FC = () => {
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
   const { actions: dashboardActions, viewMode } = useDashboardActions({
     dashboardContainer,
+    initialViewMode,
   });
   const onDashboardContainerLoaded = useCallback((dashboard: DashboardAPI) => {
     if (dashboard) {
@@ -82,6 +90,23 @@ const DashboardViewComponent: React.FC = () => {
 
   const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
+  const { navigateTo } = useNavigateTo();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const dashboardListingUrl = useMemo(
+    () =>
+      `${getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.dashboards,
+      })}`,
+    [getSecuritySolutionUrl]
+  );
+  const getEditDashboardUrl = useCallback(
+    (id: string) =>
+      `${getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.dashboards,
+        path: `${id}/edit`,
+      })}`,
+    [getSecuritySolutionUrl]
+  );
 
   return (
     <>
@@ -100,7 +125,23 @@ const DashboardViewComponent: React.FC = () => {
           <EuiFlexItem grow={false}>
             <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
               {showWriteControls && dashboardExists && (
-                <EditDashboardButton actions={dashboardActions} />
+                <DashboardTopNav
+                  redirectTo={(props) => {
+                    if (props.destination === 'listing') {
+                      navigateTo({ url: dashboardListingUrl });
+                    }
+                    if (props.destination === 'dashboard') {
+                      navigateTo({ url: getEditDashboardUrl(props.id) });
+                    }
+                  }}
+                  dashboardContainer={dashboardContainer}
+                  embedSettings={{
+                    forceHideFilterBar: true,
+                    forceShowTopNavMenu: false,
+                    forceShowQueryInput: true,
+                    forceShowDatePicker: true,
+                  }}
+                />
               )}
             </HeaderPage>
           </EuiFlexItem>

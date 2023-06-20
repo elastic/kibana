@@ -24,11 +24,13 @@ type QuickSaveDashboard = (params?: QuickSaveDashboardParams) => void;
 
 export const useDashboardActions = ({
   dashboardContainer,
+  initialViewMode,
 }: {
   dashboardContainer?: DashboardAPI;
+  initialViewMode: ViewMode;
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.VIEW);
+  const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
 
   // const hasUnsavedChanges =
   //   dashboardContainer?.select((state) => state.componentState.hasUnsavedChanges) ?? false;

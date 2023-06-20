@@ -25,7 +25,7 @@ export {
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
 export { DashboardListingTable } from './dashboard_listing';
-
+export { DashboardTopNav } from './dashboard_top_nav';
 export {
   type DashboardAppLocator,
   type DashboardAppLocatorParams,

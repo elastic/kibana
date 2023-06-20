@@ -24,25 +24,28 @@ import {
   leaveConfirmStrings,
   getDashboardBreadcrumb,
   unsavedChangesBadgeStrings,
-} from '../_dashboard_app_strings';
-import { UI_SETTINGS } from '../../../common';
-import { useDashboardAPI } from '../dashboard_app';
-import { pluginServices } from '../../services/plugin_services';
-import { useDashboardMenuItems } from './use_dashboard_menu_items';
-import { DashboardEmbedSettings, DashboardRedirect } from '../types';
-import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
-import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
-import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
+} from '../dashboard_app/_dashboard_app_strings';
+import { UI_SETTINGS } from '../../common';
+import { useDashboardAPI } from '../dashboard_app/dashboard_app';
+import { pluginServices } from '../services/plugin_services';
+import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
+import { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
+import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
+import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
+import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 
 import './_dashboard_top_nav.scss';
-export interface DashboardTopNavProps {
+export interface InternalDashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
-export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavProps) {
+export function InternalDashboardTopNav({
+  embedSettings,
+  redirectTo,
+}: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
 

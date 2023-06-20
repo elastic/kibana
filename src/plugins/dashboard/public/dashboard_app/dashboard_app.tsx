@@ -32,13 +32,13 @@ import {
 import { DashboardAPI, DashboardRenderer } from '..';
 import { DASHBOARD_APP_ID } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
-import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import { AwaitingDashboardAPI } from '../dashboard_container';
 import { type DashboardEmbedSettings, DashboardRedirect } from './types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
+import { DashboardTopNav } from '../dashboard_top_nav';
 
 export interface DashboardAppProps {
   history: History;
@@ -190,11 +190,7 @@ export function DashboardApp({
       )}
       {!showNoDataPage && (
         <>
-          {dashboardAPI && (
-            <DashboardAPIContext.Provider value={dashboardAPI}>
-              <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
-            </DashboardAPIContext.Provider>
-          )}
+          <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
 
           {getLegacyConflictWarning?.()}
 
