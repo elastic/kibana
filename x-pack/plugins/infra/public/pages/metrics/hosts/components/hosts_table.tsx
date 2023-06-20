@@ -50,7 +50,7 @@ export const HostsTable = () => {
         ref={refs.hostsTableRef}
         data-test-subj="hostsView-table"
         itemId="id"
-        isSelectable={true}
+        isSelectable
         selection={selection}
         pagination={{
           pageIndex: pagination.pageIndex ?? 0,
