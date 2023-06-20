@@ -16,24 +16,23 @@ exports[`renders DashboardCloneModal 1`] = `
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
-    <EuiText>
-      <p>
-        <FormattedMessage
-          defaultMessage="Please enter a new name for your dashboard."
-          id="dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"
-          values={Object {}}
-        />
-      </p>
-    </EuiText>
-    <EuiSpacer />
-    <EuiFieldText
-      aria-label="Cloned Dashboard Title"
-      autoFocus={true}
-      data-test-subj="clonedDashboardTitle"
-      isInvalid={false}
-      onChange={[Function]}
-      value="dash title"
-    />
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label="Title"
+      labelType="label"
+    >
+      <EuiFieldText
+        aria-label="Cloned Dashboard Title"
+        autoFocus={true}
+        data-test-subj="clonedDashboardTitle"
+        isInvalid={false}
+        onChange={[Function]}
+        value="dash title"
+      />
+    </EuiFormRow>
   </EuiModalBody>
   <EuiModalFooter>
     <EuiButtonEmpty
@@ -55,8 +54,8 @@ exports[`renders DashboardCloneModal 1`] = `
       size="m"
     >
       <FormattedMessage
-        defaultMessage="Confirm Clone"
-        id="dashboard.topNav.cloneModal.confirmButtonLabel"
+        defaultMessage="Clone"
+        id="dashboard.topNav.cloneModal.cloneButtonLabel"
         values={Object {}}
       />
     </EuiButton>
