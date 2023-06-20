@@ -21,7 +21,7 @@ import {
 } from '../../../routes';
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
-import { EngineError } from '../engine_error';
+import { EngineError } from '../search_application_error';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { SearchApplicationAPI } from './search_application_api';

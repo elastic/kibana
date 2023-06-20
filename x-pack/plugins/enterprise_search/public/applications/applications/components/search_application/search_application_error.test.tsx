@@ -16,7 +16,7 @@ import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 import { mountWithIntl } from '../../../test_helpers';
 
-import { EngineError } from './engine_error';
+import { EngineError } from './search_application_error';
 
 describe('EngineError', () => {
   beforeEach(() => {

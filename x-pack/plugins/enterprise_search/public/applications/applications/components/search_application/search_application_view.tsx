@@ -28,9 +28,9 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_templat
 import { DeleteSearchApplicationModal } from '../search_applications/delete_search_application_modal';
 
 import { EngineConnect } from './engine_connect/engine_connect';
-import { EngineError } from './engine_error';
 import { EngineHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
+import { EngineError } from './search_application_error';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
 import { SearchApplicationSearchPreview } from './search_preview/search_preview';
 
