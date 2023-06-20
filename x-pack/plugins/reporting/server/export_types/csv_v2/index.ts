@@ -62,7 +62,7 @@ export interface CsvExportTypeStartDeps {
   esClient: IClusterClient;
 }
 
-export class CsvExportType
+export class CsvV2ExportType
   implements
     ExportType<
       CsvExportTypeSetupDeps,
