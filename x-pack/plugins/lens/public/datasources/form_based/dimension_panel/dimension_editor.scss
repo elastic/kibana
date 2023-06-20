@@ -49,6 +49,12 @@
   min-block-size: $euiSizeL;
 }
 
+.lnsIndexPatternDimensionEditor__operationLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .lnsIndexPatternDimensionEditor__warning {
   margin-bottom: $euiSize;
   margin-top: $euiSizeS;
