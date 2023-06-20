@@ -339,6 +339,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
           job={this.props.job}
           customUrls={customUrls}
           onChange={this.props.setCustomUrls}
+          dataViewListItems={this.state.dataViewListItems}
         />
       </>
     );

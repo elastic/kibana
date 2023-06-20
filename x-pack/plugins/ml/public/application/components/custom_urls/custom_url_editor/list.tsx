@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlUrlConfig, MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
@@ -49,6 +50,7 @@ export interface CustomUrlListProps {
   job: Job | DataFrameAnalyticsConfig;
   customUrls: MlUrlConfig[];
   onChange: (customUrls: MlUrlConfig[]) => void;
+  dataViewListItems?: DataViewListItem[];
 }
 
 /*
@@ -59,6 +61,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   job,
   customUrls,
   onChange: setCustomUrls,
+  dataViewListItems,
 }) => {
   const {
     services: {
@@ -125,9 +128,21 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       customUrl.time_range !== undefined &&
       customUrl.time_range !== TIME_RANGE_TYPE.AUTO
     ) {
-      // DFA job url - need the timefield to test the URL.
-      const urlState = parseUrlState(customUrl.url_value);
-      const dataViewId: string = urlState._a?.index;
+      let dataViewId;
+      // DFA job url - need the timefield to test the URL. Get it from the job config.
+      if (customUrl.url_value.includes('dashboards')) {
+        // need to get the dataview from the dashboard to get timefield
+        const indexName = job.dest.index;
+        const backupIndexName = job.source.index[0];
+        dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
+        if (!dataViewId) {
+          dataViewId = dataViewListItems?.find((item) => item.title === backupIndexName)?.id;
+        }
+      } else {
+        const urlState = parseUrlState(customUrl.url_value);
+        dataViewId = urlState._a?.index;
+      }
+
       if (dataViewId) {
         const dataView = await dataViews.get(dataViewId);
         timefieldName = dataView?.timeFieldName ?? null;
