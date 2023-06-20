@@ -16,6 +16,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { StepAboutRule } from '../step_about_rule';
 import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { TestProviders } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -99,17 +100,19 @@ describe('StepAboutRuleToggleDetails', () => {
   describe('note value does exist', () => {
     test('it renders toggle buttons, defaulted to "details"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <StepAboutRuleToggleDetails
-            loading={false}
-            stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-              setup: '',
-            }}
-            stepData={mockRule}
-          />
-        </ThemeProvider>
+        <TestProviders>
+          <ThemeProvider theme={mockTheme}>
+            <StepAboutRuleToggleDetails
+              loading={false}
+              stepDataDetails={{
+                note: mockRule.note,
+                description: mockRule.description,
+                setup: '',
+              }}
+              stepData={mockRule}
+            />
+          </ThemeProvider>
+        </TestProviders>
       );
 
       expect(wrapper.find(EuiButtonGroup).exists()).toBeTruthy();
@@ -119,17 +122,19 @@ describe('StepAboutRuleToggleDetails', () => {
 
     test('it allows users to toggle between "details" and "note"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <StepAboutRuleToggleDetails
-            loading={false}
-            stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-              setup: '',
-            }}
-            stepData={mockRule}
-          />
-        </ThemeProvider>
+        <TestProviders>
+          <ThemeProvider theme={mockTheme}>
+            <StepAboutRuleToggleDetails
+              loading={false}
+              stepDataDetails={{
+                note: mockRule.note,
+                description: mockRule.description,
+                setup: '',
+              }}
+              stepData={mockRule}
+            />
+          </ThemeProvider>
+        </TestProviders>
       );
 
       expect(wrapper.find('[idSelected="details"]').exists()).toBeTruthy();
@@ -147,17 +152,19 @@ describe('StepAboutRuleToggleDetails', () => {
 
     test('it displays notes markdown when user toggles to "notes"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <StepAboutRuleToggleDetails
-            loading={false}
-            stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-              setup: '',
-            }}
-            stepData={mockRule}
-          />
-        </ThemeProvider>
+        <TestProviders>
+          <ThemeProvider theme={mockTheme}>
+            <StepAboutRuleToggleDetails
+              loading={false}
+              stepDataDetails={{
+                note: mockRule.note,
+                description: mockRule.description,
+                setup: '',
+              }}
+              stepData={mockRule}
+            />
+          </ThemeProvider>
+        </TestProviders>
       );
 
       wrapper
@@ -176,17 +183,19 @@ describe('StepAboutRuleToggleDetails', () => {
   describe('setup value is empty string', () => {
     test('it does render toggle buttons if note is not empty', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <StepAboutRuleToggleDetails
-            loading={false}
-            stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-              setup: '',
-            }}
-            stepData={mockRule}
-          />
-        </ThemeProvider>
+        <TestProviders>
+          <ThemeProvider theme={mockTheme}>
+            <StepAboutRuleToggleDetails
+              loading={false}
+              stepDataDetails={{
+                note: mockRule.note,
+                description: mockRule.description,
+                setup: '',
+              }}
+              stepData={mockRule}
+            />
+          </ThemeProvider>
+        </TestProviders>
       );
 
       expect(wrapper.find(EuiButtonGroup).exists()).toBeTruthy();
@@ -199,17 +208,19 @@ describe('StepAboutRuleToggleDetails', () => {
   describe('setup value does exist', () => {
     test('it renders toggle buttons, defaulted to "details"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <StepAboutRuleToggleDetails
-            loading={false}
-            stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-              setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
-            }}
-            stepData={mockRule}
-          />
-        </ThemeProvider>
+        <TestProviders>
+          <ThemeProvider theme={mockTheme}>
+            <StepAboutRuleToggleDetails
+              loading={false}
+              stepDataDetails={{
+                note: mockRule.note,
+                description: mockRule.description,
+                setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              }}
+              stepData={mockRule}
+            />
+          </ThemeProvider>
+        </TestProviders>
       );
 
       expect(wrapper.find(EuiButtonGroup).exists()).toBeTruthy();
@@ -220,17 +231,19 @@ describe('StepAboutRuleToggleDetails', () => {
 
     test('it allows users to toggle between "details" and "setup"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <StepAboutRuleToggleDetails
-            loading={false}
-            stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-              setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
-            }}
-            stepData={mockRule}
-          />
-        </ThemeProvider>
+        <TestProviders>
+          <ThemeProvider theme={mockTheme}>
+            <StepAboutRuleToggleDetails
+              loading={false}
+              stepDataDetails={{
+                note: mockRule.note,
+                description: mockRule.description,
+                setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              }}
+              stepData={mockRule}
+            />
+          </ThemeProvider>
+        </TestProviders>
       );
 
       expect(wrapper.find('[idSelected="details"]').exists()).toBeTruthy();
@@ -250,17 +263,19 @@ describe('StepAboutRuleToggleDetails', () => {
 
     test('it displays notes markdown when user toggles to "setup"', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <StepAboutRuleToggleDetails
-            loading={false}
-            stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-              setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
-            }}
-            stepData={mockRule}
-          />
-        </ThemeProvider>
+        <TestProviders>
+          <ThemeProvider theme={mockTheme}>
+            <StepAboutRuleToggleDetails
+              loading={false}
+              stepDataDetails={{
+                note: mockRule.note,
+                description: mockRule.description,
+                setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              }}
+              stepData={mockRule}
+            />
+          </ThemeProvider>
+        </TestProviders>
       );
 
       wrapper
