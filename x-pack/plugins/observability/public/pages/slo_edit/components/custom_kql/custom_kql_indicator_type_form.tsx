@@ -32,9 +32,9 @@ interface Option {
 
 export function CustomKqlIndicatorTypeForm() {
   const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
-  const { isLoading, data: indexFields } = useFetchIndexPatternFields(
-    watch('indicator.params.index')
-  );
+  const index = watch('indicator.params.index');
+
+  const { isLoading, data: indexFields } = useFetchIndexPatternFields(index);
   const timestampFields = (indexFields ?? []).filter((field) => field.type === 'date');
 
   return (
@@ -71,9 +71,9 @@ export function CustomKqlIndicatorTypeForm() {
                   )}
                   data-test-subj="customKqlIndicatorFormTimestampFieldSelect"
                   isClearable
-                  isDisabled={!watch('indicator.params.index')}
+                  isDisabled={!index}
                   isInvalid={fieldState.invalid}
-                  isLoading={!!watch('indicator.params.index') && isLoading}
+                  isLoading={!!index && isLoading}
                   onChange={(selected: EuiComboBoxOptionOption[]) => {
                     if (selected.length) {
                       return field.onChange(selected[0].value);
@@ -83,7 +83,7 @@ export function CustomKqlIndicatorTypeForm() {
                   }}
                   options={createOptions(timestampFields)}
                   selectedOptions={
-                    !!watch('indicator.params.index') &&
+                    !!index &&
                     !!field.value &&
                     timestampFields.some((timestampField) => timestampField.name === field.value)
                       ? [{ value: field.value, label: field.value }]
