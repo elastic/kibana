@@ -297,6 +297,7 @@ export const getXyVisualization = ({
           eventAnnotationService,
           savedObjectsTagging,
           dataViews: data.dataViews,
+          kibanaTheme,
         })
       );
     }
