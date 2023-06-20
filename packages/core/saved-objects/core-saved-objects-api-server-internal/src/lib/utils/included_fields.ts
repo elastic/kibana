@@ -18,11 +18,9 @@ const ROOT_FIELDS = [
   'updated_at',
   'created_at',
   'originId',
-] as const;
+];
 
-export type RootField = typeof ROOT_FIELDS[number];
-
-export function getRootFields(): string[] {
+export function getRootFields() {
   return [...ROOT_FIELDS];
 }
 

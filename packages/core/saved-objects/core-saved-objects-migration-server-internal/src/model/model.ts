@@ -9,7 +9,6 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { getRootFields } from '@kbn/core-saved-objects-api-server-internal';
 
 import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
@@ -48,6 +47,7 @@ import {
   hasLaterVersionAlias,
   aliasVersion,
   REINDEX_TEMP_SUFFIX,
+  getIndexTypes,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -1425,10 +1425,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isRight(res)) {
       if (!res.right.match) {
         if (res.right.updatedHashes?.length) {
-          const updatedRootFields = res.right.updatedHashes.filter((field) =>
-            getRootFields().includes(field)
+          const typeFields = getIndexTypes(stateP);
+          const nonTypeFields = res.right.updatedHashes.filter(
+            (field) => !typeFields.includes(field)
           );
-          if (updatedRootFields.length) {
+          console.log('TYPE vs NON_TYPE', typeFields, nonTypeFields);
+          if (nonTypeFields.length) {
             return {
               ...stateP,
               controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
@@ -1437,7 +1439,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
                 ...stateP.logs,
                 {
                   level: 'info',
-                  message: `Kibana is performing a compatible update and some root fields have been updated. All SO documents must be updated. Updated root fields: ${updatedRootFields}.`,
+                  message: `Kibana is performing a compatible update and some root fields have been updated. All SO documents must be updated. Updated root fields: ${nonTypeFields}.`,
                 },
               ],
             };

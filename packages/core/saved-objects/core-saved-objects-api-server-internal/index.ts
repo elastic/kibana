@@ -7,8 +7,6 @@
  */
 
 export {
-  getRootFields,
-  type RootField,
   SavedObjectsRepository,
   SavedObjectsClient,
   SavedObjectsClientProvider,

@@ -2616,7 +2616,7 @@ describe('migrations v2 model', () => {
         it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if mappings do not match', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({
             match: false,
-            updatedHashes: ['type1', 'type2'],
+            updatedHashes: ['dashboard', 'lens'],
           });
           const newState = model(
             checkTargetMappingsState,
@@ -2630,12 +2630,12 @@ describe('migrations v2 model', () => {
               should: [
                 {
                   term: {
-                    type: 'type1',
+                    type: 'dashboard',
                   },
                 },
                 {
                   term: {
-                    type: 'type2',
+                    type: 'lens',
                   },
                 },
               ],
@@ -2646,7 +2646,7 @@ describe('migrations v2 model', () => {
         it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if core fields have been updated', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({
             match: false,
-            updatedHashes: ['type1', 'type2', 'namespaces'], // 'namespaces' is a root field (core, common to all SOs)
+            updatedHashes: ['dashboard', 'lens', 'namespaces'], // 'namespaces' is a root field (core, common to all SOs)
           });
           const newState = model(
             checkTargetMappingsState,

@@ -12,15 +12,11 @@
 
 import crypto from 'crypto';
 import { cloneDeep, mapValues } from 'lodash';
-import type {
-  SavedObjectsFieldMapping,
-  SavedObjectsMappingProperties,
-} from '@kbn/core-saved-objects-server';
+import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { RootField } from '@kbn/core-saved-objects-api-server-internal';
 
 /**
  * Creates an index mapping with the core properties required by saved object
@@ -140,9 +136,7 @@ function findChangedProp(actual: any, expected: any) {
  * @returns {IndexMapping}
  */
 export function getBaseMappings(): IndexMapping {
-  const baseMappings: IndexMapping & {
-    properties: Partial<Record<RootField, SavedObjectsFieldMapping>>;
-  } = {
+  return {
     dynamic: 'strict',
     properties: {
       type: {
@@ -188,8 +182,6 @@ export function getBaseMappings(): IndexMapping {
       },
     },
   };
-
-  return baseMappings;
 }
 
 function validateAndMerge(
