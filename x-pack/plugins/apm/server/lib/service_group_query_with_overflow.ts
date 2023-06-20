@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import { SERVICE_NAME } from '@kbn/ux-plugin/common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../common/es_fields/apm';
 import { ServiceGroup } from '../../common/service_groups';
 
 export function serviceGroupWithOverflowQuery(
