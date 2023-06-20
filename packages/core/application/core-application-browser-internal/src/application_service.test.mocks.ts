@@ -26,11 +26,23 @@ jest.doMock('history', () => ({
 }));
 
 export const parseAppUrlMock = jest.fn();
+export const getLocationObservableMock = jest.fn();
 jest.doMock('./utils', () => {
   const original = jest.requireActual('./utils');
 
   return {
     ...original,
     parseAppUrl: parseAppUrlMock,
+    getLocationObservable: getLocationObservableMock,
+  };
+});
+
+export const registerAnalyticsContextProviderMock = jest.fn();
+jest.doMock('./register_analytics_context_provider', () => {
+  const original = jest.requireActual('./register_analytics_context_provider');
+
+  return {
+    ...original,
+    registerAnalyticsContextProvider: registerAnalyticsContextProviderMock,
   };
 });

@@ -119,6 +119,7 @@ export interface DocLinks {
     readonly connectorsAzureBlobStorage: string;
     readonly connectorsClients: string;
     readonly connectorsConfluence: string;
+    readonly connectorsContentExtraction: string;
     readonly connectorsGoogleCloudStorage: string;
     readonly connectorsJira: string;
     readonly connectorsMicrosoftSQL: string;

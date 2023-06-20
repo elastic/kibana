@@ -21,6 +21,7 @@ import {
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_TYPE_ID,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   TIMESTAMP,
@@ -45,15 +46,19 @@ export function pageTitleContent(ruleCategory: string) {
   });
 }
 
+const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
+const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
+const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
+
 export function PageTitle({ alert }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
 
   if (!alert) return <EuiLoadingSpinner />;
 
   const showExperimentalBadge =
-    alert.fields[ALERT_RULE_CATEGORY] === 'Log threshold' ||
-    alert.fields[ALERT_RULE_CATEGORY] === 'Metric threshold' ||
-    alert.fields[ALERT_RULE_CATEGORY] === 'Inventory';
+    alert.fields[ALERT_RULE_TYPE_ID] === LOG_DOCUMENT_COUNT_RULE_TYPE_ID ||
+    alert.fields[ALERT_RULE_TYPE_ID] === METRIC_THRESHOLD_ALERT_TYPE_ID ||
+    alert.fields[ALERT_RULE_TYPE_ID] === METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
 
   return (
     <div data-test-subj="page-title-container">

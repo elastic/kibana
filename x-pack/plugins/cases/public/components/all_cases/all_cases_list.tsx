@@ -278,6 +278,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             status: filterOptions.status,
             owner: filterOptions.owner,
             severity: filterOptions.severity,
+            category: filterOptions.category,
           }}
           hiddenStatuses={hiddenStatuses}
           onCreateCasePressed={onCreateCasePressed}
