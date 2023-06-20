@@ -7,10 +7,10 @@
 
 import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
-import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
@@ -42,10 +42,10 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IIndexPatternFieldList): DataViewBase =>
-    fields && fields.length > 0
+  (title: string, fields: DataViewFieldMap): DataViewBase =>
+    fields && Object.keys(fields).length > 0
       ? {
-          fields: fields.map((field) =>
+          fields: Object.keys(fields).map((fieldName) =>
             pick(
               [
                 'name',
@@ -56,7 +56,7 @@ export const getIndexFields = memoizeOne(
                 'subType',
                 'conflictDescriptions',
               ],
-              field
+              fields[fieldName]
             )
           ),
           title,
@@ -78,8 +78,16 @@ interface FetchIndexReturn {
   browserFields: BrowserFields;
   indexes: string[];
   indexExists: boolean;
+  /**
+   * @deprecated use dataViewSpec
+   */
   indexPatterns: DataViewBase;
+  /**
+   * This variable should be renamed dataViewSpec and should have it's types
+   * updated upstream but we will save that for some other time
+   */
   dataView: DataViewSpec | undefined;
+  dataViewSpec: DataViewSpec;
 }
 
 /**
@@ -87,20 +95,30 @@ interface FetchIndexReturn {
  * returns state directly, no redux
  */
 export const useFetchIndex = (
-  indexNames: string[],
+  indexNamesOrDvId: string | string[],
   onlyCheckIfIndicesExist: boolean = false,
   strategy: 'indexFields' | 'dataView' | typeof ENDPOINT_FIELDS_SEARCH_STRATEGY = 'indexFields'
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
-  const previousIndexesName = useRef<string[]>([]);
+  const previousIndexesNameOrId = useRef<string[] | string | undefined>([]);
+  const isIndexNameArray = Array.isArray(indexNamesOrDvId);
+
+  const defaultIndexesArray = useMemo(
+    () => (isIndexNameArray ? indexNamesOrDvId : []),
+    [indexNamesOrDvId, isIndexNameArray]
+  );
 
   const [state, setState] = useState<FetchIndexReturn & { loading: boolean }>({
     browserFields: DEFAULT_BROWSER_FIELDS,
-    indexes: indexNames,
+    indexes: defaultIndexesArray,
     indexExists: true,
+    /**
+     * @deprecated use dataViewSpec
+     */
     indexPatterns: DEFAULT_INDEX_PATTERNS,
     dataView: undefined,
+    dataViewSpec: {},
     loading: false,
   });
   const { addError } = useAppToasts();
@@ -111,27 +129,36 @@ export const useFetchIndex = (
         try {
           setState({ ...state, loading: true });
           abortCtrl.current = new AbortController();
-          const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
-          const dataView = dv.toSpec();
-          const { browserFields } = getDataViewStateFromIndexFields(iNames, dataView.fields);
+          let dataView: DataViewSpec;
+          if (!isIndexNameArray) {
+            const fulldv = await data.dataViews.get(indexNamesOrDvId);
+            dataView = fulldv.toSpec();
+            previousIndexesNameOrId.current = dataView?.id;
+          } else {
+            const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
+            dataView = dv.toSpec();
+          }
 
-          previousIndexesName.current = dv.getIndexPattern().split(',');
+          const { browserFields } = getDataViewStateFromIndexFields(iNames, dataView.fields);
+          previousIndexesNameOrId.current = dataView?.title?.split(',');
 
           setState({
             loading: false,
             dataView,
+            dataViewSpec: dataView,
             browserFields,
-            indexes: dv.getIndexPattern().split(','),
-            indexExists: dv.getIndexPattern().split(',').length > 0,
-            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields),
+            indexes: dataView?.title?.split(',') ?? [],
+            indexExists: dataView?.title != null && dataView.title.split(',').length > 0,
+            indexPatterns: getIndexFields(dataView?.title ?? '', dataView?.fields ?? {}),
           });
         } catch (exc) {
           setState({
             browserFields: DEFAULT_BROWSER_FIELDS,
-            indexes: indexNames,
+            indexes: defaultIndexesArray,
             indexExists: true,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             dataView: undefined,
+            dataViewSpec: {},
             loading: false,
           });
           addError(exc?.message, { title: i18n.ERROR_INDEX_FIELDS_SEARCH });
@@ -140,18 +167,18 @@ export const useFetchIndex = (
 
       asyncSearch();
     },
-    [addError, data.dataViews, indexNames, state]
+    [addError, data.dataViews, defaultIndexesArray, indexNamesOrDvId, isIndexNameArray, state]
   );
 
   useEffect(() => {
-    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
-      indexFieldsSearch(indexNames);
+    if (!isEmpty(indexNamesOrDvId) && !isEqual(previousIndexesNameOrId.current, indexNamesOrDvId)) {
+      indexFieldsSearch(indexNamesOrDvId);
     }
     return () => {
       abortCtrl.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexNames, previousIndexesName]);
+  }, [indexNamesOrDvId, previousIndexesNameOrId]);
 
   return [state.loading, state];
 };

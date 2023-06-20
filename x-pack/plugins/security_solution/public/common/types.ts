@@ -23,6 +23,7 @@ export interface SecuritySolutionUiConfigType {
 
 /**
  * DataViewBase with enhanced index fields used in timelines
+ * @deprecated replace with DataViewSpec in @kbn/data-views-plugin/common
  */
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: FieldSpec[];
@@ -31,3 +32,9 @@ export interface SecuritySolutionDataViewBase extends DataViewBase {
 
 export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 export type Refetch = () => void;
+
+// /**
+//  * @deprecated use DataViewSpec from @kbn/data-views-plugin/common
+//  * or DataView if absolutely necessary
+//  */
+// export type DataViewBase = DataViewBase;
