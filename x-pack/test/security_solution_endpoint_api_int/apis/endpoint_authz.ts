@@ -49,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'get',
         path: ACTION_DETAILS_ROUTE,
         body: undefined,
+        version: '2023-10-31',
       },
       {
         method: 'get',
