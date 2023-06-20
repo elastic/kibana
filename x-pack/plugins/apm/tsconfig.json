@@ -93,6 +93,7 @@
     "@kbn/controls-plugin",
     "@kbn/core-http-server",
     "@kbn/unified-field-list",
+    "@kbn/slo-schema",
   ],
   "exclude": [
     "target/**/*",
