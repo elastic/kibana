@@ -156,11 +156,9 @@ export const useHostsTable = () => {
     const selectedHostNames = selectedItems.map(({ name }) => name);
     const newFilter = createHostsFilter(selectedHostNames, dataView);
 
-    if (newFilter) {
-      filterManagerService.addFilters(newFilter);
-      setSelectedItems([]);
-      hostsTableRef.current?.setSelection([]);
-    }
+    filterManagerService.addFilters(newFilter);
+    setSelectedItems([]);
+    hostsTableRef.current?.setSelection([]);
   }, [dataView, filterManagerService, selectedItems]);
 
   const reportHostEntryClick = useCallback(
