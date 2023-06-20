@@ -7,7 +7,6 @@
  */
 
 import expect from '@kbn/expect';
-import { Page } from '@kbn/share-plugin/public/url_service/redirect/components/page';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -16,12 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const listingTable = getService('listingTable');
 
-  describe.only('dashboard listing page', function describeIndexTests() {
+  describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
     before(async function () {
       await PageObjects.dashboard.initTests();
-      await PageObjects.common.sleep(600);
     });
 
     describe('create prompt', () => {
