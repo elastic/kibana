@@ -13,6 +13,7 @@ import { HttpStart } from '@kbn/core/public';
 import { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   BuilderEntry,
+  DataViewField,
   ExceptionsBuilderExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
@@ -65,6 +66,7 @@ interface BuilderExceptionListItemProps {
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
+  getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -88,6 +90,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     isDisabled = false,
     operatorsList,
     allowCustomOptions = false,
+    getExtendedFields,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -161,6 +164,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           }
                           operatorsList={operatorsList}
                           allowCustomOptions={allowCustomOptions}
+                          getExtendedFields={getExtendedFields}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

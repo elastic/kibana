@@ -34,18 +34,6 @@ export const DURATION_ANOMALY: DurationAnomalyActionGroup = {
   name: 'Uptime Duration Anomaly',
 };
 
-export const ACTION_GROUP_DEFINITIONS: {
-  MONITOR_STATUS: MonitorStatusActionGroup;
-  TLS_LEGACY: TLSLegacyActionGroup;
-  TLS: TLSActionGroup;
-  DURATION_ANOMALY: DurationAnomalyActionGroup;
-} = {
-  MONITOR_STATUS,
-  TLS_LEGACY,
-  TLS,
-  DURATION_ANOMALY,
-};
-
 export const CLIENT_ALERT_TYPES = {
   MONITOR_STATUS: 'xpack.uptime.alerts.monitorStatus',
   TLS_LEGACY: 'xpack.uptime.alerts.tls',

@@ -258,7 +258,7 @@ export function ConfigureLogs() {
             direction="column"
             gutterSize="xs"
           >
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem style={{ width: '100%' }}>
               <EuiAccordion
                 id="advancedSettingsAccordion"
                 css={{

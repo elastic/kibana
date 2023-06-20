@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('chat widget is present on integrations page', async () => {
-      PageObjects.common.navigateToUrl('integrations', 'browse', {
+      await PageObjects.common.navigateToUrl('integrations', 'browse', {
         useActualUrl: true,
         shouldUseHashForSubUrl: false,
       });
@@ -29,15 +29,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('chat widget is present on home getting_started page', async () => {
-      PageObjects.common.navigateToUrl('home', '/getting_started', {
+      await PageObjects.common.navigateToUrl('home', '/getting_started', {
         useActualUrl: true,
         shouldUseHashForSubUrl: true,
       });
       await testSubjects.existOrFail('cloud-chat');
     });
 
-    it('chat widget is present on management page', async () => {
-      PageObjects.common.navigateToApp('management');
+    it('chat widget is present on observability/overview page', async () => {
+      await PageObjects.common.navigateToUrl('observability', '/overview', {
+        useActualUrl: true,
+        shouldUseHashForSubUrl: true,
+      });
+      await testSubjects.existOrFail('cloud-chat');
+    });
+
+    it('chat widget is present on security/get_started page', async () => {
+      await PageObjects.common.navigateToUrl('security', '/get_started', {
+        useActualUrl: true,
+        shouldUseHashForSubUrl: true,
+      });
       await testSubjects.existOrFail('cloud-chat');
     });
   });
