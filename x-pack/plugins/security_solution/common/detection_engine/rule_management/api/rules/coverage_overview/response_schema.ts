@@ -7,26 +7,25 @@
 
 import * as t from 'io-ts';
 import { NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
+import { CoverageOverviewRuleActivity } from './request_schema';
 
-export type MitreCoverageRuleData = t.TypeOf<typeof MitreCoverageRuleData>;
-export const MitreCoverageRuleData = t.type({
+export type CoverageOverviewRuleData = t.TypeOf<typeof CoverageOverviewRuleData>;
+export const CoverageOverviewRuleData = t.type({
   name: t.string,
-  enabled: t.boolean,
+  activity: CoverageOverviewRuleActivity,
 });
 
-export type MitreCoverageAvailableRuleData = t.TypeOf<typeof MitreCoverageAvailableRuleData>;
-export const MitreCoverageAvailableRuleData = t.type({
+export type CoverageOverviewUnmappedRuleData = t.TypeOf<typeof CoverageOverviewUnmappedRuleData>;
+export const CoverageOverviewUnmappedRuleData = t.type({
+  id: t.string,
   name: t.string,
-  available: t.literal(true),
 });
 
 export type MitreCoverageResponse = t.TypeOf<typeof MitreCoverageResponse>;
 export const MitreCoverageResponse = t.exact(
   t.type({
     coverage: t.record(t.string, NonEmptyArray(t.string)),
-    rules_data: t.record(
-      t.string,
-      NonEmptyArray(t.union([MitreCoverageRuleData, MitreCoverageAvailableRuleData]))
-    ),
+    rules_data: t.record(t.string, NonEmptyArray(CoverageOverviewRuleData)),
+    unmapped_rules: t.array(CoverageOverviewUnmappedRuleData),
   })
 );

@@ -8,28 +8,28 @@
 import * as t from 'io-ts';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
-export type MitreCoverageRuleAvailability = t.TypeOf<typeof MitreCoverageRuleAvailability>;
-export const MitreCoverageRuleAvailability = t.union([
+export type CoverageOverviewRuleActivity = t.TypeOf<typeof CoverageOverviewRuleActivity>;
+export const CoverageOverviewRuleActivity = t.union([
   t.literal('enabled'),
   t.literal('disabled'),
   t.literal('available'),
 ]);
 
-export type MitreCoverageRuleOrigin = t.TypeOf<typeof MitreCoverageRuleOrigin>;
-export const MitreCoverageRuleOrigin = t.union([
+export type CoverageOverviewRuleSource = t.TypeOf<typeof CoverageOverviewRuleSource>;
+export const CoverageOverviewRuleSource = t.union([
   t.literal('prebuilt'),
   t.literal('custom'),
-  t.literal('customized'),
+  t.literal('customized'), // Customized prebuilt rule
 ]);
 
-export type MitreCoverageFilter = t.TypeOf<typeof MitreCoverageFilter>;
-export const MitreCoverageFilter = t.partial({
+export type CoverageOverviewFilter = t.TypeOf<typeof CoverageOverviewFilter>;
+export const CoverageOverviewFilter = t.partial({
   searchTerm: NonEmptyString,
-  availability: MitreCoverageRuleAvailability,
-  origin: MitreCoverageRuleOrigin,
+  activity: CoverageOverviewRuleActivity,
+  source: CoverageOverviewRuleSource,
 });
 
-export type MitreCoverageRequest = t.TypeOf<typeof MitreCoverageRequest>;
-export const MitreCoverageRequest = t.partial({
-  filter: MitreCoverageFilter,
+export type CoverageOverviewRequest = t.TypeOf<typeof CoverageOverviewRequest>;
+export const CoverageOverviewRequest = t.partial({
+  filter: CoverageOverviewFilter,
 });
