@@ -65,6 +65,7 @@ class DocLinks {
   public connectorsAzureBlobStorage: string;
   public connectorsClients: string;
   public connectorsConfluence: string;
+  public connectorsContentExtraction: string;
   public connectorsGoogleCloudStorage: string;
   public connectorsJira: string;
   public connectorsMicrosoftSQL: string;
@@ -204,6 +205,7 @@ class DocLinks {
     this.connectors = '';
     this.connectorsAzureBlobStorage = '';
     this.connectorsConfluence = '';
+    this.connectorsContentExtraction = '';
     this.connectorsClients = '';
     this.connectorsGoogleCloudStorage = '';
     this.connectorsJira = '';
@@ -345,6 +347,7 @@ class DocLinks {
     this.connectors = docLinks.links.enterpriseSearch.connectors;
     this.connectorsAzureBlobStorage = docLinks.links.enterpriseSearch.connectorsAzureBlobStorage;
     this.connectorsConfluence = docLinks.links.enterpriseSearch.connectorsConfluence;
+    this.connectorsContentExtraction = docLinks.links.enterpriseSearch.connectorsContentExtraction;
     this.connectorsClients = docLinks.links.enterpriseSearch.connectorsClients;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
