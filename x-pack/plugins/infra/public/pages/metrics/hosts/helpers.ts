@@ -13,7 +13,7 @@ export const buildCombinedHostsFilter = ({
   values,
   dataView,
 }: {
-  values: Array<string | number>;
+  values: string[];
   field: string;
   dataView: DataView | undefined;
 }) => {
@@ -21,10 +21,7 @@ export const buildCombinedHostsFilter = ({
     return null;
   }
   const indexField = dataView.getFieldByName(field)!;
-
   const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
 
-  const filter = buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
-
-  return filter;
+  return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
 };

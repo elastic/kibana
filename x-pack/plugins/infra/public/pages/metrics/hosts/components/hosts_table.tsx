@@ -14,6 +14,7 @@ import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
 import { DEFAULT_PAGE_SIZE } from '../constants';
+import { HostsTableFilterAction } from './host_table_filter_action';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
@@ -32,13 +33,19 @@ export const HostsTable = () => {
     pagination,
     sorting,
     selection,
-    FilterButton,
+    selectedItemsCount,
+    filterSelectedHosts,
     hostsTableRef,
   } = useHostsTableContext();
 
   return (
     <>
-      {FilterButton}
+      {selectedItemsCount > 0 && (
+        <HostsTableFilterAction
+          selectedItemsCount={selectedItemsCount}
+          filterSelectedHosts={filterSelectedHosts}
+        />
+      )}
       <EuiBasicTable
         ref={hostsTableRef}
         data-test-subj="hostsView-table"
