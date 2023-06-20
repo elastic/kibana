@@ -218,6 +218,13 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return container.findAllByCssSelector('[data-test-subj*=streamEntry]');
     },
 
+    async getLogsTableColumnHeaders() {
+      const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
+        '~logColumnHeader'
+      );
+      return await Promise.all(columnHeaderElements.map((element) => element.getVisibleText()));
+    },
+
     // Alerts Tab
     getAlertsTab() {
       return testSubjects.find('hostsView-tabs-alerts');

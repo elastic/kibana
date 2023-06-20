@@ -579,6 +579,59 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
+
+      describe('categories', async () => {
+        it('400s when a too long category value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  category: 'A very long category with more than fifty characters!',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when an empty string category value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  category: '',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when a string with spaces category value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  category: '  ',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+      });
     });
 
     describe('alerts', () => {
