@@ -24,7 +24,7 @@ import { createProfilingUsers } from './create_profiling_users';
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-async function getProfilingApiClient({
+export async function getProfilingApiClient({
   kibanaServer,
   username,
 }: {
