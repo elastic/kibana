@@ -89,7 +89,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
               !isMaxSeriesToPlotValid ? (
                 <FormattedMessage
                   id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotError"
-                  defaultMessage="Maximum number of series to plot must be greater than 1 and less than 50."
+                  defaultMessage="Maximum number of series to plot must be between 1 and 50."
                 />
               ) : undefined
             }
