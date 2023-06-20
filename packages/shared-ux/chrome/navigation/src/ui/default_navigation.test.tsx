@@ -8,8 +8,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { type Observable, of } from 'rxjs';
-import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import { type Observable, of, BehaviorSubject } from 'rxjs';
+import type {
+  ChromeNavLink,
+  ChromeProjectNavigation,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 
 import { getServicesMock } from '../../mocks/src/jest';
 import { NavigationProvider } from '../services';
@@ -370,6 +374,126 @@ describe('<DefaultNavigation />', () => {
       expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
       expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
         'RecentThis is an exampleAnother example'
+      );
+    });
+
+    test('should set the active node', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Item 1',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+        {
+          id: 'item2',
+          title: 'Item 2',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const navigationBody: RootNavigationItemDefinition[] = [
+        {
+          type: 'navGroup',
+          id: 'group1',
+          children: [
+            {
+              link: 'item1' as any,
+              title: 'Item 1',
+            },
+            {
+              link: 'item2' as any,
+              title: 'Item 2',
+            },
+          ],
+        },
+      ];
+
+      const activeNodes$ = new BehaviorSubject([
+        [
+          {
+            id: 'group1',
+            title: 'Group 1',
+            path: ['group1'],
+          },
+          {
+            id: 'item1',
+            title: 'Item 1',
+            path: ['group1', 'item1'],
+          },
+        ],
+      ]);
+
+      const getActiveNodes$ = () => activeNodes$.asObservable();
+
+      const { findByTestId } = render(
+        <NavigationProvider {...services} navLinks$={navLinks$} getActiveNodes$={getActiveNodes$}>
+          <DefaultNavigation navigationTree={{ body: navigationBody }} />
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
+        'euiSideNavItemButton-isSelected'
+      );
+      expect(await findByTestId('nav-item-group1.item2')).not.toHaveClass(
+        'euiSideNavItemButton-isSelected'
+      );
+    });
+
+    test('should override the history behaviour to set the active node', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Item 1',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const navigationBody: RootNavigationItemDefinition[] = [
+        {
+          type: 'navGroup',
+          id: 'group1',
+          children: [
+            {
+              link: 'item1' as any,
+              title: 'Item 1',
+              getIsActive: () => true,
+            },
+          ],
+        },
+      ];
+
+      const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([[]]);
+      const getActiveNodes$ = () => activeNodes$.asObservable();
+
+      const onProjectNavigationChange = (nav: ChromeProjectNavigation) => {
+        if (nav.navigationTreeFlattened) {
+          Object.values(nav.navigationTreeFlattened).forEach((node) => {
+            if (node.getIsActive) {
+              activeNodes$.next([[node]]);
+            }
+          });
+        }
+      };
+
+      const { findByTestId } = render(
+        <NavigationProvider
+          {...services}
+          navLinks$={navLinks$}
+          getActiveNodes$={getActiveNodes$}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <DefaultNavigation navigationTree={{ body: navigationBody }} />
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
+        'euiSideNavItemButton-isSelected'
       );
     });
   });

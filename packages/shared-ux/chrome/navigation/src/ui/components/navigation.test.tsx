@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { render } from '@testing-library/react';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { BehaviorSubject, of, type Observable } from 'rxjs';
 import { getServicesMock } from '../../../mocks/src/jest';
 import { NavigationProvider } from '../../services';
@@ -613,20 +614,22 @@ describe('<Navigation />', () => {
         'euiSideNavItemButton-isSelected'
       );
 
-      activeNodes$.next([
-        [
-          {
-            id: 'group1',
-            title: 'Group 1',
-            path: ['group1'],
-          },
-          {
-            id: 'item2',
-            title: 'Item 2',
-            path: ['group1', 'item2'],
-          },
-        ],
-      ]);
+      await act(async () => {
+        activeNodes$.next([
+          [
+            {
+              id: 'group1',
+              title: 'Group 1',
+              path: ['group1'],
+            },
+            {
+              id: 'item2',
+              title: 'Item 2',
+              path: ['group1', 'item2'],
+            },
+          ],
+        ]);
+      });
 
       expect(await findByTestId('nav-item-group1.item1')).not.toHaveClass(
         'euiSideNavItemButton-isSelected'
