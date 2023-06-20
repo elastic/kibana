@@ -30,28 +30,40 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   };
 
   interface Endpoint {
-    req: {
-      url: string;
-      method?: 'GET';
-      params?: { query: Record<string, any> };
-      body?: any;
-    };
-    expectForbidden: (status: number) => void;
-    expectResponse: (status: number) => void;
-    onExpectationFail?: () => Promise<any>;
+    url: string;
+    method?: 'GET';
+    params?: { query: Record<string, any> };
+    body?: any;
   }
 
   const endpoints: Endpoint[] = [
+    // {
+    //   url: profilingRoutePaths.TopNContainers,
+    //   params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
+    // },
+    // {
+    //   url: profilingRoutePaths.TopNDeployments,
+    //   params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
+    // },
+    // {
+    //   url: profilingRoutePaths.TopNHosts,
+    //   params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
+    // },
+    // {
+    //   url: profilingRoutePaths.TopNTraces,
+    //   params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
+    // },
     {
-      req: {
-        method: 'GET',
-        url: profilingRoutePaths.Flamechart,
-        params: {
-          query: { timeFrom: start, timeTo: end, kuery: '' },
-        },
-      },
-      expectForbidden: expect403,
-      expectResponse: expect200,
+      url: profilingRoutePaths.TopNThreads,
+      params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
+    },
+    // {
+    //   url: profilingRoutePaths.TopNFunctions,
+    //   params: { query: { timeFrom: start, timeTo: end, kuery: '', startIndex: 1, endIndex: 5 } },
+    // },
+    {
+      url: profilingRoutePaths.Flamechart,
+      params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
     },
   ];
 
@@ -63,27 +75,29 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     runAsUser: Awaited<ReturnType<typeof getProfilingApiClient>>;
   }) {
     for (const endpoint of endpoints) {
+      const method = endpoint.method || 'GET';
+      const endpointPath = `${method} ${endpoint.url}`;
       try {
-        log.info(`Requesting: ${endpoint.req.url}. Expecting: ${expectation}`);
+        log.info(`Requesting: ${endpointPath}. Expecting: ${expectation}`);
         const result = await runAsUser({
-          endpoint: `${endpoint.req.method} ${endpoint.req.url}`,
-          params: endpoint.req.params,
+          endpoint: endpointPath,
+          params: endpoint.params,
         });
         if (expectation === 'forbidden') {
           throw new Error(
-            `Endpoint: ${endpoint.req.method} ${endpoint.req.url}
+            `Endpoint: ${endpointPath}
               Status code: ${result.status}
               Response: ${result.body}`
           );
         }
 
-        endpoint.expectResponse(result.status);
+        expect200(result.status);
       } catch (e) {
         if (e instanceof ProfilingApiError && expectation === 'forbidden') {
-          endpoint.expectForbidden(e.res.status);
+          expect403(e.res.status);
         } else {
           throw new Error(
-            `Endpoint: ${endpoint.req.method} ${endpoint.req.url}
+            `Endpoint: ${endpointPath}
               Status code: ${e.res.status}
               Response: ${e.res}
     
@@ -95,14 +109,31 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   registry.when('Profiling feature controls', { config: 'cloud', archives: [] }, () => {
-    it(`returns forbidden for users with no access to APIs`, async () => {
+    before(async () => {
+      try {
+        const result = await profilingApiClient.adminUser({
+          endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+        });
+        console.log('### caue  profilingApiClient:  result:', result.body);
+        if (!result.body.has_setup) {
+          console.log('#### setting up Universal Profiling');
+          await profilingApiClient.adminUser({
+            endpoint: `POST ${profilingRoutePaths.HasSetupESResources}`,
+          });
+          console.log('### Profiling set up');
+        }
+      } catch (e) {
+        console.log('### caue  profilingApiClient:  e:', e);
+      }
+    });
+    it(`returns forbidden for users with no access to profiling APIs`, async () => {
       await executeRequests({
         runAsUser: profilingApiClient.noAccessUser,
         expectation: 'forbidden',
       });
     });
 
-    it(`returns ok for users with access to APIs`, async () => {
+    it(`returns ok for users with access to profiling APIs`, async () => {
       await executeRequests({ runAsUser: profilingApiClient.readUser, expectation: 'response' });
     });
   });

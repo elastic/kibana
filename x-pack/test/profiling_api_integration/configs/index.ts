@@ -6,7 +6,10 @@
  */
 
 import { mapValues } from 'lodash';
+import path from 'path';
 import { createTestConfig, CreateTestConfig } from '../common/config';
+
+const kibanaYamlFilePath = path.join(__dirname, './ftr_kibana.yml');
 
 const profilingDebugLogger = {
   name: 'plugins.profiling',
@@ -19,7 +22,7 @@ const profilingFtrConfigs = {
     license: 'trial' as const,
     kibanaConfig: {
       'logging.loggers': [profilingDebugLogger],
-      'xpack.profiling.enabled': true,
+      config: kibanaYamlFilePath,
     },
   },
 };

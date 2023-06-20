@@ -99,6 +99,8 @@ export function createTestConfig(
             kibana: { hostname: kibanaServerUrl },
           });
 
+          await supertest(kibanaServerUrl).post('/api/fleet/setup').set('kbn-xsrf', 'foo');
+
           return {
             noAccessUser: await getProfilingApiClient({
               kibanaServer,
