@@ -19,6 +19,7 @@ import { SeverityBadge } from '../../../../../detections/components/rules/severi
 import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
+import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeInfoForReview>;
@@ -82,7 +83,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 };
 
 const createUpgradeButtonColumn = (
-  upgradeOneRule: (ruleId: string) => void,
+  upgradeOneRule: UpgradePrebuiltRulesTableActions['upgradeOneRule'],
   loadingRules: RuleSignatureId[]
 ): TableColumn => ({
   field: 'rule_id',

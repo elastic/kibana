@@ -7,7 +7,6 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
@@ -67,10 +66,6 @@ export interface UpgradePrebuiltRulesTableState {
    * Rule rows selected in EUI InMemory Table
    */
   selectedRules: RuleUpgradeInfoForReview[];
-  /**
-   * Legacy ML Jobs that cause modal to pop up before performing rule ugprades
-   */
-  legacyJobsInstalled: MlSummaryJob[];
 }
 
 export interface UpgradePrebuiltRulesTableActions {
@@ -78,8 +73,8 @@ export interface UpgradePrebuiltRulesTableActions {
   upgradeOneRule: (ruleId: string) => void;
   upgradeSelectedRules: () => void;
   upgradeAllRules: () => void;
-  selectRules: (rules: RuleUpgradeInfoForReview[]) => void;
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
+  selectRules: (rules: RuleUpgradeInfoForReview[]) => void;
 }
 
 export interface UpgradePrebuiltRulesContextType {
