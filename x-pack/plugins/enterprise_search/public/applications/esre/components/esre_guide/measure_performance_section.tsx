@@ -36,7 +36,11 @@ const steps: EuiContainedStepProps[] = [
         defaultMessage="Visit {behavioralAnalytics} and create your first collection"
         values={{
           behavioralAnalytics: (
-            <EuiLinkTo to={generatePath(ANALYTICS_PLUGIN.URL)} shouldNotCreateHref>
+            <EuiLinkTo
+              data-telemetry-id="entSearch-esre-measurePerformance-behavioralAnalyticsLink"
+              to={generatePath(ANALYTICS_PLUGIN.URL)}
+              shouldNotCreateHref
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.esre.measurePerformanceSection.step1.behavioralAnalyticsLinkText',
                 {
@@ -98,7 +102,12 @@ export const MeasurePerformanceSection: React.FC = () => (
                 defaultMessage="Use {behavioralAnalytics} dashboards and tools to visualize user behavior and measure the impact of your changes."
                 values={{
                   behavioralAnalytics: (
-                    <EuiLink target="_blank" href={docLinks.behavioralAnalytics} external>
+                    <EuiLink
+                      data-telemetry-id="entSearch-esre-measurePerformance-behavioralAnalyticsDocsLink"
+                      target="_blank"
+                      href={docLinks.behavioralAnalytics}
+                      external
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.esre.measurePerformanceSection.behavioralAnalyticsLinkText',
                         {
