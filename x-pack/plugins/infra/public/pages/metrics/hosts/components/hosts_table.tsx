@@ -14,7 +14,7 @@ import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
 import { DEFAULT_PAGE_SIZE } from '../constants';
-import { HostsTableFilterAction } from './host_table_filter_action';
+import { HostsTableFilterAction } from './table/filter_action';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
@@ -35,7 +35,7 @@ export const HostsTable = () => {
     selection,
     selectedItemsCount,
     filterSelectedHosts,
-    hostsTableRef,
+    refs,
   } = useHostsTableContext();
 
   return (
@@ -47,7 +47,7 @@ export const HostsTable = () => {
         />
       )}
       <EuiBasicTable
-        ref={hostsTableRef}
+        ref={refs.hostsTableRef}
         data-test-subj="hostsView-table"
         itemId="id"
         isSelectable={true}

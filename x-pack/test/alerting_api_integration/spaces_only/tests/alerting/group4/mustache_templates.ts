@@ -217,6 +217,23 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
     });
 
+    it('should handle FormatNumber', async () => {
+      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
+      // const DeepContextVariables
+      const template = `{{#context.deep}}{{#FormatNumber}}
+        {{{arrayI.1}}}; en-US; style: currency, currency: EUR
+      {{/FormatNumber}}{{/context.deep}}`;
+      const rule = await createRule({
+        id: slackConnector.id,
+        group: 'default',
+        params: {
+          message: `message {{alertId}} - ${template}`,
+        },
+      });
+      const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
+      expect(body.trim()).to.be('€45.00');
+    });
+
     async function createRule(action: any) {
       const ruleResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
