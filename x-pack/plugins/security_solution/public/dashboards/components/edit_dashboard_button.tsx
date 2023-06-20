@@ -5,62 +5,50 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import type { Query, Filter } from '@kbn/es-query';
-import { EuiButton } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { EDIT_DASHBOARD_BUTTON_TITLE } from '../pages/details/translations';
-import { useKibana, useNavigation } from '../../common/lib/kibana';
+import React from 'react';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 export interface EditDashboardButtonComponentProps {
-  filters?: Filter[];
-  query?: Query;
-  savedObjectId: string | undefined;
-  timeRange: {
-    from: string;
-    to: string;
-    fromStr?: string | undefined;
-    toStr?: string | undefined;
-  };
+  actions: Array<{
+    action: () => void;
+    isSaveInProgress: boolean;
+    iconType?: string;
+    title: string;
+    buttonType?: 'fill';
+    id: string;
+  }>;
 }
 
-const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> = ({
-  filters,
-  query,
-  savedObjectId,
-  timeRange,
-}) => {
-  const {
-    services: { dashboard },
-  } = useKibana();
-  const { navigateTo } = useNavigation();
-
-  const onClick = useCallback(
-    (e) => {
-      e.preventDefault();
-      const url = dashboard?.locator?.getRedirectUrl({
-        query,
-        filters,
-        timeRange,
-        dashboardId: savedObjectId,
-        viewMode: ViewMode.EDIT,
-      });
-      if (url) {
-        navigateTo({ url });
-      }
-    },
-    [dashboard?.locator, query, filters, timeRange, savedObjectId, navigateTo]
-  );
+const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> = ({ actions }) => {
   return (
-    <EuiButton
-      color="primary"
-      data-test-subj="dashboardEditButton"
-      fill
-      iconType="pencil"
-      onClick={onClick}
-    >
-      {EDIT_DASHBOARD_BUTTON_TITLE}
-    </EuiButton>
+    <>
+      {actions.map<React.ReactElement>(
+        ({ id, title, action, isSaveInProgress, iconType, buttonType }) => {
+          return buttonType === 'fill' ? (
+            <EuiButton
+              color="primary"
+              data-test-subj={id}
+              fill
+              iconType={iconType}
+              isLoading={isSaveInProgress}
+              onClick={action}
+              key={id}
+            >
+              {title}
+            </EuiButton>
+          ) : (
+            <EuiButtonEmpty
+              data-test-subj={id}
+              isLoading={isSaveInProgress}
+              onClick={action}
+              key={id}
+            >
+              {title}
+            </EuiButtonEmpty>
+          );
+        }
+      )}
+    </>
   );
 };
 
