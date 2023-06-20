@@ -44,7 +44,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
 
   const { cloudFormationUrl, error, isError, isLoading } = useCreateCloudFormationUrl({
     cloudFormationTemplateUrl,
-    enrollmentAPIKey: apyKeysData?.data?.items[0].api_key,
+    enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
   });
 
   return (
