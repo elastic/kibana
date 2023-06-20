@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { ConnectorTypes } from '../../connectors';
 import { ActionTypes } from './common';
 import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from './create_case';
@@ -43,6 +42,34 @@ describe('Create case', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    it('empty category is decoded properly', () => {
+      const defaultRequestEmptyCategory = {
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, category: null },
+      };
+
+      const query = CreateCaseUserActionRt.decode(defaultRequestEmptyCategory);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequestEmptyCategory,
+      });
+    });
+
+    it('string category is decoded properly', () => {
+      const defaultRequestStringCategory = {
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, category: 'sci-fi' },
+      };
+
+      const query = CreateCaseUserActionRt.decode(defaultRequestStringCategory);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequestStringCategory,
       });
     });
 
@@ -100,6 +127,34 @@ describe('Create case', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    it('empty category in request', () => {
+      const requestWithEmptyCategory = {
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, category: null },
+      };
+
+      const query = CreateCaseUserActionWithoutConnectorIdRt.decode(requestWithEmptyCategory);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: requestWithEmptyCategory,
+      });
+    });
+
+    it('string category in request', () => {
+      const requestWithStringCategory = {
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, category: 'romance' },
+      };
+
+      const query = CreateCaseUserActionWithoutConnectorIdRt.decode(requestWithStringCategory);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: requestWithStringCategory,
       });
     });
 
