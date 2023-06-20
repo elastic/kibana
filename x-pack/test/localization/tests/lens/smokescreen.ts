@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   describe('lens smokescreen tests', () => {
-    let termTranslator: (term: string, field?: string) => string;
+    let termTranslator: (term: string, field?: string, values?: number) => string;
 
     before(async () => {
       const serverArgs: string[] = config.get('kbnTestServer.serverArgs');
