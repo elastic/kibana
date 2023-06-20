@@ -12,9 +12,9 @@ import createContainer from 'constate';
 import { isEqual } from 'lodash';
 import { CriteriaWithPagination } from '@elastic/eui';
 import { isNumber } from 'lodash/fp';
-import { EuiButton } from '@elastic/eui';
 import { EuiTableSelectionType } from '@elastic/eui';
 import type { EuiBasicTable } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
@@ -162,11 +162,20 @@ const toggleDialogActionLabel = i18n.translate(
   }
 );
 
+const selectedHostsLabel = (selectedHostsCount: number) => {
+  return i18n.translate('xpack.infra.hostsViewPage.table.selectedHostsButton', {
+    values: { selectedHostsCount },
+    defaultMessage:
+      'Selected {selectedHostsCount} {selectedHostsCount, plural, =1 {host} other {hosts}}',
+  });
+};
+
 /**
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = () => {
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { hostNodes } = useHostsViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const [{ pagination, sorting }, setProperties] = useHostsTableUrlState();
@@ -205,22 +214,39 @@ export const useHostsTable = () => {
       filterManagerService.addFilters(newFilter);
       setSelectedItems([]);
       hostsTableRef.current?.setSelection([]);
+      setIsPopoverOpen(false);
     }
   }, [dataView, filterManagerService, selectedItems]);
 
-  const FilterButton =
-    selectedItems.length > 0 ? (
-      <EuiButton
+  const FilterButton = selectedItems.length > 0 && (
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      data-test-subj="bulkAction"
+      panelPaddingSize="s"
+      button={
+        <EuiButtonEmpty
+          data-test-subj="infraUseHostsTableButton"
+          size="xs"
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+        >
+          {selectedHostsLabel(selectedItems.length)}
+        </EuiButtonEmpty>
+      }
+    >
+      <EuiButtonEmpty
         data-test-subj="infraUseHostsTableHostsButton"
-        color="primary"
         iconType="filter"
         onClick={filterSelectedHosts}
       >
         {i18n.translate('xpack.infra.hostsViewPage.table.addFilter', {
           defaultMessage: 'Add filter',
         })}
-      </EuiButton>
-    ) : null;
+      </EuiButtonEmpty>
+    </EuiPopover>
+  );
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {

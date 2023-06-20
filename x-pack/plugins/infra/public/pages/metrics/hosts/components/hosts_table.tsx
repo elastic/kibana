@@ -8,9 +8,6 @@
 import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
 import { NoData } from '../../../../components/empty_states';
 import { HostNodeRow, useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
@@ -41,10 +38,7 @@ export const HostsTable = () => {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>{FilterButton}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
+      {FilterButton}
       <EuiBasicTable
         ref={hostsTableRef}
         data-test-subj="hostsView-table"
