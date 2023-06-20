@@ -7,6 +7,8 @@
  */
 
 import React from 'react';
+import { batch } from 'react-redux';
+
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
@@ -26,10 +28,10 @@ import {
 } from '../../../common/control_group/control_group_constants';
 import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
-import { IEditableControlFactory } from '../../types';
+import { DataControlEditorChanges, IEditableControlFactory } from '../../types';
 import { ControlInputTransform } from '../../../common/types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { DataControlInput, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
 
 export function openAddDataControlFlyout(
   this: ControlGroupContainer,
@@ -45,9 +47,8 @@ export function openAddDataControlFlyout(
     theme: { theme$ },
   } = pluginServices.getServices();
 
-  let controlInput: Partial<DataControlInput> = {};
-  const onCancel = () => {
-    if (Object.keys(controlInput).length === 0) {
+  const onCancel = (changes?: DataControlEditorChanges) => {
+    if (!changes || Object.keys(changes.input).length === 0) {
       this.closeAllFlyouts();
       return;
     }
@@ -64,6 +65,53 @@ export function openAddDataControlFlyout(
     });
   };
 
+  const onSaveFlyout = async (changes: DataControlEditorChanges, type?: string) => {
+    this.closeAllFlyouts();
+    if (!type) {
+      return;
+    }
+
+    let controlInput = changes.input;
+    const factory = getControlFactory(type) as IEditableControlFactory;
+    if (factory.presaveTransformFunction) {
+      controlInput = factory.presaveTransformFunction(controlInput);
+    }
+
+    if (controlInputTransform) {
+      controlInput = controlInputTransform({ ...controlInput }, type);
+    }
+
+    const dataControlInput = {
+      grow: changes.grow,
+      width: changes.width,
+      ...controlInput,
+    };
+    let newControl;
+    switch (type) {
+      case OPTIONS_LIST_CONTROL:
+        newControl = await this.addOptionsListControl(
+          dataControlInput as AddOptionsListControlProps
+        );
+        break;
+      case RANGE_SLIDER_CONTROL:
+        newControl = await this.addRangeSliderControl(
+          dataControlInput as AddRangeSliderControlProps
+        );
+        break;
+      default:
+        newControl = await this.addDataControlFromField(dataControlInput as AddDataControlProps);
+    }
+
+    if (onSave && !isErrorEmbeddable(newControl)) {
+      onSave(newControl.id);
+    }
+
+    batch(() => {
+      this.dispatch.setDefaultControlGrow(changes.grow);
+      this.dispatch.setDefaultControlWidth(changes.width);
+    });
+  };
+
   const flyoutInstance = openFlyout(
     toMountPoint(
       <ControlGroupContainerContext.Provider value={this}>
@@ -73,51 +121,8 @@ export function openAddDataControlFlyout(
           isCreate={true}
           width={this.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
           grow={this.getInput().defaultControlGrow ?? DEFAULT_CONTROL_GROW}
-          updateTitle={(newTitle) => (controlInput.title = newTitle)}
-          updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-          updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
-          onSave={async (type) => {
-            this.closeAllFlyouts();
-            if (!type) {
-              return;
-            }
-
-            const factory = getControlFactory(type) as IEditableControlFactory;
-            if (factory.presaveTransformFunction) {
-              controlInput = factory.presaveTransformFunction(controlInput);
-            }
-
-            if (controlInputTransform) {
-              controlInput = controlInputTransform({ ...controlInput }, type);
-            }
-
-            let newControl;
-
-            switch (type) {
-              case OPTIONS_LIST_CONTROL:
-                newControl = await this.addOptionsListControl(
-                  controlInput as AddOptionsListControlProps
-                );
-                break;
-              case RANGE_SLIDER_CONTROL:
-                newControl = await this.addRangeSliderControl(
-                  controlInput as AddRangeSliderControlProps
-                );
-                break;
-              default:
-                newControl = await this.addDataControlFromField(
-                  controlInput as AddDataControlProps
-                );
-            }
-
-            if (onSave && !isErrorEmbeddable(newControl)) {
-              onSave(newControl.id);
-            }
-          }}
+          onSave={onSaveFlyout}
           onCancel={onCancel}
-          onTypeEditorChange={(partialInput) =>
-            (controlInput = { ...controlInput, ...partialInput })
-          }
         />
       </ControlGroupContainerContext.Provider>,
       { theme$ }
@@ -128,8 +133,6 @@ export function openAddDataControlFlyout(
       onClose: () => {
         onCancel();
       },
-      // @ts-ignore - TODO: Remove this once https://github.com/elastic/eui/pull/6645 lands in Kibana
-      focusTrapProps: { scrollLock: true },
     }
   );
   setFlyoutRef(flyoutInstance);

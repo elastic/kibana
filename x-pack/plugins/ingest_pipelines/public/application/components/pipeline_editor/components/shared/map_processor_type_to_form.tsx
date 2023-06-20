@@ -56,6 +56,7 @@ import {
   UserAgent,
   FormFieldsComponent,
   UriParts,
+  Reroute,
 } from '../processor_form/processors';
 
 interface FieldDescriptor {
@@ -695,6 +696,20 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
           field,
           target_field: targetField,
         },
+      }),
+  },
+  reroute: {
+    FieldsComponent: Reroute,
+    docLinkPath: '/reroute-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.reroute', {
+      defaultMessage: 'Reroute',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.reroute', {
+      defaultMessage: 'Routes a document to another target index or data stream.',
+    }),
+    getDefaultDescription: ({ field, target_field: targetField }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.reroute', {
+        defaultMessage: 'Routes a document to another target index or data stream',
       }),
   },
   script: {

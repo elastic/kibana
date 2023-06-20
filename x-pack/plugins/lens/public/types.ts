@@ -62,7 +62,6 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
-import type { FormatSelectorOptions } from './datasources/form_based/dimension_panel/format_selector';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
@@ -437,6 +436,7 @@ export interface Datasource<T = unknown, P = unknown> {
     layerId: string,
     indexPatterns: IndexPatternMap,
     dateRange: DateRange,
+    nowInstant: Date,
     searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 
@@ -668,7 +668,6 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector: boolean;
   dataSectionExtra?: React.ReactNode;
-  formatSelectorOptions: FormatSelectorOptions | undefined;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -844,7 +843,6 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   isMetricDimension?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
-  formatSelectorOptions?: FormatSelectorOptions; // only relevant if supportFieldFormat is true
   labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 

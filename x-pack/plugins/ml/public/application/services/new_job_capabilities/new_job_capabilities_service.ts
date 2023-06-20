@@ -6,8 +6,13 @@
  */
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Field, Aggregation, AggId, FieldId } from '../../../../common/types/fields';
-import { EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import {
+  type Field,
+  type Aggregation,
+  type AggId,
+  type FieldId,
+  EVENT_RATE_FIELD_ID,
+} from '@kbn/ml-anomaly-utils';
 import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
 import { ml } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';

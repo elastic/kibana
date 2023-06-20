@@ -94,6 +94,14 @@ export const getSavedQueryCheckboxLabel = (savedQueryName: string) =>
     }
   );
 
+export const getSavedQueryCheckboxLabelWithoutName = () =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldShouldLoadQueryDynamicallyLabelWithoutName',
+    {
+      defaultMessage: 'Load saved query dynamically on each rule execution',
+    }
+  );
+
 export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchingIcesHelperDescription',
   {

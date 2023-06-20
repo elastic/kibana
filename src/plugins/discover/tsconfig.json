@@ -53,6 +53,7 @@
     "@kbn/shared-ux-router",
     "@kbn/dom-drag-drop",
     "@kbn/ebt-tools",
+    "@kbn/core-saved-objects-api-server",
   ],
   "exclude": [
     "target/**/*",

@@ -105,7 +105,7 @@ describe('Alert Event Details', () => {
     const packData = packFixture();
     const multiQueryPackData = multiQueryPackFixture();
 
-    before(() => {
+    beforeEach(() => {
       loadPack(packData).then((data) => {
         packId = data.saved_object_id;
         packName = data.name;
@@ -119,7 +119,7 @@ describe('Alert Event Details', () => {
         ruleName = data.name;
       });
     });
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
       cleanupPack(multiQueryPackId);
       cleanupRule(ruleId);
@@ -145,7 +145,7 @@ describe('Alert Event Details', () => {
       cy.contains('Save changes').click();
       cy.getBySel('response-actions-error')
         .within(() => {
-          cy.contains(' Pack is a required field');
+          cy.contains('Pack is a required field');
         })
         .should('exist');
       cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
