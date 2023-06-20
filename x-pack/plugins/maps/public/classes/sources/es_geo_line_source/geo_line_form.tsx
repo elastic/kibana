@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getTermsFields, getIsTimeseries } from '../../../index_pattern_util';
+import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_strings';
 
 interface Props {
   indexPattern: DataView;
@@ -78,9 +79,7 @@ export function GeoLineForm(props: Props) {
       {!props.groupByTimeseries && (
         <>
           <EuiFormRow
-            label={i18n.translate('xpack.maps.source.esGeoLine.splitFieldLabel', {
-              defaultMessage: 'Entity',
-            })}
+            label={ENTITY_INPUT_LABEL}
           >
             <SingleFieldSelect
               placeholder={i18n.translate('xpack.maps.source.esGeoLine.splitFieldPlaceholder', {
@@ -94,9 +93,7 @@ export function GeoLineForm(props: Props) {
           </EuiFormRow>
 
           <EuiFormRow
-            label={i18n.translate('xpack.maps.source.esGeoLine.sortFieldLabel', {
-              defaultMessage: 'Sort',
-            })}
+            label={SORT_INPUT_LABEL}
           >
             <SingleFieldSelect
               placeholder={i18n.translate('xpack.maps.source.esGeoLine.sortFieldPlaceholder', {

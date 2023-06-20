@@ -19,6 +19,7 @@ import type { OnSourceChangeArgs } from '../source';
 interface Props {
   bucketsName: string;
   indexPatternId: string;
+  groupByTimeSeries: boolean;
   splitField: string;
   sortField: string;
   metrics: AggDescriptor[];
@@ -69,6 +70,10 @@ export class UpdateSourceEditor extends Component<Props, State> {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
+  _onGroupByTimeseriesChange = (groupByTimeseries: boolean) => {
+    this.props.onChange({ propName: 'groupByTimeseries', value: groupByTimeseries });
+  };
+
   _onSplitFieldChange = (fieldName: string) => {
     this.props.onChange({ propName: 'splitField', value: fieldName });
   };
@@ -117,8 +122,10 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <EuiSpacer size="m" />
           <GeoLineForm
             indexPattern={this.state.indexPattern}
+            onGroupByTimeseriesChange={this._onGroupByTimeseriesChange}
             onSortFieldChange={this._onSortFieldChange}
             onSplitFieldChange={this._onSplitFieldChange}
+            groupByTimeseries={this.props.groupByTimeseries}
             sortField={this.props.sortField}
             splitField={this.props.splitField}
           />

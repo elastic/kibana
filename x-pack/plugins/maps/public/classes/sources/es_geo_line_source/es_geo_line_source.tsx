@@ -39,6 +39,7 @@ import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_proper
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { mergeExecutionContext } from '../execution_context_utils';
+import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_strings';
 
 type ESGeoLineSourceSyncMeta = Pick<
   ESGeoLineSourceDescriptor,
@@ -80,12 +81,12 @@ export class ESGeoLineSource extends AbstractESAggSource {
       typeof normalizedDescriptor.groupByTimeseries === 'boolean'
         ? normalizedDescriptor.groupByTimeseries
         : false;
-    if (!groupByTimeseries && !isValidStringConfig(normalizedDescriptor.splitField)) {
+    /*if (!groupByTimeseries && !isValidStringConfig(normalizedDescriptor.splitField)) {
       throw new Error('Cannot create an ESGeoLineSource without a splitField');
     }
     if (!groupByTimeseries && !isValidStringConfig(normalizedDescriptor.sortField)) {
       throw new Error('Cannot create an ESGeoLineSource without a sortField');
-    }
+    }*/
 
     return {
       ...normalizedDescriptor,
@@ -118,6 +119,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
+        groupByTimeseries={this._descriptor.groupByTimeseries}
         splitField={this._descriptor.splitField}
         sortField={this._descriptor.sortField}
       />
@@ -321,6 +323,20 @@ export class ESGeoLineSource extends AbstractESAggSource {
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
+    if (!this._descriptor.splitField) {
+      throw new Error(i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
+        defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
+        values: { inputLabel: ENTITY_INPUT_LABEL }
+      }));
+    }
+
+    if (!this._descriptor.sortField) {
+      throw new Error(i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
+        defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
+        values: { inputLabel: SORT_INPUT_LABEL }
+      }));
+    }
+
     const indexPattern = await this.getIndexPattern();
 
     // Request is broken into 2 requests
@@ -492,8 +508,6 @@ export class ESGeoLineSource extends AbstractESAggSource {
         areResultsTrimmed: false,
       };
     }
-
-    console.log(meta);
 
     const entitiesFoundMsg = meta.areEntitiesTrimmed
       ? i18n.translate('xpack.maps.esGeoLine.areEntitiesTrimmedMsg', {
