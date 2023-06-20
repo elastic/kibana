@@ -625,6 +625,7 @@ export class ManifestManager {
   }
 
   /**
+   * @deprecated
    * Cleanup .fleet-artifacts index if there are some orphan artifacts
    */
   public async cleanup(manifest: Manifest) {

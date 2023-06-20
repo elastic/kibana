@@ -176,7 +176,8 @@ export class ManifestTask {
       if (deleteErrors) {
         reportErrors(this.logger, [deleteErrors]);
       }
-      await manifestManager.cleanup(newManifest);
+      // TODO: Decide if we remove this or move it to other place when it runs less frequently.
+      // await manifestManager.cleanup(newManifest);
     } catch (err) {
       this.logger.error(wrapErrorIfNeeded(err));
     }
