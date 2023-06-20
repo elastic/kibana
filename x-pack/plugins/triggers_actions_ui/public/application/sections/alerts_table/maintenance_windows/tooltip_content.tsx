@@ -76,9 +76,7 @@ export const TooltipContent = memo((props: TooltipContentProps) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" direction="row">
           <EuiFlexItem grow={false}>
-            <EuiText size="relative">
-              {START_TIME}:
-            </EuiText>
+            <EuiText size="relative">{START_TIME}:</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="relative">
@@ -90,9 +88,7 @@ export const TooltipContent = memo((props: TooltipContentProps) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" direction="row">
           <EuiFlexItem grow={false}>
-            <EuiText size="relative">
-              {END_TIME}:
-            </EuiText>
+            <EuiText size="relative">{END_TIME}:</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="relative">
