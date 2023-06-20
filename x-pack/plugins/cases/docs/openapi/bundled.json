@@ -12,16 +12,24 @@
       "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
-  "tags": [
-    {
-      "name": "cases",
-      "description": "Case APIs enable you to open and track issues."
-    }
-  ],
   "servers": [
     {
       "url": "http://localhost:5601",
       "description": "local"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "cases",
+      "description": "Case APIs enable you to open and track issues."
     }
   ],
   "paths": {
@@ -1833,7 +1841,14 @@
             "$ref": "#/components/parameters/page_index"
           },
           {
-            "$ref": "#/components/parameters/page_size"
+            "name": "perPage",
+            "in": "query",
+            "description": "The number of items to return. Limited to 100 items.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
           },
           {
             "$ref": "#/components/parameters/sort_order"
@@ -5254,13 +5269,5 @@
         }
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ]
+  }
 }
