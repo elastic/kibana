@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BudgetingMethod, CreateSLOInput, IndicatorType, TimeWindow } from '@kbn/slo-schema';
+import { BudgetingMethod, IndicatorType, TimeWindow } from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
@@ -15,6 +15,7 @@ import {
   INDICATOR_CUSTOM_KQL,
   INDICATOR_CUSTOM_METRIC,
 } from '../../utils/slo/labels';
+import { CreateSLOForm } from './types';
 
 export const SLI_OPTIONS: Array<{
   value: IndicatorType;
@@ -87,7 +88,7 @@ export const ROLLING_TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
   }),
 }));
 
-export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
+export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
   name: '',
   description: '',
   indicator: {
@@ -101,7 +102,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
     },
   },
   timeWindow: {
-    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
+    duration: { value: 30, unit: 'd' },
     type: 'rolling',
   },
   tags: [],
@@ -111,7 +112,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
   },
 };
 
-export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOInput = {
+export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
   name: '',
   description: '',
   indicator: {
@@ -125,7 +126,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOInput = {
     },
   },
   timeWindow: {
-    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
+    duration: { value: 30, unit: 'd' },
     type: 'rolling',
   },
   tags: [],

@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
-import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
 import {
@@ -29,9 +28,10 @@ import {
   TIMEWINDOW_TYPE_OPTIONS,
 } from '../constants';
 import { maxWidth } from './slo_edit_form';
+import { CreateSLOForm } from '../types';
 
 export function SloEditFormObjectiveSection() {
-  const { control, watch, getFieldState, resetField } = useFormContext<CreateSLOInput>();
+  const { control, watch, getFieldState, resetField } = useFormContext<CreateSLOForm>();
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowTypeSelect = useGeneratedHtmlId({ prefix: 'timeWindowTypeSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });

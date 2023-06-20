@@ -6,13 +6,7 @@
  */
 
 import { BudgetingMethod, Indicator, TimeWindow } from '@kbn/slo-schema';
-
-export type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
-
-export interface Duration {
-  value: number;
-  unit: DurationUnit;
-}
+import { Duration } from '../../typings';
 
 export interface CreateSLOForm {
   name: string;

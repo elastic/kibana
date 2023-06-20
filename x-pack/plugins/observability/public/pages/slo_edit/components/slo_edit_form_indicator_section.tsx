@@ -7,11 +7,10 @@
 
 import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CreateSLOInput } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-
 import { SLI_OPTIONS } from '../constants';
+import { CreateSLOForm } from '../types';
 import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
 import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
 import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
@@ -26,7 +25,7 @@ interface SloEditFormIndicatorSectionProps {
 }
 
 export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicatorSectionProps) {
-  const { control, watch, setValue } = useFormContext<CreateSLOInput>();
+  const { control, watch, setValue } = useFormContext<CreateSLOForm>();
 
   const indicator = watch('indicator.type');
 

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -17,11 +16,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Controller, useFormContext, useFieldArray } from 'react-hook-form';
-import { CreateSLOInput } from '@kbn/slo-schema';
-import { range, first, xor } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { first, range, xor } from 'lodash';
+import React, { ReactNode, useEffect } from 'react';
+import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { CreateSLOForm } from '../../types';
 
 interface Option {
   label: string;
@@ -68,7 +68,7 @@ export function MetricIndicator({
   metricTooltip,
   equationTooltip,
 }: MetricIndicatorProps) {
-  const { control, watch, setValue } = useFormContext<CreateSLOInput>();
+  const { control, watch, setValue } = useFormContext<CreateSLOForm>();
 
   const metricFields = (indexFields ?? []).filter((field) => field.type === 'number');
 

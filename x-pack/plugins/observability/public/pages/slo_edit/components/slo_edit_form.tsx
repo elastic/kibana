@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
-import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,27 +15,31 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-
-import { useKibana } from '../../../utils/kibana_react';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import merge from 'lodash/fp/merge';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useHistory, useLocation } from 'react-router-dom';
+import { sloFeatureId } from '../../../../common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
+import { paths } from '../../../config/paths';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
-import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
-import { useShowSections } from '../hooks/use_show_sections';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
-import { useSectionFormValidation } from '../hooks/use_section_form_validation';
-import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
-import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
-import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
+import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
+import { useKibana } from '../../../utils/kibana_react';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import {
+  transformSloResponseToCreateSloForm,
   transformValuesToCreateSLOInput,
-  transformSloResponseToCreateSloInput,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
-import { paths } from '../../../config/paths';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
-import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
-import { sloFeatureId } from '../../../../common';
+import { useSectionFormValidation } from '../hooks/use_section_form_validation';
+import { useShowSections } from '../hooks/use_show_sections';
+import { CreateSLOForm } from '../types';
+import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
+import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
+import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -69,10 +70,8 @@ export function SloEditForm({ slo }: Props) {
     useHashQuery: false,
   });
 
-  const urlParams = urlStateStorage.get<CreateSLOInput>('_a');
-
+  const urlParams = urlStateStorage.get<CreateSLOForm>('_a');
   const searchParams = new URLSearchParams(search);
-
   const isEditMode = slo !== undefined;
 
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
@@ -88,9 +87,9 @@ export function SloEditForm({ slo }: Props) {
     }
   }, [isEditMode, rules, slo]);
 
-  const methods = useForm({
-    defaultValues: { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...urlParams },
-    values: transformSloResponseToCreateSloInput(slo),
+  const methods = useForm<CreateSLOForm>({
+    defaultValues: merge(SLO_EDIT_FORM_DEFAULT_VALUES, urlParams),
+    values: transformSloResponseToCreateSloForm(slo),
     mode: 'all',
   });
   const { watch, getFieldState, getValues, formState, trigger } = methods;

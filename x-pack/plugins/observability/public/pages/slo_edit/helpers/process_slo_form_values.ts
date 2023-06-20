@@ -5,29 +5,36 @@
  * 2.0.
  */
 
-import omit from 'lodash/omit';
 import type { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
-
 import { toDuration } from '../../../utils/slo/duration';
+import { CreateSLOForm } from '../types';
 
-export function transformSloResponseToCreateSloInput(
+export function transformSloResponseToCreateSloForm(
   values: SLOWithSummaryResponse | undefined
-): CreateSLOInput | undefined {
+): CreateSLOForm | undefined {
   if (!values) return undefined;
 
   return {
-    ...omit(values, ['id', 'revision', 'createdAt', 'updatedAt', 'summary', 'enabled']),
+    name: values.name,
+    description: values.description,
+    indicator: values.indicator,
+    budgetingMethod: values.budgetingMethod,
+    timeWindow: {
+      duration: toDuration(values.timeWindow.duration),
+      type: values.timeWindow.type,
+    },
     objective: {
-      target: values.objective.target * 100,
+      target: values.objective.target,
       ...(values.budgetingMethod === 'timeslices' &&
         values.objective.timesliceTarget && {
           timesliceTarget: values.objective.timesliceTarget * 100,
         }),
       ...(values.budgetingMethod === 'timeslices' &&
         values.objective.timesliceWindow && {
-          timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
+          timesliceWindow: toDuration(values.objective.timesliceWindow),
         }),
     },
+    tags: values.tags,
   };
 }
 

@@ -8,12 +8,12 @@
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { CreateSLOInput } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchDataViews } from '../../../../hooks/use_fetch_data_views';
 import { useFetchIndices } from '../../../../hooks/use_fetch_indices';
+import { CreateSLOForm } from '../../types';
 
 interface Option {
   label: string;
@@ -21,7 +21,7 @@ interface Option {
 }
 
 export function IndexSelection() {
-  const { control, getFieldState } = useFormContext<CreateSLOInput>();
+  const { control, getFieldState } = useFormContext<CreateSLOForm>();
 
   const [searchValue, setSearchValue] = useState<string>('');
   const [dataViewOptions, setDataViewOptions] = useState<Option[]>([]);

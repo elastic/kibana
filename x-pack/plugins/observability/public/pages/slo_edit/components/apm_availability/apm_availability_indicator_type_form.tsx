@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import type { CreateSLOInput } from '@kbn/slo-schema';
-
+import React, { useEffect } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
+import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { setValue, watch } = useFormContext<CreateSLOInput>();
+  const { setValue, watch } = useFormContext<CreateSLOForm>();
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
     setValue('indicator.params.index', apmIndex);

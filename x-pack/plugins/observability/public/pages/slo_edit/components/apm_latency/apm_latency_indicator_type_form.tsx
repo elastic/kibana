@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
-import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import type { CreateSLOInput } from '@kbn/slo-schema';
-
+import React, { useEffect } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
+import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmLatencyIndicatorTypeForm() {
-  const { control, setValue, watch, getFieldState } = useFormContext<CreateSLOInput>();
+  const { control, setValue, watch, getFieldState } = useFormContext<CreateSLOForm>();
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
     setValue('indicator.params.index', apmIndex);

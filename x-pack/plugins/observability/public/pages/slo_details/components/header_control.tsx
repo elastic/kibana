@@ -20,7 +20,7 @@ import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
 import {
-  transformSloResponseToCreateSloInput,
+  transformSloResponseToCreateSloForm,
   transformValuesToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SloDeleteConfirmationModal } from '../../slos/components/slo_delete_confirmation_modal';
@@ -112,7 +112,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
       setIsPopoverOpen(false);
 
       const newSlo = transformValuesToCreateSLOInput(
-        transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
+        transformSloResponseToCreateSloForm({ ...slo, name: `[Copy] ${slo.name}` })!
       );
 
       cloneSlo({ slo: newSlo, originalSloId: slo.id });
