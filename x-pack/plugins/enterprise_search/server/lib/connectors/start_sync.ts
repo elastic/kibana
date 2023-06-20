@@ -7,18 +7,22 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
+import {
+  CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
+  CONNECTORS_INDEX,
+  CONNECTORS_JOBS_INDEX,
+} from '../..';
 import { isConfigEntry } from '../../../common/connectors/is_category_entry';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
 import {
-  ConnectorSyncConfiguration,
   ConnectorDocument,
+  ConnectorSyncConfiguration,
   ConnectorSyncJobDocument,
+  SyncJobType,
   SyncStatus,
   TriggerMethod,
-  SyncJobType,
 } from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 
@@ -63,6 +67,11 @@ export const startConnectorSync = async (
       });
     }
 
+    const targetIndexName =
+      jobType === SyncJobType.ACCESS_CONTROL
+        ? CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX + index_name
+        : index_name;
+
     return await client.asCurrentUser.index<ConnectorSyncJobDocument>({
       document: {
         cancelation_requested_at: null,
@@ -72,7 +81,7 @@ export const startConnectorSync = async (
           configuration,
           filtering: filtering ? filtering[0]?.active ?? null : null,
           id: connectorId,
-          index_name,
+          index_name: targetIndexName,
           language,
           pipeline: pipeline ?? null,
           service_type,
