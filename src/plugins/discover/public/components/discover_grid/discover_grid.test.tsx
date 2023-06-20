@@ -259,12 +259,12 @@ describe('DiscoverGrid', () => {
             {
               aggregatable: false,
               name: '@timestamp',
-              type: 'keyword',
+              type: 'date',
             },
             {
               aggregatable: false,
               name: 'message',
-              type: 'keyword',
+              type: 'string',
             },
           ],
         })

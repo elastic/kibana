@@ -15,6 +15,11 @@ export const fields = [
     scripted: false,
     filterable: false,
     aggregatable: false,
+    spec: {
+      name: '_source',
+      type: '_source',
+      aggregatable: false,
+    },
   },
   {
     name: '_index',
@@ -22,6 +27,11 @@ export const fields = [
     scripted: false,
     filterable: true,
     aggregatable: false,
+    spec: {
+      name: '_index',
+      type: 'string',
+      aggregatable: false,
+    },
   },
   {
     name: 'message',
@@ -30,6 +40,11 @@ export const fields = [
     scripted: false,
     filterable: false,
     aggregatable: false,
+    spec: {
+      name: 'message',
+      type: 'string',
+      aggregatable: false,
+    },
   },
   {
     name: 'extension',
@@ -38,6 +53,11 @@ export const fields = [
     scripted: false,
     filterable: true,
     aggregatable: true,
+    spec: {
+      name: 'message',
+      type: 'string',
+      aggregatable: false,
+    },
   },
   {
     name: 'bytes',
@@ -47,6 +67,11 @@ export const fields = [
     filterable: true,
     aggregatable: true,
     sortable: true,
+    spec: {
+      name: 'message',
+      type: 'string',
+      aggregatable: false,
+    },
   },
   {
     name: 'scripted',
@@ -54,6 +79,11 @@ export const fields = [
     displayName: 'scripted',
     scripted: true,
     filterable: false,
+    spec: {
+      name: 'scripted',
+      type: 'number',
+      aggregatable: false,
+    },
   },
   {
     name: 'object.value',
@@ -62,6 +92,11 @@ export const fields = [
     scripted: false,
     filterable: true,
     aggregatable: true,
+    spec: {
+      name: 'object.value',
+      type: 'number',
+      aggregatable: false,
+    },
   },
   {
     name: '@timestamp',
@@ -70,6 +105,11 @@ export const fields = [
     scripted: false,
     filterable: true,
     aggregatable: true,
+    spec: {
+      name: '@timestamp',
+      type: 'date',
+      aggregatable: false,
+    },
   },
 ] as DataView['fields'];
 
