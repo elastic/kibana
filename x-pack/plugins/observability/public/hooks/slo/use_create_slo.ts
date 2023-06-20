@@ -49,20 +49,20 @@ export function useCreateSlo() {
         // Return a context object with the snapshotted value
         return { previousSloList: data };
       },
-      onSuccess: (_data, { slo: { name } }) => {
+      onSuccess: (_data, { slo }) => {
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.create.successNotification', {
             defaultMessage: 'Successfully created {name}',
-            values: { name },
+            values: { name: slo.name },
           })
         );
         queryClient.invalidateQueries(sloKeys.lists());
       },
-      onError: (error, { slo: { name } }) => {
+      onError: (error, { slo }) => {
         toasts.addError(new Error(String(error)), {
           title: i18n.translate('xpack.observability.slo.create.errorNotification', {
             defaultMessage: 'Something went wrong while creating {name}',
-            values: { name },
+            values: { name: slo.name },
           }),
         });
       },
