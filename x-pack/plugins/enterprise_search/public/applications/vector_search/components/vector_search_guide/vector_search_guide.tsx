@@ -7,11 +7,64 @@
 
 import React from 'react';
 
-import { EuiLink, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchVectorSearchPageTemplate } from '../layout/page_template';
+
+const CREATE_INDEX_SNIPPET = `PUT /image-index
+{
+  "mappings": {
+    "properties": {
+      "image-vector": {
+        "type": "dense_vector",
+        "dims": 3,
+        "index": true,
+        "similarity": "l2_norm"
+      },
+      "title-vector": {
+        "type": "dense_vector",
+        "dims": 5,
+        "index": true,
+        "similarity": "l2_norm"
+      },
+      "title": {
+        "type": "text"
+      },
+      "file-type": {
+        "type": "keyword"
+      }
+    }
+  }
+}`;
+
+const INGEST_SNIPPET = `POST /image-index/_bulk?refresh=true
+{ "index": { "_id": "1" } }
+{ "image-vector": [1, 5, -20], "title-vector": [12, 50, -10, 0, 1], "title": "moose family", "file-type": "jpg" }
+{ "index": { "_id": "2" } }
+{ "image-vector": [42, 8, -15], "title-vector": [25, 1, 4, -12, 2], "title": "alpine lake", "file-type": "png" }
+{ "index": { "_id": "3" } }
+{ "image-vector": [15, 11, 23], "title-vector": [1, 5, 25, 50, 20], "title": "full moon", "file-type": "jpg" }
+...`;
+
+const QUERY_SNIPPET = `POST /image-index/_search
+{
+  "knn": {
+    "field": "image-vector",
+    "query_vector": [-5, 9, -12],
+    "k": 10,
+    "num_candidates": 100
+  },
+  "fields": [ "title", "file-type" ]
+}`;
 
 export const VectorSearchGuide: React.FC = () => (
   <EnterpriseSearchVectorSearchPageTemplate
@@ -40,135 +93,105 @@ export const VectorSearchGuide: React.FC = () => (
     }}
   >
     <SetPageChrome />
-    <section>
-      <div>
-        <h2>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.vectorSearch.guide.createIndex.title"
-            defaultMessage="Create an index"
-          />
-        </h2>
-        <p>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.vectorSearch.guide.createIndex.description"
-            defaultMessage="Start by creating an index with one or more {denseVector} fields."
-            values={{ denseVector: <span>dense_vector</span> }}
-          />
-        </p>
-      </div>
-      <div>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={4}>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.vectorSearch.guide.createIndex.title"
+              defaultMessage="Create an index"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.vectorSearch.guide.createIndex.description"
+              defaultMessage="Start by creating an index with one or more {denseVector} fields."
+              values={{ denseVector: <span>dense_vector</span> }}
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={6}>
         <pre>
-          <code>
-            {`PUT image-index
-{
-  "mappings": {
-    "properties": {
-      "image-vector": {
-        "type": "dense_vector",
-        "dims": 3,
-        "index": true,
-        "similarity": "l2_norm"
-      },
-      "title-vector": {
-        "type": "dense_vector",
-        "dims": 5,
-        "index": true,
-        "similarity": "l2_norm"
-      },
-      "title": {
-        "type": "text"
-      },
-      "file-type": {
-        "type": "keyword"
-      }
-    }
-  }
-}`}
-          </code>
+          <code>{CREATE_INDEX_SNIPPET}</code>
         </pre>
-      </div>
-    </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
     <EuiHorizontalRule />
-    <section>
-      <div>
-        <h2>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.vectorSearch.guide.ingest.title"
-            defaultMessage="Ingest your data"
-          />
-        </h2>
-        <p>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.vectorSearch.guide.ingest.description"
-            defaultMessage="Add data to your index to make it searchable."
-          />
-        </p>
-      </div>
-      <div>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={4}>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.vectorSearch.guide.ingest.title"
+              defaultMessage="Ingest your data"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.vectorSearch.guide.ingest.description"
+              defaultMessage="Add data to your index to make it searchable."
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={6}>
         <pre>
-          <code>
-            {`POST image-index/_bulk?refresh=true
-{ "index": { "_id": "1" } }
-{ "image-vector": [1, 5, -20], "title-vector": [12, 50, -10, 0, 1], "title": "moose family", "file-type": "jpg" }
-{ "index": { "_id": "2" } }
-{ "image-vector": [42, 8, -15], "title-vector": [25, 1, 4, -12, 2], "title": "alpine lake", "file-type": "png" }
-{ "index": { "_id": "3" } }
-{ "image-vector": [15, 11, 23], "title-vector": [1, 5, 25, 50, 20], "title": "full moon", "file-type": "jpg" }
-...`}
-          </code>
+          <code>{INGEST_SNIPPET}</code>
         </pre>
-      </div>
-    </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
     <EuiHorizontalRule />
-    <section>
-      <div>
-        <h2>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.vectorSearch.guide.query.title"
-            defaultMessage="Build your vector search query"
-          />
-        </h2>
-        <p>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.vectorSearch.guide.query.description"
-            defaultMessage="Now you're ready to explore your data with searches and aggregations."
-          />
-        </p>
-      </div>
-      <div>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={4}>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.vectorSearch.guide.query.title"
+              defaultMessage="Build your vector search query"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.vectorSearch.guide.query.description"
+              defaultMessage="Now you're ready to explore your data with searches and aggregations."
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={6}>
         <pre>
-          <code>
-            {`POST image-index/_search
-{
-  "knn": {
-    "field": "image-vector",
-    "query_vector": [-5, 9, -12],
-    "k": 10,
-    "num_candidates": 100
-  },
-  "fields": [ "title", "file-type" ]
-}`}
-          </code>
+          <code>{QUERY_SNIPPET}</code>
         </pre>
-      </div>
-    </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
     <EuiHorizontalRule />
-    <section>
-      <div>
-        <h2>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.title"
-            defaultMessage="Don’t have a model deployed?"
-          />
-        </h2>
-        <p>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.description"
-            defaultMessage="Elastic can help you generate embeddings."
-          />
-        </p>
-      </div>
-      <div>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={4}>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.title"
+              defaultMessage="Don’t have a model deployed?"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.description"
+              defaultMessage="Elastic can help you generate embeddings."
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={6}>
         <ul>
           <li>
             <h3>
@@ -199,7 +222,7 @@ export const VectorSearchGuide: React.FC = () => (
             </p>
           </li>
         </ul>
-      </div>
-    </section>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EnterpriseSearchVectorSearchPageTemplate>
 );
