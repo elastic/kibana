@@ -25,7 +25,7 @@ export const ColumnHeader = React.memo(
   ({ label, toolTip, formula, popoverContainerRef }: Props) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [offset, setOffset] = useState(0);
-    const [isPopoverOpen, { on: openPopover, off: closePopover }] = useBoolean(false);
+    const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
     const { euiTheme } = useEuiTheme();
     const { headerHeight } = useKibanaHeader();
@@ -39,9 +39,9 @@ export const ColumnHeader = React.memo(
           (containerRef.current?.getBoundingClientRect().y ?? 0) - SEARCH_BAR_OFFSET - headerHeight;
 
         setOffset(headerHeight * (scrollPosition <= 0 ? -1 : 1) + ANCHOR_SPACING);
-        openPopover();
+        togglePopover();
       },
-      [headerHeight, openPopover]
+      [headerHeight, togglePopover]
     );
 
     return (
