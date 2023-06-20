@@ -46,7 +46,11 @@ type ESGeoLineSourceSyncMeta = Pick<
 >;
 
 const MAX_TRACKS = 250;
-const TIME_SERIES_FIELD_NAME = '_tsid';
+
+// Constant is used to identify time series id field in UIs, tooltips, and styling. 
+// Constant is not passed to Elasticsearch APIs and is not related to '_tsid' document metadata field.
+// Constant value of '_tsid' is arbitrary.
+const TIME_SERIES_ID_FIELD_NAME = '_tsid';
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
@@ -159,8 +163,8 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   _createTsidField(): IField | null {
     return new InlineField<ESGeoLineSource>({
-      fieldName: TIME_SERIES_FIELD_NAME,
-      label: TIME_SERIES_FIELD_NAME,
+      fieldName: TIME_SERIES_ID_FIELD_NAME,
+      label: TIME_SERIES_ID_FIELD_NAME,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
       dataType: 'string',
@@ -187,7 +191,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       return this._createSplitField();
     }
 
-    if (name === TIME_SERIES_FIELD_NAME) {
+    if (name === TIME_SERIES_ID_FIELD_NAME) {
       return this._createTsidField();
     }
 
@@ -292,7 +296,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       resp,
-      TIME_SERIES_FIELD_NAME,
+      TIME_SERIES_ID_FIELD_NAME,
     );
 
     const entityCount = featureCollection.features.length;
