@@ -371,6 +371,9 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   };
 }
 
+// eslint-disable-next-line import/no-default-export
+export default ScrollableLogTextStreamView;
+
 /**
  * If the above component wasn't a class component, this wouldn't be necessary
  * since the `useColumnWidths` hook could have been used directly.

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { dynamic } from '../common/dynamic';
 import { LogsSharedPlugin } from './plugin';
 
 export type {
@@ -42,20 +43,39 @@ export type {
 } from './components/logging/log_text_stream';
 export {
   iconColumnId,
-  LogColumnHeader,
-  LogColumnHeadersWrapper,
-  LogEntryColumn,
-  LogEntryContextMenu,
-  LogEntryFieldColumn,
-  LogEntryMessageColumn,
-  LogEntryRowWrapper,
-  LogEntryTimestampColumn,
-  ScrollableLogTextStreamView,
   useColumnWidths,
-} from './components/logging/log_text_stream';
+} from './components/logging/log_text_stream/log_entry_column';
 export { LogEntryFlyout } from './components/logging/log_entry_flyout';
-export { LazyLogStreamWrapper as LogStream } from './components/log_stream/lazy_log_stream_wrapper';
-export type { LogStreamProps } from './components/log_stream';
+export type { LogStreamProps } from './components/log_stream/log_stream';
+
+export const LogStream = dynamic(() => import('./components/log_stream/log_stream'));
+export const LogColumnHeader = dynamic(
+  () => import('./components/logging/log_text_stream/column_headers')
+);
+export const LogColumnHeadersWrapper = dynamic(
+  () => import('./components/logging/log_text_stream/column_headers')
+);
+export const LogEntryColumn = dynamic(
+  () => import('./components/logging/log_text_stream/log_entry_column')
+);
+export const LogEntryContextMenu = dynamic(
+  () => import('./components/logging/log_text_stream/log_entry_context_menu')
+);
+export const LogEntryFieldColumn = dynamic(
+  () => import('./components/logging/log_text_stream/log_entry_field_column')
+);
+export const LogEntryMessageColumn = dynamic(
+  () => import('./components/logging/log_text_stream/log_entry_message_column')
+);
+export const LogEntryRowWrapper = dynamic(
+  () => import('./components/logging/log_text_stream/log_entry_row')
+);
+export const LogEntryTimestampColumn = dynamic(
+  () => import('./components/logging/log_text_stream/log_entry_timestamp_column')
+);
+export const ScrollableLogTextStreamView = dynamic(
+  () => import('./components/logging/log_text_stream/scrollable_log_text_stream_view')
+);
 
 // State machine utils
 export {
