@@ -1566,7 +1566,7 @@ describe('TaskManagerRunner', () => {
         );
       });
 
-      test('skips task.run when the task run returns skip Error ', async () => {
+      test('skips task.run when the task run returns a SkipError ', async () => {
         const mockTaskInstance: Partial<ConcreteTaskInstance> = {
           schedule: { interval: '10m' },
           status: TaskStatus.Running,
@@ -1579,6 +1579,11 @@ describe('TaskManagerRunner', () => {
 
         const { runner, store, logger } = await readyToRunStageSetup({
           instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            delay: 3000,
+            enabled: true,
+            max_attempts: 20,
+          },
           definitions: {
             bar: {
               title: 'Bar!',
@@ -1607,6 +1612,82 @@ describe('TaskManagerRunner', () => {
           'Task Manager has skipped executing the Task (bar/foo) 1 times as it has invalid params.'
         );
         expect(result).toEqual(asErr({ state: {}, error: skipError }));
+      });
+
+      test('does not skip when disabled (recurring task)', async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          schedule: { interval: '10m' },
+          attempts: 1,
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStatePAram: 'foo' },
+          runAt: new Date(),
+          requeueInvalidTask: {
+            attempts: mockRequeueInvalidTasksConfig.max_attempts,
+          },
+        };
+        const skipError = createSkipError(new Error('test'));
+
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { state: { new: 'foo' }, error: skipError };
+                },
+              }),
+            },
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledTimes(1);
+        const instance = store.update.mock.calls[0][0];
+
+        expect(instance.runAt.getTime()).toBe(600000); // reschedule attempt
+        expect(instance.state).toEqual({ new: 'foo' });
+        expect(instance.schedule).toEqual(mockTaskInstance.schedule);
+        expect(instance.attempts).toBe(mockTaskInstance.attempts);
+        expect(instance.requeueInvalidTask?.attempts).toBe(20);
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(result).toEqual(asErr({ state: { new: 'foo' }, error: skipError }));
+      });
+
+      test('does not skip when disabled (non-recurring task)', async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          attempts: 5, // defaultMaxAttempts
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          enabled: true,
+          state: { existingStatePAram: 'foo' },
+          runAt: new Date(),
+          requeueInvalidTask: {
+            attempts: 0,
+          },
+        };
+        const skipError = createSkipError(new Error('test'));
+
+        const { store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { state: { new: 'foo' }, error: skipError };
+                },
+              }),
+            },
+          },
+        });
+
+        expect(store.update).not.toHaveBeenCalled();
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(store.remove).toHaveBeenCalled();
       });
 
       test('resets skip attempts on the first successful run', async () => {
