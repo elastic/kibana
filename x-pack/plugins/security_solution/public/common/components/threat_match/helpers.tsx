@@ -11,9 +11,11 @@ import { addIdToItem } from '@kbn/securitysolution-utils';
 import type { ThreatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { threatMap } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+
 import type { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
 
 /**
@@ -24,8 +26,8 @@ import type { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './type
  * @param itemIndex entry index
  */
 export const getFormattedEntry = (
-  indexPattern: DataViewBase,
-  threatIndexPatterns: DataViewBase,
+  indexPattern: DataViewSpec,
+  threatIndexPatterns: DataViewSpec,
   item: Entry,
   itemIndex: number,
   uuidGen: () => string = uuidv4
@@ -34,10 +36,8 @@ export const getFormattedEntry = (
   const { fields: threatFields } = threatIndexPatterns;
   const field = item.field;
   const threatField = item.value;
-  const [foundField] = fields.filter(({ name }) => field != null && field === name);
-  const [threatFoundField] = threatFields.filter(
-    ({ name }) => threatField != null && threatField === name
-  );
+  const foundField = fields?.[field ?? ''];
+  const threatFoundField = threatFields?.[threatField ?? ''];
   const maybeId: typeof item & { id?: string } = item;
   return {
     id: maybeId.id ?? uuidGen(),
@@ -55,8 +55,8 @@ export const getFormattedEntry = (
  * @param entries item entries
  */
 export const getFormattedEntries = (
-  indexPattern: DataViewBase,
-  threatIndexPatterns: DataViewBase,
+  indexPattern: DataViewSpec,
+  threatIndexPatterns: DataViewSpec,
   entries: Entry[]
 ): FormattedEntry[] => {
   return entries.reduce<FormattedEntry[]>((acc, item, index) => {

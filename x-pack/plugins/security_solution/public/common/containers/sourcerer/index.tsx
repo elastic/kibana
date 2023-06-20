@@ -395,15 +395,15 @@ export const useSourcererDataView = (
   const legacyDataView: Omit<SourcererDataView, 'id'> & { id: string | null } = useMemo(
     () => ({
       ...fetchIndexReturn,
-      dataView: fetchIndexReturn.dataView,
-      runtimeMappings: (fetchIndexReturn.dataView?.runtimeFieldMap as RunTimeMappings) ?? {},
-      title: fetchIndexReturn.dataView?.title ?? '',
-      id: fetchIndexReturn.dataView?.id ?? null,
+      dataView: fetchIndexReturn.dataViewSpec,
+      runtimeMappings: (fetchIndexReturn.dataViewSpec?.runtimeFieldMap as RunTimeMappings) ?? {},
+      title: fetchIndexReturn.dataViewSpec?.title ?? '',
+      id: fetchIndexReturn.dataViewSpec?.id ?? null,
       loading: indexPatternsLoading,
       patternList: fetchIndexReturn.indexes,
       indexFields: fetchIndexReturn.indexPatterns
         .fields as SelectedDataView['indexPattern']['fields'],
-      fields: fetchIndexReturn.dataView?.fields,
+      fields: fetchIndexReturn.dataViewSpec?.fields,
     }),
     [fetchIndexReturn, indexPatternsLoading]
   );

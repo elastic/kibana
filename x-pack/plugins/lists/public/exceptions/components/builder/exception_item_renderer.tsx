@@ -23,12 +23,13 @@ import {
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';
-import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { BuilderEntryItem } from './entry_renderer';
 import { EntryFieldError } from './reducer';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common/types';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {
@@ -52,13 +53,11 @@ interface BuilderExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionItemIndex: number;
   osTypes?: OsTypeArray;
-  indexPattern: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined;
+  indexPattern: DataViewSpec;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<
-    Omit<DataView, 'fields'> & { fields: FieldSpec[] }
-  >;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<DataViewSpec>;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: EntryFieldError) => void;
@@ -67,6 +66,7 @@ interface BuilderExceptionListItemProps {
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
+  fieldFormats: FieldFormatsStartCommon;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -90,6 +90,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     isDisabled = false,
     operatorsList,
     allowCustomOptions = false,
+    fieldFormats,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -163,6 +164,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           }
                           operatorsList={operatorsList}
                           allowCustomOptions={allowCustomOptions}
+                          fieldFormats={fieldFormats}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

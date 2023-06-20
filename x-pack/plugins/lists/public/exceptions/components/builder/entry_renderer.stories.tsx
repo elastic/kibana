@@ -16,7 +16,7 @@ import {
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
@@ -171,13 +171,18 @@ export default {
 
 const BuilderEntryItemTemplate: Story<EntryItemProps> = (args) => <BuilderEntryItem {...args} />;
 
-const getMockIndexPattern = (): Omit<DataView, 'fields'> & { fields: FieldSpec[] } =>
-  ({
-    ...createStubDataView({
-      spec: { id: '1234', title: 'logstash-*' },
-    }),
-    fields,
-  } as Omit<DataView, 'fields'> & { fields: FieldSpec[] });
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 
 export const Default = BuilderEntryItemTemplate.bind({});
 Default.args = {

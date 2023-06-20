@@ -14,11 +14,12 @@ import {
   EuiComboBoxOptionOption,
   EuiComboBox,
 } from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import { uniq } from 'lodash';
 
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../src/plugins/unified_search/public';
@@ -42,9 +43,9 @@ const SINGLE_SELECTION = { asPlainText: true };
 
 interface AutocompleteFieldMatchProps {
   placeholder: string;
-  selectedField: DataViewFieldBase | undefined;
+  selectedField: FieldSpec | undefined;
   selectedValue: string | undefined;
-  indexPattern: DataViewBase | undefined;
+  indexPattern: DataViewSpec | undefined;
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
@@ -54,6 +55,7 @@ interface AutocompleteFieldMatchProps {
   autocompleteService: AutocompleteStart;
   onChange: (arg: string) => void;
   onError?: (arg: boolean) => void;
+  fieldFormats: FieldFormatsStartCommon;
 }
 
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
@@ -70,6 +72,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   autocompleteService,
   onChange,
   onError,
+  fieldFormats,
 }): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
@@ -79,6 +82,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     autocompleteService,
     fieldValue: selectedValue,
     indexPattern,
+    fieldFormats,
     operatorType: OperatorTypeEnum.MATCH,
     query: searchQuery,
     selectedField,

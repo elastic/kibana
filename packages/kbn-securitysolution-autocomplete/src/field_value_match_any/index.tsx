@@ -10,7 +10,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../src/plugins/unified_search/public';
@@ -27,9 +28,10 @@ import { paramContainsSpace } from '../param_contains_space';
 
 interface AutocompleteFieldMatchAnyProps {
   placeholder: string;
-  selectedField: DataViewFieldBase | undefined;
+  selectedField: FieldSpec | undefined;
   selectedValue: string[];
-  indexPattern: DataViewBase | undefined;
+  indexPattern: DataViewSpec | undefined;
+  fieldFormats: FieldFormatsStartCommon;
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
@@ -46,6 +48,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   selectedField,
   selectedValue,
   indexPattern,
+  fieldFormats,
   isLoading,
   isDisabled = false,
   isClearable = false,
@@ -62,6 +65,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     autocompleteService,
     fieldValue: selectedValue,
     indexPattern,
+    fieldFormats,
     operatorType: OperatorTypeEnum.MATCH_ANY,
     query: searchQuery,
     selectedField,

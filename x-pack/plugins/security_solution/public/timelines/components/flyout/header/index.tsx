@@ -75,7 +75,9 @@ const ActiveTimelinesContainer = styled(EuiFlexItem)`
 
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
-  const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
+  const { browserFields, indexPattern, sourcererDataView } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -130,13 +132,13 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
       combineQueries({
         config: esQueryConfig,
         dataProviders,
-        indexPattern,
+        indexPattern: sourcererDataView ?? {},
         browserFields,
         filters: filters ? filters : [],
         kqlQuery: kqlQueryTest,
         kqlMode,
       }),
-    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQueryTest]
+    [browserFields, dataProviders, esQueryConfig, filters, sourcererDataView, kqlMode, kqlQueryTest]
   );
 
   const handleClose = useCallback(() => {
@@ -348,7 +350,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const { selectedPatterns, indexPattern, browserFields } = useSourcererDataView(
+  const { selectedPatterns, indexPattern, browserFields, sourcererDataView } = useSourcererDataView(
     SourcererScopeName.timeline
   );
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -394,13 +396,13 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
       combineQueries({
         config: esQueryConfig,
         dataProviders,
-        indexPattern,
+        indexPattern: sourcererDataView ?? {},
         browserFields,
         filters: filters ? filters : [],
         kqlQuery,
         kqlMode,
       }),
-    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
+    [browserFields, dataProviders, esQueryConfig, filters, sourcererDataView, kqlMode, kqlQuery]
   );
 
   const isBlankTimeline: boolean = useMemo(

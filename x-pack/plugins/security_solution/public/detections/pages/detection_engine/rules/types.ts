@@ -16,9 +16,9 @@ import type {
   Threats,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { DataViewBase, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/common';
 
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
@@ -156,7 +156,7 @@ export enum GroupByOptions {
 export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
-  indexPattern?: DataViewBase;
+  indexPattern?: DataViewSpec;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   dataViewId?: string;

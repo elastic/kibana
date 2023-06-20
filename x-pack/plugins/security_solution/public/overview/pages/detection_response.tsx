@@ -34,7 +34,12 @@ import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query
 
 const DetectionResponseComponent = () => {
   const { filterQuery } = useGlobalFilterQuery();
-  const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
+  const {
+    indicesExist,
+    indexPattern,
+    loading: isSourcererLoading,
+    sourcererDataView,
+  } = useSourcererDataView();
   const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadCases = useGetUserCasesPermissions().read;
@@ -49,7 +54,7 @@ const DetectionResponseComponent = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+            <SiemSearchBar id={InputsModelId.global} indexPattern={sourcererDataView ?? {}} />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
             <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE} />

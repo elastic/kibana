@@ -32,7 +32,7 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
-import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
 import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
@@ -46,9 +46,11 @@ import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 
-export const filterIndexPatterns: FilterEndpointFields<
-  Omit<DataView, 'fields'> & { fields: FieldSpec[] }
-> = (patterns, type, osTypes) => {
+export const filterIndexPatterns: FilterEndpointFields<DataViewSpec> = (
+  patterns,
+  type,
+  osTypes
+) => {
   switch (type) {
     case 'endpoint':
       const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
@@ -61,18 +63,30 @@ export const filterIndexPatterns: FilterEndpointFields<
       return {
         ...patterns,
         fields:
-          patterns != null ? patterns.fields.filter(({ name }) => osFilterForEndpoint(name)) : [],
-      } as Omit<DataView, 'fields'> & { fields: FieldSpec[] };
+          patterns != null
+            ? Object.values(patterns.fields ?? {}).reduce((acc, { name }) => {
+                if (!osFilterForEndpoint(name)) {
+                  return { ...acc, [name]: patterns?.fields?.[name] };
+                } else {
+                  return acc;
+                }
+              }, {})
+            : [],
+      } as DataViewSpec;
     case 'endpoint_events':
       return {
         ...patterns,
         fields:
           patterns != null
-            ? patterns.fields.filter(({ name }) =>
-                EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(name)
-              )
+            ? Object.values(patterns.fields ?? {}).reduce((acc, { name }) => {
+                if (!EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(name)) {
+                  return { ...acc, [name]: patterns?.fields?.[name] };
+                } else {
+                  return acc;
+                }
+              }, {})
             : [],
-      } as Omit<DataView, 'fields'> & { fields: FieldSpec[] };
+      } as DataViewSpec;
     default:
       return patterns;
   }

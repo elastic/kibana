@@ -14,9 +14,10 @@ import type { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { inputsActions } from '../../store/inputs';
@@ -44,7 +45,7 @@ import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timera
 
 interface SiemSearchBarProps {
   id: InputsModelId.global | InputsModelId.timeline;
-  indexPattern: DataViewBase;
+  indexPattern: DataViewSpec;
   pollForSignalIndex?: () => void;
   timelineId?: string;
   dataTestSubj?: string;
@@ -82,6 +83,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       unifiedSearch: {
         ui: { SearchBar },
       },
+      fieldFormats,
     } = useKibana().services;
 
     const dispatch = useDispatch();
@@ -294,9 +296,12 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const indexPatterns = useMemo(
-      () => (indexPattern != null && !isLoading ? [indexPattern] : []),
-      [indexPattern, isLoading]
+    const dataViewInstance: DataView | undefined = useMemo(
+      () =>
+        indexPattern != null && !isLoading
+          ? new DataView({ spec: indexPattern, fieldFormats })
+          : undefined,
+      [fieldFormats, indexPattern, isLoading]
     );
 
     const onTimeRangeChange = useCallback(
@@ -321,7 +326,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         <SearchBar
           appName="siem"
           isLoading={isLoading}
-          indexPatterns={indexPatterns as DataView[]}
+          indexPatterns={dataViewInstance ? [dataViewInstance] : undefined}
           query={filterQuery}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}

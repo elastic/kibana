@@ -6,9 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
-import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common/types';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 import type { Rule } from '../../rule_management/logic/types';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
@@ -17,7 +15,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
-  indexPatterns: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined;
+  dataViewSpec: DataViewSpec;
 }
 
 /**
@@ -25,10 +23,7 @@ export interface ReturnUseFetchExceptionFlyoutData {
  * item conditions options.
  *
  */
-export const useFetchIndexPatterns = (
-  rules: Rule[] | null,
-  fieldFormats: FieldFormatsStartCommon
-): ReturnUseFetchExceptionFlyoutData => {
+export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExceptionFlyoutData => {
   const { dataViewId } = useSourcererDataView();
   const isSingleRule = useMemo(() => rules != null && rules.length === 1, [rules]);
   const isMLRule = useMemo(
@@ -71,13 +66,10 @@ export const useFetchIndexPatterns = (
     }
   }, [jobs, isMLRule, memoDataViewId, memoNonDataViewIndexPatterns]);
 
-  const [isIndexPatternLoading, { dataView }] = useFetchIndex(memoRuleIndicesOrDvId, true);
+  const [isIndexPatternLoading, { dataViewSpec }] = useFetchIndex(memoRuleIndicesOrDvId, true);
 
   return {
     isLoading: isIndexPatternLoading || mlJobLoading,
-    indexPatterns: new DataView({
-      spec: dataView,
-      fieldFormats,
-    }),
+    dataViewSpec,
   };
 };

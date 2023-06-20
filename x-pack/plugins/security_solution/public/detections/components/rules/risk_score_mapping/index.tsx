@@ -21,10 +21,11 @@ import {
 } from '@elastic/eui';
 import type { EuiRangeProps } from '@elastic/eui';
 
-import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
 import type { RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 
 import type { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
@@ -49,7 +50,7 @@ interface RiskScoreFieldProps {
   dataTestSubj: string;
   field: FieldHook<AboutStepRiskScore>;
   idAria: string;
-  indices: DataViewBase;
+  indices: DataViewSpec;
   isDisabled: boolean;
   placeholder?: string;
 }
@@ -241,11 +242,8 @@ export const RiskScoreField = ({
  * @param mapping Mapping of a specified field name to risk score.
  * @param pattern Existing index pattern.
  */
-const getFieldTypeByMapping = (
-  mapping: RiskScoreMapping,
-  pattern: DataViewBase
-): DataViewFieldBase => {
+const getFieldTypeByMapping = (mapping: RiskScoreMapping, pattern: DataViewSpec): FieldSpec => {
   const field = mapping?.[0]?.field ?? '';
-  const [knownFieldType] = pattern.fields.filter(({ name }) => field != null && field === name);
-  return knownFieldType ?? { name: field, type: 'number' };
+  const knownFieldType = pattern.fields?.[field];
+  return knownFieldType ?? ({ name: field, type: 'number' } as FieldSpec);
 };

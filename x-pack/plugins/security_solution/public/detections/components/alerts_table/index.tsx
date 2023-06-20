@@ -125,6 +125,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   const {
     browserFields,
     indexPattern: indexPatterns,
+    sourcererDataView,
     runtimeMappings,
   } = useSourcererDataView(sourcererScope);
   const license = useLicense();
@@ -158,11 +159,11 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const combinedQuery = useMemo(() => {
-    if (browserFields != null && indexPatterns != null) {
+    if (browserFields != null && sourcererDataView != null) {
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        indexPattern: indexPatterns,
+        indexPattern: sourcererDataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
@@ -170,7 +171,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       });
     }
     return null;
-  }, [browserFields, globalQuery, indexPatterns, uiSettings, allFilters]);
+  }, [browserFields, uiSettings, sourcererDataView, allFilters, globalQuery]);
 
   useInvalidFilterQuery({
     id: tableId,

@@ -158,7 +158,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       config: {},
       queries: query ? [query] : [],
       filters: filters ?? [],
-      indexPattern: { fields: [], title: '' },
+      indexPattern: { fields: {}, title: '' },
     });
 
     // we only need to handle kqlError because control group can handle Lucene error

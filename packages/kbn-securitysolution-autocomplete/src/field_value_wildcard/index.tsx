@@ -8,7 +8,8 @@
 
 import React, { useCallback, useMemo, useState, useEffect, memo } from 'react';
 import { EuiFormRow, EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 import { uniq } from 'lodash';
 
@@ -32,9 +33,10 @@ const SINGLE_SELECTION = { asPlainText: true };
 type Warning = string | React.ReactNode;
 interface AutocompleteFieldWildcardProps {
   placeholder: string;
-  selectedField: DataViewFieldBase | undefined;
+  selectedField: FieldSpec | undefined;
   selectedValue: string | undefined;
-  indexPattern: DataViewBase | undefined;
+  indexPattern: DataViewSpec | undefined;
+  fieldFormats: FieldFormatsStartCommon;
   isLoading: boolean;
   isDisabled?: boolean;
   isClearable?: boolean;
@@ -56,6 +58,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
     selectedField,
     selectedValue,
     indexPattern,
+    fieldFormats,
     isLoading,
     isDisabled = false,
     isClearable = false,
@@ -74,6 +77,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
       autocompleteService,
       fieldValue: selectedValue,
       indexPattern,
+      fieldFormats,
       operatorType: OperatorTypeEnum.WILDCARD,
       query: searchQuery,
       selectedField,

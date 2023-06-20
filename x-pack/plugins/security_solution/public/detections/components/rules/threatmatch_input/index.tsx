@@ -149,8 +149,8 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
         {dataViewMemo != null && threatDataViewMemo != null ? (
           <ThreatMatchComponent
             listItems={threatItems as ThreatMapEntries[]}
-            indexPatterns={dataViewMemo}
-            threatIndexPatterns={threatDataViewMemo}
+            indexPatterns={indexPatterns}
+            threatIndexPatterns={threatIndexPatterns}
             data-test-subj="threatmatch-builder"
             id-aria="threatmatch-builder"
             onChange={handleBuilderOnChange}

@@ -27,8 +27,9 @@ import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { waitFor } from '@testing-library/dom';
 import { ReactWrapper, mount } from 'enzyme';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';
 
@@ -38,13 +39,18 @@ import * as i18n from './translations';
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-utils');
 
-const getMockIndexPattern = (title?: string): Omit<DataView, 'fields'> & { fields: FieldSpec[] } =>
-  ({
-    ...createStubDataView({
-      spec: { id: '1234', title: title ?? 'logstash-*' },
-    }),
-    fields,
-  } as Omit<DataView, 'fields'> & { fields: FieldSpec[] });
+const getMockIndexPattern = (title?: string): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: title ?? 'logstash-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
@@ -84,6 +90,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -112,6 +119,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -145,6 +153,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -176,6 +185,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -207,6 +217,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -237,6 +248,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -268,6 +280,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -301,6 +314,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -334,6 +348,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -368,6 +383,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -402,6 +418,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -435,6 +452,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -469,6 +487,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -503,6 +522,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -540,6 +560,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="rule_default"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -570,6 +591,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -623,6 +645,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -662,6 +685,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -699,6 +723,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -736,6 +761,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -773,6 +799,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -810,6 +837,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -853,6 +881,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
@@ -890,6 +919,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={mockSetErrorExists}
@@ -926,6 +956,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={mockSetErrorExists}
@@ -971,6 +1002,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern('logs-endpoint.events.*')}
+        fieldFormats={fieldFormatsMock}
         listType="endpoint_events"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -1016,6 +1048,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern('logs-endpoint.events.*')}
+        fieldFormats={fieldFormatsMock}
         listType="endpoint_events"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
@@ -1058,6 +1091,7 @@ describe('BuilderEntryItem', () => {
         }}
         httpService={mockKibanaHttpService}
         indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}

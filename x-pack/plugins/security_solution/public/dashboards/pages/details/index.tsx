@@ -47,7 +47,7 @@ const DashboardViewComponent: React.FC = () => {
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { indexPattern, indicesExist } = useSourcererDataView();
+  const { indexPattern, indicesExist, sourcererDataView } = useSourcererDataView();
 
   const { show: canReadDashboard, showWriteControls } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
@@ -74,7 +74,7 @@ const DashboardViewComponent: React.FC = () => {
     <>
       {indicesExist && (
         <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+          <SiemSearchBar id={InputsModelId.global} indexPattern={sourcererDataView ?? {}} />
         </FiltersGlobal>
       )}
       <SecuritySolutionPageWrapper>

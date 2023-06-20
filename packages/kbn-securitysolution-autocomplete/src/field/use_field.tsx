@@ -14,7 +14,7 @@ import {
   EuiToolTip,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { DataViewFieldMap, DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { FieldConflictsInfo, getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
@@ -27,25 +27,24 @@ import {
 } from './types';
 import { disabledTypesWithTooltipText } from './disabled_types_with_tooltip_text';
 
-const getExistingFields = (indexPattern: DataViewBase | undefined): DataViewFieldBase[] => {
-  return indexPattern != null ? indexPattern.fields : [];
+const getExistingFields = (
+  indexPattern: DataViewSpec | undefined
+): DataViewFieldMap | undefined => {
+  return indexPattern?.fields;
 };
 
-const getSelectedFields = (selectedField: DataViewField | undefined): DataViewFieldBase[] => {
+const getSelectedFields = (selectedField: FieldSpec | undefined): FieldSpec[] => {
   return selectedField && selectedField.name.trim() !== '' ? [selectedField] : [];
 };
 
 const getAvailableFields = (
-  existingFields: DataViewField[],
-  selectedFields: DataViewField[],
+  existingFields: DataViewFieldMap | undefined,
+  selectedFields: FieldSpec[],
   fieldTypeFilter: string[] | undefined
-): DataViewField[] => {
-  const fieldsByName = new Map<string, DataViewField>();
-
-  existingFields.forEach((f) => fieldsByName.set(f.name, f));
+): FieldSpec[] => {
+  const fieldsByName = new Map<string, FieldSpec>(Object.entries(existingFields ?? {}));
   selectedFields.forEach((f) => fieldsByName.set(f.name, f));
-
-  const uniqueFields = Array.from(fieldsByName.values());
+  const uniqueFields: FieldSpec[] = Array.from(fieldsByName.values());
 
   if (fieldTypeFilter && fieldTypeFilter?.length > 0) {
     return uniqueFields.filter(({ type }) => fieldTypeFilter.includes(type));
@@ -55,14 +54,13 @@ const getAvailableFields = (
 };
 
 const getComboBoxFields = (
-  indexPattern: DataViewBase | undefined,
-  selectedField: DataViewField | undefined,
+  indexPattern: DataViewSpec | undefined,
+  selectedField: FieldSpec | undefined,
   fieldTypeFilter: string[] | undefined
 ): ComboBoxFields => {
   const existingFields = getExistingFields(indexPattern);
   const selectedFields = getSelectedFields(selectedField);
   const availableFields = getAvailableFields(existingFields, selectedFields, fieldTypeFilter);
-
   return { availableFields, selectedFields };
 };
 
@@ -99,8 +97,8 @@ const getMappingConflictsTooltipInfo = (fields: ComboBoxFields) => {
 const getComboBoxProps = (fields: ComboBoxFields): GetFieldComboBoxPropsReturn => {
   const { availableFields, selectedFields } = fields;
 
-  const genericProps = getGenericComboBoxProps<DataViewFieldBase>({
-    getLabel: (field) => field.name,
+  const genericProps = getGenericComboBoxProps<FieldSpec>({
+    getLabel: (field: FieldSpec) => field.name,
     options: availableFields,
     selectedOptions: selectedFields,
   });
@@ -124,13 +122,16 @@ export const useField = ({
 }: FieldBaseProps) => {
   const [touched, setIsTouched] = useState(false);
 
-  const [customOption, setCustomOption] = useState<DataViewFieldBase | null>(null);
+  const [customOption, setCustomOption] = useState<FieldSpec | null>(null);
   const sPaddingSize = useEuiPaddingSize('s');
 
   const { availableFields, selectedFields } = useMemo(() => {
     const indexPatternsToUse =
       customOption != null && indexPattern != null
-        ? { ...indexPattern, fields: [customOption, ...indexPattern?.fields] }
+        ? ({
+            ...indexPattern,
+            fields: { ...indexPattern?.fields, [customOption.name]: customOption },
+          } as DataViewSpec)
         : indexPattern;
     return getComboBoxFields(indexPatternsToUse, selectedField, fieldTypeFilter);
   }, [indexPattern, fieldTypeFilter, selectedField, customOption]);
@@ -148,7 +149,7 @@ export const useField = ({
 
   const handleValuesChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]): void => {
-      const newValues: DataViewFieldBase[] = newOptions.map(
+      const newValues: FieldSpec[] = newOptions.map(
         ({ label }) => availableFields[labels.indexOf(label)]
       );
       onChange(newValues);
@@ -163,8 +164,8 @@ export const useField = ({
       if (!normalizedSearchValue) {
         return;
       }
-      setCustomOption({ name: val, type: 'text' });
-      onChange([{ name: val, type: 'text' }]);
+      setCustomOption({ name: val, type: 'text' } as FieldSpec);
+      onChange([{ name: val, type: 'text' } as FieldSpec]);
     },
     [onChange]
   );

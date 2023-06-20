@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { DataViewFieldBase } from '@kbn/es-query';
 import { ReactElement } from 'react';
 import { act } from '@testing-library/react';
 
@@ -14,16 +13,77 @@ import { renderHook } from '@testing-library/react-hooks';
 import TestRenderer from 'react-test-renderer';
 const { act: actTestRenderer } = TestRenderer;
 
-import { fields } from '../../fields/index.mock';
 import { useField } from '../use_field';
+import { DataViewFieldMap, DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields } from '@kbn/data-views-plugin/common/fields/fields.mocks';
 
 jest.mock('../../translations', () => ({
   BINARY_TYPE_NOT_SUPPORTED: 'Binary fields are currently unsupported',
 }));
 
-const indexPattern = { fields, title: 'title' };
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }).toSpec(),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
+const indexPattern = getMockIndexPattern();
+
 const onChangeMock = jest.fn();
 const selectedField = { name: '@timestamp', type: 'date' };
+const newIndexPattern: DataViewSpec = {
+  ...createStubDataView({
+    spec: {
+      title: 'title1',
+      id: '1234',
+    },
+  }).toSpec(),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = {};
+    for (const field of [
+      {
+        name: 'bytes',
+        type: 'number',
+        esTypes: ['long'],
+        count: 10,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+      },
+      {
+        name: 'ssl',
+        type: 'boolean',
+        esTypes: ['boolean'],
+        count: 20,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+      },
+      {
+        name: '@timestamp',
+        type: 'date',
+        esTypes: ['date'],
+        count: 30,
+        scripted: false,
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+      },
+    ]) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+};
 describe('useField', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -40,43 +100,6 @@ describe('useField', () => {
       expect(fieldWidth).toEqual({});
     });
     it('should map fields to comboOptions correctly and return empty selectedComboOptions', () => {
-      const newIndexPattern = {
-        ...indexPattern,
-        fields: [
-          {
-            name: 'bytes',
-            type: 'number',
-            esTypes: ['long'],
-            count: 10,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-          {
-            name: 'ssl',
-            type: 'boolean',
-            esTypes: ['boolean'],
-            count: 20,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-          {
-            name: '@timestamp',
-            type: 'date',
-            esTypes: ['date'],
-            count: 30,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-        ] as unknown as DataViewFieldBase[],
-        title: 'title1',
-      };
-
       const { result } = renderHook(() =>
         useField({ indexPattern: newIndexPattern, onChange: onChangeMock })
       );
@@ -85,48 +108,11 @@ describe('useField', () => {
       expect(selectedComboOptions).toEqual([]);
     });
     it('should not return a selected field when empty string as a combo option', () => {
-      const newIndexPattern = {
-        ...indexPattern,
-        fields: [
-          {
-            name: 'bytes',
-            type: 'number',
-            esTypes: ['long'],
-            count: 10,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-          {
-            name: 'ssl',
-            type: 'boolean',
-            esTypes: ['boolean'],
-            count: 20,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-          {
-            name: '@timestamp',
-            type: 'date',
-            esTypes: ['date'],
-            count: 30,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-        ] as unknown as DataViewFieldBase[],
-        title: 'title1',
-      };
-
       const { result } = renderHook(() =>
         useField({
           indexPattern: newIndexPattern,
           onChange: onChangeMock,
-          selectedField: { name: '', type: 'keyword' },
+          selectedField: { name: '', type: 'keyword' } as FieldSpec,
         })
       );
       const { comboOptions, selectedComboOptions } = result.current;
@@ -134,48 +120,11 @@ describe('useField', () => {
       expect(selectedComboOptions).toEqual([]);
     });
     it('should not return a selected field when string with spaces is written as a combo option', () => {
-      const newIndexPattern = {
-        ...indexPattern,
-        fields: [
-          {
-            name: 'bytes',
-            type: 'number',
-            esTypes: ['long'],
-            count: 10,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-          {
-            name: 'ssl',
-            type: 'boolean',
-            esTypes: ['boolean'],
-            count: 20,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-          {
-            name: '@timestamp',
-            type: 'date',
-            esTypes: ['date'],
-            count: 30,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-        ] as unknown as DataViewFieldBase[],
-        title: 'title1',
-      };
-
       const { result } = renderHook(() =>
         useField({
           indexPattern: newIndexPattern,
           onChange: onChangeMock,
-          selectedField: { name: ' ', type: 'keyword' },
+          selectedField: { name: ' ', type: 'keyword' } as FieldSpec,
         })
       );
       const { comboOptions, selectedComboOptions } = result.current;
@@ -183,45 +132,12 @@ describe('useField', () => {
       expect(selectedComboOptions).toEqual([]);
     });
     it('should map fields to comboOptions correctly and return selectedComboOptions', () => {
-      const newIndexPattern = {
-        ...indexPattern,
-        fields: [
-          {
-            name: 'bytes',
-            type: 'number',
-            esTypes: ['long'],
-            count: 10,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-          {
-            name: 'ssl',
-            type: 'boolean',
-            esTypes: ['boolean'],
-            count: 20,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-          {
-            name: '@timestamp',
-            type: 'date',
-            esTypes: ['date'],
-            count: 30,
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
-          },
-        ] as unknown as DataViewFieldBase[],
-        title: 'title1',
-      };
-
       const { result } = renderHook(() =>
-        useField({ indexPattern: newIndexPattern, onChange: onChangeMock, selectedField })
+        useField({
+          indexPattern: newIndexPattern,
+          onChange: onChangeMock,
+          selectedField: selectedField as FieldSpec,
+        })
       );
       const { comboOptions, selectedComboOptions } = result.current;
       expect(comboOptions).toEqual([{ label: 'bytes' }, { label: 'ssl' }, { label: '@timestamp' }]);
@@ -230,49 +146,65 @@ describe('useField', () => {
   });
 
   describe('getDisabledLabelTooltipTexts and renderFields', () => {
+    const tempIndexPattern: DataViewSpec = {
+      ...createStubDataView({
+        spec: {
+          title: 'title1',
+          id: '1234',
+        },
+      }).toSpec(),
+      fields: ((): DataViewFieldMap => {
+        const fieldMap: DataViewFieldMap = {};
+        for (const field of [
+          {
+            name: 'blob',
+            type: 'unknown',
+            esTypes: ['binary'],
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
+          {
+            name: 'bytes',
+            type: 'number',
+            esTypes: ['long'],
+            count: 10,
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
+          {
+            name: 'ssl',
+            type: 'boolean',
+            esTypes: ['boolean'],
+            count: 20,
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
+          {
+            name: '@timestamp',
+            type: 'date',
+            esTypes: ['date'],
+            count: 30,
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
+        ]) {
+          fieldMap[field.name] = { ...field };
+        }
+        return fieldMap;
+      })(),
+    };
     it('should return label as component and disable the binary field type if field.esType has one the disabled types', () => {
-      indexPattern.fields = [
-        {
-          name: 'blob',
-          type: 'unknown',
-          esTypes: ['binary'],
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-        {
-          name: 'bytes',
-          type: 'number',
-          esTypes: ['long'],
-          count: 10,
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-        {
-          name: 'ssl',
-          type: 'boolean',
-          esTypes: ['boolean'],
-          count: 20,
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-        {
-          name: '@timestamp',
-          type: 'date',
-          esTypes: ['date'],
-          count: 30,
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-      ] as unknown as DataViewFieldBase[];
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() =>
+        useField({ indexPattern: tempIndexPattern, onChange: onChangeMock })
+      );
       const { comboOptions, renderFields } = result.current;
       expect(comboOptions).toEqual([
         { label: 'blob' },
@@ -286,48 +218,9 @@ describe('useField', () => {
       });
     });
     it('should return label as component and disable the binary field type if field.type is one of the disabled types', () => {
-      indexPattern.fields = [
-        {
-          name: 'blob',
-          type: 'binary',
-          esTypes: [],
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-        {
-          name: 'bytes',
-          type: 'number',
-          esTypes: ['long'],
-          count: 10,
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-        {
-          name: 'ssl',
-          type: 'boolean',
-          esTypes: ['boolean'],
-          count: 20,
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-        {
-          name: '@timestamp',
-          type: 'date',
-          esTypes: ['date'],
-          count: 30,
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-      ] as unknown as DataViewFieldBase[];
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() =>
+        useField({ indexPattern: tempIndexPattern, onChange: onChangeMock })
+      );
       const { comboOptions, renderFields } = result.current;
       expect(comboOptions).toEqual([
         { label: 'blob' },
@@ -341,41 +234,16 @@ describe('useField', () => {
       });
     });
     it('should return label as string', () => {
-      indexPattern.fields = [
-        {
-          name: 'bytes',
-          type: 'number',
-          esTypes: ['long'],
-          count: 10,
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-        {
-          name: 'ssl',
-          type: 'boolean',
-          esTypes: ['boolean'],
-          count: 20,
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-        {
-          name: '@timestamp',
-          type: 'date',
-          esTypes: ['date'],
-          count: 30,
-          scripted: false,
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-      ] as unknown as DataViewFieldBase[];
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() =>
+        useField({ indexPattern: tempIndexPattern, onChange: onChangeMock })
+      );
       const { comboOptions, renderFields } = result.current;
-      expect(comboOptions).toEqual([{ label: 'bytes' }, { label: 'ssl' }, { label: '@timestamp' }]);
+      expect(comboOptions).toEqual([
+        { label: 'blob', disabled: undefined },
+        { label: 'bytes', disabled: undefined },
+        { label: 'ssl', disabled: undefined },
+        { label: '@timestamp', disabled: undefined },
+      ]);
       act(() => {
         const label = renderFields({ label: '@timestamp' }) as ReactElement;
         expect(label).toEqual('@timestamp');
@@ -486,7 +354,12 @@ describe('useField', () => {
     });
     it('should return isInvalid equals false with selectedField and isRequired is true', () => {
       const { result } = renderHook(() =>
-        useField({ indexPattern, onChange: onChangeMock, isRequired: true, selectedField })
+        useField({
+          indexPattern,
+          onChange: onChangeMock,
+          isRequired: true,
+          selectedField: selectedField as FieldSpec,
+        })
       );
 
       actTestRenderer(() => {

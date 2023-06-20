@@ -14,26 +14,29 @@ import {
   UseFieldValueAutocompleteReturn,
   useFieldValueAutocomplete,
 } from '.';
-import { getField } from '../../fields/index.mock';
 import { autocompleteStartMock } from '../../autocomplete/index.mock';
-import { DataViewFieldBase } from '@kbn/es-query';
+import {
+  DataViewField,
+  DataViewFieldMap,
+  DataViewSpec,
+  FieldSpec,
+} from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields, getField } from '@kbn/data-views-plugin/common/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-// Copied from "src/plugins/data/common/index_patterns/index_pattern.stub.ts"
-// TODO: Remove this in favor of the above if/when it is ported, https://github.com/elastic/kibana/issues/100715
-export const stubIndexPatternWithFields = {
-  id: '1234',
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'response',
-      type: 'number',
-      esTypes: ['integer'],
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
-};
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }).toSpec(),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 
 describe('use_field_value_autocomplete', () => {
   const onErrorMock = jest.fn();
@@ -57,6 +60,7 @@ describe('use_field_value_autocomplete', () => {
           },
           fieldValue: '',
           indexPattern: undefined,
+          fieldFormats: fieldFormatsMock,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: undefined,
@@ -80,7 +84,8 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: getValueSuggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: getMockIndexPattern(),
+          fieldFormats: fieldFormatsMock,
           operatorType: OperatorTypeEnum.EXISTS,
           query: '',
           selectedField: getField('machine.os'),
@@ -107,7 +112,8 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: getValueSuggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: getMockIndexPattern(),
+          fieldFormats: fieldFormatsMock,
           operatorType: OperatorTypeEnum.EXISTS,
           query: '',
           selectedField: undefined,
@@ -135,6 +141,7 @@ describe('use_field_value_autocomplete', () => {
           },
           fieldValue: '',
           indexPattern: undefined,
+          fieldFormats: fieldFormatsMock,
           operatorType: OperatorTypeEnum.EXISTS,
           query: '',
           selectedField: getField('machine.os'),
@@ -153,7 +160,7 @@ describe('use_field_value_autocomplete', () => {
     const suggestionsMock = jest.fn().mockResolvedValue([]);
 
     await act(async () => {
-      const selectedField: DataViewFieldBase | undefined = getField('nestedField.child');
+      const selectedField: FieldSpec | undefined = getField('nestedField.child');
       if (selectedField == null) {
         throw new TypeError('selectedField for this test should always be defined');
       }
@@ -169,7 +176,8 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: suggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: getMockIndexPattern(),
+          fieldFormats: fieldFormatsMock,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: { ...selectedField, name: 'child' },
@@ -214,7 +222,8 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: getValueSuggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: getMockIndexPattern(),
+          fieldFormats: fieldFormatsMock,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: getField('ssl'),
@@ -245,7 +254,8 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: suggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: getMockIndexPattern(),
+          fieldFormats: fieldFormatsMock,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: getField('bytes'),
@@ -275,7 +285,8 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: getValueSuggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: getMockIndexPattern(),
+          fieldFormats: fieldFormatsMock,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: getField('@tags'),
@@ -294,7 +305,8 @@ describe('use_field_value_autocomplete', () => {
 
       expect(getValueSuggestionsMock).toHaveBeenCalledWith({
         field: getField('@tags'),
-        indexPattern: stubIndexPatternWithFields,
+        indexPattern: getMockIndexPattern(),
+        fieldFormats: fieldFormatsMock,
         query: '',
         signal,
         useTimeRange: false,
@@ -315,7 +327,8 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: getValueSuggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: getMockIndexPattern(),
+          fieldFormats: fieldFormatsMock,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: getField('@tags'),
@@ -327,12 +340,24 @@ describe('use_field_value_autocomplete', () => {
 
       expect(result.current[3]).not.toBeNull();
 
-      // Added check for typescripts sake, if null,
+      // TODO: Added check for typescripts sake, if null,
       // would not reach below logic as test would stop above
       if (result.current[3] != null) {
         result.current[3]({
-          fieldSelected: getField('@tags'),
-          patterns: stubIndexPatternWithFields,
+          fieldSelected: getField('@tags') as DataViewField, // as-cast - see above.
+          patterns: createStubDataView({
+            spec: {
+              id: '1234',
+              title: 'logstash-*',
+              fields: ((): DataViewFieldMap => {
+                const fieldMap: DataViewFieldMap = Object.create(null);
+                for (const field of fields) {
+                  fieldMap[field.name] = { ...field };
+                }
+                return fieldMap;
+              })(),
+            },
+          }),
           searchQuery: '',
           value: 'hello',
         });

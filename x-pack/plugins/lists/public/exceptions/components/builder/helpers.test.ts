@@ -51,11 +51,11 @@ import {
   isOneOfOperator,
   isOperator,
 } from '@kbn/securitysolution-list-utils';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { createStubDataView } from '@kbn/data-plugin/common/stubs';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
 
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
@@ -94,13 +94,18 @@ const getEntryMatchAnyWithIdMock = (): EntryMatchAny & { id: string } => ({
   id: '123',
 });
 
-const getMockIndexPattern = (): Omit<DataView, 'fields'> & { fields: FieldSpec[] } =>
-  ({
-    ...createStubDataView({
-      spec: { id: '1234', title: 'logstash-*' },
-    }),
-    fields,
-  } as Omit<DataView, 'fields'> & { fields: FieldSpec[] });
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }).toSpec(),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 
 const getMockBuilderEntry = (): FormattedBuilderEntry => ({
   correspondingKeywordField: undefined,
@@ -146,7 +151,7 @@ const getMockNestedParentBuilderEntry = (): FormattedBuilderEntry => ({
   value: undefined,
 });
 
-const mockEndpointFields = [
+const mockEndpointFields: FieldSpec[] = [
   {
     aggregatable: false,
     count: 0,
@@ -170,19 +175,23 @@ const mockEndpointFields = [
   },
 ];
 
-export const getEndpointField = (name: string): DataViewFieldBase =>
-  mockEndpointFields.find((field) => field.name === name) as DataViewFieldBase;
+export const getEndpointField = (name: string): FieldSpec | undefined =>
+  mockEndpointFields.find((field) => field.name === name);
 
-const filterIndexPatterns: FilterEndpointFields<
-  Omit<DataView, 'fields'> & { fields: FieldSpec[] }
-> = (patterns, type) => {
+const filterIndexPatterns: FilterEndpointFields<DataViewSpec> = (patterns, type) => {
   return type === 'endpoint'
-    ? ({
+    ? {
         ...patterns,
-        fields: patterns?.fields.filter(({ name }) =>
-          ['file.path.caseless', 'file.Ext.code_signature.status'].includes(name)
-        ),
-      } as Omit<DataView, 'fields'> & { fields: FieldSpec[] })
+        fields: ((): DataViewFieldMap => {
+          const fieldMap: DataViewFieldMap = Object.create(null);
+          for (const field of fields) {
+            if (!['file.path.caseless', 'file.Ext.code_signature.status'].includes(field.name)) {
+              fieldMap[field.name] = { ...field };
+            }
+          }
+          return fieldMap;
+        })(),
+      }
     : patterns;
 };
 
@@ -250,7 +259,13 @@ describe('Exception builder helpers', () => {
       beforeAll(() => {
         payloadIndexPattern = {
           ...payloadIndexPattern,
-          fields: [...payloadIndexPattern.fields, ...mockEndpointFields],
+          fields: ((): DataViewFieldMap => {
+            const fieldMap: DataViewFieldMap = payloadIndexPattern.fields ?? Object.create(null);
+            for (const field of [...mockEndpointFields]) {
+              fieldMap[field.name] = { ...field };
+            }
+            return fieldMap;
+          })(),
         };
       });
 
@@ -273,8 +288,13 @@ describe('Exception builder helpers', () => {
           value: 'some value',
         };
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
-        const expected: DataViewBase = {
-          fields: [{ ...getEndpointField('file.Ext.code_signature.status'), name: 'status' }],
+        const expected: DataViewSpec = {
+          fields: {
+            status: {
+              ...getEndpointField('file.Ext.code_signature.status'),
+              name: 'status',
+            } as FieldSpec,
+          },
           id: '1234',
           title: 'logstash-*',
         };
@@ -328,8 +348,12 @@ describe('Exception builder helpers', () => {
           'endpoint',
           filterIndexPatterns
         );
-        const expected: DataViewBase = {
-          fields: [getEndpointField('file.Ext.code_signature.status')],
+        const expected: DataViewSpec = {
+          fields: {
+            [getEndpointField('file.Ext.code_signature.status')?.name ?? 'status']: {
+              ...getEndpointField('file.Ext.code_signature.status'),
+            } as FieldSpec,
+          },
           id: '1234',
           title: 'logstash-*',
         };
@@ -1092,7 +1116,7 @@ describe('Exception builder helpers', () => {
           field: {
             name: 'host.name',
             type: 'keyword',
-          },
+          } as FieldSpec,
           id: '123',
           nested: undefined,
           operator: isOperator,
@@ -1315,21 +1339,27 @@ describe('Exception builder helpers', () => {
 
   describe('#getFormattedBuilderEntry', () => {
     test('it returns entry with a value for "correspondingKeywordField" when "item.field" is of type "text" and matching keyword field exists', () => {
-      const payloadIndexPattern: DataViewBase = {
+      const payloadIndexPattern: DataViewSpec = {
         ...getMockIndexPattern(),
-        fields: [
-          ...fields,
-          {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['text'],
-            name: 'machine.os.raw.text',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: false,
-            type: 'string',
-          },
-        ],
+        fields: ((): DataViewFieldMap => {
+          const fieldMap: DataViewFieldMap = Object.create(null);
+          for (const field of [
+            ...fields,
+            {
+              aggregatable: false,
+              count: 0,
+              esTypes: ['text'],
+              name: 'machine.os.raw.text',
+              readFromDocValues: true,
+              scripted: false,
+              searchable: false,
+              type: 'string',
+            },
+          ]) {
+            fieldMap[field.name] = { ...field };
+          }
+          return fieldMap;
+        })(),
       };
       const payloadItem: BuilderEntry = {
         ...getEntryMatchWithIdMock(),
@@ -1368,21 +1398,27 @@ describe('Exception builder helpers', () => {
     });
 
     test('it returns entry with field value undefined if "allowCustomFieldOptions" is "false" and no matching field found', () => {
-      const payloadIndexPattern: DataViewBase = {
+      const payloadIndexPattern: DataViewSpec = {
         ...getMockIndexPattern(),
-        fields: [
-          ...fields,
-          {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['text'],
-            name: 'machine.os.raw.text',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: false,
-            type: 'string',
-          },
-        ],
+        fields: ((): DataViewFieldMap => {
+          const fieldMap: DataViewFieldMap = Object.create(null);
+          for (const field of [
+            ...fields,
+            {
+              aggregatable: false,
+              count: 0,
+              esTypes: ['text'],
+              name: 'machine.os.raw.text',
+              readFromDocValues: true,
+              scripted: false,
+              searchable: false,
+              type: 'string',
+            },
+          ]) {
+            fieldMap[field.name] = { ...field };
+          }
+          return fieldMap;
+        })(),
       };
       const payloadItem: BuilderEntry = {
         ...getEntryMatchWithIdMock(),
@@ -1411,21 +1447,27 @@ describe('Exception builder helpers', () => {
     });
 
     test('it returns entry with custom field value if "allowCustomFieldOptions" is "true" and no matching field found', () => {
-      const payloadIndexPattern: DataViewBase = {
+      const payloadIndexPattern: DataViewSpec = {
         ...getMockIndexPattern(),
-        fields: [
-          ...fields,
-          {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['text'],
-            name: 'machine.os.raw.text',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: false,
-            type: 'string',
-          },
-        ],
+        fields: ((): DataViewFieldMap => {
+          const fieldMap: DataViewFieldMap = Object.create(null);
+          for (const field of [
+            ...fields,
+            {
+              aggregatable: false,
+              count: 0,
+              esTypes: ['text'],
+              name: 'machine.os.raw.text',
+              readFromDocValues: true,
+              scripted: false,
+              searchable: false,
+              type: 'string',
+            },
+          ]) {
+            fieldMap[field.name] = { ...field };
+          }
+          return fieldMap;
+        })(),
       };
       const payloadItem: BuilderEntry = {
         ...getEntryMatchWithIdMock(),
@@ -1446,7 +1488,7 @@ describe('Exception builder helpers', () => {
         field: {
           name: 'custom.text',
           type: 'keyword',
-        },
+        } as FieldSpec,
         id: '123',
         nested: undefined,
         operator: isOperator,
@@ -1566,7 +1608,13 @@ describe('Exception builder helpers', () => {
   describe('#getCorrespondingKeywordField', () => {
     test('it returns matching keyword field if "selectedFieldIsTextType" is true and keyword field exists', () => {
       const output = getCorrespondingKeywordField({
-        fields,
+        fields: ((): DataViewFieldMap => {
+          const fieldMap: DataViewFieldMap = Object.create(null);
+          for (const field of fields) {
+            fieldMap[field.name] = { ...field };
+          }
+          return fieldMap;
+        })(),
         selectedField: 'machine.os.raw.text',
       });
 
@@ -1575,7 +1623,13 @@ describe('Exception builder helpers', () => {
 
     test('it returns undefined if "selectedFieldIsTextType" is false', () => {
       const output = getCorrespondingKeywordField({
-        fields,
+        fields: ((): DataViewFieldMap => {
+          const fieldMap: DataViewFieldMap = Object.create(null);
+          for (const field of fields) {
+            fieldMap[field.name] = { ...field };
+          }
+          return fieldMap;
+        })(),
         selectedField: 'machine.os.raw',
       });
 
@@ -1584,7 +1638,13 @@ describe('Exception builder helpers', () => {
 
     test('it returns undefined if "selectedField" is empty string', () => {
       const output = getCorrespondingKeywordField({
-        fields,
+        fields: ((): DataViewFieldMap => {
+          const fieldMap: DataViewFieldMap = Object.create(null);
+          for (const field of fields) {
+            fieldMap[field.name] = { ...field };
+          }
+          return fieldMap;
+        })(),
         selectedField: '',
       });
 
@@ -1593,7 +1653,13 @@ describe('Exception builder helpers', () => {
 
     test('it returns undefined if "selectedField" is undefined', () => {
       const output = getCorrespondingKeywordField({
-        fields,
+        fields: ((): DataViewFieldMap => {
+          const fieldMap: DataViewFieldMap = Object.create(null);
+          for (const field of fields) {
+            fieldMap[field.name] = { ...field };
+          }
+          return fieldMap;
+        })(),
         selectedField: undefined,
       });
 

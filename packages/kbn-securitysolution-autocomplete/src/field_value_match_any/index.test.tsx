@@ -12,9 +12,12 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormHelpText } from '@elastic/
 import { act, waitFor } from '@testing-library/react';
 
 import { AutocompleteFieldMatchAnyComponent } from '.';
-import { getField, fields } from '../fields/index.mock';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import { autocompleteStartMock } from '../autocomplete/index.mock';
+import { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields, getField } from '@kbn/data-views-plugin/common/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 jest.mock('../hooks/use_field_value_autocomplete', () => {
   const actual = jest.requireActual('../hooks/use_field_value_autocomplete');
@@ -29,6 +32,18 @@ jest.mock('../translations', () => ({
 
 describe('AutocompleteFieldMatchAnyComponent', () => {
   let wrapper: ReactWrapper;
+  const getMockIndexPattern = (): DataViewSpec => ({
+    ...createStubDataView({
+      spec: { id: '1234', title: 'logstash-*' },
+    }),
+    fields: ((): DataViewFieldMap => {
+      const fieldMap: DataViewFieldMap = Object.create(null);
+      for (const field of fields) {
+        fieldMap[field.name] = { ...field };
+      }
+      return fieldMap;
+    })(),
+  });
   const getValueSuggestionsMock = jest
     .fn()
     .mockResolvedValue([false, true, ['value 3', 'value 4'], jest.fn()]);
@@ -54,11 +69,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           ...autocompleteStartMock,
           getValueSuggestions: getValueSuggestionsMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={true}
         isLoading={false}
@@ -83,11 +95,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           ...autocompleteStartMock,
           getValueSuggestions: getValueSuggestionsMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={true}
@@ -114,11 +123,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           ...autocompleteStartMock,
           getValueSuggestions: getValueSuggestionsMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={true}
         isDisabled={false}
         isLoading={false}
@@ -141,11 +147,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           ...autocompleteStartMock,
           getValueSuggestions: getValueSuggestionsMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -171,11 +174,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           ...autocompleteStartMock,
           getValueSuggestions: getValueSuggestionsMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -205,11 +205,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
           ...autocompleteStartMock,
           getValueSuggestions: getValueSuggestionsMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isLoading={false}
         isClearable={false}
         isDisabled={false}
@@ -237,11 +234,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         autocompleteService={{
           ...autocompleteStartMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -285,11 +279,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         autocompleteService={{
           ...autocompleteStartMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -319,11 +310,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         autocompleteService={{
           ...autocompleteStartMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -353,11 +341,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         autocompleteService={{
           ...autocompleteStartMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -378,11 +363,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         autocompleteService={{
           ...autocompleteStartMock,
         }}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}

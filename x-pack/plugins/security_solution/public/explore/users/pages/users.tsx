@@ -102,26 +102,27 @@ const UsersComponent = () => {
     return globalFilters;
   }, [severitySelection, tabName, globalFilters]);
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
   const [globalFiltersQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern,
+        indexPattern: sourcererDataView,
         queries: [query],
         filters: globalFilters,
       }),
-    [globalFilters, indexPattern, uiSettings, query]
+    [globalFilters, sourcererDataView, uiSettings, query]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern,
+        indexPattern: sourcererDataView,
         queries: [query],
         filters: tabsFilters,
       }),
-    [indexPattern, query, tabsFilters, uiSettings]
+    [sourcererDataView, query, tabsFilters, uiSettings]
   );
 
   useInvalidFilterQuery({
@@ -187,7 +188,7 @@ const UsersComponent = () => {
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar indexPattern={sourcererDataView ?? {}} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>

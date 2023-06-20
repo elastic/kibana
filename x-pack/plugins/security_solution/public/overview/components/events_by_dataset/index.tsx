@@ -10,9 +10,10 @@ import numeral from '@elastic/numeral';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { useEffect, useMemo, useCallback } from 'react';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
 import { EuiButton } from '@elastic/eui';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
@@ -46,7 +47,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   combinedQueries?: string;
   filters: Filter[];
   headerChildren?: React.ReactNode;
-  indexPattern: DataViewBase;
+  indexPattern: DataViewSpec;
   indexNames: string[];
   runtimeMappings?: MappingRuntimeFields;
   onlyField?: string;

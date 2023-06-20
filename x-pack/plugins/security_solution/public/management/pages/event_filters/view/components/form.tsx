@@ -11,7 +11,6 @@ import { isEqual } from 'lodash';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiForm,
   EuiFormRow,
@@ -29,7 +28,6 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
-import { DataView } from '@kbn/data-views-plugin/common';
 
 import { eventsIndexPattern } from '../../../../../../common/endpoint/constants';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
@@ -146,7 +144,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
-    const [isIndexPatternLoading, { dataView }] = useFetchIndex(indexNames);
+    const [isIndexPatternLoading, { dataViewSpec }] = useFetchIndex(indexNames);
 
     const [areConditionsValid, setAreConditionsValid] = useState(
       !!exception.entries.length || false
@@ -209,14 +207,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
       setSelectedPolicies(policiesData);
     }, [hasFormChanged, exception, policies]);
-
-    const dataViewMemo = useMemo(() => {
-      if (dataView != null) {
-        return new DataView({ spec: dataView, fieldFormats });
-      } else {
-        return null;
-      }
-    }, [dataView, fieldFormats]);
 
     const eventFilterItem = useMemo<ArtifactFormComponentProps['item']>(() => {
       const ef: ArtifactFormComponentProps['item'] = exception;
@@ -438,36 +428,34 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
     const exceptionBuilderComponentMemo = useMemo(
       () =>
-        dataViewMemo != null ? (
-          getExceptionBuilderComponentLazy({
-            allowLargeValueLists: false,
-            httpService: http,
-            autocompleteService: autocompleteSuggestions,
-            exceptionListItems: [eventFilterItem as ExceptionListItemSchema],
-            listType: EVENT_FILTER_LIST_TYPE,
-            listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
-            listNamespaceType: 'agnostic',
-            ruleName: RULE_NAME,
-            indexPatterns: dataViewMemo,
-            isOrDisabled: true,
-            isOrHidden: true,
-            isAndDisabled: false,
-            isNestedDisabled: false,
-            dataTestSubj: 'alert-exception-builder',
-            idAria: 'alert-exception-builder',
-            onChange: handleOnBuilderChange,
-            listTypeSpecificIndexPatternFilter: filterIndexPatterns,
-            operatorsList: EVENT_FILTERS_OPERATORS,
-            osTypes: exception.os_types,
-          })
-        ) : (
-          <EuiLoadingSpinner />
-        ),
+        getExceptionBuilderComponentLazy({
+          allowLargeValueLists: false,
+          httpService: http,
+          autocompleteService: autocompleteSuggestions,
+          exceptionListItems: [eventFilterItem as ExceptionListItemSchema],
+          listType: EVENT_FILTER_LIST_TYPE,
+          listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          listNamespaceType: 'agnostic',
+          ruleName: RULE_NAME,
+          indexPatterns: dataViewSpec,
+          fieldFormats,
+          isOrDisabled: true,
+          isOrHidden: true,
+          isAndDisabled: false,
+          isNestedDisabled: false,
+          dataTestSubj: 'alert-exception-builder',
+          idAria: 'alert-exception-builder',
+          onChange: handleOnBuilderChange,
+          listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+          operatorsList: EVENT_FILTERS_OPERATORS,
+          osTypes: exception.os_types,
+        }),
       [
         http,
         autocompleteSuggestions,
         eventFilterItem,
-        dataViewMemo,
+        dataViewSpec,
+        fieldFormats,
         handleOnBuilderChange,
         exception.os_types,
       ]

@@ -77,7 +77,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
       : scopeId != null && isDetectionsAlertsTable(scopeId)
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
-    const { browserFields, indexPattern } = useSourcererDataView(activeScope);
+    const { browserFields, indexPattern, sourcererDataView } = useSourcererDataView(activeScope);
 
     const icon = iconType ?? 'visBarVertical';
     const side = iconSide ?? 'left';
@@ -140,7 +140,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         <StatefulTopN
           browserFields={browserFields}
           field={field}
-          indexPattern={indexPattern}
+          indexPattern={sourcererDataView ?? {}}
           onFilterAdded={onFilterAdded}
           paddingSize={paddingSize}
           showLegend={showLegend}
@@ -153,7 +153,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
       [
         browserFields,
         field,
-        indexPattern,
+        sourcererDataView,
         onFilterAdded,
         paddingSize,
         showLegend,

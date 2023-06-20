@@ -33,7 +33,7 @@ export enum ExceptionListTypeEnum {
 }
 
 export type FilterEndpointFields<Type> = (
-  patterns: Type | undefined,
+  patterns: Type,
   type: ExceptionListType,
   osTypes?: OsTypeArray
-) => Type | undefined;
+) => Type;

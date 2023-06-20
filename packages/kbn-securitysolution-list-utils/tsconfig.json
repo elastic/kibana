@@ -2,14 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts"
-  ],
+  "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/es-query",
     "@kbn/i18n",
@@ -17,9 +12,9 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/securitysolution-list-constants",
     "@kbn/securitysolution-utils",
-    "@kbn/field-types"
+    "@kbn/field-types",
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-plugin"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

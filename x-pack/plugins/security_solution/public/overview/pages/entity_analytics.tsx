@@ -27,7 +27,12 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 
 const EntityAnalyticsComponent = () => {
-  const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
+  const {
+    indicesExist,
+    loading: isSourcererLoading,
+    indexPattern,
+    sourcererDataView,
+  } = useSourcererDataView();
   const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
 
   return (
@@ -36,7 +41,7 @@ const EntityAnalyticsComponent = () => {
         <>
           {isPlatinumOrTrialLicense && capabilitiesFetched && (
             <FiltersGlobal>
-              <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+              <SiemSearchBar id={InputsModelId.global} indexPattern={sourcererDataView ?? {}} />
             </FiltersGlobal>
           )}
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">

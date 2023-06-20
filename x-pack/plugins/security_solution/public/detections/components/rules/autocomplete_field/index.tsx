@@ -8,14 +8,15 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
-import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 interface AutocompleteFieldProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
-  indices: DataViewBase;
+  indices: DataViewSpec;
   isDisabled: boolean;
   fieldType: string;
   placeholder?: string;
@@ -40,9 +41,7 @@ export const AutocompleteField = ({
 
   const selectedField = useMemo(() => {
     const existingField = (field.value as string) ?? '';
-    const [newSelectedField] = indices.fields.filter(
-      ({ name }) => existingField != null && existingField === name
-    );
+    const newSelectedField = indices.fields?.[existingField];
     return newSelectedField;
   }, [field.value, indices]);
 

@@ -4,10 +4,7 @@
     "outDir": "target/types",
     "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
     "@kbn/datemath",
     "@kbn/es-query",
@@ -17,8 +14,10 @@
     "@kbn/securitysolution-list-utils",
     "@kbn/doc-links",
     "@kbn/securitysolution-utils",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/data-plugin",
+    "@kbn/unified-search-plugin"
   ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "exclude": ["target/**/*"]
 }

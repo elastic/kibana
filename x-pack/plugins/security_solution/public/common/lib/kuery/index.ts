@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Filter, EsQueryConfig, Query, DataViewBase } from '@kbn/es-query';
 import {
   fromKueryExpression,
@@ -27,7 +28,7 @@ export type PrimitiveOrArrayOfPrimitives =
 export interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern: DataViewBase;
+  indexPattern: DataViewSpec;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;
@@ -231,7 +232,7 @@ export const convertToBuildEsQuery = ({
   filters,
 }: {
   config: EsQueryConfig;
-  indexPattern: DataViewBase | undefined;
+  indexPattern: DataViewSpec | undefined;
   queries: Query[];
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {
@@ -239,7 +240,7 @@ export const convertToBuildEsQuery = ({
     return [
       JSON.stringify(
         buildEsQuery(
-          indexPattern,
+          { ...indexPattern, fields: Object.values(indexPattern?.fields ?? {}) } as DataViewBase,
           queries,
           filters.filter((f) => f.meta.disabled === false),
           {

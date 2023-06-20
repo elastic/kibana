@@ -26,7 +26,9 @@ export const TopNAction = ({
   casesService: CasesUiStart;
 }) => {
   const { pathname } = useLocation();
-  const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
+  const { browserFields, indexPattern, sourcererDataView } = useSourcererDataView(
+    getScopeFromPath(pathname)
+  );
   const userCasesPermissions = useGetUserCasesPermissions();
   const CasesContext = casesService.ui.getCasesContext();
   const { field, nodeRef, metadata } = context;
@@ -51,7 +53,7 @@ export const TopNAction = ({
           scopeId={metadata?.scopeId}
           toggleTopN={onClose}
           value={field.value}
-          indexPattern={indexPattern}
+          indexPattern={sourcererDataView ?? {}}
           browserFields={browserFields}
         />
       </EuiWrappingPopover>

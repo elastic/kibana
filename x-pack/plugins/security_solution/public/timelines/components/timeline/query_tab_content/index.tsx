@@ -203,6 +203,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
+    sourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
@@ -232,7 +233,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const combinedQueries = combineQueries({
     config: esQueryConfig,
     dataProviders,
-    indexPattern,
+    indexPattern: sourcererDataView ?? {},
     browserFields,
     filters,
     kqlQuery,

@@ -32,7 +32,7 @@ import {
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 
 import { AndOrBadge } from '../and_or_badge';
@@ -41,6 +41,7 @@ import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
 import { getTotalErrorExist } from './selectors';
 import { EntryFieldError, State, exceptionsBuilderReducer } from './reducer';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common/types';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -81,7 +82,7 @@ export interface ExceptionBuilderProps {
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
   osTypes?: OsTypeArray;
-  indexPatterns: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined;
+  indexPatterns: DataViewSpec;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
@@ -89,15 +90,14 @@ export interface ExceptionBuilderProps {
   listId: string | undefined;
   listNamespaceType: NamespaceType | undefined;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<
-    Omit<DataView, 'fields'> & { fields: FieldSpec[] }
-  >;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<DataViewSpec>;
   onChange: (arg: OnChangeProps) => void;
   ruleName?: string;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
   exceptionItemName?: string;
   allowCustomFieldOptions?: boolean;
+  fieldFormats: FieldFormatsStartCommon;
 }
 
 export const ExceptionBuilderComponent = ({
@@ -121,6 +121,7 @@ export const ExceptionBuilderComponent = ({
   osTypes,
   operatorsList,
   allowCustomFieldOptions = false,
+  fieldFormats,
 }: ExceptionBuilderProps): JSX.Element => {
   const [state, dispatch] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
@@ -442,6 +443,7 @@ export const ExceptionBuilderComponent = ({
                 isDisabled={isDisabled}
                 operatorsList={operatorsList}
                 allowCustomOptions={allowCustomFieldOptions}
+                fieldFormats={fieldFormats}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

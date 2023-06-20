@@ -115,7 +115,7 @@ export const threatDefault = [
 export const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
-  indexPattern: { fields: [], title: '' },
+  indexPattern: { fields: {}, title: '' },
   machineLearningJobId: [],
   ruleType: 'query',
   threatIndex: [],

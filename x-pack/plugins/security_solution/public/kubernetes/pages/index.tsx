@@ -35,6 +35,7 @@ export const KubernetesContainer = React.memo(() => {
   const { globalFullScreen } = useGlobalFullScreen();
   const {
     indexPattern,
+    sourcererDataView,
     // runtimeMappings,
     // loading: isLoadingIndexPattern,
   } = useSourcererDataView();
@@ -54,11 +55,11 @@ export const KubernetesContainer = React.memo(() => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern,
+        indexPattern: sourcererDataView,
         queries: [query],
         filters,
       }),
-    [filters, indexPattern, uiSettings, query]
+    [filters, sourcererDataView, uiSettings, query]
   );
 
   useInvalidFilterQuery({
@@ -108,7 +109,7 @@ export const KubernetesContainer = React.memo(() => {
       {kubernetesSecurity.getKubernetesPage({
         filter: (
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
-            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+            <SiemSearchBar id={InputsModelId.global} indexPattern={sourcererDataView ?? {}} />
           </FiltersGlobal>
         ),
         indexPattern,

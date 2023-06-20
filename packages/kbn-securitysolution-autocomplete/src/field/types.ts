@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import { FieldConflictsInfo } from '@kbn/securitysolution-list-utils';
+import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 import { GetGenericComboBoxPropsReturn } from '../get_generic_combo_box_props';
 
 export interface FieldProps extends FieldBaseProps {
@@ -19,18 +20,18 @@ export interface FieldProps extends FieldBaseProps {
   showMappingConflicts?: boolean;
 }
 export interface FieldBaseProps {
-  indexPattern: DataViewBase | undefined;
+  indexPattern: DataViewSpec | undefined;
   fieldTypeFilter?: string[];
   isRequired?: boolean;
-  selectedField?: DataViewFieldBase | undefined;
+  selectedField?: FieldSpec | undefined;
   fieldInputWidth?: number;
   showMappingConflicts?: boolean;
-  onChange: (a: DataViewFieldBase[]) => void;
+  onChange: (a: FieldSpec[]) => void;
 }
 
 export interface ComboBoxFields {
-  availableFields: DataViewField[];
-  selectedFields: DataViewField[];
+  availableFields: FieldSpec[];
+  selectedFields: FieldSpec[];
 }
 
 export interface GetFieldComboBoxPropsReturn extends GetGenericComboBoxPropsReturn {
@@ -38,6 +39,9 @@ export interface GetFieldComboBoxPropsReturn extends GetGenericComboBoxPropsRetu
   mappingConflictsTooltipInfo: { [label: string]: FieldConflictsInfo[] };
 }
 
+/**
+ * @deprecated use FieldSpec or DataViewFieldMap from @kbn/data-views-plugin/common
+ */
 export interface DataViewField extends DataViewFieldBase {
   esTypes?: string[];
 }

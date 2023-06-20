@@ -60,7 +60,9 @@ import {
 } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { HttpStart } from '@kbn/core/public';
-import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { isEmpty } from 'lodash';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 import { getEmptyValue } from '../../../common/empty_value';
 
@@ -76,13 +78,11 @@ export interface EntryItemProps {
   autocompleteService: AutocompleteStart;
   entry: FormattedBuilderEntry;
   httpService: HttpStart;
-  indexPattern: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined;
+  indexPattern: DataViewSpec;
   showLabel: boolean;
   osTypes?: OsTypeArray;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<
-    Omit<DataView, 'fields'> & { fields: FieldSpec[] }
-  >;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<DataViewSpec>;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: EntryFieldError) => void;
@@ -90,6 +90,7 @@ export interface EntryItemProps {
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
+  fieldFormats: FieldFormatsStartCommon;
 }
 
 /**
@@ -102,44 +103,47 @@ export interface EntryItemProps {
  * set to add a nested field
  */
 export const getFilteredIndexPatterns = (
-  patterns: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined,
+  patterns: DataViewSpec,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: FilterEndpointFields<Omit<DataView, 'fields'> & { fields: FieldSpec[] }>,
+  preFilter?: FilterEndpointFields<DataViewSpec>,
   osTypes?: OsTypeArray
-): DataView => {
+): DataViewSpec => {
   const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
-  if (item.nested === 'child' && item.parent != null) {
+  if (indexPatterns != null && item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown
     return {
       ...indexPatterns,
-      fields: indexPatterns?.fields
-        .filter((indexField) => {
-          const subTypeNested = getDataViewFieldSubtypeNested(indexField);
-          const fieldHasCommonParentPath =
-            subTypeNested &&
-            item.parent != null &&
-            subTypeNested.nested.path === item.parent.parent.field;
+      fields: Object.values(indexPatterns?.fields ?? {}).reduce((acc, indexField) => {
+        const subTypeNested = getDataViewFieldSubtypeNested(indexField);
+        const fieldHasCommonParentPath =
+          subTypeNested &&
+          item.parent != null &&
+          subTypeNested.nested.path === item.parent.parent.field;
 
-          return fieldHasCommonParentPath;
-        })
-        .map((f) => {
-          const [fieldNameWithoutParentPath] = f.name.split('.').slice(-1);
-          return { ...f, name: fieldNameWithoutParentPath };
-        }),
-    } as DataView;
+        if (!fieldHasCommonParentPath) {
+          const [fieldNameWithoutParentPath] = indexField.name.split('.').slice(-1);
+          return { ...acc, [fieldNameWithoutParentPath]: indexField };
+        } else {
+          return acc;
+        }
+      }, {} as DataViewSpec),
+    } as DataViewSpec;
   } else if (item.nested === 'parent' && item.field != null) {
     // when user has selected a nested entry, right above it we show the common parent
-    return { ...indexPatterns, fields: [item.field] } as DataView;
+    return { ...indexPatterns, fields: { [item.field.name]: item.field } } as DataViewSpec;
   } else if (item.nested === 'parent' && item.field == null) {
     // when user selects to add a nested entry, only nested fields are shown as options
     return {
       ...indexPatterns,
-      fields: indexPatterns?.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
-    } as DataView;
+      fields: Object.values(indexPatterns?.fields ?? {}).reduce(
+        (acc, field) => (!isDataViewFieldSubtypeNested(field) ? { ...acc, field } : acc),
+        {} as DataViewSpec
+      ),
+    } as DataViewSpec;
   } else {
-    return indexPatterns as DataView;
+    return indexPatterns;
   }
 };
 
@@ -160,6 +164,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   isDisabled = false,
   operatorsList,
   allowCustomOptions = false,
+  fieldFormats,
 }): JSX.Element => {
   const sPaddingSize = useEuiPaddingSize('s');
 
@@ -233,7 +238,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     (): boolean =>
       isDisabled ||
       (!allowCustomOptions &&
-        (indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0))),
+        (indexPattern == null || (indexPattern != null && !isEmpty(indexPattern.fields)))),
     [isDisabled, indexPattern, allowCustomOptions]
   );
 
@@ -435,6 +440,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             selectedField={entry.correspondingKeywordField ?? entry.field}
             selectedValue={value}
+            fieldFormats={fieldFormats}
             isDisabled={isFieldComponentDisabled}
             isLoading={false}
             isClearable={false}
@@ -462,6 +468,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isLoading={false}
             isClearable={false}
             indexPattern={indexPattern}
+            fieldFormats={fieldFormats}
             onError={handleError}
             onChange={handleFieldMatchAnyValueChange}
             isRequired
@@ -492,6 +499,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             isLoading={false}
             isClearable={false}
             indexPattern={indexPattern}
+            fieldFormats={fieldFormats}
             onError={handleError}
             onChange={handleFieldWildcardValueChange}
             onWarning={handleWarning}

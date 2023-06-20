@@ -84,8 +84,11 @@ interface FetchIndexReturn {
   browserFields: BrowserFields;
   indexes: string[];
   indexExists: boolean;
+  /**
+   * @deprecated use fields on dataViewSpec
+   */
   indexPatterns: DataViewBase;
-  dataView: DataViewSpec;
+  dataViewSpec: DataViewSpec;
 }
 
 /**
@@ -111,7 +114,7 @@ export const useFetchIndex = (
     indexes: defaultIndexesArray,
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
-    dataView: {},
+    dataViewSpec: {},
     loading: false,
   });
   const { addError, addWarning } = useAppToasts();
@@ -160,7 +163,7 @@ export const useFetchIndex = (
 
           setState({
             loading: false,
-            dataView: dv,
+            dataViewSpec: dv,
             browserFields,
             indexes: dv?.title != null ? dv.title.split(',') : [],
             indexExists: dv?.title != null && dv?.title?.split(',').length > 0,

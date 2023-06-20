@@ -91,15 +91,17 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+  const { browserFields, indexPattern, sourcererDataView } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      if (browserFields != null && indexPattern != null) {
+      if (browserFields != null && sourcererDataView != null) {
         return combineQueries({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
-          indexPattern,
+          indexPattern: sourcererDataView,
           browserFields,
           filters: [
             ...(defaultFilters ?? []),
@@ -120,8 +122,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       from,
       globalFilters,
       globalQuery,
-      indexPattern,
       parentGroupingFilter,
+      sourcererDataView,
       to,
       uiSettings,
     ]

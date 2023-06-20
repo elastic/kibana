@@ -11,7 +11,22 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { FieldComponent } from '..';
-import { fields, getField } from '../../fields/index.mock';
+import { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields, getField } from '@kbn/data-views-plugin/common/mocks';
+
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 
 describe('FieldComponent', () => {
   it('should render the component enabled and displays the selected field correctly', () => {
@@ -20,11 +35,7 @@ describe('FieldComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         onChange={jest.fn()}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
@@ -39,11 +50,7 @@ describe('FieldComponent', () => {
         isClearable={false}
         isDisabled={true}
         isLoading={false}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         onChange={jest.fn()}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
@@ -58,11 +65,7 @@ describe('FieldComponent', () => {
         isClearable={false}
         isDisabled={true}
         isLoading={true}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         onChange={jest.fn()}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
@@ -76,11 +79,7 @@ describe('FieldComponent', () => {
   it('should allow user to clear values if isClearable is true', () => {
     const wrapper = render(
       <FieldComponent
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         isClearable={true}
         isDisabled={false}
         isLoading={false}
@@ -98,11 +97,7 @@ describe('FieldComponent', () => {
         isClearable={false}
         isDisabled={true}
         isLoading={false}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         onChange={jest.fn()}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
@@ -119,11 +114,7 @@ describe('FieldComponent', () => {
     const mockOnChange = jest.fn();
     const wrapper = render(
       <FieldComponent
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logstash-*',
-        }}
+        indexPattern={getMockIndexPattern()}
         isClearable={false}
         isDisabled={false}
         isLoading={false}

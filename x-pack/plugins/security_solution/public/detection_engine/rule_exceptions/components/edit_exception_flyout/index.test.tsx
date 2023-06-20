@@ -127,7 +127,7 @@ describe('When the edit exception modal is opened', () => {
     mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
     mockFetchIndexPatterns.mockImplementation(() => ({
       isLoading: false,
-      indexPatterns: stubIndexPattern,
+      dataViewSpec: stubIndexPattern.toSpec(),
     }));
     mockUseFindExceptionListReferences.mockImplementation(() => [
       false,
@@ -171,7 +171,7 @@ describe('When the edit exception modal is opened', () => {
       // Mocks one of the hooks as loading
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
-        indexPatterns: createStubDataView({ spec: { title: 'foo*' } }),
+        dataViewSpec: createStubDataView({ spec: { title: 'foo*' } }).toSpec(),
       }));
 
       const wrapper = mount(

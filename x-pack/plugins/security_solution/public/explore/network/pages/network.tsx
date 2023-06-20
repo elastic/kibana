@@ -109,7 +109,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+    const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+      useSourcererDataView();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -137,14 +138,14 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config: getEsQueryConfig(kibana.services.uiSettings),
-      indexPattern,
+      indexPattern: sourcererDataView,
       queries: [query],
       filters: globalFilters,
     });
 
     const [tabsFilterQuery] = convertToBuildEsQuery({
       config: getEsQueryConfig(kibana.services.uiSettings),
-      indexPattern,
+      indexPattern: sourcererDataView,
       queries: [query],
       filters: tabsFilters,
     });

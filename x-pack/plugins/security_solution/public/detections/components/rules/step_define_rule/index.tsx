@@ -296,7 +296,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  const [isIndexPatternLoading, { browserFields, dataView }] =
+  const [isIndexPatternLoading, { browserFields, dataViewSpec }] =
     // dataViewId is not empty, therefore not undefined
     useFetchIndex(dataViewId != null && !isEmpty(dataViewId) ? dataViewId : index);
 
@@ -327,9 +327,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
      * figure out where the discrepency is.
      */
     setAggregatableFields(
-      aggregatableFields(dataView?.fields != null ? Object.values(dataView.fields) : [])
+      aggregatableFields(dataViewSpec?.fields != null ? Object.values(dataViewSpec.fields) : [])
     );
-  }, [dataView]);
+  }, [dataViewSpec]);
 
   const termsAggregationFields: FieldSpec[] = useMemo(
     () => getTermsAggregationFields(aggFields),
@@ -338,7 +338,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const [
     threatIndexPatternsLoading,
-    { browserFields: threatBrowserFields, dataView: threatIndexPatterns },
+    { browserFields: threatBrowserFields, dataViewSpec: threatIndexPatterns },
   ] = useFetchIndex(!isEmpty(threatIndex) ? threatIndex : []);
 
   // reset form when rule type changes
@@ -483,7 +483,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ threatMapping }) => (
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
-        indexPatterns={dataView}
+        indexPatterns={dataViewSpec}
         threatBrowserFields={threatBrowserFields}
         threatIndexModified={threatIndexModified}
         threatIndexPatterns={threatIndexPatterns}
@@ -494,7 +494,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [
       handleResetThreatIndices,
-      dataView,
+      dataViewSpec,
       threatBrowserFields,
       threatIndexModified,
       threatIndexPatterns,
@@ -695,12 +695,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   ]);
 
   const dataViewMemo = useMemo(() => {
-    if (dataView != null) {
-      return new DataView({ spec: dataView, fieldFormats });
+    if (dataViewSpec != null) {
+      return new DataView({ spec: dataViewSpec, fieldFormats });
     } else {
       return null;
     }
-  }, [dataView, fieldFormats]);
+  }, [dataViewSpec, fieldFormats]);
 
   const QueryBarMemo = useMemo(
     () => (
@@ -764,30 +764,30 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const optionsData = useMemo(
     () =>
-      dataView == null || dataView?.fields == null || isEmpty(dataView?.fields)
+      dataViewSpec == null || dataViewSpec?.fields == null || isEmpty(dataViewSpec?.fields)
         ? {
             keywordFields: [],
             dateFields: [],
             nonDateFields: [],
           }
         : {
-            keywordFields: Object.values(dataView.fields)
+            keywordFields: Object.values(dataViewSpec.fields)
               .filter((f) => f.esTypes?.includes('keyword'))
               .map((f) => ({ label: f.name })),
-            dateFields: Object.values(dataView.fields)
+            dateFields: Object.values(dataViewSpec.fields)
               .filter((f) => f.type === 'date')
               .map((f) => ({ label: f.name })),
-            nonDateFields: Object.values(dataView.fields)
+            nonDateFields: Object.values(dataViewSpec.fields)
               .filter((f) => f.type !== 'date')
               .map((f) => ({ label: f.name })),
           },
-    [dataView]
+    [dataViewSpec]
   );
 
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(initialState);
 
   if (dataSourceType === DataSourceType.DataView) {
-    dataForDescription.dataViewTitle = dataView.title;
+    dataForDescription.dataViewTitle = dataViewSpec.title;
   }
 
   return isReadOnlyView ? (
@@ -847,7 +847,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: isIndexPatternLoading,
-                    dataView,
+                    dataView: dataViewSpec,
                     showFilterBar: true,
                     // isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',

@@ -10,15 +10,17 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
-import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+
 import type { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
 import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
 
 interface EntryItemProps {
   entry: FormattedEntry;
-  indexPattern: DataViewBase;
-  threatIndexPatterns: DataViewBase;
+  indexPattern: DataViewSpec;
+  threatIndexPatterns: DataViewSpec;
   showLabel: boolean;
   onChange: (arg: Entry, i: number) => void;
 }

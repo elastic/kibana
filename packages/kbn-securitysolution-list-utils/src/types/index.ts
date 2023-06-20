@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataViewFieldBase } from '@kbn/es-query';
 import type {
   CreateExceptionListItemSchema,
@@ -39,13 +40,13 @@ export interface OperatorOption {
 
 export interface FormattedBuilderEntry {
   id: string;
-  field: DataViewField | undefined;
+  field: FieldSpec | undefined;
   operator: OperatorOption;
   value: string | string[] | undefined;
   nested: 'parent' | 'child' | undefined;
   entryIndex: number;
   parent: { parent: BuilderEntryNested; parentIndex: number } | undefined;
-  correspondingKeywordField: DataViewFieldBase | undefined;
+  correspondingKeywordField: FieldSpec | undefined;
 }
 
 export interface EmptyEntry {

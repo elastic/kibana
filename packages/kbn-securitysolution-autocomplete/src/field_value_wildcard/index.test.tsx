@@ -10,9 +10,13 @@ import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormHelpText } from '@elastic/eui';
 import { act, waitFor } from '@testing-library/react';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+
 import { AutocompleteFieldWildcardComponent } from '.';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
-import { fields, getField } from '../fields/index.mock';
 import { autocompleteStartMock } from '../autocomplete/index.mock';
 import { FILENAME_WILDCARD_WARNING, FILEPATH_WARNING } from '@kbn/securitysolution-utils';
 
@@ -22,6 +26,19 @@ jest.mock('../translations', () => ({
 }));
 describe('AutocompleteFieldWildcardComponent', () => {
   let wrapper: ReactWrapper;
+
+  const getMockIndexPattern = (): DataViewSpec => ({
+    ...createStubDataView({
+      spec: { id: '1234', title: 'logs-endpoint.events.*' },
+    }),
+    fields: ((): DataViewFieldMap => {
+      const fieldMap: DataViewFieldMap = Object.create(null);
+      for (const field of fields) {
+        fieldMap[field.name] = { ...field };
+      }
+      return fieldMap;
+    })(),
+  });
 
   const getValueSuggestionsMock = jest
     .fn()
@@ -45,11 +62,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled
         isLoading={false}
@@ -72,11 +86,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled
         isLoading={false}
@@ -98,11 +109,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading
@@ -126,11 +134,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={true}
         isDisabled={false}
         isLoading={false}
@@ -150,11 +155,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -177,11 +179,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -208,11 +207,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -238,11 +234,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -281,11 +274,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -314,11 +304,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -354,11 +341,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -398,11 +382,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -433,11 +414,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -467,11 +445,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -492,11 +467,8 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper = mount(
       <AutocompleteFieldWildcardComponent
         autocompleteService={autocompleteStartMock}
-        indexPattern={{
-          fields,
-          id: '1234',
-          title: 'logs-endpoint.events.*',
-        }}
+        indexPattern={getMockIndexPattern()}
+        fieldFormats={fieldFormatsMock}
         isClearable={false}
         isDisabled={false}
         isLoading={false}

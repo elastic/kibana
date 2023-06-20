@@ -172,6 +172,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     browserFields,
     dataViewId,
     indexPattern,
+    sourcererDataView,
     runtimeMappings,
     selectedPatterns,
     dataViewId: selectedDataViewId,
@@ -260,12 +261,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        indexPattern,
+        indexPattern: sourcererDataView ?? {},
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, browserFields, globalFilters, start, indexPattern, query, end]
+    [esQueryConfig, browserFields, globalFilters, start, sourcererDataView, query, end]
   );
 
   const canQueryTimeline = useMemo(

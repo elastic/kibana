@@ -43,7 +43,8 @@ const OverviewComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
 
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
@@ -71,7 +72,7 @@ const OverviewComponent = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+            <SiemSearchBar id={InputsModelId.global} indexPattern={sourcererDataView ?? {}} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
@@ -102,7 +103,7 @@ const OverviewComponent = () => {
                       deleteQuery={deleteQuery}
                       filters={filters}
                       from={from}
-                      indexPattern={indexPattern}
+                      indexPattern={sourcererDataView ?? {}}
                       indexNames={selectedPatterns}
                       query={query}
                       queryType="overview"
@@ -116,7 +117,7 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexNames={selectedPatterns}
-                      indexPattern={indexPattern}
+                      indexPattern={sourcererDataView ?? {}}
                       query={query}
                       setQuery={setQuery}
                       to={to}

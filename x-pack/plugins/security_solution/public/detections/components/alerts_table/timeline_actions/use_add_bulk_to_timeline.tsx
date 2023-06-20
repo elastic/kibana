@@ -67,6 +67,7 @@ export const useAddBulkToTimelineAction = ({
     dataViewId,
     runtimeMappings,
     indexPattern,
+    sourcererDataView,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
@@ -91,7 +92,7 @@ export const useAddBulkToTimelineAction = ({
   const combinedQuery = combineQueries({
     config: esQueryConfig,
     dataProviders: [],
-    indexPattern,
+    indexPattern: sourcererDataView ?? {},
     filters: combinedFilters,
     kqlQuery: { query: '', language: 'kuery' },
     browserFields,

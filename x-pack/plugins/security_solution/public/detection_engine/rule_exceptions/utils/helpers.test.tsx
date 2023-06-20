@@ -108,7 +108,7 @@ describe('Exception helpers', () => {
   describe('#filterIndexPatterns', () => {
     test('it returns index patterns without filtering if list type is "detection"', () => {
       const mockIndexPatterns = getMockIndexPattern();
-      const output = filterIndexPatterns(mockIndexPatterns, 'detection', ['windows']);
+      const output = filterIndexPatterns(mockIndexPatterns.toSpec(), 'detection', ['windows']);
 
       expect(output).toEqual(mockIndexPatterns);
     });
@@ -118,7 +118,7 @@ describe('Exception helpers', () => {
         ...getMockIndexPattern(),
         fields: [...fields, ...mockEndpointFields],
       } as Omit<DataView, 'fields'> & { fields: FieldSpec[] };
-      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['windows']);
+      const output = filterIndexPatterns(mockIndexPatterns.toSpec(), 'endpoint', ['windows']);
 
       expect(output?.fields).toEqual([...mockEndpointFields]);
     });
@@ -128,7 +128,7 @@ describe('Exception helpers', () => {
         ...getMockIndexPattern(),
         fields: [...fields, ...mockLinuxEndpointFields],
       } as Omit<DataView, 'fields'> & { fields: FieldSpec[] };
-      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['linux']);
+      const output = filterIndexPatterns(mockIndexPatterns.toSpec(), 'endpoint', ['linux']);
 
       expect(output?.fields).toEqual([...mockLinuxEndpointFields]);
     });

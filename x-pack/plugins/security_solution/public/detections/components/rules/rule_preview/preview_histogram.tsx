@@ -11,7 +11,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '
 import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { buildEsQuery } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
@@ -63,7 +64,7 @@ interface PreviewHistogramProps {
   addNoiseWarning: () => void;
   spaceId: string;
   ruleType: Type;
-  indexPattern: DataViewBase | undefined;
+  indexPattern: DataViewSpec | undefined;
   timeframeOptions: TimeframePreviewOptions;
 }
 
@@ -77,7 +78,7 @@ export const PreviewHistogram = ({
   indexPattern,
   timeframeOptions,
 }: PreviewHistogramProps) => {
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, fieldFormats } = useKibana().services;
   const { setQuery, isInitializing } = useGlobalTime();
   const startDate = useMemo(
     () => timeframeOptions.timeframeStart.toISOString(),
@@ -158,9 +159,13 @@ export const PreviewHistogram = ({
 
   const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
   const config = getEsQueryConfig(uiSettings);
+  const dataViewInstance = useMemo(() => {
+    const dv = new DataView({ spec: indexPattern, fieldFormats });
+    return dv;
+  }, [indexPattern, fieldFormats]);
   const pageFilters = useMemo(() => {
     const filterQuery = buildEsQuery(
-      indexPattern,
+      dataViewInstance,
       [{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }],
       [],
       {
@@ -184,7 +189,7 @@ export const PreviewHistogram = ({
         },
       },
     ];
-  }, [config, indexPattern, previewId]);
+  }, [config, dataViewInstance, previewId]);
 
   return (
     <>

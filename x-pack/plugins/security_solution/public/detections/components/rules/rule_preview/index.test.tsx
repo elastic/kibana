@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
 
 import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';
@@ -23,6 +23,7 @@ import {
   stepDefineDefaultValue,
 } from '../../../pages/detection_engine/rules/utils';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_preview_route');
@@ -37,10 +38,17 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
 }));
 jest.mock('./use_preview_invocation_count');
 
-const getMockIndexPattern = (): DataViewBase => ({
-  fields,
-  id: '1234',
-  title: 'logstash-*',
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }).toSpec(),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
 });
 
 const defaultProps: RulePreviewProps = {

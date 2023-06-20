@@ -8,8 +8,9 @@
 import React from 'react';
 import moment from 'moment';
 
-import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import {
@@ -69,10 +70,17 @@ jest.mock('../../../../timelines/components/fields_browser', () => ({
   useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
 }));
 
-const getMockIndexPattern = (): DataViewBase => ({
-  fields,
-  id: '1234',
-  title: 'logstash-*',
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }).toSpec(),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
 });
 
 const getLastMonthTimeframe = () => ({

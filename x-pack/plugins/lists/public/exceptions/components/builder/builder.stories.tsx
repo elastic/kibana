@@ -11,7 +11,7 @@ import { HttpStart } from '@kbn/core/public';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
@@ -221,13 +221,18 @@ const BuilderTemplate: Story<ExceptionBuilderProps> = (args) => (
   <ExceptionBuilderComponent {...args} />
 );
 
-const getMockIndexPattern = (): Omit<DataView, 'fields'> & { fields: FieldSpec[] } =>
-  ({
-    ...createStubDataView({
-      spec: { id: '1234', title: 'logstash-*' },
-    }),
-    fields,
-  } as Omit<DataView, 'fields'> & { fields: FieldSpec[] });
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 
 export const Default = BuilderTemplate.bind({});
 Default.args = {

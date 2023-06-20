@@ -28,9 +28,10 @@ import {
   CreateRuleExceptionListItemSchema,
   createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { DataViewBase, DataViewFieldBase, getDataViewFieldSubtypeNested } from '@kbn/es-query';
+import { DataViewFieldBase, getDataViewFieldSubtypeNested } from '@kbn/es-query';
 
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { DataViewFieldMap, DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 
 import {
   ALL_OPERATORS,
@@ -696,18 +697,16 @@ export const getCorrespondingKeywordField = ({
   fields,
   selectedField,
 }: {
-  fields: DataViewFieldBase[];
+  fields: DataViewFieldMap | undefined;
   selectedField: string | undefined;
-}): DataViewFieldBase | undefined => {
+}): FieldSpec | undefined => {
   const selectedFieldBits =
     selectedField != null && selectedField !== '' ? selectedField.split('.') : [];
   const selectedFieldIsTextType = selectedFieldBits.slice(-1)[0] === 'text';
 
-  if (selectedFieldIsTextType && selectedFieldBits.length > 0) {
+  if (fields != null && selectedFieldIsTextType && selectedFieldBits.length > 0) {
     const keywordField = selectedFieldBits.slice(0, selectedFieldBits.length - 1).join('.');
-    const [foundKeywordField] = fields.filter(
-      ({ name }) => keywordField !== '' && keywordField === name
-    );
+    const foundKeywordField = fields[keywordField];
     return foundKeywordField;
   }
 
@@ -727,7 +726,7 @@ export const getCorrespondingKeywordField = ({
  * @param allowCustomFieldOptions determines if field must be found to match in indexPattern or not
  */
 export const getFormattedBuilderEntry = (
-  indexPattern: DataViewBase,
+  indexPattern: DataViewSpec,
   item: BuilderEntry,
   itemIndex: number,
   parent: EntryNested | undefined,
@@ -736,7 +735,7 @@ export const getFormattedBuilderEntry = (
 ): FormattedBuilderEntry => {
   const { fields } = indexPattern;
   const field = parent != null ? `${parent.field}.${item.field}` : item.field;
-  const [foundField] = fields.filter(({ name }) => field != null && field === name);
+  const foundField = field != null ? fields?.[field] : undefined;
   const correspondingKeywordField = getCorrespondingKeywordField({
     fields,
     selectedField: field,
@@ -764,7 +763,7 @@ export const getFormattedBuilderEntry = (
     return {
       correspondingKeywordField,
       entryIndex: itemIndex,
-      field: fieldToUse,
+      field: fieldToUse as FieldSpec,
       id: item.id != null ? item.id : `${itemIndex}`,
       nested: undefined,
       operator: getExceptionOperatorSelect(item),
@@ -786,7 +785,7 @@ export const getFormattedBuilderEntry = (
  * was added to ensure that nested items could be identified with their parent entry
  */
 export const getFormattedBuilderEntries = (
-  indexPattern: DataViewBase,
+  indexPattern: DataViewSpec,
   entries: BuilderEntry[],
   allowCustomFieldOptions: boolean,
   parent?: EntryNested,
@@ -810,14 +809,13 @@ export const getFormattedBuilderEntries = (
         entryIndex: index,
         field: isNewNestedEntry
           ? undefined
-          : // This type below is really a FieldSpec type from "src/plugins/data/common/index_patterns/fields/types.ts", we cast it here to keep using the DataViewFieldBase interface
-            ({
+          : ({
               aggregatable: false,
               esTypes: ['nested'],
               name: item.field != null ? item.field : '',
               searchable: false,
               type: 'string',
-            } as DataViewFieldBase),
+            } as FieldSpec),
         id: item.id != null ? item.id : `${index}`,
         nested: 'parent',
         operator: isOperator,

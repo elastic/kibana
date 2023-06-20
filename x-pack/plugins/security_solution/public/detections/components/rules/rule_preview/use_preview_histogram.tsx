@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useMatrixHistogramCombined } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy';
 import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
@@ -21,7 +21,7 @@ interface PreviewHistogramParams {
   startDate: string;
   spaceId: string;
   ruleType: Type;
-  indexPattern: DataViewBase | undefined;
+  indexPattern: DataViewSpec | undefined;
   skip?: boolean;
 }
 

@@ -88,7 +88,7 @@ describe('When the add exception modal is opened', () => {
     mockUseAddOrUpdateException.mockImplementation(() => [false, jest.fn()]);
     mockFetchIndexPatterns.mockImplementation(() => ({
       isLoading: false,
-      indexPatterns: stubIndexPattern,
+      dataViewSpec: stubIndexPattern.toSpec(),
     }));
 
     mockUseSignalIndex.mockImplementation(() => ({
@@ -154,9 +154,10 @@ describe('When the add exception modal is opened', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       // Mocks one of the hooks as loading
+      const stubDataView = createStubDataView({ spec: { title: 'foo*' } });
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
-        indexPatterns: createStubDataView({ spec: { title: 'foo*' } }),
+        dataViewSpec: stubDataView.toSpec(),
       }));
 
       wrapper = mount(
