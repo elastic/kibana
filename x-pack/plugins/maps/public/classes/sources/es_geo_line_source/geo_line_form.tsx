@@ -26,10 +26,10 @@ interface Props {
 
 export function GeoLineForm(props: Props) {
   const { isTimeseries, dimensionLabels } = useMemo(() => {
-    const isTimeseries = getIsTimeseries(props.indexPattern);
+    const isTimeseriesInsideMemo = getIsTimeseries(props.indexPattern);
     return {
-      isTimeseries,
-      dimensionLabels: isTimeseries
+      isTimeseries: isTimeseriesInsideMemo,
+      dimensionLabels: isTimeseriesInsideMemo
         ? props.indexPattern.fields
             .filter((field) => {
               return field.timeSeriesDimension;
