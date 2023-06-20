@@ -13,32 +13,37 @@ import { CanvasTemplate } from '../../../types';
 
 export function initializeListTemplates(deps: RouteInitializerDeps) {
   const { router } = deps;
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${API_ROUTE_TEMPLATES}`,
-      validate: {
-        params: schema.object({}),
-      },
-    },
-    catchErrorHandler(async (context, request, response) => {
-      const savedObjectsClient = (await context.core).savedObjects.client;
-
-      const templates = await savedObjectsClient.find<CanvasTemplate>({
-        type: TEMPLATE_TYPE,
-        sortField: 'name.keyword',
-        sortOrder: 'desc',
-        search: '*',
-        searchFields: ['name', 'help'],
-        fields: ['id', 'name', 'help', 'tags'],
-      });
-
-      return response.ok({
-        body: {
-          templates: templates.saved_objects.map((hit) => ({
-            ...hit.attributes,
-          })),
-        },
-      });
+      access: 'internal',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { params: schema.object({}) },
+        },
+      },
+      catchErrorHandler(async (context, request, response) => {
+        const savedObjectsClient = (await context.core).savedObjects.client;
+
+        const templates = await savedObjectsClient.find<CanvasTemplate>({
+          type: TEMPLATE_TYPE,
+          sortField: 'name.keyword',
+          sortOrder: 'desc',
+          search: '*',
+          searchFields: ['name', 'help'],
+          fields: ['id', 'name', 'help', 'tags'],
+        });
+
+        return response.ok({
+          body: {
+            templates: templates.saved_objects.map((hit) => ({
+              ...hit.attributes,
+            })),
+          },
+        });
+      })
+    );
 }
