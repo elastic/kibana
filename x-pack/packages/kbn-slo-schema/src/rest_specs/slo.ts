@@ -12,6 +12,7 @@ import {
   historicalSummarySchema,
   indicatorSchema,
   indicatorTypesArraySchema,
+  indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
   objectiveSchema,
@@ -198,7 +199,7 @@ type APMTransactionDurationIndicatorSchema = t.TypeOf<typeof apmTransactionDurat
 type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
 type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
 type TimeWindow = t.TypeOf<typeof timeWindowTypeSchema>;
-
+type IndicatorType = t.OutputOf<typeof indicatorTypesSchema>;
 type Indicator = t.OutputOf<typeof indicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
@@ -245,6 +246,7 @@ export type {
   APMTransactionDurationIndicatorSchema,
   APMTransactionErrorRateIndicatorSchema,
   GetSLOBurnRatesResponse,
+  IndicatorType,
   Indicator,
   MetricCustomIndicator,
   KQLCustomIndicator,

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BudgetingMethod, CreateSLOInput, TimeWindow } from '@kbn/slo-schema';
+import { BudgetingMethod, CreateSLOInput, IndicatorType, TimeWindow } from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
@@ -17,7 +17,7 @@ import {
 } from '../../utils/slo/labels';
 
 export const SLI_OPTIONS: Array<{
-  value: CreateSLOInput['indicator']['type'];
+  value: IndicatorType;
   text: string;
 }> = [
   {
