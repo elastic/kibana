@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import type { LogViewReference } from '../../../../../common/log_views';
+import { DEFAULT_LOG_VIEW, LogViewReference } from '../../../../../common/log_views';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { LogStream } from '../../../log_stream';
@@ -28,7 +28,7 @@ export interface LogsProps {
   onSearchChange?: (query: string) => void;
 }
 
-const TEXT_QUERY_THROTTLE_INTERVAL_MS = 250;
+const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = ({
   nodeName,
@@ -73,8 +73,7 @@ export const Logs = ({
   }, []);
 
   const logView: LogViewReference = useMemo(
-    () =>
-      logViewReference ? logViewReference : { type: 'log-view-reference', logViewId: 'default' },
+    () => (logViewReference ? logViewReference : DEFAULT_LOG_VIEW),
     [logViewReference]
   );
 
@@ -107,7 +106,7 @@ export const Logs = ({
           <EuiFlexItem grow={false}>
             <RedirectAppLinks coreStart={services}>
               <EuiButtonEmpty
-                data-test-subj="iinfraAssetDetailsLogsTabOpenInLogsButton"
+                data-test-subj="infraAssetDetailsLogsTabOpenInLogsButton"
                 size="xs"
                 flush="both"
                 iconType="popout"
