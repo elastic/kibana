@@ -14,7 +14,11 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createApmRule } from '../alerts/alerting_api_helper';
-import { waitForRuleStatus, runRuleSoon } from '../alerts/wait_for_rule_status';
+import {
+  waitForRuleStatus,
+  runRuleSoon,
+  waitForAlertInIndex,
+} from '../alerts/wait_for_rule_status';
 
 type TransactionsGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -28,6 +32,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const serviceName = 'synth-go';
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
+
+  const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 
   async function getTransactionGroups(overrides?: {
     path?: {
@@ -182,6 +188,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.status).to.be(204);
         });
 
+        it('indexes alert document', async () => {
+          const resp = await waitForAlertInIndex({
+            es: esClient,
+            indexName: APM_ALERTS_INDEX,
+            ruleId,
+          });
+
+          expect(resp.hits.hits.length).to.be(1);
+        });
+
         it('returns the correct number of alert counts', async () => {
           const txGroupsTypeRequest = await getTransactionGroups({
             query: { transactionType: 'request' },
@@ -252,6 +268,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             supertest,
           });
           expect(response.status).to.be(204);
+        });
+
+        it('indexes alert document', async () => {
+          const resp = await waitForAlertInIndex({
+            es: esClient,
+            indexName: APM_ALERTS_INDEX,
+            ruleId,
+          });
+
+          expect(resp.hits.hits.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {
@@ -326,6 +352,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             supertest,
           });
           expect(response.status).to.be(204);
+        });
+
+        it('indexes alert document', async () => {
+          const resp = await waitForAlertInIndex({
+            es: esClient,
+            indexName: APM_ALERTS_INDEX,
+            ruleId,
+          });
+
+          expect(resp.hits.hits.length).to.be(1);
         });
 
         it('returns the correct number of alert counts', async () => {

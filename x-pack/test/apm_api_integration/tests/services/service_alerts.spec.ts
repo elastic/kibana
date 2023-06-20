@@ -8,8 +8,12 @@ import expect from '@kbn/expect';
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { waitForActiveAlert } from '../../common/utils/wait_for_active_alert';
 import { createApmRule } from '../alerts/alerting_api_helper';
+import {
+  waitForRuleStatus,
+  runRuleSoon,
+  waitForAlertInIndex,
+} from '../alerts/wait_for_rule_status';
 
 export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -17,10 +21,11 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const synthtraceEsClient = getService('synthtraceEsClient');
   const esClient = getService('es');
-  const log = getService('log');
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
   const goService = 'synth-go';
+
+  const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 
   async function getServiceAlerts({
     serviceName,
@@ -117,12 +122,39 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;
-        await waitForActiveAlert({ ruleId, esClient, log });
+        expect(createdRule.id).to.not.eql(undefined);
       });
 
       after(async () => {
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
         await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+      });
+
+      it('checks if rule is active', async () => {
+        const executionStatus = await waitForRuleStatus({
+          id: ruleId,
+          expectedStatus: 'active',
+          supertest,
+        });
+        expect(executionStatus.status).to.be('active');
+      });
+
+      it('should successfully run the rule', async () => {
+        const response = await runRuleSoon({
+          ruleId,
+          supertest,
+        });
+        expect(response.status).to.be(204);
+      });
+
+      it('indexes alert document', async () => {
+        const resp = await waitForAlertInIndex({
+          es: esClient,
+          indexName: APM_ALERTS_INDEX,
+          ruleId,
+        });
+
+        expect(resp.hits.hits.length).to.be(1);
       });
 
       it('returns the correct number of alerts', async () => {
