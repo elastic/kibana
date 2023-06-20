@@ -13,6 +13,7 @@ import { Inspect } from './inspect';
 
 interface WizardState {
   datasetName: string;
+  serviceName: string;
   logFilePaths: string[];
   namespace: string;
   customConfigurations: string;
@@ -31,6 +32,7 @@ interface WizardState {
 
 const initialState: WizardState = {
   datasetName: '',
+  serviceName: '',
   logFilePaths: [''],
   namespace: 'default',
   customConfigurations: '',
