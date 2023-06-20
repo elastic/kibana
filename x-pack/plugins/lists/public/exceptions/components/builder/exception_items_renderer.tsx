@@ -34,6 +34,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common/types';
 
 import { AndOrBadge } from '../and_or_badge';
 
@@ -41,7 +42,6 @@ import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
 import { getTotalErrorExist } from './selectors';
 import { EntryFieldError, State, exceptionsBuilderReducer } from './reducer';
-import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common/types';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;

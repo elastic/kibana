@@ -24,12 +24,12 @@ import {
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common/types';
 
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { BuilderEntryItem } from './entry_renderer';
 import { EntryFieldError } from './reducer';
-import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common/types';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {
