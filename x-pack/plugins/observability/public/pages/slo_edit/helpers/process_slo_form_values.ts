@@ -24,7 +24,7 @@ export function transformSloResponseToCreateSloForm(
       type: values.timeWindow.type,
     },
     objective: {
-      target: values.objective.target,
+      target: values.objective.target * 100,
       ...(values.budgetingMethod === 'timeslices' &&
         values.objective.timesliceTarget && {
           timesliceTarget: values.objective.timesliceTarget * 100,
@@ -38,9 +38,16 @@ export function transformSloResponseToCreateSloForm(
   };
 }
 
-export function transformValuesToCreateSLOInput(values: CreateSLOInput): CreateSLOInput {
+export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): CreateSLOInput {
   return {
-    ...values,
+    name: values.name,
+    description: values.description,
+    indicator: values.indicator,
+    budgetingMethod: values.budgetingMethod,
+    timeWindow: {
+      duration: `${values.timeWindow.duration.value}${values.timeWindow.duration.unit}`,
+      type: values.timeWindow.type,
+    },
     objective: {
       target: values.objective.target / 100,
       ...(values.budgetingMethod === 'timeslices' &&
@@ -49,15 +56,23 @@ export function transformValuesToCreateSLOInput(values: CreateSLOInput): CreateS
         }),
       ...(values.budgetingMethod === 'timeslices' &&
         values.objective.timesliceWindow && {
-          timesliceWindow: `${values.objective.timesliceWindow}m`,
+          timesliceWindow: `${values.objective.timesliceWindow.value}${values.objective.timesliceWindow.unit}`,
         }),
     },
+    tags: values.tags,
   };
 }
 
-export function transformValuesToUpdateSLOInput(values: CreateSLOInput): UpdateSLOInput {
+export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSLOInput {
   return {
-    ...values,
+    name: values.name,
+    description: values.description,
+    indicator: values.indicator,
+    budgetingMethod: values.budgetingMethod,
+    timeWindow: {
+      duration: `${values.timeWindow.duration.value}${values.timeWindow.duration.unit}`,
+      type: values.timeWindow.type,
+    },
     objective: {
       target: values.objective.target / 100,
       ...(values.budgetingMethod === 'timeslices' &&
@@ -66,8 +81,9 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOInput): UpdateS
         }),
       ...(values.budgetingMethod === 'timeslices' &&
         values.objective.timesliceWindow && {
-          timesliceWindow: `${values.objective.timesliceWindow}m`,
+          timesliceWindow: `${values.objective.timesliceWindow.value}${values.objective.timesliceWindow.unit}`,
         }),
     },
+    tags: values.tags,
   };
 }

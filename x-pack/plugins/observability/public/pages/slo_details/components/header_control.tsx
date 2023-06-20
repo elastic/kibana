@@ -21,7 +21,7 @@ import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
 import {
   transformSloResponseToCreateSloForm,
-  transformValuesToCreateSLOInput,
+  transformCreateSLOFormToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SloDeleteConfirmationModal } from '../../slos/components/slo_delete_confirmation_modal';
 import type { RulesParams } from '../../../locators/rules';
@@ -111,7 +111,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     if (slo) {
       setIsPopoverOpen(false);
 
-      const newSlo = transformValuesToCreateSLOInput(
+      const newSlo = transformCreateSLOFormToCreateSLOInput(
         transformSloResponseToCreateSloForm({ ...slo, name: `[Copy] ${slo.name}` })!
       );
 

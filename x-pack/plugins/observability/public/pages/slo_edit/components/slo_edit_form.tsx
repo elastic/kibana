@@ -31,7 +31,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import {
   transformSloResponseToCreateSloForm,
-  transformValuesToCreateSLOInput,
+  transformCreateSLOFormToCreateSLOInput,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
@@ -117,7 +117,7 @@ export function SloEditForm({ slo }: Props) {
     if (!isValid) {
       return;
     }
-    const values = transformValuesToCreateSLOInput(getValues());
+    const values = transformCreateSLOFormToCreateSLOInput(getValues());
     try {
       await copyTextToClipboard(JSON.stringify(values, null, 2));
       notifications.toasts.add({
@@ -164,7 +164,7 @@ export function SloEditForm({ slo }: Props) {
         navigate(basePath.prepend(paths.observability.slos));
       }
     } else {
-      const processedValues = transformValuesToCreateSLOInput(values);
+      const processedValues = transformCreateSLOFormToCreateSLOInput(values);
 
       if (isCreateRuleCheckboxChecked) {
         const { id } = await createSlo({ slo: processedValues });
