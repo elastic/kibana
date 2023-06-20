@@ -94,9 +94,7 @@ export const buildEqlSearchRequest = ({
         ? {
             tiebreaker_field: tiebreakerField,
           }
-        : {
-            tiebreaker_field: undefined,
-          }),
+        : {}),
       fields,
     },
   };

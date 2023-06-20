@@ -318,7 +318,6 @@ describe('buildEqlSearchRequest', () => {
             "query": "process where true",
             "runtime_mappings": undefined,
             "size": 100,
-            "tiebreaker_field": undefined,
             "timestamp_field": undefined,
           },
           "index": Array [
