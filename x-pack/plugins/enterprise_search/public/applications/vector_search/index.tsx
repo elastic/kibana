@@ -14,9 +14,9 @@ import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { ROOT_PATH } from './routes';
+import { VectorSearchGuide } from './components/vector_search_guide/vector_search_guide';
 
-const VectorSearchGuide = () => <span>VectorSearchGuide</span>;
+import { ROOT_PATH } from './routes';
 
 export const EnterpriseSearchVectorSearch: React.FC<InitialAppData> = (props) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;

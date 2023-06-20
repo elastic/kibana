@@ -226,6 +226,11 @@ describe('useEnterpriseSearchApplicationNav', () => {
             name: 'ESRE',
           },
           {
+            href: '/app/enterprise_search/vector_search',
+            id: 'vectorSearch',
+            name: 'Vector Search',
+          },
+          {
             href: '/app/enterprise_search/search_experiences',
             id: 'searchExperiences',
             name: 'Search Experiences',
@@ -416,6 +421,11 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
           href: '/app/enterprise_search/esre',
           id: 'esre',
           name: 'ESRE',
+        },
+        {
+          href: '/app/enterprise_search/vector_search',
+          id: 'vectorSearch',
+          name: 'Vector Search',
         },
         {
           href: '/app/enterprise_search/search_experiences',
