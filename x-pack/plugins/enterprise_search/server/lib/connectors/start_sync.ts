@@ -67,9 +67,10 @@ export const startConnectorSync = async (
       });
     }
 
+    const indexNameWithoutSearchPrefix = index_name.replace('search-', '');
     const targetIndexName =
       jobType === SyncJobType.ACCESS_CONTROL
-        ? `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}index_name`
+        ? `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexNameWithoutSearchPrefix}`
         : index_name;
 
     return await client.asCurrentUser.index<ConnectorSyncJobDocument>({

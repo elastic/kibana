@@ -315,7 +315,7 @@ describe('startSync lib function', () => {
           created_at: null,
           custom_scheduling: {},
           error: null,
-          index_name: 'index_name',
+          index_name: 'search-index_name',
           language: null,
           last_access_control_sync_status: null,
           last_seen: null,
