@@ -30,9 +30,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
   const serviceName = 'synth-go';
-  const start = Date.now() - 24 * 60 * 60 * 1000;
-  const end = Date.now();
-
+  const dayInMs = 24 * 60 * 60 * 1000;
+  const start = Date.now() - dayInMs;
+  const end = Date.now() + dayInMs;
   const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 
   async function getTransactionGroups(overrides?: {
@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         path: { serviceName },
         query: {
           start: new Date(start).toISOString(),
-          end: new Date(end + 5 * 60 * 1000).toISOString(),
+          end: new Date(end).toISOString(),
           latencyAggregationType: LatencyAggregationType.avg,
           transactionType: 'request',
           environment: 'ENVIRONMENT_ALL',
