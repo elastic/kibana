@@ -29,7 +29,7 @@ import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
-import { Job, isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
+import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
@@ -211,7 +211,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
               )}
             </EuiFormRow>
           </EuiFlexItem>
-          {isAnomalyDetectionJob(job) ? (
+          {(customUrl as MlKibanaUrlConfig).time_range ? (
             <EuiFlexItem grow={false}>
               <EuiFormRow
                 label={

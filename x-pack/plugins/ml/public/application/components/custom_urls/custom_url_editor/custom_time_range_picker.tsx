@@ -82,7 +82,7 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
           <EuiSwitch
             disabled={disabled}
             label={i18n.translate('xpack.ml.customUrlsEditor.addCustomTimeRangeSwitchLabel', {
-              defaultMessage: 'Add custom time range?',
+              defaultMessage: 'Add custom time range',
             })}
             checked={showCustomTimeRangeSelector}
             onChange={(e) => onCustomTimeRangeSwitchChange(e.target.checked)}

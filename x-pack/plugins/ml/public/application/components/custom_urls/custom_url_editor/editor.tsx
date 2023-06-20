@@ -375,7 +375,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
             </EuiFormRow>
           )}
 
-        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) && (
+        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) && hasTimefield && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup direction="column" gutterSize="xs">
@@ -392,7 +392,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                       className="url-time-range"
                       display="rowCompressed"
                     >
-                      {showCustomTimeRangeSelector && hasTimefield ? (
+                      {showCustomTimeRangeSelector ? (
                         <IntervalTimerangeSelector
                           disabled={customUrl?.customTimeRange !== undefined}
                           setAddIntervalTimerange={setAddIntervalTimerange}
@@ -437,9 +437,9 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {(type === URL_TYPE.KIBANA_DASHBOARD ||
-                  (type === URL_TYPE.KIBANA_DISCOVER && hasTimefield)) &&
-                showCustomTimeRangeSelector ? (
+                {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
+                showCustomTimeRangeSelector &&
+                hasTimefield ? (
                   <CustomTimeRangePicker
                     disabled={addIntervalTimerange}
                     onCustomTimeRangeChange={onCustomTimeRangeChange}
