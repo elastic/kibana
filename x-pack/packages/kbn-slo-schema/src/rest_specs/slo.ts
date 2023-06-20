@@ -22,6 +22,7 @@ import {
   summarySchema,
   tagsSchema,
   timeWindowSchema,
+  timeWindowTypeSchema,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -166,6 +167,7 @@ type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.bod
 type GetPreviewDataResponse = t.TypeOf<typeof getPreviewDataResponseSchema>;
 
 type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
+type TimeWindow = t.TypeOf<typeof timeWindowTypeSchema>;
 
 type Indicator = t.OutputOf<typeof indicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
@@ -211,4 +213,5 @@ export type {
   Indicator,
   MetricCustomIndicator,
   KQLCustomIndicator,
+  TimeWindow,
 };
