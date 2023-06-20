@@ -190,8 +190,8 @@ export const useHostsTable = () => {
 
   const items = useMemo(() => buildItemsList(hostNodes), [hostNodes]);
   const clickedItem = useMemo(
-    () => items.find(({ id }) => id === hostFlyoutState?.clickedItemId),
-    [hostFlyoutState?.clickedItemId, items]
+    () => items.find(({ id }) => id === hostFlyoutState?.itemId),
+    [hostFlyoutState?.itemId, items]
   );
 
   const currentPage = useMemo(() => {
@@ -214,19 +214,17 @@ export const useHostsTable = () => {
             name: TABLE_COLUMN_LABEL.toggleDialogAction,
             description: TABLE_COLUMN_LABEL.toggleDialogAction,
             icon: ({ id }) =>
-              hostFlyoutState?.clickedItemId && id === hostFlyoutState?.clickedItemId
-                ? 'minimize'
-                : 'expand',
+              hostFlyoutState?.itemId && id === hostFlyoutState?.itemId ? 'minimize' : 'expand',
             type: 'icon',
             'data-test-subj': 'hostsView-flyout-button',
             onClick: ({ id }) => {
               setHostFlyoutState({
-                clickedItemId: id,
+                itemId: id,
               });
-              if (id === hostFlyoutState?.clickedItemId) {
+              if (id === hostFlyoutState?.itemId) {
                 setHostFlyoutState(null);
               } else {
-                setHostFlyoutState({ clickedItemId: id });
+                setHostFlyoutState({ itemId: id });
               }
             },
           },
@@ -356,7 +354,7 @@ export const useHostsTable = () => {
       },
     ],
     [
-      hostFlyoutState?.clickedItemId,
+      hostFlyoutState?.itemId,
       reportHostEntryClick,
       searchCriteria.dateRange,
       setHostFlyoutState,
@@ -375,7 +373,7 @@ export const useHostsTable = () => {
     currentPage,
     closeFlyout,
     items,
-    isFlyoutOpen: !!hostFlyoutState?.clickedItemId,
+    isFlyoutOpen: !!hostFlyoutState?.itemId,
     onTableChange,
     pagination,
     sorting,

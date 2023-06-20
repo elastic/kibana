@@ -32,7 +32,7 @@ interface Props {
 }
 
 export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
-  const mlContext = useDataSource();
+  const dataSourceContext = useDataSource();
   const { services } = useMlKibana();
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
     const { uiSettings, data, fieldFormats, charts } = services;
@@ -71,15 +71,15 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [additionalExpanded, setAdditionalExpanded] = useState(false);
   function getSummaryStepTitle() {
-    if (mlContext.selectedSavedSearch) {
+    if (dataSourceContext.selectedSavedSearch) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
         defaultMessage: 'New job from saved search {title}',
-        values: { title: mlContext.selectedSavedSearch.title ?? '' },
+        values: { title: dataSourceContext.selectedSavedSearch.title ?? '' },
       });
-    } else if (mlContext.currentDataView.id !== undefined) {
+    } else if (dataSourceContext.selectedDataView.id !== undefined) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleDataView', {
         defaultMessage: 'New job from data view {dataViewName}',
-        values: { dataViewName: mlContext.currentDataView.getName() },
+        values: { dataViewName: dataSourceContext.selectedDataView.getName() },
       });
     }
     return '';
@@ -118,7 +118,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
           <FieldStatsFlyoutProvider
-            dataView={mlContext.currentDataView}
+            dataView={dataSourceContext.selectedDataView}
             fieldStatsServices={fieldStatsServices}
             timeRangeMs={timeRangeMs}
             dslQuery={jobCreator.query}

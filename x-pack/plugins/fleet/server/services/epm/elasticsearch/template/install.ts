@@ -571,11 +571,12 @@ export function prepareTemplate({
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = pkg;
   const fields = loadFieldsFromYaml(pkg, dataStream.path);
-  const validFields = processFields(fields);
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     experimentalDataStreamFeature?.features.tsdb;
+
+  const validFields = processFields(fields, isIndexModeTimeSeries);
 
   const mappings = generateMappings(validFields);
   const templateName = generateTemplateName(dataStream);
@@ -636,7 +637,6 @@ async function installTemplate({
     name: template.templateName,
     body: template.indexTemplate,
   };
-
   await retryTransientEsErrors(
     () => esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] }),
     { logger }
