@@ -268,7 +268,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
               >
                 <FormattedMessage
                   id="xpack.snapshotRestore.snapshotDetails.repositoryTitle"
-                  defaultMessage="'{repositoryName}' repository"
+                  defaultMessage="''{repositoryName}'' repository"
                   values={{ repositoryName }}
                 />
               </EuiLink>

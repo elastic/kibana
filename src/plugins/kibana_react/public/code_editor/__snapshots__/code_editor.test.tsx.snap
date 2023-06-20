@@ -127,14 +127,14 @@ exports[`<CodeEditor /> is rendered 1`] = `
                       data-emotion="css"
                       data-s=""
                     >
-
+                      
                       .emotion-euiToolTipAnchor-block{display:block;}
                     </style>
                     <style
                       data-emotion="css"
                       data-s=""
                     >
-
+                      
                       .emotion-euiToolTipAnchor-block *[disabled]{pointer-events:none;}
                     </style>
                     <style
@@ -153,14 +153,14 @@ exports[`<CodeEditor /> is rendered 1`] = `
                       data-emotion="css"
                       data-s=""
                     >
-
+                      
                       .emotion-euiToolTipAnchor-block{display:block;}
                     </style>,
                     <style
                       data-emotion="css"
                       data-s=""
                     >
-
+                      
                       .emotion-euiToolTipAnchor-block *[disabled]{pointer-events:none;}
                     </style>,
                   ],

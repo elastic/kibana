@@ -10,20 +10,20 @@ import { escapeSearchReservedChars, validateSlug } from './util';
 
 describe('escapeSearchReservedChars', () => {
   it('should escape search reserved chars', () => {
-    expect(escapeSearchReservedChars('+')).toEqual(`\\+`);
-    expect(escapeSearchReservedChars('-')).toEqual(`\\-`);
-    expect(escapeSearchReservedChars('!')).toEqual(`\\!`);
-    expect(escapeSearchReservedChars('(')).toEqual(`\\(`);
-    expect(escapeSearchReservedChars(')')).toEqual(`\\)`);
-    expect(escapeSearchReservedChars('*')).toEqual(`\\*`);
-    expect(escapeSearchReservedChars('~')).toEqual(`\\~`);
-    expect(escapeSearchReservedChars('^')).toEqual(`\\^`);
-    expect(escapeSearchReservedChars('|')).toEqual(`\\|`);
-    expect(escapeSearchReservedChars('[')).toEqual(`\\[`);
-    expect(escapeSearchReservedChars(']')).toEqual(`\\]`);
-    expect(escapeSearchReservedChars('{')).toEqual(`\\{`);
-    expect(escapeSearchReservedChars('}')).toEqual(`\\}`);
-    expect(escapeSearchReservedChars('"')).toEqual(`\\"`);
+    expect(escapeSearchReservedChars('+')).toEqual('\\+');
+    expect(escapeSearchReservedChars('-')).toEqual('\\-');
+    expect(escapeSearchReservedChars('!')).toEqual('\\!');
+    expect(escapeSearchReservedChars('(')).toEqual('\\(');
+    expect(escapeSearchReservedChars(')')).toEqual('\\)');
+    expect(escapeSearchReservedChars('*')).toEqual('\\*');
+    expect(escapeSearchReservedChars('~')).toEqual('\\~');
+    expect(escapeSearchReservedChars('^')).toEqual('\\^');
+    expect(escapeSearchReservedChars('|')).toEqual('\\|');
+    expect(escapeSearchReservedChars('[')).toEqual('\\[');
+    expect(escapeSearchReservedChars(']')).toEqual('\\]');
+    expect(escapeSearchReservedChars('{')).toEqual('\\{');
+    expect(escapeSearchReservedChars('}')).toEqual('\\}');
+    expect(escapeSearchReservedChars('"')).toEqual('\\"');
   });
 
   it('escapes short URL slugs', () => {
