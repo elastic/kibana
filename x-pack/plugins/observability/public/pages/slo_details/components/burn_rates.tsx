@@ -159,7 +159,7 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
               'xpack.observability.slo.burnRate.technicalPreviewBadgeDescription',
               {
                 defaultMessage:
-                  'This functionality is in technical preview and is subject to change or maybe removed in future versions. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Technical preview features are not subject to the support service level agreement of official generally available features.',
+                  'This functionality is in technical preview and is subject to change or may be removed in future versions. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Technical preview features are not subject to the support service level agreement of official generally available features.',
               }
             )}
           />
