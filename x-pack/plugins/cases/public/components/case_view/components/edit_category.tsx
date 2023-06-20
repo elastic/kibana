@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiText,
   EuiHorizontalRule,
@@ -16,6 +16,7 @@ import {
   EuiButtonIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useGetCategories } from '../../../containers/use_get_categories';
 import * as i18n from '../../category/translations';
@@ -29,13 +30,51 @@ export interface EditCategoryProps {
   category?: string | null;
 }
 
+interface CategoryFormState {
+  isValid: boolean | undefined;
+  submit: FormHook<{ category?: EditCategoryProps['category'] }>['submit'];
+}
+
+type CategoryFormWrapper = Pick<EditCategoryProps, 'category' | 'isLoading'> & {
+  availableCategories: string[];
+  onChange?: (state: CategoryFormState) => void;
+};
+
+const CategoryFormWrapper: React.FC<CategoryFormWrapper> = ({
+  category,
+  availableCategories,
+  isLoading,
+  onChange,
+}) => {
+  const { form } = useForm({
+    defaultValue: { category },
+  });
+
+  const { submit, isValid: isFormValid } = form;
+
+  useEffect(() => {
+    if (onChange) {
+      onChange({ isValid: isFormValid, submit });
+    }
+  }, [isFormValid, onChange, submit]);
+
+  return (
+    <Form form={form}>
+      <CategoryFormField isLoading={isLoading} availableCategories={availableCategories} />
+    </Form>
+  );
+};
+
+CategoryFormWrapper.displayName = 'CategoryFormWrapper';
+
 export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditCategoryProps) => {
   const { permissions } = useCasesContext();
   const [isEditCategory, setIsEditCategory] = useState(false);
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
 
-  const { form } = useForm({
-    defaultValue: { category },
+  const [formState, setFormState] = useState<CategoryFormState>({
+    isValid: undefined,
+    submit: async () => ({ isValid: false, data: {} }),
   });
 
   const onEdit = () => {
@@ -47,20 +86,19 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
   };
 
   const onSubmitCategory = async () => {
-    const { isValid, data } = await form.submit();
+    const { isValid, data } = await formState.submit();
 
     if (isValid) {
       const newCategory = data.category != null ? data.category : null;
 
       onSubmit(newCategory);
-      form.reset({ defaultValue: data });
     }
 
     setIsEditCategory(false);
   };
 
   const isLoadingAll = isLoading || isLoadingCategories;
-  const isCategoryValid = form.isValid;
+  const isCategoryValid = formState.isValid;
 
   return (
     <EuiFlexItem grow={false}>
@@ -101,9 +139,12 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
           )}
           {isEditCategory && (
             <EuiFlexGroup data-test-subj="edit-category" direction="column">
-              <Form form={form}>
-                <CategoryFormField isLoading={isLoadingAll} availableCategories={categories} />
-              </Form>
+              <CategoryFormWrapper
+                onChange={setFormState}
+                category={category}
+                availableCategories={categories}
+                isLoading={isLoadingAll}
+              />
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>

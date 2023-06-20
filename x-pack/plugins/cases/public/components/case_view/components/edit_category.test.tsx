@@ -233,4 +233,28 @@ describe('EditCategory ', () => {
 
     expect(screen.queryByTestId('category-edit-button')).not.toBeInTheDocument();
   });
+
+  it('should set the category correctly if it is updated', async () => {
+    const { rerender } = appMockRender.render(
+      <EditCategory {...defaultProps} category={'My category'} />
+    );
+
+    userEvent.click(screen.getByTestId('category-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
+      expect(screen.getByText('My category')).toBeInTheDocument();
+    });
+
+    userEvent.click(screen.getByTestId('edit-category-cancel'));
+
+    rerender(<EditCategory {...defaultProps} category="category from the API" />);
+
+    userEvent.click(screen.getByTestId('category-edit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
+      expect(screen.getByText('category from the API')).toBeInTheDocument();
+    });
+  });
 });
