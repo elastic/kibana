@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
+import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { waitFor } from '@testing-library/dom';
 
 import { createAddToNewCaseLensAction } from './add_to_new_case';
-import type { ActionContext, DashboardVisualizationEmbeddable } from './types';
+import type { ActionContext } from './types';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -72,7 +72,7 @@ describe('createAddToNewCaseLensAction', () => {
     id: 'mockId',
     attributes: mockAttributes,
     timeRange: mockTimeRange,
-  }) as unknown as DashboardVisualizationEmbeddable;
+  }) as unknown as LensEmbeddable;
 
   const context = {
     embeddable: mockEmbeddable,
@@ -129,7 +129,7 @@ describe('createAddToNewCaseLensAction', () => {
           ...context,
           embeddable: new ErrorEmbeddable('some error', {
             id: '123',
-          }) as unknown as DashboardVisualizationEmbeddable,
+          }) as unknown as LensEmbeddable,
         })
       ).toEqual(false);
     });
@@ -138,7 +138,7 @@ describe('createAddToNewCaseLensAction', () => {
       expect(
         await action.isCompatible({
           ...context,
-          embeddable: new MockEmbeddable('not_lens') as unknown as DashboardVisualizationEmbeddable,
+          embeddable: new MockEmbeddable('not_lens') as unknown as LensEmbeddable,
         })
       ).toEqual(false);
     });
