@@ -95,7 +95,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'dateFormat:tz': 'UTC',
       },
     },
-    apps: kibanaFunctionalConfig.get('apps'),
+    apps: {
+      ...kibanaFunctionalConfig.get('apps'),
+      observability: {
+        pathname: '/app/observability',
+      },
+      security: {
+        pathname: '/app/security',
+      },
+    },
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {

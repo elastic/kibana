@@ -2909,6 +2909,27 @@
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.cloud",
+            "type": "Object",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "cloud",
+                "scope": "public",
+                "docId": "kibCloudPluginApi",
+                "section": "def-public.CloudStart",
+                "text": "CloudStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7787,16 +7808,18 @@
           "<{ body: ",
           "TypeC",
           "<{ significantFieldValues: ",
-          "TypeC",
-          "<{ fields: ",
           "ArrayC",
           "<",
           "TypeC",
           "<{ field: ",
           "StringC",
           "; value: ",
+          "UnionC",
+          "<[",
           "StringC",
-          "; }>>; }>; }>; }> | undefined; handler: ({}: ",
+          ", ",
+          "NumberC",
+          "]>; }>>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7804,7 +7827,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { body: { significantFieldValues: { fields: { field: string; value: string; }[]; }; }; }; }) => Promise<unknown>; } & ",
+          " & { params: { body: { significantFieldValues: { field: string; value: string | number; }[]; }; }; }) => Promise<unknown>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9311,16 +9334,18 @@
           "<{ body: ",
           "TypeC",
           "<{ significantFieldValues: ",
-          "TypeC",
-          "<{ fields: ",
           "ArrayC",
           "<",
           "TypeC",
           "<{ field: ",
           "StringC",
           "; value: ",
+          "UnionC",
+          "<[",
           "StringC",
-          "; }>>; }>; }>; }> | undefined; handler: ({}: ",
+          ", ",
+          "NumberC",
+          "]>; }>>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9328,7 +9353,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { body: { significantFieldValues: { fields: { field: string; value: string; }[]; }; }; }; }) => Promise<unknown>; } & ",
+          " & { params: { body: { significantFieldValues: { field: string; value: string | number; }[]; }; }; }) => Promise<unknown>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -14739,16 +14764,18 @@
               "{ params: ",
               "TypeC",
               "<{ significantFieldValues: ",
-              "TypeC",
-              "<{ fields: ",
               "ArrayC",
               "<",
               "TypeC",
               "<{ field: ",
               "StringC",
               "; value: ",
+              "UnionC",
+              "<[",
               "StringC",
-              "; }>>; }>; }>; messages: (params: { significantFieldValues: { fields: { field: string; value: string; }[]; }; }) => ",
+              ", ",
+              "NumberC",
+              "]>; }>>; }>; messages: (params: { significantFieldValues: { field: string; value: string | number; }[]; }) => ",
               "ChatCompletionRequestMessage",
               "[]; }"
             ],
