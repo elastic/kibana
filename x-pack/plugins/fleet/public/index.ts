@@ -15,7 +15,7 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);
 };
 
-export type { NewPackagePolicy } from './types';
+export type { NewPackagePolicy, KibanaSavedObjectType } from './types';
 export type {
   AgentDetailsReassignPolicyAction,
   AgentPolicyDetailsDeployAgentAction,
