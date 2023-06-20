@@ -275,7 +275,7 @@ export function addTimeSeriesFields(
   if (!isIndexModeTimeSeries) return fields;
 
   for (const field of fields) {
-    if ('metric_type' in field) {
+    if (field.name.includes('*') && 'metric_type' in field) {
       newFields.push({ ...field, time_series_metric: field.metric_type });
     }
   }
@@ -284,9 +284,9 @@ export function addTimeSeriesFields(
 
 export function processFields(fields: Fields, isIndexModeTimeSeries?: boolean): Fields {
   const processedFields = processFieldsWithWildcard(fields);
-  const expandedFields = expandFields(processedFields);
-  const addedFields = addTimeSeriesFields(expandedFields, isIndexModeTimeSeries);
-  const dedupedFields = dedupFields(addedFields);
+  const addedFields = addTimeSeriesFields(processedFields, isIndexModeTimeSeries);
+  const expandedFields = expandFields(addedFields);
+  const dedupedFields = dedupFields(expandedFields);
 
   return validateFields(dedupedFields, dedupedFields);
 }

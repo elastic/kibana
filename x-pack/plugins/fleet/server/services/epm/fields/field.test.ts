@@ -673,7 +673,7 @@ describe('processFields', () => {
 
   describe('addTimeSeriesFields', () => {
     const literalYml = `
-    - name: total
+    - name: a.*.b
       type: long
       format: bytes
       unit: byte
@@ -684,11 +684,11 @@ describe('processFields', () => {
 
     const fields: Field[] = safeLoad(literalYml);
 
-    test('Copies metric_type to time_series_metric field when tsds is enabled', () => {
+    test('Copies metric_type to time_series_metric field when tsds is enabled and name has wildcard', () => {
       expect(addTimeSeriesFields(fields, true)).toMatchInlineSnapshot(`
         [
           {
-            "name": "total",
+            "name": "a.*.b",
             "type": "long",
             "format": "bytes",
             "unit": "byte",
@@ -704,7 +704,7 @@ describe('processFields', () => {
       expect(addTimeSeriesFields(fields, false)).toMatchInlineSnapshot(`
         [
           {
-            "name": "total",
+            "name": "a.*.b",
             "type": "long",
             "format": "bytes",
             "unit": "byte",
