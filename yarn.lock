@@ -4824,6 +4824,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/navigation-embeddable-plugin@link:src/plugins/navigation_embeddable":
+  version "0.0.0"
+  uid ""
+
 "@kbn/navigation-plugin@link:src/plugins/navigation":
   version "0.0.0"
   uid ""

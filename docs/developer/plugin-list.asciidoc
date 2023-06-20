@@ -249,6 +249,10 @@ management section itself.
 It also provides a stateful version of it on the start contract.
 
 
+|{kib-repo}blob/{branch}/src/plugins/navigation_embeddable/README.md[navigationEmbeddable]
+|This plugin adds the Navigation Embeddable which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
+
+
 |{kib-repo}blob/{branch}/src/plugins/newsfeed/README.md[newsfeed]
 |The newsfeed plugin adds a NewsfeedNavButton to the top navigation bar and renders the content in the flyout.
 Content is fetched from the remote (https://feeds.elastic.co) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.

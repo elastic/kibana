@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/navigation-embeddable-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "An embeddable for quickly navigating between dashboards.",
+  "plugin": {
+    "id": "navigationEmbeddable",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "embeddable"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": [
+    ]
+  }
+}
