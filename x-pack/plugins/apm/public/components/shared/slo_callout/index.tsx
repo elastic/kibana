@@ -6,18 +6,50 @@
  */
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CreateSLOInput } from '@kbn/slo-schema';
+import { encode } from '@kbn/rison';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   dismissCallout: () => void;
-  sloParams: string;
+  serviceName: string;
+  environment: string;
+  transactionType?: string;
+  transactionName?: string;
 }
+type RecursivePartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer U>
+    ? Array<RecursivePartial<U>>
+    : T[P] extends object | undefined
+    ? RecursivePartial<T[P]>
+    : T[P];
+};
 
-export function SloCallout({ dismissCallout, sloParams }: Props) {
+export function SloCallout({
+  dismissCallout,
+  serviceName,
+  environment,
+  transactionType,
+  transactionName,
+}: Props) {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
+
+  const sloInput: RecursivePartial<CreateSLOInput> = {
+    indicator: {
+      type: 'sli.apm.transactionErrorRate',
+      params: {
+        service: serviceName,
+        environment,
+        transactionName: transactionName ?? '',
+        transactionType: transactionType ?? '',
+      },
+    },
+  };
+
+  const sloParams = `?_a=${encode(sloInput)}`;
   return (
     <EuiCallOut
       title={i18n.translate('xpack.apm.slo.callout.title', {

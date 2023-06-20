@@ -6,8 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CreateSLOInput, Indicator } from '@kbn/slo-schema';
-import { encode } from '@kbn/rison';
 import React from 'react';
 
 import {
@@ -61,20 +59,6 @@ export function ServiceOverview() {
   const isRumAgent = isRumAgentName(agentName);
   const isServerless = isServerlessAgent(serverlessType);
 
-  const params: Partial<Indicator['params']> = {
-    service: serviceName,
-    environment,
-    transactionType,
-  };
-  const sloInput: CreateSLOInput = {
-    indicator: {
-      type: 'sli.apm.transactionErrorRate',
-      params,
-    },
-  };
-
-  const sloParams = `?_a=${encode(sloInput)}`;
-
   const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
     path: {
       serviceName,
@@ -112,7 +96,9 @@ export function ServiceOverview() {
           dismissCallout={() => {
             setSloCalloutDismissed(true);
           }}
-          sloParams={sloParams}
+          serviceName={serviceName}
+          environment={environment}
+          transactionType={transactionType}
         />
       )}
       <EuiSpacer />
