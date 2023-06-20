@@ -7,16 +7,7 @@
 
 import React, { FC, useMemo, useState } from 'react';
 import moment, { type Moment } from 'moment';
-import {
-  EuiDatePicker,
-  EuiDatePickerRange,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiDatePicker, EuiDatePickerRange, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../contexts/kibana';
@@ -77,28 +68,15 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize={'none'} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            disabled={disabled}
-            label={i18n.translate('xpack.ml.customUrlsEditor.addCustomTimeRangeSwitchLabel', {
-              defaultMessage: 'Add custom time range',
-            })}
-            checked={showCustomTimeRangeSelector}
-            onChange={(e) => onCustomTimeRangeSwitchChange(e.target.checked)}
-            compressed
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            content={i18n.translate('xpack.ml.customUrlsEditor.customTimeRangeTooltip', {
-              defaultMessage: 'If not set, time range defaults to global settings.',
-            })}
-            position="top"
-            type="iInCircle"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiSwitch
+        disabled={disabled}
+        label={i18n.translate('xpack.ml.customUrlsEditor.addCustomTimeRangeSwitchLabel', {
+          defaultMessage: 'Add custom time range',
+        })}
+        checked={showCustomTimeRangeSelector}
+        onChange={(e) => onCustomTimeRangeSwitchChange(e.target.checked)}
+        compressed
+      />
       {showCustomTimeRangeSelector ? (
         <>
           <EuiSpacer size="s" />

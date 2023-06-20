@@ -33,7 +33,7 @@ import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
-import { Job } from '../../../../../common/types/anomaly_detection_jobs';
+import { Job, isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
@@ -128,8 +128,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       // DFA job url - need the timefield to test the URL.
       const urlState = parseUrlState(customUrl.url_value);
       const dataViewId: string = urlState._a?.index;
-      const dataView = await dataViews.get(dataViewId ?? '');
-      timefieldName = dataView?.timeFieldName ?? null;
+      if (dataViewId) {
+        const dataView = await dataViews.get(dataViewId);
+        timefieldName = dataView?.timeFieldName ?? null;
+      }
     }
 
     if (index < customUrls.length) {
@@ -234,7 +236,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
               )}
             </EuiFormRow>
           </EuiFlexItem>
-          {(customUrl as MlKibanaUrlConfig).time_range ? (
+          {(isDataFrameAnalyticsConfigs(job) &&
+            (customUrl as MlKibanaUrlConfig).time_range &&
+            (customUrl as MlKibanaUrlConfig).time_range !== 'auto') ||
+          isAnomalyDetectionJob(job) ? (
             <EuiFlexItem grow={false}>
               <EuiFormRow
                 label={

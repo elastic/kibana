@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiIconTip,
   EuiRadioGroup,
   EuiSelect,
   EuiSpacer,
@@ -379,16 +380,33 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
         {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) && hasTimefield && (
           <>
             <EuiSpacer size="m" />
-            <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiFormRow
                       label={
-                        <FormattedMessage
-                          id="xpack.ml.customUrlsEditor.timeRangeLabel"
-                          defaultMessage="Time range"
-                        />
+                        <EuiFlexGroup gutterSize={'none'} alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <FormattedMessage
+                              id="xpack.ml.customUrlsEditor.timeRangeLabel"
+                              defaultMessage="Time range"
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiIconTip
+                              content={i18n.translate(
+                                'xpack.ml.customUrlsEditor.timeRangeTooltip',
+                                {
+                                  defaultMessage:
+                                    'If not set, time range defaults to global settings.',
+                                }
+                              )}
+                              position="top"
+                              type="iInCircle"
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       }
                       className="url-time-range"
                       display="rowCompressed"
