@@ -254,7 +254,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               color="success"
               iconType="check"
               title={i18n.translate('xpack.security.management.apiKeys.createSuccessMessage', {
-                defaultMessage: "Created API key '{name}'",
+                defaultMessage: "Created API key ''{name}''",
                 values: { name: this.state.createdApiKey.name },
               })}
             >
@@ -752,7 +752,7 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (updateApiKeyResponse) {
       this.props.notifications.toasts.addSuccess({
         title: i18n.translate('xpack.security.management.apiKeys.updateSuccessMessage', {
-          defaultMessage: "Updated API key '{name}'",
+          defaultMessage: "Updated API key ''{name}''",
           values: { name: this.state.selectedApiKey?.name },
         }),
         'data-test-subj': 'updateApiKeySuccessToast',

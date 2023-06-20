@@ -64,7 +64,7 @@ export function getAggNameConflictToastMessages(
       if (aggListNameCheck === aggName) {
         conflicts.push(
           i18n.translate('xpack.transform.stepDefineForm.nestedAggListConflictErrorMessage', {
-            defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggListName}'.`,
+            defaultMessage: `Couldn't add configuration ''{aggName}'' because of a nesting conflict with ''{aggListName}''.`,
             values: { aggName, aggListName },
           })
         );
