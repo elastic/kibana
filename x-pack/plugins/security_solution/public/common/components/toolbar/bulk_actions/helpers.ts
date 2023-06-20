@@ -28,20 +28,19 @@ export const createInitialTagsState = (existingTags: string[][], defaultTags: st
   const allTagsUnion = union(existingTagsUnion, defaultTags);
   return allTagsUnion
     .map((tag): EuiSelectableOption => {
-      const checkedStatus = existingTagsIntersection.includes(tag)
-        ? 'on'
-        : existingTagsUnion.includes(tag)
-        ? 'mixed'
-        : undefined;
+      let checkedStatus: { checked: EuiSelectableOption['checked']; 'data-test-subj': string } = {
+        checked: undefined,
+        'data-test-subj': 'unselected-alert-tag',
+      };
+      if (existingTagsIntersection.includes(tag)) {
+        checkedStatus = { checked: 'on', 'data-test-subj': 'selected-alert-tag' };
+      } else if (existingTagsUnion.includes(tag)) {
+        checkedStatus = { checked: 'mixed', 'data-test-subj': 'mixed-alert-tag' };
+      }
+
       return {
         label: tag,
-        checked: checkedStatus,
-        'data-test-subj':
-          checkedStatus === 'on'
-            ? 'selected-alert-tag'
-            : checkedStatus === 'mixed'
-            ? 'mixed-alert-tag'
-            : 'unselected-alert-tag',
+        ...checkedStatus,
       };
     })
     .sort(checkedSortCallback);
