@@ -95,21 +95,46 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     }
   }, [rule, alert, dataViews, logViews]);
 
+  // Identify `intervalFactor` to adjust time ranges based on custom user settings.
+  // For example, if a user would have a `5m` lookback, based on the `1m` default this would result in a factor of `5`.
+  const lookbackDuration = alert.fields['kibana.alert.rule.parameters']
+    ? moment.duration(
+        alert.fields['kibana.alert.rule.parameters'].timeSize as number,
+        alert.fields['kibana.alert.rule.parameters'].timeUnit as any
+      )
+    : moment.duration(1, 'm');
+  const intervalFactor = Math.min(1, lookbackDuration.asSeconds() / 60);
+
   const alertStart = moment(alert.start);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
 
   const timeRange = {
-    min: alertStart.clone().subtract(20, 'minutes'),
-    max: alertEnd ? alertEnd.clone().add(5, 'minutes') : moment(new Date()),
+    min: alertStart.clone().subtract(20 * intervalFactor, 'minutes'),
+    max: alertEnd ? alertEnd.clone().add(5 * intervalFactor, 'minutes') : moment(new Date()),
   };
 
   const initialAnalysisStart = {
-    baselineMin: alertStart.clone().subtract(10, 'minutes').valueOf(),
-    baselineMax: alertStart.clone().subtract(1, 'minutes').valueOf(),
-    deviationMin: alertStart.valueOf(),
-    deviationMax: alertStart.clone().add(10, 'minutes').isAfter(moment(new Date()))
+    baselineMin: alertStart
+      .clone()
+      .subtract(10 * intervalFactor, 'minutes')
+      .valueOf(),
+    baselineMax: alertStart
+      .clone()
+      .subtract(2 * intervalFactor, 'minutes')
+      .valueOf(),
+    deviationMin: alertStart
+      .clone()
+      .subtract(1 * intervalFactor, 'minutes')
+      .valueOf(),
+    deviationMax: alertStart
+      .clone()
+      .add(10 * intervalFactor, 'minutes')
+      .isAfter(moment(new Date()))
       ? moment(new Date()).valueOf()
-      : alertStart.clone().add(10, 'minutes').valueOf(),
+      : alertStart
+          .clone()
+          .add(10 * intervalFactor, 'minutes')
+          .valueOf(),
   };
 
   const explainLogSpikeTitle = i18n.translate(
@@ -129,7 +154,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
       pValue: item.pValue,
     }));
     setLogSpikeParams(
-      fieldValuePairs ? { significantFieldValues: fieldValuePairs?.slice(0, 2) } : undefined
+      fieldValuePairs ? { significantFieldValues: fieldValuePairs?.slice(0, 50) } : undefined
     );
   };
 
