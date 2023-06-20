@@ -419,7 +419,8 @@ class DocLinks {
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
     this.searchApplicationsTemplates = docLinks.links.enterpriseSearch.searchApplicationsTemplates;
-    this.searchApplicationsSafeSearch = docLinks.links.enterpriseSearch.searchApplicationsSafeSearch;
+    this.searchApplicationsSafeSearch =
+      docLinks.links.enterpriseSearch.searchApplicationsSafeSearch;
     this.searchApplications = docLinks.links.enterpriseSearch.searchApplications;
     this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
     this.start = docLinks.links.enterpriseSearch.start;
