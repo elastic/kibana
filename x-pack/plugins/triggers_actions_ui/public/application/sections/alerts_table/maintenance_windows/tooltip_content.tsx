@@ -42,17 +42,24 @@ interface TooltipContentProps {
 
 export const TooltipContent = memo((props: TooltipContentProps) => {
   const { maintenanceWindow, timestamp } = props;
-  const { title, events } = maintenanceWindow;
+  const { title, events, eventStartTime, eventEndTime } = maintenanceWindow;
+
+  const defaultEvent = useMemo(() => {
+    return {
+      gte: eventStartTime,
+      lte: eventEndTime,
+    };
+  }, [eventStartTime, eventEndTime]);
 
   const event = useMemo(() => {
     if (!timestamp) {
-      return null;
+      return defaultEvent;
     }
     const time = events.find(({ gte, lte }) => {
       return moment(timestamp).isBetween(gte, lte, undefined, '[]');
     });
-    return time || null;
-  }, [events, timestamp]);
+    return time || defaultEvent;
+  }, [events, timestamp, defaultEvent]);
 
   return (
     <EuiFlexGroup
@@ -66,38 +73,34 @@ export const TooltipContent = memo((props: TooltipContentProps) => {
         </EuiText>
       </EuiFlexItem>
       <EuiHorizontalRule margin="none" />
-      {event && (
-        <>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" direction="row">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" direction="row">
-              <EuiFlexItem grow={false}>
-                <EuiText size="relative">
-                  <strong>{START_TIME}:</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="relative">
-                  {formatDate(event.gte, MAINTENANCE_WINDOW_DATE_FORMAT)}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiText size="relative">
+              <strong>{START_TIME}:</strong>
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" direction="row">
-              <EuiFlexItem grow={false}>
-                <EuiText size="relative">
-                  <strong>{END_TIME}:</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="relative">
-                  {formatDate(event.lte, MAINTENANCE_WINDOW_DATE_FORMAT)}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiText size="relative">
+              {formatDate(event.gte, MAINTENANCE_WINDOW_DATE_FORMAT)}
+            </EuiText>
           </EuiFlexItem>
-        </>
-      )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" direction="row">
+          <EuiFlexItem grow={false}>
+            <EuiText size="relative">
+              <strong>{END_TIME}:</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="relative">
+              {formatDate(event.lte, MAINTENANCE_WINDOW_DATE_FORMAT)}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 });
