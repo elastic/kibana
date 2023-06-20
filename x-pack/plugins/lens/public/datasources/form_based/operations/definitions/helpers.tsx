@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
@@ -103,10 +103,10 @@ export const generateMissingFieldMessage = (
         missingFields: (
           <>
             {missingFields.map((field, index) => (
-              <>
+              <Fragment key={field}>
                 <strong>{field}</strong>
                 {index + 1 === missingFields.length ? '' : ', '}
-              </>
+              </Fragment>
             ))}
           </>
         ),

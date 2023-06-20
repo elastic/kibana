@@ -10,9 +10,8 @@ export const getVulnerabilitiesByResourceData = () => ({
   total_vulnerabilities: 8,
   page: [
     {
-      'resource.id': 'resource-id-1',
-      'resource.name': 'resource-test-1',
-      'cloud.region': 'us-test-1',
+      resource: { id: 'resource-id-1', name: 'resource-test-1' },
+      cloud: { region: 'us-test-1' },
       vulnerabilities_count: 4,
       severity_map: {
         critical: 1,
@@ -22,9 +21,8 @@ export const getVulnerabilitiesByResourceData = () => ({
       },
     },
     {
-      'resource.id': 'resource-id-2',
-      'resource.name': 'resource-test-2',
-      'cloud.region': 'us-test-1',
+      resource: { id: 'resource-id-2', name: 'resource-test-2' },
+      cloud: { region: 'us-test-1' },
       vulnerabilities_count: 4,
       severity_map: {
         critical: 1,
