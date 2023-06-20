@@ -154,7 +154,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  describe.only('Hosts View', function () {
+  describe('Hosts View', function () {
     before(async () => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),

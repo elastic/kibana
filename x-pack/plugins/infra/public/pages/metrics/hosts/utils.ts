@@ -44,9 +44,11 @@ export const retrieveFieldsFromFilter = (filters: Filter[], fields: string[] = [
     if (isCombinedFilter(filter)) {
       retrieveFieldsFromFilter(filter.meta.params, fields);
     }
+
     if (filter.meta.key) {
       fields.push(filter.meta.key);
     }
   }
+
   return fields;
 };
