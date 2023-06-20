@@ -138,7 +138,7 @@ export interface VulnScoreTrend {
   high: number;
   medium: number;
   low: number;
-  score_by_cloud_account: Array<{
+  score_by_cloud_account?: Array<{
     cloudAccountId: string;
     cloudAccountName: string;
     critical: number;
