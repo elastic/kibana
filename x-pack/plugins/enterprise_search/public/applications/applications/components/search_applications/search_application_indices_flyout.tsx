@@ -35,7 +35,7 @@ import { healthColorsMap } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
-import { EngineError } from '../search_application/search_application_error';
+import { SearchApplicationError } from '../search_application/search_application_error';
 
 import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
 
@@ -140,7 +140,7 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
 
         <EuiFlyoutBody>
           {searchApplicationFetchError ? (
-            <EngineError error={fetchSearchApplicationApiError} />
+            <SearchApplicationError error={fetchSearchApplicationApiError} />
           ) : (
             <EuiBasicTable items={indices} columns={columns} loading={isSearchApplicationLoading} />
           )}

@@ -16,9 +16,9 @@ import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 import { mountWithIntl } from '../../../test_helpers';
 
-import { EngineError } from './search_application_error';
+import { SearchApplicationError } from './search_application_error';
 
-describe('EngineError', () => {
+describe('SearchApplicationError', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({});
@@ -32,7 +32,7 @@ describe('EngineError', () => {
         statusCode: 404,
       },
     } as HttpError;
-    const wrapper = mountWithIntl(<EngineError error={error} />);
+    const wrapper = mountWithIntl(<SearchApplicationError error={error} />);
 
     expect(wrapper.find(NotFoundPrompt)).toHaveLength(1);
     expect(wrapper.find(SendEnterpriseSearchTelemetry)).toHaveLength(1);
@@ -55,7 +55,7 @@ describe('EngineError', () => {
         statusCode: 500,
       },
     } as HttpError;
-    const wrapper = mountWithIntl(<EngineError error={error} />);
+    const wrapper = mountWithIntl(<SearchApplicationError error={error} />);
 
     expect(wrapper.find(ErrorStatePrompt)).toHaveLength(1);
     expect(wrapper.find(SendEnterpriseSearchTelemetry)).toHaveLength(1);

@@ -14071,7 +14071,7 @@
     "xpack.enterpriseSearch.schema.errorsTable.link.view": "查看",
     "xpack.enterpriseSearch.schema.fieldNameLabel": "字段名称",
     "xpack.enterpriseSearch.schema.fieldTypeLabel": "字段类型",
-    "xpack.enterpriseSearch.searchApplications.engine.notFound.action1": "返回到搜索应用程序",
+    "xpack.enterpriseSearch.searchApplications.searchApplication.notFound.action1": "返回到搜索应用程序",
     "xpack.enterpriseSearch.searchExperiences.guide.description": "搜索 UI 是一个 JavaScript 库，您无需浪费时间进行重复工作便可实现卓越的搜索体验。它开箱即可兼容 Elasticsearch、App Search 和 Workplace Search，以便您专注于为用户、客户和员工构建最佳体验。",
     "xpack.enterpriseSearch.searchExperiences.guide.documentationLink": "访问搜索 UI 文档",
     "xpack.enterpriseSearch.searchExperiences.guide.features.1": "用途是进行搜索。Elastic 将构建并维护搜索 UI。",

@@ -18,7 +18,7 @@ import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
-export const EngineError: React.FC<{ error?: HttpError; notFound?: boolean }> = ({
+export const SearchApplicationError: React.FC<{ error?: HttpError; notFound?: boolean }> = ({
   error,
   notFound,
 }) => {
@@ -28,7 +28,7 @@ export const EngineError: React.FC<{ error?: HttpError; notFound?: boolean }> = 
         <SendEnterpriseSearchTelemetry action="error" metric="not_found" />
         <NotFoundPrompt
           backToContent={i18n.translate(
-            'xpack.enterpriseSearch.searchApplications.engine.notFound.action1',
+            'xpack.enterpriseSearch.searchApplications.searchApplication.notFound.action1',
             {
               defaultMessage: 'Back to Search Applications',
             }

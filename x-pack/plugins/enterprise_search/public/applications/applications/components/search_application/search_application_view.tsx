@@ -30,7 +30,7 @@ import { DeleteSearchApplicationModal } from '../search_applications/delete_sear
 import { EngineConnect } from './engine_connect/engine_connect';
 import { EngineHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
-import { EngineError } from './search_application_error';
+import { SearchApplicationError } from './search_application_error';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
 import { SearchApplicationSearchPreview } from './search_preview/search_preview';
 
@@ -74,7 +74,7 @@ export const SearchApplicationView: React.FC = () => {
           rightSideItems: [],
         }}
         searchApplicationName={searchApplicationName}
-        emptyState={<EngineError error={fetchSearchApplicationApiError} />}
+        emptyState={<SearchApplicationError error={fetchSearchApplicationApiError} />}
         hasSchemaConflicts={hasSchemaConflicts}
       />
     );
@@ -117,7 +117,7 @@ export const SearchApplicationView: React.FC = () => {
             searchApplicationName={searchApplicationName}
             hasSchemaConflicts={hasSchemaConflicts}
           >
-            <EngineError notFound />
+            <SearchApplicationError notFound />
           </EnterpriseSearchApplicationsPageTemplate>
         </Route>
       </Switch>

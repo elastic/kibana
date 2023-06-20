@@ -21,7 +21,7 @@ import {
 } from '../../../routes';
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
-import { EngineError } from '../search_application_error';
+import { SearchApplicationError } from '../search_application_error';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { SearchApplicationAPI } from './search_application_api';
@@ -91,7 +91,7 @@ export const EngineConnect: React.FC = () => {
         searchApplicationName={searchApplicationName}
         hasSchemaConflicts={hasSchemaConflicts}
       >
-        <EngineError notFound />
+        <SearchApplicationError notFound />
       </EnterpriseSearchApplicationsPageTemplate>
     );
   }
