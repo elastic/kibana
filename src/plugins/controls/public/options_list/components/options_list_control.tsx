@@ -162,7 +162,10 @@ export const OptionsListControl = ({
         anchorPosition="downCenter"
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
         className="optionsList__popoverOverride"
-        closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
+        closePopover={() => {
+          optionsList.dispatch.setPopoverOpen(false);
+          optionsList.publishNewSelections();
+        }}
         anchorClassName="optionsList__anchorOverride"
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >

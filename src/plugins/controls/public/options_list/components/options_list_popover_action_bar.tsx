@@ -143,7 +143,10 @@ export const OptionsListPopoverActionBar = ({
                     size="xs"
                     color="danger"
                     iconType="eraser"
-                    onClick={() => optionsList.dispatch.clearSelections({})}
+                    onClick={() => {
+                      optionsList.dispatch.clearSelections({});
+                      optionsList.publishNewSelections();
+                    }}
                     data-test-subj="optionsList-control-clear-all-selections"
                     aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
                   />
