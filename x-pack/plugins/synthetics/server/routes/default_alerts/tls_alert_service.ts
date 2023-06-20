@@ -7,17 +7,21 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
+import { TLSParams } from '../../../common/runtime_types/alerts/tls';
 import { savedObjectsAdapter } from '../../legacy_uptime/lib/saved_objects';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
-import { SyntheticsMonitorStatusTranslations } from '../../../common/rules/synthetics/translations';
+import { TlsTranslations } from '../../../common/rules/synthetics/translations';
 import { UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
   SYNTHETICS_ALERT_RULE_TYPES,
 } from '../../../common/constants/synthetics_alerts';
 
-export class StatusAlertService {
+// uuid based on the string 'uptime-tls-default-alert'
+const TLS_DEFAULT_ALERT_ID = '7a532181-ff1d-4317-9367-7ca789133920';
+
+export class TLSAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
@@ -34,21 +38,12 @@ export class StatusAlertService {
 
   async getExistingAlert() {
     const rulesClient = (await this.context.alerting)?.getRulesClient();
-
-    const { data } = await rulesClient.find({
-      options: {
-        page: 1,
-        perPage: 1,
-        filter: `alert.attributes.alertTypeId:(${SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS})`,
-      },
-    });
-
-    const alert = data?.[0];
-    if (!alert) {
-      return;
+    try {
+      const alert = await rulesClient.get({ id: TLS_DEFAULT_ALERT_ID });
+      return { ...alert, ruleTypeId: alert.alertTypeId };
+    } catch (e) {
+      return null;
     }
-
-    return { ...alert, ruleTypeId: alert.alertTypeId };
   }
   async createDefaultAlertIfNotExist() {
     const alert = await this.getExistingAlert();
@@ -59,17 +54,20 @@ export class StatusAlertService {
     const actions = await this.getAlertActions();
 
     const rulesClient = (await this.context.alerting)?.getRulesClient();
-    const newAlert = await rulesClient.create<{}>({
+    const newAlert = await rulesClient.create<TLSParams>({
       data: {
         actions,
         params: {},
         consumer: 'uptime',
-        alertTypeId: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
+        alertTypeId: SYNTHETICS_ALERT_RULE_TYPES.TLS,
         schedule: { interval: '1m' },
-        tags: ['SYNTHETICS_DEFAULT_ALERT'],
-        name: `Synthetics internal alert`,
+        tags: ['SYNTHETICS_TLS_DEFAULT_ALERT'],
+        name: `Synthetics internal TLS alert`,
         enabled: true,
         throttle: null,
+      },
+      options: {
+        id: TLS_DEFAULT_ALERT_ID,
       },
     });
     return { ...newAlert, ruleTypeId: newAlert.alertTypeId };
@@ -106,15 +104,14 @@ export class StatusAlertService {
     );
 
     return populateAlertActions({
-      groupId: ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id,
+      groupId: ACTION_GROUP_DEFINITIONS.TLS_CERTIFICATE.id,
       defaultActions,
       defaultEmail: settings?.defaultEmail!,
       translations: {
-        defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
-        defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
-        defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
-        defaultRecoverySubjectMessage:
-          SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
+        defaultActionMessage: TlsTranslations.defaultActionMessage,
+        defaultRecoveryMessage: TlsTranslations.defaultRecoveryMessage,
+        defaultSubjectMessage: TlsTranslations.defaultSubjectMessage,
+        defaultRecoverySubjectMessage: TlsTranslations.defaultRecoverySubjectMessage,
       },
     });
   }
