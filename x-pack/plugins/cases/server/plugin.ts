@@ -112,7 +112,10 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    registerInternalAttachments(this.externalReferenceAttachmentTypeRegistry);
+    registerInternalAttachments(
+      this.externalReferenceAttachmentTypeRegistry,
+      this.persistableStateAttachmentTypeRegistry
+    );
     registerCaseFileKinds(this.caseConfig.files, plugins.files);
 
     this.securityPluginSetup = plugins.security;

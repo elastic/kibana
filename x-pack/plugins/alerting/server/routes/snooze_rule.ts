@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ILicenseState, RuleMutedError } from '../lib';
 import { verifyAccessAndContext, rRuleSchema } from './lib';
 import { SnoozeOptions } from '../rules_client';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { AlertingRequestHandlerContext, INTERNAL_ALERTING_SNOOZE_RULE } from '../types';
 import { validateSnoozeSchedule } from '../lib/validate_snooze_schedule';
 
 const paramSchema = schema.object({
@@ -42,7 +42,7 @@ export const snoozeRuleRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_snooze`,
+      path: INTERNAL_ALERTING_SNOOZE_RULE,
       validate: {
         params: paramSchema,
         body: bodySchema,

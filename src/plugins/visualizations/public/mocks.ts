@@ -25,6 +25,7 @@ import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/moc
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { VisualizationsPlugin } from './plugin';
 import { Schemas } from './vis_types';
@@ -34,6 +35,7 @@ const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
   registerAlias: jest.fn(),
   visEditorsRegistry: { registerDefault: jest.fn(), register: jest.fn(), get: jest.fn() },
+  listingViewRegistry: { add: jest.fn() },
 });
 
 const createStartContract = (): VisualizationsStart => ({
@@ -77,6 +79,7 @@ const createInstance = async () => {
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjects: savedObjectsPluginMock.createStartContract(),
       savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
+      savedSearch: savedSearchPluginMock.createStartContract(),
       navigation: navigationPluginMock.createStartContract(),
       presentationUtil: presentationUtilPluginMock.createStartContract(coreMock.createStart()),
       urlForwarding: urlForwardingPluginMock.createStartContract(),

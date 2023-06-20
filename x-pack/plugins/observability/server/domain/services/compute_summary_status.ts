@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { ErrorBudget, SLO, Status } from '../models';
+import { CompositeSLO, ErrorBudget, SLO, Status } from '../models';
 
-export function computeSummaryStatus(slo: SLO, sliValue: number, errorBudget: ErrorBudget): Status {
+export function computeSummaryStatus(
+  slo: SLO | CompositeSLO,
+  sliValue: number,
+  errorBudget: ErrorBudget
+): Status {
   if (sliValue === -1) {
     return 'NO_DATA';
   }
 
-  if (slo.objective.target <= sliValue) {
+  if (sliValue >= slo.objective.target) {
     return 'HEALTHY';
   } else {
     return errorBudget.remaining > 0 ? 'DEGRADING' : 'VIOLATED';

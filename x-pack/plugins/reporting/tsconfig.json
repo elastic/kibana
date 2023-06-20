@@ -38,6 +38,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/generate-csv",
     "@kbn/reporting-common",
+    "@kbn/saved-search-plugin",
   ],
   "exclude": [
     "target/**/*",

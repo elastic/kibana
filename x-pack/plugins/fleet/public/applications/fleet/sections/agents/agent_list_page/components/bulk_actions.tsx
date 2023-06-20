@@ -126,7 +126,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   // update the query removing the "managed" agents
   const selectionQuery = useMemo(() => {
-    if (managedAgents) {
+    if (managedAgents.length) {
       const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${managedAgents
         .map((id) => `"${id}"`)
         .join(' or ')})`;

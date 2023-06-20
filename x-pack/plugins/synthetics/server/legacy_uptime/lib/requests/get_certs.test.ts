@@ -112,6 +112,10 @@ describe('getCerts', () => {
           Object {
             "common_name": "r2.shared.global.fastly.net",
             "issuer": "GlobalSign CloudSSL CA - SHA256 - G3",
+            "locationName": undefined,
+            "monitorName": "Real World Test",
+            "monitorType": undefined,
+            "monitorUrl": "https://fullurl.com",
             "monitors": Array [
               Object {
                 "configId": undefined,
@@ -137,6 +141,9 @@ describe('getCerts', () => {
               "_source": Array [
                 "monitor.id",
                 "monitor.name",
+                "monitor.type",
+                "url.full",
+                "observer.geo.name",
                 "tls.server.x509.issuer.common_name",
                 "tls.server.x509.subject.common_name",
                 "tls.server.hash.sha1",
@@ -232,7 +239,7 @@ describe('getCerts', () => {
                 },
               ],
             },
-            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*",
           },
           Object {
             "meta": true,

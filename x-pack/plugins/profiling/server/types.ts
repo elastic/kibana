@@ -15,17 +15,17 @@ import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
   features: FeaturesPluginSetup;
-  spaces: SpacesPluginSetup;
   cloud: CloudSetup;
   fleet: FleetSetupContract;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface ProfilingPluginStartDeps {
   observability: {};
   features: {};
-  spaces: SpacesPluginStart;
   cloud: CloudStart;
   fleet: FleetStartContract;
+  spaces?: SpacesPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

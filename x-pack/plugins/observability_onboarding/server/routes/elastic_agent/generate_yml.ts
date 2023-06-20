@@ -9,6 +9,7 @@ import { dump, load } from 'js-yaml';
 
 export const generateYml = ({
   datasetName = '',
+  serviceName,
   namespace = '',
   customConfigurations,
   logFilePaths = [],
@@ -17,6 +18,7 @@ export const generateYml = ({
   logfileId,
 }: {
   datasetName?: string;
+  serviceName?: string;
   namespace?: string;
   customConfigurations?: string;
   logFilePaths?: string[];
@@ -25,6 +27,16 @@ export const generateYml = ({
   logfileId: string;
 }) => {
   const customConfigYaml = load(customConfigurations ?? '');
+  const processors = [
+    {
+      add_fields: {
+        target: 'service',
+        fields: {
+          name: serviceName,
+        },
+      },
+    },
+  ];
 
   return dump({
     ...{
@@ -49,6 +61,7 @@ export const generateYml = ({
                 dataset: datasetName,
               },
               paths: logFilePaths,
+              ...(serviceName ? { processors } : {}),
             },
           ],
         },
