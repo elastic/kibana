@@ -21,6 +21,7 @@ import {
   GroupedFieldsParams,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -101,7 +102,6 @@ export function DiscoverSidebarComponent({
   onAddField,
   onAddFilter,
   onRemoveField,
-  selectedDataView,
   trackUiMetric,
   useNewFieldsApi = false,
   onFieldEdited,
@@ -109,7 +109,6 @@ export function DiscoverSidebarComponent({
   setFieldEditorRef,
   closeFlyout,
   editField,
-  viewMode,
   createNewDataView,
   showDataViewPicker,
   showFieldList,
@@ -119,6 +118,7 @@ export function DiscoverSidebarComponent({
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
+  const selectedDataView = useInternalStateSelector((state) => state.dataView!);
 
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
     INITIAL_SELECTED_FIELDS_RESULT

@@ -85,10 +85,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onRemoveField: (fieldName: string) => void;
   /**
-   * Currently selected data view
-   */
-  selectedDataView?: DataView;
-  /**
    * Metric tracking function
    * @param metricType
    * @param eventName
