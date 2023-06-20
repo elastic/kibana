@@ -40,8 +40,8 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ embeddable, onClose, onS
   const attachments = useMemo(() => {
     const { timeRange } = embeddable.getInput();
     const attributes = embeddable.getFullAttributes();
-
-    return [getLensCaseAttachment({ attributes, timeRange })];
+    // we've checked attributes exists before rendering (isCompatible), attributes should not be undefined here
+    return attributes != null ? [getLensCaseAttachment({ attributes, timeRange })] : [];
   }, [embeddable]);
   useEffect(() => {
     modal.open({ getAttachments: () => attachments });

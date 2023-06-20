@@ -39,8 +39,9 @@ const AddToNewCaseFlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuc
     toastContent: ADD_TO_CASE_SUCCESS,
   });
 
+  // we've checked attributes exists before rendering (isCompatible), attributes should not be undefined here
   const attachments = useMemo(
-    () => [getLensCaseAttachment({ attributes, timeRange })],
+    () => (attributes != null ? [getLensCaseAttachment({ attributes, timeRange })] : []),
     [attributes, timeRange]
   );
 
