@@ -105,7 +105,7 @@ describe('find', () => {
       );
     });
 
-    it(`invalid category array with > ${MAX_CATEGORY_FILTER_LENGTH} items`, async () => {
+    it(`throws an error when the category array has ${MAX_CATEGORY_FILTER_LENGTH} items`, async () => {
       const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
 
       const findRequest = createCasesClientMockFindRequest({ category });

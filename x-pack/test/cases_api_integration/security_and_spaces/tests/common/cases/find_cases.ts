@@ -349,7 +349,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('unhappy path - 400s when bad category field supplied', async () => {
+      it('unhappy path - 400s when more than the maximum category fields are supplied', async () => {
         const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
 
         await findCases({ supertest, query: { category }, expectedHttpCode: 400 });
