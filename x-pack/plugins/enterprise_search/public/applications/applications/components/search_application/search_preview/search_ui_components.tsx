@@ -40,7 +40,7 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
 import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
 
-import { EngineViewLogic } from '../engine_view_logic';
+import { EngineViewLogic } from '../search_application_view_logic';
 
 import { convertResultToFieldsAndIndex, ConvertedResult, FieldValue } from './convert_results';
 import { useSelectedDocument } from './document_context';

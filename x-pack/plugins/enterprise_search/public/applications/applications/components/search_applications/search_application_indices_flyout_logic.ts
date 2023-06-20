@@ -12,7 +12,7 @@ import {
   EngineViewActions,
   EngineViewLogic,
   EngineViewValues,
-} from '../search_application/engine_view_logic';
+} from '../search_application/search_application_view_logic';
 
 export interface SearchApplicationIndicesFlyoutValues {
   fetchSearchApplicationApiError?: EngineViewValues['fetchEngineApiError'];

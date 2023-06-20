@@ -36,7 +36,7 @@ import {
 } from '../search_applications/components/indices_select_combobox';
 
 import { AddIndicesLogic } from './add_indices_logic';
-import { EngineViewLogic } from './engine_view_logic';
+import { EngineViewLogic } from './search_application_view_logic';
 
 export interface AddIndicesFlyoutProps {
   onClose: () => void;

@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
-import { EngineViewLogic } from '../engine_view_logic';
+import { EngineViewLogic } from '../search_application_view_logic';
 
 import { EngineApiLogic } from './engine_api_logic';
 

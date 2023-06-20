@@ -22,7 +22,7 @@ import {
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
 import { EngineError } from '../engine_error';
-import { EngineViewLogic } from '../engine_view_logic';
+import { EngineViewLogic } from '../search_application_view_logic';
 
 import { SearchApplicationAPI } from './search_application_api';
 

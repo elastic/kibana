@@ -14,7 +14,7 @@ import { DeleteSearchApplicationApiLogicResponse } from '../../api/search_applic
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 import { SearchApplicationsListLogic } from '../search_applications/search_applications_list_logic';
 
-import { EngineViewLogic, EngineViewValues } from './engine_view_logic';
+import { EngineViewLogic, EngineViewValues } from './search_application_view_logic';
 
 const DEFAULT_VALUES: EngineViewValues = {
   engineData: undefined,

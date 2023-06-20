@@ -45,7 +45,7 @@ import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
-import { EngineViewLogic } from './engine_view_logic';
+import { EngineViewLogic } from './search_application_view_logic';
 
 const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaField }) => {
   const { navigateToUrl } = useValues(KibanaLogic);

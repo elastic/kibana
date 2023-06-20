@@ -61,7 +61,7 @@ import {
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
 import { EngineIndicesLogic } from '../engine_indices_logic';
-import { EngineViewLogic } from '../engine_view_logic';
+import { EngineViewLogic } from '../search_application_view_logic';
 
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';

@@ -29,9 +29,9 @@ import { DeleteSearchApplicationModal } from '../search_applications/delete_sear
 
 import { EngineConnect } from './engine_connect/engine_connect';
 import { EngineError } from './engine_error';
-import { EngineViewLogic } from './engine_view_logic';
 import { EngineHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
+import { EngineViewLogic } from './search_application_view_logic';
 import { SearchApplicationSearchPreview } from './search_preview/search_preview';
 
 export const EngineView: React.FC = () => {

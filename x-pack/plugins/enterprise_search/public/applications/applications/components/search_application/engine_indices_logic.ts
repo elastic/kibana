@@ -12,7 +12,11 @@ import {
   UpdateSearchApplicationApiLogicActions,
 } from '../../api/search_applications/update_search_application_api_logic';
 
-import { EngineViewActions, EngineViewLogic, EngineViewValues } from './engine_view_logic';
+import {
+  EngineViewActions,
+  EngineViewLogic,
+  EngineViewValues,
+} from './search_application_view_logic';
 
 export interface EngineIndicesLogicActions {
   addIndicesToEngine: (indices: string[]) => { indices: string[] };
