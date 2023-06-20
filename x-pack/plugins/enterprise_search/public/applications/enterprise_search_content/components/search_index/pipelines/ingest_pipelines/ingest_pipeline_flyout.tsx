@@ -106,6 +106,17 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
                     }
                   )}
                 </p>
+                <EuiLink
+                  href={`${docLinks.connectorsContentExtraction}#connectors-content-extraction-local`}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalIngestLinkLocalExtractionLabel',
+                    {
+                      defaultMessage: 'Learn more about local content extraction.',
+                    }
+                  )}
+                </EuiLink>
               </EuiCallOut>
             ) : (
               <></>
