@@ -20,7 +20,6 @@ import {
 
 import { connectToQueryState, DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { addLog } from '../../../utils/add_log';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 
@@ -157,10 +156,6 @@ export function getState({
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
   const appStateInitial = createInitialAppState(defaultSize, appStateFromUrl, uiSettings);
   const appStateContainer = createStateContainer<AppState>(appStateInitial);
-  appStateContainer.set = (state: AppState) => {
-    addLog('[setAppState] setting app State');
-    appStateContainer.set(state);
-  };
 
   const getAllFilters = () => [
     ...getFilters(globalStateContainer.getState()),
@@ -206,7 +201,6 @@ export function getState({
     startSync: () => {
       // some filters may not be valid for this context, so update
       // the filter manager with a modified list of valid filters
-      addLog('[startSync] Syncing state');
       data.query.filterManager.setFilters(getValidFilters(dataView, getAllFilters()));
 
       const stopSyncingAppFilters = connectToQueryState(data.query, appStateContainer, {

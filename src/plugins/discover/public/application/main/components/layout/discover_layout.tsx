@@ -23,7 +23,6 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DragContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import { useDiscoverCustomization } from '../../../../customizations/customization_provider';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -74,7 +73,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     inspector,
   } = useDiscoverServices();
-  const searchBarCustomization = useDiscoverCustomization('search_bar');
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
     state.query,
