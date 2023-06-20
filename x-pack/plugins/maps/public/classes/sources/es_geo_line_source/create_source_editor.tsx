@@ -103,7 +103,10 @@ export class CreateSourceEditor extends Component<Props, State> {
     const { indexPattern, geoField, groupByTimeseries, splitField, sortField } = this.state;
 
     const sourceConfig =
-      indexPattern && indexPattern.id && geoField && (groupByTimeseries || splitField && sortField)
+      indexPattern &&
+      indexPattern.id &&
+      geoField &&
+      (groupByTimeseries || (splitField && sortField))
         ? { indexPatternId: indexPattern.id, geoField, groupByTimeseries, splitField, sortField }
         : null;
     this.props.onSourceConfigChange(sourceConfig);

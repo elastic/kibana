@@ -78,9 +78,7 @@ export function GeoLineForm(props: Props) {
       )}
       {!props.groupByTimeseries && (
         <>
-          <EuiFormRow
-            label={ENTITY_INPUT_LABEL}
-          >
+          <EuiFormRow label={ENTITY_INPUT_LABEL}>
             <SingleFieldSelect
               placeholder={i18n.translate('xpack.maps.source.esGeoLine.splitFieldPlaceholder', {
                 defaultMessage: 'Select entity field',
@@ -92,9 +90,7 @@ export function GeoLineForm(props: Props) {
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            label={SORT_INPUT_LABEL}
-          >
+          <EuiFormRow label={SORT_INPUT_LABEL}>
             <SingleFieldSelect
               placeholder={i18n.translate('xpack.maps.source.esGeoLine.sortFieldPlaceholder', {
                 defaultMessage: 'Select sort field',
