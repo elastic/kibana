@@ -12,8 +12,6 @@
     "@kbn/es-query",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
-    "@kbn/field-formats-plugin",
-    "@kbn/data-views-plugin"
   ],
   "exclude": ["target/**/*"]
 }

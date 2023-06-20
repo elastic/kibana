@@ -14,7 +14,6 @@
     "@kbn/securitysolution-utils",
     "@kbn/field-types",
     "@kbn/data-views-plugin",
-    "@kbn/field-formats-plugin"
   ],
   "exclude": ["target/**/*"]
 }
