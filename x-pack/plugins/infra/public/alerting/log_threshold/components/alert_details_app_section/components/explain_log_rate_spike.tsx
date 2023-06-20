@@ -97,13 +97,16 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
 
   // Identify `intervalFactor` to adjust time ranges based on custom user settings.
   // For example, if a user would have a `5m` lookback, based on the `1m` default this would result in a factor of `5`.
-  const lookbackDuration = alert.fields['kibana.alert.rule.parameters']
+  const lookbackDuration =
+    alert.fields['kibana.alert.rule.parameters'] &&
+    alert.fields['kibana.alert.rule.parameters'].timeSize &&
+    alert.fields['kibana.alert.rule.parameters'].timeUnit
     ? moment.duration(
         alert.fields['kibana.alert.rule.parameters'].timeSize as number,
         alert.fields['kibana.alert.rule.parameters'].timeUnit as any
       )
     : moment.duration(1, 'm');
-  const intervalFactor = Math.min(1, lookbackDuration.asSeconds() / 60);
+  const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
 
   const alertStart = moment(alert.start);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
