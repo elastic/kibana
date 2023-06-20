@@ -26,6 +26,6 @@ export const MitreCoverageResponse = t.exact(
   t.type({
     coverage: t.record(t.string, NonEmptyArray(t.string)),
     rules_data: t.record(t.string, NonEmptyArray(CoverageOverviewRuleData)),
-    unmapped_rules: t.array(CoverageOverviewUnmappedRuleData),
+    unmapped_rules_data: t.array(CoverageOverviewUnmappedRuleData),
   })
 );
