@@ -89,7 +89,7 @@ export function updateAppStateBySavedSearch({
   }
 
   const columns = getDefaultColumns(savedSearch, uiSettings);
-  if (columns.length && !isEqual(columns, appState.columns)) {
+  if (!isEqual(columns, appState.columns)) {
     nextAppState.columns = columns;
   }
   const query = searchSource.getField('query');
