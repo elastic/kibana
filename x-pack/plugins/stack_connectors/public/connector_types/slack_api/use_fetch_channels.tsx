@@ -20,7 +20,7 @@ import { ChannelsResponse, GetChannelsResponse } from '../../../common/slack_api
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../../common';
 import * as i18n from './translations';
 
-interface UseLoadTagsQueryProps {
+interface UseFetchChannelsProps {
   authToken: string;
 }
 
@@ -38,7 +38,7 @@ const fetchChannels = async (
   );
 };
 
-export function useFetchChannels(props: UseLoadTagsQueryProps) {
+export function useFetchChannels(props: UseFetchChannelsProps) {
   const { authToken } = props;
 
   const {
