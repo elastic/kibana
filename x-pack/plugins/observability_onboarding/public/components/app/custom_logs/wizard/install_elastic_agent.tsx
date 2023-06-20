@@ -64,11 +64,9 @@ export function InstallElasticAgent() {
 
   const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
     (callApi) => {
-      const { apiKeyEncoded, onboardingId } = getState();
       if (
         CurrentStep === InstallElasticAgent &&
-        !apiKeyEncoded &&
-        !onboardingId
+        !hasAlreadySavedFlow(getState())
       ) {
         return callApi(
           'GET /internal/observability_onboarding/custom_logs/privileges'
@@ -93,8 +91,6 @@ export function InstallElasticAgent() {
   } = useFetcher(
     (callApi) => {
       const {
-        apiKeyEncoded,
-        onboardingId,
         datasetName,
         serviceName,
         namespace,
@@ -103,8 +99,8 @@ export function InstallElasticAgent() {
       } = getState();
       if (
         CurrentStep === InstallElasticAgent &&
-        monitoringRole?.hasPrivileges &&
-        !(apiKeyEncoded && onboardingId)
+        !hasAlreadySavedFlow(getState()) &&
+        monitoringRole?.hasPrivileges
       ) {
         return callApi(
           'POST /internal/observability_onboarding/custom_logs/save',
@@ -664,4 +660,9 @@ function getInstallShipperCommand({
 function oneLine(parts: TemplateStringsArray, ...args: string[]) {
   const str = flatten(zip(parts, args)).join('');
   return str.replace(/\s+/g, ' ').trim();
+}
+
+type WizardState = ReturnType<ReturnType<typeof useWizard>['getState']>;
+function hasAlreadySavedFlow({ apiKeyEncoded, onboardingId }: WizardState) {
+  return Boolean(apiKeyEncoded && onboardingId);
 }
