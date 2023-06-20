@@ -28,7 +28,7 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_templat
 import { DeleteSearchApplicationModal } from '../search_applications/delete_search_application_modal';
 
 import { EngineConnect } from './engine_connect/engine_connect';
-import { EngineHeaderDocsAction } from './header_docs_action';
+import { SearchApplicationHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
 import { SearchApplicationError } from './search_application_error';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
@@ -51,7 +51,7 @@ export const SearchApplicationView: React.FC = () => {
   const { renderHeaderActions } = useValues(KibanaLogic);
 
   useLayoutEffect(() => {
-    renderHeaderActions(EngineHeaderDocsAction);
+    renderHeaderActions(SearchApplicationHeaderDocsAction);
 
     return () => {
       renderHeaderActions();

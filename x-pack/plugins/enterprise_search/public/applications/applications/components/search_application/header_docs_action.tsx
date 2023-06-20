@@ -13,19 +13,22 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../shared/doc_links';
 
-export const EngineHeaderDocsAction: React.FC = () => (
+export const SearchApplicationHeaderDocsAction: React.FC = () => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem>
       <EuiButtonEmpty
-        data-telemetry-id="entSearchApplications-engineHeader-documentationLink"
-        data-test-subj="engine-documentation-link"
+        data-telemetry-id="entSearchApplications-searchApplicationHeader-documentationLink"
+        data-test-subj="search-applications-documentation-link"
         href={docLinks.searchApplications}
         target="_blank"
         iconType="documents"
       >
-        {i18n.translate('xpack.enterpriseSearch.content.engine.header.searchApplicationsDoc', {
-          defaultMessage: 'Search Applications Doc',
-        })}
+        {i18n.translate(
+          'xpack.enterpriseSearch.searchApplications.searchApplication.header.searchApplicationsDoc',
+          {
+            defaultMessage: 'Search Applications Doc',
+          }
+        )}
       </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
