@@ -8,7 +8,9 @@ import React from 'react';
 
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { MetricChart, MetricChartProps } from './metric_chart';
+import { HostMetricsDocsLink } from '../../metric_explanation/host_metrics_docs_link';
 
 const DEFAULT_BREAKDOWN_SIZE = 20;
 const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRow?: boolean }> = [
@@ -88,12 +90,16 @@ const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRo
 
 export const MetricsGrid = React.memo(() => {
   return (
-    <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
-      {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
-        <EuiFlexItem key={chartProp.type} style={fullRow ? { gridColumn: '1/-1' } : {}}>
-          <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
+    <>
+      <HostMetricsDocsLink />
+      <EuiSpacer size="s" />
+      <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
+        {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
+          <EuiFlexItem key={chartProp.type} style={fullRow ? { gridColumn: '1/-1' } : {}}>
+            <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    </>
   );
 });

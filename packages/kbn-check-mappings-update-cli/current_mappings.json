@@ -1898,9 +1898,6 @@
   "fleet-uninstall-tokens": {
     "dynamic": false,
     "properties": {
-      "created_at": {
-        "type": "date"
-      },
       "policy_id": {
         "type": "keyword"
       },
