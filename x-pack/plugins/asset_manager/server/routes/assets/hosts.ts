@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import datemath from '@kbn/datemath';
 import {
   dateRt,
   inRangeFromStringRt,
@@ -49,8 +50,8 @@ export function hostsRoutes<T extends RequestHandlerContext>({
 
       try {
         const response = await assetAccessor.getHosts({
-          from,
-          to,
+          from: datemath.parse(from)!.valueOf(),
+          to: datemath.parse(to)!.valueOf(),
           esClient,
         });
 

@@ -33,10 +33,10 @@ describe(__filename, () => {
     });
 
     const collector1 = jest.fn(async (opts: CollectorOptions) => {
-      return [];
+      return { assets: [] };
     });
     const collector2 = jest.fn(async (opts: CollectorOptions) => {
-      return [];
+      return { assets: [] };
     });
 
     runner.registerCollector('foo', collector1);
@@ -61,7 +61,7 @@ describe(__filename, () => {
       throw new Error('no');
     });
     const collector2 = jest.fn(async (opts: CollectorOptions) => {
-      return [];
+      return { assets: [] };
     });
 
     runner.registerCollector('foo', collector1);
@@ -84,10 +84,12 @@ describe(__filename, () => {
     });
 
     const collector = jest.fn(async (opts: CollectorOptions) => {
-      return [
-        { 'asset.kind': 'container', 'asset.ean': 'foo' },
-        { 'asset.kind': 'pod', 'asset.ean': 'bar' },
-      ] as Asset[];
+      return {
+        assets: [
+          { 'asset.kind': 'container', 'asset.ean': 'foo' },
+          { 'asset.kind': 'pod', 'asset.ean': 'bar' },
+        ] as Asset[],
+      };
     });
 
     runner.registerCollector('foo', collector);
@@ -102,5 +104,72 @@ describe(__filename, () => {
         { 'asset.kind': 'pod', 'asset.ean': 'bar' },
       ],
     });
+  });
+
+  it('handles multi-pages collectors', async () => {
+    const runner = new CollectorRunner({
+      outputClient: getMockClient() as unknown as ElasticsearchClient,
+      inputClient: getMockClient() as unknown as ElasticsearchClient,
+      logger: getMockLogger(),
+      intervalMs: 1,
+      sourceIndices: INDEX_DEFAULTS,
+    });
+
+    const collector = jest
+      .fn()
+      .mockResolvedValueOnce({
+        assets: [{ 'asset.kind': 'host', 'asset.ean': 'one' }],
+        afterKey: ['one'],
+      })
+      .mockResolvedValueOnce({
+        assets: [{ 'asset.kind': 'host', 'asset.ean': 'two' }],
+        afterKey: ['two'],
+      })
+      .mockResolvedValueOnce({ assets: [{ 'asset.kind': 'host', 'asset.ean': 'three' }] });
+
+    runner.registerCollector('foo', collector);
+
+    await runner.run();
+
+    expect(collector.mock.calls).to.have.length(3);
+  });
+
+  it('passes page cursor to collectors', async () => {
+    const runner = new CollectorRunner({
+      outputClient: getMockClient() as unknown as ElasticsearchClient,
+      inputClient: getMockClient() as unknown as ElasticsearchClient,
+      logger: getMockLogger(),
+      intervalMs: 1,
+      sourceIndices: INDEX_DEFAULTS,
+    });
+
+    const collector = jest
+      .fn()
+      .mockImplementationOnce(async (options) => {
+        expect(options.afterKey).to.eql(undefined);
+        return {
+          assets: [{ 'asset.kind': 'host', 'asset.ean': 'one' }],
+          afterKey: ['one'],
+        };
+      })
+      .mockImplementationOnce(async (options) => {
+        expect(options.afterKey).to.eql(['one']);
+        return {
+          assets: [{ 'asset.kind': 'host', 'asset.ean': 'two' }],
+          afterKey: ['two'],
+        };
+      })
+      .mockImplementationOnce(async (options) => {
+        expect(options.afterKey).to.eql(['two']);
+        return {
+          assets: [{ 'asset.kind': 'host', 'asset.ean': 'three' }],
+        };
+      });
+
+    runner.registerCollector('foo', collector);
+
+    await runner.run();
+
+    expect(collector.mock.calls).to.have.length(3);
   });
 });

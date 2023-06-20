@@ -19,6 +19,7 @@
     "@kbn/io-ts-utils",
     "@kbn/expect",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-http-request-handler-context-server"
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/datemath"
   ]
 }

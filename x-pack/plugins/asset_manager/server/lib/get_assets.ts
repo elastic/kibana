@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { debug } from '../../common/debug_log';
 import { Asset, AssetFilters } from '../../common/types_api';
 import { ASSETS_INDEX_PREFIX } from '../constants';
@@ -95,7 +95,7 @@ export async function getAssets({
     }
   }
 
-  const dsl: SearchRequest = {
+  const dsl = {
     index: ASSETS_INDEX_PREFIX + '*',
     size,
     query: {
