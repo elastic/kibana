@@ -18,7 +18,7 @@ import {
   findIntegrationsResponseRT,
   formatSearch,
   INTEGRATIONS_URL,
-} from '../../../common';
+} from '../../../common/latest';
 import { FindDatasetsError, FindIntegrationsError } from '../../../common/datasets/errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { IDatasetsClient } from './types';

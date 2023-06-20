@@ -10,5 +10,3 @@ import { DiscoverLogExplorerPlugin } from './plugin';
 export function plugin() {
   return new DiscoverLogExplorerPlugin();
 }
-
-export type { DiscoverLogExplorerPluginSetup, DiscoverLogExplorerPluginStart } from './types';

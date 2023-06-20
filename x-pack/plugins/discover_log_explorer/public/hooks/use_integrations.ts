@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
-import { FindIntegrationsRequestQuery, SortOrder } from '../../common';
+import { FindIntegrationsRequestQuery, SortOrder } from '../../common/latest';
 import { IDatasetsClient } from '../services/datasets';
 import { createIntegrationStateMachine } from '../state_machines/integrations';
 

@@ -8,7 +8,7 @@
 import React, { RefCallback } from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { getIntegrationId } from '../../../common';
+import { getIntegrationId } from '../../../common/latest';
 import { Integration } from '../../../common/datasets';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH } from './constants';
 import { DatasetSelectionHandler, PanelId } from './types';

@@ -11,7 +11,7 @@ import {
   FindDatasetsResponse,
   FindIntegrationsRequestQuery,
   FindIntegrationsResponse,
-} from '../../../common';
+} from '../../../common/latest';
 
 export type DatasetsServiceSetup = void;
 

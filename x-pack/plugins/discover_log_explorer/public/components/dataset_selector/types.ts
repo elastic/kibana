@@ -6,7 +6,7 @@
  */
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
-import { IntegrationId, SortOrder } from '../../../common';
+import { IntegrationId, SortOrder } from '../../../common/latest';
 import { Dataset, Integration } from '../../../common/datasets';
 import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
 import {

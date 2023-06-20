@@ -6,7 +6,7 @@
  */
 
 import { assign, createMachine } from 'xstate';
-import { FindDatasetsResponse } from '../../../../common';
+import { FindDatasetsResponse } from '../../../../common/latest';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import type {

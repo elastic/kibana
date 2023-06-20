@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { DISCOVER_LOG_EXPLORER_PROFILE_ID } from '../common';
+import { DISCOVER_LOG_EXPLORER_PROFILE_ID } from '../common/constants';
 import { createLazyCustomDatasetSelector } from './customizations';
 import { DatasetsService } from './services/datasets';
 import { DiscoverLogExplorerClientPluginClass, DiscoverLogExplorerStartDeps } from './types';

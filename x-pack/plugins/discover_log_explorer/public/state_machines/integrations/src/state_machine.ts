@@ -8,7 +8,7 @@
 import { assign, createMachine } from 'xstate';
 import { EntityList } from '../../../../common/entity_list';
 import { Dataset, Integration } from '../../../../common/datasets';
-import { FindIntegrationsResponse, getIntegrationId } from '../../../../common';
+import { FindIntegrationsResponse, getIntegrationId } from '../../../../common/latest';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {

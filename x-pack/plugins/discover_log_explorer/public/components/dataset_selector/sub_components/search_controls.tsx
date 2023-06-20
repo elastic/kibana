@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { SortOrder } from '../../../../common';
+import { SortOrder } from '../../../../common/latest';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH, sortOptions, sortOrdersLabel } from '../constants';
 import { DatasetsSelectorSearchHandler, DatasetsSelectorSearchParams } from '../types';
 

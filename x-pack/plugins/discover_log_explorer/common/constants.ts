@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/no_export_all */
-
 export const DISCOVER_LOG_EXPLORER_PROFILE_ID = 'discover-log-explorer';
-
-/**
- * Exporting versioned APIs types
- */
-export * from './latest';
-export * as datasetsV1 from './datasets/v1';
