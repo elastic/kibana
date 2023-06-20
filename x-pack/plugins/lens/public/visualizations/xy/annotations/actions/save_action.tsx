@@ -8,14 +8,16 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import {
   OnSaveProps as SavedObjectOnSaveProps,
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
@@ -49,46 +51,48 @@ export const SaveModal = ({
   const closeModal = () => unmountComponentAtNode(domElement);
 
   return (
-    <SavedObjectSaveModal
-      onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
-      onClose={closeModal}
-      title={title}
-      description={description}
-      showCopyOnSave={showCopyOnSave}
-      objectType={i18n.translate(
-        'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.objectType',
-        { defaultMessage: 'group' }
-      )}
-      customModalTitle={i18n.translate(
-        'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.modalTitle',
-        {
-          defaultMessage: 'Save annotation group to library',
+    <I18nProvider>
+      <SavedObjectSaveModal
+        onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
+        onClose={closeModal}
+        title={title}
+        description={description}
+        showCopyOnSave={showCopyOnSave}
+        objectType={i18n.translate(
+          'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.objectType',
+          { defaultMessage: 'group' }
+        )}
+        customModalTitle={i18n.translate(
+          'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.modalTitle',
+          {
+            defaultMessage: 'Save annotation group to library',
+          }
+        )}
+        showDescription={true}
+        confirmButtonLabel={
+          <>
+            <div>
+              <EuiIcon type="save" />
+            </div>
+            <div>
+              {i18n.translate(
+                'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.confirmButton',
+                { defaultMessage: 'Save group' }
+              )}
+            </div>
+          </>
         }
-      )}
-      showDescription={true}
-      confirmButtonLabel={
-        <>
-          <div>
-            <EuiIcon type="save" />
-          </div>
-          <div>
-            {i18n.translate(
-              'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.confirmButton',
-              { defaultMessage: 'Save group' }
-            )}
-          </div>
-        </>
-      }
-      options={
-        savedObjectsTagging ? (
-          <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-            initialSelection={selectedTags}
-            onTagsSelected={setSelectedTags}
-            markOptional
-          />
-        ) : undefined
-      }
-    />
+        options={
+          savedObjectsTagging ? (
+            <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+              initialSelection={selectedTags}
+              onTagsSelected={setSelectedTags}
+              markOptional
+            />
+          ) : undefined
+        }
+      />
+    </I18nProvider>
   );
 };
 
@@ -237,6 +241,7 @@ export const getSaveLayerAction = ({
   savedObjectsTagging,
   dataViews,
   goToAnnotationLibrary,
+  kibanaTheme,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -246,6 +251,7 @@ export const getSaveLayerAction = ({
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   dataViews: DataViewsContract;
   goToAnnotationLibrary: () => Promise<void>;
+  kibanaTheme: ThemeServiceStart;
 }): LayerAction => {
   const neverSaved = !isByReferenceAnnotationsLayer(layer);
 
@@ -265,26 +271,28 @@ export const getSaveLayerAction = ({
     execute: async (domElement) => {
       if (domElement) {
         render(
-          <SaveModal
-            domElement={domElement}
-            savedObjectsTagging={savedObjectsTagging}
-            onSave={async (props) => {
-              await onSave({
-                state,
-                layer,
-                setState,
-                eventAnnotationService,
-                toasts,
-                modalOnSaveProps: props,
-                dataViews,
-                goToAnnotationLibrary,
-              });
-            }}
-            title={neverSaved ? '' : layer.__lastSaved.title}
-            description={neverSaved ? '' : layer.__lastSaved.description}
-            tags={neverSaved ? [] : layer.__lastSaved.tags}
-            showCopyOnSave={!neverSaved}
-          />,
+          <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+            <SaveModal
+              domElement={domElement}
+              savedObjectsTagging={savedObjectsTagging}
+              onSave={async (props) => {
+                await onSave({
+                  state,
+                  layer,
+                  setState,
+                  eventAnnotationService,
+                  toasts,
+                  modalOnSaveProps: props,
+                  dataViews,
+                  goToAnnotationLibrary,
+                });
+              }}
+              title={neverSaved ? '' : layer.__lastSaved.title}
+              description={neverSaved ? '' : layer.__lastSaved.description}
+              tags={neverSaved ? [] : layer.__lastSaved.tags}
+              showCopyOnSave={!neverSaved}
+            />
+          </KibanaThemeProvider>,
           domElement
         );
       }

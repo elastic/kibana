@@ -3489,22 +3489,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/scripts/route.ts"
               },
               {
@@ -3774,10 +3758,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
-              },
-              {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
@@ -4325,11 +4305,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/get_rule_execution_events/route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/get_rule_execution_results/route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
               },
               {
                 "plugin": "osquery",
@@ -5612,14 +5592,6 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts"
               },
               {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts"
-              },
-              {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/uninstall_token/handlers.test.ts"
               },
@@ -6547,34 +6519,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/kql_telemetry/route.ts"
               },
               {
@@ -7258,6 +7202,22 @@
                 "path": "x-pack/plugins/lists/server/routes/internal/create_exceptions_list_route.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_rule_health/get_rule_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/routes/live_query/create_live_query_route.ts"
               },
@@ -7400,6 +7360,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/dashboards/routes/get_dashboards_by_tags.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_preview_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8884,14 +8848,6 @@
                 "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/update.ts"
               },
@@ -10062,14 +10018,6 @@
               {
                 "plugin": "bfetch",
                 "path": "src/plugins/bfetch/server/plugin.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/search/routes/session.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
               },
               {
                 "plugin": "share",
@@ -14127,6 +14075,10 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "@kbn/core-http-router-server-mocks",
+                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/get_runtime_field.ts"
               },
@@ -14157,6 +14109,22 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/has_data_views.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
               },
               {
                 "plugin": "ml",
@@ -14384,6 +14352,10 @@
               },
               {
                 "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/csp_rule_template/get_csp_rule_template.ts"
               },
               {
@@ -14475,14 +14447,6 @@
                 "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
               },
               {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/policies/policies.test.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
-              },
-              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/server/options_list/options_list_cluster_settings_route.ts"
               },
@@ -14532,11 +14496,39 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
+                "plugin": "cloudDefend",
+                "path": "x-pack/plugins/cloud_defend/server/routes/policies/policies.test.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/plugins/cloud_defend/server/routes/status/status.test.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router_mock_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-mocks",
+                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router_mock_route.test.ts"
               }
             ],
             "returnComment": [],
@@ -14607,6 +14599,10 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "@kbn/core-http-router-server-mocks",
+                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/put_runtime_field.ts"
               },
@@ -14617,6 +14613,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
               },
               {
                 "plugin": "ml",
@@ -14669,10 +14673,6 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               }
             ],
             "returnComment": [],
@@ -14743,6 +14743,10 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "@kbn/core-http-router-server-mocks",
+                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/fields/update_fields.ts"
               },
@@ -14780,7 +14784,35 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/search.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
               },
               {
                 "plugin": "aiops",
@@ -15173,10 +15205,6 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               }
             ],
             "returnComment": [],
@@ -15247,16 +15275,16 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "@kbn/core-http-router-server-mocks",
+                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               }
             ],
             "returnComment": [],
@@ -15327,6 +15355,10 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "@kbn/core-http-router-server-mocks",
+                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/delete_runtime_field.ts"
               },
@@ -15340,7 +15372,15 @@
               },
               {
                 "plugin": "data",
+                "path": "src/plugins/data/server/search/routes/session.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/search.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
               },
               {
                 "plugin": "ml",
@@ -15389,10 +15429,6 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-mocks",
-                "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               }
             ],
             "returnComment": [],

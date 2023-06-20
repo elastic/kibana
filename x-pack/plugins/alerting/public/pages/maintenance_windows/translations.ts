@@ -617,3 +617,7 @@ export const START_TRIAL = i18n.translate(
     defaultMessage: 'Start trial',
   }
 );
+
+export const REFRESH = i18n.translate('xpack.alerting.maintenanceWindows.refreshButton', {
+  defaultMessage: 'Refresh',
+});
