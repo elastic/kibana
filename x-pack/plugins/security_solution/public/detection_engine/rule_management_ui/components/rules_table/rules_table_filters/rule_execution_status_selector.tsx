@@ -34,23 +34,23 @@ const RuleExecutionStatusSelectorComponent = ({
 }: RuleExecutionStatusSelectorProps) => {
   const [isExecutionStatusPopoverOpen, setIsExecutionStatusPopoverOpen] = useState(false);
 
-  const selectableOptions = [
+  const selectableOptions: EuiSelectableOption[] = [
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus.succeeded),
+      label: getCapitalizedStatusText(RuleExecutionStatus.succeeded) || '',
       data: { status: RuleExecutionStatus.succeeded },
       checked: selectedStatus === RuleExecutionStatus.succeeded ? 'on' : undefined,
     },
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus['partial failure']),
+      label: getCapitalizedStatusText(RuleExecutionStatus['partial failure']) || '',
       data: { status: RuleExecutionStatus['partial failure'] },
       checked: selectedStatus === RuleExecutionStatus['partial failure'] ? 'on' : undefined,
     },
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus.failed),
+      label: getCapitalizedStatusText(RuleExecutionStatus.failed) || '',
       data: { status: RuleExecutionStatus.failed },
       checked: selectedStatus === RuleExecutionStatus.failed ? 'on' : undefined,
     },
-  ] as EuiSelectableOption[];
+  ];
 
   const handleSelectableOptionsChange = (
     newOptions: EuiSelectableOption[],
