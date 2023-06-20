@@ -5659,6 +5659,37 @@
               }
             }
           }
+        },
+        "installation_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "package_policy_id": {
+                "type": "keyword"
+              },
+              "feature": {
+                "type": "keyword"
+              },
+              "package_version": {
+                "type": "keyword"
+              },
+              "agent_policy_id": {
+                "type": "keyword"
+              },
+              "deployment_mode": {
+                "type": "keyword"
+              },
+              "created_at": {
+                "type": "date"
+              },
+              "created_by": {
+                "type": "keyword"
+              },
+              "agent_count": {
+                "type": "long"
+              }
+            }
+          }
         }
       }
     },
