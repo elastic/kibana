@@ -29,6 +29,7 @@ import moment from 'moment';
 import { css } from '@emotion/react';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TopAlert } from '../../../typings/alerts';
+import { ExperimentalBadge } from '../../../components/experimental_badge';
 
 export interface PageTitleProps {
   alert: TopAlert | null;
@@ -49,9 +50,17 @@ export function PageTitle({ alert }: PageTitleProps) {
 
   if (!alert) return <EuiLoadingSpinner />;
 
+  const showExperimentalBadge =
+    alert.fields[ALERT_RULE_CATEGORY] === 'Log threshold' ||
+    alert.fields[ALERT_RULE_CATEGORY] === 'Metric threshold' ||
+    alert.fields[ALERT_RULE_CATEGORY] === 'Inventory';
+
   return (
     <div data-test-subj="page-title-container">
-      {pageTitleContent(alert.fields[ALERT_RULE_CATEGORY])}
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+        {pageTitleContent(alert.fields[ALERT_RULE_CATEGORY])}
+        {showExperimentalBadge && <ExperimentalBadge />}
+      </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>

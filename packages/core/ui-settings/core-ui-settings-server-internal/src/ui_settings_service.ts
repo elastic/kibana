@@ -10,6 +10,7 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { mapToObject } from '@kbn/std';
 
 import type { Logger } from '@kbn/logging';
+import { stripVersionQualifier } from '@kbn/std';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -32,6 +33,7 @@ export interface SetupDeps {
   http: InternalHttpServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
 }
+
 type ClientType<T> = T extends 'global'
   ? UiSettingsGlobalClient
   : T extends 'namespace'
@@ -109,7 +111,7 @@ export class UiSettingsService
       const isNamespaceScope = scope === 'namespace';
       const options = {
         type: (isNamespaceScope ? 'config' : 'config-global') as 'config' | 'config-global',
-        id: version,
+        id: stripVersionQualifier(version),
         buildNum,
         savedObjectsClient,
         defaults: isNamespaceScope

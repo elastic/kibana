@@ -50,17 +50,18 @@ export const ConnectorConfigurationForm = () => {
         items={localConfigView.unCategorizedItems}
         hasDocumentLevelSecurityEnabled={productFeatures.hasDocumentLevelSecurityEnabled}
       />
-      {localConfigView.categories.map((category) => (
-        <>
+      {localConfigView.categories.map((category, index) => (
+        <React.Fragment key={index}>
           <EuiSpacer />
           <EuiTitle size="s">
             <h3>{category.label}</h3>
           </EuiTitle>
+          <EuiSpacer />
           <ConnectorConfigurationFormItems
             items={category.configEntries}
             hasDocumentLevelSecurityEnabled={productFeatures.hasDocumentLevelSecurityEnabled}
           />
-        </>
+        </React.Fragment>
       ))}
       <EuiSpacer />
       <EuiFormRow>
