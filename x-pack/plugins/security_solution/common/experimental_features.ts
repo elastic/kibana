@@ -69,7 +69,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the `upload` endpoint response action (v8.9)
    */
-  responseActionUploadEnabled: false,
+  responseActionUploadEnabled: true,
 
   /**
    * Enables top charts on Alerts Page
@@ -82,7 +82,7 @@ export const allowedExperimentalValues = Object.freeze({
   securityFlyoutEnabled: false,
 
   /**
-   * Enables the Elastic Security Assistant
+   * Enables the Elastic AI Assistant
    */
   assistantEnabled: false,
 

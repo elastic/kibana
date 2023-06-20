@@ -447,6 +447,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should load the Logs tab section when clicking on it', async () => {
           await testSubjects.existOrFail('hostsView-logs');
         });
+
+        it('should load the Logs tab with the right columns', async () => {
+          await retry.try(async () => {
+            const columnLabels = await pageObjects.infraHostsView.getLogsTableColumnHeaders();
+
+            expect(columnLabels).to.eql(['Timestamp', 'host.name', 'Message']);
+          });
+        });
       });
 
       describe('Alerts Tab', () => {
