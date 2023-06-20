@@ -248,8 +248,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
                 defaultMessage="To get the most out of the client, use the javascript client's example template and follow our {searchapplicationClientDocLink} on building a search experience."
                 values={{
                   searchapplicationClientDocLink: (
-                    // replace # with search application client doc link
-                    <EuiLink href="#">
+                    <EuiLink href={`${docLinks.searchApplications}`}>
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step3.clientDocumenation',
                         {
