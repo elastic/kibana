@@ -4751,6 +4751,13 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       ['login:']: { authorizedSpaces: ['x', 'foo'] },
     });
 
+  const auditObjects = objects.map((obj) => {
+    return {
+      type: obj.saved_object.type,
+      id: obj.saved_object.id,
+    };
+  });
+
   test('returns empty array when no objects are provided`', async () => {
     const { securityExtension } = setup();
     const emptyObjects: Array<SavedObjectsResolveResponse<unknown> | BulkResolveError> = [];
@@ -4790,6 +4797,7 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       spaces: expectedSpaces,
       enforceMap: expectedEnforceMap,
       auditOptions: {
+        objects: auditObjects,
         useSuccessOutcome: true,
       },
     });
@@ -4817,7 +4825,7 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       action: SecurityAction.INTERNAL_BULK_RESOLVE,
       typesAndSpaces: expectedEnforceMap,
       typeMap: partiallyAuthorizedTypeMap,
-      auditOptions: { useSuccessOutcome: true },
+      auditOptions: { objects: auditObjects, useSuccessOutcome: true },
     });
   });
 
@@ -4835,7 +4843,7 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       action: SecurityAction.INTERNAL_BULK_RESOLVE,
       typesAndSpaces: expectedEnforceMap,
       typeMap: fullyAuthorizedTypeMap,
-      auditOptions: { useSuccessOutcome: true },
+      auditOptions: { objects: auditObjects, useSuccessOutcome: true },
     });
     expect(result).toEqual(objects);
   });
@@ -4866,37 +4874,44 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       action: 'saved_object_resolve',
       addToSpaces: undefined,
       deleteFromSpaces: undefined,
-      objects: undefined,
+      objects: auditObjects,
       useSuccessOutcome: true,
     });
-    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
-    expect(addAuditEventSpy).toHaveBeenCalledWith({
-      action: 'saved_object_resolve',
-      addToSpaces: undefined,
-      deleteFromSpaces: undefined,
-      unauthorizedSpaces: undefined,
-      unauthorizedTypes: undefined,
-      error: undefined,
-      outcome: 'success',
-    });
-    expect(auditLogger.log).toHaveBeenCalledTimes(1);
-    expect(auditLogger.log).toHaveBeenCalledWith({
-      error: undefined,
-      event: {
-        action: AuditAction.RESOLVE,
-        category: ['database'],
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(auditObjects.length);
+    let i = 1;
+    for (const auditObj of auditObjects) {
+      expect(addAuditEventSpy).toHaveBeenNthCalledWith(i++, {
+        action: 'saved_object_resolve',
+        addToSpaces: undefined,
+        deleteFromSpaces: undefined,
+        unauthorizedSpaces: undefined,
+        unauthorizedTypes: undefined,
+        error: undefined,
         outcome: 'success',
-        type: ['access'],
-      },
-      kibana: {
-        add_to_spaces: undefined,
-        delete_from_spaces: undefined,
-        unauthorized_spaces: undefined,
-        unauthorized_types: undefined,
-        saved_object: undefined,
-      },
-      message: `User has resolved saved objects`,
-    });
+        savedObject: auditObj,
+      });
+    }
+    expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
+    i = 1;
+    for (const auditObj of auditObjects) {
+      expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+        error: undefined,
+        event: {
+          action: AuditAction.RESOLVE,
+          category: ['database'],
+          outcome: 'success',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
+          saved_object: auditObj,
+        },
+        message: `User has resolved ${auditObj.type} [id=${auditObj.id}]`,
+      });
+    }
   });
 
   test(`throws when unauthorized`, async () => {
@@ -4939,28 +4954,31 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
     );
     expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
 
-    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
-    expect(auditLogger.log).toHaveBeenCalledTimes(1);
-    expect(auditLogger.log).toHaveBeenCalledWith({
-      error: {
-        code: 'Error',
-        message: `Unable to bulk_get ${resolveObj1.saved_object.type},${resolveObj2.saved_object.type}`,
-      },
-      event: {
-        action: AuditAction.RESOLVE,
-        category: ['database'],
-        outcome: 'failure',
-        type: ['access'],
-      },
-      kibana: {
-        add_to_spaces: undefined,
-        delete_from_spaces: undefined,
-        unauthorized_spaces: undefined,
-        unauthorized_types: undefined,
-        saved_object: undefined,
-      },
-      message: `Failed attempt to resolve saved objects`,
-    });
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
+    expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+    let i = 1;
+    for (const auditObj of auditObjects) {
+      expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
+        error: {
+          code: 'Error',
+          message: `Unable to bulk_get ${resolveObj1.saved_object.type},${resolveObj2.saved_object.type}`,
+        },
+        event: {
+          action: AuditAction.RESOLVE,
+          category: ['database'],
+          outcome: 'failure',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
+          saved_object: auditObj,
+        },
+        message: `Failed attempt to resolve ${auditObj.type} [id=${auditObj.id}]`,
+      });
+    }
   });
 });
 
@@ -6196,11 +6214,11 @@ describe(`#auditObjectsForSpaceDeletion`, () => {
     expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, the addAudit method is called directly
     expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length - 1);
     expect(auditLogger.log).toHaveBeenCalledTimes(objects.length - 1);
-    const i = 0;
+    let i = 0;
     for (const obj of objects) {
       if (i === 0) continue; // The first object namespaces includes '*', so there will not be an audit for it
 
-      expect(auditLogger.log).toHaveBeenNthCalledWith(i, {
+      expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
         error: undefined,
         event: {
           action: AuditAction.UPDATE_OBJECTS_SPACES,
