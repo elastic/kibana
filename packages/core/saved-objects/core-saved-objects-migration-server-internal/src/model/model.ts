@@ -9,6 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { getRootFields } from '@kbn/core-saved-objects-api-server-internal';
 
 import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
@@ -1423,37 +1424,58 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
       if (!res.right.match) {
-        if (res.right.updatedTypes?.length) {
-          return {
-            ...stateP,
-            controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
-            updatedTypesQuery: Option.some({
-              bool: {
-                should: res.right.updatedTypes.map((type) => ({ term: { type } })),
-              },
-            }),
-            logs: [
-              ...stateP.logs,
-              {
-                level: 'info',
-                message: `Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings: ${res.right.updatedTypes}.`,
-              },
-            ],
-          };
+        if (res.right.updatedHashes?.length) {
+          const updatedRootFields = res.right.updatedHashes.filter((field) =>
+            getRootFields().includes(field)
+          );
+          if (updatedRootFields.length) {
+            return {
+              ...stateP,
+              controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+              updatedTypesQuery: Option.none,
+              logs: [
+                ...stateP.logs,
+                {
+                  level: 'info',
+                  message: `Kibana is performing a compatible update and some root fields have been updated. All SO documents must be updated. Updated root fields: ${updatedRootFields}.`,
+                },
+              ],
+            };
+          } else {
+            // all updated hashes correspond to SO types
+            const updatedTypes = res.right.updatedHashes;
+            return {
+              ...stateP,
+              controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+              updatedTypesQuery: Option.some({
+                bool: {
+                  should: updatedTypes.map((type) => ({ term: { type } })),
+                },
+              }),
+              logs: [
+                ...stateP.logs,
+                {
+                  level: 'info',
+                  message: `Kibana is performing a compatible update and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${updatedTypes}.`,
+                },
+              ],
+            };
+          }
         } else {
+          // some top-level properties have changed, e.g. 'dynamic' or '_meta' (see diffMappings())
           return {
             ...stateP,
             controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
             updatedTypesQuery: Option.none,
           };
         }
+      } else {
+        // The md5 of ALL mappings match, so there's no need to update target mappings
+        return {
+          ...stateP,
+          controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+        };
       }
-
-      // The md5 of the mappings match, so there's no need to update target mappings
-      return {
-        ...stateP,
-        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
-      };
     } else {
       throwBadResponse(stateP, res as never);
     }

@@ -9,7 +9,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { diffMappings, getUpdatedTypes } from '../core/build_active_mappings';
+import { diffMappings, getUpdatedHashes } from '../core/build_active_mappings';
 
 /** @internal */
 export interface CheckTargetMappingsParams {
@@ -20,7 +20,7 @@ export interface CheckTargetMappingsParams {
 /** @internal */
 export interface TargetMappingsCompareResult {
   match: boolean;
-  updatedTypes?: string[];
+  updatedHashes?: string[];
 }
 
 export const checkTargetMappings =
@@ -33,6 +33,6 @@ export const checkTargetMappings =
       return Either.right({ match: false });
     }
     const diff = diffMappings(actualMappings, expectedMappings);
-    const updatedTypes = getUpdatedTypes(actualMappings, expectedMappings);
-    return Either.right({ match: !diff, updatedTypes });
+    const updatedHashes = getUpdatedHashes(actualMappings, expectedMappings);
+    return Either.right({ match: !diff, updatedHashes });
   };

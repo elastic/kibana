@@ -11,16 +11,18 @@ const ROOT_FIELDS = [
   'namespaces',
   'type',
   'references',
-  'migrationVersion',
+  'migrationVersion', // deprecated, see https://github.com/elastic/kibana/pull/150075
   'coreMigrationVersion',
   'typeMigrationVersion',
   'managed',
   'updated_at',
   'created_at',
   'originId',
-];
+] as const;
 
-export function getRootFields() {
+export type RootField = typeof ROOT_FIELDS[number];
+
+export function getRootFields(): string[] {
   return [...ROOT_FIELDS];
 }
 

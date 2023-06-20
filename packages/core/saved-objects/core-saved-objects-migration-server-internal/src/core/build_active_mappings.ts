@@ -12,11 +12,15 @@
 
 import crypto from 'crypto';
 import { cloneDeep, mapValues } from 'lodash';
-import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsFieldMapping,
+  SavedObjectsMappingProperties,
+} from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { RootField } from '@kbn/core-saved-objects-api-server-internal';
 
 /**
  * Creates an index mapping with the core properties required by saved object
@@ -65,9 +69,9 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
 
 /**
  * Compares the actual vs expected mappings' hashes.
- * Returns a boolean query to select only the types with updated mappings (updated hashes).
+ * Returns a list with all the hashes that have been updated.
  */
-export const getUpdatedTypes = (
+export const getUpdatedHashes = (
   current: IndexMapping,
   updated: IndexMapping
 ): string[] | undefined => {
@@ -75,13 +79,13 @@ export const getUpdatedTypes = (
     return undefined;
   }
 
-  const updatedTypes = Object.keys(updated._meta!.migrationMappingPropertyHashes!).filter(
+  const updatedHashes = Object.keys(updated._meta!.migrationMappingPropertyHashes!).filter(
     (key) =>
       current._meta!.migrationMappingPropertyHashes![key] !==
       updated._meta!.migrationMappingPropertyHashes![key]
   );
 
-  return updatedTypes;
+  return updatedHashes;
 };
 
 // Convert an object to an md5 hash string, using a stable serialization (canonicalStringify)
@@ -136,7 +140,9 @@ function findChangedProp(actual: any, expected: any) {
  * @returns {IndexMapping}
  */
 export function getBaseMappings(): IndexMapping {
-  return {
+  const baseMappings: IndexMapping & {
+    properties: Partial<Record<RootField, SavedObjectsFieldMapping>>;
+  } = {
     dynamic: 'strict',
     properties: {
       type: {
@@ -182,6 +188,8 @@ export function getBaseMappings(): IndexMapping {
       },
     },
   };
+
+  return baseMappings;
 }
 
 function validateAndMerge(

@@ -10,7 +10,7 @@ import type {
   IndexMapping,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { buildActiveMappings, diffMappings, getUpdatedTypes } from './build_active_mappings';
+import { buildActiveMappings, diffMappings, getUpdatedHashes } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {
   test('creates a strict mapping', () => {
@@ -209,7 +209,7 @@ describe('diffMappings', () => {
   });
 });
 
-describe('getUpdatedTypes', () => {
+describe('getUpdatedHashes', () => {
   test('is undefined if _meta is missing from actual', () => {
     const actual: IndexMapping = {
       dynamic: 'strict',
@@ -223,7 +223,7 @@ describe('getUpdatedTypes', () => {
       properties: {},
     };
 
-    expect(getUpdatedTypes(actual, expected)).toBeUndefined();
+    expect(getUpdatedHashes(actual, expected)).toBeUndefined();
   });
 
   test('is undefined if migrationMappingPropertyHashes is missing from actual', () => {
@@ -240,7 +240,7 @@ describe('getUpdatedTypes', () => {
       properties: {},
     };
 
-    expect(getUpdatedTypes(actual, expected)).toBeUndefined();
+    expect(getUpdatedHashes(actual, expected)).toBeUndefined();
   });
 
   test('gives a list of the types with updated hashes', () => {
@@ -267,6 +267,6 @@ describe('getUpdatedTypes', () => {
       },
     };
 
-    expect(getUpdatedTypes(actual, expected)).toEqual(['type2', 'type4']);
+    expect(getUpdatedHashes(actual, expected)).toEqual(['type2', 'type4']);
   });
 });

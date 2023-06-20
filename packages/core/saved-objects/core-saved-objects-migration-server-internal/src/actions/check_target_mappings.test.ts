@@ -9,12 +9,12 @@
 import * as Either from 'fp-ts/lib/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { checkTargetMappings } from './check_target_mappings';
-import { diffMappings, getUpdatedTypes } from '../core/build_active_mappings';
+import { diffMappings, getUpdatedHashes } from '../core/build_active_mappings';
 
 jest.mock('../core/build_active_mappings');
 
 const diffMappingsMock = diffMappings as jest.MockedFn<typeof diffMappings>;
-const getUpdatedTypesMock = getUpdatedTypes as jest.MockedFn<typeof getUpdatedTypes>;
+const getUpdatedHashesMock = getUpdatedHashes as jest.MockedFn<typeof getUpdatedHashes>;
 
 const actualMappings: IndexMapping = {
   properties: {
@@ -82,7 +82,7 @@ describe('checkTargetMappings', () => {
 
   it('returns match=false if diffMappings() finds differences', async () => {
     diffMappingsMock.mockReturnValueOnce({ changedProp: 'type1' });
-    getUpdatedTypesMock.mockReturnValueOnce(['type1', 'type2']);
+    getUpdatedHashesMock.mockReturnValueOnce(['type1', 'type2']);
 
     const task = checkTargetMappings({
       actualMappings,
@@ -90,6 +90,6 @@ describe('checkTargetMappings', () => {
     });
 
     const result = await task();
-    expect(result).toEqual(Either.right({ match: false, updatedTypes: ['type1', 'type2'] }));
+    expect(result).toEqual(Either.right({ match: false, updatedHashes: ['type1', 'type2'] }));
   });
 });
