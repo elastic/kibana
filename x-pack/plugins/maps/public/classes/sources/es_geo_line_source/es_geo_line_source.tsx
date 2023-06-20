@@ -81,12 +81,6 @@ export class ESGeoLineSource extends AbstractESAggSource {
       typeof normalizedDescriptor.groupByTimeseries === 'boolean'
         ? normalizedDescriptor.groupByTimeseries
         : false;
-    /*if (!groupByTimeseries && !isValidStringConfig(normalizedDescriptor.splitField)) {
-      throw new Error('Cannot create an ESGeoLineSource without a splitField');
-    }
-    if (!groupByTimeseries && !isValidStringConfig(normalizedDescriptor.sortField)) {
-      throw new Error('Cannot create an ESGeoLineSource without a sortField');
-    }*/
 
     return {
       ...normalizedDescriptor,
@@ -273,7 +267,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const resp = await this._runEsQuery({
       requestId: `${this.getId()}_tracks`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.timeSeriesTrackRequestName', {
-        defaultMessage: '{layerName} time series tracks request',
+        defaultMessage: `'{layerName}' tracks request (time series)`,
         values: {
           layerName,
         },
@@ -282,7 +276,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.esGeoLine.timeSeriesTrackRequestDescription', {
         defaultMessage:
-          'Get time series tracks for from data view: {dataViewName}, geospatial field: {geoFieldName}',
+          'Get tracks from data view: {dataViewName}, geospatial field: {geoFieldName}',
         values: {
           dataViewName: indexPattern.getName(),
           geoFieldName: this._descriptor.geoField,
@@ -372,7 +366,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const entityResp = await this._runEsQuery({
       requestId: `${this.getId()}_entities`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.entityRequestName', {
-        defaultMessage: '{layerName} entities request',
+        defaultMessage: `'{layerName}' entities request`,
         values: {
           layerName,
         },
@@ -452,7 +446,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const tracksResp = await this._runEsQuery({
       requestId: `${this.getId()}_tracks`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.trackRequestName', {
-        defaultMessage: '{layerName} tracks request',
+        defaultMessage: `'{layerName}' tracks request (terms)`,
         values: {
           layerName,
         },
@@ -470,7 +464,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
-        { description: 'es_geo_line:entity_tracks' },
+        { description: 'es_geo_line:terms_tracks' },
         requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
