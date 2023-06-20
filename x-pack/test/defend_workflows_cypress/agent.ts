@@ -29,7 +29,11 @@ export class AgentManager extends Manager {
     super.cleanup();
     this.log.info('Cleaning up the agent process');
     if (this.vmName) {
-      execa.commandSync(`multipass delete -p ${this.vmName}`);
+      if (process.env.CI) {
+        execa.commandSync(`vagrant destroy ${this.vmName} -f`);
+      } else {
+        execa.commandSync(`multipass delete -p ${this.vmName}`);
+      }
 
       this.log.info('Agent process closed');
     }

@@ -60,13 +60,23 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       disk: '8G',
     });
 
-    log.info(`VM created using Multipass.
-    VM Name: ${vmName}
-    Elastic Agent Version: ${version}
+    if (process.env.CI) {
+      log.info(`VM created using Vagrant.
+      VM Name: ${vmName}
+      Elastic Agent Version: ${version}
 
-    Shell access: ${chalk.bold(`multipass shell ${vmName}`)}
-    Delete VM:    ${chalk.bold(`multipass delete -p ${vmName}${await getVmCountNotice()}`)}
-`);
+      Shell access: ${chalk.bold(`vagrant ssh ${vmName}`)}
+      Delete VM:    ${chalk.bold(`vagrant destroy ${vmName} -f`)}
+  `);
+    } else {
+      log.info(`VM created using Multipass.
+        VM Name: ${vmName}
+        Elastic Agent Version: ${version}
+
+        Shell access: ${chalk.bold(`multipass shell ${vmName}`)}
+        Delete VM:    ${chalk.bold(`multipass delete -p ${vmName}${await getVmCountNotice()}`)}
+    `);
+    }
   } catch (error) {
     log.error(dump(error));
     log.indent(-4);

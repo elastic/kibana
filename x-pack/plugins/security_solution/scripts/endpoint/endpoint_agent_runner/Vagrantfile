@@ -1,0 +1,9 @@
+hostname = ENV["VMNAME"] || 'ubuntu'
+
+Vagrant.configure("2") do |config|
+  config.vm.define "test" do |deb|
+    deb.vm.box = "ubuntu/jammy64"
+    # deb.vm.box = "perk/ubuntu-2204-arm64"
+    deb.vm.hostname = hostname
+  end
+end
