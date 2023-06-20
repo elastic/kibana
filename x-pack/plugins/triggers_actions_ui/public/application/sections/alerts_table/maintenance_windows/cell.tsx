@@ -6,15 +6,10 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiLink, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
-import {
-  MaintenanceWindow,
-  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
-  MANAGEMENT_APP_ID,
-} from '@kbn/alerting-plugin/common';
-import { ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import { EuiSkeletonText, EuiToolTip, EuiText } from '@elastic/eui';
+import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import { ALERT_MAINTENANCE_WINDOW_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { CellComponentProps } from '../types';
-import { useKibana } from '../../../../common/lib/kibana';
 import { TooltipContent } from './tooltip_content';
 
 const isMaintenanceWindowValid = (mw: MaintenanceWindow | undefined): mw is MaintenanceWindow => {
@@ -23,17 +18,14 @@ const isMaintenanceWindowValid = (mw: MaintenanceWindow | undefined): mw is Main
 
 interface MaintenanceWindowBaseCellProps {
   maintenanceWindows: MaintenanceWindow[];
+  timestamp?: string;
   isLoading: boolean;
 }
 
 export const MaintenanceWindowBaseCell = memo((props: MaintenanceWindowBaseCellProps) => {
-  const { maintenanceWindows, isLoading } = props;
+  const { maintenanceWindows, isLoading, timestamp } = props;
 
-  const {
-    application: { getUrlForApp },
-  } = useKibana().services;
-
-  const tooltipWithLink = useMemo(() => {
+  const tooltipWithText = useMemo(() => {
     if (!maintenanceWindows.length) {
       return null;
     }
@@ -41,21 +33,19 @@ export const MaintenanceWindowBaseCell = memo((props: MaintenanceWindowBaseCellP
     return maintenanceWindows.map((mw, index) => {
       return (
         <>
-          <EuiToolTip key={mw.id} content={<TooltipContent maintenanceWindow={mw} />}>
-            <EuiLink
-              href={getUrlForApp(MANAGEMENT_APP_ID, {
-                deepLinkId: MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows,
-                path: '/',
-              })}
-            >
+          <EuiToolTip
+            key={`${mw.id}_tooltip`}
+            content={<TooltipContent maintenanceWindow={mw} timestamp={timestamp} />}
+          >
+            <EuiText key={`${mw.id}_text`} size="relative">
               {mw.title}
-            </EuiLink>
+            </EuiText>
           </EuiToolTip>
           {index !== maintenanceWindows.length - 1 && <>,&nbsp;</>}
         </>
       );
     });
-  }, [maintenanceWindows, getUrlForApp]);
+  }, [maintenanceWindows, timestamp]);
 
   return (
     <EuiSkeletonText
@@ -64,7 +54,7 @@ export const MaintenanceWindowBaseCell = memo((props: MaintenanceWindowBaseCellP
       isLoading={isLoading}
       size="s"
     >
-      {tooltipWithLink}
+      {tooltipWithText}
     </EuiSkeletonText>
   );
 });
@@ -84,7 +74,11 @@ export const MaintenanceWindowCell = memo((props: CellComponentProps) => {
   }
 
   return (
-    <MaintenanceWindowBaseCell maintenanceWindows={validMaintenanceWindows} isLoading={isLoading} />
+    <MaintenanceWindowBaseCell
+      maintenanceWindows={validMaintenanceWindows}
+      isLoading={isLoading}
+      timestamp={alert[TIMESTAMP]?.[0]}
+    />
   );
 });
 

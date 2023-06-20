@@ -5,27 +5,24 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, formatDate } from '@elastic/eui';
-import {
-  MaintenanceWindow,
-  STATUS_DISPLAY,
-  MAINTENANCE_WINDOW_DATE_FORMAT,
-} from '@kbn/alerting-plugin/common';
+import React, { memo, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, formatDate, EuiHorizontalRule } from '@elastic/eui';
+import { MaintenanceWindow, MAINTENANCE_WINDOW_DATE_FORMAT } from '@kbn/alerting-plugin/common';
 import { css } from '@emotion/react';
 
 const START_TIME = i18n.translate(
   'xpack.triggersActionsUI.alertsTable.maintenanceWindowTooltip.startTime',
   {
-    defaultMessage: 'Start time',
+    defaultMessage: 'Start',
   }
 );
 
 const END_TIME = i18n.translate(
   'xpack.triggersActionsUI.alertsTable.maintenanceWindowTooltip.endTime',
   {
-    defaultMessage: 'End time',
+    defaultMessage: 'End',
   }
 );
 
@@ -40,11 +37,22 @@ const textStyle = css`
 
 interface TooltipContentProps {
   maintenanceWindow: MaintenanceWindow;
+  timestamp?: string;
 }
 
 export const TooltipContent = memo((props: TooltipContentProps) => {
-  const { maintenanceWindow } = props;
-  const { status, title, eventStartTime, eventEndTime } = maintenanceWindow;
+  const { maintenanceWindow, timestamp } = props;
+  const { title, events } = maintenanceWindow;
+
+  const event = useMemo(() => {
+    if (!timestamp) {
+      return null;
+    }
+    const time = events.find(({ gte, lte }) => {
+      return moment(timestamp).isBetween(gte, lte, undefined, '[]');
+    });
+    return time || null;
+  }, [events, timestamp]);
 
   return (
     <EuiFlexGroup
@@ -52,46 +60,44 @@ export const TooltipContent = memo((props: TooltipContentProps) => {
       gutterSize="xs"
       direction="column"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color={STATUS_DISPLAY[status].color}>{STATUS_DISPLAY[status].label}</EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
       <EuiFlexItem grow={false}>
         <EuiText size="relative" css={textStyle}>
           <strong>{title}</strong>
         </EuiText>
       </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" direction="column">
-          <EuiFlexItem>
-            <EuiText size="relative">
-              <strong>{START_TIME}:</strong>
-            </EuiText>
+      <EuiHorizontalRule margin="none" />
+      {event && (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" direction="row">
+              <EuiFlexItem grow={false}>
+                <EuiText size="relative">
+                  <strong>{START_TIME}:</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="relative">
+                  {formatDate(event.gte, MAINTENANCE_WINDOW_DATE_FORMAT)}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="relative">
-              {formatDate(eventStartTime, MAINTENANCE_WINDOW_DATE_FORMAT)}
-            </EuiText>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" direction="row">
+              <EuiFlexItem grow={false}>
+                <EuiText size="relative">
+                  <strong>{END_TIME}:</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="relative">
+                  {formatDate(event.lte, MAINTENANCE_WINDOW_DATE_FORMAT)}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" direction="column">
-          <EuiFlexItem>
-            <EuiText size="relative">
-              <strong>{END_TIME}:</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="relative">
-              {formatDate(eventEndTime, MAINTENANCE_WINDOW_DATE_FORMAT)}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 });

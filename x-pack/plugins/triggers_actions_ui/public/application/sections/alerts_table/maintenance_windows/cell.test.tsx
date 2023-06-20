@@ -14,16 +14,6 @@ import { getMaintenanceWindowMockMap } from './index.mock';
 import { getCasesMockMap } from '../cases/index.mock';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: jest.fn(() => ''),
-      },
-    },
-  }),
-}));
-
 const casesMap = getCasesMockMap();
 const maintenanceWindowsMap = getMaintenanceWindowMockMap();
 const alert = {

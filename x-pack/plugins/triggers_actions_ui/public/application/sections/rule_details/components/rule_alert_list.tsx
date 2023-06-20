@@ -73,7 +73,11 @@ const RuleAlertListMaintenanceWindowCell = (props: RuleAlertListMaintenanceWindo
   }, [alert, maintenanceWindows]);
 
   return (
-    <MaintenanceWindowBaseCell maintenanceWindows={validMaintenanceWindows} isLoading={isLoading} />
+    <MaintenanceWindowBaseCell
+      timestamp={alert.start?.toISOString()}
+      maintenanceWindows={validMaintenanceWindows}
+      isLoading={isLoading}
+    />
   );
 };
 
