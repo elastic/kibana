@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { initializeESFieldsRoute } from './es_fields';
-import { RouteInitializerDeps } from '..';
-
-export function initESFieldsRoutes(deps: RouteInitializerDeps) {
-  initializeESFieldsRoute(deps);
-}
+export { CollapsiblePanel } from './collapsible_panel';
