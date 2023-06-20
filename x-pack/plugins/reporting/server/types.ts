@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CustomRequestHandlerContext, IRouter, KibanaRequest } from '@kbn/core/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -32,8 +32,6 @@ import type { Writable } from 'stream';
 import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
-import type { ReportingCore } from './core';
-import type { ReportTaskParams } from './lib/tasks';
 import { ExportTypesRegistry } from './lib';
 
 /**
@@ -59,44 +57,18 @@ export type ScrollConfig = ReportingConfigType['csv']['scroll'];
  * Internal Types
  */
 
-// default fn type for CreateJobFnFactory
-export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
+export type CreateJobFn<JobParamsType> = (
   jobParams: JobParamsType,
   context: ReportingRequestHandlerContext,
   req: KibanaRequest
-) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
+) => JobParamsType & { isDeprecated: boolean; browserTimezone: any };
 
-// default fn type for RunTaskFnFactory
-export type RunTaskFn<TaskPayloadType = BasePayload> = (
+export type RunTaskFn<TaskPayloadType> = (
+  payload: TaskPayloadType,
   jobId: string,
-  payload: ReportTaskParams<TaskPayloadType>['payload'],
   cancellationToken: CancellationToken,
   stream: Writable
 ) => Promise<TaskRunResult>;
-
-export type CreateJobFnFactory<CreateJobFnType> = (
-  reporting: ReportingCore,
-  logger: Logger
-) => CreateJobFnType;
-
-export type RunTaskFnFactory<RunTaskFnType> = (
-  reporting: ReportingCore,
-  logger: Logger
-) => RunTaskFnType;
-
-export interface ExportTypeDefinition<
-  CreateJobFnType = CreateJobFn | null,
-  RunTaskFnType = RunTaskFn
-> {
-  id: string;
-  name: string;
-  jobType: string;
-  jobContentEncoding?: string;
-  jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
-  runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
-  validLicenses: string[];
-}
 
 export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
