@@ -110,6 +110,7 @@ export const MAX_BULK_GET_CASES = 1000 as const;
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_CATEGORY_LENGTH = 50 as const;
 
 /**
  * Cases features
