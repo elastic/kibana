@@ -39,6 +39,7 @@ function prepareTest(setCustomUrlsFn: jest.Mock) {
     job: { job_id: 'test', analysis_config: {} } as Job,
     customUrls,
     onChange: setCustomUrlsFn,
+    dataViewListItems: [],
   };
 
   return shallow(<CustomUrlList {...props} />);

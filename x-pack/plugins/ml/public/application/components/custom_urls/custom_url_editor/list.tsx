@@ -27,6 +27,7 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
+jest.mock('../../../contexts/kibana');
 
 import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
@@ -34,7 +35,7 @@ import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
-import { Job, isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
+import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
@@ -186,6 +187,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
     // Validate the time range.
     const timeRange = (customUrl as MlKibanaUrlConfig).time_range;
+    const isCustomTimeRange = (customUrl as MlKibanaUrlConfig).is_custom_time_range === true;
     const isInvalidTimeRange = !isValidTimeRange(timeRange);
     const invalidIntervalError = isInvalidTimeRange
       ? [
@@ -251,10 +253,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
               )}
             </EuiFormRow>
           </EuiFlexItem>
-          {(isDataFrameAnalyticsConfigs(job) &&
-            (customUrl as MlKibanaUrlConfig).time_range &&
-            (customUrl as MlKibanaUrlConfig).time_range !== 'auto') ||
-          isAnomalyDetectionJob(job) ? (
+          {isCustomTimeRange === false ? (
             <EuiFlexItem grow={false}>
               <EuiFormRow
                 label={

@@ -222,6 +222,7 @@ export function buildCustomUrlFromSettings(
     const urlToAdd = {
       url_name: settings.label,
       url_value: settings.otherUrlSettings?.urlValue ?? '',
+      ...(settings.customTimeRange ? { is_custom_time_range: true } : {}),
     };
 
     return Promise.resolve(urlToAdd);
@@ -315,7 +316,7 @@ async function buildDashboardUrlFromSettings(
     location?.path
   );
 
-  const urlToAdd = {
+  const urlToAdd: MlUrlConfig = {
     url_name: settings.label,
     url_value: decodeURIComponent(`dashboards${url.parse(resultPath).hash}`),
     time_range: TIME_RANGE_TYPE.AUTO as string,
@@ -323,6 +324,10 @@ async function buildDashboardUrlFromSettings(
 
   if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
     urlToAdd.time_range = settings.timeRange.interval;
+  }
+
+  if (settings.customTimeRange) {
+    urlToAdd.is_custom_time_range = true;
   }
 
   return urlToAdd;
@@ -377,6 +382,10 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
 
   if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
     urlToAdd.time_range = settings.timeRange.interval;
+  }
+
+  if (settings.customTimeRange) {
+    urlToAdd.is_custom_time_range = true;
   }
 
   return urlToAdd;
