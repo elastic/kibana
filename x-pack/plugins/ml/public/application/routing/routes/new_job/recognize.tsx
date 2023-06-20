@@ -45,7 +45,7 @@ export const checkViewOrCreateRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<PageProps> = ({ location }) => {
   const { id } = parse(location.search, { sort: false });
 
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
@@ -64,7 +64,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   );
 };
 
-const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, deps }) => {
+const CheckViewOrCreateWrapper: FC<PageProps> = ({ location }) => {
   const {
     services: {
       notifications: { toasts },
