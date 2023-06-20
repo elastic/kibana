@@ -14,6 +14,9 @@ import type { PackagePolicy } from '../types';
  */
 export const getCloudFormationTemplateUrlFromPackagePolicy = (packagePolicy?: PackagePolicy) => {
   const cloudFormationTemplateUrl = packagePolicy?.inputs?.reduce((accInput, input) => {
+    if (accInput !== '') {
+      return accInput;
+    }
     if (input?.enabled && input?.config?.cloud_formation_template_url) {
       return input.config.cloud_formation_template_url.value;
     }

@@ -17,6 +17,9 @@ export const getCloudFormationTemplateUrlFromAgentPolicy = (selectedPolicy?: Age
     (acc, packagePolicy) => {
       const findCloudFormationTemplateUrlConfig = packagePolicy.inputs?.reduce(
         (accInput, input) => {
+          if (accInput !== '') {
+            return accInput;
+          }
           if (input?.enabled && input?.config?.cloud_formation_template_url) {
             return input.config.cloud_formation_template_url.value;
           }
