@@ -21,6 +21,8 @@ import { CommentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
@@ -30,6 +32,7 @@ import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import type { ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
 import type { TopAlert } from '../../../typings/alerts';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 
 const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';
 
@@ -202,23 +205,35 @@ export function AlertActions({
 
   return (
     <>
-      <EuiFlexItem>
-        <EuiToolTip
-          content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
-            defaultMessage: 'View in app',
-          })}
-        >
+      {/* Hide the View In App for the Threshold alerts, temporarily https://github.com/elastic/kibana/pull/159915  */}
+      {alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID ? (
+        <EuiFlexItem>
           <EuiButtonIcon
-            aria-label={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
-              defaultMessage: 'View in app',
-            })}
-            color="text"
-            href={prepend(alert.link ?? '')}
-            iconType="eye"
+            iconType=""
+            disabled
+            data-test-subj="o11yAlertActionsButtonThresholdRuleDisabled"
             size="s"
           />
-        </EuiToolTip>
-      </EuiFlexItem>
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem>
+          <EuiToolTip
+            content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
+              defaultMessage: 'View in app',
+            })}
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
+                defaultMessage: 'View in app',
+              })}
+              color="text"
+              href={prepend(alert.link ?? '')}
+              iconType="eye"
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem>
         <EuiPopover
