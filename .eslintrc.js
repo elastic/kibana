@@ -604,6 +604,7 @@ module.exports = {
         '**/cypress.config.{js,ts}',
         'x-pack/test_serverless/**/config*.ts',
         'x-pack/test_serverless/*/test_suites/**/*',
+        'x-pack/test/profiling_api_integration/**/*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
