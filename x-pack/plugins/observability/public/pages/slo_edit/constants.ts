@@ -102,7 +102,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
     },
   },
   timeWindow: {
-    duration: { value: 30, unit: 'd' },
+    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
     type: 'rolling',
   },
   tags: [],
@@ -126,7 +126,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
     },
   },
   timeWindow: {
-    duration: { value: 30, unit: 'd' },
+    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
     type: 'rolling',
   },
   tags: [],

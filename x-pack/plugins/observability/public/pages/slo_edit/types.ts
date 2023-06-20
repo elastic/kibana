@@ -6,14 +6,13 @@
  */
 
 import { BudgetingMethod, Indicator, TimeWindow } from '@kbn/slo-schema';
-import { Duration } from '../../typings';
 
 export interface CreateSLOForm {
   name: string;
   description: string;
   indicator: Indicator;
   timeWindow: {
-    duration: Duration;
+    duration: string;
     type: TimeWindow;
   };
   tags: string[];
@@ -21,6 +20,6 @@ export interface CreateSLOForm {
   objective: {
     target: number;
     timesliceTarget?: number;
-    timesliceWindow?: Duration;
+    timesliceWindow?: string;
   };
 }

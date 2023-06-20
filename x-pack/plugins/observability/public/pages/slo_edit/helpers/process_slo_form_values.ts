@@ -20,7 +20,7 @@ export function transformSloResponseToCreateSloForm(
     indicator: values.indicator,
     budgetingMethod: values.budgetingMethod,
     timeWindow: {
-      duration: toDuration(values.timeWindow.duration),
+      duration: values.timeWindow.duration,
       type: values.timeWindow.type,
     },
     objective: {
@@ -31,7 +31,7 @@ export function transformSloResponseToCreateSloForm(
         }),
       ...(values.budgetingMethod === 'timeslices' &&
         values.objective.timesliceWindow && {
-          timesliceWindow: toDuration(values.objective.timesliceWindow),
+          timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
         }),
     },
     tags: values.tags,
@@ -45,7 +45,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     indicator: values.indicator,
     budgetingMethod: values.budgetingMethod,
     timeWindow: {
-      duration: `${values.timeWindow.duration.value}${values.timeWindow.duration.unit}`,
+      duration: values.timeWindow.duration,
       type: values.timeWindow.type,
     },
     objective: {
@@ -56,7 +56,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
         }),
       ...(values.budgetingMethod === 'timeslices' &&
         values.objective.timesliceWindow && {
-          timesliceWindow: `${values.objective.timesliceWindow.value}${values.objective.timesliceWindow.unit}`,
+          timesliceWindow: `${values.objective.timesliceWindow}m`,
         }),
     },
     tags: values.tags,
@@ -70,7 +70,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     indicator: values.indicator,
     budgetingMethod: values.budgetingMethod,
     timeWindow: {
-      duration: `${values.timeWindow.duration.value}${values.timeWindow.duration.unit}`,
+      duration: values.timeWindow.duration,
       type: values.timeWindow.type,
     },
     objective: {
@@ -81,7 +81,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
         }),
       ...(values.budgetingMethod === 'timeslices' &&
         values.objective.timesliceWindow && {
-          timesliceWindow: `${values.objective.timesliceWindow.value}${values.objective.timesliceWindow.unit}`,
+          timesliceWindow: `${values.objective.timesliceWindow}m`,
         }),
     },
     tags: values.tags,
