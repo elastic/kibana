@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getAllPrivateLocations } from './get_private_locations';
+import { getAllPrivateLocationsAttributes } from './get_private_locations';
 import {
   privateLocationsSavedObjectId,
   privateLocationsSavedObjectName,
@@ -39,7 +39,7 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => ({
   handler: async ({ request, server, savedObjectsClient }): Promise<any> => {
     const location = request.body as PrivateLocation;
 
-    const { locations } = await getAllPrivateLocations(savedObjectsClient);
+    const { locations } = await getAllPrivateLocationsAttributes(savedObjectsClient);
     const existingLocations = locations.filter((loc) => loc.id !== location.agentPolicyId);
 
     const result = await savedObjectsClient.create(
