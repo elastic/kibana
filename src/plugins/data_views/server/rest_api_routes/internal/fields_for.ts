@@ -99,10 +99,13 @@ const validate: FullValidationConfig<any, any, any> = {
   },
   response: {
     200: {
-      body: schema.object({
-        fields: schema.arrayOf(FieldDescriptorSchema),
-        indices: schema.arrayOf(schema.string()),
-      }),
+      body: schema.object(
+        {
+          // fields: schema.arrayOf(FieldDescriptorSchema),
+          // indices: schema.arrayOf(schema.string()),
+        },
+        { unknowns: 'forbid' }
+      ),
     },
   },
 };
