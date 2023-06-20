@@ -47,7 +47,7 @@ export function getInitialAnalyticsStats(): AnalyticStatsBarStats {
   return {
     total: {
       label: i18n.translate('xpack.ml.overview.statsBar.totalAnalyticsLabel', {
-        defaultMessage: 'Total',
+        defaultMessage: 'Total analytics jobs',
       }),
       value: 0,
       show: true,
@@ -97,18 +97,12 @@ export function getAnalyticsJobsStats(
   );
   resultStats.failed.show = resultStats.failed.value > 0;
   resultStats.total.value = analyticsStats.count;
-
-  if (resultStats.total.value === 0) {
-    resultStats.started.show = false;
-    resultStats.stopped.show = false;
-  }
-
   return resultStats;
 }
 
 export const getAnalyticsFactory = (
   setAnalytics: React.Dispatch<React.SetStateAction<DataFrameAnalyticsListRow[]>>,
-  setAnalyticsStats: (update: AnalyticStatsBarStats | undefined) => void,
+  setAnalyticsStats: React.Dispatch<React.SetStateAction<AnalyticStatsBarStats | undefined>>,
   setErrorMessage: React.Dispatch<
     React.SetStateAction<GetDataFrameAnalyticsStatsResponseError | undefined>
   >,
