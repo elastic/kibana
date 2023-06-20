@@ -5,19 +5,27 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 import { withSpan } from './helpers';
 
-export async function collectPods({ client, from, transaction, sourceIndices }: CollectorOptions) {
+export async function collectPods({
+  client,
+  from,
+  to,
+  transaction,
+  sourceIndices,
+  afterKey,
+}: CollectorOptions) {
   const { metrics, logs, traces } = sourceIndices;
-  const dsl = {
+  const dsl: estypes.SearchRequest = {
     index: [metrics, logs, traces],
     size: QUERY_MAX_SIZE,
     collapse: {
       field: 'kubernetes.pod.uid',
     },
-    sort: [{ '@timestamp': 'desc' }],
+    sort: [{ 'kubernetes.pod.uid': 'asc' }],
     _source: false,
     fields: [
       'kubernetes.*',
@@ -33,6 +41,7 @@ export async function collectPods({ client, from, transaction, sourceIndices }: 
             range: {
               '@timestamp': {
                 gte: from,
+                lte: to,
               },
             },
           },
@@ -45,10 +54,14 @@ export async function collectPods({ client, from, transaction, sourceIndices }: 
     },
   };
 
+  if (afterKey) {
+    dsl.search_after = afterKey;
+  }
+
   const esResponse = await client.search(dsl);
 
-  const pods = withSpan({ transaction, name: 'processing_response' }, () => {
-    return esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
+  const result = withSpan({ transaction, name: 'processing_response' }, async () => {
+    const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
       const { fields = {} } = hit;
       const podUid = fields['kubernetes.pod.uid'];
       const nodeName = fields['kubernetes.node.name'];
@@ -74,7 +87,11 @@ export async function collectPods({ client, from, transaction, sourceIndices }: 
 
       return acc;
     }, []);
+
+    const hitsLen = esResponse.hits.hits.length;
+    const next = hitsLen === QUERY_MAX_SIZE ? esResponse.hits.hits[hitsLen - 1].sort : undefined;
+    return { assets, afterKey: next };
   });
 
-  return pods;
+  return result;
 }

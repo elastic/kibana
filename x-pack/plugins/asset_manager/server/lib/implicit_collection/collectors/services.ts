@@ -5,27 +5,23 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 import { withSpan } from './helpers';
 
-const MISSING_KEY = '__unknown__';
-
 export async function collectServices({
   client,
   from,
+  to,
   transaction,
   sourceIndices,
-}: CollectorOptions): Promise<Asset[]> {
+  afterKey,
+}: CollectorOptions) {
   const { traces, serviceMetrics, serviceLogs } = sourceIndices;
-  const dsl = {
+  const dsl: estypes.SearchRequest = {
     index: [traces, serviceMetrics, serviceLogs],
     size: 0,
-    sort: [
-      {
-        '@timestamp': 'desc',
-      },
-    ],
     _source: false,
     query: {
       bool: {
@@ -34,6 +30,7 @@ export async function collectServices({
             range: {
               '@timestamp': {
                 gte: from,
+                lte: to,
               },
             },
           },
@@ -48,26 +45,36 @@ export async function collectServices({
       },
     },
     aggs: {
-      service_environment: {
-        multi_terms: {
+      services: {
+        composite: {
           size: QUERY_MAX_SIZE,
-          terms: [
+          sources: [
             {
-              field: 'service.name',
+              serviceName: {
+                terms: {
+                  field: 'service.name',
+                },
+              },
             },
             {
-              field: 'service.environment',
-              missing: MISSING_KEY,
+              serviceEnvironment: {
+                terms: {
+                  field: 'service.environment',
+                },
+              },
             },
           ],
         },
         aggs: {
-          container_host: {
+          container_and_hosts: {
             multi_terms: {
-              size: QUERY_MAX_SIZE,
               terms: [
-                { field: 'container.id', missing: MISSING_KEY },
-                { field: 'host.hostname', missing: MISSING_KEY },
+                {
+                  field: 'host.hostname',
+                },
+                {
+                  field: 'container.id',
+                },
               ],
             },
           },
@@ -76,14 +83,23 @@ export async function collectServices({
     },
   };
 
+  if (afterKey) {
+    dsl.aggs!.services!.composite!.after = afterKey;
+  }
+
   const esResponse = await client.search(dsl);
 
-  const services = withSpan({ transaction, name: 'processing_response' }, () => {
-    const serviceEnvironment = esResponse.aggregations?.service_environment as { buckets: any[] };
+  const result = withSpan({ transaction, name: 'processing_response' }, async () => {
+    const { after_key: nextKey, buckets = [] } = (esResponse.aggregations?.services || {}) as any;
+    const assets = buckets.reduce((acc: Asset[], bucket: any) => {
+      const {
+        key: { serviceName, serviceEnvironment },
+        container_and_hosts: containerHosts,
+      } = bucket;
 
-    return (serviceEnvironment?.buckets ?? []).reduce<Asset[]>((acc: Asset[], hit: any) => {
-      const [serviceName, environment] = hit.key;
-      const containerHosts = hit.container_host.buckets;
+      if (!serviceName) {
+        return acc;
+      }
 
       const service: Asset = {
         '@timestamp': new Date().toISOString(),
@@ -94,17 +110,17 @@ export async function collectServices({
         'asset.parents': [],
       };
 
-      if (environment !== MISSING_KEY) {
-        service['service.environment'] = environment;
+      if (serviceEnvironment) {
+        service['service.environment'] = serviceEnvironment;
       }
 
-      containerHosts.forEach((nestedHit: any) => {
-        const [containerId, hostname] = nestedHit.key;
-        if (containerId !== MISSING_KEY) {
+      containerHosts.buckets?.forEach((containerBucket: any) => {
+        const [containerId, hostname] = containerBucket.key;
+        if (containerId) {
           (service['asset.parents'] as string[]).push(`container:${containerId}`);
         }
 
-        if (hostname !== MISSING_KEY) {
+        if (hostname) {
           (service['asset.references'] as string[]).push(`host:${hostname}`);
         }
       });
@@ -113,7 +129,9 @@ export async function collectServices({
 
       return acc;
     }, []);
+
+    return { assets, afterKey: buckets.length === QUERY_MAX_SIZE ? nextKey : undefined };
   });
 
-  return services;
+  return result;
 }
