@@ -20,7 +20,6 @@ import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
   NO_DATA_ACTIONS,
-  WARNING_ACTIONS,
 } from './threshold_executor';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
@@ -1961,14 +1960,6 @@ expect.extend({
   toBeAlertAction(action?: Action) {
     const pass = action?.id === FIRED_ACTIONS.id && action?.action.alertState === 'ALERT';
     const message = () => `expected ${action} to be an ALERT action`;
-    return {
-      message,
-      pass,
-    };
-  },
-  toBeWarnAction(action?: Action) {
-    const pass = action?.id === WARNING_ACTIONS.id && action?.action.alertState === 'WARNING';
-    const message = () => `expected ${JSON.stringify(action)} to be an WARNING action`;
     return {
       message,
       pass,

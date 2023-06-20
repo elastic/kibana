@@ -31,6 +31,7 @@ export const useDeleteCases = () => {
       onSuccess: (_, { successToasterTitle }) => {
         queryClient.invalidateQueries(casesQueriesKeys.casesList());
         queryClient.invalidateQueries(casesQueriesKeys.tags());
+        queryClient.invalidateQueries(casesQueriesKeys.categories());
         queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
 
         showSuccessToast(successToasterTitle);

@@ -64,6 +64,7 @@ const createStartContractMock = () => {
     getChromeStyle$: jest.fn(),
     setChromeStyle: jest.fn(),
     project: {
+      setHome: jest.fn(),
       setNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),
       setBreadcrumbs: jest.fn(),
@@ -86,6 +87,7 @@ const createStartContractMock = () => {
 type ChromeServiceContract = PublicMethodsOf<ChromeService>;
 const createMock = () => {
   const mocked: jest.Mocked<ChromeServiceContract> = {
+    setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };

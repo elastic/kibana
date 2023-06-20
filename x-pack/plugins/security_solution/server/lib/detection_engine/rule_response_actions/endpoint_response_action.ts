@@ -34,16 +34,19 @@ export const endpointResponseAction = (
   }, {});
   return Promise.all(
     each(agentIds, async (agent) =>
-      endpointAppContextService.getActionCreateService().createActionFromAlert({
-        hosts: {
-          [agent]: {
-            name: hosts[agent],
+      endpointAppContextService.getActionCreateService().createActionFromAlert(
+        {
+          hosts: {
+            [agent]: {
+              name: hosts[agent],
+            },
           },
+          endpoint_ids: [agent],
+          alert_ids: alertIds,
+          ...commonData,
         },
-        endpoint_ids: [agent],
-        alert_ids: alertIds,
-        ...commonData,
-      })
+        [agent]
+      )
     )
   );
 };

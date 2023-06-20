@@ -27,6 +27,23 @@ describe('Rule Monitoring API Client', () => {
 
   const signal = new AbortController().signal;
 
+  describe('setupDetectionEngineHealthApi', () => {
+    const responseMock = {};
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(responseMock);
+    });
+
+    it('calls API with correct parameters', async () => {
+      await api.setupDetectionEngineHealthApi();
+
+      expect(fetchMock).toHaveBeenCalledWith('/internal/detection_engine/health/_setup', {
+        method: 'POST',
+      });
+    });
+  });
+
   describe('fetchRuleExecutionEvents', () => {
     const responseMock: GetRuleExecutionEventsResponse = {
       events: [],

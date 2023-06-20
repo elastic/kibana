@@ -18,6 +18,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
+jest.mock('@kbn/core-http-router-server-internal');
 import { HttpService } from './http_service';
 import { HttpConfigType, config } from './http_config';
 import { cspConfig } from './csp';
@@ -347,42 +348,6 @@ test('register preboot route handler on preboot', async () => {
   await service.stop();
 });
 
-test('register preboot route handler on setup', async () => {
-  const registerRouterMock = jest.fn();
-  mockHttpServer
-    .mockImplementationOnce(() => ({
-      setup: () => ({
-        server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
-        registerStaticDir: jest.fn(),
-        registerRouterAfterListening: registerRouterMock,
-      }),
-      start: noop,
-      stop: noop,
-      isListening: jest.fn(),
-    }))
-    .mockImplementationOnce(() => ({
-      setup: () => ({ server: {} }),
-      start: noop,
-      stop: noop,
-      isListening: jest.fn(),
-    }));
-
-  const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
-  await service.preboot(prebootDeps);
-
-  const registerRoutesMock = jest.fn();
-  const { registerPrebootRoutes } = await service.setup(setupDeps);
-  registerPrebootRoutes('some-path', registerRoutesMock);
-
-  expect(registerRoutesMock).toHaveBeenCalledTimes(1);
-  expect(registerRoutesMock).toHaveBeenCalledWith(expect.any(Router));
-
-  const [[router]] = registerRoutesMock.mock.calls;
-  expect(registerRouterMock).toHaveBeenCalledTimes(1);
-  expect(registerRouterMock).toHaveBeenCalledWith(router);
-  await service.stop();
-});
-
 test('returns `preboot` http server contract on preboot', async () => {
   const configService = createConfigService();
   const httpServer = {
@@ -441,7 +406,6 @@ test('returns http server contract on setup', async () => {
   expect(setupContract).toMatchObject(httpServer);
   expect(setupContract).toMatchObject({
     createRouter: expect.any(Function),
-    registerPrebootRoutes: expect.any(Function),
   });
   await service.stop();
 });
@@ -479,4 +443,44 @@ test('does not start http server if configured with `autoListen:false`', async (
 
   expect(httpServer.start).not.toHaveBeenCalled();
   await service.stop();
+});
+
+test('passes versioned config to router', async () => {
+  const configService = createConfigService({
+    versioned: {
+      versionResolution: 'newest',
+      strictClientVersionCheck: false,
+    },
+  });
+
+  const httpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerRouter: jest.fn() }),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  const prebootHttpServer = {
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mockHttpServer.mockImplementationOnce(() => prebootHttpServer);
+  mockHttpServer.mockImplementationOnce(() => httpServer);
+
+  const service = new HttpService({ coreId, configService, env, logger });
+  await service.preboot(prebootDeps);
+  const { createRouter } = await service.setup(setupDeps);
+  await service.stop();
+
+  createRouter('/foo');
+
+  expect(Router).toHaveBeenCalledTimes(1);
+  expect(Router).toHaveBeenNthCalledWith(
+    1,
+    '/foo',
+    expect.any(Object), // logger
+    expect.any(Function), // context enhancer
+    expect.objectContaining({ isDev: true, versionedRouteResolution: 'newest' })
+  );
 });
