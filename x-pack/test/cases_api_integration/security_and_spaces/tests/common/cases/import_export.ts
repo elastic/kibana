@@ -77,8 +77,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(objects).to.have.length(4);
 
-      expectExportToHaveCaseSavedObject(objects, caseRequest);
-      expectExportToHaveUserActions(objects, caseRequest);
+      const expectedCaseRequest = { ...caseRequest, category: null }; // added default value
+
+      expectExportToHaveCaseSavedObject(objects, expectedCaseRequest);
+      expectExportToHaveUserActions(objects, expectedCaseRequest);
       expectExportToHaveAComment(objects);
     });
 

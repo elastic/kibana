@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
@@ -16,6 +17,7 @@ import {
   OnSaveProps as SavedObjectOnSaveProps,
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
@@ -239,6 +241,7 @@ export const getSaveLayerAction = ({
   savedObjectsTagging,
   dataViews,
   goToAnnotationLibrary,
+  kibanaTheme,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -248,6 +251,7 @@ export const getSaveLayerAction = ({
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   dataViews: DataViewsContract;
   goToAnnotationLibrary: () => Promise<void>;
+  kibanaTheme: ThemeServiceStart;
 }): LayerAction => {
   const neverSaved = !isByReferenceAnnotationsLayer(layer);
 
@@ -267,26 +271,28 @@ export const getSaveLayerAction = ({
     execute: async (domElement) => {
       if (domElement) {
         render(
-          <SaveModal
-            domElement={domElement}
-            savedObjectsTagging={savedObjectsTagging}
-            onSave={async (props) => {
-              await onSave({
-                state,
-                layer,
-                setState,
-                eventAnnotationService,
-                toasts,
-                modalOnSaveProps: props,
-                dataViews,
-                goToAnnotationLibrary,
-              });
-            }}
-            title={neverSaved ? '' : layer.__lastSaved.title}
-            description={neverSaved ? '' : layer.__lastSaved.description}
-            tags={neverSaved ? [] : layer.__lastSaved.tags}
-            showCopyOnSave={!neverSaved}
-          />,
+          <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+            <SaveModal
+              domElement={domElement}
+              savedObjectsTagging={savedObjectsTagging}
+              onSave={async (props) => {
+                await onSave({
+                  state,
+                  layer,
+                  setState,
+                  eventAnnotationService,
+                  toasts,
+                  modalOnSaveProps: props,
+                  dataViews,
+                  goToAnnotationLibrary,
+                });
+              }}
+              title={neverSaved ? '' : layer.__lastSaved.title}
+              description={neverSaved ? '' : layer.__lastSaved.description}
+              tags={neverSaved ? [] : layer.__lastSaved.tags}
+              showCopyOnSave={!neverSaved}
+            />
+          </KibanaThemeProvider>,
           domElement
         );
       }
