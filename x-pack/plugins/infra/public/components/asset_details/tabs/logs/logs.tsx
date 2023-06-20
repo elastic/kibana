@@ -72,20 +72,21 @@ export const Logs = ({
     setTextQuery(e.target.value);
   }, []);
 
+  const logView: LogViewReference = useMemo(
+    () =>
+      logViewReference ? logViewReference : { type: 'log-view-reference', logViewId: 'default' },
+    [logViewReference]
+  );
+
   const logsUrl = useMemo(() => {
     return locators.nodeLogsLocator.getRedirectUrl({
       nodeType,
       nodeId: nodeName,
       time: startTimestamp,
       filter: textQueryDebounced,
+      logView,
     });
-  }, [locators.nodeLogsLocator, nodeName, nodeType, startTimestamp, textQueryDebounced]);
-
-  const logView: LogViewReference = useMemo(
-    () =>
-      logViewReference ? logViewReference : { type: 'log-view-reference', logViewId: 'default' },
-    [logViewReference]
-  );
+  }, [locators.nodeLogsLocator, nodeName, nodeType, startTimestamp, textQueryDebounced, logView]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent">
@@ -140,6 +141,7 @@ export const Logs = ({
             endTimestamp={currentTime}
             query={filter}
             height="60vh"
+            showFlyoutAction
           />
         )}
       </EuiFlexItem>

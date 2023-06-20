@@ -82,6 +82,7 @@ export const LogsTabContent = () => {
           endTimestamp={to}
           filters={[hostsFilterQuery]}
           query={filterQuery}
+          showFlyoutAction
         />
       </EuiFlexItem>
     </EuiFlexGroup>
