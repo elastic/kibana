@@ -34,7 +34,7 @@ import { SearchApplicationContent } from './search_application_content';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
 import { SearchApplicationSearchPreview } from './search_preview/search_preview';
 
-export const EngineView: React.FC = () => {
+export const SearchApplicationView: React.FC = () => {
   const { fetchSearchApplication, closeDeleteSearchApplicationModal } = useActions(
     SearchApplicationViewLogic
   );

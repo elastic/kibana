@@ -20,7 +20,7 @@ import {
 } from '../../routes';
 
 import { SearchApplicationNameLogic } from './search_application_name_logic';
-import { EngineView } from './search_application_view';
+import { SearchApplicationView } from './search_application_view';
 
 export const SearchApplicationRouter: React.FC = () => {
   const searchApplicationName = decodeURIComponent(
@@ -51,7 +51,7 @@ export const SearchApplicationRouter: React.FC = () => {
         exact
       />
       <Route path={SEARCH_APPLICATION_TAB_PATH}>
-        <EngineView />
+        <SearchApplicationView />
       </Route>
     </Switch>
   );
