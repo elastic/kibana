@@ -8,7 +8,11 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
-import { EngineViewActions, EngineViewLogic, EngineViewValues } from '../engine/engine_view_logic';
+import {
+  EngineViewActions,
+  EngineViewLogic,
+  EngineViewValues,
+} from '../search_application/engine_view_logic';
 
 export interface SearchApplicationIndicesFlyoutValues {
   fetchSearchApplicationApiError?: EngineViewValues['fetchEngineApiError'];

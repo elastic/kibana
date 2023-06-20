@@ -16,8 +16,8 @@ import {
   SEARCH_APPLICATION_PATH,
 } from '../../routes';
 
-import { SearchApplicationRouter } from '../engine/search_application_router';
 import { NotFound } from '../not_found';
+import { SearchApplicationRouter } from '../search_application/search_application_router';
 
 import { SearchApplicationsList } from './search_applications_list';
 
