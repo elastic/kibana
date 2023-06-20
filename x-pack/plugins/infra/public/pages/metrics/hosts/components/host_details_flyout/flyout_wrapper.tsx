@@ -23,7 +23,9 @@ const NODE_TYPE = 'host' as InventoryItemType;
 
 export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const { logViewReference, loading } = useLogViewReference();
+  const { logViewReference, loading } = useLogViewReference({
+    id: 'hosts-flyout-logs-view',
+  });
   const currentTimeRange = useMemo(
     () => ({
       ...getDateRangeAsTimestamp(),
