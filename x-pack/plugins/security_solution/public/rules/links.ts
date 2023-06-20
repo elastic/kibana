@@ -24,7 +24,7 @@ export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
   title: RULES,
   path: RULES_LANDING_PATH,
-  globalSearchDisabled: true,
+  hideTimeline: true,
   links: [
     {
       id: SecurityPageName.rules,
