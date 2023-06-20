@@ -43,7 +43,3 @@ export function lazyMlNodesAvailable() {
 export function permissionToViewMlNodeCount() {
   return userHasPermissionToViewMlNodeCount;
 }
-
-export function getMlNodesCount(): number {
-  return mlNodeCount;
-}
