@@ -7,20 +7,18 @@
 
 import React, { FC } from 'react';
 import { parse } from 'query-string';
-
 import { i18n } from '@kbn/i18n';
-
+import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath } from '../../../contexts/kibana';
-
+import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_creation';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import {
-  loadNewJobCapabilities,
   DATA_FRAME_ANALYTICS,
+  loadNewJobCapabilities,
 } from '../../../services/new_job_capabilities/load_new_job_capabilities';
 
 export const analyticsJobsCreationRouteFactory = (
@@ -43,20 +41,38 @@ export const analyticsJobsCreationRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<PageProps> = ({ location }) => {
   const { index, jobId, savedSearchId }: Record<string, any> = parse(location.search, {
     sort: false,
   });
+  const {
+    services: {
+      data: { dataViews: dataViewsService },
+      savedSearch: savedSearchService,
+    },
+  } = useMlKibana();
 
-  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
-    ...basicResolvers(deps),
-    analyticsFields: () =>
-      loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, DATA_FRAME_ANALYTICS),
-  });
+  const { context } = useRouteResolver(
+    'full',
+    ['canGetDataFrameAnalytics', 'canCreateDataFrameAnalytics'],
+    {
+      ...basicResolvers(),
+      analyticsFields: () =>
+        loadNewJobCapabilities(
+          index,
+          savedSearchId,
+          dataViewsService,
+          savedSearchService,
+          DATA_FRAME_ANALYTICS
+        ),
+    }
+  );
 
   return (
     <PageLoader context={context}>
-      <Page jobId={jobId} />
+      <DataSourceContextProvider>
+        <Page jobId={jobId} />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

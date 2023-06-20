@@ -29,9 +29,19 @@ interface MiniHistogramProps {
   chartData?: SignificantTermHistogramItem[];
   isLoading: boolean;
   label: string;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
 }
 
-export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, label }) => {
+export const MiniHistogram: FC<MiniHistogramProps> = ({
+  chartData,
+  isLoading,
+  label,
+  barColorOverride,
+  barHighlightColorOverride,
+}) => {
   const { charts } = useAiopsAppContext();
 
   const euiTheme = useEuiTheme();
@@ -88,6 +98,9 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, la
     );
   }
 
+  const barColor = barColorOverride ? [barColorOverride] : undefined;
+  const barHighlightColor = barHighlightColorOverride ? [barHighlightColorOverride] : ['orange'];
+
   return (
     <div css={cssChartSize}>
       <Chart>
@@ -101,6 +114,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, la
           yAccessors={['doc_count_overall']}
           data={chartData}
           stackAccessors={[0]}
+          color={barColor}
         />
         <BarSeries
           id={label}
@@ -110,7 +124,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, la
           yAccessors={['doc_count_significant_term']}
           data={chartData}
           stackAccessors={[0]}
-          color={['orange']}
+          color={barHighlightColor}
         />
       </Chart>
     </div>

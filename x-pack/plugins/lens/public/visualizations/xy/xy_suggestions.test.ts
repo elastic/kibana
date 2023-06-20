@@ -25,6 +25,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 jest.mock('../../id_generator');
 
@@ -38,6 +39,7 @@ const xyVisualization = getXyVisualization({
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  dataViewsService: {} as DataViewsPublicPluginStart,
 });
 
 describe('xy_suggestions', () => {

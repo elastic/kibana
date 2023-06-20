@@ -94,6 +94,7 @@ export type PartitionVisComponentProps = Omit<
   palettesRegistry: PaletteRegistry;
   services: Pick<StartDeps, 'data' | 'fieldFormats'>;
   columnCellValueActions: ColumnCellValueActions;
+  hasOpenedOnAggBasedEditor: boolean;
 };
 
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
@@ -106,6 +107,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     syncColors,
     interactive,
     overrides,
+    hasOpenedOnAggBasedEditor,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
   const chartTheme = props.chartsThemeService.useChartsTheme();
@@ -149,7 +151,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const [showLegend, setShowLegend] = useState<boolean>(() => showLegendDefault());
 
   const showToggleLegendElement = props.uiState !== undefined;
-
+  const [chartIsLoaded, setChartIsLoaded] = useState<boolean>(false);
   const [containerDimensions, setContainerDimensions] = useState<
     undefined | PieContainerDimensions
   >();
@@ -157,12 +159,14 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const parentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (parentRef && parentRef.current) {
+    // chart should be loaded to compute the dimensions
+    // otherwise the height is set to 0
+    if (parentRef && parentRef.current && chartIsLoaded) {
       const parentHeight = parentRef.current!.getBoundingClientRect().height;
       const parentWidth = parentRef.current!.getBoundingClientRect().width;
       setContainerDimensions({ width: parentWidth, height: parentHeight });
     }
-  }, [parentRef]);
+  }, [chartIsLoaded, parentRef]);
 
   useEffect(() => {
     const legendShow = showLegendDefault();
@@ -173,6 +177,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     (isRendered: boolean = true) => {
       if (isRendered) {
         props.renderComplete();
+        setChartIsLoaded(true);
       }
     },
     [props]
@@ -364,8 +369,16 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   ) as Partial<SettingsProps>;
 
   const themeOverrides = useMemo(
-    () => getPartitionTheme(visType, visParams, chartTheme, containerDimensions, rescaleFactor),
-    [visType, visParams, chartTheme, containerDimensions, rescaleFactor]
+    () =>
+      getPartitionTheme(
+        visType,
+        visParams,
+        chartTheme,
+        containerDimensions,
+        rescaleFactor,
+        hasOpenedOnAggBasedEditor
+      ),
+    [visType, visParams, chartTheme, containerDimensions, rescaleFactor, hasOpenedOnAggBasedEditor]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');

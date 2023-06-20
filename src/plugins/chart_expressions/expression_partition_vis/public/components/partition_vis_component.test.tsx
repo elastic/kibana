@@ -83,6 +83,7 @@ describe('PartitionVisComponent', function () {
         data: dataPluginMock.createStartContract(),
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
       },
+      hasOpenedOnAggBasedEditor: false,
     };
   });
 

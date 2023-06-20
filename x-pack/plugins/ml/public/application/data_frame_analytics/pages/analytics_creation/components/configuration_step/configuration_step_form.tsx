@@ -41,7 +41,7 @@ import {
 } from '../../../../../components/field_stats_flyout';
 import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { useMlContext } from '../../../../../contexts/ml';
+import { useDataSource } from '../../../../../contexts/ml';
 
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
@@ -120,8 +120,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   state,
   setCurrentStep,
 }) => {
-  const mlContext = useMlContext();
-  const { currentDataView, selectedSavedSearch } = mlContext;
+  const { selectedDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
@@ -187,7 +186,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   };
 
   const indexData = useIndexData(
-    currentDataView,
+    selectedDataView,
     getIndexDataQuery(savedSearchQuery, jobConfigQuery),
     toastNotifications,
     runtimeMappings
@@ -216,7 +215,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     setMaxDistinctValuesError(undefined);
 
     try {
-      if (currentDataView !== undefined) {
+      if (selectedDataView !== undefined) {
         const depVarOptions = [];
         let depVarUpdate = formState.dependentVariable;
         // Get fields and filter for supported types for job type
@@ -353,7 +352,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   }, 300);
 
   useEffect(() => {
-    setFormState({ sourceIndex: currentDataView.title });
+    setFormState({ sourceIndex: selectedDataView.title });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -378,7 +377,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   useEffect(() => {
     if (isJobTypeWithDepVar) {
-      const indexPatternRuntimeFields = getCombinedRuntimeMappings(currentDataView);
+      const indexPatternRuntimeFields = getCombinedRuntimeMappings(selectedDataView);
       let runtimeOptions;
 
       if (indexPatternRuntimeFields) {
@@ -524,15 +523,15 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fields: includesTableItems
         .filter((d) => d.feature_type === 'numerical' && d.is_included)
         .map((d) => d.name),
-      index: currentDataView.title,
+      index: selectedDataView.title,
       legendType: getScatterplotMatrixLegendType(jobType),
       searchQuery: jobConfigQuery,
       runtimeMappings,
-      indexPattern: currentDataView,
+      indexPattern: selectedDataView,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      currentDataView.title,
+      selectedDataView.title,
       dependentVariable,
       includesTableItems,
       isJobTypeWithDepVar,
@@ -576,7 +575,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   return (
     <FieldStatsFlyoutProvider
-      dataView={currentDataView}
+      dataView={selectedDataView}
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={indexData.timeRangeMs}
       dslQuery={jobConfigQuery}
@@ -593,7 +592,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             fullWidth
           >
             <ExplorationQueryBar
-              indexPattern={currentDataView}
+              indexPattern={selectedDataView}
               setSearchQuery={setJobConfigQuery}
               query={query}
             />
@@ -613,7 +612,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               <EuiBadge color="hollow">
                 {selectedSavedSearch !== null
                   ? selectedSavedSearch.title
-                  : currentDataView.getName()}
+                  : selectedDataView.getName()}
               </EuiBadge>
             </Fragment>
           }
@@ -631,7 +630,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               helpText={
                 dependentVariableOptions.length === 0 &&
                 dependentVariableFetchFail === false &&
-                currentDataView &&
+                selectedDataView &&
                 i18n.translate(
                   'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
                   {

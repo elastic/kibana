@@ -23,7 +23,7 @@ import { XJsonMode } from '@kbn/ace';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getCombinedRuntimeMappings, isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { useMlContext } from '../../../../../contexts/ml';
+import { useDataSource } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';
 import { SwitchModal } from './switch_modal';
@@ -93,8 +93,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     xJson: advancedRuntimeMappingsConfig,
   } = useXJsonMode(runtimeMappings || '');
 
-  const mlContext = useMlContext();
-  const { currentDataView } = mlContext;
+  const { selectedDataView } = useDataSource();
 
   const applyChanges = () => {
     const removeRuntimeMappings = advancedRuntimeMappingsConfig === '';
@@ -132,7 +131,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   };
 
   useEffect(function getInitialRuntimeMappings() {
-    const combinedRuntimeMappings = getCombinedRuntimeMappings(currentDataView, runtimeMappings);
+    const combinedRuntimeMappings = getCombinedRuntimeMappings(selectedDataView, runtimeMappings);
 
     const prettySourceConfig = JSON.stringify(combinedRuntimeMappings, null, 2);
 

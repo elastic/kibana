@@ -80,7 +80,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "solution": "search",
               "telemetryId": "onboarding--search--database",
               "title": <FormattedMessage
-                defaultMessage="Search across databases and {lineBreak} business systems"
+                defaultMessage="Search across databases {lineBreak} and business systems"
                 id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
                 values={
                   Object {
@@ -219,6 +219,33 @@ exports[`guide cards snapshots should render all cards 1`] = `
           size="m"
         />
       </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        key="4"
+      >
+        <GuideCard
+          activateGuide={[MockFunction]}
+          activeFilter="all"
+          card={
+            Object {
+              "icon": "videoPlayer",
+              "navigateTo": Object {
+                "appId": "synthetics",
+                "path": "/monitors/getting-started",
+              },
+              "order": 14,
+              "solution": "observability",
+              "telemetryId": "onboarding--observability--synthetics",
+              "title": "Create a Synthetic Monitor",
+            }
+          }
+          guidesState={Array []}
+          navigateToApp={[MockFunction]}
+        />
+        <EuiSpacer
+          size="m"
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlexItem>
   <EuiFlexItem
@@ -313,7 +340,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "solution": "security",
               "telemetryId": "onboarding--security--cloud",
               "title": <FormattedMessage
-                defaultMessage="Secure my cloud assets with {lineBreak} cloud security posture management (CSPM)"
+                defaultMessage="Secure my cloud assets with cloud {lineBreak} security posture management (CSPM)"
                 id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"
                 values={
                   Object {

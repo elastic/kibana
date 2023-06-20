@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiPopover } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
-import { useLocalStorage } from 'react-use';
 import { QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { AddQuickPromptModal } from './add_quick_prompt_modal/add_quick_prompt_modal';
@@ -19,8 +18,6 @@ import { useAssistantContext } from '../../assistant_context';
 const QuickPromptsFlexGroup = styled(EuiFlexGroup)`
   margin: 16px;
 `;
-
-export const QUICK_PROMPT_LOCAL_STORAGE_KEY = 'quickPrompts';
 
 const COUNT_BEFORE_OVERFLOW = 5;
 interface QuickPromptsProps {
@@ -33,18 +30,12 @@ interface QuickPromptsProps {
  * and localstorage for storing new and edited prompts.
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput }) => {
-  const { basePromptContexts, baseQuickPrompts, nameSpace, promptContexts } = useAssistantContext();
-
-  // Local storage for all quick prompts, prefixed by assistant nameSpace
-  const [localStorageQuickPrompts, setLocalStorageQuickPrompts] = useLocalStorage(
-    `${nameSpace}.${QUICK_PROMPT_LOCAL_STORAGE_KEY}`,
-    baseQuickPrompts
-  );
-  const [quickPrompts, setQuickPrompts] = useState(localStorageQuickPrompts ?? []);
+  const { allQuickPrompts, basePromptContexts, promptContexts, setAllQuickPrompts } =
+    useAssistantContext();
 
   const contextFilteredQuickPrompts = useMemo(() => {
     const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
-    return quickPrompts.filter((quickPrompt) => {
+    return allQuickPrompts.filter((quickPrompt) => {
       // Return quick prompt as match if it has no categories, otherwise ensure category exists in registered prompt contexts
       if (quickPrompt.categories == null || quickPrompt.categories.length === 0) {
         return true;
@@ -54,7 +45,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
         });
       }
     });
-  }, [quickPrompts, promptContexts]);
+  }, [allQuickPrompts, promptContexts]);
 
   // Overflow state
   const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
@@ -74,10 +65,9 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
   // Callback for manage modal, saves to local storage on change
   const onQuickPromptsChange = useCallback(
     (newQuickPrompts: QuickPrompt[]) => {
-      setLocalStorageQuickPrompts(newQuickPrompts);
-      setQuickPrompts(newQuickPrompts);
+      setAllQuickPrompts(newQuickPrompts);
     },
-    [setLocalStorageQuickPrompts]
+    [setAllQuickPrompts]
   );
   return (
     <QuickPromptsFlexGroup gutterSize="s" alignItems="center">
@@ -126,7 +116,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
       <EuiFlexItem grow={false}>
         <AddQuickPromptModal
           promptContexts={basePromptContexts}
-          quickPrompts={quickPrompts}
+          quickPrompts={allQuickPrompts}
           onQuickPromptsChange={onQuickPromptsChange}
         />
       </EuiFlexItem>
