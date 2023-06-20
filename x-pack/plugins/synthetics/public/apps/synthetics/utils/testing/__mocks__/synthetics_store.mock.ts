@@ -23,7 +23,7 @@ import {
  */
 export const mockState: SyntheticsAppState = {
   ui: {
-    alertFlyoutVisible: false,
+    alertFlyoutVisible: null,
     basePath: 'yyz',
     esKuery: '',
     integrationsPopoverOpen: null,
