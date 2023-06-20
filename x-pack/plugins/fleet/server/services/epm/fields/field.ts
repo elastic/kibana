@@ -277,6 +277,8 @@ export function addTimeSeriesFields(
   for (const field of fields) {
     if (field.name.includes('*') && 'metric_type' in field) {
       newFields.push({ ...field, time_series_metric: field.metric_type });
+    } else {
+      newFields.push({ ...field });
     }
   }
   return newFields;

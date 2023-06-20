@@ -684,6 +684,18 @@ describe('processFields', () => {
 
     const fields: Field[] = safeLoad(literalYml);
 
+    const noWildcardYml = `
+    - name: test
+      type: long
+      format: bytes
+      unit: byte
+      metric_type: gauge
+      description: |
+        Total swap memory.
+`;
+
+    const noWildcardFields: Field[] = safeLoad(noWildcardYml);
+
     test('Copies metric_type to time_series_metric field when tsds is enabled and name has wildcard', () => {
       expect(addTimeSeriesFields(fields, true)).toMatchInlineSnapshot(`
         [
@@ -705,6 +717,21 @@ describe('processFields', () => {
         [
           {
             "name": "a.*.b",
+            "type": "long",
+            "format": "bytes",
+            "unit": "byte",
+            "metric_type": "gauge",
+            "description": "Total swap memory.\\n"
+          }
+        ]
+      `);
+    });
+
+    test('Returns input fields when name has no wildcard', () => {
+      expect(addTimeSeriesFields(noWildcardFields, true)).toMatchInlineSnapshot(`
+        [
+          {
+            "name": "test",
             "type": "long",
             "format": "bytes",
             "unit": "byte",
