@@ -20,6 +20,8 @@ import {
   waitForHostToEnroll,
 } from './fleet_services';
 
+const VAGRANT_CWD = `${process.cwd()}/scripts/endpoint/endpoint_agent_runner/`;
+
 export interface CreateAndEnrollEndpointHostOptions
   extends Pick<CreateMultipassVmOptions, 'disk' | 'cpus' | 'memory'> {
   kbnClient: KbnClient;
@@ -169,9 +171,10 @@ const createMultipassVm = async ({
   memory = '1G',
 }: CreateMultipassVmOptions): Promise<CreateMultipassVmResponse> => {
   if (process.env.CI) {
-    await execa.command(`vagrant up --provider qemu --provision`, {
+    // await execa.command(`vagrant up --provider qemu --provision`, {
+    await execa.command(`vagrant up`, {
       env: {
-        VAGRANT_CWD: `${process.cwd()}/endpoint_agent_runner/`,
+        VAGRANT_CWD,
         VMNAME: vmName,
       },
       stdio: ['inherit', 'inherit', 'inherit'],
@@ -238,20 +241,20 @@ const enrollHostWithFleet = async ({
         `vagrant ssh test -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`,
         {
           env: {
-            VAGRANT_CWD: `${process.cwd()}/endpoint_agent_runner/`,
+            VAGRANT_CWD,
           },
           stdio: ['inherit', 'inherit', 'inherit'],
         }
       );
       await execa.command(`vagrant ssh test -- tar -zxf ${agentDownloadedFile}`, {
         env: {
-          VAGRANT_CWD: `${process.cwd()}/endpoint_agent_runner/`,
+          VAGRANT_CWD,
         },
         stdio: ['inherit', 'inherit', 'inherit'],
       });
       await execa.command(`vagrant ssh test -- rm -f ${agentDownloadedFile}`, {
         env: {
-          VAGRANT_CWD: `${process.cwd()}/endpoint_agent_runner/`,
+          VAGRANT_CWD,
         },
         stdio: ['inherit', 'inherit', 'inherit'],
       });
@@ -292,7 +295,7 @@ const enrollHostWithFleet = async ({
       ['ssh', 'test', '--', `cd ${vmDirName} && ${agentInstallArguments.join(' ')}`],
       {
         env: {
-          VAGRANT_CWD: `${process.cwd()}/endpoint_agent_runner/`,
+          VAGRANT_CWD,
         },
         stdio: ['inherit', 'inherit', 'inherit'],
       }
