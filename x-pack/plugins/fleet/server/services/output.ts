@@ -46,6 +46,8 @@ import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
 } from '../errors';
 
+import type { OutputType } from '../types';
+
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -165,9 +167,9 @@ async function findPoliciesWithFleetServer(
   return [];
 }
 
-function validateLogstashOutputNotUsedInFleetServerPolicy(
+function validateOutputNotUsedInFleetServerPolicy(
   agentPolicies: AgentPolicy[],
-  dataOutputType?: string
+  dataOutputType: OutputType['Logstash'] | OutputType['Kafka']
 ) {
   // Validate no policy with fleet server use that policy
   for (const agentPolicy of agentPolicies) {
@@ -200,7 +202,7 @@ async function validateTypeChanges(
     (data?.type === outputType.Logstash || data?.type === outputType.Kafka)
   ) {
     // Validate no policy with fleet server use that policy
-    validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies, data.type);
+    validateOutputNotUsedInFleetServerPolicy(fleetServerPolicies, data.type);
   }
   await updateFleetServerPoliciesDataOutputId(
     soClient,
