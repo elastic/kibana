@@ -141,14 +141,13 @@ export const useHostsTable = () => {
 
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
   const popoverContainerRef = React.createRef<HTMLDivElement>();
+  const hostsTableRef = useRef<EuiBasicTable | null>(null);
 
   const closeFlyout = useCallback(() => setHostFlyoutState(null), [setHostFlyoutState]);
 
   const onSelectionChange = (newSelectedItems: HostNodeRow[]) => {
     setSelectedItems(newSelectedItems);
   };
-
-  const hostsTableRef = useRef<EuiBasicTable | null>(null);
 
   const filterSelectedHosts = useCallback(() => {
     if (!selectedItems.length) {

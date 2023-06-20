@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import { useBoolean } from '../../../../../hooks/use_boolean';
 
 const selectedHostsLabel = (selectedHostsCount: number) => {
   return i18n.translate('xpack.infra.hostsViewPage.table.selectedHostsButton', {
@@ -17,21 +18,23 @@ const selectedHostsLabel = (selectedHostsCount: number) => {
   });
 };
 
-interface HostsTableFilterActionProps {
+interface FilterActionProps {
   selectedItemsCount: number;
   filterSelectedHosts: () => void;
 }
 
-export const HostsTableFilterAction = ({
-  selectedItemsCount,
-  filterSelectedHosts,
-}: HostsTableFilterActionProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: FilterActionProps) => {
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
+
+  const onAddFilterClick = () => {
+    filterSelectedHosts();
+    closePopover();
+  };
 
   return (
     <EuiPopover
       isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
+      closePopover={closePopover}
       data-test-subj="bulkAction"
       panelPaddingSize="s"
       button={
@@ -40,7 +43,7 @@ export const HostsTableFilterAction = ({
           size="xs"
           iconSide="right"
           iconType="arrowDown"
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          onClick={() => togglePopover()}
         >
           {selectedHostsLabel(selectedItemsCount)}
         </EuiButtonEmpty>
@@ -49,10 +52,7 @@ export const HostsTableFilterAction = ({
       <EuiButtonEmpty
         data-test-subj="infraUseHostsTableHostsButton"
         iconType="filter"
-        onClick={() => {
-          filterSelectedHosts();
-          setIsPopoverOpen(false);
-        }}
+        onClick={onAddFilterClick}
       >
         {i18n.translate('xpack.infra.hostsViewPage.table.addFilter', {
           defaultMessage: 'Add filter',
