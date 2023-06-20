@@ -7,10 +7,7 @@
 
 import * as t from 'io-ts';
 import { Coordinate } from '../../../typings/timeseries';
-import {
-  getTransactionDurationChartPreview,
-  TransactionDurationChartPreviewResponse,
-} from './rule_types/transaction_duration/get_transaction_duration_chart_preview';
+import { getTransactionDurationChartPreview } from './rule_types/transaction_duration/get_transaction_duration_chart_preview';
 import { getTransactionErrorCountChartPreview } from './rule_types/error_count/get_error_count_chart_preview';
 import { getTransactionErrorRateChartPreview } from './rule_types/transaction_error_rate/get_transaction_error_rate_chart_preview';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -105,7 +102,7 @@ const transactionDurationChartPreview = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    latencyChartPreview: TransactionDurationChartPreviewResponse;
+    latencyChartPreview: PreviewChartResponse;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
 
