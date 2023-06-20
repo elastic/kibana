@@ -15,8 +15,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
@@ -24,6 +22,7 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { LogCategorizationPage } from './log_categorization_page';
+import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -40,29 +39,10 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
 }) => {
   if (!dataView) return null;
 
-  if (!dataView.isTimeBased()) {
-    return (
-      <EuiCallOut
-        title={i18n.translate(
-          'xpack.aiops.logCategorization.dataViewNotBasedOnTimeSeriesNotificationTitle',
-          {
-            defaultMessage: 'The data view "{dataViewTitle}" is not based on a time series.',
-            values: { dataViewTitle: dataView.getName() },
-          }
-        )}
-        color="danger"
-        iconType="warning"
-      >
-        <p>
-          {i18n.translate(
-            'xpack.aiops.logCategorization.dataViewNotBasedOnTimeSeriesNotificationDescription',
-            {
-              defaultMessage: 'Log pattern analysis only runs over time-based indices.',
-            }
-          )}
-        </p>
-      </EuiCallOut>
-    );
+  const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
+
+  if (warning !== null) {
+    return <>{warning}</>;
   }
 
   const datePickerDeps = {
