@@ -300,7 +300,7 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
       process.on('message', async (message) => {
         if (message === 'cleanup') {
           await procs.stop('kibana');
-          shutdownEs();
+          await shutdownEs();
           resolve(0);
         }
 

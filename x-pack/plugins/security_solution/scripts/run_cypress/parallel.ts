@@ -384,7 +384,7 @@ export const cli = () => {
             }
 
             await procs.stop('kibana');
-            shutdownEs();
+            await shutdownEs();
             cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
 
             return result;
