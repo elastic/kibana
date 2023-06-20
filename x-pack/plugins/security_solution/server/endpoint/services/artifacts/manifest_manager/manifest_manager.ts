@@ -152,7 +152,9 @@ export class ManifestManager {
    * @returns {Promise<InternalArtifactCompleteSchema[]>} An array of uncompressed artifacts built from exception-list-agnostic SOs.
    * @throws Throws/rejects if there are errors building the list.
    */
-  protected async buildExceptionListArtifacts(): Promise<ArtifactsBuildResult> {
+  protected async buildExceptionListArtifacts(
+    allPolicyIds: string[]
+  ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
 
@@ -160,12 +162,9 @@ export class ManifestManager {
       defaultArtifacts.push(await this.buildExceptionListArtifact(os));
     }
 
-    await iterateAllListItems(
-      (page) => this.listEndpointPolicyIds(page),
-      async (policyId) => {
-        policySpecificArtifacts[policyId] = defaultArtifacts;
-      }
-    );
+    allPolicyIds.forEach((policyId) => {
+      policySpecificArtifacts[policyId] = defaultArtifacts;
+    });
 
     return { defaultArtifacts, policySpecificArtifacts };
   }
@@ -199,12 +198,43 @@ export class ManifestManager {
   }
 
   /**
+   * Builds an artifact (by policy) based on the current state of the
+   * artifacts list (Trusted Apps, Host Iso. Exceptions, Event Filters, Blocklists)
+   * (which uses the `exception-list-agnostic` SO type)
+   */
+  protected async buildArtifactsByPolicy(
+    allPolicyIds: string[],
+    supportedOSs: string[],
+    osOptions: BuildArtifactsForOsOptions
+  ) {
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+    await pMap(
+      allPolicyIds,
+      async (policyId) => {
+        for (const os of supportedOSs) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(
+            await this.buildArtifactsForOs({ os, policyId, ...osOptions })
+          );
+        }
+      },
+      {
+        concurrency: 5,
+        /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
+         * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
+        stopOnError: false,
+      }
+    );
+
+    return policySpecificArtifacts;
+  }
+
+  /**
    * Builds an array of artifacts (one per supported OS) based on the current state of the
    * Trusted Apps list (which uses the `exception-list-agnostic` SO type)
    */
-  protected async buildTrustedAppsArtifacts(): Promise<ArtifactsBuildResult> {
+  protected async buildTrustedAppsArtifacts(allPolicyIds: string[]): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
-    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       name: ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME,
@@ -214,17 +244,12 @@ export class ManifestManager {
       defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
-    await iterateAllListItems(
-      (page) => this.listEndpointPolicyIds(page),
-      async (policyId) => {
-        for (const os of ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS) {
-          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(
-            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
-          );
-        }
-      }
-    );
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> =
+      await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
 
     return { defaultArtifacts, policySpecificArtifacts };
   }
@@ -234,9 +259,10 @@ export class ManifestManager {
    * Event Filters list
    * @protected
    */
-  protected async buildEventFiltersArtifacts(): Promise<ArtifactsBuildResult> {
+  protected async buildEventFiltersArtifacts(
+    allPolicyIds: string[]
+  ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
-    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
       listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
       name: ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME,
@@ -246,17 +272,12 @@ export class ManifestManager {
       defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
-    await iterateAllListItems(
-      (page) => this.listEndpointPolicyIds(page),
-      async (policyId) => {
-        for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
-          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(
-            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
-          );
-        }
-      }
-    );
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> =
+      await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
 
     return { defaultArtifacts, policySpecificArtifacts };
   }
@@ -266,29 +287,23 @@ export class ManifestManager {
    * Blocklist list
    * @protected
    */
-  protected async buildBlocklistArtifacts(): Promise<ArtifactsBuildResult> {
+  protected async buildBlocklistArtifacts(allPolicyIds: string[]): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
-    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
       listId: ENDPOINT_BLOCKLISTS_LIST_ID,
       name: ArtifactConstants.GLOBAL_BLOCKLISTS_NAME,
     };
 
-    for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+    for (const os of ArtifactConstants.SUPPORTED_BLOCKLISTS_OPERATING_SYSTEMS) {
       defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
-    await iterateAllListItems(
-      (page) => this.listEndpointPolicyIds(page),
-      async (policyId) => {
-        for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
-          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(
-            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
-          );
-        }
-      }
-    );
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> =
+      await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_BLOCKLISTS_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
 
     return { defaultArtifacts, policySpecificArtifacts };
   }
@@ -299,9 +314,10 @@ export class ManifestManager {
    * @returns
    */
 
-  protected async buildHostIsolationExceptionsArtifacts(): Promise<ArtifactsBuildResult> {
+  protected async buildHostIsolationExceptionsArtifacts(
+    allPolicyIds: string[]
+  ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
-    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
       listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
       name: ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME,
@@ -311,17 +327,12 @@ export class ManifestManager {
       defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
-    await iterateAllListItems(
-      (page) => this.listEndpointPolicyIds(page),
-      async (policyId) => {
-        for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
-          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(
-            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
-          );
-        }
-      }
-    );
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> =
+      await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
 
     return { defaultArtifacts, policySpecificArtifacts };
   }
@@ -462,12 +473,13 @@ export class ManifestManager {
   public async buildNewManifest(
     baselineManifest: Manifest = ManifestManager.createDefaultManifest(this.schemaVersion)
   ): Promise<Manifest> {
+    const allPolicyIds = await this.listEndpointPolicyIds();
     const results = await Promise.all([
-      this.buildExceptionListArtifacts(),
-      this.buildTrustedAppsArtifacts(),
-      this.buildEventFiltersArtifacts(),
-      this.buildHostIsolationExceptionsArtifacts(),
-      this.buildBlocklistArtifacts(),
+      this.buildExceptionListArtifacts(allPolicyIds),
+      this.buildTrustedAppsArtifacts(allPolicyIds),
+      this.buildEventFiltersArtifacts(allPolicyIds),
+      this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
+      this.buildBlocklistArtifacts(allPolicyIds),
     ]);
 
     const manifest = new Manifest({
@@ -612,12 +624,25 @@ export class ManifestManager {
     });
   }
 
-  private async listEndpointPolicyIds(page: number) {
-    return this.packagePolicyService.listIds(this.savedObjectsClient, {
-      page,
-      perPage: 20,
-      kuery: 'ingest-package-policies.package.name:endpoint',
-    });
+  private async listEndpointPolicyIds() {
+    const allPolicyIds: string[] = [];
+
+    let paging = true;
+    let page = 1;
+
+    while (paging) {
+      const { items, total } = await this.packagePolicyService.listIds(this.savedObjectsClient, {
+        page,
+        perPage: 100,
+        kuery: 'ingest-package-policies.package.name:endpoint',
+      });
+
+      allPolicyIds.push(...items);
+
+      paging = (page - 1) * 20 + items.length < total;
+      page++;
+    }
+    return allPolicyIds;
   }
 
   public getArtifactsClient(): EndpointArtifactClientInterface {
