@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 export function timeSeriesDataViewWarning(
   dataView: DataView,
-  feature: 'change_point_detection' | 'log_categorization' | 'log_rate_spikes'
+  feature: 'change_point_detection' | 'log_categorization' | 'explain_log_rate_spikes'
 ) {
   if (dataView.isTimeBased()) {
     return null;
@@ -27,9 +27,9 @@ export function timeSeriesDataViewWarning(
     });
   } else if (feature === 'log_categorization') {
     description = i18n.translate('xpack.aiops.logCategorizationTimeSeriesWarning.description', {
-      defaultMessage: 'Change point detection only runs over time-based indices.',
+      defaultMessage: 'Log pattern analysis only runs over time-based indices.',
     });
-  } else if (feature === 'log_rate_spikes') {
+  } else if (feature === 'explain_log_rate_spikes') {
     description = i18n.translate('xpack.aiops.logRateSpikesTimeSeriesWarning.description', {
       defaultMessage: 'Log rate spikes only runs over time-based indices.',
     });

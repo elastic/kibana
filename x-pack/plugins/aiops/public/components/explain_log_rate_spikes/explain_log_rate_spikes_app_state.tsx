@@ -48,7 +48,7 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
 }) => {
   if (!dataView) return null;
 
-  const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
+  const warning = timeSeriesDataViewWarning(dataView, 'explain_log_rate_spikes');
 
   if (warning !== null) {
     return <>{warning}</>;

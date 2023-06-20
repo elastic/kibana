@@ -39,7 +39,7 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
 }) => {
   if (!dataView) return null;
 
-  const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
+  const warning = timeSeriesDataViewWarning(dataView, 'log_categorization');
 
   if (warning !== null) {
     return <>{warning}</>;
