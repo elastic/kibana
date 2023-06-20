@@ -16,9 +16,7 @@ import { getGeoPointFields, getIsTimeseries } from '../../../index_pattern_util'
 import { GeoLineForm } from './geo_line_form';
 
 interface Props {
-  onSourceConfigChange: (
-    sourceConfig: Partial<ESGeoLineSourceDescriptor> | null
-  ) => void;
+  onSourceConfigChange: (sourceConfig: Partial<ESGeoLineSourceDescriptor> | null) => void;
 }
 
 interface State {

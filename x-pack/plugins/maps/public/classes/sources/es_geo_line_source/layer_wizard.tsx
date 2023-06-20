@@ -35,9 +35,7 @@ export const geoLineLayerWizardConfig: LayerWizard = {
     return !getIsGoldPlus();
   },
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (
-      sourceConfig: Partial<ESGeoLineSourceDescriptor> | null
-    ) => {
+    const onSourceConfigChange = (sourceConfig: Partial<ESGeoLineSourceDescriptor> | null) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;
