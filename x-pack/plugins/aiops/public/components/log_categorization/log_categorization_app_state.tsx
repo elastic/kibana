@@ -15,6 +15,8 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
@@ -36,6 +38,33 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   savedSearch,
   appDependencies,
 }) => {
+  if (!dataView) return null;
+
+  if (!dataView.isTimeBased()) {
+    return (
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.aiops.logCategorization.dataViewNotBasedOnTimeSeriesNotificationTitle',
+          {
+            defaultMessage: 'The data view "{dataViewTitle}" is not based on a time series.',
+            values: { dataViewTitle: dataView.getName() },
+          }
+        )}
+        color="danger"
+        iconType="warning"
+      >
+        <p>
+          {i18n.translate(
+            'xpack.aiops.logCategorization.dataViewNotBasedOnTimeSeriesNotificationDescription',
+            {
+              defaultMessage: 'Log pattern analysis only runs over time-based indices.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+    );
+  }
+
   const datePickerDeps = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
     toMountPoint,
