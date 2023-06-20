@@ -264,6 +264,7 @@ const useEnsureDefaultNamespace = ({
     updatePolicy(policy);
   }, [newPolicy, input, updatePolicy]);
 };
+
 const usePolicyTemplateInitialName = ({
   isEditPage,
   isLoading,
