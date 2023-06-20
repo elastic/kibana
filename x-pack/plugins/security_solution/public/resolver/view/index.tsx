@@ -17,9 +17,7 @@ import type { State } from '../../common/store/types';
  * The `Resolver` component to use. This sets up the DataAccessLayer provider. Use `ResolverWithoutProviders` in tests or in other scenarios where you want to provide a different (or fake) data access layer.
  */
 export const Resolver = React.memo((props: ResolverProps) => {
-  const store = useSelector(
-    (state: State) => state.analyzer.analyzerById[props.resolverComponentInstanceID]
-  );
+  const store = useSelector((state: State) => state.analyzer[props.resolverComponentInstanceID]);
 
   const dispatch = useDispatch();
   if (!store) {
