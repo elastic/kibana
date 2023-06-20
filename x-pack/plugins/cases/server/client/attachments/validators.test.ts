@@ -23,6 +23,10 @@ describe('validators', () => {
       expect(() => validateFindCommentsPagination({ page: 100 })).not.toThrowError();
     });
 
+    it('does not throw if page and perPage are defined and valid', () => {
+      expect(() => validateFindCommentsPagination({ page: 2, perPage: 100 })).not.toThrowError();
+    });
+
     it('returns if page and perPage are undefined', () => {
       expect(() => validateFindCommentsPagination({})).not.toThrowError();
     });
