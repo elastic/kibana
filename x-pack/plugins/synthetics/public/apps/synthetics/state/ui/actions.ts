@@ -6,15 +6,19 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
+import {
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '../../../../../common/constants/synthetics_alerts';
 
 export interface PopoverState {
   id: string;
   open: boolean;
 }
 
-export const setAlertFlyoutVisible = createAction<boolean | undefined>('[UI] TOGGLE ALERT FLYOUT');
-
-export const setAlertFlyoutType = createAction<string>('[UI] SET ALERT FLYOUT TYPE');
+export const setAlertFlyoutVisible = createAction<
+  typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE | null
+>('[UI] TOGGLE ALERT FLYOUT');
 
 export const setBasePath = createAction<string>('[UI] SET BASE PATH');
 
