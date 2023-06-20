@@ -96,7 +96,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-message-signing-keys": "93421f43fed2526b59092a4e3c65d64bc2266c0f",
         "fleet-preconfiguration-deletion-record": "c52ea1e13c919afe8a5e8e3adbb7080980ecc08e",
         "fleet-proxy": "6cb688f0d2dd856400c1dbc998b28704ff70363d",
-        "fleet-uninstall-tokens": "d25a8aedb522d2b839ab0950160777528122070f",
+        "fleet-uninstall-tokens": "ed8aa37e3cdd69e4360709e64944bb81cae0c025",
         "graph-workspace": "5cc6bb1455b078fd848c37324672163f09b5e376",
         "guided-onboarding-guide-state": "d338972ed887ac480c09a1a7fbf582d6a3827c91",
         "guided-onboarding-plugin-state": "bc109e5ef46ca594fdc179eda15f3095ca0a37a4",
