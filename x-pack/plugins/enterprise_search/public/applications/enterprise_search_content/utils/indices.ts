@@ -111,9 +111,8 @@ export function getLastUpdated(index?: ElasticsearchIndexWithIngestion): string 
 export function getContentExtractionDisabled(index?: ElasticsearchIndexWithIngestion): boolean {
   if (!index) return false;
   if (isConnectorIndex(index)) {
-    const connectorIndex: ConnectorIndex = index;
     const contentExtractionDisabled =
-      connectorIndex.connector.configuration?.use_text_extraction_service?.value;
+      index.connector.configuration?.use_text_extraction_service?.value;
     return !!contentExtractionDisabled;
   }
 
