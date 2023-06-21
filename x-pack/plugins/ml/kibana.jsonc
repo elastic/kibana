@@ -29,7 +29,6 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
-      "savedObjectsFinder",
       "savedObjectsManagement",
       "savedSearch"
     ],
@@ -55,6 +54,7 @@
       "kibanaUtils",
       "lens",
       "maps",
+      "savedObjectsFinder",
       "usageCollection",
       "unifiedFieldList",
       "unifiedSearch"

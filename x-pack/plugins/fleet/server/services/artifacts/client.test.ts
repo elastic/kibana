@@ -9,6 +9,9 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
 
+import { appContextService } from '../app_context';
+import { createAppContextStartContractMock } from '../../mocks';
+
 import { FleetArtifactsClient } from './client';
 import {
   generateArtifactEsGetSingleHitMock,
@@ -20,7 +23,6 @@ import {
 describe('When using the Fleet Artifacts Client', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
   let artifactClient: FleetArtifactsClient;
-
   const setEsClientGetMock = (withInvalidArtifact?: boolean) => {
     const singleHit = generateArtifactEsGetSingleHitMock();
 
@@ -33,6 +35,8 @@ describe('When using the Fleet Artifacts Client', () => {
   };
 
   beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+
     esClientMock = elasticsearchServiceMock.createInternalClient();
     artifactClient = new FleetArtifactsClient(esClientMock, 'endpoint');
   });
