@@ -6,21 +6,27 @@
  */
 
 import * as t from 'io-ts';
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import { enumeration, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
-export type CoverageOverviewRuleActivity = t.TypeOf<typeof CoverageOverviewRuleActivity>;
-export const CoverageOverviewRuleActivity = t.union([
-  t.literal('enabled'),
-  t.literal('disabled'),
-  t.literal('available'),
-]);
+export enum CoverageOverviewRuleActivity {
+  Enabled = 'enabled',
+  Disabled = 'disabled',
+  Available = 'available',
+}
+export const CoverageOverviewRuleActivitySchema = enumeration(
+  'CoverageOverviewRuleActivity',
+  CoverageOverviewRuleActivity
+);
 
-export type CoverageOverviewRuleSource = t.TypeOf<typeof CoverageOverviewRuleSource>;
-export const CoverageOverviewRuleSource = t.union([
-  t.literal('prebuilt'),
-  t.literal('custom'),
-  t.literal('customized'), // Customized prebuilt rule
-]);
+export enum CoverageOverviewRuleSource {
+  Prebuilt = 'prebuilt',
+  Custom = 'custom',
+  Customized = 'customized',
+}
+export const CoverageOverviewRuleSourceSchema = enumeration(
+  'CoverageOverviewRuleSource',
+  CoverageOverviewRuleSource
+);
 
 export type CoverageOverviewFilter = t.TypeOf<typeof CoverageOverviewFilter>;
 export const CoverageOverviewFilter = t.partial({
