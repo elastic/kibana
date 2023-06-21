@@ -14,19 +14,19 @@ This logic provides the following functionality via the `IDetectionEngineHealthC
 
 The assets' sources are located in the repo under `x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/logic/detection_engine_health/assets`.
 
-### Installed via internal user
+### Assets are installed on behalf of the internal user
 
 The important aspect to know about is that we install these assets via the saved objects `import()` method, and do it on behalf of the internal Kibana user (which is `kibana_system` by default). This user has privileges for writing saved objects out of the box, which allows our users to be able to install the assets without configuring any additional RBAC.
 
 See `createDetectionEngineHealthClient` and `installAssetsForMonitoringHealth` for the implementation details.
 
-### Are JSON
+### Assets' source files are JSON
 
 Another thing to consider is that the assets are stored as `.json` files in the repo. This has pros and cons, but the important benefit here is that it allows you to make changes in the assets faster. Especially it applies to Kibana dashboards, which are large objects, and it's hard to construct a dashboard manually in the code.
 
 ### Updating the rule monitoring dashboard
 
-For example, let's talk about updating the `dashboard_rule_monitoring.json`. It is very conveniet to be able to install this dashboard via calling the `_setup` endpoint, and then go edit it in Kibana, export it, and update the source file based on the exported `.ndjson` file.
+For example, let's talk about updating the `dashboard_rule_monitoring.json`. It is very convenient to be able to install this dashboard via calling the `_setup` endpoint, and then go edit it in Kibana, save it, export it, and update the source file based on the exported `.ndjson` file.
 
 Only a few adjustments would need to be done after that manually in the source file:
 
