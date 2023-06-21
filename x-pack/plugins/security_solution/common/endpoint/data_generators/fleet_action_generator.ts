@@ -21,7 +21,7 @@ import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/
 
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action (isolate or unisolate) */
-  generate(overrides: DeepPartial<EndpointAction> = {}, index?: number): EndpointAction {
+  generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
     return merge(
       {

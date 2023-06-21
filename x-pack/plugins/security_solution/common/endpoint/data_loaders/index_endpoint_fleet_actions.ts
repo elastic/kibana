@@ -56,7 +56,9 @@ export const indexEndpointAndFleetActionsForHost = async (
   const agentId = endpointHost.elastic.agent.id;
   const actionsCount = options.numResponseActions ?? 1;
   const total =
-    options.numResponseActions === 1 ? 1 : fleetActionGenerator.randomN(5) + actionsCount;
+    options.numResponseActions === 1
+      ? actionsCount
+      : fleetActionGenerator.randomN(5) + actionsCount;
   const response: IndexedEndpointAndFleetActionsForHostResponse = {
     actions: [],
     actionResponses: [],
