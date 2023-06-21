@@ -265,7 +265,7 @@ describe('EditCategory ', () => {
       expect(screen.getByText('My category')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('remove-category-cross-button'));
+    userEvent.click(screen.getByTestId('category-remove-button'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(null));
   });
