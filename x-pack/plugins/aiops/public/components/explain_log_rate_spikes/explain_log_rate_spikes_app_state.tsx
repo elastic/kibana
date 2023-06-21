@@ -8,9 +8,6 @@
 import React, { FC } from 'react';
 import { pick } from 'lodash';
 
-import { EuiCallOut } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
@@ -28,6 +25,7 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { SpikeAnalysisTableRowStateProvider } from '../spike_analysis_table/spike_analysis_table_row_provider';
 
 import { ExplainLogRateSpikesPage } from './explain_log_rate_spikes_page';
+import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -38,32 +36,22 @@ export interface ExplainLogRateSpikesAppStateProps {
   savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
+  /** Option to make main histogram sticky */
+  stickyHistogram?: boolean;
 }
 
 export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
+  stickyHistogram,
 }) => {
   if (!dataView) return null;
 
-  if (!dataView.isTimeBased()) {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationTitle', {
-          defaultMessage: 'The data view "{dataViewTitle}" is not based on a time series.',
-          values: { dataViewTitle: dataView.getName() },
-        })}
-        color="danger"
-        iconType="warning"
-      >
-        <p>
-          {i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationDescription', {
-            defaultMessage: 'Log rate spike analysis only runs over time-based indices.',
-          })}
-        </p>
-      </EuiCallOut>
-    );
+  const warning = timeSeriesDataViewWarning(dataView, 'explain_log_rate_spikes');
+
+  if (warning !== null) {
+    return <>{warning}</>;
   }
 
   const datePickerDeps = {
@@ -80,7 +68,7 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
           <SpikeAnalysisTableRowStateProvider>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <ExplainLogRateSpikesPage />
+                <ExplainLogRateSpikesPage stickyHistogram={stickyHistogram} />
               </DatePickerContextProvider>
             </StorageContextProvider>
           </SpikeAnalysisTableRowStateProvider>

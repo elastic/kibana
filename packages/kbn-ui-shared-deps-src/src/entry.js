@@ -21,6 +21,8 @@ export const EmotionCache = require('@emotion/cache');
 export const EmotionReact = require('@emotion/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
+
+export const IoTs = require('io-ts');
 export const KbnMonaco = require('@kbn/monaco');
 export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
 export const React = require('react');

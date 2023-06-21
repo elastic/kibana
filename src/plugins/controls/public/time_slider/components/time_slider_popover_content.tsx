@@ -18,7 +18,6 @@ import { EuiDualRangeRef, TimeSliderSlidingWindowRange } from './time_slider_sli
 interface Props {
   value: [number, number];
   onChange: (value?: [number, number]) => void;
-  onClear: () => void;
   stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeMin: number;
@@ -90,17 +89,6 @@ export function TimeSliderPopoverContent(props: Props) {
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem>{rangeInput}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={TimeSliderStrings.control.getClearSelection()}>
-          <EuiButtonIcon
-            iconType="eraser"
-            color="danger"
-            onClick={props.onClear}
-            aria-label={TimeSliderStrings.control.getClearSelection()}
-            data-test-subj="timeSlider__clearTimeButton"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
