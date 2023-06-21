@@ -393,19 +393,21 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                               defaultMessage="Time range"
                             />
                           </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiIconTip
-                              content={i18n.translate(
-                                'xpack.ml.customUrlsEditor.timeRangeTooltip',
-                                {
-                                  defaultMessage:
-                                    'If not set, time range defaults to global settings.',
-                                }
-                              )}
-                              position="top"
-                              type="iInCircle"
-                            />
-                          </EuiFlexItem>
+                          {showCustomTimeRangeSelector ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiIconTip
+                                content={i18n.translate(
+                                  'xpack.ml.customUrlsEditor.timeRangeTooltip',
+                                  {
+                                    defaultMessage:
+                                      'If not set, time range defaults to global settings.',
+                                  }
+                                )}
+                                position="top"
+                                type="iInCircle"
+                              />
+                            </EuiFlexItem>
+                          ) : null}
                         </EuiFlexGroup>
                       }
                       className="url-time-range"
