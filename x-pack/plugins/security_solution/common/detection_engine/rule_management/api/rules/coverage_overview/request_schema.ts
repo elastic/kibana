@@ -35,7 +35,7 @@ export const CoverageOverviewFilter = t.partial({
   source: NonEmptyArray(CoverageOverviewRuleSourceSchema),
 });
 
-export type CoverageOverviewRequest = t.TypeOf<typeof CoverageOverviewRequest>;
-export const CoverageOverviewRequest = t.partial({
+export type CoverageOverviewRequestBody = t.TypeOf<typeof CoverageOverviewRequestBody>;
+export const CoverageOverviewRequestBody = t.partial({
   filter: CoverageOverviewFilter,
 });
