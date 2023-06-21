@@ -13,7 +13,6 @@ import { ThemeProvider } from 'styled-components';
 
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
 import { euiDarkVars } from '@kbn/ui-theme';
@@ -220,27 +219,3 @@ export const createAppMockRenderer = ({
     getFilesClient,
   };
 };
-
-export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => ({
-  path: 'path',
-  type: 'type',
-  value: 'mockedValue' as unknown as T,
-  isPristine: false,
-  isDirty: false,
-  isModified: false,
-  isValidating: false,
-  isValidated: false,
-  isChangingValue: false,
-  errors: [],
-  isValid: true,
-  getErrorsMessages: jest.fn(),
-  onChange: jest.fn(),
-  setValue: jest.fn(),
-  setErrors: jest.fn(),
-  clearErrors: jest.fn(),
-  validate: jest.fn(),
-  reset: jest.fn(),
-  __isIncludedInOutput: true,
-  __serializeValue: jest.fn(),
-  ...options,
-});
