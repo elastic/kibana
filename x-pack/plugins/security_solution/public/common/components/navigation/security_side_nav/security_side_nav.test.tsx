@@ -163,8 +163,10 @@ describe('SecuritySideNav', () => {
     );
   });
 
-  it('should render custom item', () => {
-    mockUseNavLinks.mockReturnValue([{ id: SecurityPageName.landing, title: 'Get started' }]);
+  it('should render get started item', () => {
+    mockUseNavLinks.mockReturnValue([
+      { id: SecurityPageName.landing, title: 'Get started', sideNavIcon: 'launch' },
+    ]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({

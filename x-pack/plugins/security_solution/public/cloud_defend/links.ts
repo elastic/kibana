@@ -17,12 +17,12 @@ const commonLinkProperties: Partial<LinkItem> = {
   capabilities: [`${SERVER_APP_ID}.show`],
 };
 
-export const manageLinks: LinkItem = {
+export const cloudDefendLink: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('policies'),
   description: i18n.translate('xpack.securitySolution.appLinks.cloudDefendPoliciesDescription', {
     defaultMessage:
       'Secure container workloads in Kubernetes from attacks and drift through granular and flexible runtime policies.',
   }),
-  icon: IconCloudDefend,
+  landingIcon: IconCloudDefend,
   ...commonLinkProperties,
 };

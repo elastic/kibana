@@ -24,7 +24,7 @@ export const findingsLinks: LinkItem = {
   ...commonLinkProperties,
 };
 
-export const dashboardLinks: LinkItem = {
+export const cspDashboardLink: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('dashboard'),
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureDashboardDescription',
@@ -47,7 +47,7 @@ export const vulnerabilityDashboardLink: LinkItem = {
   ...commonLinkProperties,
 };
 
-export const benchmarksLinks: LinkItem = {
+export const benchmarksLink: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
@@ -55,6 +55,6 @@ export const benchmarksLinks: LinkItem = {
       defaultMessage: 'View benchmark rules.',
     }
   ),
-  icon: IconEndpoints,
+  landingIcon: IconEndpoints,
   ...commonLinkProperties,
 };

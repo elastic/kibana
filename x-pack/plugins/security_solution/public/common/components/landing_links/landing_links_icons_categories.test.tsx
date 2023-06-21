@@ -35,13 +35,13 @@ const defaultAppManageLink: NavigationLink = {
       id: SecurityPageName.rules,
       title: RULES_ITEM_LABEL,
       description: '',
-      icon: 'testIcon1',
+      landingIcon: 'testIcon1',
     },
     {
       id: SecurityPageName.exceptions,
       title: EXCEPTIONS_ITEM_LABEL,
       description: '',
-      icon: 'testIcon2',
+      landingIcon: 'testIcon2',
     },
   ],
 };
@@ -99,7 +99,7 @@ describe('LandingLinksIconsCategories', () => {
           id: SecurityPageName.rules,
           title: RULES_ITEM_LABEL,
           description: '',
-          icon: 'testIcon1',
+          landingIcon: 'testIcon1',
         },
       ],
     });

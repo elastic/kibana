@@ -34,7 +34,7 @@ const StyledEuiTitle = styled(EuiTitle)`
 
 export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) => (
   <EuiFlexGrid columns={3} gutterSize="xl">
-    {items.map(({ title, description, id, icon, isBeta, betaOptions }) => (
+    {items.map(({ title, description, id, landingIcon, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
         <EuiFlexGroup
           direction="column"
@@ -44,7 +44,7 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
         >
           <EuiFlexItem grow={false}>
             <SecuritySolutionLink tabIndex={-1} deepLinkId={id}>
-              <EuiIcon aria-hidden="true" size="xl" type={icon ?? ''} role="presentation" />
+              <EuiIcon aria-hidden="true" size="xl" type={landingIcon ?? ''} role="presentation" />
             </SecuritySolutionLink>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

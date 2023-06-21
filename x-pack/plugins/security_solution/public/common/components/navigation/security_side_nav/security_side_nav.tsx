@@ -46,7 +46,7 @@ const formatLink = (
   label: navLink.title,
   position: getNavItemPosition(navLink.id),
   ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
-  ...(navLink.icon && { iconType: navLink.icon }),
+  ...(navLink.sideNavIcon && { iconType: navLink.sideNavIcon }),
   ...(navLink.categories?.length && { categories: navLink.categories }),
   ...(navLink.links?.length && {
     items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
@@ -54,7 +54,7 @@ const formatLink = (
         acc.push({
           id: current.id,
           label: current.title,
-          iconType: current.icon,
+          iconType: current.sideNavIcon,
           isBeta: current.isBeta,
           betaOptions: current.betaOptions,
           ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
@@ -74,10 +74,10 @@ const formatGetStartedLink = (
 ): SolutionSideNavItem => ({
   id: navLink.id,
   label: navLink.title,
+  iconType: navLink.sideNavIcon,
   position: SolutionSideNavItemPosition.bottom,
-  ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
-  iconType: 'launch',
   appendSeparator: true,
+  ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
 });
 
 /**

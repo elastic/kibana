@@ -38,7 +38,7 @@ import {
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
-import { manageLinks as cloudDefendLinks } from '../cloud_defend/links';
+import { cloudDefendLink } from '../cloud_defend/links';
 import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
 import { IconEndpoints } from '../common/icons/endpoints';
@@ -67,7 +67,7 @@ const categories = [
     label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
       defaultMessage: 'Cloud Security',
     }),
-    linkIds: [cloudDefendLinks.id],
+    linkIds: [cloudDefendLink.id],
   },
 ];
 
@@ -91,7 +91,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.endpointsDescription', {
         defaultMessage: 'Hosts running Elastic Defend.',
       }),
-      icon: IconEndpoints,
+      landingIcon: IconEndpoints,
       title: ENDPOINTS,
       path: ENDPOINTS_PATH,
       skipUrlState: true,
@@ -104,7 +104,7 @@ export const links: LinkItem = {
         defaultMessage:
           'Use policies to customize endpoint and cloud workload protections and other configurations.',
       }),
-      icon: IconTool,
+      landingIcon: IconTool,
       path: POLICIES_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -119,7 +119,7 @@ export const links: LinkItem = {
             'Improve performance or alleviate conflicts with other applications running on your hosts.',
         }
       ),
-      icon: IconDashboards,
+      landingIcon: IconDashboards,
       path: TRUSTED_APPS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -130,7 +130,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.eventFiltersDescription', {
         defaultMessage: 'Exclude high volume or unwanted events being written into Elasticsearch.',
       }),
-      icon: IconPipeline,
+      landingIcon: IconPipeline,
       path: EVENT_FILTERS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -141,7 +141,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.hostIsolationDescription', {
         defaultMessage: 'Allow isolated hosts to communicate with specific IPs.',
       }),
-      icon: IconSavedObject,
+      landingIcon: IconSavedObject,
       path: HOST_ISOLATION_EXCEPTIONS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -152,7 +152,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.blocklistDescription', {
         defaultMessage: 'Exclude unwanted applications from running on your hosts.',
       }),
-      icon: IconShield,
+      landingIcon: IconShield,
       path: BLOCKLIST_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -163,12 +163,12 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.actionHistoryDescription', {
         defaultMessage: 'View the history of response actions performed on hosts.',
       }),
-      icon: IconConsole,
+      landingIcon: IconConsole,
       path: RESPONSE_ACTIONS_HISTORY_PATH,
       skipUrlState: true,
       hideTimeline: true,
     },
-    cloudDefendLinks,
+    cloudDefendLink,
   ],
 };
 

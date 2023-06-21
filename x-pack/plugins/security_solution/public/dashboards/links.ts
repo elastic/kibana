@@ -9,10 +9,7 @@ import { DASHBOARDS_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/c
 import { DASHBOARDS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import { links as kubernetesLinks } from '../kubernetes/links';
-import {
-  dashboardLinks as cspDashboardLinks,
-  vulnerabilityDashboardLink,
-} from '../cloud_security_posture/links';
+import { cspDashboardLink, vulnerabilityDashboardLink } from '../cloud_security_posture/links';
 import {
   ecsDataQualityDashboardLinks,
   detectionResponseLinks,
@@ -25,11 +22,11 @@ const subLinks: LinkItem[] = [
   overviewLinks,
   detectionResponseLinks,
   kubernetesLinks,
-  cspDashboardLinks,
+  cspDashboardLink,
   vulnerabilityDashboardLink,
   entityAnalyticsLinks,
   ecsDataQualityDashboardLinks,
-].map((link) => ({ ...link, icon: IconDashboards }));
+].map((link) => ({ ...link, sideNavIcon: IconDashboards }));
 
 export const dashboardsLinks: LinkItem = {
   id: SecurityPageName.dashboards,

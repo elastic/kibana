@@ -14,30 +14,29 @@ import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { CASES_FEATURE_ID, CASES_PATH, SecurityPageName } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 
-const casesDeepLinks = getCasesDeepLinks({ basePath: CASES_PATH });
-const { id, deepLinks, ...casesDeepLink } = casesDeepLinks;
-// Mind the array order returned by getCasesDeepLinks
-const [casesConfigureDeepLink, casesCreateDeepLink] = deepLinks;
-
-// Extends AppDeepLink to return LinkItem type
-export const links: LinkItem = {
-  ...casesDeepLink,
-  id: SecurityPageName.case,
-  globalNavPosition: 5,
-  capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
-  links: [
-    {
-      ...casesConfigureDeepLink,
-      id: SecurityPageName.caseConfigure,
+const casesLinks = getCasesDeepLinks<LinkItem>({
+  basePath: CASES_PATH,
+  extend: {
+    [SecurityPageName.case]: {
+      globalNavPosition: 5,
+      capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
+    },
+    [SecurityPageName.caseConfigure]: {
       capabilities: [`${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`],
       licenseType: 'gold',
       sideNavDisabled: true,
     },
-    {
-      ...casesCreateDeepLink,
-      id: SecurityPageName.caseCreate,
+    [SecurityPageName.caseCreate]: {
       capabilities: [`${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`],
       sideNavDisabled: true,
     },
-  ],
+  },
+});
+
+const { id, deepLinks, ...rest } = casesLinks;
+
+export const links = {
+  ...rest,
+  id: SecurityPageName.case,
+  links: deepLinks as LinkItem[],
 };

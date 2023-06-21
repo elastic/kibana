@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { transparentize, type EuiThemeComputed } from '@elastic/eui';
+import { transparentize, type EuiThemeComputed, euiFontSize, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 const EUI_HEADER_HEIGHT = '96px';
-const PANEL_LEFT_OFFSET = '248px';
-const PANEL_WIDTH = '340px';
+const PANEL_LEFT_OFFSET = '249px';
+const PANEL_WIDTH = '270px';
 
 export const panelClass = 'solutionSideNavPanel';
 
@@ -25,6 +25,7 @@ export const SolutionSideNavPanelStyles = (
   width: ${PANEL_WIDTH};
   height: inherit;
   z-index: 999;
+  background-color: ${euiTheme.colors.body};
 
   // If the bottom bar is visible add padding to the navigation
   ${$bottomOffset != null &&
@@ -57,12 +58,20 @@ export const SolutionSideNavPanelStyles = (
 `;
 
 export const SolutionSideNavTitleStyles = (euiTheme: EuiThemeComputed<{}>) => css`
-  padding-left: ${euiTheme.size.s};
   padding-top: ${euiTheme.size.s};
 `;
 
 export const SolutionSideNavCategoryTitleStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  text-transform: uppercase;
+  color: ${euiTheme.colors.darkShade};
   padding-left: ${euiTheme.size.s};
+  padding-bottom: ${euiTheme.size.s};
+  ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xxs')}
+`;
+
+export const SolutionSideNavPanelLinksGroupStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  padding-left: 0;
+  padding-right: 0;
 `;
 
 export const SolutionSideNavCategoryAccordionStyles = (euiTheme: EuiThemeComputed<{}>) => css`

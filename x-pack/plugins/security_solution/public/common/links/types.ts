@@ -94,9 +94,10 @@ export interface LinkItem {
     text: string;
   };
   /**
-   * Icon that is displayed on the navigation menu and the landing page.
+   * Icon that is displayed on menu navigation landing page.
+   * Only required for pages that are displayed inside a landing page.
    */
-  icon?: IconType;
+  landingIcon?: IconType;
   /**
    * Image that is displayed on menu navigation landing page.
    * Only required for pages that are displayed inside a landing page.
@@ -118,6 +119,10 @@ export interface LinkItem {
    * Disables link in the side navigation. Defaults to false.
    */
   sideNavDisabled?: boolean;
+  /**
+   * Icon that is displayed on the side navigation menu.
+   */
+  sideNavIcon?: IconType;
   /**
    * Disables the state query string in the URL. Defaults to false.
    */
@@ -142,11 +147,12 @@ export interface NavigationLink {
   categories?: LinkCategories;
   description?: string;
   disabled?: boolean;
-  icon?: IconType;
   id: SecurityPageName;
+  landingIcon?: IconType;
+  landingImage?: string;
   links?: NavigationLink[];
-  image?: string;
   title: string;
+  sideNavIcon?: IconType;
   skipUrlState?: boolean;
   unauthorized?: boolean;
   isBeta?: boolean;
