@@ -4639,11 +4639,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-cards-navigation@link:packages/kbn-management/cards_navigation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/management-plugin@link:src/plugins/management":
   version "0.0.0"
   uid ""
 
 "@kbn/management-test-plugin@link:test/plugin_functional/plugins/management_test_plugin":
+  version "0.0.0"
+  uid ""
+
+"@kbn/management-types@link:packages/kbn-management/types":
   version "0.0.0"
   uid ""
 
