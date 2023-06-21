@@ -130,21 +130,28 @@ export function registerResponseActionRoutes(
       )
     );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: KILL_PROCESS_ROUTE,
-      validate: KillOrSuspendProcessRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canKillProcess'] },
-      logger,
-      responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
-        endpointContext,
-        'kill-process'
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: KillOrSuspendProcessRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canKillProcess'] },
+        logger,
+        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+          endpointContext,
+          'kill-process'
+        )
       )
-    )
-  );
+    );
 
   router.post(
     {

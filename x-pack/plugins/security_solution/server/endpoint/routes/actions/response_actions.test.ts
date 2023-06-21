@@ -385,6 +385,7 @@ describe('Response actions', () => {
     it('sends the kill-process command payload from the kill process route', async () => {
       const ctx = await callRoute(KILL_PROCESS_ROUTE, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -501,6 +502,7 @@ describe('Response actions', () => {
           KILL_PROCESS_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
