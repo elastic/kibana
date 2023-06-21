@@ -30,8 +30,17 @@ export const CoverageOverviewRuleSourceSchema = enumeration(
 
 export type CoverageOverviewFilter = t.TypeOf<typeof CoverageOverviewFilter>;
 export const CoverageOverviewFilter = t.partial({
+  /**
+   * A search term to filter the response by rule name, index pattern, MITRE ATT&CK tactic or technique
+   */
   search_term: NonEmptyString,
+  /**
+   * An activity filter representing an array combined of CoverageOverviewRuleActivity values to include only specified rules in the response
+   */
   activity: NonEmptyArray(CoverageOverviewRuleActivitySchema),
+  /**
+   * A source filter representing an array combined of CoverageOverviewRuleSource values to include only specified rules in the response
+   */
   source: NonEmptyArray(CoverageOverviewRuleSourceSchema),
 });
 

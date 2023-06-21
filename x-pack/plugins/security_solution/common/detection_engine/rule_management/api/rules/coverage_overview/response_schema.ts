@@ -18,8 +18,17 @@ export const CoverageOverviewRuleData = t.type({
 export type CoverageOverviewResponse = t.TypeOf<typeof CoverageOverviewResponse>;
 export const CoverageOverviewResponse = t.exact(
   t.type({
+    /**
+     * Map having (tacticId, techniqueId or subtechniqueId) as the key and an array of rule ids as the value
+     */
     coverage: t.record(t.string, NonEmptyArray(t.string)),
+    /**
+     * Array of unmapped rule ids
+     */
     unmapped_rule_ids: t.array(t.string),
-    rules_data: t.record(t.string, NonEmptyArray(CoverageOverviewRuleData)),
+    /**
+     * Map having ruleId as the key and coverage overview rule data as the value
+     */
+    rules_data: t.record(t.string, CoverageOverviewRuleData),
   })
 );
