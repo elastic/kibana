@@ -90,18 +90,25 @@ export function registerResponseActionRoutes(
       )
     );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: ISOLATE_HOST_ROUTE_V2,
-      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canIsolateHost'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'isolate')
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: NoParametersRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canIsolateHost'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'isolate')
+      )
+    );
 
   router.post(
     {

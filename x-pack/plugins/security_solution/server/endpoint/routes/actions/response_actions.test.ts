@@ -229,7 +229,10 @@ describe('Response actions', () => {
     });
 
     it('succeeds when an endpoint ID is provided', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE_V2, { body: { endpoint_ids: ['XYZ'] } });
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
+        body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
+      });
       expect(mockResponse.ok).toBeCalled();
     });
 
@@ -244,6 +247,7 @@ describe('Response actions', () => {
             result: ErrMessage,
           },
         },
+        version: '2023-10-31',
       });
       expect(mockResponse.ok).not.toBeCalled();
       const response = mockResponse.customError.mock.calls[0][0];
@@ -252,7 +256,10 @@ describe('Response actions', () => {
     });
 
     it('accepts a comment field', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE_V2, { body: { endpoint_ids: ['XYZ'], comment: 'XYZ' } });
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
+        body: { endpoint_ids: ['XYZ'], comment: 'XYZ' },
+        version: '2023-10-31',
+      });
       expect(mockResponse.ok).toBeCalled();
     });
 
@@ -262,6 +269,7 @@ describe('Response actions', () => {
       const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['ABC-XYZ-000'] },
         searchResponse: metadataResponse,
+        version: '2023-10-31',
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -275,6 +283,7 @@ describe('Response actions', () => {
       const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
         mockUser: testU,
+        version: '2023-10-31',
       });
 
       const actionDoc: EndpointAction = (
@@ -288,6 +297,7 @@ describe('Response actions', () => {
       const CommentText = "I am isolating this because it's Friday";
       const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'], comment: CommentText },
+        version: '2023-10-31',
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -303,6 +313,7 @@ describe('Response actions', () => {
 
       const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: endpointIds, comment: 'XYZ' },
+        version: '2023-10-31',
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -322,6 +333,7 @@ describe('Response actions', () => {
     it('records the timeout in the action payload', async () => {
       const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -337,6 +349,7 @@ describe('Response actions', () => {
       const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
         searchResponse: doc,
+        version: '2023-10-31',
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -348,6 +361,7 @@ describe('Response actions', () => {
     it('sends the isolate command payload from the isolate route', async () => {
       const ctx = await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -456,6 +470,7 @@ describe('Response actions', () => {
           ISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -655,6 +670,7 @@ describe('Response actions', () => {
           ISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -708,6 +724,7 @@ describe('Response actions', () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           license: Platinum,
+          version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
       });
@@ -717,6 +734,7 @@ describe('Response actions', () => {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canIsolateHost: false },
           license: Gold,
+          version: '2023-10-31',
         });
 
         expect(mockResponse.forbidden).toBeCalled();
@@ -736,6 +754,7 @@ describe('Response actions', () => {
       it('allows user to perform isolation when canIsolateHost is true', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
+          version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
       });
@@ -751,6 +770,7 @@ describe('Response actions', () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canIsolateHost: false },
+          version: '2023-10-31',
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
@@ -807,6 +827,7 @@ describe('Response actions', () => {
       it('logs a comment to the provided cases', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'], case_ids: ['one', 'two'] },
+          version: '2023-10-31',
         });
 
         expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(2);
@@ -818,6 +839,7 @@ describe('Response actions', () => {
       it('logs a comment to any cases associated with the given alerts', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'], alert_ids: ['one', 'two'] },
+          version: '2023-10-31',
         });
 
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
@@ -833,6 +855,7 @@ describe('Response actions', () => {
             case_ids: ['ONE', 'TWO', 'case-1'],
             alert_ids: ['one', 'two'],
           },
+          version: '2023-10-31',
         });
 
         expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(4);
