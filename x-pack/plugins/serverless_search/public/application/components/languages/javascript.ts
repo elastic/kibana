@@ -59,7 +59,7 @@ bytes: 293,
 aborted: false
 }
 */`,
-  installClient: `$ npm install @elastic/elasticsearch@8`,
+  installClient: 'npm install @elastic/elasticsearch@8',
   name: i18n.translate('xpack.serverlessSearch.languages.javascript', {
     defaultMessage: 'JavaScript / Node.js',
   }),
