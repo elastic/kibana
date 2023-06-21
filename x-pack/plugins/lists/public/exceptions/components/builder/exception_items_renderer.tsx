@@ -34,7 +34,6 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
-import deepEqual from 'fast-deep-equal';
 
 import { AndOrBadge } from '../and_or_badge';
 
@@ -132,9 +131,7 @@ export const ExceptionBuilderComponent = ({
     disableNested: isNestedDisabled,
     disableOr: isOrDisabled,
   });
-  const [currentExceptionListItems, setCurrentExceptionListItems] = useState<
-    ExceptionsBuilderExceptionItem[]
-  >([]);
+  const [areAllEntriesDeleted, setAreAllEntriesDeleted] = useState<boolean>(false);
 
   const {
     addNested,
@@ -256,6 +253,7 @@ export const ExceptionBuilderComponent = ({
         // just add a default entry to it
         if (updatedExceptions.length === 0) {
           setDefaultExceptions(item);
+          setAreAllEntriesDeleted(true);
         } else if (updatedExceptions.length > 0 && exceptionListItemSchema.is(item)) {
           setUpdateExceptionsToDelete([...exceptionsToDelete, item]);
         } else {
@@ -398,15 +396,34 @@ export const ExceptionBuilderComponent = ({
     }
   }, [exceptions, handleAddNewExceptionItem]);
 
+  /**
+   * This component relies on the "exceptionListItems" to pre-fill its entries,
+   *  but any subsequent updates to the entries are not reflected back to
+   * the "exceptionListItems". To ensure correct behavior, we need to only
+   * fill the entries from the "exceptionListItems" during initialization.
+   *
+   * In the initialization phase, if there are "exceptionListItems" with
+   * pre-filled entries, the exceptions array will be empty. However,
+   * there are cases where the "exceptionListItems" may not be sent
+   * correctly during initialization, leading to the exceptions
+   * array being filled with empty entries. Therefore, we need to
+   *  check if the exception is correctly populated with a valid
+   * "field" when the "exceptionListItems" has entries. that's why
+   * "exceptionsEntriesPopulated" is used
+   *
+   * It's important to differentiate this case from when the user
+   * deletes all the entries and the "exceptionListItems" has pre-filled values.
+   * that's why "allEntriesDeleted" is used
+   */
+
   useEffect(() => {
-    if (
-      exceptionListItems.length > 0 &&
-      !deepEqual(exceptionListItems, currentExceptionListItems)
-    ) {
-      setCurrentExceptionListItems(exceptionListItems);
+    if (!exceptionListItems.length) return;
+    const exceptionsEntriesPopulated = exceptions.some((exception) =>
+      exception.entries.some((entry) => entry.field)
+    );
+    if (!exceptionsEntriesPopulated && !areAllEntriesDeleted)
       setUpdateExceptions(exceptionListItems);
-    }
-  }, [currentExceptionListItems, exceptionListItems, setUpdateExceptions]);
+  }, [areAllEntriesDeleted, exceptionListItems, exceptions, setUpdateExceptions]);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="exceptionsBuilderWrapper">
