@@ -56,7 +56,7 @@ interface Props {
 }
 
 export function Navigation({ children, unstyled = false, dataTestSubj }: Props) {
-  const { onProjectNavigationChange, getActiveNodes$ } = useNavigationServices();
+  const { onProjectNavigationChange, activeNodes$ } = useNavigationServices();
   const navTreeFlattened = useRef<Record<string, ChromeProjectNavigationNode>>({});
 
   // We keep a reference of the order of the children that register themselves when mounting.
@@ -65,7 +65,7 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
   const orderChildrenRef = useRef<Record<string, number>>({});
   const idx = useRef(0);
 
-  const activeNodes = useObservable(getActiveNodes$(), []);
+  const activeNodes = useObservable(activeNodes$, []);
   const [navigationItems, setNavigationItems] = useState<
     Record<string, ChromeProjectNavigationNode>
   >({});

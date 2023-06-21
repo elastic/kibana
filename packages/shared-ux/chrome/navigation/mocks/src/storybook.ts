@@ -14,7 +14,6 @@ import { ChromeNavigationViewModel, NavigationServices } from '../../types';
 type Arguments = ChromeNavigationViewModel & NavigationServices;
 export type Params = Pick<
   Arguments,
-  | 'activeNavItemId'
   | 'navIsOpen'
   | 'navigationTree'
   | 'platformConfig'
@@ -53,7 +52,7 @@ export class StorybookMock extends AbstractStorybookMock<
       recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
       navLinks$: params.navLinks$ ?? new BehaviorSubject([]),
       onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
-      getActiveNodes$: () => new BehaviorSubject([]),
+      activeNodes$: new BehaviorSubject([]),
     };
   }
 

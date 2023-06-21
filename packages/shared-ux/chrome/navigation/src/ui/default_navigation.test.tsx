@@ -427,10 +427,10 @@ describe('<DefaultNavigation />', () => {
         ],
       ]);
 
-      const getActiveNodes$ = () => activeNodes$.asObservable();
+      const getActiveNodes$ = () => activeNodes$;
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} navLinks$={navLinks$} getActiveNodes$={getActiveNodes$}>
+        <NavigationProvider {...services} navLinks$={navLinks$} activeNodes$={getActiveNodes$()}>
           <DefaultNavigation navigationTree={{ body: navigationBody }} />
         </NavigationProvider>
       );
@@ -469,7 +469,7 @@ describe('<DefaultNavigation />', () => {
       ];
 
       const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([[]]);
-      const getActiveNodes$ = () => activeNodes$.asObservable();
+      const getActiveNodes$ = () => activeNodes$;
 
       const onProjectNavigationChange = (nav: ChromeProjectNavigation) => {
         if (nav.navigationTreeFlattened) {
@@ -485,7 +485,7 @@ describe('<DefaultNavigation />', () => {
         <NavigationProvider
           {...services}
           navLinks$={navLinks$}
-          getActiveNodes$={getActiveNodes$}
+          activeNodes$={getActiveNodes$()}
           onProjectNavigationChange={onProjectNavigationChange}
         >
           <DefaultNavigation navigationTree={{ body: navigationBody }} />

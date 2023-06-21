@@ -594,10 +594,10 @@ describe('<Navigation />', () => {
         ],
       ]);
 
-      const getActiveNodes$ = () => activeNodes$.asObservable();
+      const getActiveNodes$ = () => activeNodes$;
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} getActiveNodes$={getActiveNodes$} navLinks$={navLinks$}>
+        <NavigationProvider {...services} activeNodes$={getActiveNodes$()} navLinks$={navLinks$}>
           <Navigation>
             <Navigation.Group id="group1">
               <Navigation.Item<any> link="item1" title="Item 1" />
@@ -651,7 +651,7 @@ describe('<Navigation />', () => {
       ]);
 
       const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
-      const getActiveNodes$ = () => activeNodes$.asObservable();
+      const getActiveNodes$ = () => activeNodes$;
 
       const onProjectNavigationChange = (nav: ChromeProjectNavigation) => {
         if (nav.navigationTreeFlattened) {
@@ -666,7 +666,7 @@ describe('<Navigation />', () => {
       const { findByTestId } = render(
         <NavigationProvider
           {...services}
-          getActiveNodes$={getActiveNodes$}
+          activeNodes$={getActiveNodes$()}
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >

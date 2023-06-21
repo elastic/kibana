@@ -16,7 +16,7 @@ import {
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, map, takeUntil, ReplaySubject } from 'rxjs';
 import type { Location } from 'history';
 import { createHomeBreadcrumb } from './home_breadcrumbs';
 import { findActiveNodes, flattenNav, stripQueryParams } from './utils';
@@ -42,7 +42,7 @@ export class ProjectNavigationService {
     breadcrumbs: ChromeProjectBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
   }>({ breadcrumbs: [], params: { absolute: false } });
-
+  private readonly stop$ = new ReplaySubject<void>(1);
   private application?: InternalApplicationStart;
   private http?: HttpStart;
   private unlistenHistory?: () => void;
@@ -71,7 +71,7 @@ export class ProjectNavigationService {
         return this.projectNavigation$.asObservable();
       },
       getActiveNodes$: () => {
-        return this.activeNodes$.asObservable();
+        return this.activeNodes$.pipe(takeUntil(this.stop$));
       },
       setProjectSideNavComponent: (component: SideNavComponent | null) => {
         this.customProjectSideNavComponent$.next({ current: component });
@@ -126,11 +126,9 @@ export class ProjectNavigationService {
       location
     );
 
-    let requiresUpdate = false;
+    let requiresUpdate = activeNodes.length !== this.activeNodes$.value.length;
 
-    if (activeNodes.length !== this.activeNodes$.value.length) {
-      requiresUpdate = true;
-    } else {
+    if (!requiresUpdate) {
       this.activeNodes$.value.forEach((nodesBranch, i) => {
         nodesBranch.forEach((node, j) => {
           if (node.id !== activeNodes[i][j]?.id) {
@@ -150,6 +148,7 @@ export class ProjectNavigationService {
   }
 
   public stop() {
+    this.stop$.next();
     this.unlistenHistory?.();
   }
 }

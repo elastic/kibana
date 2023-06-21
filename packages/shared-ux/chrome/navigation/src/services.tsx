@@ -37,7 +37,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     navigateToUrl,
     navIsOpen: true,
     onProjectNavigationChange: serverless.setNavigation,
-    getActiveNodes$: serverless.getActiveNavigationNodes$,
+    activeNodes$: serverless.getActiveNavigationNodes$(),
   };
 
   return (

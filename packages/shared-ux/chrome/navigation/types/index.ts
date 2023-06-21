@@ -21,14 +21,13 @@ import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
  * @public
  */
 export interface NavigationServices {
-  activeNavItemId?: string;
   basePath: BasePathService;
   recentlyAccessed$: Observable<RecentItem[]>;
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
   onProjectNavigationChange: (chromeProjectNavigation: ChromeProjectNavigation) => void;
-  getActiveNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
+  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 }
 
 /**

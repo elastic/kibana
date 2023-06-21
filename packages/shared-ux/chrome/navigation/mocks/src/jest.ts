@@ -28,7 +28,7 @@ export const getServicesMock = ({
     navIsOpen: true,
     navigateToUrl,
     onProjectNavigationChange: jest.fn(),
-    getActiveNodes$: () => of(activeNodes),
+    activeNodes$: of(activeNodes),
   };
 };
 
