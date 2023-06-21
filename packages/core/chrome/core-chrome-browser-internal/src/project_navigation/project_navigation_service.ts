@@ -18,6 +18,8 @@ import {
 import type { HttpStart } from '@kbn/core-http-browser';
 import { BehaviorSubject, Observable, combineLatest, map, takeUntil, ReplaySubject } from 'rxjs';
 import type { Location } from 'history';
+import deepEqual from 'react-fast-compare';
+
 import { createHomeBreadcrumb } from './home_breadcrumbs';
 import { findActiveNodes, flattenNav, stripQueryParams } from './utils';
 
@@ -59,10 +61,8 @@ export class ProjectNavigationService {
         return this.projectHome$.asObservable();
       },
       setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
-        const { navigationTreeFlattened, ...rest } = projectNavigation;
-        this.projectNavigation$.next(rest);
-        this.projectNavigationNavTreeFlattened =
-          navigationTreeFlattened ?? flattenNav(projectNavigation.navigationTree);
+        this.projectNavigation$.next(projectNavigation);
+        this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
         this.setActiveProjectNavigationNodes();
       },
       getProjectNavigation$: () => {
@@ -124,17 +124,21 @@ export class ProjectNavigationService {
       location
     );
 
+    // Each time we call findActiveNodes() we create a new array of activeNodes. As this array is used
+    // in React in useCallback() and useMemo() dependencies arrays it triggers an infinite navigation
+    // tree registration loop. To avoid that we only notify the listeners when the activeNodes array
+    // has actually changed.
     let requiresUpdate = activeNodes.length !== this.activeNodes$.value.length;
 
     if (!requiresUpdate) {
       for (const [i, nodesBranch] of this.activeNodes$.value.entries()) {
         for (const [j, node] of nodesBranch.entries()) {
-          if (node.id !== activeNodes[i][j]?.id) {
+          if (!deepEqual(node, activeNodes[i][j])) {
             requiresUpdate = true;
             break;
           }
         }
-          }
+      }
     }
 
     if (!requiresUpdate) return;

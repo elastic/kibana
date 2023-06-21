@@ -106,12 +106,17 @@ export const findActiveNodes = (
   const activeNodes: ChromeProjectNavigationNode[][] = [];
   const matches: string[][] = [];
 
+  const activeNodeFromKey = (key: string): ChromeProjectNavigationNode => ({
+    ...navTree[key],
+    isActive: true,
+  });
+
   Object.entries(navTree).forEach(([key, node]) => {
     if (node.getIsActive && location) {
       const isActive = node.getIsActive(location);
       if (isActive) {
         const keysWithParents = extractParentPaths(key);
-        activeNodes.push(keysWithParents.map((k) => navTree[k]));
+        activeNodes.push(keysWithParents.map(activeNodeFromKey));
       }
       return;
     }
@@ -135,7 +140,7 @@ export const findActiveNodes = (
     const longestMatch = matches[matches.length - 1];
     longestMatch.forEach((key) => {
       const keysWithParents = extractParentPaths(key);
-      activeNodes.push(keysWithParents.map((k) => navTree[k]));
+      activeNodes.push(keysWithParents.map(activeNodeFromKey));
     });
   }
 
