@@ -379,17 +379,21 @@ export function getTextBasedDatasource({
       }
 
       render(
-        <DimensionTrigger
-          id={props.columnId}
-          color={customLabel && selectedField ? 'primary' : 'danger'}
-          dataTestSubj="lns-dimensionTrigger-textBased"
-          label={
-            customLabel ??
-            i18n.translate('xpack.lens.textBasedLanguages.missingField', {
-              defaultMessage: 'Missing field',
-            })
-          }
-        />,
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <DimensionTrigger
+              id={props.columnId}
+              color={customLabel && selectedField ? 'primary' : 'danger'}
+              dataTestSubj="lns-dimensionTrigger-textBased"
+              label={
+                customLabel ??
+                i18n.translate('xpack.lens.textBasedLanguages.missingField', {
+                  defaultMessage: 'Missing field',
+                })
+              }
+            />{' '}
+          </I18nProvider>
+        </KibanaThemeProvider>,
         domElement
       );
     },
@@ -421,73 +425,75 @@ export function getTextBasedDatasource({
       });
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <EuiFormRow
-            data-test-subj="text-based-languages-field-selection-row"
-            label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
-              defaultMessage: 'Field',
-            })}
-            fullWidth
-            className="lnsIndexPatternDimensionEditor--padded"
-          >
-            <FieldSelect
-              existingFields={updatedFields}
-              selectedField={selectedField}
-              onChoose={(choice) => {
-                const meta = fields.find((f) => f.name === choice.field)?.meta;
-                const newColumn = {
-                  columnId: props.columnId,
-                  fieldName: choice.field,
-                  meta,
-                };
-                return props.setState(
-                  !selectedField
-                    ? {
-                        ...props.state,
-                        layers: {
-                          ...props.state.layers,
-                          [props.layerId]: {
-                            ...props.state.layers[props.layerId],
-                            columns: [...props.state.layers[props.layerId].columns, newColumn],
-                            allColumns: [
-                              ...props.state.layers[props.layerId].allColumns,
-                              newColumn,
-                            ],
-                          },
-                        },
-                      }
-                    : {
-                        ...props.state,
-                        layers: {
-                          ...props.state.layers,
-                          [props.layerId]: {
-                            ...props.state.layers[props.layerId],
-                            columns: props.state.layers[props.layerId].columns.map((col) =>
-                              col.columnId !== props.columnId
-                                ? col
-                                : { ...col, fieldName: choice.field, meta }
-                            ),
-                            allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
-                              col.columnId !== props.columnId
-                                ? col
-                                : { ...col, fieldName: choice.field, meta }
-                            ),
-                          },
-                        },
-                      }
-                );
-              }}
-            />
-          </EuiFormRow>
-          {props.dataSectionExtra && (
-            <div
-              style={{
-                paddingLeft: euiThemeVars.euiSize,
-                paddingRight: euiThemeVars.euiSize,
-              }}
+          <I18nProvider>
+            <EuiFormRow
+              data-test-subj="text-based-languages-field-selection-row"
+              label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
+                defaultMessage: 'Field',
+              })}
+              fullWidth
+              className="lnsIndexPatternDimensionEditor--padded"
             >
-              {props.dataSectionExtra}
-            </div>
-          )}
+              <FieldSelect
+                existingFields={updatedFields}
+                selectedField={selectedField}
+                onChoose={(choice) => {
+                  const meta = fields.find((f) => f.name === choice.field)?.meta;
+                  const newColumn = {
+                    columnId: props.columnId,
+                    fieldName: choice.field,
+                    meta,
+                  };
+                  return props.setState(
+                    !selectedField
+                      ? {
+                          ...props.state,
+                          layers: {
+                            ...props.state.layers,
+                            [props.layerId]: {
+                              ...props.state.layers[props.layerId],
+                              columns: [...props.state.layers[props.layerId].columns, newColumn],
+                              allColumns: [
+                                ...props.state.layers[props.layerId].allColumns,
+                                newColumn,
+                              ],
+                            },
+                          },
+                        }
+                      : {
+                          ...props.state,
+                          layers: {
+                            ...props.state.layers,
+                            [props.layerId]: {
+                              ...props.state.layers[props.layerId],
+                              columns: props.state.layers[props.layerId].columns.map((col) =>
+                                col.columnId !== props.columnId
+                                  ? col
+                                  : { ...col, fieldName: choice.field, meta }
+                              ),
+                              allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
+                                col.columnId !== props.columnId
+                                  ? col
+                                  : { ...col, fieldName: choice.field, meta }
+                              ),
+                            },
+                          },
+                        }
+                  );
+                }}
+              />
+            </EuiFormRow>
+            {props.dataSectionExtra && (
+              <div
+                style={{
+                  paddingLeft: euiThemeVars.euiSize,
+                  paddingRight: euiThemeVars.euiSize,
+                }}
+              >
+                {props.dataSectionExtra}
+              </div>
+            )}
+          </I18nProvider>
         </KibanaThemeProvider>,
         domElement
       );

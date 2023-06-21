@@ -99,14 +99,22 @@ export class TelemetryService {
 
   /** Retrieve the opt-in/out notification URL **/
   public getOptInStatusUrl = () => {
-    const { sendUsageTo } = this.config;
-    return getTelemetryChannelEndpoint({ channelName: 'optInStatus', env: sendUsageTo });
+    const { appendServerlessChannelsSuffix, sendUsageTo } = this.config;
+    return getTelemetryChannelEndpoint({
+      channelName: 'optInStatus',
+      env: sendUsageTo,
+      appendServerlessChannelsSuffix,
+    });
   };
 
   /** Retrieve the URL to report telemetry **/
   public getTelemetryUrl = () => {
-    const { sendUsageTo } = this.config;
-    return getTelemetryChannelEndpoint({ channelName: 'snapshot', env: sendUsageTo });
+    const { appendServerlessChannelsSuffix, sendUsageTo } = this.config;
+    return getTelemetryChannelEndpoint({
+      channelName: 'snapshot',
+      env: sendUsageTo,
+      appendServerlessChannelsSuffix,
+    });
   };
 
   /**
