@@ -104,6 +104,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('edit-tags-submit');
 
         // validate user action
+        await testSubjects.existOrFail('no-categories');
         await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
       });
 
