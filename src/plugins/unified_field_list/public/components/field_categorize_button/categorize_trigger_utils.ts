@@ -49,8 +49,8 @@ export async function canCategorize(
   if (
     field.name === '_id' ||
     !dataView?.id ||
-    !field.esTypes?.includes('text') ||
-    !dataView.isTimeBased()
+    !dataView.isTimeBased() ||
+    !field.esTypes?.includes('text')
   ) {
     return false;
   }
