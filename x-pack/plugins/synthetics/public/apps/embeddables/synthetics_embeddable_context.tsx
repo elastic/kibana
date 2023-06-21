@@ -8,11 +8,11 @@
 import React, { useRef } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { createMemoryHistory } from 'history';
-import { EuiPanel } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPanel } from '@elastic/eui';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { SyntheticsEmbeddableStateContextProvider } from '../synthetics/contexts/synthetics_embeddable_context';
 import { getSyntheticsAppProps } from '../synthetics/render_app';
 import { storage, store } from '../synthetics/state';
@@ -25,33 +25,44 @@ export const SyntheticsEmbeddableContext: React.FC<{ search: string }> = ({ sear
   const history = useRef(createMemoryHistory({ initialEntries: [`${search}`] }));
 
   return (
-    <SyntheticsEmbeddableStateContextProvider>
-      <EuiThemeProvider darkMode={props.darkMode}>
-        <ReduxProvider store={store}>
-          <Router history={history.current}>
-            <SyntheticsSettingsContextProvider {...props}>
-              <KibanaContextProvider
-                services={{
-                  ...kibanaService.coreStart,
-                  storage,
-                  data: kibanaService.startPlugins.data,
-                  inspector: kibanaService.startPlugins.inspector,
-                  triggersActionsUi: kibanaService.startPlugins.triggersActionsUi,
-                  observability: kibanaService.startPlugins.observability,
-                  cases: kibanaService.startPlugins.cases,
-                }}
-              >
-                <RedirectAppLinks
-                  className={APP_WRAPPER_CLASS}
-                  application={kibanaService.coreStart.application}
-                >
-                  <EuiPanel hasShadow={false}>{children}</EuiPanel>
-                </RedirectAppLinks>
-              </KibanaContextProvider>
-            </SyntheticsSettingsContextProvider>
-          </Router>
-        </ReduxProvider>
-      </EuiThemeProvider>
-    </SyntheticsEmbeddableStateContextProvider>
+    <EuiErrorBoundary>
+      <props.i18n.Context>
+        <KibanaThemeProvider
+          theme$={props.appMountParameters.theme$}
+          modify={{
+            breakpoint: {
+              xxl: 1600,
+              xxxl: 2000,
+            },
+          }}
+        >
+          <SyntheticsEmbeddableStateContextProvider>
+            <EuiThemeProvider darkMode={props.darkMode}>
+              <ReduxProvider store={store}>
+                <Router history={history.current}>
+                  <SyntheticsSettingsContextProvider {...props}>
+                    <KibanaContextProvider
+                      services={{
+                        ...kibanaService.coreStart,
+                        storage,
+                        data: kibanaService.startPlugins.data,
+                        inspector: kibanaService.startPlugins.inspector,
+                        triggersActionsUi: kibanaService.startPlugins.triggersActionsUi,
+                        observability: kibanaService.startPlugins.observability,
+                        cases: kibanaService.startPlugins.cases,
+                      }}
+                    >
+                      <RedirectAppLinks coreStart={props.coreStart}>
+                        <EuiPanel hasShadow={false}>{children}</EuiPanel>
+                      </RedirectAppLinks>
+                    </KibanaContextProvider>
+                  </SyntheticsSettingsContextProvider>
+                </Router>
+              </ReduxProvider>
+            </EuiThemeProvider>
+          </SyntheticsEmbeddableStateContextProvider>
+        </KibanaThemeProvider>
+      </props.i18n.Context>
+    </EuiErrorBoundary>
   );
 };
