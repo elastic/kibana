@@ -31,7 +31,21 @@ export const ViewLocationMonitors = ({
 
   const history = useHistory();
 
-  const formattedLocationName = useMemo(() => <strong>{locationName}</strong>, [locationName]);
+  const { formattedLocationName, href } = useMemo(
+    () => ({
+      formattedLocationName: <strong>{locationName}</strong>,
+      href:
+        count > 0
+          ? history.createHref({
+              pathname: '/monitors',
+              search: `?locations=${JSON.stringify([locationName])}`,
+            })
+          : history.createHref({
+              pathname: '/add-monitor',
+            }),
+    }),
+    [count, history, locationName]
+  );
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
@@ -42,27 +56,18 @@ export const ViewLocationMonitors = ({
       )}
 
       <EuiSpacer size="s" />
-      {count > 0 ? (
-        <EuiButton
-          data-test-subj="syntheticsViewLocationMonitorsButton"
-          href={history.createHref({
-            pathname: '/monitors',
-            search: `?locations=${JSON.stringify([locationName])}`,
-          })}
-        >
-          {VIEW_LOCATION_MONITORS}
-        </EuiButton>
-      ) : (
-        <EuiButton
-          data-test-subj="syntheticsViewLocationMonitorsButton"
-          href={history.createHref({
-            pathname: '/add-monitor',
-          })}
-        >
-          {count > 0 ? VIEW_MESSAGE : CREATE_MONITOR}
-        </EuiButton>
-      )}
+      <ViewLocationMonitorsButton href={href}>
+        {count > 0 ? VIEW_LOCATION_MONITORS : CREATE_MONITOR}
+      </ViewLocationMonitorsButton>
     </EuiPopover>
+  );
+};
+
+const ViewLocationMonitorsButton: React.FC<{ href: string }> = ({ href, children }) => {
+  return (
+    <EuiButton data-test-subj="syntheticsViewLocationMonitorsButton" href={href}>
+      {children}
+    </EuiButton>
   );
 };
 
