@@ -22,6 +22,7 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { LogCategorizationPage } from './log_categorization_page';
+import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -36,6 +37,14 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   savedSearch,
   appDependencies,
 }) => {
+  if (!dataView) return null;
+
+  const warning = timeSeriesDataViewWarning(dataView, 'log_categorization');
+
+  if (warning !== null) {
+    return <>{warning}</>;
+  }
+
   const datePickerDeps = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
     toMountPoint,

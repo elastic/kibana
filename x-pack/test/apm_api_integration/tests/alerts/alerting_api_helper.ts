@@ -48,21 +48,25 @@ export async function createApmRule<T extends ApmRuleType>({
   params: ApmRuleParamsType[T];
   actions?: any[];
 }) {
-  const { body } = await supertest
-    .post(`/api/alerting/rule`)
-    .set('kbn-xsrf', 'foo')
-    .send({
-      params,
-      consumer: 'apm',
-      schedule: {
-        interval: '1m',
-      },
-      tags: ['apm'],
-      name,
-      rule_type_id: ruleTypeId,
-      actions,
-    });
-  return body;
+  try {
+    const { body } = await supertest
+      .post(`/api/alerting/rule`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        params,
+        consumer: 'apm',
+        schedule: {
+          interval: '1m',
+        },
+        tags: ['apm'],
+        name,
+        rule_type_id: ruleTypeId,
+        actions,
+      });
+    return body;
+  } catch (error: any) {
+    throw new Error(`[Rule] Creating a rule failed: ${error}`);
+  }
 }
 
 function getTimerange() {

@@ -156,6 +156,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             errorRate: 0.25,
             impact: 0.9009009009009009,
             transactionType: 'request',
+            alertsCount: 0,
           });
         });
       });

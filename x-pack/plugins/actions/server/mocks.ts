@@ -30,6 +30,7 @@ const createSetupMock = () => {
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),
     getActionsHealth: jest.fn(),
+    getActionsConfigurationUtilities: jest.fn(),
   };
   return mock;
 };
