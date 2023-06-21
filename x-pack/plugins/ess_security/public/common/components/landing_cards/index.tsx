@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
+  EuiThemeComputed,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -42,7 +43,7 @@ const pageHeaderStyles = css`
   }
 `;
 
-const getFlexItemStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+const getFlexItemStyles = (euiTheme: EuiThemeComputed) => css`
   background: ${euiTheme.colors.lightestShade};
   padding: 20px;
   margin: -12px !important;
