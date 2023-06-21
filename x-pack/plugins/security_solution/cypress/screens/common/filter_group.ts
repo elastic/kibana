@@ -36,6 +36,12 @@ export const OPTION_SELECTABLE = (popoverIndex: number, value: string) =>
 export const OPTION_IGNORED = (popoverIndex: number, value: string) =>
   `#control-popover-${popoverIndex} [data-test-subj="optionsList-control-ignored-selection-${value}"]`;
 
+export const OPTION_SELECTABLE_COUNT = getDataTestSubjectSelector(
+  'optionsList-document-count-badge'
+);
+
+export const CONTROL_POPOVER = (popoverIdx: number) => `#control-popover-${popoverIdx}`;
+
 export const DETECTION_PAGE_FILTER_GROUP_WRAPPER = '.filter-group__wrapper';
 
 export const DETECTION_PAGE_FILTERS_LOADING = '.securityPageWrapper .controlFrame--controlLoading';

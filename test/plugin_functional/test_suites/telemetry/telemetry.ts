@@ -20,9 +20,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const supertest = getService('supertest');
   const PageObjects = getPageObjects(['common']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/159929
-  // Failing: See https://github.com/elastic/kibana/issues/159929
-  describe.skip('Telemetry service', () => {
+  describe('Telemetry service', () => {
     describe('Screenshot mode', () => {
       const checkCanSendTelemetry = (): Promise<boolean> => {
         return browser.executeAsync<boolean>((cb) => {
@@ -70,6 +68,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         previousMinor = `${minor === 0 ? major - 1 : major}.${
           minor === 0 ? minor : minor - 1
         }.${patch}`;
+
+        // Navigating first, so we can dismiss the welcome prompt, before deleting the telemetry SO.
+        await PageObjects.common.navigateToApp('home');
 
         await kbnClient.savedObjects.delete({ type: TELEMETRY_SO_TYPE, id: TELEMETRY_SO_ID });
       });
