@@ -67,6 +67,7 @@ import { AlertsHistogramPanel } from '../../../../detections/components/alerts_k
 import { useUserData } from '../../../../detections/components/user_info';
 import { StepDefineRuleReadOnly } from '../../../../detections/components/rules/step_define_rule';
 import { StepScheduleRuleReadOnly } from '../../../../detections/components/rules/step_schedule_rule';
+import { StepRuleActionsReadOnly } from '../../../../detections/components/rules/step_rule_actions';
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
@@ -290,7 +291,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
 
-  const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
+  const {
+    aboutRuleData,
+    modifiedAboutRuleDetailsData,
+    defineRuleData,
+    scheduleRuleData,
+    ruleActionsData,
+  } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
       : {
@@ -298,6 +305,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           modifiedAboutRuleDetailsData: null,
           defineRuleData: null,
           scheduleRuleData: null,
+          ruleActionsData: null,
         };
   const [dataViewTitle, setDataViewTitle] = useState<string>();
   useEffect(() => {
@@ -644,6 +652,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const defaultRuleStackByOption: AlertsStackByField = 'event.category';
 
+  const hasNotificationActions = ruleActionsData != null && ruleActionsData.actions.length > 0;
+  const hasResponseActions =
+    ruleActionsData != null && (ruleActionsData.responseActions || []).length > 0;
+  const hasActions = hasNotificationActions || hasResponseActions;
+
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
@@ -791,6 +804,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         )}
                       </StepPanel>
                     </EuiFlexItem>
+                    {hasActions && (
+                      <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
+                        <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
+                          <StepRuleActionsReadOnly
+                            addPadding={false}
+                            defaultValues={ruleActionsData}
+                          />
+                        </StepPanel>
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
