@@ -30,7 +30,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { elasticsearchUrl } from './search_application_api';
-import { EngineApiLogic } from './search_application_api_logic';
+import { SearchApplicationApiLogic } from './search_application_api_logic';
 
 const clientSnippet = (esUrl: string, searchApplicationName: string, apiKey: string) => `
 import Client from '@elastic/search-application-client'
@@ -88,7 +88,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
   } = useValues(KibanaLogic);
   const [selectedTab, setSelectedTab] = React.useState<TabId>('apirequest');
   const { searchApplicationName: engineName } = useValues(SearchApplicationViewLogic);
-  const { apiKey } = useValues(EngineApiLogic);
+  const { apiKey } = useValues(SearchApplicationApiLogic);
   const cloudContext = useCloudDetails();
 
   const params = { query: 'pizza', myCustomParameter: 'example value' };

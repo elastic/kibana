@@ -10,14 +10,14 @@ import { kea, MakeLogicType } from 'kea';
 import { Status } from '../../../../../../common/types/api';
 import { GenerateEngineApiKeyLogic } from '../../../../enterprise_search_content/api/generate_engine_api_key/generate_engine_api_key_logic';
 
-interface EngineAPIActions {
+interface SearchApplicationAPIActions {
   apiError: typeof GenerateEngineApiKeyLogic.actions.apiError;
   apiReset: typeof GenerateEngineApiKeyLogic.actions.apiReset;
   closeGenerateModal: void;
   openGenerateModal: void;
 }
 
-export interface EngineAPILogicValues {
+export interface SearchApplicationAPILogicValues {
   apiKey: string;
   apiKeyData: typeof GenerateEngineApiKeyLogic.values.data;
   apiKeyStatus: typeof GenerateEngineApiKeyLogic.values.status;
@@ -25,7 +25,9 @@ export interface EngineAPILogicValues {
   isGenerateModalOpen: boolean;
 }
 
-export const EngineApiLogic = kea<MakeLogicType<EngineAPILogicValues, EngineAPIActions>>({
+export const SearchApplicationApiLogic = kea<
+  MakeLogicType<SearchApplicationAPILogicValues, SearchApplicationAPIActions>
+>({
   actions: {
     closeGenerateModal: true,
     openGenerateModal: true,

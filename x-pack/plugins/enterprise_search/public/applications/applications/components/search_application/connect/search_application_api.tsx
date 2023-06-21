@@ -31,7 +31,7 @@ import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { EngineApiIntegrationStage } from './engine_api_integration';
 import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/generate_engine_api_key_modal';
-import { EngineApiLogic } from './search_application_api_logic';
+import { SearchApplicationApiLogic } from './search_application_api_logic';
 
 export const elasticsearchUrl = (cloudContext: CloudDetails): string => {
   const defaultUrl = 'http://localhost:9200';
@@ -41,8 +41,8 @@ export const elasticsearchUrl = (cloudContext: CloudDetails): string => {
 
 export const SearchApplicationAPI = () => {
   const { searchApplicationName } = useValues(SearchApplicationViewLogic);
-  const { isGenerateModalOpen } = useValues(EngineApiLogic);
-  const { openGenerateModal, closeGenerateModal } = useActions(EngineApiLogic);
+  const { isGenerateModalOpen } = useValues(SearchApplicationApiLogic);
+  const { openGenerateModal, closeGenerateModal } = useActions(SearchApplicationApiLogic);
   const cloudContext = useCloudDetails();
 
   const steps = [
