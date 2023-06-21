@@ -9,24 +9,15 @@
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
 import { BehaviorSubject } from 'rxjs';
-import { ChromeNavigationViewModel, NavigationServices } from '../../types';
+import { NavigationServices } from '../../types';
 
-type Arguments = ChromeNavigationViewModel & NavigationServices;
+type Arguments = NavigationServices;
 export type Params = Pick<
   Arguments,
-  | 'navIsOpen'
-  | 'navigationTree'
-  | 'platformConfig'
-  | 'recentlyAccessed$'
-  | 'navLinks$'
-  | 'recentlyAccessedFilter'
-  | 'onProjectNavigationChange'
+  'navIsOpen' | 'recentlyAccessed$' | 'navLinks$' | 'onProjectNavigationChange'
 >;
 
-export class StorybookMock extends AbstractStorybookMock<
-  ChromeNavigationViewModel,
-  NavigationServices
-> {
+export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices> {
   propArguments = {};
 
   serviceArguments = {
@@ -56,10 +47,7 @@ export class StorybookMock extends AbstractStorybookMock<
     };
   }
 
-  getProps(params: Params): ChromeNavigationViewModel {
-    return {
-      ...params,
-      recentlyAccessedFilter: params.recentlyAccessedFilter,
-    };
+  getProps(params: Params) {
+    return params;
   }
 }
