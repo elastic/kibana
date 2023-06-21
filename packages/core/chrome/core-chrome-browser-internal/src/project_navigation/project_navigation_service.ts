@@ -128,18 +128,7 @@ export class ProjectNavigationService {
     // in React in useCallback() and useMemo() dependencies arrays it triggers an infinite navigation
     // tree registration loop. To avoid that we only notify the listeners when the activeNodes array
     // has actually changed.
-    let requiresUpdate = activeNodes.length !== this.activeNodes$.value.length;
-
-    if (!requiresUpdate) {
-      for (const [i, nodesBranch] of this.activeNodes$.value.entries()) {
-        for (const [j, node] of nodesBranch.entries()) {
-          if (!deepEqual(node, activeNodes[i][j])) {
-            requiresUpdate = true;
-            break;
-          }
-        }
-      }
-    }
+    const requiresUpdate = !deepEqual(activeNodes, this.activeNodes$.value);
 
     if (!requiresUpdate) return;
 
