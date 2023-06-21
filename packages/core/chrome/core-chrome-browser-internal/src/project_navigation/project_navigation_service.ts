@@ -136,7 +136,7 @@ export class ProjectNavigationService {
             break;
           }
         }
-          }
+      }
     }
 
     if (!requiresUpdate) return;
