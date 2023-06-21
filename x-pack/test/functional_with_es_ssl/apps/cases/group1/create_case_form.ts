@@ -58,8 +58,8 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       // validate tag exists
       await testSubjects.existOrFail('tag-tagme');
 
-       // validate category exists
-       await testSubjects.existOrFail('category-new');
+      // validate category exists
+      await testSubjects.existOrFail('category-new');
 
       // validate no connector added
       const button = await find.byCssSelector('[data-test-subj*="case-callout"] button');
