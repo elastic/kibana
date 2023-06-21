@@ -33,7 +33,7 @@ export interface ProcessesProps {
   nodeName: string;
   nodeType: InventoryItemType;
   currentTime: number;
-  searchFilter?: string;
+  search?: string;
   onSearchFilterChange?: (searchFilter: string) => void;
 }
 
@@ -46,10 +46,10 @@ export const Processes = ({
   currentTime,
   nodeName,
   nodeType,
-  searchFilter,
+  search,
   onSearchFilterChange,
 }: ProcessesProps) => {
-  const [searchText, setSearchText] = useState(searchFilter ?? '');
+  const [searchText, setSearchText] = useState(search ?? '');
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
     searchText ? Query.parse(searchText) : Query.MATCH_ALL
   );
