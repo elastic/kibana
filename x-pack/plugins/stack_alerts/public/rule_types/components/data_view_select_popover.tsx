@@ -21,7 +21,11 @@ import {
   useEuiPaddingCSS,
 } from '@elastic/eui';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { DataView, DataViewSpec, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewSpec,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import { EsQueryRuleMetaData } from '../es_query/types';
