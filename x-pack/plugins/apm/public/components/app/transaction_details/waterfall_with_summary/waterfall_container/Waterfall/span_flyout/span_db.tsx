@@ -65,9 +65,9 @@ export function SpanDatabase({ spanDb }: Props) {
             language={'sql'}
             style={xcode}
             customStyle={{
-              color: null,
-              background: null,
-              padding: null,
+              color: undefined,
+              background: undefined,
+              padding: undefined,
               lineHeight: dbSyntaxLineHeight,
               whiteSpace: 'pre-wrap',
               overflowX: 'scroll',
