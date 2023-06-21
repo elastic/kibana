@@ -13,14 +13,6 @@ import { act } from 'react-dom/test-utils';
 import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 
-jest.mock('../helpers/source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
-  }),
-}));
-
 describe('ExpressionRow', () => {
   async function setup(expression: MetricExpression) {
     const wrapper = mountWithIntl(

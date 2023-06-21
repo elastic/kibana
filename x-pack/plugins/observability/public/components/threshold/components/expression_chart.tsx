@@ -31,7 +31,6 @@ import { Color } from '../../../../common/threshold_rule/color_palette';
 import {
   MetricsExplorerChartType,
   MetricsExplorerOptionsMetric,
-  MetricsSourceConfiguration,
 } from '../../../../common/threshold_rule/types';
 import { MetricExpression, TimeRange } from '../types';
 import { createFormatterForMetric } from '../helpers/create_formatter_for_metric';
@@ -57,7 +56,6 @@ interface Props {
   filterQuery?: string;
   groupBy?: string | string[];
   hideTitle?: boolean;
-  source?: MetricsSourceConfiguration;
   timeRange?: TimeRange;
 }
 
@@ -69,14 +67,12 @@ export function ExpressionChart({
   filterQuery,
   groupBy,
   hideTitle = false,
-  source,
   timeRange,
 }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const { isLoading, data } = useMetricsExplorerChartData(
     expression,
     derivedIndexPattern,
-    source,
     filterQuery,
     groupBy,
     timeRange
