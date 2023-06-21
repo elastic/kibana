@@ -241,7 +241,7 @@ export function getEuiGridColumns({
 export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
   const timeFieldName = dataView.timeFieldName;
 
-  if (showTimeCol && !columns.find((col) => col === timeFieldName)) {
+  if (showTimeCol && timeFieldName && !columns.find((col) => col === timeFieldName)) {
     return [timeFieldName, ...columns];
   }
 
