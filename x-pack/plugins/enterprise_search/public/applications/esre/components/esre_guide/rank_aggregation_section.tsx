@@ -49,6 +49,7 @@ export const RankAggregationSection: React.FC = () => (
         <EuiFlexItem grow={false}>
           <EsreGuideAccordion
             id="rrfRankingAccordion"
+            data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingAccordion"
             icon={rrfRankingIllustration}
             title={i18n.translate('xpack.enterpriseSearch.esre.rrfRankingAccordion.title', {
               defaultMessage: 'RRF hybrid ranking',
@@ -66,6 +67,7 @@ export const RankAggregationSection: React.FC = () => (
         <EuiFlexItem grow={false}>
           <EsreGuideAccordion
             id="linearCombinationAccordion"
+            data-telemetry-id="entSearch-esre-rankAggregation-linearCombinationAccordion"
             icon={linearCombinationIllustration}
             title={i18n.translate('xpack.enterpriseSearch.esre.linearCombinationAccordion.title', {
               defaultMessage: 'Linear combination',
