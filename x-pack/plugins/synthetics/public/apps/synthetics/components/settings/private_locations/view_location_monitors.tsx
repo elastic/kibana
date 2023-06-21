@@ -31,7 +31,7 @@ export const ViewLocationMonitors = ({
 
   const history = useHistory();
 
-  const { formattedLocationName, href } = useMemo(
+  const { formattedLocationName, href, viewMonitorsMessage } = useMemo(
     () => ({
       formattedLocationName: <strong>{locationName}</strong>,
       href:
@@ -43,6 +43,7 @@ export const ViewLocationMonitors = ({
           : history.createHref({
               pathname: '/add-monitor',
             }),
+      viewMonitorsMessage: count > 0 ? VIEW_LOCATION_MONITORS : CREATE_MONITOR,
     }),
     [count, history, locationName]
   );
@@ -56,9 +57,7 @@ export const ViewLocationMonitors = ({
       )}
 
       <EuiSpacer size="s" />
-      <ViewLocationMonitorsButton href={href}>
-        {count > 0 ? VIEW_LOCATION_MONITORS : CREATE_MONITOR}
-      </ViewLocationMonitorsButton>
+      <ViewLocationMonitorsButton href={href}>{viewMonitorsMessage}</ViewLocationMonitorsButton>
     </EuiPopover>
   );
 };
@@ -80,10 +79,6 @@ const VIEW_LOCATION_MONITORS = i18n.translate(
 
 const CREATE_MONITOR = i18n.translate('xpack.synthetics.monitorManagement.createLocationMonitors', {
   defaultMessage: 'Create monitor',
-});
-
-const VIEW_MESSAGE = i18n.translate('xpack.synthetics.monitorManagement.viewMessage', {
-  defaultMessage: 'View monitors',
 });
 
 const GreaterThanZeroMessage = ({ count, name }: { count: number; name: JSX.Element }) => (
