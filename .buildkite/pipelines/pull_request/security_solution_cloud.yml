@@ -9,4 +9,6 @@ steps:
     plugins:
       - improbable-eng/docker-service#v0.3.0:
           container: agoldis/sorry-cypress-director
+          flags:
+            - --userns=host
 
