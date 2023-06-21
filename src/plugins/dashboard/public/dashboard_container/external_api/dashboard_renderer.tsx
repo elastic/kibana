@@ -18,8 +18,10 @@ import React, {
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
+import useUnmount from 'react-use/lib/useUnmount';
 
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import {
   DashboardAPI,
@@ -47,7 +49,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     const [loading, setLoading] = useState(true);
     const [screenshotMode, setScreenshotMode] = useState(false);
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
-    const [dashboardIdToBuild, setDashboardIdToBuild] = useState<string | undefined>(savedObjectId);
+    const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
 
     useImperativeHandle(
       ref,
@@ -66,22 +68,22 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       })();
     }, []);
 
-    useEffect(() => {
-      // check if dashboard container is expecting id change... if not, update dashboardIdToBuild to force it to rebuild the container.
-      if (!dashboardContainer) return;
-      if (!dashboardContainer.isExpectingIdChange()) setDashboardIdToBuild(savedObjectId);
-
-      // Disabling exhaustive deps because this useEffect should only be triggered when the savedObjectId changes.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [savedObjectId]);
-
     const id = useMemo(() => uuidv4(), []);
 
     useEffect(() => {
-      let canceled = false;
-      let destroyContainer: () => void;
+      if (dashboardContainer) {
+        // When a dashboard already exists, don't rebuild it, just set a new id.
+        dashboardContainer.navigateToDashboard(savedObjectId);
 
+        return;
+      }
+      setLoading(true);
+
+      let canceled = false;
       (async () => {
+        fatalError?.destroy();
+        setFatalError(undefined);
+
         const creationOptions = await getCreationOptions?.();
 
         // Lazy loading all services is required in this component because it is exported and contributes to the bundle size.
@@ -91,12 +93,12 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         const dashboardFactory = embeddable.getEmbeddableFactory(
           DASHBOARD_CONTAINER_TYPE
         ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
-        const container = (await dashboardFactory?.create(
+        const container = await dashboardFactory?.create(
           { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
           undefined,
           creationOptions,
           savedObjectId
-        )) as DashboardContainer;
+        );
 
         if (canceled) {
           container.destroy();
@@ -104,20 +106,29 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         }
 
         setLoading(false);
+
+        if (isErrorEmbeddable(container)) {
+          setFatalError(container);
+          return;
+        }
+
         if (dashboardRoot.current) {
           container.render(dashboardRoot.current);
         }
 
         setDashboardContainer(container);
-        destroyContainer = () => container.destroy();
       })();
       return () => {
         canceled = true;
-        destroyContainer?.();
       };
-      // Disabling exhaustive deps because embeddable should only be created when the dashboardIdToBuild changes.
+      // Disabling exhaustive deps because embeddable should only be created on first render.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dashboardIdToBuild]);
+    }, [savedObjectId]);
+
+    useUnmount(() => {
+      fatalError?.destroy();
+      dashboardContainer?.destroy();
+    });
 
     const viewportClasses = classNames(
       'dashboardViewport',
@@ -131,10 +142,12 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       <EuiLoadingElastic size="xxl" />
     );
 
-    return (
-      <div className={viewportClasses}>
-        {loading ? loadingSpinner : <div ref={dashboardRoot} />}
-      </div>
-    );
+    const renderDashboardContents = () => {
+      if (fatalError) return fatalError.render();
+      if (loading) return loadingSpinner;
+      return <div ref={dashboardRoot} />;
+    };
+
+    return <div className={viewportClasses}>{renderDashboardContents()}</div>;
   }
 );
