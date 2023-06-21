@@ -15,7 +15,6 @@ import React, {
   useEffect,
   forwardRef,
   useImperativeHandle,
-  useCallback,
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
@@ -126,7 +125,6 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         if (isErrorEmbeddable(container)) {
           setFatalError(container);
           if (container.error instanceof SavedObjectNotFound) {
-            console.log('\n\n\n MISSING \n\n\n');
             setDashboardMissing(true);
           }
           return;
