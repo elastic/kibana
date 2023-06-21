@@ -9,13 +9,13 @@ import { omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
 
-import { SavedObjectsUtils } from '@kbn/core/server';
 import type {
+  ElasticsearchClient,
   KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
-  ElasticsearchClient,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 
 import _ from 'lodash';
 
@@ -27,10 +27,10 @@ import type {
   OutputSoKafkaAttributes,
 } from '../types';
 import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
 import {
   SO_SEARCH_LIMIT,
@@ -41,9 +41,9 @@ import {
 } from '../../common/constants';
 import { normalizeHostsForAgents } from '../../common/services';
 import {
-  OutputUnauthorizedError,
-  OutputInvalidError,
   FleetEncryptedSavedObjectEncryptionKeyRequired,
+  OutputInvalidError,
+  OutputUnauthorizedError,
 } from '../errors';
 
 import type { OutputType } from '../types';
@@ -285,6 +285,59 @@ class OutputService {
     return outputs;
   }
 
+  private async _updateDefaultOutput(
+    soClient: SavedObjectsClientContract,
+    defaultDataOutputId: string,
+    updateData: { is_default: boolean } | { is_default_monitoring: boolean },
+    fromPreconfiguration: boolean
+  ) {
+    const originalOutput = await this.get(soClient, defaultDataOutputId);
+    this._validateFieldsAreEditable(
+      originalOutput,
+      updateData,
+      defaultDataOutputId,
+      fromPreconfiguration
+    );
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: outputIdToUuid(defaultDataOutputId),
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
+
+    return await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
+      SAVED_OBJECT_TYPE,
+      outputIdToUuid(defaultDataOutputId),
+      updateData
+    );
+  }
+
+  private _validateFieldsAreEditable(
+    originalOutput: Output,
+    data: Partial<Output>,
+    id: string,
+    fromPreconfiguration: boolean
+  ) {
+    if (originalOutput.is_preconfigured) {
+      if (!fromPreconfiguration) {
+        const allowEditFields = originalOutput.allow_edit ?? [];
+
+        const allKeys = Array.from(new Set([...Object.keys(data)])) as Array<keyof Output>;
+        for (const key of allKeys) {
+          if (
+            (!!originalOutput[key] || !!data[key]) &&
+            !allowEditFields.includes(key) &&
+            !deepEqual(originalOutput[key], data[key])
+          ) {
+            throw new OutputUnauthorizedError(
+              `Preconfigured output ${id} ${key} cannot be updated outside of kibana config file.`
+            );
+          }
+        }
+      }
+    }
+  }
+
   public async ensureDefaultOutput(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
@@ -375,24 +428,22 @@ class OutputService {
     // ensure only default output exists
     if (data.is_default) {
       if (defaultDataOutputId) {
-        await this.update(
+        await this._updateDefaultOutput(
           soClient,
-          esClient,
           defaultDataOutputId,
           { is_default: false },
-          { fromPreconfiguration: options?.fromPreconfiguration ?? false }
+          options?.fromPreconfiguration ?? false
         );
       }
     }
     if (data.is_default_monitoring) {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
       if (defaultMonitoringOutputId) {
-        await this.update(
+        await this._updateDefaultOutput(
           soClient,
-          esClient,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
-          { fromPreconfiguration: options?.fromPreconfiguration ?? false }
+          options?.fromPreconfiguration ?? false
         );
       }
     }
@@ -621,29 +672,20 @@ class OutputService {
     }
   ) {
     const originalOutput = await this.get(soClient, id);
-    if (originalOutput.is_preconfigured) {
-      if (!fromPreconfiguration) {
-        const allowEditFields = originalOutput.allow_edit ?? [];
 
-        const allKeys = Array.from(new Set([...Object.keys(data)])) as Array<keyof Output>;
-        for (const key of allKeys) {
-          if (
-            (!!originalOutput[key] || !!data[key]) &&
-            !allowEditFields.includes(key) &&
-            !deepEqual(originalOutput[key], data[key])
-          ) {
-            throw new OutputUnauthorizedError(
-              `Preconfigured output ${id} ${key} cannot be updated outside of kibana config file.`
-            );
-          }
-        }
-      }
+    this._validateFieldsAreEditable(originalOutput, data, id, fromPreconfiguration);
+    if (
+      (originalOutput.is_default && data.is_default === false) ||
+      (data.is_default_monitoring === false && originalOutput.is_default_monitoring)
+    ) {
+      throw new OutputUnauthorizedError(
+        `Default output ${id} cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
+      );
     }
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
-
     await validateTypeChanges(
       soClient,
       esClient,
@@ -749,12 +791,11 @@ class OutputService {
     // ensure only default output exists
     if (data.is_default) {
       if (defaultDataOutputId && defaultDataOutputId !== id) {
-        await this.update(
+        await this._updateDefaultOutput(
           soClient,
-          esClient,
           defaultDataOutputId,
           { is_default: false },
-          { fromPreconfiguration }
+          fromPreconfiguration
         );
       }
     }
@@ -762,12 +803,11 @@ class OutputService {
       const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
 
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
-        await this.update(
+        await this._updateDefaultOutput(
           soClient,
-          esClient,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
-          { fromPreconfiguration }
+          fromPreconfiguration
         );
       }
     }
