@@ -64,7 +64,7 @@ describe('Elasticsearch client headers', () => {
     );
   });
 
-  it('send the correct default headers to elasticsearch', async () => {
+  it('sends the correct default headers to elasticsearch', async () => {
     await client.ping();
 
     expect(requests).toHaveLength(1);
