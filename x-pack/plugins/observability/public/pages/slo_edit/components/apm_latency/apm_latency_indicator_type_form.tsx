@@ -18,7 +18,7 @@ export function ApmLatencyIndicatorTypeForm() {
   const { control, setValue, watch, getFieldState } = useFormContext<CreateSLOForm>();
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
-    setValue('indicator.params.index', apmIndex);
+    setTimeout(() => setValue('indicator.params.index', apmIndex));
   }, [apmIndex, setValue]);
 
   return (

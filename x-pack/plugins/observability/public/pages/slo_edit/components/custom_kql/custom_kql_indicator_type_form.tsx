@@ -32,8 +32,8 @@ interface Option {
 
 export function CustomKqlIndicatorTypeForm() {
   const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
-  const index = watch('indicator.params.index');
 
+  const index = watch('indicator.params.index');
   const { isLoading, data: indexFields } = useFetchIndexPatternFields(index);
   const timestampFields = (indexFields ?? []).filter((field) => field.type === 'date');
 
