@@ -193,7 +193,8 @@ import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
         runElasticsearch({
           config,
           log,
-          name: `ftr-${esPort}-${Math.random().toString(36).substring(2)}`,
+          name: `ftr-${esPort}`,
+          // name: `ftr-${esPort}-${Math.random().toString(36).substring(2)}`,
           esFrom: 'snapshot',
           onEarlyExit,
         }),

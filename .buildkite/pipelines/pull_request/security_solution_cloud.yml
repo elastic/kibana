@@ -5,4 +5,8 @@ steps:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 5
+    plugins:
+      - improbable-eng/docker-service#v0.3.0:
+        container: agoldis/sorry-cypress-director
+
