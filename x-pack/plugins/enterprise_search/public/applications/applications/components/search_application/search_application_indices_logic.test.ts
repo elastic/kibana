@@ -10,9 +10,12 @@ import { LogicMounter } from '../../../__mocks__/kea_logic';
 import { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
 import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 
-import { EngineIndicesLogic, EngineIndicesLogicValues } from './search_application_indices_logic';
+import {
+  SearchApplicationIndicesLogic,
+  SearchApplicationIndicesLogicValues,
+} from './search_application_indices_logic';
 
-const DEFAULT_VALUES: EngineIndicesLogicValues = {
+const DEFAULT_VALUES: SearchApplicationIndicesLogicValues = {
   addIndicesFlyoutOpen: false,
   isLoadingSearchApplication: true,
   searchApplicationData: undefined,
@@ -44,7 +47,7 @@ const mockEngineData: EnterpriseSearchApplicationDetails = {
 };
 
 describe('SearchApplicationViewLogic', () => {
-  const { mount } = new LogicMounter(EngineIndicesLogic);
+  const { mount } = new LogicMounter(SearchApplicationIndicesLogic);
   const { mount: mountFetchSearchApplicationApiLogic } = new LogicMounter(
     FetchSearchApplicationApiLogic
   );
@@ -65,7 +68,7 @@ describe('SearchApplicationViewLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(EngineIndicesLogic.values).toEqual(DEFAULT_VALUES);
+    expect(SearchApplicationIndicesLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('listeners', () => {
@@ -73,32 +76,40 @@ describe('SearchApplicationViewLogic', () => {
       FetchSearchApplicationApiLogic.actions.apiSuccess(mockEngineData);
     });
     it('has engine data', () => {
-      expect(EngineIndicesLogic.values.searchApplicationData).toEqual(mockEngineData);
+      expect(SearchApplicationIndicesLogic.values.searchApplicationData).toEqual(mockEngineData);
     });
 
     describe('engineUpdated', () => {
       it('fetches new engine details', () => {
-        jest.spyOn(EngineIndicesLogic.actions, 'fetchSearchApplication');
+        jest.spyOn(SearchApplicationIndicesLogic.actions, 'fetchSearchApplication');
 
-        EngineIndicesLogic.actions.engineUpdated({
+        SearchApplicationIndicesLogic.actions.searchApplicationUpdated({
           ...mockEngineData,
           indices: mockEngineData.indices.map((index) => index.name),
         });
 
-        expect(EngineIndicesLogic.actions.fetchSearchApplication).toHaveBeenCalledTimes(1);
-        expect(EngineIndicesLogic.actions.fetchSearchApplication).toHaveBeenCalledWith({
+        expect(SearchApplicationIndicesLogic.actions.fetchSearchApplication).toHaveBeenCalledTimes(
+          1
+        );
+        expect(SearchApplicationIndicesLogic.actions.fetchSearchApplication).toHaveBeenCalledWith({
           name: DEFAULT_VALUES.searchApplicationName,
         });
       });
     });
     describe('removeIndexFromEngine', () => {
       it('updated engine removing the given index', () => {
-        jest.spyOn(EngineIndicesLogic.actions, 'updateEngineRequest');
+        jest.spyOn(SearchApplicationIndicesLogic.actions, 'updateSearchApplicationRequest');
 
-        EngineIndicesLogic.actions.removeIndexFromEngine(mockEngineData.indices[0].name);
+        SearchApplicationIndicesLogic.actions.removeIndexFromSearchApplication(
+          mockEngineData.indices[0].name
+        );
 
-        expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledTimes(1);
-        expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledWith({
+        expect(
+          SearchApplicationIndicesLogic.actions.updateSearchApplicationRequest
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          SearchApplicationIndicesLogic.actions.updateSearchApplicationRequest
+        ).toHaveBeenCalledWith({
           name: DEFAULT_VALUES.searchApplicationName,
           indices: ['search-002'],
         });
@@ -106,12 +117,16 @@ describe('SearchApplicationViewLogic', () => {
     });
     describe('addIndicesToEngine', () => {
       it('updated engine removing the given index', () => {
-        jest.spyOn(EngineIndicesLogic.actions, 'updateEngineRequest');
+        jest.spyOn(SearchApplicationIndicesLogic.actions, 'updateSearchApplicationRequest');
 
-        EngineIndicesLogic.actions.addIndicesToEngine(['search-003']);
+        SearchApplicationIndicesLogic.actions.addIndicesToSearchApplication(['search-003']);
 
-        expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledTimes(1);
-        expect(EngineIndicesLogic.actions.updateEngineRequest).toHaveBeenCalledWith({
+        expect(
+          SearchApplicationIndicesLogic.actions.updateSearchApplicationRequest
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          SearchApplicationIndicesLogic.actions.updateSearchApplicationRequest
+        ).toHaveBeenCalledWith({
           name: DEFAULT_VALUES.searchApplicationName,
           indices: ['search-001', 'search-002', 'search-003'],
         });

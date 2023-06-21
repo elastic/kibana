@@ -60,7 +60,7 @@ import {
 } from '../../../routes';
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
-import { EngineIndicesLogic } from '../search_application_indices_logic';
+import { SearchApplicationIndicesLogic } from '../search_application_indices_logic';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { DocumentProvider } from './document_context';
@@ -354,7 +354,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
     SearchApplicationViewLogic
   );
   const { resultFields, sortableFields } = useValues(SearchApplicationSearchPreviewLogic);
-  const { searchApplicationData } = useValues(EngineIndicesLogic);
+  const { searchApplicationData } = useValues(SearchApplicationIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
     const transporter = new InternalSearchApplicationTransporter(http, searchApplicationName);

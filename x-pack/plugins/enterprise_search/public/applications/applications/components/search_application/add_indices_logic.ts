@@ -9,12 +9,15 @@ import { kea, MakeLogicType } from 'kea';
 
 import { UpdateSearchApplicationApiLogic } from '../../api/search_applications/update_search_application_api_logic';
 
-import { EngineIndicesLogic, EngineIndicesLogicActions } from './search_application_indices_logic';
+import {
+  SearchApplicationIndicesLogic,
+  SearchApplicationIndicesLogicActions,
+} from './search_application_indices_logic';
 
 export interface AddIndicesLogicActions {
-  addIndicesToEngine: EngineIndicesLogicActions['addIndicesToEngine'];
-  closeAddIndicesFlyout: EngineIndicesLogicActions['closeAddIndicesFlyout'];
-  engineUpdated: EngineIndicesLogicActions['engineUpdated'];
+  addIndicesToSearchApplication: SearchApplicationIndicesLogicActions['addIndicesToSearchApplication'];
+  closeAddIndicesFlyout: SearchApplicationIndicesLogicActions['closeAddIndicesFlyout'];
+  searchApplicationUpdated: SearchApplicationIndicesLogicActions['searchApplicationUpdated'];
   setSelectedIndices: (indices: string[]) => {
     indices: string[];
   };
@@ -23,8 +26,8 @@ export interface AddIndicesLogicActions {
 
 export interface AddIndicesLogicValues {
   selectedIndices: string[];
-  updateEngineError: typeof UpdateSearchApplicationApiLogic.values.error | undefined;
-  updateEngineStatus: typeof UpdateSearchApplicationApiLogic.values.status;
+  updateSearchApplicationError: typeof UpdateSearchApplicationApiLogic.values.error | undefined;
+  updateSearchApplicationStatus: typeof UpdateSearchApplicationApiLogic.values.status;
 }
 
 export const AddIndicesLogic = kea<MakeLogicType<AddIndicesLogicValues, AddIndicesLogicActions>>({
@@ -33,21 +36,24 @@ export const AddIndicesLogic = kea<MakeLogicType<AddIndicesLogicValues, AddIndic
     submitSelectedIndices: () => true,
   },
   connect: {
-    actions: [EngineIndicesLogic, ['addIndicesToEngine', 'engineUpdated', 'closeAddIndicesFlyout']],
+    actions: [
+      SearchApplicationIndicesLogic,
+      ['addIndicesToSearchApplication', 'searchApplicationUpdated', 'closeAddIndicesFlyout'],
+    ],
     values: [
       UpdateSearchApplicationApiLogic,
-      ['status as updateEngineStatus', 'error as updateEngineError'],
+      ['status as updateSearchApplicationStatus', 'error as updateSearchApplicationError'],
     ],
   },
   listeners: ({ actions, values }) => ({
-    engineUpdated: () => {
+    searchApplicationUpdated: () => {
       actions.closeAddIndicesFlyout();
     },
     submitSelectedIndices: () => {
       const { selectedIndices } = values;
       if (selectedIndices.length === 0) return;
 
-      actions.addIndicesToEngine(selectedIndices);
+      actions.addIndicesToSearchApplication(selectedIndices);
     },
   }),
   path: ['enterprise_search', 'content', 'add_indices_logic'],

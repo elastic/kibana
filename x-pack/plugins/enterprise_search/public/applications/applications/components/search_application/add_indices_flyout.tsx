@@ -43,11 +43,12 @@ export interface AddIndicesFlyoutProps {
 }
 
 export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) => {
-  const { searchApplicationData: engineData } = useValues(SearchApplicationViewLogic);
-  const { selectedIndices, updateEngineStatus, updateEngineError } = useValues(AddIndicesLogic);
+  const { searchApplicationData } = useValues(SearchApplicationViewLogic);
+  const { selectedIndices, updateSearchApplicationStatus, updateSearchApplicationError } =
+    useValues(AddIndicesLogic);
   const { setSelectedIndices, submitSelectedIndices } = useActions(AddIndicesLogic);
 
-  const existingIndices = engineData?.indices?.map((index) => index.name);
+  const existingIndices = searchApplicationData?.indices?.map((index) => index.name);
 
   const selectedOptions = useMemo(
     () => selectedIndices.map((index) => indexToOption(index)),
@@ -66,22 +67,22 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
         <EuiTitle>
           <h2>
             {i18n.translate(
-              'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.title',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.title',
               { defaultMessage: 'Add new indices' }
             )}
           </h2>
         </EuiTitle>
-        {updateEngineStatus === Status.ERROR && updateEngineError && (
+        {updateSearchApplicationStatus === Status.ERROR && updateSearchApplicationError && (
           <>
             <EuiSpacer />
             <EuiCallOut
               color="danger"
               title={i18n.translate(
-                'xpack.enterpriseSearch.content.engines.indices.addIndicesFlyout.updateError.title',
-                { defaultMessage: 'Error updating engine' }
+                'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.updateError.title',
+                { defaultMessage: 'Error updating search application' }
               )}
             >
-              {getErrorsFromHttpResponse(updateEngineError).map((errMessage, i) => (
+              {getErrorsFromHttpResponse(updateSearchApplicationError).map((errMessage, i) => (
                 <p id={`createErrorMsg.${i}`}>{errMessage}</p>
               ))}
             </EuiCallOut>
@@ -92,7 +93,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
         <EuiFormRow
           fullWidth
           label={i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.selectableLabel',
+            'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.selectableLabel',
             { defaultMessage: 'Select searchable indices' }
           )}
         >
@@ -114,7 +115,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
               onClick={submitSelectedIndices}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.submitButton',
+                'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.submitButton',
                 { defaultMessage: 'Add selected' }
               )}
             </EuiButton>
@@ -126,7 +127,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
               onClick={onClose}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.cancelButton',
+                'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.cancelButton',
                 { defaultMessage: 'Cancel' }
               )}
             </EuiButtonEmpty>

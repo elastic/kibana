@@ -13,20 +13,18 @@ import { AddIndicesLogic, AddIndicesLogicValues } from './add_indices_logic';
 
 const DEFAULT_VALUES: AddIndicesLogicValues = {
   selectedIndices: [],
-  updateEngineError: undefined,
-  updateEngineStatus: Status.IDLE,
+  updateSearchApplicationError: undefined,
+  updateSearchApplicationStatus: Status.IDLE,
 };
 
 describe('AddIndicesLogic', () => {
   const { mount: mountAddIndicesLogic } = new LogicMounter(AddIndicesLogic);
-  const { mount: mountEngineIndicesLogic } = new LogicMounter(AddIndicesLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
 
     mountAddIndicesLogic();
-    mountEngineIndicesLogic();
   });
 
   it('has expected default values', () => {
@@ -51,13 +49,13 @@ describe('AddIndicesLogic', () => {
   });
 
   describe('listeners', () => {
-    describe('engineUpdated', () => {
+    describe('searchApplicationUpdated', () => {
       it('closes the add indices flyout', () => {
         jest.spyOn(AddIndicesLogic.actions, 'closeAddIndicesFlyout');
 
-        AddIndicesLogic.actions.engineUpdated({
+        AddIndicesLogic.actions.searchApplicationUpdated({
           indices: [],
-          name: 'engine-name',
+          name: 'search-application-name',
           updated_at_millis: 2202018295,
         });
 
@@ -67,21 +65,21 @@ describe('AddIndicesLogic', () => {
 
     describe('submitSelectedIndices', () => {
       it('does not make a request if there are no selectedIndices', () => {
-        jest.spyOn(AddIndicesLogic.actions, 'addIndicesToEngine');
+        jest.spyOn(AddIndicesLogic.actions, 'addIndicesToSearchApplication');
 
         AddIndicesLogic.actions.submitSelectedIndices();
 
-        expect(AddIndicesLogic.actions.addIndicesToEngine).toHaveBeenCalledTimes(0);
+        expect(AddIndicesLogic.actions.addIndicesToSearchApplication).toHaveBeenCalledTimes(0);
       });
 
-      it('calls addIndicesToEngine when there are selectedIndices', () => {
-        jest.spyOn(AddIndicesLogic.actions, 'addIndicesToEngine');
+      it('calls addIndicesToSearchApplication when there are selectedIndices', () => {
+        jest.spyOn(AddIndicesLogic.actions, 'addIndicesToSearchApplication');
 
         AddIndicesLogic.actions.setSelectedIndices(['index-001', 'index-002']);
         AddIndicesLogic.actions.submitSelectedIndices();
 
-        expect(AddIndicesLogic.actions.addIndicesToEngine).toHaveBeenCalledTimes(1);
-        expect(AddIndicesLogic.actions.addIndicesToEngine).toHaveBeenCalledWith([
+        expect(AddIndicesLogic.actions.addIndicesToSearchApplication).toHaveBeenCalledTimes(1);
+        expect(AddIndicesLogic.actions.addIndicesToSearchApplication).toHaveBeenCalledWith([
           'index-001',
           'index-002',
         ]);

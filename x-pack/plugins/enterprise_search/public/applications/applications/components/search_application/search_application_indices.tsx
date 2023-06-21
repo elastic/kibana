@@ -33,18 +33,18 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
-import { EngineIndicesLogic } from './search_application_indices_logic';
+import { SearchApplicationIndicesLogic } from './search_application_indices_logic';
 
-export const EngineIndices: React.FC = () => {
+export const SearchApplicationIndices: React.FC = () => {
   const subduedBackground = useEuiBackgroundColor('subdued');
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
-  const { searchApplicationData: engineData } = useValues(EngineIndicesLogic);
-  const { removeIndexFromEngine } = useActions(EngineIndicesLogic);
+  const { searchApplicationData } = useValues(SearchApplicationIndicesLogic);
+  const { removeIndexFromSearchApplication } = useActions(SearchApplicationIndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
   const [removeIndexConfirm, setConfirmRemoveIndex] = useState<string | null>(null);
 
-  if (!engineData) return null;
-  const { indices } = engineData;
+  if (!searchApplicationData) return null;
+  const { indices } = searchApplicationData;
 
   const hasAllUnreachableIndices = indices.every(({ health }) => health === 'unknown');
 
@@ -53,9 +53,9 @@ export const EngineIndices: React.FC = () => {
   const removeIndexAction: EuiTableActionsColumnType<EnterpriseSearchApplicationIndex>['actions'][0] =
     {
       color: 'danger',
-      'data-test-subj': 'engine-remove-index-btn',
+      'data-test-subj': 'search-application-remove-index-btn',
       description: i18n.translate(
-        'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.indices.actions.removeIndex.title',
         {
           defaultMessage: 'Remove this index from search application',
         }
@@ -64,7 +64,7 @@ export const EngineIndices: React.FC = () => {
       isPrimary: false,
       name: (index: EnterpriseSearchApplicationIndex) =>
         i18n.translate(
-          'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.caption',
+          'xpack.enterpriseSearch.searchApplications.searchApplication.indices.actions.removeIndex.caption',
           {
             defaultMessage: 'Remove index {indexName}',
             values: {
@@ -84,15 +84,18 @@ export const EngineIndices: React.FC = () => {
 
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchApplicationIndex>> = [
     {
-      name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.name.columnTitle', {
-        defaultMessage: 'Index name',
-      }),
+      name: i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.searchApplication.indices.name.columnTitle',
+        {
+          defaultMessage: 'Index name',
+        }
+      ),
       render: ({ health, name }: EnterpriseSearchApplicationIndex) =>
         health === 'unknown' ? (
           name
         ) : (
           <EuiLinkTo
-            data-test-subj="engine-index-link"
+            data-test-subj="search-application-index-link"
             to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_PATH, {
               indexName: name,
             })}`}
@@ -107,9 +110,12 @@ export const EngineIndices: React.FC = () => {
     },
     {
       field: 'health',
-      name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.health.columnTitle', {
-        defaultMessage: 'Index health',
-      }),
+      name: i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.searchApplication.indices.health.columnTitle',
+        {
+          defaultMessage: 'Index health',
+        }
+      ),
       render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
         <span>
           <EuiIcon type="dot" color={indexHealthToHealthColor(health)} />
@@ -122,13 +128,16 @@ export const EngineIndices: React.FC = () => {
     },
     {
       field: 'count',
-      name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.docsCount.columnTitle', {
-        defaultMessage: 'Docs count',
-      }),
+      name: i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.searchApplication.indices.docsCount.columnTitle',
+        {
+          defaultMessage: 'Docs count',
+        }
+      ),
       render: (count: number | null) =>
         count === null
           ? i18n.translate(
-              'xpack.enterpriseSearch.content.engine.indices.docsCount.notAvailableLabel',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.indices.docsCount.notAvailableLabel',
               { defaultMessage: 'N/A' }
             )
           : count,
@@ -140,9 +149,9 @@ export const EngineIndices: React.FC = () => {
       actions: [
         {
           available: (index) => index.health !== 'unknown',
-          'data-test-subj': 'engine-view-index-btn',
+          'data-test-subj': 'search-application-view-index-btn',
           description: i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.actions.viewIndex.title',
+            'xpack.enterpriseSearch.searchApplications.searchApplication.indices.actions.viewIndex.title',
             {
               defaultMessage: 'View this index',
             }
@@ -151,7 +160,7 @@ export const EngineIndices: React.FC = () => {
           isPrimary: false,
           name: (index) =>
             i18n.translate(
-              'xpack.enterpriseSearch.content.engine.indices.actions.viewIndex.caption',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.indices.actions.viewIndex.caption',
               {
                 defaultMessage: 'View index {indexName}',
                 values: {
@@ -172,9 +181,12 @@ export const EngineIndices: React.FC = () => {
         },
         ...(indices.length > 1 ? [removeIndexAction] : []),
       ],
-      name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.actions.columnTitle', {
-        defaultMessage: 'Actions',
-      }),
+      name: i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.searchApplication.indices.actions.columnTitle',
+        {
+          defaultMessage: 'Actions',
+        }
+      ),
       width: '10%',
     },
   ];
@@ -189,14 +201,14 @@ export const EngineIndices: React.FC = () => {
               hasAllUnreachableIndices ? (
                 <>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.indices.allUnknownIndicesCallout.title',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.indices.allUnknownIndicesCallout.title',
                     { defaultMessage: 'All of your indices are unavailable.' }
                   )}
                 </>
               ) : (
                 <>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.indices.someUnknownIndicesCallout.title',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.indices.someUnknownIndicesCallout.title',
                     { defaultMessage: 'Some of your indices are unavailable.' }
                   )}
                 </>
@@ -207,7 +219,7 @@ export const EngineIndices: React.FC = () => {
               {hasAllUnreachableIndices ? (
                 <>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.indices.allUnknownIndicesCallout.description',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.indices.allUnknownIndicesCallout.description',
                     {
                       defaultMessage:
                         'Your search application has no reachable indices. Add some indices and check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
@@ -217,7 +229,7 @@ export const EngineIndices: React.FC = () => {
               ) : (
                 <>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.indices.someUnknownIndicesCallout.description',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.indices.someUnknownIndicesCallout.description',
                     {
                       defaultMessage:
                         'Some data might be unreachable from this search application. Check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
@@ -244,7 +256,7 @@ export const EngineIndices: React.FC = () => {
           box: {
             incremental: true,
             placeholder: i18n.translate(
-              'xpack.enterpriseSearch.content.engine.indices.searchPlaceholder',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.indices.searchPlaceholder',
               { defaultMessage: 'Filter indices' }
             ),
             schema: true,
@@ -257,7 +269,7 @@ export const EngineIndices: React.FC = () => {
         <EuiConfirmModal
           onCancel={() => setConfirmRemoveIndex(null)}
           onConfirm={() => {
-            removeIndexFromEngine(removeIndexConfirm);
+            removeIndexFromSearchApplication(removeIndexConfirm);
             setConfirmRemoveIndex(null);
             sendEnterpriseSearchTelemetry({
               action: 'clicked',
@@ -265,13 +277,13 @@ export const EngineIndices: React.FC = () => {
             });
           }}
           title={i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
+            'xpack.enterpriseSearch.searchApplications.searchApplication.indices.removeIndexConfirm.title',
             { defaultMessage: 'Remove this index from the search application' }
           )}
           buttonColor="danger"
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.text',
+            'xpack.enterpriseSearch.searchApplications.searchApplication.indices.removeIndexConfirm.text',
             {
               defaultMessage: 'Yes, Remove This Index',
             }
@@ -282,7 +294,7 @@ export const EngineIndices: React.FC = () => {
           <EuiText>
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.description',
+                'xpack.enterpriseSearch.searchApplications.searchApplication.indices.removeIndexConfirm.description',
                 {
                   defaultMessage:
                     "This won't delete the index. You may add it back to this search application at a later time.",

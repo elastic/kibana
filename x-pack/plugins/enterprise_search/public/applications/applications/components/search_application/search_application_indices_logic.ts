@@ -18,38 +18,38 @@ import {
   SearchApplicationViewValues,
 } from './search_application_view_logic';
 
-export interface EngineIndicesLogicActions {
-  addIndicesToEngine: (indices: string[]) => { indices: string[] };
+export interface SearchApplicationIndicesLogicActions {
+  addIndicesToSearchApplication: (indices: string[]) => { indices: string[] };
   closeAddIndicesFlyout: () => void;
-  engineUpdated: UpdateSearchApplicationApiLogicActions['apiSuccess'];
   fetchSearchApplication: SearchApplicationViewActions['fetchSearchApplication'];
   openAddIndicesFlyout: () => void;
-  removeIndexFromEngine: (indexName: string) => { indexName: string };
-  updateEngineRequest: UpdateSearchApplicationApiLogicActions['makeRequest'];
+  removeIndexFromSearchApplication: (indexName: string) => { indexName: string };
+  searchApplicationUpdated: UpdateSearchApplicationApiLogicActions['apiSuccess'];
+  updateSearchApplicationRequest: UpdateSearchApplicationApiLogicActions['makeRequest'];
 }
 
-export interface EngineIndicesLogicValues {
+export interface SearchApplicationIndicesLogicValues {
   addIndicesFlyoutOpen: boolean;
   isLoadingSearchApplication: SearchApplicationViewValues['isLoadingSearchApplication'];
   searchApplicationData: SearchApplicationViewValues['searchApplicationData'];
   searchApplicationName: SearchApplicationViewValues['searchApplicationName'];
 }
 
-export const EngineIndicesLogic = kea<
-  MakeLogicType<EngineIndicesLogicValues, EngineIndicesLogicActions>
+export const SearchApplicationIndicesLogic = kea<
+  MakeLogicType<SearchApplicationIndicesLogicValues, SearchApplicationIndicesLogicActions>
 >({
   actions: {
-    addIndicesToEngine: (indices) => ({ indices }),
+    addIndicesToSearchApplication: (indices) => ({ indices }),
     closeAddIndicesFlyout: () => true,
     openAddIndicesFlyout: () => true,
-    removeIndexFromEngine: (indexName) => ({ indexName }),
+    removeIndexFromSearchApplication: (indexName) => ({ indexName }),
   },
   connect: {
     actions: [
       SearchApplicationViewLogic,
       ['fetchSearchApplication'],
       UpdateSearchApplicationApiLogic,
-      ['makeRequest as updateEngineRequest', 'apiSuccess as engineUpdated'],
+      ['makeRequest as updateSearchApplicationRequest', 'apiSuccess as searchApplicationUpdated'],
     ],
     values: [
       SearchApplicationViewLogic,
@@ -57,30 +57,30 @@ export const EngineIndicesLogic = kea<
     ],
   },
   listeners: ({ actions, values }) => ({
-    addIndicesToEngine: ({ indices }) => {
+    addIndicesToSearchApplication: ({ indices }) => {
       if (!values.searchApplicationData) return;
       const existingIndicesNames = values.searchApplicationData.indices.map((index) => index.name);
       const updatedIndices = Array.from(new Set([...existingIndicesNames, ...indices]));
-      actions.updateEngineRequest({
+      actions.updateSearchApplicationRequest({
         name: values.searchApplicationName,
         indices: updatedIndices,
       });
     },
-    engineUpdated: () => {
+    searchApplicationUpdated: () => {
       actions.fetchSearchApplication({ name: values.searchApplicationName });
     },
-    removeIndexFromEngine: ({ indexName }) => {
+    removeIndexFromSearchApplication: ({ indexName }) => {
       if (!values.searchApplicationData) return;
       const updatedIndices = values.searchApplicationData.indices
         .filter((index) => index.name !== indexName)
         .map((index) => index.name);
-      actions.updateEngineRequest({
+      actions.updateSearchApplicationRequest({
         name: values.searchApplicationName,
         indices: updatedIndices,
       });
     },
   }),
-  path: ['enterprise_search', 'content', 'engine_indices_logic'],
+  path: ['enterprise_search', 'content', 'search_application_indices_logic'],
   reducers: {
     addIndicesFlyoutOpen: [
       false,

@@ -26,8 +26,8 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_templat
 
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { SearchApplicationError } from './search_application_error';
-import { EngineIndices } from './search_application_indices';
-import { EngineIndicesLogic } from './search_application_indices_logic';
+import { SearchApplicationIndices } from './search_application_indices';
+import { SearchApplicationIndicesLogic } from './search_application_indices_logic';
 import { SearchApplicationSchema } from './search_application_schema';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
 import './search_application_layout.scss';
@@ -68,8 +68,8 @@ export const SearchApplicationContent = () => {
   const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
   );
-  const { addIndicesFlyoutOpen } = useValues(EngineIndicesLogic);
-  const { closeAddIndicesFlyout, openAddIndicesFlyout } = useActions(EngineIndicesLogic);
+  const { addIndicesFlyoutOpen } = useValues(SearchApplicationIndicesLogic);
+  const { closeAddIndicesFlyout, openAddIndicesFlyout } = useActions(SearchApplicationIndicesLogic);
   const { contentTabId = SearchApplicationContentTabs.INDICES } = useParams<{
     contentTabId?: string;
   }>();
@@ -136,9 +136,12 @@ export const SearchApplicationContent = () => {
             fill
             onClick={openAddIndicesFlyout}
           >
-            {i18n.translate('xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton', {
-              defaultMessage: 'Add new indices',
-            })}
+            {i18n.translate(
+              'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addNewIndicesButton',
+              {
+                defaultMessage: 'Add new indices',
+              }
+            )}
           </EuiButton>,
         ],
         tabs: [
@@ -162,7 +165,7 @@ export const SearchApplicationContent = () => {
       searchApplicationName={searchApplicationName}
       hasSchemaConflicts={hasSchemaConflicts}
     >
-      {contentTabId === SearchApplicationContentTabs.INDICES && <EngineIndices />}
+      {contentTabId === SearchApplicationContentTabs.INDICES && <SearchApplicationIndices />}
       {contentTabId === SearchApplicationContentTabs.SCHEMA && <SearchApplicationSchema />}
       {addIndicesFlyoutOpen && <AddIndicesFlyout onClose={closeAddIndicesFlyout} />}
     </EnterpriseSearchApplicationsPageTemplate>
