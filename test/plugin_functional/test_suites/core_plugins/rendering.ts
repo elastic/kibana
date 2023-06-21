@@ -141,6 +141,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'newsfeed.service.pathTemplate (string)',
         'newsfeed.service.urlRoot (string)',
         'telemetry.allowChangingOptInStatus (boolean)',
+        'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
         'telemetry.banner (boolean)',
         'telemetry.labels.branch (string)',
         'telemetry.labels.ciBuildId (string)',
