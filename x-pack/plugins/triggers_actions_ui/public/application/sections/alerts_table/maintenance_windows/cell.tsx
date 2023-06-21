@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiSkeletonText, EuiToolTip, EuiText } from '@elastic/eui';
+import { EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { ALERT_MAINTENANCE_WINDOW_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { CellComponentProps } from '../types';
@@ -18,34 +18,42 @@ const isMaintenanceWindowValid = (mw: MaintenanceWindow | undefined): mw is Main
 
 interface MaintenanceWindowBaseCellProps {
   maintenanceWindows: MaintenanceWindow[];
+  maintenanceWindowIds: string[];
   timestamp?: string;
   isLoading: boolean;
 }
 
 export const MaintenanceWindowBaseCell = memo((props: MaintenanceWindowBaseCellProps) => {
-  const { maintenanceWindows, isLoading, timestamp } = props;
+  const { maintenanceWindows, maintenanceWindowIds, isLoading, timestamp } = props;
 
   const tooltipWithText = useMemo(() => {
-    if (!maintenanceWindows.length) {
-      return null;
-    }
-
-    return maintenanceWindows.map((mw, index) => {
-      return (
-        <>
-          <EuiToolTip
-            key={`${mw.id}_tooltip`}
-            content={<TooltipContent maintenanceWindow={mw} timestamp={timestamp} />}
-          >
-            <EuiText key={`${mw.id}_text`} size="relative">
-              {mw.title}
-            </EuiText>
-          </EuiToolTip>
-          {index !== maintenanceWindows.length - 1 && <>,&nbsp;</>}
-        </>
-      );
-    });
-  }, [maintenanceWindows, timestamp]);
+    const totalLength = maintenanceWindows.length + maintenanceWindowIds.length;
+    return (
+      <>
+        {maintenanceWindows.map((mw, index) => (
+          <>
+            <EuiToolTip
+              key={`${mw.id}_tooltip`}
+              content={<TooltipContent maintenanceWindow={mw} timestamp={timestamp} />}
+            >
+              <span key={`${mw.id}_title`}>
+                {mw.title}
+                {index !== totalLength - 1 && <>, &nbsp;</>}
+              </span>
+            </EuiToolTip>
+          </>
+        ))}
+        {maintenanceWindowIds.map((id, index) => (
+          <>
+            <span key={`${id}_id`}>
+              {id}
+              {index + maintenanceWindows.length !== totalLength - 1 && <>, &nbsp;</>}
+            </span>
+          </>
+        ))}
+      </>
+    );
+  }, [maintenanceWindows, maintenanceWindowIds, timestamp]);
 
   return (
     <EuiSkeletonText
@@ -69,13 +77,19 @@ export const MaintenanceWindowCell = memo((props: CellComponentProps) => {
       .filter(isMaintenanceWindowValid);
   }, [alert, maintenanceWindows]);
 
-  if (validMaintenanceWindows.length === 0) {
+  const idsWithoutMaintenanceWindow = useMemo(() => {
+    const maintenanceWindowIds = alert[ALERT_MAINTENANCE_WINDOW_IDS] || [];
+    return maintenanceWindowIds.filter((id) => !maintenanceWindows.get(id));
+  }, [alert, maintenanceWindows]);
+
+  if (validMaintenanceWindows.length === 0 && idsWithoutMaintenanceWindow.length === 0) {
     return <>--</>;
   }
 
   return (
     <MaintenanceWindowBaseCell
       maintenanceWindows={validMaintenanceWindows}
+      maintenanceWindowIds={idsWithoutMaintenanceWindow}
       isLoading={isLoading}
       timestamp={alert[TIMESTAMP]?.[0]}
     />
