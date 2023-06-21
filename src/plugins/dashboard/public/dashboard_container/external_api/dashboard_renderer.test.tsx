@@ -184,12 +184,13 @@ describe('dashboard renderer', () => {
     await act(async () => {
       wrapper = await mountWithIntl(<DashboardRenderer savedObjectId="saved_object_kibanana" />);
     });
+    await wrapper!.update();
 
     // The shared UX not found prompt should be rendered.
     expect(wrapper!.find(NotFoundPrompt).exists()).toBeTruthy();
   });
 
-  test.only('renders a 404 page when dashboard navigation returns a savedObjectNotFound error', async () => {
+  test('renders a 404 page when dashboard navigation returns a savedObjectNotFound error', async () => {
     mockDashboardContainer.navigateToDashboard = jest
       .fn()
       .mockRejectedValue(new SavedObjectNotFound('dashboard', 'gat em'));
@@ -205,6 +206,7 @@ describe('dashboard renderer', () => {
     await act(async () => {
       await wrapper.setProps({ savedObjectId: 'saved_object_kibanakiwi' });
     });
+    await wrapper!.update();
 
     // The shared UX not found prompt should be rendered.
     expect(wrapper!.find(NotFoundPrompt).exists()).toBeTruthy();

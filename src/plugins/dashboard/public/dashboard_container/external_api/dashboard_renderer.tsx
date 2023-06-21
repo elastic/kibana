@@ -164,7 +164,6 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 
     const renderDashboardContents = () => {
       if (dashboardMissing) {
-        console.log('\n\n\n returning empty prompt\n\n\n');
         return (
           <NotFoundPrompt
             title={i18n.translate('dashboard.renderer.404Title', {
