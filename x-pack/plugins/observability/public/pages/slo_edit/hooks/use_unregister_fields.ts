@@ -7,13 +7,14 @@
 
 import { IndicatorType } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
+import { merge } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import {
-  CUSTOM_METRIC_DEFAULT_VALUES,
-  CUSTOM_KQL_DEFAULT_VALUES,
   APM_AVAILABILITY_DEFAULT_VALUES,
   APM_LATENCY_DEFAULT_VALUES,
+  CUSTOM_KQL_DEFAULT_VALUES,
+  CUSTOM_METRIC_DEFAULT_VALUES,
   SLO_EDIT_FORM_DEFAULT_VALUES,
 } from '../constants';
 import { CreateSLOForm } from '../types';
@@ -36,28 +37,16 @@ export function useUnregisterFields() {
       unregister('indicator.params');
       switch (indicatorType) {
         case 'sli.metric.custom':
-          reset(
-            { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...CUSTOM_METRIC_DEFAULT_VALUES },
-            { keepDefaultValues: true }
-          );
+          reset(Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, CUSTOM_METRIC_DEFAULT_VALUES));
           break;
         case 'sli.kql.custom':
-          reset(
-            { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...CUSTOM_KQL_DEFAULT_VALUES },
-            { keepDefaultValues: true }
-          );
+          reset(Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, CUSTOM_KQL_DEFAULT_VALUES));
           break;
         case 'sli.apm.transactionDuration':
-          reset(
-            { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...APM_LATENCY_DEFAULT_VALUES },
-            { keepDefaultValues: true }
-          );
+          reset(Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, APM_LATENCY_DEFAULT_VALUES));
           break;
         case 'sli.apm.transactionErrorRate':
-          reset(
-            { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...APM_AVAILABILITY_DEFAULT_VALUES },
-            { keepDefaultValues: true }
-          );
+          reset(Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, APM_AVAILABILITY_DEFAULT_VALUES));
           break;
         default:
           assertNever(indicatorType);
