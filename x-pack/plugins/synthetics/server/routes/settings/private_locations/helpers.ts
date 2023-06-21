@@ -41,10 +41,10 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
     agentPolicyId: location.agentPolicyId,
     concurrentMonitors: location.concurrentMonitors,
     tags: location.tags,
+    isServiceManaged: false,
     geo: {
-      // to do: change 0 to null
-      lat: location.geo?.lat ? location.geo.lat : 0,
-      lon: location.geo?.lon ? location.geo.lon : 0,
+      lat: location.geo?.lat ? location.geo.lat : null,
+      lon: location.geo?.lon ? location.geo.lon : null,
     },
   };
 };

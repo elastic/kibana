@@ -10,7 +10,7 @@ import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { getPrivateLocationsSO } from '../settings/private_locations/get_private_locations';
+import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import {
   MonitorFields,
   EncryptedSyntheticsMonitor,
@@ -176,7 +176,7 @@ export const syncEditedMonitor = async ({
       formattedMonitor
     );
 
-    const allPrivateLocations = await getPrivateLocationsSO(savedObjectsClient);
+    const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
 
     const editSyncPromise = syntheticsMonitorClient.editMonitors(
       [

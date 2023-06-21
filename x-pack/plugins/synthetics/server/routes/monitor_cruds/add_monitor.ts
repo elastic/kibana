@@ -22,7 +22,7 @@ import {
   EncryptedSyntheticsMonitor,
 } from '../../../common/runtime_types';
 import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
-import { getPrivateLocationsSO } from '../settings/private_locations/get_private_locations';
+import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -286,7 +286,7 @@ export const getPrivateLocationsForMonitor = async (
   if (hasPrivateLocation.length === 0) {
     return [];
   }
-  return await getPrivateLocationsSO(soClient);
+  return await getPrivateLocations(soClient);
 };
 
 export const getMonitorNamespace = (

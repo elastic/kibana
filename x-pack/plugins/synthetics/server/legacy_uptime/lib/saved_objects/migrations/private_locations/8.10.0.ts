@@ -43,6 +43,7 @@ export const migration8100: SavedObjectMigrationFn<
           lat: location.geo?.lat ? Number(location.geo?.lat) : null,
           lon: location.geo?.lon ? Number(location.geo.lon) : null,
         },
+        isServiceManaged: false,
       })),
     },
   };

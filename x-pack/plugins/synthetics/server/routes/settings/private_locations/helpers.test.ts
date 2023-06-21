@@ -59,6 +59,7 @@ const testLocations2 = {
 
 describe('toClientContract', () => {
   it('formats SO attributes to client contract with falsy geo location', () => {
+    // @ts-ignore fixtures are purposely wrong types for testing
     expect(toClientContract(testLocations)).toEqual({
       locations: [
         {
@@ -92,6 +93,7 @@ describe('toClientContract', () => {
   });
 
   it('formats SO attributes to client contract with truthy geo location', () => {
+    // @ts-ignore fixtures are purposely wrong types for testing
     expect(toClientContract(testLocations2)).toEqual({
       locations: [
         {
