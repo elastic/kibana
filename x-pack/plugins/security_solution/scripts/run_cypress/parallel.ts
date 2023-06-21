@@ -8,7 +8,6 @@
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
-import * as fs from 'fs';
 import globby from 'globby';
 import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -28,18 +27,12 @@ import {
   ProviderCollection,
   readProviderSpec,
 } from '@kbn/test/src/functional_test_runner/lib';
-import * as parser from '@babel/parser';
-import type {
-  ExpressionStatement,
-  Identifier,
-  ObjectExpression,
-  ObjectProperty,
-} from '@babel/types';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
+import { parseTestFileConfig } from './utils';
 
 /**
  * Retrieve test files using a glob pattern.
@@ -141,68 +134,6 @@ export const cli = () => {
         _.pull(esPorts, esPort);
         _.pull(kibanaPorts, kibanaPort);
         _.pull(fleetServerPorts, fleetServerPort);
-      };
-
-      const parseTestFileConfig = (
-        filePath: string
-      ): Record<string, string | number | Record<string, string | number>> | undefined => {
-        const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
-
-        const ast = parser.parse(testFile, {
-          sourceType: 'module',
-          plugins: ['typescript'],
-        });
-
-        const expressionStatement = _.find(ast.program.body, ['type', 'ExpressionStatement']) as
-          | ExpressionStatement
-          | undefined;
-
-        const callExpression = expressionStatement?.expression;
-        // @ts-expect-error
-        if (expressionStatement?.expression?.arguments?.length === 3) {
-          // @ts-expect-error
-          const callExpressionArguments = _.find(callExpression?.arguments, [
-            'type',
-            'ObjectExpression',
-          ]) as ObjectExpression | undefined;
-
-          const callExpressionProperties = _.find(callExpressionArguments?.properties, [
-            'key.name',
-            'env',
-          ]) as ObjectProperty[] | undefined;
-          // @ts-expect-error
-          const ftrConfig = _.find(callExpressionProperties?.value?.properties, [
-            'key.name',
-            'ftrConfig',
-          ]);
-
-          if (!ftrConfig) {
-            return {};
-          }
-
-          return _.reduce(
-            ftrConfig.value.properties,
-            (acc: Record<string, string | number | Record<string, string>>, property) => {
-              const key = (property.key as Identifier).name;
-              let value;
-              if (property.value.type === 'ArrayExpression') {
-                value = _.map(property.value.elements, (element) => {
-                  if (element.type === 'StringLiteral') {
-                    return element.value as string;
-                  }
-                  return element.value as string;
-                });
-              }
-              if (key && value) {
-                // @ts-expect-error
-                acc[key] = value;
-              }
-              return acc;
-            },
-            {}
-          );
-        }
-        return undefined;
       };
 
       const log = new ToolingLog({

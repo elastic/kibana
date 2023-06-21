@@ -8,10 +8,11 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { cloudPlugin } from 'cypress-cloud/plugin';
 import path from 'path';
-import execa from 'execa';
 import { fork } from 'child_process';
+import execa from 'execa';
 import type { ChildProcess } from 'child_process';
 import { esArchiver } from './support/es_archiver';
+import { isSkipped } from '../scripts/run_cypress/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -52,52 +53,56 @@ export default defineCypressConfig({
 
       const esArchiverInstance = esArchiver(on, config);
 
-      on('before:run', (spec) => {
-        try {
-          execa.commandSync('kill $(lsof -t -i:5622)', { shell: true });
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-        try {
-          execa.commandSync('kill $(lsof -t -i:9222)', { shell: true });
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-      });
-
       on('before:spec', (spec) => {
         console.error('before:spec', spec, processes);
 
-        if (processes.length) {
-          processes.forEach((child) => {
-            child.kill();
-          });
-          processes = [];
-        }
+        const isSkippedSpec = isSkipped(spec.absolute);
 
-        if (!processes.length) {
-          const program = path.resolve('../scripts/start_cypress_setup_env.js');
-          const parameters = [
-            `run --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
-          ];
-          const options = {
-            env: {
-              NODE_OPTIONS: '--no-warnings',
-              PATH: process.env.PATH,
-              KIBANA_INSTALL_DIR: process.env.KIBANA_INSTALL_DIR,
-              CI: process.env.CI,
-            },
-            stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
-          };
+        console.error('isSkippedSpec', isSkippedSpec);
 
-          const child = fork(program, parameters, options);
+        if (!isSkippedSpec) {
+          try {
+            execa.commandSync('kill $(lsof -t -i:5622)', { shell: true });
+            // eslint-disable-next-line no-empty
+          } catch (e) {}
+          try {
+            execa.commandSync('kill $(lsof -t -i:9222)', { shell: true });
+            // eslint-disable-next-line no-empty
+          } catch (e) {}
 
-          processes.push(child);
-
-          return new Promise((resolve) => {
-            child.on('message', (message) => {
-              console.log('message from child:', message);
-              esArchiverInstance.load('auditbeat').then(() => resolve(message));
+          if (processes.length) {
+            processes.forEach((child) => {
+              child.kill();
             });
-          });
+            processes = [];
+          }
+
+          if (!processes.length) {
+            const program = path.resolve('../scripts/start_cypress_setup_env.js');
+            const parameters = [
+              `run --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
+            ];
+            const options = {
+              env: {
+                NODE_OPTIONS: '--no-warnings',
+                PATH: process.env.PATH,
+                KIBANA_INSTALL_DIR: process.env.KIBANA_INSTALL_DIR,
+                CI: process.env.CI,
+              },
+              stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+            };
+
+            const child = fork(program, parameters, options);
+
+            processes.push(child);
+
+            return new Promise((resolve) => {
+              child.on('message', (message) => {
+                console.log('message from child:', message);
+                esArchiverInstance.load('auditbeat').then(() => resolve(message));
+              });
+            });
+          }
         }
       });
 

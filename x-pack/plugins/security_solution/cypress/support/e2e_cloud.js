@@ -29,7 +29,7 @@ Cypress.on('uncaught:exception', () => {
 });
 
 // before(() => {
-//   Cypress.config('baseUrl', 'http://localhost:5620');
+//   Cypress.config('baseUrl', 'http://localhost:5622');
 // });
 
 // Alternatively you can use CommonJS syntax:
