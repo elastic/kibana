@@ -822,6 +822,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 # Actionable observability
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/observability_functional @elastic/actionable-observability
+x-pack/plugins/infra/public/alerting @elastic/actionable-observability
 x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 
 # Observability robots
