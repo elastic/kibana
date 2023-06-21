@@ -28,7 +28,7 @@ export async function showLensVisToADJobFlyout(
     coreStart,
     share,
     data,
-    lens,
-    dashboardService
+    dashboardService,
+    lens
   );
 }
