@@ -153,21 +153,28 @@ export function registerResponseActionRoutes(
       )
     );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: SUSPEND_PROCESS_ROUTE,
-      validate: KillOrSuspendProcessRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canSuspendProcess'] },
-      logger,
-      responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
-        endpointContext,
-        'suspend-process'
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: KillOrSuspendProcessRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canSuspendProcess'] },
+        logger,
+        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+          endpointContext,
+          'suspend-process'
+        )
       )
-    )
-  );
+    );
 
   router.post(
     {

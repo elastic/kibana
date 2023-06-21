@@ -117,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: SUSPEND_PROCESS_ROUTE,
         body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
+        version: '2023-10-31',
       },
     ];
 

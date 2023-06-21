@@ -28,5 +28,6 @@ export const suspendProcess = (
 ): Promise<ResponseActionApiResponse> => {
   return KibanaServices.get().http.post<ResponseActionApiResponse>(SUSPEND_PROCESS_ROUTE, {
     body: JSON.stringify(params),
+    version: '2023-10-31',
   });
 };
