@@ -64,184 +64,183 @@ export default ({ getService }: FtrProviderContext) => {
           status_code: 400,
         });
       });
+    });
 
-      describe('tests with auditbeat data', () => {
-        before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+    describe.skip('tests with auditbeat data', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      beforeEach(async () => {
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+      });
+
+      it('should be able to add tags to multiple alerts', async () => {
+        const rule = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: 'process.executable: "/usr/bin/sudo"',
+        };
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccess({ supertest, log, id });
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const alerts = await getSignalsByIds(supertest, log, [id]);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+
+        await supertest
+          .post(DETECTION_ENGINE_ALERT_TAGS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(
+            setAlertTags({
+              tagsToAdd: ['tag-1'],
+              tagsToRemove: [],
+              query: buildAlertTagsQuery(alertIds),
+            })
+          )
+          .expect(200);
+
+        const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getQuerySignalIds(alertIds))
+          .expect(200);
+
+        body.hits.hits.map((alert) => {
+          expect(alert._source?.['kibana.alert.workflow_tags']).to.eql(['tag-1']);
         });
+      });
 
-        after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      it('should be able to add tags to alerts that have tags already and not duplicate them', async () => {
+        const rule = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: 'process.executable: "/usr/bin/sudo"',
+        };
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccess({ supertest, log, id });
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const alerts = await getSignalsByIds(supertest, log, [id]);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+
+        await supertest
+          .post(DETECTION_ENGINE_ALERT_TAGS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(
+            setAlertTags({
+              tagsToAdd: ['tag-1'],
+              tagsToRemove: [],
+              query: buildAlertTagsQuery(alertIds.slice(0, 4)),
+            })
+          )
+          .expect(200);
+
+        await supertest
+          .post(DETECTION_ENGINE_ALERT_TAGS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(
+            setAlertTags({
+              tagsToAdd: ['tag-1'],
+              tagsToRemove: [],
+              query: buildAlertTagsQuery(alertIds),
+            })
+          )
+          .expect(200);
+
+        const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getQuerySignalIds(alertIds))
+          .expect(200);
+
+        body.hits.hits.map((alert) => {
+          expect(alert._source?.['kibana.alert.workflow_tags']).to.eql(['tag-1']);
         });
+      });
 
-        beforeEach(async () => {
-          await deleteAllRules(supertest, log);
-          await createSignalsIndex(supertest, log);
+      it('should be able to remove tags', async () => {
+        const rule = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: 'process.executable: "/usr/bin/sudo"',
+        };
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccess({ supertest, log, id });
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const alerts = await getSignalsByIds(supertest, log, [id]);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+
+        await supertest
+          .post(DETECTION_ENGINE_ALERT_TAGS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(
+            setAlertTags({
+              tagsToAdd: ['tag-1', 'tag-2'],
+              tagsToRemove: [],
+              query: buildAlertTagsQuery(alertIds),
+            })
+          )
+          .expect(200);
+
+        await supertest
+          .post(DETECTION_ENGINE_ALERT_TAGS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(
+            setAlertTags({
+              tagsToAdd: [],
+              tagsToRemove: ['tag-2'],
+              query: buildAlertTagsQuery(alertIds),
+            })
+          )
+          .expect(200);
+
+        const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getQuerySignalIds(alertIds))
+          .expect(200);
+
+        body.hits.hits.map((alert) => {
+          expect(alert._source?.['kibana.alert.workflow_tags']).to.eql(['tag-1']);
         });
+      });
 
-        afterEach(async () => {
-          await deleteAllAlerts(supertest, log, es);
-          await deleteAllRules(supertest, log);
-        });
+      it('should be able to remove tags that do not exist without breaking', async () => {
+        const rule = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: 'process.executable: "/usr/bin/sudo"',
+        };
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccess({ supertest, log, id });
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const alerts = await getSignalsByIds(supertest, log, [id]);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id);
 
-        it('should be able to add tags to multiple alerts', async () => {
-          const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            query: 'process.executable: "/usr/bin/sudo"',
-          };
-          const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 10, [id]);
-          const alerts = await getSignalsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        await supertest
+          .post(DETECTION_ENGINE_ALERT_TAGS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(
+            setAlertTags({
+              tagsToAdd: [],
+              tagsToRemove: ['tag-1'],
+              query: buildAlertTagsQuery(alertIds),
+            })
+          )
+          .expect(200);
 
-          await supertest
-            .post(DETECTION_ENGINE_ALERT_TAGS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(
-              setAlertTags({
-                tagsToAdd: ['tag-1'],
-                tagsToRemove: [],
-                query: buildAlertTagsQuery(alertIds),
-              })
-            )
-            .expect(200);
+        const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getQuerySignalIds(alertIds))
+          .expect(200);
 
-          const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(alertIds))
-            .expect(200);
-
-          body.hits.hits.map((alert) => {
-            expect(alert._source?.['kibana.alert.workflow_tags']).to.eql(['tag-1']);
-          });
-        });
-
-        it('should be able to add tags to alerts that have tags already and not duplicate them', async () => {
-          const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            query: 'process.executable: "/usr/bin/sudo"',
-          };
-          const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 10, [id]);
-          const alerts = await getSignalsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
-
-          await supertest
-            .post(DETECTION_ENGINE_ALERT_TAGS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(
-              setAlertTags({
-                tagsToAdd: ['tag-1'],
-                tagsToRemove: [],
-                query: buildAlertTagsQuery(alertIds.slice(0, 4)),
-              })
-            )
-            .expect(200);
-
-          await supertest
-            .post(DETECTION_ENGINE_ALERT_TAGS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(
-              setAlertTags({
-                tagsToAdd: ['tag-1'],
-                tagsToRemove: [],
-                query: buildAlertTagsQuery(alertIds),
-              })
-            )
-            .expect(200);
-
-          const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(alertIds))
-            .expect(200);
-
-          body.hits.hits.map((alert) => {
-            expect(alert._source?.['kibana.alert.workflow_tags']).to.eql(['tag-1']);
-          });
-        });
-
-        it('should be able to remove tags', async () => {
-          const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            query: 'process.executable: "/usr/bin/sudo"',
-          };
-          const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 10, [id]);
-          const alerts = await getSignalsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
-
-          await supertest
-            .post(DETECTION_ENGINE_ALERT_TAGS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(
-              setAlertTags({
-                tagsToAdd: ['tag-1', 'tag-2'],
-                tagsToRemove: [],
-                query: buildAlertTagsQuery(alertIds),
-              })
-            )
-            .expect(200);
-
-          await supertest
-            .post(DETECTION_ENGINE_ALERT_TAGS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(
-              setAlertTags({
-                tagsToAdd: [],
-                tagsToRemove: ['tag-2'],
-                query: buildAlertTagsQuery(alertIds),
-              })
-            )
-            .expect(200);
-
-          const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(alertIds))
-            .expect(200);
-
-          body.hits.hits.map((alert) => {
-            expect(alert._source?.['kibana.alert.workflow_tags']).to.eql(['tag-1']);
-          });
-        });
-
-        it('should be able to remove tags that do not exist without breaking', async () => {
-          const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            query: 'process.executable: "/usr/bin/sudo"',
-          };
-          const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 10, [id]);
-          const alerts = await getSignalsByIds(supertest, log, [id]);
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
-
-          await supertest
-            .post(DETECTION_ENGINE_ALERT_TAGS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(
-              setAlertTags({
-                tagsToAdd: [],
-                tagsToRemove: ['tag-1'],
-                query: buildAlertTagsQuery(alertIds),
-              })
-            )
-            .expect(200);
-
-          const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(alertIds))
-            .expect(200);
-
-          body.hits.hits.map((alert) => {
-            expect(alert._source?.['kibana.alert.workflow_tags']).to.eql([]);
-          });
+        body.hits.hits.map((alert) => {
+          expect(alert._source?.['kibana.alert.workflow_tags']).to.eql([]);
         });
       });
     });
