@@ -20,6 +20,7 @@ import { useInfiniteScroll } from './use_infinite_scroll';
 import { GridItemsByGroup } from './grid_by_group/grid_items_by_group';
 import { GroupFields } from './grid_by_group/group_fields';
 import {
+  fetchMonitorOverviewAction,
   quietFetchOverviewAction,
   selectOverviewState,
   setFlyoutConfig,
@@ -48,6 +49,11 @@ export const OverviewGrid = memo(() => {
   const dispatch = useDispatch();
   const intersectionRef = useRef(null);
   const { monitorsSortedByStatus } = useMonitorsSortedByStatus();
+
+  // fetch overview for all other page state changes
+  useEffect(() => {
+    dispatch(fetchMonitorOverviewAction.get(pageState));
+  }, [dispatch, pageState]);
 
   const setFlyoutConfigCallback = useCallback(
     (params: FlyoutParamProps) => dispatch(setFlyoutConfig(params)),

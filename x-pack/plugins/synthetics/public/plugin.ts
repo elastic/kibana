@@ -24,7 +24,7 @@ import type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
 } from '@kbn/exploratory-view-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { EmbeddableStart, EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -52,6 +52,9 @@ import type {
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
 import { AppStatus, AppUpdater } from '@kbn/core-application-browser';
+
+import { kibanaService } from './utils/kibana_service';
+import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import {
@@ -76,6 +79,7 @@ export interface ClientPluginsSetup {
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ClientPluginsStart {
@@ -121,7 +125,10 @@ export class UptimePlugin
 
   private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
-  public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
+  public setup(
+    coreSetup: CoreSetup<ClientPluginsStart, unknown>,
+    plugins: ClientPluginsSetup
+  ): void {
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: PLUGIN.ID,
@@ -134,7 +141,7 @@ export class UptimePlugin
       });
     }
     const getUptimeDataHelper = async () => {
-      const [coreStart] = await core.getStartServices();
+      const [coreStart] = await coreSetup.getStartServices();
       const { UptimeDataHelper } = await import('./legacy_uptime/app/uptime_overview_fetcher');
 
       return UptimeDataHelper(coreStart);
@@ -170,9 +177,17 @@ export class UptimePlugin
       },
     });
 
-    registerSyntheticsRoutesWithNavigation(core, plugins);
+    registerSyntheticsRoutesWithNavigation(coreSetup, plugins);
 
-    core.getStartServices().then(([coreStart, clientPluginsStart]) => {});
+    coreSetup.getStartServices().then(([coreStart, clientPluginsStart]) => {
+      kibanaService.init(
+        coreSetup,
+        plugins,
+        coreStart,
+        clientPluginsStart,
+        this.initContext.env.mode.dev
+      );
+    });
 
     const appKeywords = [
       'Synthetics',
@@ -192,7 +207,7 @@ export class UptimePlugin
       'web perf',
     ];
 
-    core.application.register({
+    coreSetup.application.register({
       id: PLUGIN.ID,
       euiIconType: 'logoObservability',
 
@@ -206,7 +221,7 @@ export class UptimePlugin
         { id: 'Settings', title: 'Settings', path: '/settings' },
       ],
       mount: async (params: AppMountParameters) => {
-        const [coreStart, corePlugins] = await core.getStartServices();
+        const [coreStart, corePlugins] = await coreSetup.getStartServices();
         const { renderApp } = await import('./legacy_uptime/app/render_app');
         return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
       },
@@ -214,7 +229,7 @@ export class UptimePlugin
     });
 
     // Register the Synthetics UI plugin
-    core.application.register({
+    coreSetup.application.register({
       id: 'synthetics',
       euiIconType: 'logoObservability',
       order: 8400,
@@ -223,16 +238,20 @@ export class UptimePlugin
       keywords: appKeywords,
       deepLinks: [],
       mount: async (params: AppMountParameters) => {
-        const [coreStart, corePlugins] = await core.getStartServices();
-
+        kibanaService.appMountParameters = params;
         const { renderApp } = await import('./apps/synthetics/render_app');
-        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
+        await coreSetup.getStartServices();
+
+        return renderApp(params);
       },
     });
+
+    registerSyntheticsEmbeddables(coreSetup, plugins);
   }
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
+    setStartServices(coreStart);
 
     const { registerExtension } = pluginsStart.fleet;
     setStartServices(coreStart);

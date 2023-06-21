@@ -36,10 +36,10 @@ const Application = (props: SyntheticsAppProps) => {
   const {
     basePath,
     canSave,
-    core,
+    coreStart,
     darkMode,
     i18n: i18nCore,
-    plugins,
+    setupPlugins,
     renderGlobalHelpControls,
     setBadge,
     startPlugins,
@@ -63,8 +63,6 @@ const Application = (props: SyntheticsAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
-  kibanaService.core = core;
-  kibanaService.startPlugins = startPlugins;
   kibanaService.theme = props.appMountParameters.theme$;
 
   store.dispatch(setBasePath(basePath));
@@ -84,8 +82,8 @@ const Application = (props: SyntheticsAppProps) => {
           <ReduxProvider store={store}>
             <KibanaContextProvider
               services={{
-                ...core,
-                ...plugins,
+                ...coreStart,
+                ...setupPlugins,
                 storage,
                 data: startPlugins.data,
                 inspector: startPlugins.inspector,
@@ -107,7 +105,7 @@ const Application = (props: SyntheticsAppProps) => {
                           <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
                             <RedirectAppLinks
                               className={APP_WRAPPER_CLASS}
-                              application={core.application}
+                              application={coreStart.application}
                             >
                               <InspectorContextProvider>
                                 <PageRouter />
