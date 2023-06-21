@@ -6,14 +6,13 @@
  */
 
 import {
-  ApmUsername,
-  APM_TEST_PASSWORD,
-} from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
-import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
+  ObservabilityOnboardingUsername,
+  OBSERVABILITY_ONBOARDING_TEST_PASSWORD,
+} from '@kbn/observability-onboarding-plugin/server/test_helpers/create_apm_users/authentication';
+import { createObservabilityOnboardingUsers } from '@kbn/observability-onboarding-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
-import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { ObservabilityOnboardingFtrConfigName } from '../configs';
 import {
   FtrProviderContext,
@@ -25,20 +24,20 @@ import { RegistryProvider } from './registry';
 
 export interface ObservabilityOnboardingFtrConfig {
   name: ObservabilityOnboardingFtrConfigName;
-  license: 'basic' | 'trial';
+  license: 'basic';
   kibanaConfig?: Record<string, any>;
 }
 
-async function getApmApiClient({
+async function getObservabilityOnboardingApiClient({
   kibanaServer,
   username,
 }: {
   kibanaServer: UrlObject;
-  username: ApmUsername | 'elastic';
+  username: ObservabilityOnboardingUsername | 'elastic';
 }) {
   const url = format({
     ...kibanaServer,
-    auth: `${username}:${APM_TEST_PASSWORD}`,
+    auth: `${username}:${OBSERVABILITY_ONBOARDING_TEST_PASSWORD}`,
   });
 
   return createObservabilityOnboardingApiClient(supertest(url));
@@ -46,19 +45,17 @@ async function getApmApiClient({
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-type ApmApiClientKey =
+type ObservabilityOnboardingApiClientKey =
   | 'noAccessUser'
   | 'readUser'
   | 'adminUser'
   | 'writeUser'
-  | 'annotationWriterUser'
-  | 'noMlAccessUser'
-  | 'manageOwnAgentKeysUser'
-  | 'createAndAllAgentKeysUser'
-  | 'monitorClusterAndIndicesUser'
-  | 'manageServiceAccount';
+  | 'logMonitoringUser';
 
-export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
+export type ObservabilityOnboardingApiClient = Record<
+  ObservabilityOnboardingApiClientKey,
+  Awaited<ReturnType<typeof getObservabilityOnboardingApiClient>>
+>;
 
 export interface CreateTest {
   testFiles: string[];
@@ -67,8 +64,9 @@ export interface CreateTest {
   services: InheritedServices & {
     observabilityOnboardingFtrConfig: () => ObservabilityOnboardingFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
-    apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
-    ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
+    observabilityOnboardingApiClient: (
+      context: InheritedFtrProviderContext
+    ) => ObservabilityOnboardingApiClient;
   };
   junit: { reportName: string };
   esTestCluster: any;
@@ -99,66 +97,42 @@ export function createTestConfig(
         ...services,
         observabilityOnboardingFtrConfig: () => config,
         registry: RegistryProvider,
-        apmApiClient: async (context: InheritedFtrProviderContext) => {
-          console.log(servers.kibana);
+        observabilityOnboardingApiClient: async (_: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;
           const esUrl = format(esServer);
-          console.log(esServer);
-          console.log(esUrl);
 
-          // Creates APM users
-          await createApmUsers({
-            elasticsearch: { node: esUrl, username: 'system_indices_superuser', password },
+          // Creates ObservabilityOnboarding users
+          await createObservabilityOnboardingUsers({
+            elasticsearch: { node: esUrl, username, password },
             kibana: { hostname: kibanaServerUrl },
           });
 
           return {
-            noAccessUser: await getApmApiClient({
+            noAccessUser: await getObservabilityOnboardingApiClient({
               kibanaServer,
-              username: ApmUsername.noAccessUser,
+              username: ObservabilityOnboardingUsername.noAccessUser,
             }),
-            readUser: await getApmApiClient({
+            readUser: await getObservabilityOnboardingApiClient({
               kibanaServer,
-              username: ApmUsername.viewerUser,
+              username: ObservabilityOnboardingUsername.viewerUser,
             }),
-            adminUser: await getApmApiClient({
+            adminUser: await getObservabilityOnboardingApiClient({
               kibanaServer,
               username: 'elastic',
             }),
-            writeUser: await getApmApiClient({
+            writeUser: await getObservabilityOnboardingApiClient({
               kibanaServer,
-              username: ApmUsername.editorUser,
+              username: ObservabilityOnboardingUsername.editorUser,
             }),
-            annotationWriterUser: await getApmApiClient({
+            logMonitoringUser: await getObservabilityOnboardingApiClient({
               kibanaServer,
-              username: ApmUsername.apmAnnotationsWriteUser,
-            }),
-            noMlAccessUser: await getApmApiClient({
-              kibanaServer,
-              username: ApmUsername.apmReadUserWithoutMlAccess,
-            }),
-            manageOwnAgentKeysUser: await getApmApiClient({
-              kibanaServer,
-              username: ApmUsername.apmManageOwnAgentKeys,
-            }),
-            createAndAllAgentKeysUser: await getApmApiClient({
-              kibanaServer,
-              username: ApmUsername.apmManageOwnAndCreateAgentKeys,
-            }),
-            monitorClusterAndIndicesUser: await getApmApiClient({
-              kibanaServer,
-              username: ApmUsername.apmMonitorClusterAndIndices,
-            }),
-            manageServiceAccount: await getApmApiClient({
-              kibanaServer,
-              username: ApmUsername.apmManageServiceAccount,
+              username: ObservabilityOnboardingUsername.logMonitoringUser,
             }),
           };
         },
-        ml: MachineLearningAPIProvider,
       },
       junit: {
-        reportName: `APM API Integration tests (${name})`,
+        reportName: `Observability onboarding API Integration tests (${name})`,
       },
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),

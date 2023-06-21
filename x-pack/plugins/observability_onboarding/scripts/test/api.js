@@ -75,7 +75,10 @@ function runTests() {
   childProcess.execSync(cmd, {
     cwd: path.join(__dirname),
     stdio: 'inherit',
-    env: { ...process.env, APM_TEST_GREP_FILES: JSON.stringify(grepFiles) },
+    env: {
+      ...process.env,
+      OBSERVABILITY_ONBOARDING_TEST_GREP_FILES: JSON.stringify(grepFiles),
+    },
   });
 }
 

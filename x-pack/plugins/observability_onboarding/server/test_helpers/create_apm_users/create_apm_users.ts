@@ -8,7 +8,7 @@
 import { asyncForEach } from '@kbn/std';
 import { AbortError, callKibana } from './helpers/call_kibana';
 import { createOrUpdateUser } from './helpers/create_or_update_user';
-import { ApmUsername, users } from './authentication';
+import { ObservabilityOnboardingUsername, users } from './authentication';
 import { createCustomRole } from './helpers/create_custom_role';
 export interface Elasticsearch {
   node: string;
@@ -20,7 +20,7 @@ export interface Kibana {
   hostname: string;
 }
 
-export async function createApmUsers({
+export async function createObservabilityOnboardingUsers({
   kibana,
   elasticsearch,
 }: {
@@ -45,8 +45,10 @@ export async function createApmUsers({
     throw new AbortError('Security must be enabled!');
   }
 
-  const apmUsers = Object.values(ApmUsername);
-  await asyncForEach(apmUsers, async (username) => {
+  const observabilityOnboardingUsers = Object.values(
+    ObservabilityOnboardingUsername
+  );
+  await asyncForEach(observabilityOnboardingUsers, async (username) => {
     const user = users[username];
     const { builtInRoleNames = [], customRoleNames = [] } = user;
 
@@ -66,7 +68,7 @@ export async function createApmUsers({
     });
   });
 
-  return apmUsers;
+  return observabilityOnboardingUsers;
 }
 
 async function getIsSecurityEnabled({

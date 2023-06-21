@@ -9,7 +9,7 @@ import path from 'path';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
 const cwd = path.join(__dirname);
-const envGrepFiles = process.env.APM_TEST_GREP_FILES as string;
+const envGrepFiles = process.env.OBSERVABILITY_ONBOARDING_TEST_GREP_FILES as string;
 
 function getGlobPattern() {
   try {
@@ -21,10 +21,13 @@ function getGlobPattern() {
   return '**/*.spec.ts';
 }
 
-export default function apmApiIntegrationTests({ getService, loadTestFile }: FtrProviderContext) {
+export default function observabilityApiIntegrationTests({
+  getService,
+  loadTestFile,
+}: FtrProviderContext) {
   const registry = getService('registry');
 
-  describe('Observaility onboarding API tests', function () {
+  describe('Observability onboarding API tests', function () {
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
 

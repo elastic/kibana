@@ -14,29 +14,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const observabilityOnboardingApiClient = getService('observabilityOnboardingApiClient');
 
-  async function callApi(id: string) {
+  async function callApi(state = {}) {
     return await observabilityOnboardingApiClient.readUser({
-      endpoint: 'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
+      endpoint: 'POST /internal/observability_onboarding/custom_logs/save',
       params: {
-        query: {
-          id,
+        body: {
+          name: 'name',
+          state,
         },
       },
     });
   }
 
-  registry.when.skip(
-    'Agent latest versions when configuration is defined',
-    { archives: [] },
-    () => {
-      it('returns a version when agent is listed in the file', async () => {
-        const err = await expectToReject<ObservabilityOnboardingApiError>(
-          async () => await callApi('my-id')
-        );
+  registry.when('Agent latest versions when configuration is defined', { archives: [] }, () => {
+    it('returns a version when agent is listed in the file', async () => {
+      const err = await expectToReject<ObservabilityOnboardingApiError>(
+        async () => await callApi()
+      );
 
-        expect(err.res.status).to.be(500);
-        expect(err.res.body.message).to.contain('transaction.type');
-      });
-    }
-  );
+      expect(err.res.status).to.be(500);
+      expect(err.res.body.message).to.contain('unauthorized');
+    });
+  });
 }
