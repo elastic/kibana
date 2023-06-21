@@ -13,6 +13,7 @@ import { Metricset } from './metricset';
 import { Span } from './span';
 import { Transaction } from './transaction';
 import { ApmApplicationMetricFields, ApmFields, SpanParams } from './apm_fields';
+import { ServiceAsset } from '../assets';
 
 export class Instance extends Entity<ApmFields> {
   transaction(
@@ -87,6 +88,20 @@ export class Instance extends Entity<ApmFields> {
       ...this.fields,
       'metricset.name': 'app',
       ...metrics,
+    });
+  }
+
+  asset() {
+    return new ServiceAsset({
+      'asset.kind': 'service',
+      'asset.id': this.fields['service.name']!,
+      'asset.name': this.fields['service.name'],
+      'asset.ean': `service:${this.fields['service.name']}`,
+      'asset.parents': [`container:${this.fields['container.id']}`],
+      'asset.references': [
+        `pod:${this.fields['kubernetes.pod.uid']}`,
+        `host:${this.fields['service.node.name']}`,
+      ],
     });
   }
 }
