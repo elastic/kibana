@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EPM_API_ROUTES, EPM_PACKAGES_INSTALLED } from '@kbn/fleet-plugin/common';
 import * as rt from 'io-ts';
 import { isEmpty, mapValues, omitBy } from 'lodash';
 import { Integration } from '../types';
@@ -13,8 +14,8 @@ import { FindIntegrationsRequestQuery } from './find_integrations';
 /**
  * Constants
  */
-export const DATASETS_URL = '/api/fleet/epm/datasets';
-export const INTEGRATIONS_URL = '/api/fleet/epm/packages/installed';
+export const DATASETS_URL = EPM_API_ROUTES.DATA_STREAMS_PATTERN;
+export const INTEGRATIONS_URL = EPM_PACKAGES_INSTALLED;
 
 /**
  * Common types
