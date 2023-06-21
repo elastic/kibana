@@ -30,7 +30,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/generate_engine_api_key_modal';
-import { EngineApiIntegrationStage } from './search_application_api_integration';
+import { SearchApplicationApiIntegrationStage } from './search_application_api_integration';
 import { SearchApplicationApiLogic } from './search_application_api_logic';
 
 export const elasticsearchUrl = (cloudContext: CloudDetails): string => {
@@ -204,7 +204,7 @@ export const SearchApplicationAPI = () => {
       ),
     },
     {
-      children: <EngineApiIntegrationStage />,
+      children: <SearchApplicationApiIntegrationStage />,
       title: i18n.translate(
         'xpack.enterpriseSearch.content.searchApplication.searchApi.step4.title',
         {

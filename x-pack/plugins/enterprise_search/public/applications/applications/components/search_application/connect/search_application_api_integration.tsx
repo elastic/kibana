@@ -81,20 +81,20 @@ interface Tab {
   title: string;
 }
 
-export const EngineApiIntegrationStage: React.FC = () => {
+export const SearchApplicationApiIntegrationStage: React.FC = () => {
   const {
     application,
     share: { url },
   } = useValues(KibanaLogic);
   const [selectedTab, setSelectedTab] = React.useState<TabId>('apirequest');
-  const { searchApplicationName: engineName } = useValues(SearchApplicationViewLogic);
+  const { searchApplicationName } = useValues(SearchApplicationViewLogic);
   const { apiKey } = useValues(SearchApplicationApiLogic);
   const cloudContext = useCloudDetails();
 
   const params = { query: 'pizza', myCustomParameter: 'example value' };
   const Tabs: Record<TabId, Tab> = {
     apirequest: {
-      code: apiRequestSnippet(engineName, params),
+      code: apiRequestSnippet(searchApplicationName, params),
       copy: false,
       language: 'http',
       title: i18n.translate(
@@ -105,7 +105,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
       ),
     },
     client: {
-      code: clientSnippet(elasticsearchUrl(cloudContext), engineName, apiKey),
+      code: clientSnippet(elasticsearchUrl(cloudContext), searchApplicationName, apiKey),
       copy: true,
       language: 'javascript',
       title: i18n.translate(
@@ -116,7 +116,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
       ),
     },
     curl: {
-      code: cURLSnippet(elasticsearchUrl(cloudContext), engineName, apiKey, params),
+      code: cURLSnippet(elasticsearchUrl(cloudContext), searchApplicationName, apiKey, params),
       copy: true,
       language: 'bash',
       title: i18n.translate(
@@ -133,7 +133,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
     ? url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl(
         {
           loadFrom: `data:text/plain,${compressToEncodedURIComponent(
-            consoleRequest(engineName, params)
+            consoleRequest(searchApplicationName, params)
           )}`,
         },
         undefined,
