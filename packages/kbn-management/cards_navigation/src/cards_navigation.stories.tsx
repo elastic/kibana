@@ -99,7 +99,7 @@ const sectionsMock = [
         enabled: true,
         basePath: '/app/management/ingest/pipelines_logstash',
       },
-    ]
+    ],
   },
 ];
 
