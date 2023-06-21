@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiCard,
   EuiCodeBlock,
@@ -23,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpIllustration from '../../../../assets/images/nlp.svg';
 import { docLinks } from '../../../shared/doc_links';
+import { KibanaLogic } from '../../../shared/kibana';
 import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchVectorSearchPageTemplate } from '../layout/page_template';
 
@@ -72,167 +75,172 @@ const QUERY_SNIPPET = `POST /image-index/_search
   "fields": [ "title", "file-type" ]
 }`;
 
-export const VectorSearchGuide: React.FC = () => (
-  <EnterpriseSearchVectorSearchPageTemplate
-    restrictWidth
-    pageHeader={{
-      description: (
-        <p>
+export const VectorSearchGuide: React.FC = () => {
+  const { application } = useValues(KibanaLogic);
+
+  return (
+    <EnterpriseSearchVectorSearchPageTemplate
+      restrictWidth
+      pageHeader={{
+        description: (
+          <p>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.vectorSearch.guide.description"
+              defaultMessage="Elasticsearch can be used as a vector database and search along with other semantic search methods."
+            />{' '}
+            <EuiLink href={docLinks.knnSearch} target="_blank">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.vectorSearch.guide.descriptionLink"
+                defaultMessage="Learn more about vector searches."
+              />
+            </EuiLink>
+          </p>
+        ),
+        pageTitle: (
           <FormattedMessage
-            id="xpack.enterpriseSearch.vectorSearch.guide.description"
-            defaultMessage="Elasticsearch can be used as a vector database and search along with other semantic search methods."
-          />{' '}
-          <EuiLink href={docLinks.knnSearch} target="_blank">
-            <FormattedMessage
-              id="xpack.enterpriseSearch.vectorSearch.guide.descriptionLink"
-              defaultMessage="Learn more about vector searches."
-            />
-          </EuiLink>
-        </p>
-      ),
-      pageTitle: (
-        <FormattedMessage
-          id="xpack.enterpriseSearch.vectorSearch.guide.pageTitle"
-          defaultMessage="Get started with vector search"
-        />
-      ),
-    }}
-  >
-    <SetPageChrome />
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={4}>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.vectorSearch.guide.createIndex.title"
-              defaultMessage="Create an index"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.vectorSearch.guide.createIndex.description"
-              defaultMessage="Start by creating an index with one or more {denseVector} fields."
-              values={{ denseVector: <span>dense_vector</span> }}
-            />
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={6}>
-        <EuiCodeBlock>{CREATE_INDEX_SNIPPET}</EuiCodeBlock>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiHorizontalRule />
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={4}>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.vectorSearch.guide.ingest.title"
-              defaultMessage="Ingest your data"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.vectorSearch.guide.ingest.description"
-              defaultMessage="Add data to your index to make it searchable."
-            />
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={6}>
-        <EuiCodeBlock>{INGEST_SNIPPET}</EuiCodeBlock>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiHorizontalRule />
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={4}>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.vectorSearch.guide.query.title"
-              defaultMessage="Build your vector search query"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.vectorSearch.guide.query.description"
-              defaultMessage="Now you're ready to explore your data with searches and aggregations."
-            />
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={6}>
-        <EuiCodeBlock>{QUERY_SNIPPET}</EuiCodeBlock>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiHorizontalRule />
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={4}>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.title"
-              defaultMessage="Don’t have a model deployed?"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.description"
-              defaultMessage="Elastic can help you generate embeddings."
-            />
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={6}>
-        <EuiFlexGroup gutterSize="l" direction="column">
-          <EuiCard
-            href="#"
-            target="_blank"
-            layout="horizontal"
-            titleSize="s"
-            icon={<EuiIcon type={elserIllustration} size="xxl" />}
-            title={
-              <FormattedMessage
-                id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.elser.title"
-                defaultMessage="Elastic Learned Sparse Encoder (ELSER)"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.elser.description"
-                defaultMessage="Learn about the configuration-free semantic search"
-              />
-            }
+            id="xpack.enterpriseSearch.vectorSearch.guide.pageTitle"
+            defaultMessage="Get started with vector search"
           />
-          <EuiCard
-            href={docLinks.textEmbedding}
-            target="_blank"
-            layout="horizontal"
-            titleSize="s"
-            icon={<EuiIcon type={nlpIllustration} size="xxl" />}
-            title={
+        ),
+      }}
+    >
+      <SetPageChrome />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={4}>
+          <EuiTitle>
+            <h2>
               <FormattedMessage
-                id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.title"
-                defaultMessage="Run your models in Elastic"
+                id="xpack.enterpriseSearch.vectorSearch.guide.createIndex.title"
+                defaultMessage="Create an index"
               />
-            }
-            description={
+            </h2>
+          </EuiTitle>
+          <EuiText>
+            <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.description"
-                defaultMessage="Learn how to load in compatible third-party models"
+                id="xpack.enterpriseSearch.vectorSearch.guide.createIndex.description"
+                defaultMessage="Start by creating an index with one or more {denseVector} fields."
+                values={{ denseVector: <span>dense_vector</span> }}
               />
-            }
-          />
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EnterpriseSearchVectorSearchPageTemplate>
-);
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={6}>
+          <EuiCodeBlock>{CREATE_INDEX_SNIPPET}</EuiCodeBlock>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={4}>
+          <EuiTitle>
+            <h2>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.vectorSearch.guide.ingest.title"
+                defaultMessage="Ingest your data"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.vectorSearch.guide.ingest.description"
+                defaultMessage="Add data to your index to make it searchable."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={6}>
+          <EuiCodeBlock>{INGEST_SNIPPET}</EuiCodeBlock>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={4}>
+          <EuiTitle>
+            <h2>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.vectorSearch.guide.query.title"
+                defaultMessage="Build your vector search query"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.vectorSearch.guide.query.description"
+                defaultMessage="Now you're ready to explore your data with searches and aggregations."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={6}>
+          <EuiCodeBlock>{QUERY_SNIPPET}</EuiCodeBlock>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={4}>
+          <EuiTitle>
+            <h2>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.title"
+                defaultMessage="Don’t have a model deployed?"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.description"
+                defaultMessage="Elastic can help you generate embeddings."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={6}>
+          <EuiFlexGroup gutterSize="l" direction="column">
+            <EuiCard
+              onClick={() =>
+                application.navigateToApp(ESRE_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1'))
+              }
+              layout="horizontal"
+              titleSize="s"
+              icon={<EuiIcon type={elserIllustration} size="xxl" />}
+              title={
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.elser.title"
+                  defaultMessage="Elastic Learned Sparse Encoder (ELSER)"
+                />
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.elser.description"
+                  defaultMessage="Learn about the configuration-free semantic search"
+                />
+              }
+            />
+            <EuiCard
+              href={docLinks.textEmbedding}
+              target="_blank"
+              layout="horizontal"
+              titleSize="s"
+              icon={<EuiIcon type={nlpIllustration} size="xxl" />}
+              title={
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.title"
+                  defaultMessage="Run your models in Elastic"
+                />
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.description"
+                  defaultMessage="Learn how to load in compatible third-party models"
+                />
+              }
+            />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EnterpriseSearchVectorSearchPageTemplate>
+  );
+};
