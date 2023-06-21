@@ -17,10 +17,10 @@ const mockActions = { makeRequest: jest.fn(), setKeyName: jest.fn() };
 
 const mockValues = { apiKey: '', isLoading: false, isSuccess: false, keyName: '' };
 
-import { GenerateEngineApiKeyModal } from './generate_search_application_api_key_modal';
+import { GenerateSearchApplicationApiKeyModal } from './generate_search_application_api_key_modal';
 
 const onCloseMock = jest.fn();
-describe('GenerateEngineApiKeyModal', () => {
+describe('GenerateSearchApplicationApiKeyModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues(mockValues);
@@ -29,7 +29,7 @@ describe('GenerateEngineApiKeyModal', () => {
 
   it('renders the empty modal', () => {
     const wrapper = shallow(
-      <GenerateEngineApiKeyModal searchApplicationName="puggles" onClose={onCloseMock} />
+      <GenerateSearchApplicationApiKeyModal searchApplicationName="puggles" onClose={onCloseMock} />
     );
     expect(wrapper.find(EuiModal)).toHaveLength(1);
 
@@ -40,20 +40,31 @@ describe('GenerateEngineApiKeyModal', () => {
   describe('Modal content', () => {
     it('renders API key name form', () => {
       const wrapper = shallow(
-        <GenerateEngineApiKeyModal searchApplicationName="puggles" onClose={onCloseMock} />
+        <GenerateSearchApplicationApiKeyModal
+          searchApplicationName="puggles"
+          onClose={onCloseMock}
+        />
       );
       expect(wrapper.find(EuiFieldText)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="generateApiKeyButton"]')).toHaveLength(1);
     });
 
     it('pre-set the key name with engine name', () => {
-      mount(<GenerateEngineApiKeyModal searchApplicationName="puggles" onClose={onCloseMock} />);
+      mount(
+        <GenerateSearchApplicationApiKeyModal
+          searchApplicationName="puggles"
+          onClose={onCloseMock}
+        />
+      );
       expect(mockActions.setKeyName).toHaveBeenCalledWith('puggles read-only API key');
     });
 
     it('sets keyName name on form', () => {
       const wrapper = shallow(
-        <GenerateEngineApiKeyModal searchApplicationName="puggles" onClose={onCloseMock} />
+        <GenerateSearchApplicationApiKeyModal
+          searchApplicationName="puggles"
+          onClose={onCloseMock}
+        />
       );
       const textField = wrapper.find(EuiFieldText);
       expect(textField).toHaveLength(1);
@@ -64,7 +75,10 @@ describe('GenerateEngineApiKeyModal', () => {
     it('should trigger api call from the form', () => {
       setMockValues({ ...mockValues, engineName: 'test-123', keyName: '    with-spaces    ' });
       const wrapper = shallow(
-        <GenerateEngineApiKeyModal searchApplicationName="puggles" onClose={onCloseMock} />
+        <GenerateSearchApplicationApiKeyModal
+          searchApplicationName="puggles"
+          onClose={onCloseMock}
+        />
       );
       expect(wrapper.find(EuiFieldText)).toHaveLength(1);
       wrapper.find('[data-test-subj="generateApiKeyButton"]').simulate('click');
@@ -83,7 +97,10 @@ describe('GenerateEngineApiKeyModal', () => {
         keyName: 'keyname',
       });
       const wrapper = shallow(
-        <GenerateEngineApiKeyModal searchApplicationName="puggles" onClose={onCloseMock} />
+        <GenerateSearchApplicationApiKeyModal
+          searchApplicationName="puggles"
+          onClose={onCloseMock}
+        />
       );
       expect(wrapper.find(EuiFieldText)).toHaveLength(0);
       expect(wrapper.find('[data-test-subj="generateApiKeyButton"]')).toHaveLength(0);

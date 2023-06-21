@@ -35,15 +35,14 @@ import { GenerateEngineApiKeyLogic } from '../../../../../enterprise_search_cont
 
 import { GenerateApiKeyModalLogic } from './generate_search_application_api_key_modal.logic';
 
-interface GenerateEngineApiKeyModalProps {
+interface GenerateSearchApplicationApiKeyModalProps {
   onClose(): void;
   searchApplicationName: string;
 }
 
-export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps> = ({
-  onClose,
-  searchApplicationName,
-}) => {
+export const GenerateSearchApplicationApiKeyModal: React.FC<
+  GenerateSearchApplicationApiKeyModalProps
+> = ({ onClose, searchApplicationName }) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
   const { makeRequest } = useActions(GenerateEngineApiKeyLogic);
