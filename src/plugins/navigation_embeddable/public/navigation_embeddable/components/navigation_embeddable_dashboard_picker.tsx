@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPanel, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
 
 import { NavigationEmbeddable } from '../embeddable/navigation_embeddable';
 
@@ -18,26 +18,44 @@ interface Props {
 }
 
 export const NavigationEmbeddableDashboardPicker = ({ embeddable }: Props) => {
+  const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
+
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
     return await embeddable.getDashboardList();
   }, []);
 
-  // useEffect(() => {
-  //   console.log('dashboardList', dashboardList);
-  // }, [dashboardList]);
+  useEffect(() => {
+    const currentDashboardOption = dashboardList?.currentDashboard
+      ? [
+          {
+            data: { id: dashboardList.currentDashboard.id },
+            label: dashboardList.currentDashboard.attributes.title,
+            css: {
+              fontWeight: 'bold',
+            },
+          },
+        ]
+      : [];
+    const otherDashboardOptions =
+      dashboardList?.otherDashboards.map((dashboard) => ({
+        data: { id: dashboard.id },
+        label: dashboard.attributes.title,
+      })) ?? [];
+    setDashboardListOptions([...currentDashboardOption, ...otherDashboardOptions]);
+  }, [dashboardList]);
 
   return loadingDashboardList ? (
     <EuiLoadingSpinner />
   ) : (
     <EuiPanel>
-      {dashboardList?.currentDashboard && (
-        <li key={dashboardList.currentDashboard.id}>
-          <b>{dashboardList.currentDashboard.attributes.title}</b>
-        </li>
-      )}
-      {(dashboardList?.otherDashboards ?? []).map((hit) => (
-        <li key={hit.id}>{hit.attributes.title}</li>
-      ))}
+      <EuiSelectable
+        singleSelection={true}
+        options={dashboardListOptions}
+        listProps={{ onFocusBadge: false }}
+        onChange={(newOptions) => setDashboardListOptions(newOptions)}
+      >
+        {(list) => list}
+      </EuiSelectable>
     </EuiPanel>
   );
 };
