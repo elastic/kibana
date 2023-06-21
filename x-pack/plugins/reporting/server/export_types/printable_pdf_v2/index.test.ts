@@ -9,22 +9,25 @@ jest.mock('./lib/generate_pdf');
 
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
-import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
-import { Writable } from 'stream';
-import { cryptoFactory } from '../../lib';
-import { generatePdfObservable } from './lib/generate_pdf';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import * as Rx from 'rxjs';
-import { LocatorParams } from '../../../common';
+import type { Writable } from 'stream';
 import { PdfExportType } from '.';
+import type { LocatorParams } from '../../../common';
+import type { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
+import { cryptoFactory } from '../../lib';
 import { createMockConfigSchema } from '../../test_helpers';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { generatePdfObservable } from './lib/generate_pdf';
 
 let content: string;
+let mockPdfExportType: PdfExportType;
 let stream: jest.Mocked<Writable>;
 
 const cancellationToken = {
   on: jest.fn(),
 } as unknown as CancellationToken;
+
+const mockLogger = loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'testencryptionkey';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -38,20 +41,35 @@ const getBasePayload = (baseObj: any) =>
     ...baseObj,
   } as TaskPayloadPDFV2);
 
-const configType = createMockConfigSchema({ encryptionKey: mockEncryptionKey });
-const mockCoreSetup = coreMock.createSetup();
-const mockLogger = loggingSystemMock.createLogger();
-const mockPdfExportType = new PdfExportType(
-  mockCoreSetup,
-  configType,
-  mockLogger,
-  coreMock.createPluginInitializerContext(configType)
-);
+beforeAll(async () => {
+  stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
+
+  const configType = createMockConfigSchema({ encryptionKey: mockEncryptionKey });
+  const context = coreMock.createPluginInitializerContext(configType);
+
+  const mockCoreSetup = coreMock.createSetup();
+  const mockCoreStart = coreMock.createStart();
+
+  mockPdfExportType = new PdfExportType(mockCoreSetup, configType, mockLogger, context);
+
+  mockPdfExportType.setup({
+    basePath: { set: jest.fn() },
+  });
+  mockPdfExportType.start({
+    savedObjects: mockCoreStart.savedObjects,
+    uiSettings: mockCoreStart.uiSettings,
+    screenshotting: {} as unknown as ScreenshottingStart,
+  });
+});
+
+beforeEach(() => {
+  // clear content from previous test
+  content = '';
+});
 
 test(`passes browserTimezone to generatePdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
-  (mockPdfExportType.getSpaceId as jest.Mock).mockReturnValue(DEFAULT_SPACE_ID);
 
   const browserTimezone = 'UTC';
   await mockPdfExportType.runTask(
