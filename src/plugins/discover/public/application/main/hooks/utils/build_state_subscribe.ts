@@ -67,17 +67,16 @@ export const buildStateSubscribe =
       if (!isTextBasedQueryLandPrev) {
         savedSearchState.update({ nextState });
         dataState.reset(savedSearch);
-        dataState.fetch();
-        return;
       }
     }
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
-    const chartIntervalChanged = nextState.interval !== interval;
+    const chartIntervalChanged = nextState.interval !== interval && !isTextBasedQueryLang;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
-    const docTableSortChanged = !isEqual(nextState.sort, sort);
-    const dataViewChanged = !isEqual(nextState.index, index);
+    const docTableSortChanged = !isEqual(nextState.sort, sort) && !isTextBasedQueryLang;
+    const dataViewChanged = !isEqual(nextState.index, index) && !isTextBasedQueryLang;
+    const queryChanged = !isEqual(nextQuery, prevQuery);
     let savedSearchDataView;
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
@@ -110,7 +109,8 @@ export const buildStateSubscribe =
       chartIntervalChanged ||
       breakdownFieldChanged ||
       docTableSortChanged ||
-      dataViewChanged
+      dataViewChanged ||
+      queryChanged
     ) {
       addLog('[appstate] subscribe triggers data fetching');
       dataState.fetch();

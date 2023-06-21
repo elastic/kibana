@@ -47,6 +47,7 @@ export function useTextBasedQueryLanguage({
         columns: [],
         query: undefined,
       };
+      indexTitle.current = '';
     }
   }, []);
 
