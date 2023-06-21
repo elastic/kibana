@@ -8,7 +8,7 @@
 import { v4 as uuidV4 } from 'uuid';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-import { FleetActionsClientError } from '../../../common/errors';
+import { FleetActionsClientError, FleetActionsError } from '../../../common/errors';
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
 import { auditLoggingService } from '../audit_logging';
@@ -50,7 +50,7 @@ describe('actions', () => {
     });
     it('should throw error when action does not match package name', async () => {
       const action = generateFleetAction({ action_id: '1', input_type: 'bar' });
-      expect(async () => await fleetActionsClient.create(action)).rejects.toBeInstanceOf(
+      await expect(async () => await fleetActionsClient.create(action)).rejects.toBeInstanceOf(
         FleetActionsClientError
       );
     });
@@ -144,7 +144,7 @@ describe('actions', () => {
         },
       ].map(generateFleetAction);
 
-      expect(async () => await fleetActionsClient.bulkCreate(actions)).rejects.toBeInstanceOf(
+      await expect(async () => await fleetActionsClient.bulkCreate(actions)).rejects.toBeInstanceOf(
         FleetActionsClientError
       );
     });
@@ -166,9 +166,9 @@ describe('actions', () => {
         generateFleetActionsESResponse([generateFleetAction({ action_id: '3', input_type: 'bar' })])
       );
 
-      expect(async () => await fleetActionsClient.getActionsByIds(['3'])).rejects.toBeInstanceOf(
-        FleetActionsClientError
-      );
+      await expect(
+        async () => await fleetActionsClient.getActionsByIds(['3'])
+      ).rejects.toBeInstanceOf(FleetActionsClientError);
     });
   });
 
@@ -181,7 +181,9 @@ describe('actions', () => {
       esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
 
       expect(
-        await fleetActionsClient.getActionsWithKuery('action_id: "1" or action_id: "2"')
+        await fleetActionsClient.getActionsWithKuery(
+          'action_id: "1" or action_id: "2" and input_type: "endpoint" and "@timestamp" <= "now" and "@timestamp" >= "now-2d"'
+        )
       ).toEqual({ items: actions, total: actions.length });
     });
 
@@ -192,9 +194,24 @@ describe('actions', () => {
       ].map(generateFleetAction);
       esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
 
-      expect(
+      await expect(
         async () => await fleetActionsClient.getActionsWithKuery('action_id: "1" or action_id: "2"')
       ).rejects.toBeInstanceOf(FleetActionsClientError);
+    });
+
+    it('should reject when given kuery uses un-allowed fields', async () => {
+      const actions = [
+        { action_id: '1', agents: ['agent-1'], input_type: 'foo' },
+        { action_id: '2', agents: ['agent-2'], input_type: 'foo' },
+      ].map(generateFleetAction);
+      esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
+
+      await expect(
+        async () =>
+          await fleetActionsClient.getActionsWithKuery(
+            'action_id: "1" or expiration: "2023-06-21T10:55:36.481Z"'
+          )
+      ).rejects.toBeInstanceOf(FleetActionsError);
     });
   });
 
@@ -218,7 +235,7 @@ describe('actions', () => {
         { action_id: 'action-id-23', agent_id: 'agent-2', action_input_type: 'bar' },
       ].map(generateFleetActionResult);
       esClientMock.search.mockResponse(generateFleetActionsResultsESResponse(results));
-      expect(
+      await expect(
         async () => await fleetActionsClient.getResultsByIds(['action-id-1', 'action-id-2'])
       ).rejects.toBeInstanceOf(FleetActionsClientError);
     });
@@ -245,12 +262,26 @@ describe('actions', () => {
         { action_id: 'action-id-23', agent_id: 'agent-2', action_input_type: 'bar' },
       ].map(generateFleetActionResult);
       esClientMock.search.mockResponse(generateFleetActionsResultsESResponse(results));
-      expect(
+      await expect(
         async () =>
           await fleetActionsClient.getResultsWithKuery(
             'action_id: "action-id-21" or action_id: "action-id-23"'
           )
       ).rejects.toBeInstanceOf(FleetActionsClientError);
+    });
+
+    it('should reject when given kuery uses un-allowed fields', async () => {
+      const results = [
+        { action_id: 'action-id-21', agent_id: 'agent-1', action_input_type: 'foo' },
+        { action_id: 'action-id-23', agent_id: 'agent-2', action_input_type: 'foo' },
+      ].map(generateFleetActionResult);
+      esClientMock.search.mockResponse(generateFleetActionsResultsESResponse(results));
+      await expect(
+        async () =>
+          await fleetActionsClient.getResultsWithKuery(
+            'action_id: "action-id-21" or action_input_type: "osquery"'
+          )
+      ).rejects.toBeInstanceOf(FleetActionsError);
     });
   });
 });

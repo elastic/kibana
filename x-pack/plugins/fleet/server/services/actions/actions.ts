@@ -16,6 +16,12 @@ import { FleetActionsError } from '../../../common/errors';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 import { auditLoggingService } from '../audit_logging';
 
+import {
+  validateFilterKueryNode,
+  allowedFleetActionsFields,
+  ALLOWED_FLEET_ACTIONS_FIELD_TYPES,
+} from './utils';
+
 import type { FleetActionRequest, FleetActionResult, BulkCreateResponse } from './types';
 
 const queryOptions = Object.freeze({
@@ -183,8 +189,29 @@ export const getActionsWithKuery = async (
   esClient: ElasticsearchClient,
   kuery: string
 ): Promise<{ items: FleetActionRequest[]; total: number }> => {
+  const kueryNode = fromKueryExpression(kuery);
+  const validationFilterKuery = validateFilterKueryNode({
+    astFilter: kueryNode,
+    types: ALLOWED_FLEET_ACTIONS_FIELD_TYPES,
+    indexMapping: allowedFleetActionsFields,
+    indexType: 'actions',
+  });
+
+  if (validationFilterKuery.some((obj) => obj.error != null)) {
+    const errors = validationFilterKuery
+      .reduce<string[]>((acc, item) => {
+        if (item.error) {
+          acc.push(item.error);
+        }
+        return acc;
+      }, [])
+      .join();
+    throw new FleetActionsError(`Kuery validation failed: ${errors}`);
+  }
+
   try {
-    const query = toElasticsearchQuery(fromKueryExpression(kuery));
+    const query: estypes.QueryDslQueryContainer = toElasticsearchQuery(kueryNode);
+
     const getActionSearchResponse = await esClient.search(
       {
         index: AGENT_ACTIONS_INDEX,
@@ -264,8 +291,28 @@ export const getActionResultsWithKuery = async (
   esClient: ElasticsearchClient,
   kuery: string
 ): Promise<{ items: FleetActionResult[]; total: number }> => {
+  const kueryNode = fromKueryExpression(kuery);
+  const validationFilterKuery = validateFilterKueryNode({
+    astFilter: kueryNode,
+    types: ALLOWED_FLEET_ACTIONS_FIELD_TYPES,
+    indexMapping: allowedFleetActionsFields,
+    indexType: 'results',
+  });
+
+  if (validationFilterKuery.some((obj) => obj.error != null)) {
+    const errors = validationFilterKuery
+      .reduce<string[]>((acc, item) => {
+        if (item.error) {
+          acc.push(item.error);
+        }
+        return acc;
+      }, [])
+      .join();
+    throw new FleetActionsError(`Kuery validation failed: ${errors}`);
+  }
+
   try {
-    const query = toElasticsearchQuery(fromKueryExpression(kuery));
+    const query: estypes.QueryDslQueryContainer = toElasticsearchQuery(kueryNode);
     const getActionSearchResponse = await esClient.search(
       {
         index: AGENT_ACTIONS_INDEX,
