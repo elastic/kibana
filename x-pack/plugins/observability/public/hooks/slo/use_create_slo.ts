@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import deepmerge from 'deepmerge';
 import { v1 as uuidv1 } from 'uuid';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
@@ -37,7 +36,7 @@ export function useCreateSlo() {
 
         const [queryKey, data] = latestQueriesData || [];
 
-        const newItem = deepmerge(slo, { id: uuidv1() });
+        const newItem = { ...slo, id: uuidv1() };
         const optimisticUpdate = {
           ...data,
           results: [...(data?.results ?? []), newItem],
@@ -47,7 +46,7 @@ export function useCreateSlo() {
         queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
 
         // Return a context object with the snapshotted value
-        return { previousSloList: data, slo };
+        return { previousSloList: data };
       },
       onSuccess: (_data, { slo }) => {
         toasts.addSuccess(

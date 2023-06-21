@@ -57,7 +57,6 @@ export function CustomMetricIndicatorTypeForm() {
           >
             <Controller
               name="indicator.params.timestampField"
-              shouldUnregister
               defaultValue=""
               rules={{ required: true }}
               control={control}

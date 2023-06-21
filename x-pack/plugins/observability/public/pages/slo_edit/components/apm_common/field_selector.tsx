@@ -79,7 +79,6 @@ export function FieldSelector({
         isInvalid={getFieldState(name).invalid}
       >
         <Controller
-          shouldUnregister
           defaultValue=""
           name={name}
           control={control}

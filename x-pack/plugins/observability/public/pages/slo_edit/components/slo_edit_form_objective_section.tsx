@@ -113,7 +113,6 @@ export function SloEditFormObjectiveSection() {
             <Controller
               name="timeWindow.duration"
               control={control}
-              shouldUnregister
               rules={{ required: true }}
               render={({ field: { ref, ...field } }) => (
                 <EuiSelect

@@ -54,7 +54,6 @@ export function QueryBuilder({
       fullWidth
     >
       <Controller
-        shouldUnregister
         defaultValue=""
         name={name}
         control={control}

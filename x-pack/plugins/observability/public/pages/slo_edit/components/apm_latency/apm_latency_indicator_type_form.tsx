@@ -118,7 +118,6 @@ export function ApmLatencyIndicatorTypeForm() {
             isInvalid={getFieldState('indicator.params.threshold').invalid}
           >
             <Controller
-              shouldUnregister
               name="indicator.params.threshold"
               control={control}
               defaultValue={250}

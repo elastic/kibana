@@ -133,7 +133,6 @@ export function MetricIndicator({
               <EuiFlexItem>
                 <Controller
                   name={`indicator.params.${type}.metrics.${index}.field`}
-                  shouldUnregister
                   defaultValue=""
                   rules={{ required: true }}
                   control={control}
@@ -229,7 +228,6 @@ export function MetricIndicator({
       <EuiFlexItem>
         <Controller
           name={`indicator.params.${type}.equation`}
-          shouldUnregister
           defaultValue=""
           rules={{
             required: true,

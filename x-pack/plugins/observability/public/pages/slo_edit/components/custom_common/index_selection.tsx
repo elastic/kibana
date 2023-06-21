@@ -97,7 +97,6 @@ export function IndexSelection() {
       isInvalid={getFieldState('indicator.params.index').invalid}
     >
       <Controller
-        shouldUnregister
         defaultValue=""
         name="indicator.params.index"
         control={control}

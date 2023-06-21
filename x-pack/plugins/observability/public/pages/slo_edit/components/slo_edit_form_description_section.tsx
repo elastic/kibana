@@ -106,7 +106,6 @@ export function SloEditFormDescriptionSection() {
             })}
           >
             <Controller
-              shouldUnregister
               name="tags"
               control={control}
               defaultValue={[]}
