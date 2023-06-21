@@ -84,8 +84,17 @@ export function registerSetupRoute({
           });
         }
 
+        state.data.available = await hasProfilingData(setupOptions);
+        if (state.data.available) {
+          return response.ok({
+            body: {
+              has_setup: true,
+              has_data: state.data.available,
+            },
+          });
+        }
+
         const verifyFunctions = [
-          hasProfilingData,
           isApmPackageInstalled,
           validateApmPolicy,
           validateCollectorPackagePolicy,
@@ -204,9 +213,11 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
+        const apmServerHost = dependencies.setup.cloud?.apm?.url;
         const setupInstructions = await getSetupInstructions({
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: (await context.core).savedObjects.client,
+          apmServerHost,
         });
 
         return response.ok({ body: setupInstructions });

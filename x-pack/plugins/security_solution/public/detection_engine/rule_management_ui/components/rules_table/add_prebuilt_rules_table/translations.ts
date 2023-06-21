@@ -23,3 +23,10 @@ export const INSTALL_SELECTED_RULES = (numberOfSelectedRules: number) => {
     }
   );
 };
+
+export const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.searchBarPlaceholder',
+  {
+    defaultMessage: 'Search by rule name',
+  }
+);

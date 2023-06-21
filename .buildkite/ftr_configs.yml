@@ -196,6 +196,7 @@ enabled:
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/api_integration/apis/security_solution/config.ts
   - x-pack/test/api_integration/apis/spaces/config.ts
+  - x-pack/test/api_integration/apis/status/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/telemetry/config.ts
   - x-pack/test/api_integration/apis/transform/config.ts

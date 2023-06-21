@@ -98,5 +98,6 @@
     "@kbn/ml-date-utils",
     "@kbn/deeplinks-ml",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-ui-settings-browser",
   ],
 }
