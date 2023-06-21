@@ -10,7 +10,6 @@ import { create, CreateParams } from './methods/create';
 import { get, GetParams } from './methods/get';
 import { update, UpdateParams } from './methods/update';
 import { find, FindResult } from './methods/find';
-import { deleteMaintenanceWindow, DeleteParams } from './methods/delete';
 import { archive, ArchiveParams } from './methods/archive';
 import { getActiveMaintenanceWindows } from './methods/get_active_maintenance_windows';
 import { finish, FinishParams } from './methods/finish';
@@ -63,8 +62,6 @@ export class MaintenanceWindowClient {
   public update = (params: UpdateParams): Promise<MaintenanceWindow> =>
     update(this.context, params);
   public find = (): Promise<FindResult> => find(this.context);
-  public delete = (params: DeleteParams): Promise<{}> =>
-    deleteMaintenanceWindow(this.context, params);
   public archive = (params: ArchiveParams): Promise<MaintenanceWindow> =>
     archive(this.context, params);
   public finish = (params: FinishParams): Promise<MaintenanceWindow> =>
