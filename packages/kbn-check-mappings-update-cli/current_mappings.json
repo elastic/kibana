@@ -931,17 +931,6 @@
       }
     }
   },
-  "event-annotation-group": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      }
-    }
-  },
   "visualization": {
     "dynamic": false,
     "properties": {
@@ -956,6 +945,17 @@
       },
       "kibanaSavedObjectMeta": {
         "properties": {}
+      }
+    }
+  },
+  "event-annotation-group": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
       }
     }
   },
@@ -1572,6 +1572,10 @@
       },
       "is_protected": {
         "type": "boolean"
+      },
+      "overrides": {
+        "type": "flattened",
+        "index": false
       }
     }
   },
@@ -1894,9 +1898,6 @@
   "fleet-uninstall-tokens": {
     "dynamic": false,
     "properties": {
-      "created_at": {
-        "type": "date"
-      },
       "policy_id": {
         "type": "keyword"
       },
@@ -2368,6 +2369,13 @@
       "alert": {
         "properties": {
           "status": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          },
+          "tls": {
             "properties": {
               "enabled": {
                 "type": "boolean"

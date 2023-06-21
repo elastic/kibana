@@ -21,6 +21,10 @@ interface Page {
 }
 
 export type CertFields =
+  | 'monitorName'
+  | 'locationName'
+  | 'monitorType'
+  | 'monitorUrl'
   | 'sha256'
   | 'sha1'
   | 'issuer'

@@ -45,6 +45,9 @@ import {
   ALERTS_HISTOGRAM_LEGEND,
   LEGEND_ACTIONS,
   SESSION_VIEWER_BUTTON,
+  ALERT_TAGGING_CONTEXT_MENU_ITEM,
+  ALERT_TAGGING_CONTEXT_MENU,
+  ALERT_TAGGING_UPDATE_BUTTON,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -446,4 +449,22 @@ export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) =
 
 export const openSessionViewerFromAlertTable = (rowIndex: number = 0) => {
   cy.get(SESSION_VIEWER_BUTTON).eq(rowIndex).click();
+};
+
+export const openAlertTaggingContextMenu = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+  cy.get(ALERT_TAGGING_CONTEXT_MENU_ITEM).click();
+};
+
+export const openAlertTaggingBulkActionMenu = () => {
+  cy.get(TAKE_ACTION_POPOVER_BTN).click();
+  cy.get(ALERT_TAGGING_CONTEXT_MENU_ITEM).click();
+};
+
+export const clickAlertTag = (tag: string) => {
+  cy.get(ALERT_TAGGING_CONTEXT_MENU).contains(tag).click();
+};
+
+export const updateAlertTags = () => {
+  cy.get(ALERT_TAGGING_UPDATE_BUTTON).click();
 };
