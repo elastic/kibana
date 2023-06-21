@@ -77,7 +77,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     );
   };
 
-  _onLineSimplificationSizeChange = (lineSimplificationSize: boolean) => {
+  _onLineSimplificationSizeChange = (lineSimplificationSize: number) => {
     this.setState(
       {
         lineSimplificationSize,

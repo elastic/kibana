@@ -552,7 +552,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const tooltipProperties = await super.getTooltipProperties(properties);
-    if (typeof properties!.complete === 'boolean') {
+    if (properties && typeof properties!.complete === 'boolean') {
       tooltipProperties.push(
         new TooltipProperty(
           'kbn__track__complete',
