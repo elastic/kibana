@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiCallOut,
-  EuiBetaBadge,
   EuiCodeBlock,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -431,9 +430,6 @@ const InsightEditorComponent = ({
                   defaultMessage="Add investigation query"
                 />
               )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge color={'hollow'} label={i18n.TECH_PREVIEW} size="s" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>

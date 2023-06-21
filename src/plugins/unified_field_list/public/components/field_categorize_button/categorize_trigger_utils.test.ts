@@ -51,7 +51,7 @@ const action: Action = {
   execute: () => Promise.resolve(),
 };
 
-const dataViewMock = { id: '1', toSpec: () => ({}) } as DataView;
+const dataViewMock = { id: '1', toSpec: () => ({}), isTimeBased: () => true } as DataView;
 
 describe('categorize_trigger_utils', () => {
   afterEach(() => {
