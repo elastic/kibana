@@ -237,6 +237,25 @@
             }
           },
           {
+            "name": "category",
+            "in": "query",
+            "description": "Filters the returned cases by category. Limited to 100 categories.",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "example": "my-category"
+          },
+          {
             "name": "defaultSearchOperator",
             "in": "query",
             "description": "The default operator to use for the simple_query_string.",
@@ -1833,7 +1852,15 @@
             "$ref": "#/components/parameters/page_index"
           },
           {
-            "$ref": "#/components/parameters/page_size"
+            "name": "perPage",
+            "in": "query",
+            "description": "The number of items to return. Limited to 100 items.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 100
+            }
           },
           {
             "$ref": "#/components/parameters/sort_order"
