@@ -10,12 +10,15 @@ import { getNewRule } from '../../../objects/rule';
 import {
   CONTROL_FRAMES,
   CONTROL_FRAME_TITLE,
+  CONTROL_POPOVER,
   FILTER_GROUP_CHANGED_BANNER,
-  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
+  OPTION_IGNORED,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
+  OPTION_SELECTABLE_COUNT,
   FILTER_GROUP_CONTROL_ACTION_EDIT,
+  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
@@ -26,15 +29,17 @@ import { formatPageFilterSearchParam } from '../../../../common/utils/format_pag
 import {
   closePageFilterPopover,
   markAcknowledgedFirstAlert,
+  openFirstAlert,
   openPageFilterPopover,
   resetFilters,
   selectCountTable,
+  togglePageFilterPopover,
   visitAlertsPageWithCustomFilters,
   waitForAlerts,
   waitForPageFilters,
 } from '../../../tasks/alerts';
-import { ALERTS_COUNT } from '../../../screens/alerts';
-import { navigateFromHeaderTo } from '../../../tasks/security_header';
+import { ALERTS_COUNT, ALERTS_REFRESH_BTN } from '../../../screens/alerts';
+import { kqlSearch, navigateFromHeaderTo } from '../../../tasks/security_header';
 import { ALERTS, CASES } from '../../../screens/security_header';
 import {
   addNewFilterGroupControlValues,
@@ -45,6 +50,9 @@ import {
   editFilterGroupControls,
   saveFilterGroupControls,
 } from '../../../tasks/common/filter_group';
+import { TOASTER } from '../../../screens/alerts_detection_rules';
+import { setEndDate, setStartDate } from '../../../tasks/date_picker';
+import { fillAddFilterForm, openAddFilterPopover } from '../../../tasks/search_bar';
 
 const customFilters = [
   {
@@ -233,13 +241,21 @@ describe('Detections : Page Filters', () => {
         markAcknowledgedFirstAlert();
         waitForAlerts();
         cy.get(OPTION_LIST_VALUES(0)).click();
-        cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible');
+        cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible').trigger('click');
         cy.get(ALERTS_COUNT)
           .invoke('text')
           .should((newAlertCount) => {
             expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10) - 1));
           });
       });
+
+    // cleanup
+    // revert the changes so that data does not change for further tests.
+    // It would make sure that tests can run in any order.
+    cy.get(OPTION_SELECTABLE(0, 'open')).trigger('click');
+    togglePageFilterPopover(0);
+    openFirstAlert();
+    waitForAlerts();
   });
 
   it(`URL is updated when filters are updated`, () => {
@@ -256,14 +272,14 @@ describe('Detections : Page Filters', () => {
 
     openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
-    cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
+    cy.get(OPTION_SELECTABLE(1, 'high')).click({});
     closePageFilterPopover(1);
   });
 
   it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
     cy.get(OPTION_LIST_VALUES(1)).click();
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
-    cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
+    cy.get(OPTION_SELECTABLE(1, 'high')).click({});
 
     // high should be scuccessfully selected.
     cy.get(OPTION_LIST_VALUES(1)).contains('high');
@@ -311,6 +327,57 @@ describe('Detections : Page Filters', () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
+  context('Impact of inputs', () => {
+    afterEach(() => {
+      resetFilters();
+    });
+    it('should recover from invalide kql Query result', () => {
+      // do an invalid search
+      //
+      kqlSearch('\\');
+      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      waitForPageFilters();
+      cy.get(TOASTER).should('contain.text', 'KQLSyntaxError');
+      togglePageFilterPopover(0);
+      cy.get(OPTION_SELECTABLE(0, 'open')).should('be.visible');
+      cy.get(OPTION_SELECTABLE(0, 'open')).should('contain.text', 'open');
+      cy.get(OPTION_SELECTABLE(0, 'open')).get(OPTION_SELECTABLE_COUNT).should('have.text', 2);
+    });
+
+    it('should take kqlQuery into account', () => {
+      kqlSearch('kibana.alert.workflow_status: "nothing"');
+      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      waitForPageFilters();
+      togglePageFilterPopover(0);
+      cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
+      cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
+    });
+
+    it('should take filters into account', () => {
+      openAddFilterPopover();
+      fillAddFilterForm({
+        key: 'kibana.alert.workflow_status',
+        value: 'invalid',
+      });
+      waitForPageFilters();
+      togglePageFilterPopover(0);
+      cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
+      cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
+    });
+    it('should take timeRange into account', () => {
+      const startDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
+      const endDateWithZeroAlerts = 'Jan 1, 2010 @ 00:00:00.000';
+
+      setStartDate(startDateWithZeroAlerts);
+      setEndDate(endDateWithZeroAlerts);
+
+      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      waitForPageFilters();
+      togglePageFilterPopover(0);
+      cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
+      cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
+    });
+  });
   it('Number fields are not visible in field edit panel', () => {
     const idx = 3;
     const { FILTER_FIELD_TYPE, FIELD_TYPES } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
