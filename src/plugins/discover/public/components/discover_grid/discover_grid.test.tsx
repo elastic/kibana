@@ -257,7 +257,7 @@ describe('DiscoverGrid', () => {
           getCellValue: expect.any(Function),
           fields: [
             {
-              aggregatable: false,
+              aggregatable: true,
               name: '@timestamp',
               type: 'date',
             },
@@ -265,6 +265,37 @@ describe('DiscoverGrid', () => {
               aggregatable: false,
               name: 'message',
               type: 'string',
+            },
+          ],
+        })
+      );
+    });
+
+    it('should call useDataGridColumnsCellActions with empty field name and type for unsupported field types', async () => {
+      await getComponent({
+        ...getProps(),
+        columns: ['message', '_source'],
+        onFieldEdited: jest.fn(),
+        cellActionsTriggerId: 'test',
+      });
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          triggerId: 'test',
+          getCellValue: expect.any(Function),
+          fields: [
+            {
+              aggregatable: true,
+              name: '@timestamp',
+              type: 'date',
+            },
+            {
+              aggregatable: false,
+              name: 'message',
+              type: 'string',
+            },
+            {
+              name: '',
+              type: '',
             },
           ],
         })
