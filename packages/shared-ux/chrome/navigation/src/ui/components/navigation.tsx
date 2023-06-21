@@ -17,7 +17,7 @@ import React, {
   useRef,
 } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { flattenNav } from '@kbn/core-chrome-browser-internal';
+import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
@@ -57,7 +57,6 @@ interface Props {
 
 export function Navigation({ children, unstyled = false, dataTestSubj }: Props) {
   const { onProjectNavigationChange, activeNodes$ } = useNavigationServices();
-  const navTreeFlattened = useRef<Record<string, ChromeProjectNavigationNode>>({});
 
   // We keep a reference of the order of the children that register themselves when mounting.
   // This guarantees that the navTree items sent to the Chrome service has the same order
@@ -67,6 +66,9 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
 
   const activeNodes = useObservable(activeNodes$, []);
   const [navigationItems, setNavigationItems] = useState<
+    Record<string, ChromeProjectNavigationNode>
+  >({});
+  const [debouncedNavigationItems, setDebouncedNavigationItems] = useState<
     Record<string, ChromeProjectNavigationNode>
   >({});
   const [footerChildren, setFooterChildren] = useState<ReactNode>(null);
@@ -110,37 +112,26 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
     [register, unstyled, activeNodes]
   );
 
+  useDebounce(
+    () => {
+      setDebouncedNavigationItems(navigationItems);
+    },
+    100,
+    [navigationItems]
+  );
+
   useEffect(() => {
-    const navigationTree = Object.values(navigationItems).sort((a, b) => {
+    const navigationTree = Object.values(debouncedNavigationItems).sort((a, b) => {
       const aOrder = orderChildrenRef.current[a.id];
       const bOrder = orderChildrenRef.current[b.id];
       return aOrder - bOrder;
     });
 
-    // We only want to notify the Chrome service if the navigation tree has changed
-    // For that we will compare the keys of the current navigation tree with the new one
-    const flattened = flattenNav(navigationTree);
-    const currentKeys = Object.keys(navTreeFlattened.current);
-    const newKeys = Object.keys(flattened);
-
-    let hasSameKeys = true;
-    // Check if the keys are the same
-    if (currentKeys.length !== newKeys.length) {
-      hasSameKeys = false;
-    } else if (currentKeys.some((key) => !newKeys.includes(key))) {
-      hasSameKeys = false;
-    }
-
-    if (hasSameKeys) return;
-
-    navTreeFlattened.current = flattened;
-
     // This will update the navigation tree in the Chrome service (calling the serverless.setNavigation())
     onProjectNavigationChange({
       navigationTree,
-      navigationTreeFlattened: flattened,
     });
-  }, [navigationItems, onProjectNavigationChange]);
+  }, [debouncedNavigationItems, onProjectNavigationChange]);
 
   return (
     <NavigationContext.Provider value={contextValue}>

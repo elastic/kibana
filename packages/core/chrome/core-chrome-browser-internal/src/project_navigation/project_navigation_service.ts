@@ -32,9 +32,7 @@ export class ProjectNavigationService {
     current: SideNavComponent | null;
   }>({ current: null });
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectNavigation$ = new BehaviorSubject<
-    Omit<ChromeProjectNavigation, 'navigationTreeFlattened'> | undefined
-  >(undefined);
+  private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
   private projectNavigationNavTreeFlattened: Record<string, ChromeProjectNavigationNode> = {};
 

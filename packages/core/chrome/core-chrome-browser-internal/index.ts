@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ChromeService, flattenNav } from './src';
+export { ChromeService } from './src';
 export type { InternalChromeStart } from './src';

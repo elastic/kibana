@@ -7,5 +7,3 @@
  */
 
 export { ProjectNavigationService } from './project_navigation_service';
-
-export { flattenNav } from './utils';

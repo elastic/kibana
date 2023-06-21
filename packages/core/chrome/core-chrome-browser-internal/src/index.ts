@@ -8,4 +8,3 @@
 
 export { ChromeService } from './chrome_service';
 export type { InternalChromeStart } from './types';
-export { flattenNav } from './project_navigation';
