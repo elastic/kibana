@@ -140,8 +140,8 @@ export const useHostsTable = () => {
   const { dataView } = useMetricsDataViewContext();
 
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
-  const popoverContainerRef = React.createRef<HTMLDivElement>();
-  const hostsTableRef = useRef<EuiBasicTable | null>(null);
+  const popoverContainerRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<EuiBasicTable | null>(null);
 
   const closeFlyout = useCallback(() => setHostFlyoutState(null), [setHostFlyoutState]);
 
@@ -162,7 +162,7 @@ export const useHostsTable = () => {
 
     filterManagerService.addFilters(newFilter);
     setSelectedItems([]);
-    hostsTableRef.current?.setSelection([]);
+    tableRef.current?.setSelection([]);
   }, [dataView, filterManagerService, selectedItems]);
 
   const reportHostEntryClick = useCallback(
@@ -386,7 +386,7 @@ export const useHostsTable = () => {
     filterSelectedHosts,
     refs: {
       popoverContainerRef,
-      hostsTableRef,
+      tableRef,
     },
   };
 };
