@@ -32,9 +32,7 @@ describe('validators', () => {
     });
 
     it('returns if perPage < 0', () => {
-      expect(() =>
-        validateFindCommentsPagination({ perPage: -1 })
-      ).not.toThrowError();
+      expect(() => validateFindCommentsPagination({ perPage: -1 })).not.toThrowError();
     });
 
     it('throws if page > 10k', () => {
