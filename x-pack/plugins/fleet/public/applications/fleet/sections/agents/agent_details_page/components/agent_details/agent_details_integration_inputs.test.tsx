@@ -84,26 +84,26 @@ describe('AgentDetailsIntegrationInputs', () => {
 
   it('renders a success health icon when the package input has a match in the agent component units', () => {
     agent.components = [
-        {
-          id: 'endpoint-default',
-          type: 'endpoint',
-          status: 'HEALTHY',
-          message: 'Healthy',
-          units: [
-            {
-              id: `endpoint-default-${packageMock.id}`,
-              type: 'input',
-              status: 'HEALTHY',
-              message: 'Applied policy',
-            },
-          ],
-        },
-      ];
-  
-      const component = renderComponent();
-      userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
-      expect(
-        component.getByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
-      ).toBeInTheDocument();
+      {
+        id: 'endpoint-default',
+        type: 'endpoint',
+        status: 'HEALTHY',
+        message: 'Healthy',
+        units: [
+          {
+            id: `endpoint-default-${packageMock.id}`,
+            type: 'input',
+            status: 'HEALTHY',
+            message: 'Applied policy',
+          },
+        ],
+      },
+    ];
+
+    const component = renderComponent();
+    userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    expect(
+      component.getByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
+    ).toBeInTheDocument();
   });
 });
