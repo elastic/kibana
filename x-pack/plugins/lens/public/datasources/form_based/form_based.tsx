@@ -171,10 +171,12 @@ export function getFormBasedDatasource({
   const { uiSettings, settings } = core;
 
   const DATASOURCE_ID = 'formBased';
+  const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
   const formBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState> = {
     id: DATASOURCE_ID,
+    alias: ALIAS_IDS,
 
     initialize(
       persistedState?: FormBasedPersistedState,
@@ -750,6 +752,7 @@ export function getFormBasedDatasource({
 
       return {
         datasourceId: DATASOURCE_ID,
+        datasourceAliasIds: ALIAS_IDS,
         getTableSpec: () => {
           // consider also referenced columns in this case
           // but map fields to the top referencing column

@@ -153,7 +153,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const {
     indexPattern,
     runtimeMappings,
-    dataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
@@ -351,7 +350,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         </EuiFlexGroup>
       ) : (
         <DetectionPageFilterSet
-          dataViewId={dataViewId}
           onFilterChange={pageFiltersUpdateHandler}
           filters={topLevelFilters}
           query={query}
@@ -367,7 +365,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [
       topLevelFilters,
       arePageFiltersEnabled,
-      dataViewId,
       statusFilter,
       onFilterGroupChangedCallback,
       pageFiltersUpdateHandler,
