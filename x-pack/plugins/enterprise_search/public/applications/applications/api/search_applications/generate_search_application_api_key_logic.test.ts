@@ -9,15 +9,15 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { generateEngineApiKey } from './generate_engine_api_key_logic';
+import { generateSearchApplicationApiKey } from './generate_search_application_api_key_logic';
 
-describe('GenerateEngineApiKeyLogic', () => {
+describe('GenerateSearchApplicationApiKeyLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('GenerateEngineApiKeyLogic', () => {
+  describe('generateSearchApplicationApiKey', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve({
         apiKey: {
@@ -28,8 +28,8 @@ describe('GenerateEngineApiKeyLogic', () => {
         },
       });
       http.post.mockReturnValue(promise);
-      const result = generateEngineApiKey({
-        engineName: 'puggles',
+      const result = generateSearchApplicationApiKey({
+        searchApplicationName: 'puggles',
         keyName: 'puggles read only key',
       });
       await nextTick();

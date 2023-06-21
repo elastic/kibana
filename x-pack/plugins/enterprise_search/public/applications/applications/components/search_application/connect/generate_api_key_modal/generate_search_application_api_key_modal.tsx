@@ -31,7 +31,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { GenerateEngineApiKeyLogic } from '../../../../../enterprise_search_content/api/generate_engine_api_key/generate_engine_api_key_logic';
+import { GenerateSearchApplicationApiKeyLogic } from '../../../../api/search_applications/generate_search_application_api_key_logic';
 
 import { GenerateApiKeyModalLogic } from './generate_search_application_api_key_modal.logic';
 
@@ -45,7 +45,7 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
 > = ({ onClose, searchApplicationName }) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
-  const { makeRequest } = useActions(GenerateEngineApiKeyLogic);
+  const { makeRequest } = useActions(GenerateSearchApplicationApiKeyLogic);
 
   useEffect(() => {
     setKeyName(`${searchApplicationName} read-only API key`);
@@ -93,8 +93,8 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
                           fill
                           onClick={() => {
                             makeRequest({
-                              engineName: searchApplicationName,
                               keyName: keyName.trim(),
+                              searchApplicationName,
                             });
                           }}
                           disabled={keyName.trim().length <= 0}

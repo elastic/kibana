@@ -8,7 +8,7 @@
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../../../common/types/api';
-import { GenerateEngineApiKeyLogic } from '../../../../../enterprise_search_content/api/generate_engine_api_key/generate_engine_api_key_logic';
+import { GenerateSearchApplicationApiKeyLogic } from '../../../../api/search_applications/generate_search_application_api_key_logic';
 
 import { GenerateApiKeyModalLogic } from './generate_search_application_api_key_modal.logic';
 
@@ -22,7 +22,7 @@ const DEFAULT_VALUES = {
 };
 
 describe('GenerateEngineApiKeyModal Logic', () => {
-  const { mount: apiLogicMount } = new LogicMounter(GenerateEngineApiKeyLogic);
+  const { mount: apiLogicMount } = new LogicMounter(GenerateSearchApplicationApiKeyLogic);
   const { mount } = new LogicMounter(GenerateApiKeyModalLogic);
 
   beforeEach(() => {
@@ -67,7 +67,7 @@ describe('GenerateEngineApiKeyModal Logic', () => {
     describe('apiKey', () => {
       it('updates when apiSuccess listener triggered', () => {
         expect(GenerateApiKeyModalLogic.values).toEqual(DEFAULT_VALUES);
-        GenerateEngineApiKeyLogic.actions.apiSuccess({
+        GenerateSearchApplicationApiKeyLogic.actions.apiSuccess({
           apiKey: {
             api_key: 'some-api-key-123123',
             encoded: 'encoded-api-key123123==',
@@ -97,7 +97,10 @@ describe('GenerateEngineApiKeyModal Logic', () => {
     describe('isLoading', () => {
       it('should update with API status', () => {
         expect(GenerateApiKeyModalLogic.values).toEqual(DEFAULT_VALUES);
-        GenerateEngineApiKeyLogic.actions.makeRequest({ engineName: 'puggles', keyName: 'test' });
+        GenerateSearchApplicationApiKeyLogic.actions.makeRequest({
+          keyName: 'test',
+          searchApplicationName: 'puggles',
+        });
 
         expect(GenerateApiKeyModalLogic.values).toEqual({
           ...DEFAULT_VALUES,
@@ -110,7 +113,7 @@ describe('GenerateEngineApiKeyModal Logic', () => {
     describe('isSuccess', () => {
       it('should update with API status', () => {
         expect(GenerateApiKeyModalLogic.values).toEqual(DEFAULT_VALUES);
-        GenerateEngineApiKeyLogic.actions.apiSuccess({
+        GenerateSearchApplicationApiKeyLogic.actions.apiSuccess({
           apiKey: {
             api_key: 'some-api-key-123123',
             encoded: 'encoded-api-key123123==',

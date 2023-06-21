@@ -8,19 +8,19 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../common/types/api';
-import { GenerateEngineApiKeyLogic } from '../../../../enterprise_search_content/api/generate_engine_api_key/generate_engine_api_key_logic';
+import { GenerateSearchApplicationApiKeyLogic } from '../../../api/search_applications/generate_search_application_api_key_logic';
 
 interface SearchApplicationAPIActions {
-  apiError: typeof GenerateEngineApiKeyLogic.actions.apiError;
-  apiReset: typeof GenerateEngineApiKeyLogic.actions.apiReset;
+  apiError: typeof GenerateSearchApplicationApiKeyLogic.actions.apiError;
+  apiReset: typeof GenerateSearchApplicationApiKeyLogic.actions.apiReset;
   closeGenerateModal: void;
   openGenerateModal: void;
 }
 
 export interface SearchApplicationAPILogicValues {
   apiKey: string;
-  apiKeyData: typeof GenerateEngineApiKeyLogic.values.data;
-  apiKeyStatus: typeof GenerateEngineApiKeyLogic.values.status;
+  apiKeyData: typeof GenerateSearchApplicationApiKeyLogic.values.data;
+  apiKeyStatus: typeof GenerateSearchApplicationApiKeyLogic.values.status;
   isError: boolean;
   isGenerateModalOpen: boolean;
 }
@@ -33,8 +33,11 @@ export const SearchApplicationApiLogic = kea<
     openGenerateModal: true,
   },
   connect: {
-    actions: [GenerateEngineApiKeyLogic, ['apiReset']],
-    values: [GenerateEngineApiKeyLogic, ['data as apiKeyData', 'status as apiKeyStatus']],
+    actions: [GenerateSearchApplicationApiKeyLogic, ['apiReset']],
+    values: [
+      GenerateSearchApplicationApiKeyLogic,
+      ['data as apiKeyData', 'status as apiKeyStatus'],
+    ],
   },
   listeners: ({ actions }) => ({
     openGenerateModal: () => {

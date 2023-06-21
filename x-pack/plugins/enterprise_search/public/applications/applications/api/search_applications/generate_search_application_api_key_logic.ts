@@ -17,14 +17,14 @@ interface APIKeyResponse {
   };
 }
 
-export const generateEngineApiKey = async ({
-  engineName,
+export const generateSearchApplicationApiKey = async ({
   keyName,
+  searchApplicationName,
 }: {
-  engineName: string;
   keyName: string;
+  searchApplicationName: string;
 }) => {
-  const route = `/internal/enterprise_search/search_applications/${engineName}/api_key`;
+  const route = `/internal/enterprise_search/search_applications/${searchApplicationName}/api_key`;
 
   return await HttpLogic.values.http.post<APIKeyResponse>(route, {
     body: JSON.stringify({
@@ -33,7 +33,7 @@ export const generateEngineApiKey = async ({
   });
 };
 
-export const GenerateEngineApiKeyLogic = createApiLogic(
-  ['generate_engine_api_key_logic'],
-  generateEngineApiKey
+export const GenerateSearchApplicationApiKeyLogic = createApiLogic(
+  ['generate_search_application_api_key_logic'],
+  generateSearchApplicationApiKey
 );

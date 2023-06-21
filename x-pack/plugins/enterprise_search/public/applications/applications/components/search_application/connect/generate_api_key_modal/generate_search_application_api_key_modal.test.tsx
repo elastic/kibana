@@ -84,7 +84,7 @@ describe('GenerateSearchApplicationApiKeyModal', () => {
       wrapper.find('[data-test-subj="generateApiKeyButton"]').simulate('click');
 
       expect(mockActions.makeRequest).toHaveBeenCalledWith({
-        engineName: 'puggles',
+        searchApplicationName: 'puggles',
         keyName: 'with-spaces',
       });
     });

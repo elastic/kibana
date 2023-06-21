@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../../common/types/api';
 
-import { GenerateEngineApiKeyLogic } from '../../../../../enterprise_search_content/api/generate_engine_api_key/generate_engine_api_key_logic';
+import { GenerateSearchApplicationApiKeyLogic } from '../../../../api/search_applications/generate_search_application_api_key_logic';
 
 interface GenerateApiKeyModalActions {
   setKeyName(keyName: string): { keyName: string };
@@ -17,11 +17,11 @@ interface GenerateApiKeyModalActions {
 
 interface GenerateApiKeyModalValues {
   apiKey: string;
-  data: typeof GenerateEngineApiKeyLogic.values.data;
+  data: typeof GenerateSearchApplicationApiKeyLogic.values.data;
   isLoading: boolean;
   isSuccess: boolean;
   keyName: string;
-  status: typeof GenerateEngineApiKeyLogic.values.status;
+  status: typeof GenerateSearchApplicationApiKeyLogic.values.status;
 }
 
 export const GenerateApiKeyModalLogic = kea<
@@ -31,7 +31,7 @@ export const GenerateApiKeyModalLogic = kea<
     setKeyName: (keyName) => ({ keyName }),
   },
   connect: {
-    values: [GenerateEngineApiKeyLogic, ['data', 'status']],
+    values: [GenerateSearchApplicationApiKeyLogic, ['data', 'status']],
   },
   path: ['enterprise_search', 'engines', 'api', 'generate_api_key_modal'],
   reducers: () => ({
