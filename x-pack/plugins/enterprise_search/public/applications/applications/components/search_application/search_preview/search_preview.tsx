@@ -161,7 +161,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                   <EuiText>
                     <p>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.searchPreview.configuration.tourContent',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.tourContent',
                         {
                           defaultMessage:
                             'Create your API key, learn about using language clients and find more resources in Connect.',
@@ -180,7 +180,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 stepsTotal={1}
                 anchorPosition="downCenter"
                 title={i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.searchPreview.configuration.tourTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.tourTitle',
                   {
                     defaultMessage: 'Review our API page to start using your search application',
                   }

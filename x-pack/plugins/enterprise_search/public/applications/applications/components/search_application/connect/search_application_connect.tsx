@@ -30,19 +30,19 @@ import '../search_application_layout.scss';
 import { SearchApplicationDocumentation } from './search_application_documentation';
 
 const pageTitle = i18n.translate(
-  'xpack.enterpriseSearch.content.searchApplications.connect.pageTitle',
+  'xpack.enterpriseSearch.searchApplications.searchApplication.connect.pageTitle',
   {
     defaultMessage: 'Connect',
   }
 );
 const SAFE_SEARCH_API_TAB_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.content.searchApplications.connect.searchAPITabTitle',
+  'xpack.enterpriseSearch.searchApplications.searchApplication.connect.searchAPITabTitle',
   {
     defaultMessage: 'Search API',
   }
 );
 const DOCUMENTATION_TAB_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.content.searchApplications.connect.documentationTabTitle',
+  'xpack.enterpriseSearch.searchApplications.searchApplication.connect.documentationTabTitle',
   {
     defaultMessage: 'Documentation',
   }

@@ -33,19 +33,19 @@ import { SearchApplicationViewLogic } from './search_application_view_logic';
 import './search_application_layout.scss';
 
 const pageTitle = i18n.translate(
-  'xpack.enterpriseSearch.content.searchApplications.content.pageTitle',
+  'xpack.enterpriseSearch.searchApplications.searchApplication.content.pageTitle',
   {
     defaultMessage: 'Content',
   }
 );
 const INDICES_TAB_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.content.searchApplications.content.indicesTabTitle',
+  'xpack.enterpriseSearch.searchApplications.searchApplication.content.indicesTabTitle',
   {
     defaultMessage: 'Indices',
   }
 );
 const SCHEMA_TAB_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.content.searchApplications.content.schemaTabTitle',
+  'xpack.enterpriseSearch.searchApplications.searchApplication.content.schemaTabTitle',
   {
     defaultMessage: 'Schema',
   }

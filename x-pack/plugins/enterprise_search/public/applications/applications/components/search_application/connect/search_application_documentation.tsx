@@ -34,7 +34,7 @@ export const SearchApplicationDocumentation = () => {
           <EuiText>
             <h2>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.searchApplication.documentation.searchApplication.title',
+                'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchApplication.title',
                 {
                   defaultMessage: 'Learn more about Search Applications',
                 }
@@ -45,7 +45,7 @@ export const SearchApplicationDocumentation = () => {
           <EuiText>
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.searchApplication.documentation.searchApplication.description',
+                'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchApplication.description',
                 {
                   defaultMessage:
                     'Search Applications help make your Elasticsearch data easily searchable for end users.',
@@ -56,7 +56,7 @@ export const SearchApplicationDocumentation = () => {
 
           <EuiLink href={docLinks.searchApplications} external>
             {i18n.translate(
-              'xpack.enterpriseSearch.content.searchApplication.documentation.searchApplication.readDocumentation',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchApplication.readDocumentation',
               {
                 defaultMessage: 'Read our documentation',
               }
@@ -74,7 +74,7 @@ export const SearchApplicationDocumentation = () => {
                   <EuiTitle size="s">
                     <EuiText>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.manageAPIKeys.title',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.manageAPIKeys.title',
                         { defaultMessage: 'Manage API Keys' }
                       )}
                     </EuiText>
@@ -87,7 +87,7 @@ export const SearchApplicationDocumentation = () => {
                   <EuiText>
                     <p>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.manageAPIKeys.description',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.manageAPIKeys.description',
                         {
                           defaultMessage:
                             'API keys provide a secure way to control access to Elasticsearch data and functionalities, and to limit access to specific indices or actions.',
@@ -100,7 +100,7 @@ export const SearchApplicationDocumentation = () => {
                   <EuiText>
                     <EuiLink href={docLinks.apiKeys} external>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.manageAPIKeys.learnMore',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.manageAPIKeys.learnMore',
                         {
                           defaultMessage: 'Learn more',
                         }
@@ -121,7 +121,7 @@ export const SearchApplicationDocumentation = () => {
                   <EuiTitle size="s">
                     <EuiText>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.languageClients.title',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.languageClients.title',
                         { defaultMessage: 'Build with language clients' }
                       )}
                     </EuiText>
@@ -134,7 +134,7 @@ export const SearchApplicationDocumentation = () => {
                   <EuiText>
                     <p>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.languageClients.description',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.languageClients.description',
                         {
                           defaultMessage:
                             'Develop for Elasticsearch in your preferred programming languages through our first and third-party supported clients.',
@@ -147,7 +147,7 @@ export const SearchApplicationDocumentation = () => {
                   <EuiText>
                     <EuiLink href={docLinks.clientsGuide} external>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.languageClients.learnMore',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.languageClients.learnMore',
                         {
                           defaultMessage: 'Learn more',
                         }
@@ -168,7 +168,7 @@ export const SearchApplicationDocumentation = () => {
                   <EuiTitle size="s">
                     <EuiText>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.searchInsights.title',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchInsights.title',
                         { defaultMessage: 'Search insights' }
                       )}
                     </EuiText>
@@ -181,7 +181,7 @@ export const SearchApplicationDocumentation = () => {
                   <EuiText>
                     <p>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.searchInsights.description',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchInsights.description',
                         {
                           defaultMessage:
                             'Gain insights into the performance of your search application with Behavioral Analytics.',
@@ -194,7 +194,7 @@ export const SearchApplicationDocumentation = () => {
                   <EuiText>
                     <EuiLink href={docLinks.behavioralAnalytics} external>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.documentation.searchInsights.learnMore',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchInsights.learnMore',
                         {
                           defaultMessage: 'Learn more',
                         }

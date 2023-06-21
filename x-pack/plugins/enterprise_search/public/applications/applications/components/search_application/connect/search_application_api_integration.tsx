@@ -98,7 +98,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
       copy: false,
       language: 'http',
       title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.tab.apirequestTitle',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.tab.apirequestTitle',
         {
           defaultMessage: 'API Request',
         }
@@ -109,7 +109,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
       copy: true,
       language: 'javascript',
       title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.tab.clientTitle',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.tab.clientTitle',
         {
           defaultMessage: 'Javascript Client',
         }
@@ -120,7 +120,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
       copy: true,
       language: 'bash',
       title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.tab.curlTitle',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.tab.curlTitle',
         {
           defaultMessage: 'cURL',
         }
@@ -146,13 +146,13 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.description"
+            id="xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.step4.description"
             defaultMessage="Simplify your API calls by using one of our {clientsDocumentationLink}."
             values={{
               clientsDocumentationLink: (
                 <EuiLink href={docLinks.clientsGuide}>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.clientsDocumenation',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.step4.clientsDocumenation',
                     {
                       defaultMessage: 'programming language clients',
                     }
@@ -183,7 +183,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
             <EuiText>
               <h5>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.installationTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.step4.installationTitle',
                   {
                     defaultMessage: 'Installation',
                   }
@@ -195,7 +195,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
             <EuiText color="inherit">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.npmInstallDescription',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.step4.npmInstallDescription',
                   {
                     defaultMessage:
                       'Search application client is accessible from NPM package registry',
@@ -214,7 +214,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
             <EuiText color="inherit">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.cdnInstallDescription',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.step4.cdnInstallDescription',
                   {
                     defaultMessage: 'or via CDN',
                   }
@@ -232,7 +232,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
             <EuiText color="inherit">
               <h5>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.clientUsageTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.step4.clientUsageTitle',
                   {
                     defaultMessage: 'Usage',
                   }
@@ -243,14 +243,14 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
           <EuiFlexItem>
             <EuiText>
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.clientUsageDescription"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.step4.clientUsageDescription"
                 defaultMessage="To get the most out of the client, use the javascript client's example template and follow our {searchapplicationClientDocLink} on building a search experience."
                 values={{
                   searchapplicationClientDocLink: (
                     // replace # with search application client doc link
                     <EuiLink href="#">
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step3.clientDocumenation',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.step3.clientDocumenation',
                         {
                           defaultMessage: 'how to guide',
                         }
@@ -273,7 +273,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
           <EuiFlexGroup direction="column" alignItems="flexEnd">
             <EuiLink href={consolePreviewLink} target="_blank">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.apiRequestConsoleButton"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.safeSearchApi.step4.apiRequestConsoleButton"
                 defaultMessage="Try in console"
               />
             </EuiLink>
