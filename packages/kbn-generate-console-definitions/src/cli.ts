@@ -56,7 +56,7 @@ export function runGenerateConsoleDefinitionsCli() {
       log.info('completed console definitions generation');
     },
     {
-      description: `Generate Console autocomplete defiitions from the ES specification repo`,
+      description: `Generate Console autocomplete definitions from the ES specification repo`,
       usage: `
 node scripts/generate_console_definitions.js --help
 node scripts/generate_console_definitions.js --source <ES_SPECIFICATION_REPO>
