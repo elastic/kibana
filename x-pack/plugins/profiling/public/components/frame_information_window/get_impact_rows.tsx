@@ -20,11 +20,13 @@ export function getImpactRows({
   countExclusive,
   totalSamples,
   totalSeconds,
+  isApproximate = false,
 }: {
   countInclusive: number;
   countExclusive: number;
   totalSamples: number;
   totalSeconds: number;
+  isApproximate: boolean;
 }) {
   const {
     percentage,

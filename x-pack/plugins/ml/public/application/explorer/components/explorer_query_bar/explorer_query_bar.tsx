@@ -103,6 +103,7 @@ interface ExplorerQueryBarProps {
   indexPattern: DataView;
   queryString?: string;
   updateLanguage: (language: string) => void;
+  dataViews?: DataView[];
 }
 
 export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
@@ -111,6 +112,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   indexPattern,
   queryString,
   updateLanguage,
+  dataViews = [],
 }) => {
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
   const { services } = useMlKibana();
@@ -123,7 +125,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
     http,
     docLinks,
     uiSettings,
-    dataViews,
+    dataViews: dataViewsService,
   } = services;
 
   // The internal state of the input query bar updated on every key stroke.
@@ -175,7 +177,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
         <QueryStringInput
           bubbleSubmitEvent={false}
           query={searchInput}
-          indexPatterns={[]}
+          indexPatterns={dataViews ?? []}
           onChange={searchChangeHandler}
           onSubmit={applyInfluencersFilterQuery}
           placeholder={filterPlaceHolder}
@@ -191,7 +193,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
             uiSettings,
             data,
             storage,
-            dataViews,
+            dataViews: dataViewsService,
           }}
         />
       }
