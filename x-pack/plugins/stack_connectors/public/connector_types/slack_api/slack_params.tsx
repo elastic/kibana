@@ -9,23 +9,9 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  EuiSpacer,
-  EuiFilterGroup,
-  EuiPopover,
-  EuiFilterButton,
-  EuiSelectable,
-  EuiSelectableOption,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { GetChannelsResponse, PostMessageParams } from '../../../common/slack_api/types';
-
-interface ChannelsStatus {
-  label: string;
-  checked?: 'on';
-}
 
 const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessageParams>> = ({
   actionConnector,
@@ -85,6 +71,10 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
     }
   }, [toasts, channelsError]);
 
+  const [selectedChannels, setSelectedChannels] = useState<EuiComboBoxOptionOption[]>(
+    (channels ?? []).map((c) => ({ label: c }))
+  );
+
   const slackChannels = useMemo(
     () =>
       channelsInfo
@@ -93,44 +83,11 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
     [channelsInfo]
   );
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectedChannels, setSelectedChannels] = useState<string[]>(channels ?? []);
-
-  const button = (
-    <EuiFilterButton
-      iconType="arrowDown"
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      numFilters={selectedChannels.length}
-      hasActiveFilters={selectedChannels.length > 0}
-      numActiveFilters={selectedChannels.length}
-      data-test-subj="slackChannelsButton"
-    >
-      <FormattedMessage
-        id="xpack.stackConnectors.slack.params..showChannelsListButton"
-        defaultMessage="Channels"
-      />
-    </EuiFilterButton>
-  );
-
-  const options: ChannelsStatus[] = useMemo(
-    () =>
-      slackChannels.map((slackChannel) => ({
-        label: slackChannel.label,
-        ...(selectedChannels.includes(slackChannel.label) ? { checked: 'on' } : {}),
-      })),
-    [slackChannels, selectedChannels]
-  );
-
   const onChange = useCallback(
-    (newOptions: EuiSelectableOption[]) => {
-      const newSelectedChannels = newOptions.reduce<string[]>((result, option) => {
-        if (option.checked === 'on') {
-          result = [...result, option.label];
-        }
-        return result;
-      }, []);
+    (newOptions: EuiComboBoxOptionOption[]) => {
+      const newSelectedChannels = newOptions.map((option) => option.label);
 
-      setSelectedChannels(newSelectedChannels);
+      setSelectedChannels(newOptions);
       editAction('subActionParams', { channels: newSelectedChannels, text }, index);
     },
     [editAction, index, text]
@@ -139,53 +96,22 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
   return (
     <>
       <EuiFormRow
+        label={i18n.translate('xpack.stackConnectors.slack.params.channelsComboBoxLabel', {
+          defaultMessage: 'Channels',
+        })}
         fullWidth
         error={errors.channels}
         isInvalid={errors.channels?.length > 0 && channels.length === 0}
       >
-        <EuiFilterGroup>
-          <EuiPopover
-            id={'slackChannelsPopover'}
-            button={button}
-            isOpen={isPopoverOpen}
-            closePopover={() => setIsPopoverOpen(false)}
-          >
-            <EuiSelectable
-              searchable
-              data-test-subj="slackChannelsSelectableList"
-              isLoading={isLoadingChannels}
-              options={options}
-              loadingMessage={i18n.translate(
-                'xpack.stackConnectors.components.slack.loadingMessage',
-                {
-                  defaultMessage: 'Loading channels',
-                }
-              )}
-              noMatchesMessage={i18n.translate(
-                'xpack.stackConnectors.components.slack.noChannelsFound',
-                {
-                  defaultMessage: 'No channels found',
-                }
-              )}
-              emptyMessage={i18n.translate(
-                'xpack.stackConnectors.components.slack.noChannelsAvailable',
-                {
-                  defaultMessage: 'No channels available',
-                }
-              )}
-              onChange={onChange}
-              singleSelection={true}
-            >
-              {(list, search) => (
-                <>
-                  {search}
-                  <EuiSpacer size="xs" />
-                  {list}
-                </>
-              )}
-            </EuiSelectable>
-          </EuiPopover>
-        </EuiFilterGroup>
+        <EuiComboBox
+          noSuggestions={false}
+          data-test-subj="slackChannelsComboBox"
+          isLoading={isLoadingChannels}
+          options={slackChannels}
+          selectedOptions={selectedChannels}
+          onChange={onChange}
+          singleSelection={true}
+        />
       </EuiFormRow>
       <EuiSpacer size="m" />
       <TextAreaWithMessageVariables

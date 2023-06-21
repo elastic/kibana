@@ -54,6 +54,7 @@ import { findMaintenanceWindowsRoute } from './maintenance_window/find_maintenan
 import { archiveMaintenanceWindowRoute } from './maintenance_window/archive_maintenance_window';
 import { finishMaintenanceWindowRoute } from './maintenance_window/finish_maintenance_window';
 import { activeMaintenanceWindowsRoute } from './maintenance_window/active_maintenance_windows';
+import { bulkGetMaintenanceWindowRoute } from './maintenance_window/bulk_get_maintenance_windows';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -110,4 +111,5 @@ export function defineRoutes(opts: RouteOptions) {
   archiveMaintenanceWindowRoute(router, licenseState);
   finishMaintenanceWindowRoute(router, licenseState);
   activeMaintenanceWindowsRoute(router, licenseState);
+  bulkGetMaintenanceWindowRoute(router, licenseState);
 }

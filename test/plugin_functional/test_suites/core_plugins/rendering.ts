@@ -141,6 +141,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'newsfeed.service.pathTemplate (string)',
         'newsfeed.service.urlRoot (string)',
         'telemetry.allowChangingOptInStatus (boolean)',
+        'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
         'telemetry.banner (boolean)',
         'telemetry.labels.branch (string)',
         'telemetry.labels.ciBuildId (string)',
@@ -263,7 +264,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
-        'xpack.observability.coPilot.enabled (boolean)',
+        'xpack.observability.aiAssistant.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
