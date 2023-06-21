@@ -31,7 +31,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
   interface Endpoint {
     url: string;
-    method?: 'GET';
+    method?: 'GET' | 'POST';
     params?: { query: Record<string, any> };
     body?: any;
   }
@@ -66,6 +66,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       params: { query: { timeFrom: start, timeTo: end, kuery: '' } },
     },
     { url: profilingRoutePaths.SetupDataCollectionInstructions },
+    { url: profilingRoutePaths.HasSetupESResources },
+    { url: profilingRoutePaths.HasSetupESResources, method: 'POST' },
   ];
 
   async function executeRequests({
