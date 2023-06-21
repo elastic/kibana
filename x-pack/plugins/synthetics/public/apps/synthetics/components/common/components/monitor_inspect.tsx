@@ -201,5 +201,5 @@ export const INSPECT_MONITOR_LABEL = i18n.translate(
 );
 
 const HIDE_PARAMS = i18n.translate('xpack.synthetics.monitorInspect.hideParams', {
-  defaultMessage: 'Hide params values',
+  defaultMessage: 'Hide parameter values',
 });
