@@ -266,6 +266,10 @@ export class TaskPollingLifecycle {
               );
             }
             this.logger.error(error.message);
+
+            // Emit event indicating task manager utilization % at the end of a polling cycle
+            // Because there was a polling error, no tasks were claimed so this represents the number of workers busy
+            this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
           })
         )
       )
@@ -273,6 +277,7 @@ export class TaskPollingLifecycle {
         tap(
           mapOk(() => {
             // Emit event indicating task manager utilization % at the end of a polling cycle
+            // This represents the number of workers busy + number of tasks claimed in this cycle
             this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
           })
         )
