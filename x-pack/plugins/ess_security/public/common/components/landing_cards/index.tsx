@@ -130,7 +130,7 @@ export const LandingCards = memo(() => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem css={getFlexItemStyles(euiTheme.colors.lightestShade)}>
+      <EuiFlexItem css={getFlexItemStyles(euiTheme)}>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiCard

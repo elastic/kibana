@@ -26,17 +26,17 @@ export class EssSecurityPlugin
   constructor() {}
 
   public setup(
-    _core: CoreSetup,
-    _setupDeps: EssSecurityPluginSetupDependencies
+    core: CoreSetup,
+    setupDeps: EssSecurityPluginSetupDependencies
   ): EssSecurityPluginSetup {
     return {};
   }
 
   public start(
-    _core: CoreStart,
-    _startDeps: EssSecurityPluginStartDependencies
+    core: CoreStart,
+    startDeps: EssSecurityPluginStartDependencies
   ): EssSecurityPluginStart {
-    const { securitySolution } = _startDeps;
+    const { securitySolution } = startDeps;
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
 
     return {};
