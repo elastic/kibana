@@ -89,9 +89,6 @@ export const LandingCards = memo(() => {
       data-test-subj="siem-landing-page"
       direction="column"
       gutterSize="l"
-      css={css`
-        padding: ${euiTheme.size.l};
-      `}
     >
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="l">
