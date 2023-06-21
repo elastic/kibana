@@ -556,7 +556,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. default: 20 </div><div class="param">sortOrder (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. Limited to 100 items. default: 20 </div><div class="param">sortOrder (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div>
     </div>  <!-- field-items -->
@@ -724,7 +724,9 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">assignees (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by assignees. Valid values are <code>none</code> or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API. default: null </div><div class="param">defaultSearchOperator (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by assignees. Valid values are <code>none</code> or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API. default: null </div><div class="param">category (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by category. Limited to 100 categories. default: null </div><div class="param">defaultSearchOperator (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the simple_query_string. default: OR </div><div class="param">from (optional)</div>
 
