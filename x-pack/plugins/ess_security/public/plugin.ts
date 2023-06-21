@@ -37,7 +37,7 @@ export class EssSecurityPlugin
     _startDeps: EssSecurityPluginStartDependencies
   ): EssSecurityPluginStart {
     const { securitySolution } = _startDeps;
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(_core, _startDeps));
+    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
 
     return {};
   }
