@@ -208,7 +208,7 @@ export const createExternalService = (
       ) {
         return buildSlackExecutorErrorResponse({
           slackApiError: {
-            message: `The channel "${channels.join()}" is not included in the allowed channels list "${allowedChannels.join()}" `,
+            message: `The channel "${channels.join()}" is not included in the allowed channels list "${allowedChannels.join()}"`,
           },
           logger,
         });

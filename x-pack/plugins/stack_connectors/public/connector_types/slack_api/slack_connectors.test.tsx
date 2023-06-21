@@ -6,20 +6,18 @@
  */
 
 import React from 'react';
-import { act, render, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, render, fireEvent, screen } from '@testing-library/react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import SlackActionFields from './slack_connectors';
+
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
-import userEvent from '@testing-library/user-event';
+import SlackActionFields from './slack_connectors';
+import { useFetchChannels } from './use_fetch_channels';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('./use_fetch_channels');
 
-const postMock = jest.fn();
 (useKibana as jest.Mock).mockImplementation(() => ({
   services: {
-    http: {
-      post: postMock,
-    },
     docLinks: {
       links: {
         alerting: { slackApiAction: 'url' },
@@ -32,6 +30,11 @@ const postMock = jest.fn();
       },
     },
   },
+}));
+
+(useFetchChannels as jest.Mock).mockImplementation(() => ({
+  channels: [],
+  isLoading: false,
 }));
 
 describe('SlackActionFields renders', () => {
@@ -141,15 +144,9 @@ describe('SlackActionFields renders', () => {
   });
 
   it('Allowed Channels combobox should NOT be disable when there is token', async () => {
-    /*
-     * WHY we will do that
-     * There is something wrong with the combobox from EUI, updating a state when the combobox is not mounted anymore :(
-     * which is populating our test console, so I decided to remove it since we know the reason.
-     */
-    jest.spyOn(console, 'error').mockImplementation(jest.fn());
     const actionConnector = {
       secrets: {
-        token: '',
+        token: 'qwertyuiopasdfghjklzxcvbnm',
       },
       config: {
         allowedChannels: ['foo', 'bar'],
@@ -159,10 +156,11 @@ describe('SlackActionFields renders', () => {
       name: 'slack',
       isDeprecated: false,
     };
-    postMock.mockResolvedValue({
-      ok: true,
-      channels: ['foo', 'bar', 'hello', 'world'],
-    });
+
+    (useFetchChannels as jest.Mock).mockImplementation(() => ({
+      channels: [{ label: 'foo' }, { label: 'bar' }, { label: 'hello' }, { label: 'world' }],
+      isLoading: false,
+    }));
 
     const { container } = render(
       <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
@@ -170,22 +168,10 @@ describe('SlackActionFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    await act(async () => {
-      await userEvent.type(
-        screen.getByTestId('secrets.token-input'),
-        `qwertyuiopasdfghjklzxcvbnm`,
-        {
-          delay: 10,
-        }
-      );
-    });
-
-    waitFor(() => {
-      expect(
-        container.querySelector(
-          '[data-test-subj="config.allowedChannels-input"].euiComboBox-isDisabled'
-        )
-      ).not.toBeInTheDocument();
-    });
+    expect(
+      container.querySelector(
+        '[data-test-subj="config.allowedChannels-input"].euiComboBox-isDisabled'
+      )
+    ).not.toBeInTheDocument();
   });
 });

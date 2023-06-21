@@ -128,7 +128,7 @@ describe('Slack API service', () => {
         logger,
         configurationUtilities,
         method: 'get',
-        url: 'conversations.list?types=public_channel,private_channel',
+        url: 'conversations.list?exclude_archived=true&types=public_channel,private_channel&limit=1000',
       });
     });
 
@@ -193,7 +193,7 @@ describe('Slack API service', () => {
       ).toEqual({
         actionId: SLACK_API_CONNECTOR_ID,
         serviceMessage:
-          'One of these channels "general,privat" is/are not valid with the allowed channels list "foo,bar" ',
+          'The channel "general,privat" is not included in the allowed channels list "foo,bar"',
         message: 'error posting slack message',
         status: 'error',
       });

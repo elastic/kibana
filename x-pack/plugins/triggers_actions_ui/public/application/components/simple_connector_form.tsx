@@ -201,9 +201,9 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
           {index !== secretsFormSchema.length ? <EuiSpacer size="m" /> : null}
         </React.Fragment>
       ))}
-      {configFormSchemaAfterSecrets.map(({ id, ...restConfigSchema }, index) => (
+      {configFormSchemaAfterSecrets.map(({ id, ...restConfigSchemaAfterSecrets }, index) => (
         <React.Fragment key={`config.${id}`}>
-          <FormRow id={`config.${id}`} {...restConfigSchema} readOnly={readOnly} />
+          <FormRow id={`config.${id}`} {...restConfigSchemaAfterSecrets} readOnly={readOnly} />
           {index !== configFormSchemaAfterSecrets.length ? <EuiSpacer size="m" /> : null}
         </React.Fragment>
       ))}

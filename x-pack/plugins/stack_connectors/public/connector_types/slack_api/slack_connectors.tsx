@@ -67,7 +67,9 @@ const getConfigFormSchemaAfterSecrets = (
   },
 ];
 
-const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> = ({
+const NO_SCHEMA: ConfigFieldSchema[] = [];
+
+export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> = ({
   readOnly,
   isEdit,
 }) => {
@@ -79,7 +81,6 @@ const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> = ({
   const [authToken, setAuthToken] = useState('');
 
   const { channels, isLoading } = useFetchChannels({ authToken });
-
   const configFormSchemaAfterSecrets = useMemo(
     () => getConfigFormSchemaAfterSecrets(channels, isLoading, channels.length === 0),
     [channels, isLoading]
@@ -94,7 +95,7 @@ const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> = ({
   }, [formData.secrets]);
 
   useEffect(() => {
-    if (isEmpty(authToken)) {
+    if (isEmpty(authToken) && channels.length > 0) {
       setFieldValue('config.allowedChannels', []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,7 +105,7 @@ const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> = ({
     <SimpleConnectorForm
       isEdit={isEdit}
       readOnly={readOnly}
-      configFormSchema={[]}
+      configFormSchema={NO_SCHEMA}
       secretsFormSchema={getSecretsFormSchema(docLinks)}
       configFormSchemaAfterSecrets={configFormSchemaAfterSecrets}
     />

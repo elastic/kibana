@@ -74,16 +74,14 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
   const [selectedChannels, setSelectedChannels] = useState<EuiComboBoxOptionOption[]>(
     (channels ?? []).map((c) => ({ label: c }))
   );
-  const [createdChannels, setCreatedChannels] = useState<EuiComboBoxOptionOption[]>([]);
 
-  const slackChannels = useMemo(() => {
-    const slackChannelsTmp =
+  const slackChannels = useMemo(
+    () =>
       channelsInfo
         ?.filter((slackChannel) => slackChannel.is_channel)
-        .map((slackChannel) => ({ label: slackChannel.name })) ?? [];
-    slackChannelsTmp.push(...createdChannels);
-    return slackChannelsTmp;
-  }, [channelsInfo, createdChannels]);
+        .map((slackChannel) => ({ label: slackChannel.name })) ?? [],
+    [channelsInfo]
+  );
 
   const onChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]) => {
