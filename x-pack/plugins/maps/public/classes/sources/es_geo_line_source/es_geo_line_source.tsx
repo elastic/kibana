@@ -84,9 +84,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_LINE,
       groupByTimeseries,
-      lineSimplificationSize: typeof normalizedDescriptor.lineSimplificationSize === 'number'
-        ? normalizedDescriptor.lineSimplificationSize 
-        : DEFAULT_LINE_SIMPLIFICATION_SIZE,
+      lineSimplificationSize:
+        typeof normalizedDescriptor.lineSimplificationSize === 'number'
+          ? normalizedDescriptor.lineSimplificationSize
+          : DEFAULT_LINE_SIMPLIFICATION_SIZE,
       geoField: normalizedDescriptor.geoField!,
       splitField: normalizedDescriptor.splitField,
       sortField: normalizedDescriptor.sortField,
@@ -290,10 +291,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       requestsAdapter: inspectorAdapters.requests,
     });
 
-    const { featureCollection } = convertToGeoJson(
-      resp,
-      TIME_SERIES_ID_FIELD_NAME
-    );
+    const { featureCollection } = convertToGeoJson(resp, TIME_SERIES_ID_FIELD_NAME);
 
     const entityCount = featureCollection.features.length;
     const areEntitiesTrimmed = entityCount >= 10000; // 10000 is max buckets created by time_series aggregation
