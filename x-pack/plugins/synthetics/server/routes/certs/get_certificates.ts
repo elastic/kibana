@@ -30,12 +30,8 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       sortBy: schema.maybe(schema.string()),
       direction: schema.maybe(schema.string()),
       search: schema.maybe(schema.string()),
-      notValidBefore: schema.maybe(schema.string()),
-      notValidAfter: schema.maybe(schema.string()),
       from: schema.maybe(schema.string()),
       to: schema.maybe(schema.string()),
-      filters: schema.maybe(schema.string()),
-      monitorIds: schema.maybe(schema.string()),
     }),
   },
   handler: async ({

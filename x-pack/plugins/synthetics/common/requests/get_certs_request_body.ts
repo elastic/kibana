@@ -47,7 +47,7 @@ export const getCertsRequestBody = ({
 
   const searchRequest = createEsQuery({
     body: {
-      from: pageIndex * size,
+      from: (pageIndex || 1) * size,
       size,
       sort: asMutableArray([
         {
