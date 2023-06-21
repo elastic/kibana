@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { enumeration, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import { enumeration, NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 export enum CoverageOverviewRuleActivity {
   Enabled = 'enabled',
@@ -31,8 +31,8 @@ export const CoverageOverviewRuleSourceSchema = enumeration(
 export type CoverageOverviewFilter = t.TypeOf<typeof CoverageOverviewFilter>;
 export const CoverageOverviewFilter = t.partial({
   searchTerm: NonEmptyString,
-  activity: CoverageOverviewRuleActivity,
-  source: CoverageOverviewRuleSource,
+  activity: NonEmptyArray(CoverageOverviewRuleActivitySchema),
+  source: NonEmptyArray(CoverageOverviewRuleSourceSchema),
 });
 
 export type CoverageOverviewRequest = t.TypeOf<typeof CoverageOverviewRequest>;
