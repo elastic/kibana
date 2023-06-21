@@ -49,12 +49,19 @@ export class EncryptedSavedObjectAttributesDefinition {
   /**
    * Determines whether particular attribute should be excluded from AAD.
    * @param attributeName Name of the attribute.
+   * @param excludedAttributesOverride override list of attributes to exclude. Embedding excluded AAD fields POC.
    */
-  public shouldBeExcludedFromAAD(attributeName: string) {
+  public shouldBeExcludedFromAAD(attributeName: string, excludedAttributesOverride?: string[]) {
     return (
       this.shouldBeEncrypted(attributeName) ||
-      (this.attributesToExcludeFromAAD != null &&
-        this.attributesToExcludeFromAAD.has(attributeName))
+      (!!excludedAttributesOverride
+        ? excludedAttributesOverride?.includes(attributeName)
+        : this.attributesToExcludeFromAAD != null &&
+          this.attributesToExcludeFromAAD.has(attributeName))
+      // original logic below...
+      // this.shouldBeEncrypted(attributeName) ||
+      // (this.attributesToExcludeFromAAD != null &&
+      //   this.attributesToExcludeFromAAD.has(attributeName))
     );
   }
 
@@ -64,5 +71,10 @@ export class EncryptedSavedObjectAttributesDefinition {
    */
   public shouldBeStripped(attributeName: string) {
     return this.attributesToStrip.has(attributeName);
+  }
+
+  public getAttributesToExcludeFromAAD(): string[] {
+    if (!this.attributesToExcludeFromAAD) return [];
+    return [...this.attributesToExcludeFromAAD];
   }
 }

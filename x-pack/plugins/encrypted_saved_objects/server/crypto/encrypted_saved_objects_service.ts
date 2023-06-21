@@ -15,6 +15,9 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 
+export const ENCRPYPTED_HEADER_DELIMITER: string = ',';
+export const ENCRPYPTED_HEADER_EOH: string = '.EOH.';
+
 /**
  * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users
  * and can only be consumed by the internal Kibana server. If end-users should have access to the
@@ -264,6 +267,30 @@ export class EncryptedSavedObjectsService {
     };
   }
 
+  // Embedding excluded AAD fields POC
+  // The private members are helpers for the POC that embed and exctract
+  // the AAD exclusions to/from the encrypted data strings
+  // This POC is NOT a suggested solution - it duplicates the ADD meta data in
+  // each encrpyted attribute. Ideally, we should store it only once.
+  private createEncryptionHeader(attributesToExcludeFromAAD: string[] | undefined): string {
+    if (!attributesToExcludeFromAAD || attributesToExcludeFromAAD.length === 0) return '';
+    return attributesToExcludeFromAAD
+      .join(ENCRPYPTED_HEADER_DELIMITER)
+      .concat(ENCRPYPTED_HEADER_EOH);
+  }
+  private extractAADExcludedFieldsFromEncryptionHeader(encryptionString: string): {
+    fieldsExcludedFromAAD: string[] | undefined;
+    encryptedData: string;
+  } {
+    const parts = encryptionString.split(ENCRPYPTED_HEADER_EOH);
+    if (parts.length <= 1)
+      return { fieldsExcludedFromAAD: undefined, encryptedData: encryptionString };
+    return {
+      fieldsExcludedFromAAD: parts[0].split(ENCRPYPTED_HEADER_DELIMITER),
+      encryptedData: parts[1],
+    };
+  }
+
   private *attributesToEncryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
@@ -274,16 +301,36 @@ export class EncryptedSavedObjectsService {
       return attributes;
     }
     let encryptionAAD: string | undefined;
+    let encryptionHeader = '';
 
     const encryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue != null) {
         if (!encryptionAAD) {
-          encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
+          let attributesToExcludeFromAAD: string[] | undefined;
+          // Embedding excluded AAD fields POC
+          // During encrpytion we do NOT pass in an excluded fields
+          // override. We always want to generate this based on the
+          // registered object.
+          ({ encryptionAAD, attributesToExcludeFromAAD } = this.getAAD(
+            typeDefinition,
+            descriptor,
+            attributes
+          ));
+          encryptionHeader = this.createEncryptionHeader(attributesToExcludeFromAAD);
         }
         try {
-          encryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
+          // Embedding excluded AAD fields POC
+          // Here we prefix the encrypted data with the AAD exclusion list.
+          // This is, of course, not acceptable as a real solution because it
+          // will store a copy of this meta data in ever encrypted field of an
+          // object. Ideally, the exclusion list would get stored elsewhere in
+          // the raw document only once OR could be stored once per SO type per
+          // version in an internal index.
+          encryptedAttributes[attributeName] = encryptionHeader.concat(
+            (yield [attributeValue, encryptionAAD])!
+          );
         } catch (err) {
           this.options.logger.error(
             `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
@@ -316,10 +363,7 @@ export class EncryptedSavedObjectsService {
       return attributes;
     }
 
-    return {
-      ...attributes,
-      ...encryptedAttributes,
-    };
+    return { ...attributes, ...encryptedAttributes };
   }
 
   /**
@@ -520,28 +564,55 @@ export class EncryptedSavedObjectsService {
           )}`
         );
       }
+
+      // Embedding excluded AAD fields POC
+      // Get the ADD exclusion meta data if it's there, and make sure the
+      // encrypted data string is isolated from the meta data
+      const { fieldsExcludedFromAAD, encryptedData } =
+        this.extractAADExcludedFieldsFromEncryptionHeader(attributeValue);
+
       if (!encryptionAADs.length) {
         if (params?.isTypeBeingConverted) {
           // The object is either pending conversion to a multi-namespace type, or it was just converted. We may need to attempt to decrypt
           // it with several different descriptors depending upon how the migrations are structured, and whether this is a full index
           // migration or a single document migration. Note that the originId is set either when the document is converted _or_ when it is
           // imported with "createNewCopies: false", so we have to try with and without it.
+          let encryptionAAD: string = '';
           const decryptDescriptors = params.originId
             ? [{ ...descriptor, id: params.originId }, descriptor]
             : [descriptor];
           for (const decryptDescriptor of decryptDescriptors) {
-            encryptionAADs.push(this.getAAD(typeDefinition, decryptDescriptor, attributes));
+            ({ encryptionAAD } = this.getAAD(
+              typeDefinition,
+              decryptDescriptor,
+              attributes,
+              fieldsExcludedFromAAD // If we have the meta data, use it
+            ));
+            encryptionAADs.push(encryptionAAD);
             if (descriptor.namespace) {
               const { namespace, ...alternateDescriptor } = decryptDescriptor;
-              encryptionAADs.push(this.getAAD(typeDefinition, alternateDescriptor, attributes));
+              ({ encryptionAAD } = this.getAAD(
+                typeDefinition,
+                alternateDescriptor,
+                attributes,
+                fieldsExcludedFromAAD // If we have the meta data, use it
+              ));
+              encryptionAADs.push(encryptionAAD);
             }
           }
         } else {
-          encryptionAADs.push(this.getAAD(typeDefinition, descriptor, attributes));
+          const { encryptionAAD } = this.getAAD(
+            typeDefinition,
+            descriptor,
+            attributes,
+            fieldsExcludedFromAAD // If we have the meta data, use it
+          );
+          encryptionAADs.push(encryptionAAD);
         }
       }
+
       try {
-        decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAADs])!;
+        decryptedAttributes[attributeName] = (yield [encryptedData, encryptionAADs])!;
       } catch (err) {
         this.options.logger.error(
           `Failed to decrypt "${attributeName}" attribute: ${err.message || err}`
@@ -585,16 +656,20 @@ export class EncryptedSavedObjectsService {
    * @param typeDefinition Encrypted saved object type definition.
    * @param descriptor Descriptor of the saved object to get AAD for.
    * @param attributes All attributes of the saved object instance of the specified type.
+   * @param excludedAttributesOverride Embedding excluded AAD fields POC. Optional input of attributes to exclude from AAD. Will override the registered attributes.
    */
   private getAAD(
     typeDefinition: EncryptedSavedObjectAttributesDefinition,
     descriptor: SavedObjectDescriptor,
-    attributes: Record<string, unknown>
-  ) {
+    attributes: Record<string, unknown>,
+    excludedAttributesOverride?: string[]
+  ): { encryptionAAD: string; attributesToExcludeFromAAD: string[] | undefined } {
     // Collect all attributes (both keys and values) that should contribute to AAD.
     const attributesAAD: Record<string, unknown> = {};
     for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
-      if (!typeDefinition.shouldBeExcludedFromAAD(attributeKey)) {
+      // Embedding excluded AAD fields POC
+      // Pass the override down to the typeDefinition call
+      if (!typeDefinition.shouldBeExcludedFromAAD(attributeKey, excludedAttributesOverride)) {
         attributesAAD[attributeKey] = attributeValue;
       }
     }
@@ -607,7 +682,13 @@ export class EncryptedSavedObjectsService {
       );
     }
 
-    return stringify([...descriptorToArray(descriptor), attributesAAD]);
+    return {
+      encryptionAAD: stringify([...descriptorToArray(descriptor), attributesAAD]),
+      // Embedding excluded AAD fields POC
+      // return the attribute excluded from AAD so they can be embedded during encryption
+      attributesToExcludeFromAAD:
+        excludedAttributesOverride ?? typeDefinition.getAttributesToExcludeFromAAD(),
+    };
   }
 
   /**

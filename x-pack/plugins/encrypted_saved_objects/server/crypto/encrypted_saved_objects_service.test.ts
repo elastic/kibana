@@ -11,7 +11,10 @@ import nodeCrypto from '@elastic/node-crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
 
-import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
+import {
+  ENCRPYPTED_HEADER_EOH,
+  EncryptedSavedObjectsService,
+} from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';
 
 function createNodeCryptMock(encryptionKey: string) {
@@ -38,6 +41,17 @@ function createNodeCryptMock(encryptionKey: string) {
   );
 
   return nodeCryptoMock;
+}
+
+// <T extends Record<string, unknown>>
+function removeEncryptionHeaders(attributes: Record<string, unknown>): Record<string, unknown> {
+  for (const key of Object.keys(attributes)) {
+    if (typeof attributes[key] === 'string') {
+      const parts = String(attributes[key]).split(ENCRPYPTED_HEADER_EOH);
+      if (parts.length > 1) attributes[key] = parts[1];
+    }
+  }
+  return attributes;
 }
 
 let mockNodeCrypto: jest.Mocked<Crypto>;
@@ -485,9 +499,12 @@ describe('#encryptAttributes', () => {
 
     service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attrFour']) });
 
-    await expect(
-      service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes)
-    ).resolves.toEqual({
+    const encrypted = await service.encryptAttributes(
+      { type: 'known-type-1', id: 'object-id' },
+      attributes
+    );
+
+    expect(encrypted).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -503,11 +520,16 @@ describe('#encryptAttributes', () => {
     });
 
     const mockUser = mockAuthenticatedUser();
-    await expect(
-      service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
+
+    const encrypted = await service.encryptAttributes(
+      { type: 'known-type-1', id: 'object-id' },
+      attributes,
+      {
         user: mockUser,
-      })
-    ).resolves.toEqual({
+      }
+    );
+
+    expect(removeEncryptionHeaders(encrypted)).toEqual({
       attrOne: '|one|["known-type-1","object-id",{"attrTwo":"two"}]|',
       attrTwo: 'two',
       attrThree: '|three|["known-type-1","object-id",{"attrTwo":"two"}]|',
@@ -529,9 +551,12 @@ describe('#encryptAttributes', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
     });
 
-    await expect(
-      service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes)
-    ).resolves.toEqual({
+    const encrypted = await service.encryptAttributes(
+      { type: 'known-type-1', id: 'object-id' },
+      attributes
+    );
+
+    expect(removeEncryptionHeaders(encrypted)).toEqual({
       attrOne: '|one|["known-type-1","object-id",{"attrTwo":"two"}]|',
       attrTwo: 'two',
       attrThree: '|three|["known-type-1","object-id",{"attrTwo":"two"}]|',
@@ -551,11 +576,14 @@ describe('#encryptAttributes', () => {
     });
 
     const mockUser = mockAuthenticatedUser();
-    await expect(
-      service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
+    const encrypted = await service.encryptAttributes(
+      { type: 'known-type-1', id: 'object-id' },
+      attributes,
+      {
         user: mockUser,
-      })
-    ).resolves.toEqual({
+      }
+    );
+    expect(removeEncryptionHeaders(encrypted)).toEqual({
       attrTwo: 'two',
       attrThree: '|three|["known-type-1","object-id",{"attrTwo":"two"}]|',
     });
@@ -570,13 +598,12 @@ describe('#encryptAttributes', () => {
     });
 
     const mockUser = mockAuthenticatedUser();
-    await expect(
-      service.encryptAttributes(
-        { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
-        attributes,
-        { user: mockUser }
-      )
-    ).resolves.toEqual({
+    const encrypted = await service.encryptAttributes(
+      { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+      attributes,
+      { user: mockUser }
+    );
+    expect(removeEncryptionHeaders(encrypted)).toEqual({
       attrTwo: 'two',
       attrThree: '|three|["object-ns","known-type-1","object-id",{"attrTwo":"two"}]|',
     });
@@ -596,16 +623,21 @@ describe('#encryptAttributes', () => {
       attributesToExcludeFromAAD: new Set(['attrTwo']),
     });
 
-    await expect(
-      service.encryptAttributes({ type: 'known-type-1', id: 'object-id-1' }, knownType1attributes)
-    ).resolves.toEqual({
+    const encrypted1 = await service.encryptAttributes(
+      { type: 'known-type-1', id: 'object-id-1' },
+      knownType1attributes
+    );
+    expect(removeEncryptionHeaders(encrypted1)).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: '|three|["known-type-1","object-id-1",{"attrOne":"one","attrTwo":"two"}]|',
     });
-    await expect(
-      service.encryptAttributes({ type: 'known-type-2', id: 'object-id-2' }, knownType2attributes)
-    ).resolves.toEqual({
+
+    const encrypted2 = await service.encryptAttributes(
+      { type: 'known-type-2', id: 'object-id-2' },
+      knownType2attributes
+    );
+    expect(removeEncryptionHeaders(encrypted2)).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: '|three|["known-type-2","object-id-2",{"attrOne":"one"}]|',
@@ -619,9 +651,12 @@ describe('#encryptAttributes', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
 
-    await expect(
-      service.encryptAttributes({ type: 'known-type-1', id: 'object-id-1' }, attributes)
-    ).resolves.toEqual({
+    const encrypted = await service.encryptAttributes(
+      { type: 'known-type-1', id: 'object-id-1' },
+      attributes
+    );
+
+    expect(removeEncryptionHeaders(encrypted)).toEqual({
       attrOne: '|one|["known-type-1","object-id-1",{}]|',
       attrThree: '|three|["known-type-1","object-id-1",{}]|',
     });
@@ -910,7 +945,7 @@ describe('#decryptAttributes', () => {
         { type: 'known-type-1', id: 'object-id' }, // namespace was not included in descriptor during encryption
         attributes
       );
-      expect(encryptedAttributes).toEqual({
+      expect(removeEncryptionHeaders(encryptedAttributes)).toEqual({
         attrOne: 'one',
         attrTwo: 'two',
         attrThree: expect.not.stringMatching(/^three$/),
@@ -996,7 +1031,7 @@ describe('#decryptAttributes', () => {
         { type: 'known-type-1', id: 'object-id' }, // namespace and old object ID were not used in descriptor during encryption
         attributes
       );
-      expect(encryptedAttributes).toEqual({
+      expect(removeEncryptionHeaders(encryptedAttributes)).toEqual({
         attrOne: 'one',
         attrTwo: 'two',
         attrThree: expect.not.stringMatching(/^three$/),
@@ -1470,9 +1505,12 @@ describe('#encryptAttributesSync', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
     });
 
-    expect(
-      service.encryptAttributesSync({ type: 'known-type-1', id: 'object-id' }, attributes)
-    ).toEqual({
+    const encrypted = service.encryptAttributesSync(
+      { type: 'known-type-1', id: 'object-id' },
+      attributes
+    );
+
+    expect(removeEncryptionHeaders(encrypted)).toEqual({
       attrOne: '|one|["known-type-1","object-id",{"attrTwo":"two"}]|',
       attrTwo: 'two',
       attrThree: '|three|["known-type-1","object-id",{"attrTwo":"two"}]|',
@@ -1494,9 +1532,12 @@ describe('#encryptAttributesSync', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
     });
 
-    expect(
-      service.encryptAttributesSync({ type: 'known-type-1', id: 'object-id' }, attributes)
-    ).toEqual({
+    const encrypted = service.encryptAttributesSync(
+      { type: 'known-type-1', id: 'object-id' },
+      attributes
+    );
+
+    expect(removeEncryptionHeaders(encrypted)).toEqual({
       attrOne: '|one|["known-type-1","object-id",{"attrTwo":"two"}]|',
       attrTwo: 'two',
       attrThree: '|three|["known-type-1","object-id",{"attrTwo":"two"}]|',
@@ -1515,9 +1556,12 @@ describe('#encryptAttributesSync', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
 
-    expect(
-      service.encryptAttributesSync({ type: 'known-type-1', id: 'object-id' }, attributes)
-    ).toEqual({
+    const encrypted = service.encryptAttributesSync(
+      { type: 'known-type-1', id: 'object-id' },
+      attributes
+    );
+
+    expect(removeEncryptionHeaders(encrypted)).toEqual({
       attrTwo: 'two',
       attrThree: '|three|["known-type-1","object-id",{"attrTwo":"two"}]|',
     });
@@ -1531,12 +1575,12 @@ describe('#encryptAttributesSync', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
 
-    expect(
-      service.encryptAttributesSync(
-        { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
-        attributes
-      )
-    ).toEqual({
+    const encrypted = service.encryptAttributesSync(
+      { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+      attributes
+    );
+
+    expect(removeEncryptionHeaders(encrypted)).toEqual({
       attrTwo: 'two',
       attrThree: '|three|["object-ns","known-type-1","object-id",{"attrTwo":"two"}]|',
     });
@@ -1556,22 +1600,22 @@ describe('#encryptAttributesSync', () => {
       attributesToExcludeFromAAD: new Set(['attrTwo']),
     });
 
-    expect(
-      service.encryptAttributesSync(
-        { type: 'known-type-1', id: 'object-id-1' },
-        knownType1attributes
-      )
-    ).toEqual({
+    const encrypted1 = service.encryptAttributesSync(
+      { type: 'known-type-1', id: 'object-id-1' },
+      knownType1attributes
+    );
+
+    expect(removeEncryptionHeaders(encrypted1)).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: '|three|["known-type-1","object-id-1",{"attrOne":"one","attrTwo":"two"}]|',
     });
-    expect(
-      service.encryptAttributesSync(
-        { type: 'known-type-2', id: 'object-id-2' },
-        knownType2attributes
-      )
-    ).toEqual({
+
+    const encrypted2 = service.encryptAttributesSync(
+      { type: 'known-type-2', id: 'object-id-2' },
+      knownType2attributes
+    );
+    expect(removeEncryptionHeaders(encrypted2)).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: '|three|["known-type-2","object-id-2",{"attrOne":"one"}]|',
@@ -1585,9 +1629,12 @@ describe('#encryptAttributesSync', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
 
-    expect(
-      service.encryptAttributesSync({ type: 'known-type-1', id: 'object-id-1' }, attributes)
-    ).toEqual({
+    const encrypted = service.encryptAttributesSync(
+      { type: 'known-type-1', id: 'object-id-1' },
+      attributes
+    );
+
+    expect(removeEncryptionHeaders(encrypted)).toEqual({
       attrOne: '|one|["known-type-1","object-id-1",{}]|',
       attrThree: '|three|["known-type-1","object-id-1",{}]|',
     });
@@ -1844,7 +1891,7 @@ describe('#decryptAttributesSync', () => {
         { type: 'known-type-1', id: 'object-id' }, // namespace was not included in descriptor during encryption
         attributes
       );
-      expect(encryptedAttributes).toEqual({
+      expect(removeEncryptionHeaders(encryptedAttributes)).toEqual({
         attrOne: 'one',
         attrTwo: 'two',
         attrThree: expect.not.stringMatching(/^three$/),
@@ -1930,7 +1977,7 @@ describe('#decryptAttributesSync', () => {
         { type: 'known-type-1', id: 'object-id' }, // namespace and old object ID were not used in descriptor during encryption
         attributes
       );
-      expect(encryptedAttributes).toEqual({
+      expect(removeEncryptionHeaders(encryptedAttributes)).toEqual({
         attrOne: 'one',
         attrTwo: 'two',
         attrThree: expect.not.stringMatching(/^three$/),
@@ -2373,5 +2420,58 @@ describe('#decryptAttributesSync', () => {
         })
       ).toThrowError(EncryptionError);
     });
+  });
+});
+
+describe('Embedding excluded AAD fields POC', () => {
+  it('decrypts using embedded AAD when available', async () => {
+    const attributesV2 = {
+      attrOne: 'one',
+      attrTwo: 'two',
+      attrThree: 'three',
+      attrFour: 'four',
+      attrFive: 'five',
+    };
+
+    // Register a dummy V2 type with addition attribue "attrFour" that is excluded from AAD
+    service.registerType({
+      type: 'v2->v1',
+      attributesToEncrypt: new Set(['attrTwo']),
+      attributesToExcludeFromAAD: new Set(['attrOne', 'attrFour']),
+    });
+
+    // Encrypt type as V2 would encrypt it
+    const encryptedAttributesV2 = await service.encryptAttributes(
+      { type: 'v2->v1', id: 'object-id' },
+      attributesV2
+    );
+
+    expect(encryptedAttributesV2).toEqual({
+      attrOne: 'one',
+      attrTwo: expect.stringContaining('attrOne,attrFour' + ENCRPYPTED_HEADER_EOH), // encrypyted value contains the AAD exclusion header
+      attrThree: 'three',
+      attrFour: 'four',
+      attrFive: 'five',
+    });
+
+    // Create a new service to simulate V1
+    service = new EncryptedSavedObjectsService({
+      primaryCrypto: mockNodeCrypto,
+      logger: loggingSystemMock.create().get(),
+    });
+
+    // Register the same type but without attribute "attrFour"
+    service.registerType({
+      type: 'v2->v1',
+      attributesToEncrypt: new Set(['attrTwo']),
+      attributesToExcludeFromAAD: new Set(['attrOne']),
+    });
+
+    // Decrypt should work
+    // As long as we have access to the raw document (which contains all of V2's attributes)
+    // V1 can decrypt V2 with the embedded meta data and then strip unknown attributes.
+    await expect(
+      service.decryptAttributes({ type: 'v2->v1', id: 'object-id' }, encryptedAttributesV2)
+    ).resolves.toEqual(attributesV2);
   });
 });
