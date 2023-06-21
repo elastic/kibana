@@ -16,6 +16,7 @@ export interface CreateCaseParams {
   tag?: string;
   severity?: CaseSeverity;
   owner?: string;
+  category?: string;
   assignees?: [];
 }
 
@@ -54,11 +55,13 @@ export function CasesCreateViewServiceProvider(
       description = 'desc' + uuidv4(),
       tag = 'tagme',
       severity = CaseSeverity.LOW,
+      category,
       owner,
     }: CreateCaseParams) {
       await this.setTitle(title);
       await this.setDescription(description);
       await this.setTags(tag);
+      await this.setCategory(category);
 
       if (severity !== CaseSeverity.LOW) {
         await this.setSeverity(severity);
@@ -83,6 +86,12 @@ export function CasesCreateViewServiceProvider(
 
     async setTags(tag: string) {
       await comboBox.setCustom('caseTags', tag);
+    },
+
+    async setCategory(category: string | undefined) {
+      if(category) {
+        await comboBox.setCustom('categories-list', category);
+      }
     },
 
     async setSolution(owner: string) {
