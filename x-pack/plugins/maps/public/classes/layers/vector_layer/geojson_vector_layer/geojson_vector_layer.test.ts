@@ -6,7 +6,6 @@
  */
 
 import { SOURCE_DATA_REQUEST_ID } from '../../../../../common/constants';
-import { IVectorSource } from '../../../sources/vector_source';
 import { InnerJoin } from '../../../joins/inner_join';
 import { IJoinSource } from '../../../sources/join_sources';
 import { GeoJsonVectorLayer } from './geojson_vector_layer';
@@ -78,9 +77,7 @@ describe('isLayerLoading', () => {
       test('should return false when join loading has not started', () => {
         const layer = new GeoJsonVectorLayer({
           customIcons: [],
-          joins: [
-            mockJoin
-          ],
+          joins: [mockJoin],
           layerDescriptor: {
             __dataRequests: [
               {
@@ -91,7 +88,7 @@ describe('isLayerLoading', () => {
                 dataRequestMeta: {},
                 dataRequestMetaAtStart: undefined,
                 dataRequestToken: undefined,
-              }
+              },
             ],
           } as unknown as VectorLayerDescriptor,
           source: {} as unknown as ISource,
@@ -103,26 +100,20 @@ describe('isLayerLoading', () => {
     describe('source data loaded with features', () => {
       const sourceDataRequestDescriptorWithFeatures = {
         data: {
-          features: [
-            {}
-          ],
+          features: [{}],
         },
         dataId: SOURCE_DATA_REQUEST_ID,
         dataRequestMeta: {},
         dataRequestMetaAtStart: undefined,
         dataRequestToken: undefined,
-      }
-    
+      };
+
       test('should return true when join loading has not started', () => {
         const layer = new GeoJsonVectorLayer({
           customIcons: [],
-          joins: [
-            mockJoin,
-          ],
+          joins: [mockJoin],
           layerDescriptor: {
-            __dataRequests: [
-              sourceDataRequestDescriptorWithFeatures
-            ],
+            __dataRequests: [sourceDataRequestDescriptorWithFeatures],
           } as unknown as VectorLayerDescriptor,
           source: {} as unknown as ISource,
         });
@@ -132,9 +123,7 @@ describe('isLayerLoading', () => {
       test('should return true when join data request is pending', () => {
         const layer = new GeoJsonVectorLayer({
           customIcons: [],
-          joins: [
-            mockJoin,
-          ],
+          joins: [mockJoin],
           layerDescriptor: {
             __dataRequests: [
               sourceDataRequestDescriptorWithFeatures,
@@ -142,7 +131,7 @@ describe('isLayerLoading', () => {
                 dataId: joinDataRequestId,
                 dataRequestMetaAtStart: {},
                 dataRequestToken: Symbol(),
-              }
+              },
             ],
           } as unknown as VectorLayerDescriptor,
           source: {} as unknown as ISource,
@@ -153,9 +142,7 @@ describe('isLayerLoading', () => {
       test('should return false when join data request is finished', () => {
         const layer = new GeoJsonVectorLayer({
           customIcons: [],
-          joins: [
-            mockJoin,
-          ],
+          joins: [mockJoin],
           layerDescriptor: {
             __dataRequests: [
               sourceDataRequestDescriptorWithFeatures,
@@ -165,7 +152,7 @@ describe('isLayerLoading', () => {
                 dataRequestMeta: {},
                 dataRequestMetaAtStart: undefined,
                 dataRequestToken: undefined,
-              }
+              },
             ],
           } as unknown as VectorLayerDescriptor,
           source: {} as unknown as ISource,
