@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { UpdateSearchApplicationApiLogic } from '../../api/search_applications/update_search_application_api_logic';
 
-import { EngineIndicesLogic, EngineIndicesLogicActions } from './engine_indices_logic';
+import { EngineIndicesLogic, EngineIndicesLogicActions } from './search_application_indices_logic';
 
 export interface AddIndicesLogicActions {
   addIndicesToEngine: EngineIndicesLogicActions['addIndicesToEngine'];

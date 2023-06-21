@@ -60,7 +60,7 @@ import {
 } from '../../../routes';
 import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_template';
 
-import { EngineIndicesLogic } from '../engine_indices_logic';
+import { EngineIndicesLogic } from '../search_application_indices_logic';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
 import { DocumentProvider } from './document_context';

@@ -33,7 +33,7 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
-import { EngineIndicesLogic } from './engine_indices_logic';
+import { EngineIndicesLogic } from './search_application_indices_logic';
 
 export const EngineIndices: React.FC = () => {
   const subduedBackground = useEuiBackgroundColor('subdued');

@@ -25,9 +25,9 @@ import {
 import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 
 import { AddIndicesFlyout } from './add_indices_flyout';
-import { EngineIndices } from './engine_indices';
-import { EngineIndicesLogic } from './engine_indices_logic';
 import { SearchApplicationError } from './search_application_error';
+import { EngineIndices } from './search_application_indices';
+import { EngineIndicesLogic } from './search_application_indices_logic';
 import { SearchApplicationSchema } from './search_application_schema';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
 import './search_application_layout.scss';
