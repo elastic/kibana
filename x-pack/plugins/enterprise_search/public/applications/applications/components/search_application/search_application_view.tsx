@@ -27,7 +27,7 @@ import {
 import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 import { DeleteSearchApplicationModal } from '../search_applications/delete_search_application_modal';
 
-import { EngineConnect } from './engine_connect/engine_connect';
+import { EngineConnect } from './connect/engine_connect';
 import { SearchApplicationHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
 import { SearchApplicationError } from './search_application_error';
