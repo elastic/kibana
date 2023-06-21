@@ -38,7 +38,7 @@ export interface VulnSeverityAggs {
   low: {
     doc_count: number;
   };
-  score_by_cloud_account_id: {
+  vulnerabilities_stats_by_cloud_account: {
     buckets: Array<{
       key: string; // cloud account id
       critical: {
