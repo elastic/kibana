@@ -88,7 +88,7 @@ export const LandingCards = memo(() => {
     <EuiFlexGroup
       data-test-subj="siem-landing-page"
       direction="column"
-      gutterSize="l"
+      gutterSize="m"
     >
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="l">
