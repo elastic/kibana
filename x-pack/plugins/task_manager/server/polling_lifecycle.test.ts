@@ -282,7 +282,7 @@ describe('TaskPollingLifecycle', () => {
     });
   });
 
-  describe('test workerUtilizatin events', () => {
+  describe('workerUtilization events', () => {
     test('should emit event when polling is successful', async () => {
       clock.restore();
       mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
