@@ -278,7 +278,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent withPadding />
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

@@ -5,15 +5,25 @@
  * 2.0.
  */
 
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { memo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../lib/kibana';
 
-export const LandingPageComponent = memo(() => {
+export const LandingPageComponent = memo(({ withPadding = true }: { withPadding?: boolean }) => {
   const { getStartedComponent$ } = useKibana().services;
   const GetStartedComponent = useObservable(getStartedComponent$);
-
-  return <>{GetStartedComponent}</>;
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css`
+        padding: ${withPadding ? euiTheme.size.l : 'none'};
+      `}
+    >
+      {GetStartedComponent}
+    </div>
+  );
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';
