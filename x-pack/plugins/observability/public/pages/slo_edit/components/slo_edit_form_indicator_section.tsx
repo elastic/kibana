@@ -24,7 +24,7 @@ interface SloEditFormIndicatorSectionProps {
 
 export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicatorSectionProps) {
   const { control, watch } = useFormContext<CreateSLOForm>();
-  useUnregisterFields();
+  useUnregisterFields({ isEditMode });
 
   const getIndicatorTypeForm = () => {
     switch (watch('indicator.type')) {
@@ -49,7 +49,6 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
       style={{ maxWidth }}
       data-test-subj="sloEditFormIndicatorSection"
     >
-      <pre>{JSON.stringify(watch(), null, 2)}</pre>
       {!isEditMode && (
         <>
           <EuiFormRow

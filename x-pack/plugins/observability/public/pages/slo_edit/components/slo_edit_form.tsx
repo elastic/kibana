@@ -17,7 +17,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import merge from 'lodash/fp/merge';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -30,8 +29,8 @@ import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
 import { useKibana } from '../../../utils/kibana_react';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import {
-  transformSloResponseToCreateSloForm,
   transformCreateSLOFormToCreateSLOInput,
+  transformSloResponseToCreateSloForm,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
@@ -88,7 +87,7 @@ export function SloEditForm({ slo }: Props) {
   }, [isEditMode, rules, slo]);
 
   const methods = useForm<CreateSLOForm>({
-    defaultValues: merge(SLO_EDIT_FORM_DEFAULT_VALUES, urlParams),
+    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, urlParams), // TODO handle merge
     values: transformSloResponseToCreateSloForm(slo),
     mode: 'all',
   });

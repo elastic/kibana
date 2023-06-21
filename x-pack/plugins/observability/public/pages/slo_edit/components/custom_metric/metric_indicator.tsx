@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { CreateSLOForm } from '../../types';
@@ -68,32 +68,18 @@ export function MetricIndicator({
   metricTooltip,
   equationTooltip,
 }: MetricIndicatorProps) {
-  const { control, watch, setValue } = useFormContext<CreateSLOForm>();
-
+  const { control, watch, setValue, register } = useFormContext<CreateSLOForm>();
   const metricFields = (indexFields ?? []).filter((field) => field.type === 'number');
 
-  const {
-    fields: metrics,
-    append,
-    remove,
-  } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: `indicator.params.${type}.metrics`,
   });
   const equation = watch(`indicator.params.${type}.equation`);
   const indexPattern = watch('indicator.params.index');
 
-  // Without this, the hidden fields for metric.name and metric.aggregation will
-  // not be included in the JSON when the form is submitted.
-  useEffect(() => {
-    metrics.forEach((metric, index) => {
-      setValue(`indicator.params.${type}.metrics.${index}.name`, metric.name);
-      setValue(`indicator.params.${type}.metrics.${index}.aggregation`, metric.aggregation);
-    });
-  }, [metrics, setValue, type]);
-
-  const disableAdd = metrics?.length === MAX_VARIABLES;
-  const disableDelete = metrics?.length === 1;
+  const disableAdd = fields?.length === MAX_VARIABLES;
+  const disableDelete = fields?.length === 1;
 
   const setDefaultEquationIfUnchanged = (previousNames: string[], nextNames: string[]) => {
     const defaultEquation = createEquationFromMetric(previousNames);
@@ -103,14 +89,14 @@ export function MetricIndicator({
   };
 
   const handleDeleteMetric = (index: number) => () => {
-    const currentVars = metrics.map((m) => m.name) ?? ['A'];
+    const currentVars = fields.map((m) => m.name) ?? ['A'];
     const deletedVar = currentVars[index];
     setDefaultEquationIfUnchanged(currentVars, xor(currentVars, [deletedVar]));
     remove(index);
   };
 
   const handleAddMetric = () => {
-    const currentVars = metrics.map((m) => m.name) ?? ['A'];
+    const currentVars = fields.map((m) => m.name) ?? ['A'];
     const name = first(xor(VAR_NAMES, currentVars))!;
     setDefaultEquationIfUnchanged(currentVars, [...currentVars, name]);
     append({ ...NEW_CUSTOM_METRIC, name });
@@ -119,7 +105,7 @@ export function MetricIndicator({
   return (
     <>
       <EuiFlexItem>
-        {metrics?.map((metric, index) => (
+        {fields?.map((metric, index) => (
           <EuiFormRow
             fullWidth
             label={
@@ -131,6 +117,12 @@ export function MetricIndicator({
           >
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem>
+                <input hidden {...register(`indicator.params.${type}.metrics.${index}.name`)} />
+                <input
+                  hidden
+                  {...register(`indicator.params.${type}.metrics.${index}.aggregation`)}
+                />
+
                 <Controller
                   name={`indicator.params.${type}.metrics.${index}.field`}
                   defaultValue=""
@@ -171,7 +163,6 @@ export function MetricIndicator({
                               {
                                 value: field.value,
                                 label: field.value,
-                                'data-test-subj': `customMetricIndicatorFormMetricFieldSelectedValue`,
                               },
                             ]
                           : []
@@ -260,12 +251,7 @@ export function MetricIndicator({
                 ),
               ]}
             >
-              <EuiFieldText
-                {...field}
-                isInvalid={fieldState.invalid}
-                fullWidth
-                data-test-subj="o11yCustomMetricEquation"
-              />
+              <EuiFieldText {...field} isInvalid={fieldState.invalid} fullWidth />
             </EuiFormRow>
           )}
         />
