@@ -8,6 +8,7 @@
 import {
   GROUP_COUNT,
   GROUP_LEVEL_SELECTOR,
+  GROUP_LOADER,
   GROUP_OPTION_SELECTOR,
   GROUP_PAGINATION_SELECTOR,
   GROUP_SELECTOR,
@@ -15,17 +16,30 @@ import {
 } from '../screens/alerts';
 
 export const selectGroup = (groupName: string) => {
+  cy.log('Selecting group');
   cy.get(GROUP_SELECTOR).click();
+  cy.log('GROUP_SELECTOR', cy.get(GROUP_SELECTOR));
+  console.log('GROUP_SELECTOR', cy.get(GROUP_SELECTOR));
   cy.get(GROUP_OPTION_SELECTOR(groupName)).click();
 };
 
 // TODO: @Glo please help here, these clicks are flakey
 export const openGroup = (groupName?: 'first' | 'last') => {
+  cy.get(GROUP_LOADER).should('not.exist');
   if (groupName === 'last') {
-    cy.get(GROUP_SELECTOR_OPTION).last().click({ force: true });
+    cy.get(GROUP_SELECTOR_OPTION)
+      .last()
+      .within(() => {
+        cy.get('h5').click({ force: true });
+      });
     return;
   }
-  cy.get(GROUP_SELECTOR_OPTION).first().click({ force: true });
+  scrollGroupsIntoView();
+  cy.get(GROUP_SELECTOR_OPTION)
+    .first()
+    .within(() => {
+      cy.get('h5').click({ force: true });
+    });
 };
 
 export const scrollGroupsIntoView = () => {

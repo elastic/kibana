@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { refreshPage } from '../../tasks/security_header';
 import {
   getGroupLevel,
   openGroup,
@@ -13,7 +12,6 @@ import {
   selectGroup,
 } from '../../tasks/alerts_grouping';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { importRule } from '../../tasks/api_calls/rules';
 import {
   expectRowsPerPage,
   expectTablePageActive,
@@ -32,17 +30,16 @@ describe('Alerts grouping', { testIsolation: false }, () => {
   describe('Filter', () => {
     before(() => {
       cleanKibana();
-      esArchiverLoad('auditbeat_bigger');
+      esArchiverLoad('grouping_default');
       login();
-      importRule('grouping_rules.ndjson');
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
     after(() => {
-      esArchiverUnload('auditbeat_bigger');
+      esArchiverUnload('grouping_default');
     });
     afterEach(() => {
-      refreshPage();
+      cy.reload();
       scrollGroupsIntoView();
     });
 

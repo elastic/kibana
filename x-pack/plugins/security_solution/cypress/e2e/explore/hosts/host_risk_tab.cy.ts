@@ -35,7 +35,7 @@ describe('risk tab', () => {
   });
 
   after(() => {
-    esArchiverUnload('users');
+    esArchiverUnload('risk_hosts');
   });
 
   it('renders the table', () => {

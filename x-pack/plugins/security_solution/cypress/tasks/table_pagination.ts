@@ -41,9 +41,7 @@ export const setWithinRowsPerPageTo = (selector: string, rowsCount: number) => {
   cy.get(selector).within(() => {
     cy.get(TABLE_PER_PAGE_POPOVER_BTN).click({ force: true });
   });
-  cy.get(rowsPerPageSelector(rowsCount))
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.exist');
+  cy.get(rowsPerPageSelector(rowsCount)).trigger('click');
 };
 
 export const searchByTitle = (title: string) => {
