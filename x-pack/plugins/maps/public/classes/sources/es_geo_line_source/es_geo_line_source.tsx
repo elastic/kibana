@@ -290,7 +290,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       requestsAdapter: inspectorAdapters.requests,
     });
 
-    const { featureCollection, numTrimmedTracks } = convertToGeoJson(
+    const { featureCollection } = convertToGeoJson(
       resp,
       TIME_SERIES_ID_FIELD_NAME
     );
@@ -304,7 +304,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         areResultsTrimmed: areEntitiesTrimmed,
         areEntitiesTrimmed,
         entityCount,
-        numTrimmedTracks,
+        numTrimmedTracks: 0, // geo_line by time series never truncates tracks and instead simplifies tracks
         totalEntities: resp?.aggregations?.totalEntities?.value ?? 0,
       } as ESGeoLineSourceResponseMeta,
     };
@@ -554,15 +554,21 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const tooltipProperties = await super.getTooltipProperties(properties);
-    tooltipProperties.push(
-      new TooltipProperty(
-        'isTrackComplete',
-        i18n.translate('xpack.maps.source.esGeoLine.isTrackCompleteLabel', {
-          defaultMessage: 'track is complete',
-        }),
-        properties!.complete.toString()
-      )
-    );
+    if (typeof properties!.complete === 'boolean') {
+      tooltipProperties.push(
+        new TooltipProperty(
+          'kbn__track__complete',
+          this._descriptor.groupByTimeseries
+            ? i18n.translate('xpack.maps.source.esGeoLine.isTrackSimplifiedLabel', {
+                defaultMessage: 'track is simplified',
+              })
+            : i18n.translate('xpack.maps.source.esGeoLine.isTrackTruncatedLabel', {
+                defaultMessage: 'track is truncated',
+              }),
+          (!properties.complete).toString()
+        )
+      );
+    }
     return tooltipProperties;
   }
 

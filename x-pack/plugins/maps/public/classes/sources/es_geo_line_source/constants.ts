@@ -14,4 +14,4 @@ export const MAX_TERMS_TRACKS = 250;
 // Constant value of '_tsid' is arbitrary.
 export const TIME_SERIES_ID_FIELD_NAME = '_tsid';
 
-export const DEFAULT_LINE_SIMPLIFICATION_SIZE = 100;
+export const DEFAULT_LINE_SIMPLIFICATION_SIZE = 500;
