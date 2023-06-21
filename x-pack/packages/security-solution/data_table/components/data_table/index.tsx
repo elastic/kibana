@@ -330,21 +330,23 @@ export const DataTableComponent = React.memo<DataTableProps>(
     const columnsCellActionsProps = useMemo(() => {
       const columnsCellActionData = !cellActionsTriggerId
         ? []
-        : columnHeaders.map((column) => ({
-            // TODO use FieldSpec object instead of column
-            field: {
-              name: column.id,
-              type: column.type ?? 'keyword',
-              aggregatable: column.aggregatable ?? false,
-              searchable: column.searchable ?? false,
-              esTypes: column.esTypes ?? [],
-              subType: column.subType,
-            },
-            values: data.map(
-              ({ data: columnData }) =>
-                columnData.find((rowData) => rowData.field === column.id)?.value
-            ),
-          }));
+        : columnHeaders.map((column) => {
+            return {
+              // TODO use FieldSpec object instead of column
+              field: {
+                name: column.id,
+                type: column.type ?? 'keyword',
+                aggregatable: column.aggregatable ?? false,
+                searchable: column.searchable ?? false,
+                esTypes: column.esTypes ?? [],
+                subType: column.subType,
+              },
+              values: data.map(
+                ({ data: columnData }) =>
+                  columnData.find((rowData) => rowData.field === column.id)?.value
+              ),
+            };
+          });
 
       return {
         triggerId: cellActionsTriggerId || '',
