@@ -27,7 +27,7 @@ import {
 import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 import { DeleteSearchApplicationModal } from '../search_applications/delete_search_application_modal';
 
-import { EngineConnect } from './connect/search_application_connect';
+import { SearchApplicationConnect } from './connect/search_application_connect';
 import { SearchApplicationHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
 import { SearchApplicationError } from './search_application_error';
@@ -99,7 +99,7 @@ export const SearchApplicationView: React.FC = () => {
           from={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONTENT}`}
           to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONTENT}/${SearchApplicationContentTabs.INDICES}`}
         />
-        <Route path={SEARCH_APPLICATION_CONNECT_PATH} component={EngineConnect} />
+        <Route path={SEARCH_APPLICATION_CONNECT_PATH} component={SearchApplicationConnect} />
         <Redirect
           from={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}`}
           to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}/${SearchApplicationConnectTabs.SEARCHAPI}`}

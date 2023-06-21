@@ -59,7 +59,7 @@ const getTabBreadCrumb = (tabId: string) => {
   }
 };
 
-export const EngineConnect: React.FC = () => {
+export const SearchApplicationConnect: React.FC = () => {
   const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
   );
