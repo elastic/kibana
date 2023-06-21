@@ -148,16 +148,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
           after(async () => {
             const adminSearchBar = await testSubjects.find('adminSearchBar');
-            const querySubmitButton = await testSubjects.find('querySubmitButton');
             await adminSearchBar.clearValueWithKeyboard();
-            await querySubmitButton.click();
+            await testSubjects.click('querySubmitButton');
           });
           it('when the kql query is `na`, table shows an empty list', async () => {
             const adminSearchBar = await testSubjects.find('adminSearchBar');
             await adminSearchBar.clearValueWithKeyboard();
             await adminSearchBar.type('na');
-            const querySubmitButton = await testSubjects.find('querySubmitButton');
-            await querySubmitButton.click();
+            await testSubjects.click('querySubmitButton');
             const expectedDataFromQuery = [
               [
                 'Endpoint',
@@ -186,8 +184,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await adminSearchBar.type(
               `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
             );
-            const querySubmitButton = await testSubjects.find('querySubmitButton');
-            await querySubmitButton.click();
+            await testSubjects.click('querySubmitButton');
             await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
               'endpointListTable',
               1,
@@ -204,8 +201,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await adminSearchBar.type(
               `united.endpoint.host.os.family : "windows" or host.os.family : "windows" `
             );
-            const querySubmitButton = await testSubjects.find('querySubmitButton');
-            await querySubmitButton.click();
+            await testSubjects.click('querySubmitButton');
             await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
               'endpointListTable',
               2,
@@ -228,7 +224,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             );
           });
           it('display the details flyout', async () => {
-            await (await testSubjects.find('hostnameCellLink')).click();
+            await testSubjects.click('hostnameCellLink');
             await testSubjects.existOrFail('endpointDetailsFlyout');
           });
 
