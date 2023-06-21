@@ -74,7 +74,7 @@ export function SectionLink({
       {showNewBadge && (
         <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
           <EuiBadge color="accent">
-            {i18n.translate('xpack.observability_shared.sectionLink.newLabel', {
+            {i18n.translate('xpack.observabilityShared.sectionLink.newLabel', {
               defaultMessage: 'New',
             })}
           </EuiBadge>
