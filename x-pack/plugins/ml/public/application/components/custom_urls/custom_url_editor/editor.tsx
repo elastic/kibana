@@ -29,6 +29,7 @@ import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import type { DashboardItems } from '../../../services/dashboard_service';
 import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 import { type Job } from '../../../../../common/types/anomaly_detection_jobs';
@@ -65,7 +66,7 @@ interface CustomUrlEditorProps {
   customUrl: CustomUrlSettings | undefined;
   setEditCustomUrl: (url: CustomUrlSettings) => void;
   savedCustomUrls: MlUrlConfig[];
-  dashboards: Array<{ id: string; title: string }>;
+  dashboards: DashboardItems;
   dataViewListItems: DataViewListItem[];
   showTimeRangeSelector?: boolean;
   showCustomTimeRangeSelector: boolean;
@@ -217,7 +218,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   const { label, type, timeRange, kibanaSettings, otherUrlSettings } = customUrl;
 
   const dashboardOptions = dashboards.map((dashboard) => {
-    return { value: dashboard.id, text: dashboard.title };
+    return { value: dashboard.id, text: dashboard.attributes.title };
   });
 
   const dataViewOptions = dataViewListItems.map(({ id, title }) => {
