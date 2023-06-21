@@ -105,7 +105,14 @@ export class CreateSourceEditor extends Component<Props, State> {
   };
 
   previewLayer = () => {
-    const { indexPattern, geoField, groupByTimeseries, splitField, sortField, lineSimplificationSize } = this.state;
+    const {
+      indexPattern,
+      geoField,
+      groupByTimeseries,
+      splitField,
+      sortField,
+      lineSimplificationSize,
+    } = this.state;
 
     const sourceConfig =
       indexPattern &&
@@ -113,11 +120,11 @@ export class CreateSourceEditor extends Component<Props, State> {
       geoField &&
       (groupByTimeseries || (splitField && sortField))
         ? {
-            indexPatternId: indexPattern.id, 
-            geoField, 
-            groupByTimeseries, 
+            indexPatternId: indexPattern.id,
+            geoField,
+            groupByTimeseries,
             lineSimplificationSize,
-            splitField, 
+            splitField,
             sortField,
           }
         : null;
