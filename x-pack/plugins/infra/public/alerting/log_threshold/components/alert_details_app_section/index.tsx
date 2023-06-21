@@ -40,6 +40,7 @@ import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import LogsRatioChart from './components/logs_ratio_chart';
 import { ExplainLogRateSpikes } from './components/explain_log_rate_spike';
+import { useLicense } from '../../../../hooks/use_license';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 const formatThreshold = (threshold: number) => String(threshold);
@@ -55,6 +56,9 @@ const AlertDetailsAppSection = ({
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+
+  const { hasAtLeast } = useLicense();
+  const hasLicenseForExplainLogSpike = hasAtLeast('platinum');
 
   useEffect(() => {
     /**
@@ -251,7 +255,7 @@ const AlertDetailsAppSection = ({
   };
 
   const getExplainLogRateSpikesSection = () => {
-    return <ExplainLogRateSpikes rule={rule} alert={alert} />;
+    return hasLicenseForExplainLogSpike ? <ExplainLogRateSpikes rule={rule} alert={alert} /> : null;
   };
 
   return (
