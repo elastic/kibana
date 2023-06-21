@@ -580,6 +580,7 @@ export function getFormBasedDatasource({
                 docLinks: core.docLinks,
                 http: core.http,
                 unifiedSearch,
+                theme: core.theme,
               }}
             >
               <FormBasedDimensionEditor
