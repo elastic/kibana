@@ -116,6 +116,27 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     max: alertEnd ? alertEnd.clone().add(1 * intervalFactor, 'minutes') : moment(new Date()),
   };
 
+  function getDeviationMax() {
+    if (alertEnd) {
+      return alertEnd
+        .clone()
+        .subtract(1 * intervalFactor, 'minutes')
+        .valueOf();
+    } else if (
+      alertStart
+        .clone()
+        .add(10 * intervalFactor, 'minutes')
+        .isAfter(moment(new Date()))
+    ) {
+      return moment(new Date()).valueOf();
+    } else {
+      return alertStart
+        .clone()
+        .add(10 * intervalFactor, 'minutes')
+        .valueOf();
+    }
+  }
+
   const initialAnalysisStart = {
     baselineMin: alertStart
       .clone()
@@ -129,15 +150,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
       .clone()
       .subtract(1 * intervalFactor, 'minutes')
       .valueOf(),
-    deviationMax: alertStart
-      .clone()
-      .add(3 * intervalFactor, 'minutes')
-      .isAfter(moment(new Date()))
-      ? moment(new Date()).valueOf()
-      : alertStart
-          .clone()
-          .add(3 * intervalFactor, 'minutes')
-          .valueOf(),
+    deviationMax: getDeviationMax(),
   };
 
   const explainLogSpikeTitle = i18n.translate(
