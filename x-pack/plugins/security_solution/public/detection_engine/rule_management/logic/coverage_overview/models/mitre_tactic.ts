@@ -10,7 +10,9 @@ import type { CoverageOverviewMitreTechnique } from './mitre_technique';
 
 export interface CoverageOverviewMitreTactic {
   name: string;
+  // An url leading to the tactic's page
   reference: string;
+  // A list if techniques related to this tactic
   techniques: CoverageOverviewMitreTechnique[];
   enabledRules: CoverageOverviewRuleData[];
   disabledRules: CoverageOverviewRuleData[];

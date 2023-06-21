@@ -9,8 +9,11 @@ import type { CoverageOverviewRuleData } from './rule_data';
 
 export interface CoverageOverviewMitreTechnique {
   name: string;
+  // An url leading to the technique's page
   reference: string;
+  // A number of covered subtechniques (having as minimum one rule enabled)
   numOfCoveredSubtechniques: number;
+  // A total number of subtechniques related to this technique
   numOfSubtechniques: number;
   enabledRules: CoverageOverviewRuleData[];
   disabledRules: CoverageOverviewRuleData[];
