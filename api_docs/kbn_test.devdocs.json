@@ -2399,6 +2399,39 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.runElasticsearch",
+        "type": "Function",
+        "tags": [],
+        "label": "runElasticsearch",
+        "description": [],
+        "signature": [
+          "(options: RunElasticsearchOptions) => Promise<() => Promise<void>>"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.runElasticsearch.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "RunElasticsearchOptions"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/run_elasticsearch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.runFtrCli",
         "type": "Function",
         "tags": [],
@@ -2461,6 +2494,167 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.runKibanaServer",
+        "type": "Function",
+        "tags": [],
+        "label": "runKibanaServer",
+        "description": [],
+        "signature": [
+          "(options: { procs: ",
+          {
+            "pluginId": "@kbn/dev-proc-runner",
+            "scope": "common",
+            "docId": "kibKbnDevProcRunnerPluginApi",
+            "section": "def-common.ProcRunner",
+            "text": "ProcRunner"
+          },
+          "; config: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.Config",
+            "text": "Config"
+          },
+          "; installDir?: string | undefined; extraKbnOpts?: string[] | undefined; logsDir?: string | undefined; onEarlyExit?: ((msg: string) => void) | undefined; }) => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.runKibanaServer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runKibanaServer.$1.procs",
+                "type": "Object",
+                "tags": [],
+                "label": "procs",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-proc-runner",
+                    "scope": "common",
+                    "docId": "kibKbnDevProcRunnerPluginApi",
+                    "section": "def-common.ProcRunner",
+                    "text": "ProcRunner"
+                  }
+                ],
+                "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runKibanaServer.$1.config",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.Config",
+                    "text": "Config"
+                  }
+                ],
+                "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runKibanaServer.$1.installDir",
+                "type": "string",
+                "tags": [],
+                "label": "installDir",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runKibanaServer.$1.extraKbnOpts",
+                "type": "Array",
+                "tags": [],
+                "label": "extraKbnOpts",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runKibanaServer.$1.logsDir",
+                "type": "string",
+                "tags": [],
+                "label": "logsDir",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runKibanaServer.$1.onEarlyExit",
+                "type": "Function",
+                "tags": [],
+                "label": "onEarlyExit",
+                "description": [],
+                "signature": [
+                  "((msg: string) => void) | undefined"
+                ],
+                "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test",
+                    "id": "def-common.runKibanaServer.$1.onEarlyExit.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "msg",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },

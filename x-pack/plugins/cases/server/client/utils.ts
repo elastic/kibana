@@ -149,47 +149,38 @@ export const getAlertIds = (comment: CommentRequest): string[] => {
   return [];
 };
 
-export const addStatusFilter = ({
-  status,
-  appendFilter,
-  type = CASE_SAVED_OBJECT,
-}: {
-  status: CaseStatuses;
-  appendFilter?: KueryNode;
-  type?: string;
-}): KueryNode => {
-  const filters: KueryNode[] = [];
-  filters.push(
-    nodeBuilder.is(`${type}.attributes.status`, `${STATUS_EXTERNAL_TO_ESMODEL[status]}`)
+const addStatusFilter = (status: CaseStatuses): KueryNode => {
+  return nodeBuilder.is(
+    `${CASE_SAVED_OBJECT}.attributes.status`,
+    `${STATUS_EXTERNAL_TO_ESMODEL[status]}`
   );
-
-  if (appendFilter) {
-    filters.push(appendFilter);
-  }
-
-  return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 };
 
-export const addSeverityFilter = ({
-  severity,
-  appendFilter,
-  type = CASE_SAVED_OBJECT,
-}: {
-  severity: CaseSeverity;
-  appendFilter?: KueryNode;
-  type?: string;
-}): KueryNode => {
-  const filters: KueryNode[] = [];
-
-  filters.push(
-    nodeBuilder.is(`${type}.attributes.severity`, `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`)
+const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
+  return nodeBuilder.is(
+    `${CASE_SAVED_OBJECT}.attributes.severity`,
+    `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`
   );
+};
 
-  if (appendFilter) {
-    filters.push(appendFilter);
+const buildCategoryFilter = (
+  categories: CasesFindQueryParams['category']
+): KueryNode | undefined => {
+  if (categories === undefined) {
+    return;
   }
 
-  return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+  const categoriesAsArray = Array.isArray(categories) ? categories : [categories];
+
+  if (categoriesAsArray.length === 0) {
+    return;
+  }
+
+  const categoryFilters = categoriesAsArray.map((category) =>
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.category`, `${category}`)
+  );
+
+  return nodeBuilder.or(categoryFilters);
 };
 
 export const NodeBuilderOperators = {
@@ -204,10 +195,6 @@ interface FilterField {
   field: string;
   operator: NodeBuilderOperatorsType;
   type?: string;
-}
-
-interface NestedFilterField extends FilterField {
-  nestedField: string;
 }
 
 export const buildFilter = ({
@@ -227,48 +214,7 @@ export const buildFilter = ({
   }
 
   return nodeBuilder[operator](
-    filtersAsArray.map((filter) =>
-      nodeBuilder.is(`${escapeKuery(type)}.attributes.${escapeKuery(field)}`, escapeKuery(filter))
-    )
-  );
-};
-
-/**
- * Creates a KueryNode filter for the Saved Object find API's filter field. This handles constructing a filter for
- * a nested field.
- *
- * @param filters is a string or array of strings that defines the values to search for
- * @param field is the location to search for
- * @param nestedField is the field in the saved object that has a type of 'nested'
- * @param operator whether to 'or'/'and' the created filters together
- * @type the type of saved object being searched
- * @returns a constructed KueryNode representing the filter or undefined if one could not be built
- */
-export const buildNestedFilter = ({
-  filters,
-  field,
-  nestedField,
-  operator,
-  type = CASE_SAVED_OBJECT,
-}: NestedFilterField): KueryNode | undefined => {
-  if (filters === undefined) {
-    return;
-  }
-
-  const filtersAsArray = Array.isArray(filters) ? filters : [filters];
-
-  if (filtersAsArray.length === 0) {
-    return;
-  }
-
-  return nodeBuilder[operator](
-    filtersAsArray.map((filter) =>
-      fromKueryExpression(
-        `${escapeKuery(type)}.attributes.${escapeKuery(nestedField)}:{ ${escapeKuery(
-          field
-        )}: ${escapeKuery(filter)} }`
-      )
-    )
+    filtersAsArray.map((filter) => nodeBuilder.is(`${type}.attributes.${field}`, filter))
   );
 };
 
@@ -374,7 +320,7 @@ export const buildAssigneesFilter = ({
   );
 
   const assigneesFilter = assigneesWithoutNone.map((filter) =>
-    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, filter)
   );
 
   if (!hasNoneAssignee) {
@@ -399,16 +345,17 @@ export const constructQueryOptions = ({
   from,
   to,
   assignees,
+  category,
 }: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
   const sortField = convertSortField(sortByField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
-
-  const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
-  const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
+  const statusFilter = status != null ? addStatusFilter(status) : undefined;
+  const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
+  const categoryFilter = buildCategoryFilter(category);
 
   const filters = combineFilters([
     statusFilter,
@@ -418,6 +365,7 @@ export const constructQueryOptions = ({
     rangeFilter,
     ownerFilter,
     assigneesFilter,
+    categoryFilter,
   ]);
 
   return {
@@ -500,7 +448,7 @@ export const getCaseToUpdate = (
         if (!deepEqual(currentValue, value)) {
           acc[key] = value;
         }
-      } else if (currentValue != null && value !== currentValue) {
+      } else if (currentValue !== undefined && value !== currentValue) {
         acc[key] = value;
       }
       return acc;
@@ -508,6 +456,15 @@ export const getCaseToUpdate = (
     { id: queryCase.id, version: queryCase.version }
   );
 
+/**
+ * TODO: Backend is not connected with the
+ * frontend in x-pack/plugins/cases/common/ui/types.ts.
+ * It is easy to forget to update a sort field.
+ * We should fix it and make it common.
+ * Also the sortField in x-pack/plugins/cases/common/api/cases/case.ts
+ * is set to string. We should narrow it to the
+ * acceptable values
+ */
 enum SortFieldCase {
   closedAt = 'closed_at',
   createdAt = 'created_at',
@@ -515,6 +472,7 @@ enum SortFieldCase {
   title = 'title.keyword',
   severity = 'severity',
   updatedAt = 'updated_at',
+  category = 'category',
 }
 
 export const convertSortField = (sortField: string | undefined): SortFieldCase => {
@@ -534,6 +492,8 @@ export const convertSortField = (sortField: string | undefined): SortFieldCase =
     case 'updatedAt':
     case 'updated_at':
       return SortFieldCase.updatedAt;
+    case 'category':
+      return SortFieldCase.category;
     default:
       return SortFieldCase.createdAt;
   }

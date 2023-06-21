@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
+import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
@@ -98,6 +100,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getLocationMonitors,
   getPrivateLocationsRoute,
   getSyntheticsFilters,
+  inspectSyntheticsMonitorRoute,
+  getAgentPoliciesRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [

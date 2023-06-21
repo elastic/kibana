@@ -1,4 +1,4 @@
-title: Error budget definition
+title: Error budget
 type: object
 properties:
   initial:

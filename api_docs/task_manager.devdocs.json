@@ -96,6 +96,22 @@
           },
           {
             "parentPluginId": "taskManager",
+            "id": "def-server.TaskManagerPlugin.isNodeBackgroundTasksOnly",
+            "type": "Function",
+            "tags": [],
+            "label": "isNodeBackgroundTasksOnly",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/task_manager/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskManagerPlugin.setup",
             "type": "Function",
             "tags": [],

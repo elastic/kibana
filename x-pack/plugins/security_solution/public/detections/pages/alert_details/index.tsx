@@ -12,14 +12,14 @@ import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { timelineActions } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { useGetFieldsData } from '../../../common/hooks/use_get_fields_data';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { getAlertDetailsTabUrl } from '../../../common/components/link_to';
 import { AlertDetailRouteType } from './types';
-import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { getAlertDetailsNavTabs } from './utils/navigation';
 import { SecurityPageName } from '../../../../common/constants';
 import { eventID } from '../../../../common/endpoint/models/event';
@@ -73,7 +73,7 @@ export const AlertDetailsPage = memo(() => {
       {hasData && (
         <>
           <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
-          <TabNavigationWithBreadcrumbs navTabs={getAlertDetailsNavTabs(eventId)} />
+          <TabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
           <EuiSpacer size="l" />
           <Switch>
             <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>

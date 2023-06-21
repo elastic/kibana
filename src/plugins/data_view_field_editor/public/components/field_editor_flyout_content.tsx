@@ -20,12 +20,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { euiFlyoutClassname } from '../constants';
 import type { Field } from '../types';
+import { PreviewState } from './preview/types';
 import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
 
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
 import { useFieldEditorContext } from './field_editor_context';
 import { FlyoutPanels } from './flyout_panels';
 import { FieldPreview, useFieldPreviewContext } from './preview';
+import { useStateSelector } from '../state_utils';
 
 const i18nTexts = {
   cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {
@@ -61,6 +63,8 @@ export interface Props {
   onMounted?: (args: { canCloseValidator: () => boolean }) => void;
 }
 
+const isPanelVisibleSelector = (state: PreviewState) => state.isPanelVisible;
+
 const FieldEditorFlyoutContentComponent = ({
   fieldToEdit,
   fieldToCreate,
@@ -75,9 +79,8 @@ const FieldEditorFlyoutContentComponent = ({
 
   const isMobile = useIsWithinMaxBreakpoint('s');
 
-  const {
-    panel: { isVisible: isPanelVisible },
-  } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
+  const isPanelVisible = useStateSelector(controller.state$, isPanelVisibleSelector);
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,

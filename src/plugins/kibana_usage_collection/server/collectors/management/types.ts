@@ -12,6 +12,7 @@ export interface UsageStats {
    */
   'securitySolution:defaultIndex': string;
   'securitySolution:defaultThreatIndex': string;
+  'securitySolution:alertTags': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
@@ -140,6 +141,7 @@ export interface UsageStats {
   isDefaultIndexMigrated: boolean;
   'metrics:allowCheckingForFailedShards': boolean;
   'observability:syntheticsThrottlingEnabled': boolean;
+  'observability:enableLegacyUptimeApp': boolean;
   'observability:apmLabsButton': boolean;
   'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;

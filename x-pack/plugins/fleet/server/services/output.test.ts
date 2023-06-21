@@ -82,6 +82,12 @@ function getMockedSoClient(
           type: 'elasticsearch',
         });
       }
+      case outputIdToUuid('existing-default-and-default-monitoring-output'): {
+        return mockOutputSO('existing-default-and-default-monitoring-output', {
+          is_default: true,
+          is_default_monitoring: true,
+        });
+      }
       case outputIdToUuid('existing-preconfigured-default-output'): {
         return mockOutputSO('existing-preconfigured-default-output', {
           is_default: true,
@@ -569,6 +575,46 @@ describe('Output Service', () => {
       );
     });
 
+    it('should not set default output to false when the output is already the default one', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-and-default-monitoring-output',
+      });
+
+      await expect(
+        outputService.update(
+          soClient,
+          esClientMock,
+          'existing-default-and-default-monitoring-output',
+          {
+            is_default: false,
+            name: 'Test',
+          }
+        )
+      ).rejects.toThrow(
+        `Default output existing-default-and-default-monitoring-output cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
+      );
+    });
+
+    it('should not set default monitoring output to false when the output is already the default one', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-and-default-monitoring-output',
+      });
+
+      await expect(
+        outputService.update(
+          soClient,
+          esClientMock,
+          'existing-default-and-default-monitoring-output',
+          {
+            is_default_monitoring: false,
+            name: 'Test',
+          }
+        )
+      ).rejects.toThrow(
+        `Default output existing-default-and-default-monitoring-output cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
+      );
+    });
+
     it('should update existing default monitoring output when updating an output to become the default monitoring output', async () => {
       const soClient = getMockedSoClient({
         defaultOutputMonitoringId: 'existing-default-monitoring-output',
@@ -1050,11 +1096,12 @@ describe('Output Service', () => {
       mockedAppContextService.getConfig.mockReset();
       mockedAppContextService.getConfig.mockReset();
     });
-    it('Should use cloud ID as the source of truth for ES hosts', () => {
+    it('Should use cloud plugin as the source of truth for ES hosts', () => {
       // @ts-expect-error
       mockedAppContextService.getCloud.mockReturnValue({
         isCloudEnabled: true,
         cloudId: CLOUD_ID,
+        elasticsearchUrl: 'https://cec6f261a74bf24ce33bb8811b84294f.us-east-1.aws.found.io:443',
       });
 
       mockedAppContextService.getConfig.mockReturnValue(CONFIG_WITH_ES_HOSTS);

@@ -44,6 +44,7 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
     } as unknown as DataView;
 
     defaultProps = {
+      areExamples: false,
       dataView,
       field: dataView.fields.find((f) => f.name === 'source')!,
       sampledValuesCount: 5000,

@@ -9,6 +9,8 @@ import React, { useState, useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -24,6 +26,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiTourStep,
 } from '@elastic/eui';
 import {
   PagingInfo,
@@ -82,7 +85,7 @@ class InternalEngineTransporter implements Transporter {
   ) {}
 
   async performRequest(request: SearchRequest) {
-    const url = `/internal/enterprise_search/engines/${this.engineName}/search`;
+    const url = `/internal/enterprise_search/search_applications/${this.engineName}/search`;
 
     const response = await this.http.post<SearchResponse>(url, {
       body: JSON.stringify(request),
@@ -128,6 +131,11 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
   const { engineData } = useValues(EngineViewLogic);
   const { openDeleteEngineModal } = useActions(EngineViewLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
+  const [isTourClosed, setTourClosed] = useLocalStorage<boolean>(
+    'search-application-tour-closed',
+    false
+  );
+
   return (
     <>
       <EuiPopover
@@ -136,19 +144,68 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
         panelPaddingSize="none"
         closePopover={setCloseConfiguration}
         button={
-          <EuiButtonEmpty
-            color="primary"
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={setCloseConfiguration}
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
-              {
-                defaultMessage: 'Configuration',
-              }
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            {hasSchemaConflicts && (
+              <>
+                <EuiFlexItem>
+                  <EuiIcon type="alert" color="danger" />
+                </EuiFlexItem>
+                {!isTourClosed && <EuiSpacer size="xs" />}
+              </>
             )}
-          </EuiButtonEmpty>
+            <EuiFlexItem>
+              <EuiTourStep
+                display="block"
+                decoration="beacon"
+                content={
+                  <EuiText>
+                    <p>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.searchApplication.searchPreview.configuration.tourContent',
+                        {
+                          defaultMessage:
+                            'Create your API key, learn about using language clients and find more resources in Connect.',
+                        }
+                      )}
+                    </p>
+                  </EuiText>
+                }
+                isStepOpen={!isTourClosed}
+                maxWidth={360}
+                hasArrow
+                step={1}
+                onFinish={() => {
+                  setTourClosed(true);
+                }}
+                stepsTotal={1}
+                anchorPosition="downCenter"
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.content.searchApplication.searchPreview.configuration.tourTitle',
+                  {
+                    defaultMessage: 'Review our API page to start using your search application',
+                  }
+                )}
+              >
+                <></>
+              </EuiTourStep>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiButtonEmpty
+                color="primary"
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={setCloseConfiguration}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
+                  {
+                    defaultMessage: 'Configuration',
+                  }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
       >
         <EuiContextMenuPanel style={{ width: 300 }}>
@@ -232,7 +289,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
-                  connectTabId: SearchApplicationConnectTabs.API,
+                  connectTabId: SearchApplicationConnectTabs.SEARCHAPI,
                   engineName,
                 })
               )

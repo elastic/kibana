@@ -28,6 +28,8 @@ paths:
   # EPM / integrations endpoints
   /epm/verification_key_id:
     $ref: paths/epm@verification_key_id.yaml
+  /epm/bulk_assets:
+    $ref: paths/epm@bulk_assets.yaml
   /epm/categories:
     $ref: paths/epm@categories.yaml
   /epm/packages/limited:
