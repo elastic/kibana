@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
-import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecuteReportTask } from '.';
