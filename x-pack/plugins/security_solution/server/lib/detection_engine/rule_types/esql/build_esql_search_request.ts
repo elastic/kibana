@@ -14,7 +14,7 @@ import type {
 import { buildTimeRangeFilter } from '../utils/build_events_query';
 import { getQueryFilter } from '../utils/get_query_filter';
 
-interface BuildEqlSearchRequestParams {
+export interface BuildEqlSearchRequestParams {
   query: string;
   from: string;
   to: string;
