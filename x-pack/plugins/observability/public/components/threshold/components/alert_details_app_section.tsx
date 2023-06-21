@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo } from 'react';
@@ -35,7 +36,6 @@ import { ExpressionChart } from './expression_chart';
 import { TIME_LABELS } from './criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from './threshold';
 import { MetricsExplorerChartType } from '../hooks/use_metrics_explorer_options';
-import { useSourceContext, withSourceProvider } from '../helpers/source';
 import { MetricThresholdRuleTypeParams } from '../types';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
@@ -58,19 +58,23 @@ interface AppSectionProps {
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
-export function AlertDetailsAppSection({
+// eslint-disable-next-line import/no-default-export
+export default function AlertDetailsAppSection({
   alert,
   rule,
   ruleLink,
   setAlertSummaryFields,
 }: AppSectionProps) {
   const { uiSettings, charts } = useKibana().services;
-  const { source, createDerivedIndexPattern } = useSourceContext();
   const { euiTheme } = useEuiTheme();
 
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
+  // TODO Use rule data view
+  const derivedIndexPattern = useMemo<DataViewBase>(
+    () => ({
+      fields: [],
+      title: 'unknown-index',
+    }),
+    []
   );
   const chartProps = {
     theme: charts.theme.useChartsTheme(),
@@ -162,7 +166,6 @@ export function AlertDetailsAppSection({
                   filterQuery={rule.params.filterQueryText}
                   groupBy={rule.params.groupBy}
                   hideTitle
-                  source={source}
                   timeRange={timeRange}
                 />
               </EuiFlexItem>
@@ -173,5 +176,3 @@ export function AlertDetailsAppSection({
     </EuiFlexGroup>
   ) : null;
 }
-// eslint-disable-next-line import/no-default-export
-export default withSourceProvider<AppSectionProps>(AlertDetailsAppSection)('default');
