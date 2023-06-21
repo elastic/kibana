@@ -40,7 +40,7 @@ export function runGenerateConsoleDefinitionsCli() {
             `Definitions folder already contain files, use --emptyDest to clean the folder before generation`
           );
         }
-        log.warning(`folder ${definitionsFolder} already contain files, emptying the folder`);
+        log.warning(`folder ${definitionsFolder} already contains files, emptying the folder`);
         for (const file of files) {
           fs.unlinkSync(Path.resolve(definitionsFolder, file));
         }
