@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
+import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { waitFor } from '@testing-library/dom';
 
 import { createAddToNewCaseLensAction } from './add_to_new_case';
-import type { ActionContext, DashboardVisualizationEmbeddable } from './types';
+import type { ActionContext } from './types';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -24,8 +25,6 @@ import {
 } from './mocks';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { useKibana } from '../../../common/lib/kibana';
-import { CommentType } from '../../../../common';
-import { waitFor } from '@testing-library/dom';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 
@@ -73,7 +72,7 @@ describe('createAddToNewCaseLensAction', () => {
     id: 'mockId',
     attributes: mockAttributes,
     timeRange: mockTimeRange,
-  }) as unknown as DashboardVisualizationEmbeddable;
+  }) as unknown as LensEmbeddable;
 
   const context = {
     embeddable: mockEmbeddable,
@@ -88,6 +87,7 @@ describe('createAddToNewCaseLensAction', () => {
   const mockCasePermissions = jest.fn();
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mockUseCasesAddToNewCaseFlyout.mockReturnValue({
       open: mockOpenFlyout,
     });
@@ -129,7 +129,7 @@ describe('createAddToNewCaseLensAction', () => {
           ...context,
           embeddable: new ErrorEmbeddable('some error', {
             id: '123',
-          }) as unknown as DashboardVisualizationEmbeddable,
+          }) as unknown as LensEmbeddable,
         })
       ).toEqual(false);
     });
@@ -138,7 +138,7 @@ describe('createAddToNewCaseLensAction', () => {
       expect(
         await action.isCompatible({
           ...context,
-          embeddable: new MockEmbeddable('not_lens') as unknown as DashboardVisualizationEmbeddable,
+          embeddable: new MockEmbeddable('not_lens') as unknown as LensEmbeddable,
         })
       ).toEqual(false);
     });
@@ -177,19 +177,18 @@ describe('createAddToNewCaseLensAction', () => {
 
     it('should open flyout', async () => {
       await waitFor(() => {
-        expect(mockOpenFlyout).toHaveBeenCalledWith(
-          expect.objectContaining({
-            attachments: [
-              {
-                comment: `!{lens${JSON.stringify({
-                  timeRange: mockTimeRange,
-                  attributes: mockAttributes,
-                })}}`,
-                type: CommentType.user as const,
+        expect(mockOpenFlyout).toHaveBeenCalledWith({
+          attachments: [
+            {
+              persistableStateAttachmentState: {
+                attributes: mockAttributes,
+                timeRange: mockTimeRange,
               },
-            ],
-          })
-        );
+              persistableStateAttachmentTypeId: '.lens',
+              type: 'persistableState',
+            },
+          ],
+        });
       });
     });
 

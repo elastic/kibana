@@ -11,7 +11,8 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { HostFlyout, useHostFlyoutUrlState } from '../../hooks/use_host_flyout_url_state';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
-import { metadataTab, processesTab } from './tabs';
+import { orderedFlyoutTabs } from './tabs';
+import { useLogViewReference } from '../../hooks/use_log_view_reference';
 
 export interface Props {
   node: HostNodeRow;
@@ -22,6 +23,9 @@ const NODE_TYPE = 'host' as InventoryItemType;
 
 export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const { logViewReference, loading } = useLogViewReference({
+    id: 'hosts-flyout-logs-view',
+  });
   const currentTimeRange = useMemo(
     () => ({
       ...getDateRangeAsTimestamp(),
@@ -30,31 +34,39 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
     [getDateRangeAsTimestamp]
   );
 
-  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutUrlState();
+  const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
 
   return (
     <AssetDetails
       node={node}
       nodeType={NODE_TYPE}
       currentTimeRange={currentTimeRange}
-      activeTabId={hostFlyoutOpen?.selectedTabId}
+      activeTabId={hostFlyoutState?.tabId}
       overrides={{
         metadata: {
-          query: hostFlyoutOpen?.metadataSearch,
+          query: hostFlyoutState?.metadataSearch,
           showActionsColumn: true,
         },
         processes: {
-          query: hostFlyoutOpen?.processSearch,
+          query: hostFlyoutState?.processSearch,
+        },
+        logs: {
+          query: hostFlyoutState?.logsSearch,
+          logView: {
+            reference: logViewReference,
+            loading,
+          },
         },
       }}
       onTabsStateChange={(state) =>
-        setHostFlyoutOpen({
+        setHostFlyoutState({
           metadataSearch: state.metadata?.query,
           processSearch: state.processes?.query,
-          selectedTabId: state.activeTabId as HostFlyout['selectedTabId'],
+          logsSearch: state.logs?.query,
+          tabId: state.activeTabId as HostFlyout['tabId'],
         })
       }
-      tabs={[metadataTab, processesTab]}
+      tabs={orderedFlyoutTabs}
       links={['apmServices', 'uptime']}
       renderMode={{
         showInFlyout: true,
