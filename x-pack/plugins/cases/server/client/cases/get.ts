@@ -32,7 +32,7 @@ import {
   GetCategoriesResponseRt,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
+import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
@@ -207,7 +207,7 @@ export const get = async (
     const res = flattenCaseSavedObject({
       savedObject: theCase,
       comments: theComments.saved_objects,
-      totalComment: theComments.total,
+      totalComment: countUserAttachments(theComments.saved_objects),
       totalAlerts: countAlertsForID({ comments: theComments, id }),
     });
 
