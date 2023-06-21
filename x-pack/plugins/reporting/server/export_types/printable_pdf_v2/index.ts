@@ -61,14 +61,12 @@ export type {
 export interface PdfExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
   spaces?: SpacesPluginSetup;
-  logger: Logger;
 }
 
 export interface PdfExportTypeStartDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   screenshotting: ScreenshottingStart;
-  logger: Logger;
 }
 
 export class PdfExportType
@@ -137,13 +135,13 @@ export class PdfExportType
 
   public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
     const spacesService = this.setupDeps.spaces?.spacesService;
-    const spaceId = await this.getSpaceId(request, logger);
+    const spaceId = this.getSpaceId(request, logger);
 
     if (spacesService && spaceId) {
       logger.info(`Creating UI Settings Client for space: ${spaceId}`);
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
-    return await this.getUiSettingsServiceFactory(savedObjectsClient);
+    return this.getUiSettingsServiceFactory(savedObjectsClient);
   }
 
   public getFakeRequest(
