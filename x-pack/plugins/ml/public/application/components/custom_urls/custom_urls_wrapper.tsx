@@ -8,6 +8,7 @@
 import React, { FC } from 'react';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import { useDashboardService } from '../../services/dashboard_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';
 import { CustomUrls } from './custom_urls';
@@ -29,6 +30,13 @@ export const CustomUrlsWrapper: FC<CustomUrlsWrapperProps> = (props) => {
       },
     },
   } = useMlKibana();
+  const dashboardService = useDashboardService();
 
-  return <CustomUrls {...props} currentTimeFilter={timefilter.getTime()} />;
+  return (
+    <CustomUrls
+      {...props}
+      currentTimeFilter={timefilter.getTime()}
+      dashboardService={dashboardService}
+    />
+  );
 };
