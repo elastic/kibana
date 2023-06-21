@@ -18,13 +18,13 @@ import { useLinkProps } from '../use_link_props';
  * @param {string} translatedErrorMessage The message to display in the panel when something goes wrong
  */
 export const PanelContentError = memo(function ({
+  id,
   translatedErrorMessage,
 }: {
+  id: string;
   translatedErrorMessage: string;
 }) {
-  const nodesLinkNavProps = useLinkProps({
-    panelView: 'nodes',
-  });
+  const nodesLinkNavProps = useLinkProps(id, { panelView: 'nodes' });
 
   const crumbs = useMemo(() => {
     return [

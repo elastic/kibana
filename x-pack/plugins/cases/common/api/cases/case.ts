@@ -169,7 +169,7 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The category of the case.
        */
-      category: rt.string,
+      category: rt.union([rt.string, rt.null]),
     })
   ),
 ]);
@@ -258,7 +258,6 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * The field to use for sorting the found objects.
      *
-     * This only supports, `create_at`, `closed_at`, and `status`
      */
     sortField: rt.string,
     /**
