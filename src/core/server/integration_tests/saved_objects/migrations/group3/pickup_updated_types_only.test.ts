@@ -59,7 +59,7 @@ describe('pickupUpdatedMappings', () => {
       const logs = await parseLogFile(defaultLogFilePath);
 
       expect(logs).toContainLogEntry(
-        'Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings: complex.'
+        'Kibana is performing a compatible update and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: complex.'
       );
     });
 
