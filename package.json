@@ -1127,6 +1127,7 @@
     "@kbn/lint-ts-projects-cli": "link:packages/kbn-lint-ts-projects-cli",
     "@kbn/managed-vscode-config": "link:packages/kbn-managed-vscode-config",
     "@kbn/managed-vscode-config-cli": "link:packages/kbn-managed-vscode-config-cli",
+    "@kbn/management-storybook-config": "link:packages/kbn-management/storybook/config",
     "@kbn/optimizer": "link:packages/kbn-optimizer",
     "@kbn/optimizer-webpack-helpers": "link:packages/kbn-optimizer-webpack-helpers",
     "@kbn/peggy": "link:packages/kbn-peggy",

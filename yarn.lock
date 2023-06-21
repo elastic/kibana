@@ -4647,6 +4647,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-storybook-config@link:packages/kbn-management/storybook/config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/management-test-plugin@link:test/plugin_functional/plugins/management_test_plugin":
   version "0.0.0"
   uid ""
