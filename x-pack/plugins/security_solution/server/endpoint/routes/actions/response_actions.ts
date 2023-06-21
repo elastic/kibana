@@ -51,14 +51,21 @@ export function registerResponseActionRoutes(
   /**
    * @deprecated use ISOLATE_HOST_ROUTE_V2 instead
    */
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: ISOLATE_HOST_ROUTE,
-      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: NoParametersRequestSchema,
+        },
+      },
+      withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
+    );
 
   /**
    * @deprecated use RELEASE_HOST_ROUTE instead

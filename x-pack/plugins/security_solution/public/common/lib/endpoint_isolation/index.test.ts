@@ -26,6 +26,7 @@ describe('When using Host Isolation library', () => {
 
     expect(mockKibanaServices().http.post).toHaveBeenCalledWith(ISOLATE_HOST_ROUTE, {
       body: JSON.stringify(requestBody),
+      version: '2023-10-31',
     });
   });
 

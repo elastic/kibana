@@ -207,7 +207,10 @@ describe('Response actions', () => {
     });
 
     it('correctly redirects legacy isolate to new route', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
+      await callRoute(ISOLATE_HOST_ROUTE, {
+        body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
+      });
       expect(mockResponse.custom).toBeCalled();
       const response = mockResponse.custom.mock.calls[0][0];
       expect(response.statusCode).toEqual(308);
