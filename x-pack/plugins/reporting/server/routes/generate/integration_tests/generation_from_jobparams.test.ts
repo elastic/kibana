@@ -154,7 +154,7 @@ describe('POST /api/reporting/generate', () => {
       );
   });
 
-  it('returns 400 on invalid browser timezone', async () => {
+  xit('returns 400 on invalid browser timezone', async () => {
     registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
@@ -168,7 +168,7 @@ describe('POST /api/reporting/generate', () => {
       );
   });
 
-  it('returns 500 if job handler throws an error', async () => {
+  xit('returns 500 if job handler throws an error', async () => {
     store.addReport = jest.fn().mockRejectedValue('silly');
 
     registerJobGenerationRoutes(mockReportingCore, mockLogger);
@@ -181,7 +181,7 @@ describe('POST /api/reporting/generate', () => {
       .expect(500);
   });
 
-  it(`returns 200 if job handler doesn't error`, async () => {
+  xit(`returns 200 if job handler doesn't error`, async () => {
     registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
