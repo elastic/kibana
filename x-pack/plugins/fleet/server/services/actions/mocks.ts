@@ -167,50 +167,69 @@ export const generateFleetActionsBulkCreateESResponse = (
 };
 
 export const createFleetActionsClientMock = (): jest.Mocked<FleetActionsClientInterface> => {
-  const createResponse: FleetActionRequest = generateFleetAction({
-    action_id: 'action_id_1',
-    input_type: 'foo',
+  const createResponse = (action: DeepPartial<FleetActionRequest>): FleetActionRequest =>
+    generateFleetAction(action);
+
+  const bulkCreateResponse = (
+    actions: Array<DeepPartial<FleetActionRequest>>
+  ): BulkCreateResponse => ({
+    status: 'success',
+    items: actions.map((action) => ({ status: 'success', id: action.action_id || uuidV4() })),
   });
-  const actionsRequests: FleetActionRequest[] = ['action_id_1', 'action_id_2'].map((id) =>
-    generateFleetAction({
-      action_id: id,
-      input_type: 'foo',
-    })
-  );
-  const actionsResults: FleetActionResult[] = ['action_id_1', 'action_id_2'].map((id) =>
-    generateFleetActionResult({
-      action_id: id,
-      action_input_type: 'foo',
-    })
-  );
+
+  const actionsRequests = (ids: string[]): FleetActionRequest[] =>
+    ids.map((id) =>
+      generateFleetAction({
+        action_id: id,
+        input_type: 'foo',
+      })
+    );
+
+  const actionsResults = (ids: string[]): FleetActionResult[] =>
+    ids.map((id) =>
+      generateFleetActionResult({
+        action_id: id,
+        action_input_type: 'foo',
+      })
+    );
 
   return {
-    create: jest.fn(async (_) => createResponse),
-    bulkCreate: jest.fn(
-      async (_) =>
-        ({
-          status: 'success',
-          items: [
-            { status: 'success', id: 'action_id_1' },
-            { status: 'success', id: 'action_id_2' },
-          ],
-        } as BulkCreateResponse)
-    ),
-    getActionsByIds: jest.fn(async (_) => ({
-      items: actionsRequests,
-      total: actionsRequests.length,
-    })),
-    getActionsWithKuery: jest.fn(async (_) => ({
-      items: actionsRequests,
-      total: actionsRequests.length,
-    })),
-    getResultsByIds: jest.fn(async (_) => ({
-      items: actionsResults,
-      total: actionsResults.length,
-    })),
-    getResultsWithKuery: jest.fn(async (_) => ({
-      items: actionsResults,
-      total: actionsResults.length,
-    })),
+    create: jest.fn(async (action) => {
+      return createResponse(action);
+    }),
+
+    bulkCreate: jest.fn(async (actions) => bulkCreateResponse(actions)),
+
+    getActionsByIds: jest.fn(async (ids) => {
+      const items = actionsRequests(ids);
+      return {
+        items,
+        total: items.length,
+      };
+    }),
+
+    getActionsWithKuery: jest.fn(async (_) => {
+      const items = actionsRequests(['action_id_1', 'action_id_2']);
+      return {
+        items,
+        total: items.length,
+      };
+    }),
+
+    getResultsByIds: jest.fn(async (ids) => {
+      const items = actionsResults(ids);
+      return {
+        items,
+        total: items.length,
+      };
+    }),
+
+    getResultsWithKuery: jest.fn(async (_) => {
+      const items = actionsResults(['action_id_1', 'action_id_2']);
+      return {
+        items,
+        total: items.length,
+      };
+    }),
   };
 };
