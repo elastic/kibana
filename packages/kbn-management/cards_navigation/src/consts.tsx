@@ -40,14 +40,14 @@ export const appDefinitions = {
           'Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing.',
       }
     ),
-    icon: <EuiIcon size="l" type="managementApp" />,
+    icon: <EuiIcon size="l" type="logstashInput" />,
   },
   [appIds.PIPELINES]: {
     category: appCategories.DATA,
     description: i18n.translate('management.landing.withCardNavigation.ingestDescription', {
       defaultMessage: 'Manage Logstash event processing and see the result visually.',
     }),
-    icon: <EuiIcon size="l" type="logsApp" />,
+    icon: <EuiIcon size="l" type="logstashQueue" />,
   },
   [appIds.INDEX_MANAGEMENT]: {
     category: appCategories.DATA,
@@ -57,7 +57,7 @@ export const appDefinitions = {
         defaultMessage: 'Update your Elasticsearch indices individually or in bulk.',
       }
     ),
-    icon: <EuiIcon size="l" type="indexManagementApp" />,
+    icon: <EuiIcon size="l" type="indexSettings" />,
   },
   [appIds.TRANSFORM]: {
     category: appCategories.DATA,
@@ -65,7 +65,7 @@ export const appDefinitions = {
       defaultMessage:
         'Transforms pivot indices into summarized, entity-centric indices, or create an indexed view of the latest documents.',
     }),
-    icon: <EuiIcon size="l" type="managementApp" />,
+    icon: <EuiIcon size="l" type="indexFlush" />,
   },
   [appIds.ML]: {
     category: appCategories.DATA,
@@ -73,7 +73,7 @@ export const appDefinitions = {
       defaultMessage:
         'View, export, and import machine learning analytics and anomaly detection items.',
     }),
-    icon: <EuiIcon size="l" type="machineLearningApp" />,
+    icon: <EuiIcon size="l" type="indexMapping" />,
   },
   [appIds.DATA_VIEW]: {
     category: appCategories.DATA,
@@ -81,7 +81,7 @@ export const appDefinitions = {
       defaultMessage:
         'Create and manage the data views that help you retrieve your data from Elasticsearch.',
     }),
-    icon: <EuiIcon size="l" type="managementApp" />,
+    icon: <EuiIcon size="l" type="indexEdit" />,
   },
   [appIds.SAVED_OBJECTS]: {
     category: appCategories.CONTENT,
@@ -89,28 +89,28 @@ export const appDefinitions = {
       defaultMessage:
         'Manage and share your saved objects. To edit the underlying data of an object, go to its associated application.',
     }),
-    icon: <EuiIcon size="l" type="savedObjectsApp" />,
+    icon: <EuiIcon size="l" type="save" />,
   },
   [appIds.TAGS]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.tagsDescription', {
       defaultMessage: 'Use tags to categorize and easily find your objects.',
     }),
-    icon: <EuiIcon size="l" type="managementApp" />,
+    icon: <EuiIcon size="l" type="tag" />,
   },
   [appIds.FILES_MANAGEMENT]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.fileManagementDescription', {
       defaultMessage: 'Any files created will be listed here.',
     }),
-    icon: <EuiIcon size="l" type="indexManagementApp" />,
+    icon: <EuiIcon size="l" type="documents" />,
   },
   [appIds.API_KEYS]: {
     category: appCategories.OTHER,
     description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
       defaultMessage: 'Allow applications to access Elastic on your behalf.',
     }),
-    icon: <EuiIcon size="l" type="managementApp" />,
+    icon: <EuiIcon size="l" type="lockOpen" />,
   },
   [appIds.ADVANCED_SETTINGS]: {
     category: appCategories.OTHER,
@@ -120,7 +120,7 @@ export const appDefinitions = {
         defaultMessage: 'Settings intended for advanced users.',
       }
     ),
-    icon: <EuiIcon size="l" type="logsApp" />,
+    icon: <EuiIcon size="l" type="controlsHorizontal" />,
   },
 };
 
