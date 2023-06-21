@@ -118,6 +118,7 @@ export class AddLayerPanel extends Component<Props, State> {
               disabled={isDisabled || isLoading}
               isLoading={isLoading}
               onClick={addLayersAndClose}
+              iconSide="right"
             >
               {ADD_LAYER_STEP_SECONDARY_ACTION_BUTTON_LABEL}
             </EuiButton>
