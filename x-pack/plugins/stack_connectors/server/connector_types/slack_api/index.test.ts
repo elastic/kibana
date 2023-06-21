@@ -230,7 +230,7 @@ describe('execute', () => {
       configurationUtilities,
       logger: mockedLogger,
       method: 'post',
-      url: 'chat.postMessage',
+      url: 'https://slack.com/api/chat.postMessage',
       data: { channel: 'general', text: 'some text' },
     });
 
@@ -243,7 +243,6 @@ describe('execute', () => {
         },
         ok: true,
       },
-
       status: 'ok',
     });
   });

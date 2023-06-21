@@ -99,7 +99,8 @@ fi
 
 export GCS_UPLOAD_PREFIX=FAKE_UPLOAD_PREFIX # TODO remove the need for this
 
-export KIBANA_BUILD_LOCATION="$WORKSPACE/kibana-build-xpack"
+KIBANA_BUILD_LOCATION="${WORKSPACE}/kibana-build-xpack"
+export KIBANA_BUILD_LOCATION
 
 export DISABLE_BOOTSTRAP_VALIDATION=true
 
