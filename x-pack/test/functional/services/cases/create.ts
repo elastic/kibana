@@ -89,7 +89,7 @@ export function CasesCreateViewServiceProvider(
     },
 
     async setCategory(category: string | undefined) {
-      if(category) {
+      if (category) {
         await comboBox.setCustom('categories-list', category);
       }
     },
