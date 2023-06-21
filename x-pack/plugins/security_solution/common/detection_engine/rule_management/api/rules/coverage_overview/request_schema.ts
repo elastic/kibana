@@ -30,7 +30,7 @@ export const CoverageOverviewRuleSourceSchema = enumeration(
 
 export type CoverageOverviewFilter = t.TypeOf<typeof CoverageOverviewFilter>;
 export const CoverageOverviewFilter = t.partial({
-  searchTerm: NonEmptyString,
+  search_term: NonEmptyString,
   activity: NonEmptyArray(CoverageOverviewRuleActivitySchema),
   source: NonEmptyArray(CoverageOverviewRuleSourceSchema),
 });
