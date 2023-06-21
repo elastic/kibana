@@ -19,8 +19,19 @@ import { getServicesMock } from '../../../mocks/src/jest';
 import { NavigationProvider } from '../../services';
 import { Navigation } from './navigation';
 
+// There is a 100ms debounce to update project navigation tree
+const SET_NAVIGATION_DELAY = 100;
+
 describe('<Navigation />', () => {
   const services = getServicesMock();
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   describe('builds the navigation tree', () => {
     test('render reference UI and build the navigation tree', async () => {
@@ -42,6 +53,10 @@ describe('<Navigation />', () => {
           </Navigation>
         </NavigationProvider>
       );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
 
       expect(await findByTestId('nav-item-group1.item1')).toBeVisible();
       expect(await findByTestId('nav-item-group1.item2')).toBeVisible();
@@ -148,6 +163,10 @@ describe('<Navigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
@@ -243,6 +262,10 @@ describe('<Navigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(await findByTestId('nav-item-root.group1.item1')).toBeVisible();
       expect(await findByTestId('nav-item-root.group1.item1')).toBeVisible();
 
@@ -314,6 +337,10 @@ describe('<Navigation />', () => {
           </Navigation>
         </NavigationProvider>
       );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
 
       expect(queryByTestId('nav-group-root.group1')).toBeNull();
       expect(queryByTestId('nav-item-root.group2.item1')).toBeVisible();
@@ -396,6 +423,10 @@ describe('<Navigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(await findByTestId('my-custom-element')).toBeVisible();
       expect(await findByTestId('my-other-custom-element')).toBeVisible();
       expect((await findByTestId('my-other-custom-element')).textContent).toBe('Children prop');
@@ -461,6 +492,10 @@ describe('<Navigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
@@ -468,7 +503,6 @@ describe('<Navigation />', () => {
 
       expect(navTreeGenerated).toEqual({
         navigationTree: expect.any(Array),
-        navigationTreeFlattened: expect.any(Object),
       });
     });
 
@@ -490,6 +524,10 @@ describe('<Navigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
       expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
         'RecentThis is an exampleAnother example'
@@ -508,6 +546,10 @@ describe('<Navigation />', () => {
           </Navigation>
         </NavigationProvider>
       );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -654,13 +696,15 @@ describe('<Navigation />', () => {
       const getActiveNodes$ = () => activeNodes$;
 
       const onProjectNavigationChange = (nav: ChromeProjectNavigation) => {
-        if (nav.navigationTreeFlattened) {
-          Object.values(nav.navigationTreeFlattened).forEach((node) => {
-            if (node.getIsActive) {
-              activeNodes$.next([[node]]);
-            }
-          });
-        }
+        nav.navigationTree.forEach((node) => {
+          if (node.children) {
+            node.children.forEach((child) => {
+              if (child.getIsActive?.('mockLocation' as any)) {
+                activeNodes$.next([[child]]);
+              }
+            });
+          }
+        });
       };
 
       const { findByTestId } = render(
@@ -683,6 +727,8 @@ describe('<Navigation />', () => {
           </Navigation>
         </NavigationProvider>
       );
+
+      jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
 
       expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
         'euiSideNavItemButton-isSelected'

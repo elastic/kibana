@@ -20,9 +20,20 @@ import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
 import type { ProjectNavigationTreeDefinition, RootNavigationItemDefinition } from './types';
 import { navLinksMock } from '../../mocks/src/navlinks';
+import { act } from 'react-dom/test-utils';
+
+// There is a 100ms debounce to update project navigation tree
+const SET_NAVIGATION_DELAY = 100;
 
 describe('<DefaultNavigation />', () => {
   const services = getServicesMock();
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   describe('builds custom navigation tree', () => {
     test('render reference UI and build the navigation tree', async () => {
@@ -74,6 +85,10 @@ describe('<DefaultNavigation />', () => {
           <DefaultNavigation navigationTree={{ body: navigationBody }} />
         </NavigationProvider>
       );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
 
       expect(await findByTestId('nav-item-group1.item1')).toBeVisible();
       expect(await findByTestId('nav-item-group1.item2')).toBeVisible();
@@ -199,6 +214,10 @@ describe('<DefaultNavigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
@@ -277,6 +296,10 @@ describe('<DefaultNavigation />', () => {
           <DefaultNavigation navigationTree={{ body: navigationBody }} />
         </NavigationProvider>
       );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -371,6 +394,10 @@ describe('<DefaultNavigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
       expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
         'RecentThis is an exampleAnother example'
@@ -435,6 +462,10 @@ describe('<DefaultNavigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
         'euiSideNavItemButton-isSelected'
       );
@@ -472,13 +503,15 @@ describe('<DefaultNavigation />', () => {
       const getActiveNodes$ = () => activeNodes$;
 
       const onProjectNavigationChange = (nav: ChromeProjectNavigation) => {
-        if (nav.navigationTreeFlattened) {
-          Object.values(nav.navigationTreeFlattened).forEach((node) => {
-            if (node.getIsActive) {
-              activeNodes$.next([[node]]);
-            }
-          });
-        }
+        nav.navigationTree.forEach((node) => {
+          if (node.children) {
+            node.children.forEach((child) => {
+              if (child.getIsActive) {
+                activeNodes$.next([[child]]);
+              }
+            });
+          }
+        });
       };
 
       const { findByTestId } = render(
@@ -491,6 +524,10 @@ describe('<DefaultNavigation />', () => {
           <DefaultNavigation navigationTree={{ body: navigationBody }} />
         </NavigationProvider>
       );
+
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
 
       expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
         'euiSideNavItemButton-isSelected'
@@ -550,6 +587,10 @@ describe('<DefaultNavigation />', () => {
         </NavigationProvider>
       );
 
+      await act(async () => {
+        jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
+      });
+
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
@@ -557,7 +598,6 @@ describe('<DefaultNavigation />', () => {
 
       expect(navTreeGenerated).toEqual({
         navigationTree: expect.any(Array),
-        navigationTreeFlattened: expect.any(Object),
       });
 
       // The project navigation tree passed
