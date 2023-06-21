@@ -50,7 +50,6 @@ export async function deleteSavedObjectIndices({
       headers: ES_CLIENT_HEADERS,
     }
   );
-
   await deleteIndex({
     client,
     stats,
@@ -111,15 +110,17 @@ export async function cleanSavedObjectIndices({
   client,
   stats,
   log,
+  index = ALL_SAVED_OBJECT_INDICES,
 }: {
   client: Client;
   stats: Stats;
   log: ToolingLog;
+  index?: string | string[];
 }) {
   while (true) {
     const resp = await client.deleteByQuery(
       {
-        index: ALL_SAVED_OBJECT_INDICES,
+        index,
         body: {
           query: {
             bool: {

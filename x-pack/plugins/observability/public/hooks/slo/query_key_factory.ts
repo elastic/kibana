@@ -33,6 +33,7 @@ export const sloKeys = {
   historicalSummaries: () => [...sloKeys.all, 'historicalSummary'] as const,
   historicalSummary: (sloIds: string[]) => [...sloKeys.historicalSummaries(), sloIds] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
+  burnRates: (sloId: string) => [...sloKeys.all, 'burnRates', sloId] as const,
   preview: (indicator?: Indicator) => [...sloKeys.all, 'preview', indicator] as const,
 };
 

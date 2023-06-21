@@ -38,7 +38,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  describe('discover field visualize button', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/148225
+  describe.skip('discover field visualize button', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);
     });

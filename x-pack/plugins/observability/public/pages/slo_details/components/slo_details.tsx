@@ -15,30 +15,25 @@ import {
 } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { Fragment } from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { useKibana } from '../../../utils/kibana_react';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { Overview as Overview } from './overview';
 import { SliChartPanel } from './sli_chart_panel';
+import { SloDetailsAlerts } from './slo_detail_alerts';
+import { BurnRates } from './burn_rates';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
 }
-const ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
 const OVERVIEW_TAB = 'overview';
 const ALERTS_TAB = 'alerts';
 
 export function SloDetails({ slo, isAutoRefreshing }: Props) {
-  const {
-    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
-  } = useKibana().services;
-
   const { data: activeAlerts } = useFetchActiveAlerts({
     sloIds: [slo.id],
   });
@@ -66,6 +61,9 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
               <Overview slo={slo} />
             </EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="l">
+              <EuiFlexItem>
+                <BurnRates slo={slo} isAutoRefreshing={isAutoRefreshing} />
+              </EuiFlexItem>
               <EuiFlexItem>
                 <SliChartPanel
                   data={historicalSliData}
@@ -96,27 +94,7 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
           {(activeAlerts && activeAlerts[slo.id]?.count) ?? 0}
         </EuiNotificationBadge>
       ),
-      content: (
-        <Fragment>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup direction="column" gutterSize="xl">
-            <EuiFlexItem>
-              <AlertsStateTable
-                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                configurationId={AlertConsumers.OBSERVABILITY}
-                id={ALERTS_TABLE_ID}
-                flyoutSize="s"
-                data-test-subj="alertTable"
-                featureIds={[AlertConsumers.SLO]}
-                query={{ bool: { filter: { term: { 'slo.id': slo.id } } } }}
-                showExpandToDetails={false}
-                showAlertStatusWithFlapping
-                pageSize={100}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Fragment>
-      ),
+      content: <SloDetailsAlerts slo={slo} />,
     },
   ];
 
