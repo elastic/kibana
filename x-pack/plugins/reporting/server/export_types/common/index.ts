@@ -5,10 +5,25 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
+import { FakeRawRequest, KibanaRequest } from '@kbn/core-http-server';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { Logger } from '@kbn/core/server';
+import {
+  CoreSetup,
+  Logger,
+  PluginInitializerContext,
+  IBasePath,
+  SavedObjectsServiceStart,
+  UiSettingsServiceStart,
+  HttpServiceSetup,
+  SavedObjectsClientContract,
+  CoreKibanaRequest,
+} from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { CreateJobFn, RunTaskFn } from '../../types';
+import { ReportingConfigType } from '../../config';
+import { ReportingServerInfo } from '../../core';
 
 export { decryptJobHeaders } from './decrypt_job_headers';
 export { getFullUrls } from './get_full_urls';
@@ -21,7 +36,7 @@ export interface TimeRangeParams {
   max?: Date | string | number | null;
 }
 
-export interface ExportType<
+export interface ExportTypeInterface<
   SetupDeps = any,
   StartDeps = any,
   JobParamsType extends object = any,
@@ -41,10 +56,109 @@ export interface ExportType<
 
   createJob: CreateJobFn<JobParamsType>;
   runTask: RunTaskFn<TaskPayloadType>;
+}
+
+/**
+ * @TODO move to be within @kbn-reporting-export-types
+ */
+export interface ExportTypeSetupDeps {
+  basePath: Pick<IBasePath, 'set'>;
+  spaces?: SpacesPluginSetup;
+}
+
+export interface ExportTypeStartDeps {
+  savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
+  screenshotting: ScreenshottingStart;
+}
+
+export abstract class ExportType {
+  public setupDeps!: ExportTypeSetupDeps;
+  public startDeps!: ExportTypeStartDeps;
+  public http!: HttpServiceSetup;
+
+  constructor(
+    core: CoreSetup,
+    public config: ReportingConfigType,
+    public logger: Logger,
+    public context: PluginInitializerContext<ReportingConfigType>
+  ) {
+    this.http = core.http;
+  }
+
+  setup(setupDeps: ExportTypeSetupDeps) {
+    this.setupDeps = setupDeps;
+  }
+
+  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
+    const spacesService = this.setupDeps!.spaces?.spacesService;
+    if (spacesService) {
+      const spaceId = spacesService?.getSpaceId(request);
+
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Request uses Space ID: ${spaceId}`);
+        return spaceId;
+      } else {
+        logger.debug(`Request uses default Space`);
+      }
+    }
+  }
+
+  private async getSavedObjectsClient(request: KibanaRequest) {
+    const { savedObjects } = this.startDeps;
+    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
+  }
+
+  public getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+    const { uiSettings: uiSettingsService } = this.startDeps;
+    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
+    return scopedUiSettingsService;
+  }
+
+  public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
+    const spacesService = this.setupDeps.spaces?.spacesService;
+    const spaceId = await this.getSpaceId(request, logger);
+
+    if (spacesService && spaceId) {
+      logger.info(`Creating UI Settings Client for space: ${spaceId}`);
+    }
+    const savedObjectsClient = await this.getSavedObjectsClient(request);
+    return await this.getUiSettingsServiceFactory(savedObjectsClient);
+  }
+
+  public getFakeRequest(
+    headers: Headers,
+    spaceId: string | undefined,
+    logger = this.logger
+  ): KibanaRequest {
+    const rawRequest: FakeRawRequest = {
+      headers,
+      path: '/',
+    };
+    const fakeRequest = CoreKibanaRequest.from(rawRequest);
+
+    const spacesService = this.setupDeps.spaces?.spacesService;
+    if (spacesService) {
+      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Generating request for space: ${spaceId}`);
+        this.setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
+      }
+    }
+    return fakeRequest;
+  }
 
   /*
-   * This is needed for the request handler and
-   * can be specified for each export type rather pulling it from Reporting Core
+   * Returns configurable server info
    */
-  getSpaceId: (req: KibanaRequest, logger: Logger) => string | undefined;
+  public getServerInfo(): ReportingServerInfo {
+    const serverInfo = this.http.getServerInfo();
+    return {
+      basePath: this.http.basePath.serverBasePath,
+      hostname: serverInfo.hostname,
+      name: serverInfo.name,
+      port: serverInfo.port,
+      uuid: this.context.env.instanceUuid,
+      protocol: serverInfo.protocol,
+    };
+  }
 }

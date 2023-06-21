@@ -5,33 +5,14 @@
  * 2.0.
  */
 import apm from 'elastic-apm-node';
-import {
-  CoreKibanaRequest,
-  FakeRawRequest,
-  KibanaRequest,
-  Logger,
-  Headers,
-  IBasePath,
-  SavedObjectsServiceStart,
-  UiSettingsServiceStart,
-  PluginInitializerContext,
-  SavedObjectsClientContract,
-  CoreSetup,
-  HttpServiceSetup,
-} from '@kbn/core/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
-import {
-  PdfScreenshotOptions,
-  PdfScreenshotResult,
-  ScreenshottingStart,
-} from '@kbn/screenshotting-plugin/server';
+import { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { Writable } from 'stream';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import { Headers } from '@kbn/core/server';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -45,38 +26,28 @@ import {
 } from '../../../common/constants';
 import { JobParamsPDFV2 } from '../../../common/types';
 import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
-import { ReportingConfigType } from '../../config';
-import { ReportingServerInfo } from '../../core';
-import { decryptJobHeaders, ExportType, getCustomLogo } from '../common';
+import {
+  decryptJobHeaders,
+  ExportType,
+  ExportTypeInterface,
+  ExportTypeSetupDeps,
+  ExportTypeStartDeps,
+  getCustomLogo,
+} from '../common';
 import { generatePdfObservable } from './lib/generate_pdf';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 export type {
   JobParamsPDFV2,
   TaskPayloadPDFV2,
 } from '../../../common/types/export_types/printable_pdf_v2';
-
 /**
  * @TODO move to be within @kbn-reporting-export-types
  */
-export interface PdfExportTypeSetupDeps {
-  basePath: Pick<IBasePath, 'set'>;
-  spaces?: SpacesPluginSetup;
-  logger: Logger;
-}
-
-export interface PdfExportTypeStartDeps {
-  savedObjects: SavedObjectsServiceStart;
-  uiSettings: UiSettingsServiceStart;
-  screenshotting: ScreenshottingStart;
-  logger: Logger;
-}
-
 export class PdfExportType
+  extends ExportType
   implements
-    ExportType<PdfExportTypeSetupDeps, PdfExportTypeStartDeps, JobParamsPDFV2, TaskPayloadPDFV2>
+    ExportTypeInterface<ExportTypeSetupDeps, ExportTypeStartDeps, JobParamsPDFV2, TaskPayloadPDFV2>
 {
-  private http: HttpServiceSetup;
-
   id = PDF_REPORT_TYPE_V2;
   name = 'PDF';
   validLicenses: LicenseType[] = [
@@ -89,97 +60,16 @@ export class PdfExportType
   jobType = PDF_JOB_TYPE_V2;
   jobContentEncoding = 'base64' as const;
   jobContentExtension = 'pdf' as const;
-  setupDeps!: PdfExportTypeSetupDeps;
-  startDeps!: PdfExportTypeStartDeps;
-
-  constructor(
-    core: CoreSetup,
-    private config: ReportingConfigType,
-    private logger: Logger,
-    private context: PluginInitializerContext<ReportingConfigType>
-  ) {
-    this.logger = logger.get('pdf-export');
-    this.http = core.http;
+  super() {
+    this.logger = this.logger.get('pdf-export');
   }
 
-  setup(setupDeps: PdfExportTypeSetupDeps) {
+  setup(setupDeps: ExportTypeSetupDeps) {
     this.setupDeps = setupDeps;
   }
 
-  start(startDeps: PdfExportTypeStartDeps) {
+  start(startDeps: ExportTypeStartDeps) {
     this.startDeps = startDeps;
-  }
-
-  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.setupDeps!.spaces?.spacesService;
-    if (spacesService) {
-      const spaceId = spacesService?.getSpaceId(request);
-
-      if (spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Request uses Space ID: ${spaceId}`);
-        return spaceId;
-      } else {
-        logger.debug(`Request uses default Space`);
-      }
-    }
-  }
-
-  private async getSavedObjectsClient(request: KibanaRequest) {
-    const { savedObjects } = this.startDeps;
-    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
-  }
-
-  public getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-    const { uiSettings: uiSettingsService } = this.startDeps;
-    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
-    return scopedUiSettingsService;
-  }
-
-  public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
-    const spacesService = this.setupDeps.spaces?.spacesService;
-    const spaceId = await this.getSpaceId(request, logger);
-
-    if (spacesService && spaceId) {
-      logger.info(`Creating UI Settings Client for space: ${spaceId}`);
-    }
-    const savedObjectsClient = await this.getSavedObjectsClient(request);
-    return await this.getUiSettingsServiceFactory(savedObjectsClient);
-  }
-
-  public getFakeRequest(
-    headers: Headers,
-    spaceId: string | undefined,
-    logger = this.logger
-  ): KibanaRequest {
-    const rawRequest: FakeRawRequest = {
-      headers,
-      path: '/',
-    };
-    const fakeRequest = CoreKibanaRequest.from(rawRequest);
-
-    const spacesService = this.setupDeps.spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        this.setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
-    return fakeRequest;
-  }
-
-  /*
-   * Returns configurable server info
-   */
-  public getServerInfo(): ReportingServerInfo {
-    const serverInfo = this.http.getServerInfo();
-    return {
-      basePath: this.http.basePath.serverBasePath,
-      hostname: serverInfo.hostname,
-      name: serverInfo.name,
-      port: serverInfo.port,
-      uuid: this.context.env.instanceUuid,
-      protocol: serverInfo.protocol,
-    };
   }
 
   public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult> {
@@ -230,7 +120,7 @@ export class PdfExportType
 
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
-      mergeMap(async (headers) => {
+      mergeMap(async (headers: Headers) => {
         const fakeRequest = this.getFakeRequest(headers, payload.spaceId, jobLogger);
         const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
         return await getCustomLogo(uiSettingsClient, headers);
