@@ -8,16 +8,20 @@
 import React from 'react';
 
 import {
+  EuiCard,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLink,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import elserIllustration from '../../../../assets/images/elser.svg';
+import nlpIllustration from '../../../../assets/images/nlp.svg';
 import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchVectorSearchPageTemplate } from '../layout/page_template';
 
@@ -187,36 +191,46 @@ export const VectorSearchGuide: React.FC = () => (
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={6}>
-        <ul>
-          <li>
-            <h3>
+        <EuiFlexGroup gutterSize="l" direction="column">
+          <EuiCard
+            href="#"
+            target="_blank"
+            layout="horizontal"
+            titleSize="s"
+            icon={<EuiIcon type={elserIllustration} size="xxl" />}
+            title={
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.elser.title"
                 defaultMessage="Elastic Learned Sparse Encoder (ELSER)"
               />
-            </h3>
-            <p>
+            }
+            description={
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.elser.description"
                 defaultMessage="Learn about the configuration-free semantic search"
               />
-            </p>
-          </li>
-          <li>
-            <h3>
+            }
+          />
+          <EuiCard
+            href="https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-model-ref.html#ml-nlp-model-ref-text-embedding"
+            target="_blank"
+            layout="horizontal"
+            titleSize="s"
+            icon={<EuiIcon type={nlpIllustration} size="xxl" />}
+            title={
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.title"
                 defaultMessage="Run your models in Elastic"
               />
-            </h3>
-            <p>
+            }
+            description={
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.description"
                 defaultMessage="Learn how to load in compatible third-party models"
               />
-            </p>
-          </li>
-        </ul>
+            }
+          />
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EnterpriseSearchVectorSearchPageTemplate>
