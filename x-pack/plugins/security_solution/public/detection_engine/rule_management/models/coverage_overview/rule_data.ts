@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleObjectId } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
 
 export interface CoverageOverviewRuleData {
   id: RuleObjectId; // rule SO's ids (not ruleId)
