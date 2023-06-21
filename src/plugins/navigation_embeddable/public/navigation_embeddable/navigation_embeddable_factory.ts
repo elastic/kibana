@@ -20,6 +20,10 @@ export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryD
     return true;
   }
 
+  public canCreateNew() {
+    return true;
+  }
+
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
     return new NavigationEmbeddable(initialInput, parent);
   }
