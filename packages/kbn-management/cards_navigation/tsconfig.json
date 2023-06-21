@@ -18,6 +18,7 @@
   ],
   "kbn_references": [
     "@kbn/shared-ux-storybook-mock",
-    "@kbn/management-types"
+    "@kbn/i18n",
+    "@kbn/serverless-types"
   ]
 }
