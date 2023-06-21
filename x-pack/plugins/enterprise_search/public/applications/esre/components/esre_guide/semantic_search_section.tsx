@@ -15,7 +15,10 @@ import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpEnrichmentIllustration from '../../../../assets/images/nlp.svg';
 import vectorSearchIllustration from '../../../../assets/images/vector.svg';
 
+import { ElserPanel } from './elser_panel';
 import { EsreGuideAccordion } from './esre_guide_accordion';
+import { NlpEnrichmentPanel } from './nlp_enrichment_panel';
+import { VectorSearchPanel } from './vector_search_panel';
 
 export const SemanticSearchSection: React.FC = () => (
   <EuiFlexGroup alignItems="center">
@@ -48,6 +51,7 @@ export const SemanticSearchSection: React.FC = () => (
         <EuiFlexItem grow={false}>
           <EsreGuideAccordion
             id="elserAccordion"
+            data-telemetry-id="entSearch-esre-semanticSearch-elserAccordion"
             initialIsOpen
             icon={elserIllustration}
             title={i18n.translate('xpack.enterpriseSearch.esre.elserAccordion.title', {
@@ -57,14 +61,13 @@ export const SemanticSearchSection: React.FC = () => (
               defaultMessage: 'Instant semantic search capabilities',
             })}
           >
-            <>
-              <p>Placeholder</p>
-            </>
+            <ElserPanel />
           </EsreGuideAccordion>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EsreGuideAccordion
             id="vectorSearchAccordion"
+            data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchAccordion"
             icon={vectorSearchIllustration}
             title={i18n.translate('xpack.enterpriseSearch.esre.vectorSearchAccordion.title', {
               defaultMessage: 'Vector Search',
@@ -76,14 +79,13 @@ export const SemanticSearchSection: React.FC = () => (
               }
             )}
           >
-            <>
-              <p>Placeholder</p>
-            </>
+            <VectorSearchPanel />
           </EsreGuideAccordion>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EsreGuideAccordion
-            id="vectorSearchAccordion"
+            id="nlpEnrichmentAccordion"
+            data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentAccordion"
             icon={nlpEnrichmentIllustration}
             title={i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentAccordion.title', {
               defaultMessage: 'NLP Enrichment',
@@ -95,9 +97,7 @@ export const SemanticSearchSection: React.FC = () => (
               }
             )}
           >
-            <>
-              <p>Placeholder</p>
-            </>
+            <NlpEnrichmentPanel />
           </EsreGuideAccordion>
         </EuiFlexItem>
       </EuiFlexGroup>

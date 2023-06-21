@@ -40,7 +40,6 @@ import {
   thresholdActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
-  viewInAppUrlActionVariableDescription,
 } from './messages';
 import {
   getAlertDetailsPageEnabledForApp,
@@ -137,7 +136,7 @@ export function thresholdRuleType(
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
-      defaultMessage: 'Threshold',
+      defaultMessage: 'Threshold (Technical Preview)',
     }),
     validate: {
       params: schema.object(
@@ -184,11 +183,6 @@ export function thresholdRuleType(
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
-        {
-          name: 'viewInAppUrl',
-          description: viewInAppUrlActionVariableDescription,
-          usesPublicBaseUrl: true,
-        },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },
         { name: 'container', description: containerActionVariableDescription },

@@ -35,7 +35,6 @@ export const useRouteResolver = (
 ): {
   context: RouteResolverContext;
   results: ResolverResults;
-  component?: React.Component;
 } => {
   const requiredCapabilitiesRef = useRef(requiredCapabilities);
   const customResolversRef = useRef(customResolvers);
