@@ -46,7 +46,7 @@ export const cli = () => {
         projectId: (argv.projectId as string) ?? 'security_solution',
         recordKey: 'xxx',
         cloudServiceUrl: process.env.DOCKER_SERVICE_IP
-          ? `http://${process.env.DOCKER_SERVICE_IP}:1234`
+          ? `http://host.docker.internal:1234`
           : 'https://cypress-director.herokuapp.com',
         configFile: path.resolve(argv.configFile as string),
         parallel: true,
