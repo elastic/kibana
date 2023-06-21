@@ -312,17 +312,11 @@ export const SearchBar: FC<SearchBarProps> = ({
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
       searchProps={{
+        autoFocus: chromeStyle === 'project',
         value: searchValue,
         onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
         'data-test-subj': 'nav-search-input',
-        inputRef: (input) => {
-          setSearchRef(input);
-          if (chromeStyle === 'project' && input) {
-            // while the input ref is in flight, we set focus on it
-            // to autofocus the input when it appears
-            input.focus();
-          }
-        },
+        inputRef: setSearchRef,
         compressed: true,
         'aria-label': i18nStrings.placeholderText,
         placeholder: i18nStrings.placeholderText,
