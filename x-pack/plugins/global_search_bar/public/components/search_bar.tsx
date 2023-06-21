@@ -23,7 +23,6 @@ import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-sea
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
 import { Subscription } from 'rxjs';
@@ -49,8 +48,6 @@ const EmptyMessage = () => (
   </EuiFlexGroup>
 );
 
-const GLOBAL_SEARCH_BAR_VISIBLE_KEY = 'GLOBAL_SEARCH_BAR_VISIBLE' as const;
-
 export const SearchBar: FC<SearchBarProps> = ({
   globalSearch,
   taggingApi,
@@ -64,7 +61,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   const chromeStyle = useObservable(chromeStyle$);
 
   // These hooks are used when on chromeStyle set to 'project'
-  const [isVisible, setIsVisible] = useLocalStorage(GLOBAL_SEARCH_BAR_VISIBLE_KEY, false);
+  const [isVisible, setIsVisible] = useState(false);
   const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // General hooks
