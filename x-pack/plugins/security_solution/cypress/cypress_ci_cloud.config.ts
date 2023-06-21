@@ -8,7 +8,9 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { cloudPlugin } from 'cypress-cloud/plugin';
 import path from 'path';
+import execa from 'execa';
 import { fork } from 'child_process';
+import type { ChildProcess } from 'child_process';
 import { esArchiver } from './support/es_archiver';
 
 // eslint-disable-next-line import/no-default-export
@@ -27,7 +29,7 @@ export default defineCypressConfig({
   viewportHeight: 946,
   viewportWidth: 1680,
   e2e: {
-    baseUrl: 'http://google.com',
+    baseUrl: 'http://localhost:5622',
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
     specPattern: ['./cypress/e2e', '!./cypress/e2e/investigations', '!./cypress/e2e/explore'],
@@ -44,13 +46,32 @@ export default defineCypressConfig({
       ELASTICSEARCH_USERNAME: 'system_indices_superuser',
       ELASTICSEARCH_PASSWORD: 'changeme',
     },
-    setupNodeEvents(on, config) {
-      cloudPlugin(on, config);
-      let processes = [];
+    async setupNodeEvents(on, config) {
+      await cloudPlugin(on, config);
+      let processes: ChildProcess[] = [];
+
+      const esArchiverInstance = esArchiver(on, config);
+
+      on('before:run', (spec) => {
+        try {
+          execa.commandSync('kill $(lsof -t -i:5622)', { shell: true });
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+        try {
+          execa.commandSync('kill $(lsof -t -i:9222)', { shell: true });
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+      });
 
       on('before:spec', (spec) => {
-        console.error('processes', processes.length, processes);
-        console.error('before:spec', spec);
+        console.error('before:spec', spec, processes);
+
+        if (processes.length) {
+          processes.forEach((child) => {
+            child.kill();
+          });
+          processes = [];
+        }
 
         if (!processes.length) {
           const program = path.resolve('../scripts/start_cypress_setup_env.js');
@@ -74,28 +95,13 @@ export default defineCypressConfig({
           return new Promise((resolve) => {
             child.on('message', (message) => {
               console.log('message from child:', message);
-              // console.log('config', config);
-              // config.baseUrl = message.customEnv.baseUrl;
-              // process.exit(0);
-              resolve(message);
-              // child.send('Hi');
-              // return config;
-              // return config;
+              esArchiverInstance.load('auditbeat').then(() => resolve(message));
             });
           });
         }
       });
 
-      on('after:spec', (spec, results) => {
-        console.error('after:spec', spec, results);
-        console.error('preosdsd', processes);
-        processes.forEach((child) => {
-          child.kill();
-        });
-        processes = [];
-      });
-
-      return esArchiver(on, config);
+      return config;
     },
   },
 });

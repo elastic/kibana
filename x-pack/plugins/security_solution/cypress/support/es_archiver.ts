@@ -53,4 +53,6 @@ export const esArchiver = (on: Cypress.PluginEvents, config: Cypress.PluginConfi
       return ccsEsArchiverInstance.load(archiveName);
     },
   });
+
+  return esArchiverInstance;
 };
