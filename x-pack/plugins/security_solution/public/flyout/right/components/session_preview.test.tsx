@@ -13,7 +13,8 @@ import React from 'react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID } from './test_ids';
-import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelVisualizeTab } from '../../left';
+import { SESSION_VIEW_ID } from '../../left/components/session_view';
 
 jest.mock('../hooks/use_process_data');
 
@@ -105,7 +106,7 @@ describe('SessionPreview', () => {
     getByTestId(SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelVisualizeTabPath,
+      path: { tab: LeftPanelVisualizeTab, subTab: SESSION_VIEW_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,

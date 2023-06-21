@@ -17,8 +17,9 @@ import {
 } from './test_ids';
 import { TestProviders } from '../../../common/mock';
 import { CorrelationsOverview } from './correlations_overview';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { useCorrelations } from '../../shared/hooks/use_correlations';
+import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 
 jest.mock('../../shared/hooks/use_correlations');
 
@@ -139,7 +140,7 @@ describe('<ThreatIntelligenceOverview />', () => {
     getByTestId(INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: CORRELATIONS_TAB_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,

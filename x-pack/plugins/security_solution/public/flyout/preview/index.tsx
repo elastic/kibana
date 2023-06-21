@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { panels } from './panels';
 
@@ -16,7 +16,7 @@ export const PreviewPanelKey: PreviewPanelProps['key'] = 'document-details-previ
 
 export interface PreviewPanelProps extends FlyoutPanelProps {
   key: 'document-details-preview';
-  path?: PreviewPanelPaths[];
+  path?: PanelPath;
   params?: {
     id: string;
     indexName: string;
@@ -31,7 +31,7 @@ export interface PreviewPanelProps extends FlyoutPanelProps {
  */
 export const PreviewPanel: React.FC<Partial<PreviewPanelProps>> = memo(({ path }) => {
   const previewPanel = useMemo(() => {
-    return path ? panels.find((panel) => panel.id === path[0]) : null;
+    return path ? panels.find((panel) => panel.id === path.tab) : null;
   }, [path]);
 
   if (!previewPanel) {

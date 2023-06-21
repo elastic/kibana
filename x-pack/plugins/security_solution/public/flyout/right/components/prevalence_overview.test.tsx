@@ -10,13 +10,14 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { RightPanelContext } from '../context';
 import { INSIGHTS_PREVALENCE_TEST_ID } from './test_ids';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
 import { usePrevalence } from '../hooks/use_prevalence';
 import { PrevalenceOverviewRow } from './prevalence_overview_row';
 import { useFetchFieldValuePairWithAggregation } from '../../shared/hooks/use_fetch_field_value_pair_with_aggregation';
 import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_field';
+import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 
 jest.mock('../../shared/hooks/use_fetch_field_value_pair_with_aggregation');
 jest.mock('../../shared/hooks/use_fetch_unique_by_field');
@@ -129,7 +130,7 @@ describe('<PrevalenceOverview />', () => {
     getByTestId(`${INSIGHTS_PREVALENCE_TEST_ID}ViewAllButton`).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: PREVALENCE_TAB_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,

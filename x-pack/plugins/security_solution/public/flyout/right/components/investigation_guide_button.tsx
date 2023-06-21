@@ -10,7 +10,7 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from '../context';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
-import { LeftPanelKey, LeftPanelInvestigationTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelInvestigationTab } from '../../left';
 import { INVESTIGATION_GUIDE_BUTTON_TEST_ID } from './test_ids';
 import { INVESTIGATION_GUIDE_TITLE } from './translations';
 
@@ -27,7 +27,9 @@ export const InvestigationGuideButton: React.FC = () => {
   const goToInvestigationsTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelInvestigationTabPath,
+      path: {
+        tab: LeftPanelInvestigationTab,
+      },
       params: {
         id: eventId,
         indexName,

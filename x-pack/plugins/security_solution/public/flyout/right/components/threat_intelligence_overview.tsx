@@ -23,7 +23,8 @@ import {
   THREAT_MATCHES_DETECTED,
   THREAT_ENRICHMENTS,
 } from './translations';
-import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 
 /**
  * Threat Intelligence section under Insights section, overview tab.
@@ -37,7 +38,10 @@ export const ThreatIntelligenceOverview: FC = () => {
   const goToThreatIntelligenceTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: {
+        tab: LeftPanelInsightsTab,
+        subTab: THREAT_INTELLIGENCE_TAB_ID,
+      },
       params: {
         id: eventId,
         indexName,

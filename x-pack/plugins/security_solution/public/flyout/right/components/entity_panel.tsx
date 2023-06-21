@@ -80,6 +80,7 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
   const toggleIcon = useMemo(
     () => (
       <EuiButtonIcon
+        key={`expanded-${expanded}`}
         data-test-subj={ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID}
         aria-label={`entity-toggle`}
         color="text"
@@ -89,7 +90,7 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
         size="s"
       />
     ),
-    [toggleStatus, toggleQuery]
+    [toggleStatus, toggleQuery, expanded]
   );
 
   const headerLeftSection = useMemo(

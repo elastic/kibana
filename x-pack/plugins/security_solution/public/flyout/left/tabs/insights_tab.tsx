@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { RESPONSE_TAB_ID, ResponseDetails } from '../components/response_details';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
@@ -67,11 +68,20 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  * Insights view displayed in the document details expandable flyout left section
  */
 export const InsightsTab: React.FC = memo(() => {
-  const [activeInsightsId, setActiveInsightsId] = useState(ENTITIES_TAB_ID);
+  const { panels } = useExpandableFlyoutContext();
+  const [activeInsightsId, setActiveInsightsId] = useState(
+    panels.left?.path?.subTab ?? ENTITIES_TAB_ID
+  );
 
   const onChangeCompressed = useCallback((optionId: string) => {
     setActiveInsightsId(optionId);
   }, []);
+
+  useEffect(() => {
+    if (panels.left?.path?.subTab) {
+      setActiveInsightsId(panels.left?.path?.subTab);
+    }
+  }, [panels.left?.path?.subTab]);
 
   return (
     <>

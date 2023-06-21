@@ -8,6 +8,11 @@
 
 import React from 'react';
 
+export interface PanelPath {
+  tab: string;
+  subTab?: string;
+}
+
 export interface FlyoutPanelProps {
   /**
    * Unique key to identify the panel
@@ -20,7 +25,7 @@ export interface FlyoutPanelProps {
   /**
    * Tracks the path for what to show in a panel. We may have multiple tabs or details..., so easiest to just use a stack
    */
-  path?: string[];
+  path?: PanelPath;
   /**
    * Tracks visual state such as whether the panel is collapsed
    */

@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelVisualizeTab } from '../../left';
 import { ANALYZER_PREVIEW_TITLE, ANALYZER_PREVIEW_TEXT } from './translations';
 import {
   ANALYZER_TREE_TEST_ID,
@@ -25,6 +25,7 @@ import {
 import type { StatsNode } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import { ERROR_TITLE, ERROR_MESSAGE } from '../../shared/translations';
+import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';
 
 export interface AnalyzerTreeProps {
   /**
@@ -52,7 +53,10 @@ export const AnalyzerTree: React.FC<AnalyzerTreeProps> = ({ statsNodes, loading,
   const goToAnalyserTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelVisualizeTabPath,
+      path: {
+        tab: LeftPanelVisualizeTab,
+        subTab: ANALYZE_GRAPH_ID,
+      },
       params: {
         id: eventId,
         indexName,

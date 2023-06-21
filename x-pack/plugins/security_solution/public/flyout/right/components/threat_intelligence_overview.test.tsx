@@ -17,8 +17,9 @@ import {
 } from './test_ids';
 import { TestProviders } from '../../../common/mock';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 
 jest.mock('../hooks/use_fetch_threat_intelligence');
 
@@ -169,7 +170,7 @@ describe('<ThreatIntelligenceOverview />', () => {
     getByTestId(INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: THREAT_INTELLIGENCE_TAB_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,

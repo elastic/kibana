@@ -51,7 +51,7 @@ export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
   );
   const { openPreviewPanel } = useExpandableFlyoutContext();
   const openRulePreview = useCallback(() => {
-    const PreviewPanelRulePreview: PreviewPanelProps['path'] = ['rule-preview'];
+    const PreviewPanelRulePreview: PreviewPanelProps['path'] = { tab: 'rule-preview' };
     openPreviewPanel({
       id: PreviewPanelKey,
       path: PreviewPanelRulePreview,

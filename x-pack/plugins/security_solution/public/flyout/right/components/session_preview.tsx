@@ -11,7 +11,6 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-
 import { useProcessData } from '../hooks/use_process_data';
 import { SESSION_PREVIEW_TEST_ID, SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID } from './test_ids';
 import {
@@ -21,8 +20,9 @@ import {
   SESSION_PREVIEW_TIME_TEXT,
   SESSION_PREVIEW_TITLE,
 } from './translations';
-import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelVisualizeTab } from '../../left';
 import { RenderRuleName } from '../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
+import { SESSION_VIEW_ID } from '../../left/components/session_view';
 
 /**
  * One-off helper to make sure that inline values are rendered consistently
@@ -50,7 +50,10 @@ export const SessionPreview: FC = () => {
   const goToSessionViewTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelVisualizeTabPath,
+      path: {
+        tab: LeftPanelVisualizeTab,
+        subTab: SESSION_VIEW_ID,
+      },
       params: {
         id: eventId,
         indexName,

@@ -16,7 +16,8 @@ import {
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID,
@@ -42,7 +43,7 @@ const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
   const goToInsightsEntities = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
       params: {
         id: eventId,
         indexName,

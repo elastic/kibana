@@ -14,7 +14,8 @@ import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
 import { InsightsSubSection } from './insights_subsection';
 import { useRightPanelContext } from '../context';
 import { CORRELATIONS_TEXT, CORRELATIONS_TITLE, VIEW_ALL } from './translations';
-import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 
 /**
  * Correlations section under Insights section, overview tab.
@@ -29,7 +30,10 @@ export const CorrelationsOverview: React.FC = () => {
   const goToCorrelationsTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: {
+        tab: LeftPanelInsightsTab,
+        subTab: CORRELATIONS_TAB_ID,
+      },
       params: {
         id: eventId,
         indexName,
