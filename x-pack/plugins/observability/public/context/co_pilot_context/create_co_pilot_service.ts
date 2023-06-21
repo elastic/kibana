@@ -105,7 +105,7 @@ export function createCoPilotService({ enabled, http }: { enabled: boolean; http
           .catch((err) => {
             observer.error(err);
           });
-      }).pipe(concatMap((value) => of(value).pipe(delay(25))));
+      }).pipe(concatMap((value) => of(value).pipe(delay(50))));
     },
   };
 
