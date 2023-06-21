@@ -271,5 +271,27 @@ describe('RootRoute', () => {
         expect.any(Object)
       );
     });
+
+    it('should append the status path when path already present on the host', async () => {
+      kibanaConfig.hosts.splice(0, kibanaConfig.hosts.length);
+      kibanaConfig.hosts.push('http://localhost:5601/prefix', 'http://localhost:5602/other/path');
+
+      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(new Response('', ok));
+
+      await server.inject({
+        method: 'get',
+        url: '/',
+      });
+
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(fetch).toHaveBeenCalledWith(
+        new URL('http://localhost:5601/prefix/api/status'),
+        expect.any(Object)
+      );
+      expect(fetch).toHaveBeenCalledWith(
+        new URL('http://localhost:5602/other/path/api/status'),
+        expect.any(Object)
+      );
+    });
   });
 });

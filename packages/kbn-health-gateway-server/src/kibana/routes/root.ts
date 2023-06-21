@@ -116,7 +116,7 @@ export class RootRoute implements ServerRoute {
 
   private async fetch(host: string) {
     const url = new URL(host);
-    url.pathname = statusApiPath;
+    appendStatusApiPath(url);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(
@@ -164,3 +164,7 @@ export class RootRoute implements ServerRoute {
     return options;
   }
 }
+
+const appendStatusApiPath = (url: URL) => {
+  url.pathname = `${url.pathname}/${statusApiPath}`.replace(/\/{2,}/g, '/');
+};
