@@ -124,6 +124,7 @@ export const appDefinitions = {
   },
 };
 
+// Compose a list of app ids that belong to a given category
 export const getAppIdsByCategory = (category: string) => {
   return Object.keys(appDefinitions).filter((appId) => {
     return appDefinitions[appId].category === category;

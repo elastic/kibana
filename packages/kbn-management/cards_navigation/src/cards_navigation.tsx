@@ -27,14 +27,16 @@ interface ManagementLandingPageProps {
   appBasePath: string;
 }
 
-const getDataFromManagementApp = (section: any) => {
+// Retrieve the data we need from a given app from the management app registry
+const getDataFromManagementApp = (app: any) => {
   return {
-    id: section.id,
-    title: section.title,
-    href: section.basePath,
+    id: app.id,
+    title: app.title,
+    href: app.basePath,
   };
 };
 
+// Given a category and a list of apps, build an array of apps that belong to that category
 const getAppsForCategory = (category: string, filteredApps: { [key: string]: any }) => {
   return getAppIdsByCategory(category)
     .map((appId: string) => {
@@ -59,6 +61,7 @@ const getEnabledAppsByCategory = (sections: any[]) => {
     return item.enabled ? { ...obj, [item.id]: item } : obj;
   }, {});
 
+  // Build list of categories with apps that are enabled
   return [
     {
       id: appCategories.DATA,
@@ -81,6 +84,7 @@ const getEnabledAppsByCategory = (sections: any[]) => {
       }),
       apps: getAppsForCategory(appCategories.OTHER, filteredApps),
     },
+    // Filter out categories that don't have any apps since they dont need to be rendered
   ].filter((category) => category.apps.length > 0);
 };
 

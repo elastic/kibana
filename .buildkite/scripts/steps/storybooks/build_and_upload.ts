@@ -34,7 +34,7 @@ const STORYBOOKS = [
   'expression_reveal_image',
   'expression_shape',
   'expression_tagcloud',
-  'kbn-management',
+  'management',
   'fleet',
   'grouping',
   'home',
