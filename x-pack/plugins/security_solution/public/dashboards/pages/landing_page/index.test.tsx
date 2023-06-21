@@ -36,13 +36,13 @@ const APP_DASHBOARD_LINKS: NavigationLink = {
       id: SecurityPageName.overview,
       title: OVERVIEW_ITEM_LABEL,
       description: '',
-      icon: 'testIcon1',
+      landingIcon: 'testIcon1',
     },
     {
       id: SecurityPageName.detectionAndResponse,
       title: DETECTION_RESPONSE_ITEM_LABEL,
       description: '',
-      icon: 'testIcon2',
+      landingIcon: 'testIcon2',
     },
   ],
 };
