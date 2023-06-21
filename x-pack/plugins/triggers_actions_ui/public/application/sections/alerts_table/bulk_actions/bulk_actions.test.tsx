@@ -8,7 +8,6 @@ import React, { useMemo, useReducer } from 'react';
 
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-
 import { BulkActionsContext } from './context';
 import { AlertsTable } from '../alerts_table';
 import {
@@ -24,6 +23,7 @@ import {
 import { bulkActionsReducer } from './reducer';
 import { createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';
+import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 import { createCasesServiceMock } from '../index.mock';
 
 jest.mock('@kbn/data-plugin/public');
@@ -151,9 +151,12 @@ describe('AlertsTable.BulkActions', () => {
 
   const casesMap = getCasesMockMap();
 
+  const maintenanceWindowsMap = getMaintenanceWindowMockMap();
+
   const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
     cases: { data: casesMap, isLoading: false },
+    maintenanceWindows: { data: maintenanceWindowsMap, isLoading: false },
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
