@@ -46,7 +46,9 @@ type ESGeoLineSourceSyncMeta = Pick<
   'groupByTimeseries' | 'splitField' | 'sortField'
 >;
 
-const MAX_TRACKS = 250;
+// geo_line aggregation without time series buckets uses lots of resources
+// limit resource consumption by limiting number of tracks to smaller amount
+const MAX_TERMS_TRACKS = 250;
 
 // Constant is used to identify time series id field in UIs, tooltips, and styling.
 // Constant is not passed to Elasticsearch APIs and is not related to '_tsid' document metadata field.
@@ -240,13 +242,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
       totalEntities: {
         cardinality: {
           field: '_tsid',
-          precision_threshold: MAX_TRACKS,
         },
       },
       tracks: {
-        time_series: {
-          size: MAX_TRACKS,
-        },
+        time_series: {},
         aggs: {
           path: {
             geo_line: {
@@ -295,7 +294,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     );
 
     const entityCount = featureCollection.features.length;
-    const areEntitiesTrimmed = entityCount >= MAX_TRACKS;
+    const areEntitiesTrimmed = entityCount >= 10000; // 10000 is max buckets created by time_series aggregation
 
     return {
       data: featureCollection,
@@ -347,8 +346,8 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const entitySearchSource = await this.makeSearchSource(requestMeta, 0);
     entitySearchSource.setField('trackTotalHits', false);
     const splitField = getField(indexPattern, this._descriptor.splitField);
-    const cardinalityAgg = { precision_threshold: MAX_TRACKS };
-    const termsAgg = { size: MAX_TRACKS };
+    const cardinalityAgg = { precision_threshold: MAX_TERMS_TRACKS };
+    const termsAgg = { size: MAX_TERMS_TRACKS };
     entitySearchSource.setField('aggs', {
       totalEntities: {
         cardinality: addFieldToDSL(cardinalityAgg, splitField),
@@ -397,7 +396,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       []
     );
     const totalEntities = _.get(entityResp, 'aggregations.totalEntities.value', 0);
-    const areEntitiesTrimmed = entityBuckets.length >= MAX_TRACKS;
+    const areEntitiesTrimmed = entityBuckets.length >= MAX_TERMS_TRACKS;
     if (totalEntities === 0) {
       return {
         data: EMPTY_FEATURE_COLLECTION,
