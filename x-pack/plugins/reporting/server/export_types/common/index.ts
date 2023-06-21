@@ -17,6 +17,7 @@ import {
   HttpServiceSetup,
   SavedObjectsClientContract,
   CoreKibanaRequest,
+  Headers,
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
@@ -36,7 +37,7 @@ export interface TimeRangeParams {
   max?: Date | string | number | null;
 }
 
-export interface ExportTypeInterface<
+export interface ExportTypesType<
   SetupDeps = any,
   StartDeps = any,
   JobParamsType extends object = any,

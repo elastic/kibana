@@ -6,16 +6,16 @@
  */
 
 import { isString } from 'lodash';
-import { ExportType } from '../export_types/common';
+import { ExportTypesType } from '../export_types/common';
 
-type GetCallbackFn = (item: ExportType) => boolean;
+type GetCallbackFn = (item: ExportTypesType) => boolean;
 
 export class ExportTypesRegistry {
-  private _map: Map<string, ExportType> = new Map();
+  private _map: Map<string, ExportTypesType> = new Map();
 
   constructor() {}
 
-  register(item: ExportType): void {
+  register(item: ExportTypesType): void {
     if (!isString(item.id)) {
       throw new Error(`'item' must have a String 'id' property `);
     }
@@ -35,21 +35,21 @@ export class ExportTypesRegistry {
     return this._map.size;
   }
 
-  getById(id: string): ExportType {
+  getById(id: string): ExportTypesType {
     if (!this._map.has(id)) {
       throw new Error(`Unknown id ${id}`);
     }
 
-    return this._map.get(id) as ExportType;
+    return this._map.get(id) as ExportTypesType;
   }
 
-  get(findType: GetCallbackFn): ExportType {
+  get(findType: GetCallbackFn): ExportTypesType {
     let result;
     for (const value of this._map.values()) {
       if (!findType(value)) {
         continue; // try next value
       }
-      const foundResult: ExportType = value;
+      const foundResult: ExportTypesType = value;
 
       if (result) {
         throw new Error('Found multiple items matching predicate.');

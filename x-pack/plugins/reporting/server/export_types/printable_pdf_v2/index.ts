@@ -29,7 +29,7 @@ import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_p
 import {
   decryptJobHeaders,
   ExportType,
-  ExportTypeInterface,
+  ExportTypesType,
   ExportTypeSetupDeps,
   ExportTypeStartDeps,
   getCustomLogo,
@@ -46,7 +46,7 @@ export type {
 export class PdfExportType
   extends ExportType
   implements
-    ExportTypeInterface<ExportTypeSetupDeps, ExportTypeStartDeps, JobParamsPDFV2, TaskPayloadPDFV2>
+    ExportTypesType<ExportTypeSetupDeps, ExportTypeStartDeps, JobParamsPDFV2, TaskPayloadPDFV2>
 {
   id = PDF_REPORT_TYPE_V2;
   name = 'PDF';
