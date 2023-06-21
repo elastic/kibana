@@ -6,47 +6,24 @@
  */
 
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { CancellationToken, KibanaShuttingDownError } from '@kbn/reporting-common';
+import { KibanaShuttingDownError } from '@kbn/reporting-common';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecuteReportTask } from '.';
-import { ReportingCore } from '../..';
-import { ReportingConfigType } from '../../config';
-import { PdfExportType, TaskPayloadPDFV2 } from '../../export_types/printable_pdf_v2';
+import type { ReportingCore } from '../..';
+import type { ReportingConfigType } from '../../config';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import type { SavedReport } from '../store';
-import { getContentStream } from '../content_stream';
-import { cryptoFactory } from '../crypto';
-import { LocatorParams } from '../../../common';
 
 const logger = loggingSystemMock.createLogger();
-const mockEncryptionKey = 'testencryptionkey';
-const encryptHeaders = async (headers: Record<string, string>) => {
-  const crypto = cryptoFactory(mockEncryptionKey);
-  return await crypto.encrypt(headers);
-};
-
-const getBasePayload = (baseObj: any) =>
-  ({
-    params: { forceNow: 'test' },
-    ...baseObj,
-  } as TaskPayloadPDFV2);
 
 describe('Execute Report Task', () => {
   let mockReporting: ReportingCore;
   let configType: ReportingConfigType;
-  let pdfExport: PdfExportType;
   beforeAll(async () => {
-    configType = createMockConfigSchema({ encryptionKey: mockEncryptionKey });
-
+    configType = createMockConfigSchema();
     mockReporting = await createMockReportingCore(configType);
-    const mockCoreSetup = coreMock.createSetup();
-    const mockLogger = loggingSystemMock.createLogger();
-    pdfExport = new PdfExportType(
-      mockCoreSetup,
-      configType,
-      mockLogger,
-      coreMock.createPluginInitializerContext(configType)
-    );
   });
 
   it('Instance setup', () => {
@@ -71,6 +48,22 @@ describe('Execute Report Task', () => {
     expect(task.getStatus()).toBe('initialized');
   });
 
+  it('create task runner', async () => {
+    logger.info = jest.fn();
+    logger.error = jest.fn();
+
+    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        params: { index: 'cool-reporting-index', id: 'cool-reporting-id' },
+      },
+    } as unknown as RunContext);
+    expect(taskRunner).toHaveProperty('run');
+    expect(taskRunner).toHaveProperty('cancel');
+  });
+
   it('Max Concurrency is 0 if pollEnabled is false', () => {
     const queueConfig = {
       queue: { pollEnabled: false, timeout: 55000 },
@@ -91,7 +84,18 @@ describe('Execute Report Task', () => {
   });
 
   it('throws during reporting if Kibana starts shutting down', async () => {
-    const encryptedHeaders = await encryptHeaders({});
+    mockReporting.getExportTypesRegistry().register({
+      id: 'noop',
+      name: 'Noop',
+      setup: jest.fn(),
+      start: jest.fn(),
+      getSpaceId: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: () => new Promise(() => {}),
+      jobContentExtension: 'pdf',
+      jobType: 'noop',
+      validLicenses: [],
+    });
     const store = await mockReporting.getStore();
     store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
     const task = new ExecuteReportTask(mockReporting, configType, logger);
@@ -100,20 +104,16 @@ describe('Execute Report Task', () => {
     );
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
-    const stream = await getContentStream(mockReporting, { id: 'test', index: '0' });
 
-    const taskPromise = pdfExport.runTask(
-      getBasePayload({
-        forceNow: 'test',
-        title: 'PDF Params Timezone Test',
-        locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
-        browserTimezone: 'UTC',
-        headers: encryptedHeaders,
-      }),
-      'test',
-      new CancellationToken(),
-      stream
-    );
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        params: { index: 'cool-reporting-index', id: 'noop', jobtype: 'noop', payload: {} },
+      },
+    } as unknown as RunContext);
+
+    const taskPromise = taskRunner.run();
     setImmediate(() => {
       mockReporting.pluginStop();
     });
