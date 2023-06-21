@@ -556,7 +556,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">perPage (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. default: 20 </div><div class="param">sortOrder (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of items to return. Limited to 100 items. default: 20 </div><div class="param">sortOrder (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div>
     </div>  <!-- field-items -->
