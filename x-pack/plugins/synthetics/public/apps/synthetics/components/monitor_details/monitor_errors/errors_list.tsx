@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
@@ -21,19 +22,25 @@ import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { Ping, PingState } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { isActiveState } from '../hooks/use_monitor_errors';
-import {
-  formatTestDuration,
-  formatTestRunAt,
-  useDateFormatForTest,
-} from '../../../utils/monitor_test_result/test_time_formats';
+import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+
+export function isErrorActive(item: PingState, lastErrorId?: string, latestPingStatus?: string) {
+  // if the error is the most recent, `isActiveState`, and the monitor
+  // is not yet back up, label the error as active
+  return isActiveState(item) && lastErrorId === item.state.id && latestPingStatus !== 'up';
+}
 
 export const ErrorsList = ({
   errorStates,
   loading,
+  location,
 }: {
   errorStates: PingState[];
   loading: boolean;
+  location: ReturnType<typeof useSelectedLocation>;
 }) => {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
 
@@ -47,13 +54,18 @@ export const ErrorsList = ({
 
   const history = useHistory();
 
-  const format = useDateFormatForTest();
+  const formatter = useDateFormat();
 
-  const selectedLocation = useSelectedLocation();
+  const { latestPing } = useMonitorLatestPing({
+    monitorId: configId,
+    locationLabel: location?.label,
+  });
 
-  const lastTestRun = errorStates?.sort((a, b) => {
+  const lastErrorTestRun = errorStates?.sort((a, b) => {
     return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
   })?.[0];
+
+  const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   const columns = [
     {
@@ -62,32 +74,33 @@ export const ErrorsList = ({
       sortable: (a: PingState) => {
         return moment(a.state.started_at).valueOf();
       },
-      render: (value: string, item: PingState) => {
+      render: (_value: string, item: PingState) => {
         const link = (
           <ErrorDetailsLink
             configId={configId}
             stateId={item.state?.id!}
-            label={formatTestRunAt(item.state!.started_at, format)}
-            locationId={selectedLocation?.id}
+            label={formatter(item.state!.started_at)}
+            locationId={location?.id}
           />
         );
-        const isActive = isActiveState(item);
-        if (!isActive || lastTestRun.state.id !== item.state.id) {
-          return link;
+        if (isErrorActive(item, lastErrorTestRun?.state.id, latestPing?.monitor.status)) {
+          return (
+            <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
+              <EuiFlexItem grow={false} className="eui-textNoWrap">
+                {link}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge iconType="clock" iconSide="right" css={{ maxWidth: 'max-content' }}>
+                  {ACTIVE_LABEL}
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
         }
-
-        return (
-          <EuiFlexGroup gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false} className="eui-textNoWrap">
-              {link}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge iconType="clock" iconSide="right">
-                {ACTIVE_LABEL}
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
+        return link;
+      },
+      mobileOptions: {
+        header: false,
       },
     },
     ...(isBrowserType
@@ -157,9 +170,7 @@ export const ErrorsList = ({
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(
-            `/monitor/${configId}/errors/${state.id}?locationId=${selectedLocation?.id}`
-          );
+          history.push(`/monitor/${configId}/errors/${state.id}?locationId=${location?.id}`);
         },
       };
     }
@@ -169,6 +180,7 @@ export const ErrorsList = ({
     <div>
       <EuiSpacer />
       <EuiInMemoryTable
+        css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
         tableLayout="auto"
         tableCaption={ERRORS_LIST_LABEL}
         loading={loading}

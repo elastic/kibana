@@ -15,7 +15,6 @@ import {
   TOASTER,
 } from '../../screens/alerts_detection_rules';
 import {
-  loadPrebuiltDetectionRulesFromHeaderBtn,
   filterByElasticRules,
   selectNumberOfRules,
   bulkExportRules,
@@ -32,7 +31,10 @@ import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../t
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
+import {
+  excessivelyInstallAllPrebuiltRules,
+  getAvailablePrebuiltRulesCount,
+} from '../../tasks/api_calls/prebuilt_rules';
 
 const EXPORTED_RULES_FILENAME = 'rules_export.ndjson';
 const exceptionList = getExceptionList();
@@ -42,10 +44,10 @@ describe('Export rules', () => {
 
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
@@ -83,7 +85,7 @@ describe('Export rules', () => {
   it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', function () {
     const expectedElasticRulesCount = 7;
 
-    loadPrebuiltDetectionRulesFromHeaderBtn();
+    excessivelyInstallAllPrebuiltRules();
 
     filterByElasticRules();
     selectNumberOfRules(expectedElasticRulesCount);
@@ -97,7 +99,7 @@ describe('Export rules', () => {
   it('exports only custom rules', function () {
     const expectedNumberCustomRulesToBeExported = 1;
 
-    loadPrebuiltDetectionRulesFromHeaderBtn();
+    excessivelyInstallAllPrebuiltRules();
 
     selectAllRules();
     bulkExportRules();
@@ -149,7 +151,7 @@ describe('Export rules', () => {
       // one rule with exception, one without it
       const expectedNumberCustomRulesToBeExported = 2;
 
-      loadPrebuiltDetectionRulesFromHeaderBtn();
+      excessivelyInstallAllPrebuiltRules();
 
       selectAllRules();
       bulkExportRules();

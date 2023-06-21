@@ -8,7 +8,15 @@
 import { schema } from '@kbn/config-schema';
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
 
-export const procedureNames = ['get', 'bulkGet', 'create', 'update', 'delete', 'search'] as const;
+export const procedureNames = [
+  'get',
+  'bulkGet',
+  'create',
+  'update',
+  'delete',
+  'search',
+  'mSearch',
+] as const;
 
 export type ProcedureName = typeof procedureNames[number];
 

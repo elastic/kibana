@@ -7,14 +7,14 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { Case } from '../../../../common';
+import type { CaseUI, CasesUI } from '../../../../common';
 import type { UseActionProps } from '../types';
 import { useItemsAction } from '../use_items_action';
 import * as i18n from './translations';
 
 export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActionProps) => {
   const { isFlyoutOpen, onFlyoutClosed, onSaveItems, openFlyout, isActionDisabled } =
-    useItemsAction<Case['tags']>({
+    useItemsAction<CaseUI['tags']>({
       fieldKey: 'tags',
       isDisabled,
       onAction,
@@ -24,7 +24,7 @@ export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActi
       itemsTransformer: (items) => items,
     });
 
-  const getAction = (selectedCases: Case[]) => {
+  const getAction = (selectedCases: CasesUI) => {
     return {
       name: i18n.EDIT_TAGS,
       onClick: () => openFlyout(selectedCases),

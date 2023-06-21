@@ -12,6 +12,7 @@ export class FieldEditorService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
+  private readonly find = this.ctx.getService('find');
 
   public async setName(name: string, clearFirst = false, typeCharByChar = false) {
     await this.testSubjects.setValue('nameField > input', name, {
@@ -30,6 +31,15 @@ export class FieldEditorService extends FtrService {
   }
   public async disableValue() {
     await this.testSubjects.setEuiSwitch('valueRow > toggle', 'uncheck');
+  }
+  public async clearScript() {
+    const editor = await (
+      await this.testSubjects.find('valueRow')
+    ).findByClassName('react-monaco-editor-container');
+    const textarea = await editor.findByClassName('monaco-mouse-cursor-text');
+    await textarea.click();
+    const input = await this.find.activeElement();
+    await input.clearValueWithKeyboard();
   }
   public async typeScript(script: string) {
     const editor = await (
@@ -50,6 +60,47 @@ export class FieldEditorService extends FtrService {
     await this.testSubjects.click('fieldSaveButton');
   }
 
+  async setUrlFieldFormat(template: string) {
+    const urlTemplateField = await this.find.byCssSelector(
+      'input[data-test-subj="urlEditorUrlTemplate"]'
+    );
+    await urlTemplateField.type(template);
+  }
+
+  public async setStaticLookupFormat(oldValue: string, newValue: string) {
+    await this.testSubjects.click('staticLookupEditorAddEntry');
+    await this.testSubjects.setValue('~staticLookupEditorKey', oldValue);
+    await this.testSubjects.setValue('~staticLookupEditorValue', newValue);
+  }
+
+  public async setColorFormat(value: string, color: string, backgroundColor?: string) {
+    await this.testSubjects.click('colorEditorAddColor');
+    await this.testSubjects.setValue('~colorEditorKeyPattern', value);
+    await this.testSubjects.setValue('~colorEditorColorPicker', color);
+    if (backgroundColor) {
+      await this.testSubjects.setValue('~colorEditorBackgroundPicker', backgroundColor);
+    }
+  }
+
+  public async setStringFormat(transform: string) {
+    await this.testSubjects.selectValue('stringEditorTransform', transform);
+  }
+
+  public async setTruncateFormatLength(length: string) {
+    await this.testSubjects.setValue('truncateEditorLength', length);
+  }
+
+  public async setFieldFormat(format: string) {
+    await this.find.clickByCssSelector(
+      'select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]'
+    );
+  }
+
+  public async setFormat(format: string) {
+    await this.testSubjects.setEuiSwitch('formatRow > toggle', 'check');
+    await this.setFieldFormat(format);
+  }
+
   public async confirmSave() {
     await this.retry.try(async () => {
       await this.testSubjects.setValue('saveModalConfirmText', 'change');
@@ -66,5 +117,9 @@ export class FieldEditorService extends FtrService {
         timeout: 1000,
       });
     });
+  }
+
+  public async waitUntilClosed() {
+    await this.testSubjects.waitForDeleted('fieldEditor');
   }
 }

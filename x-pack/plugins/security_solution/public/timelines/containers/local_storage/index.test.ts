@@ -19,10 +19,9 @@ import {
 
 import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import type { DataTableModel } from '../../../common/store/data_table/model';
-import { TableId } from '../../../../common/types';
 import { VIEW_SELECTION } from '../../../../common/constants';
-import type { DataTableState } from '../../../common/store/data_table/types';
+import type { DataTableModel, DataTableState } from '@kbn/securitysolution-data-table';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../common/lib/kibana');
 

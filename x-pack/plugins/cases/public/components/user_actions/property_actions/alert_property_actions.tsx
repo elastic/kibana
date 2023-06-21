@@ -6,6 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
+
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { DeleteAttachmentConfirmationModal } from '../delete_attachment_confirmation_modal';
 import { UserActionPropertyActions } from './property_actions';
@@ -31,8 +33,10 @@ const AlertPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalAlerts
       ...(showRemoveAlertIcon
         ? [
             {
-              iconType: 'minusInCircle',
+              type: AttachmentActionType.BUTTON as const,
               color: 'danger' as const,
+              disabled: false,
+              iconType: 'minusInCircle',
               label: i18n.REMOVE_ALERTS(totalAlerts),
               onClick: onModalOpen,
             },

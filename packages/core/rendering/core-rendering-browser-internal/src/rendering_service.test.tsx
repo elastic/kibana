@@ -61,6 +61,7 @@ describe('RenderingService#start', () => {
     expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
+        data-test-subj="kbnAppWrapper hiddenChrome"
       >
         <div
           id="app-fixed-viewport"

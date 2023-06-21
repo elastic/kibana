@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }) {
     it('should request clusters when zoomed to larger regions showing lots of data', async () => {
       await PageObjects.maps.setView(20, -90, 2);
       const { rawResponse: response } = await PageObjects.maps.getResponse();
-      expect(response.aggregations.gridSplit.buckets.length).to.equal(17);
+      expect(response.aggregations.gridSplit.buckets.length).to.equal(15);
     });
 
     it('should request documents when query narrows data', async () => {

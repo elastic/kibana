@@ -103,6 +103,13 @@ export class BaseRule {
       actionVariables: {
         context: actionVariables,
       },
+      // As there is "[key: string]: unknown;" in CommonAlertParams,
+      // we couldn't figure out a schema for validation and created a follow on issue:
+      // https://github.com/elastic/kibana/issues/153754
+      // Below validate function should be overwritten in each monitoring rule type
+      validate: {
+        params: { validate: (params) => params },
+      },
     };
   }
 

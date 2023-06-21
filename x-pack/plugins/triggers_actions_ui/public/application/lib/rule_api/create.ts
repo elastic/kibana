@@ -27,7 +27,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
 }): any => ({
   ...res,
   rule_type_id: ruleTypeId,
-  actions: actions.map(({ group, id, params, frequency }) => ({
+  actions: actions.map(({ group, id, params, frequency, alertsFilter }) => ({
     group,
     id,
     params,
@@ -36,6 +36,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
       throttle: frequency!.throttle,
       summary: frequency!.summary,
     },
+    alerts_filter: alertsFilter,
   })),
 });
 

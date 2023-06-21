@@ -35,7 +35,7 @@ export const Analytics: React.FC<InitialAppData> = (props) => {
           <AnalyticsOverview />
         )}
       </Route>
-      <Route exact path={COLLECTION_VIEW_PATH}>
+      <Route path={COLLECTION_VIEW_PATH}>
         <AnalyticsCollectionView />
       </Route>
     </Switch>

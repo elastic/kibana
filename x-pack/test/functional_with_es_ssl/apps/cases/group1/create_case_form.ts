@@ -51,7 +51,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       expect(await title.getVisibleText()).equal(caseTitle);
 
       // validate description
-      const description = await testSubjects.find('user-action-markdown');
+      const description = await testSubjects.find('scrollable-markdown');
       expect(await description.getVisibleText()).equal('test description');
 
       // validate tag exists
@@ -85,8 +85,8 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('case-view-title');
-        await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
-        await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user2');
+        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
+        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
       });
     });
   });

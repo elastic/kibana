@@ -233,10 +233,10 @@ export function useOnSubmit({
     queryParamsPolicyId,
   });
 
-  const navigateAddAgent = (policy?: PackagePolicy) =>
+  const navigateAddAgent = (policy: PackagePolicy) =>
     onSaveNavigate(policy, ['openEnrollmentFlyout']);
 
-  const navigateAddAgentHelp = (policy?: PackagePolicy) =>
+  const navigateAddAgentHelp = (policy: PackagePolicy) =>
     onSaveNavigate(policy, ['showAddAgentHelp']);
 
   const onSubmit = useCallback(
@@ -257,9 +257,9 @@ export function useOnSubmit({
         try {
           setFormState('LOADING');
           if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
-            const packagesToPreinstall: string[] = [];
+            const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
             if (packageInfo) {
-              packagesToPreinstall.push(packageInfo.name);
+              packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
             }
             if (withSysMonitoring) {
               packagesToPreinstall.push(FLEET_SYSTEM_PACKAGE);

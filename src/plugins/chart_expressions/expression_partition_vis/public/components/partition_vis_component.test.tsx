@@ -83,6 +83,7 @@ describe('PartitionVisComponent', function () {
         data: dataPluginMock.createStartContract(),
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
       },
+      hasOpenedOnAggBasedEditor: false,
     };
   });
 
@@ -328,5 +329,20 @@ describe('PartitionVisComponent', function () {
     expect(findTestSubject(component, 'partitionVisNegativeValues').text()).toEqual(
       "Pie chart can't render with negative values."
     );
+  });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallow(
+        <PartitionVisComponent
+          {...wrapperProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
   });
 });

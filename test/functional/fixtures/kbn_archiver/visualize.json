@@ -111,6 +111,63 @@
   "version": "WzE4LDFd"
 }
 
+
+{
+  "attributes":{
+     "description":"",
+     "kibanaSavedObjectMeta":{
+        "searchSourceJSON":"{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+     },
+     "title":"input control options",
+     "uiStateJSON":"{}",
+     "version":1,
+     "visState":"{\"title\":\"input control options\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1683308974253\",\"fieldName\":\"machine.os.raw\",\"parent\":\"\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}"
+  },
+  "coreMigrationVersion": "7.14.0",
+  "id":"5493d640-eb71-11ed-95fe-1d6198198e62",
+  "migrationVersion": {
+    "visualization": "7.14.0"
+  },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "control_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type":"visualization",
+  "updated_at": "2019-06-05T18:04:48.310Z",
+  "version":"WzYwLDFd"
+}
+
+{
+  "attributes":{
+     "description":"",
+     "kibanaSavedObjectMeta":{
+        "searchSourceJSON":"{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+     },
+     "title":"input control range",
+     "uiStateJSON":"{}",
+     "version":1,
+     "visState":"{\"title\":\"input control range\",\"type\":\"input_control_vis\",\"aggs\":[],\"params\":{\"controls\":[{\"id\":\"1683312573005\",\"fieldName\":\"memory\",\"parent\":\"\",\"label\":\"\",\"type\":\"range\",\"options\":{\"decimalPlaces\":0,\"step\":1},\"indexPatternRefName\":\"control_0_index_pattern\"},{\"id\":\"1683312619904\",\"indexPattern\":\"\",\"fieldName\":\"\",\"parent\":\"\",\"label\":\"\",\"type\":\"range\",\"options\":{\"decimalPlaces\":0,\"step\":1}}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false}}"
+  },
+  "coreMigrationVersion": "7.14.0",
+  "created_at":"2023-05-05T18:50:52.396Z",
+  "id":"c26cbac0-eb75-11ed-9d36-af11c87c7c69",
+  "managed":false,
+  "references":[
+     {
+        "id": "logstash-*",
+        "name": "control_0_index_pattern",
+        "type":"index-pattern"
+     }
+  ],
+  "type":"visualization",
+  "typeMigrationVersion":"7.14.0",
+  "updated_at":"2023-05-05T18:50:52.396Z",
+  "version":"WzY1LDFd"
+}
+
 {
   "attributes": {
     "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"message\",\"type\":\"string\",\"esTypes\":[\"text\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"message.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"message\"}}},{\"name\":\"user\",\"type\":\"string\",\"esTypes\":[\"text\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"user.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"user\"}}}]",

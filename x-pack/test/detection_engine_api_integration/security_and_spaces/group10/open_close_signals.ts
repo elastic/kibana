@@ -18,9 +18,9 @@ import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_e
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   setSignalStatus,
-  getSignalStatusEmptyResponse,
+  getAlertUpdateEmptyResponse,
   getQuerySignalIds,
   deleteAllRules,
   createRule,
@@ -37,6 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('open_close_signals', () => {
     describe('validation checks', () => {
@@ -50,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
         // remove any server generated items that are indeterministic
         delete body.took;
 
-        expect(body).to.eql(getSignalStatusEmptyResponse());
+        expect(body).to.eql(getAlertUpdateEmptyResponse());
       });
 
       it('should not give errors when querying and the signals index does exist and is empty', async () => {
@@ -64,9 +65,9 @@ export default ({ getService }: FtrProviderContext) => {
         // remove any server generated items that are indeterministic
         delete body.took;
 
-        expect(body).to.eql(getSignalStatusEmptyResponse());
+        expect(body).to.eql(getAlertUpdateEmptyResponse());
 
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
       });
 
       describe('tests with auditbeat data', () => {
@@ -84,12 +85,15 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
         });
 
         it('should be able to execute and get 10 signals', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 10, [id]);
@@ -98,7 +102,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be have set the signals in an open state initially', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 10, [id]);
@@ -110,7 +117,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be able to get a count of 10 closed signals when closing 10', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 10, [id]);
@@ -136,7 +146,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be able close signals immediately and they all should be closed', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);

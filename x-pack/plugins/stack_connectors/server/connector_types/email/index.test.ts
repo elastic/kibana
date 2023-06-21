@@ -439,6 +439,7 @@ describe('params validation', () => {
           "text": "Go to Elastic",
         },
         "message": "this is the message",
+        "messageHTML": null,
         "subject": "this is a test",
         "to": Array [
           "bob@example.com",
@@ -506,6 +507,7 @@ describe('execute()', () => {
     bcc: ['jimmy@example.com'],
     subject: 'the subject',
     message: 'a message to you',
+    messageHTML: null,
     kibanaFooterLink: {
       path: '/',
       text: 'Go to Elastic',
@@ -522,6 +524,10 @@ describe('execute()', () => {
     configurationUtilities: actionsConfigMock.create(),
     logger: mockedLogger,
   };
+
+  beforeEach(() => {
+    executorOptions.configurationUtilities = actionsConfigMock.create();
+  });
 
   test('ensure parameters are as expected', async () => {
     sendEmailMock.mockReset();
@@ -540,9 +546,65 @@ describe('execute()', () => {
         "content": Object {
           "message": "a message to you
 
-      --
+      ---
 
       This message was sent by Elastic.",
+          "messageHTML": null,
+          "subject": "the subject",
+        },
+        "hasAuth": true,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "password": "supersecret",
+          "service": "__json",
+          "user": "bob",
+        },
+      }
+    `);
+  });
+
+  test('ensure parameters are as expected with HTML', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "connectorId": "some-id",
+        "content": Object {
+          "message": "a message to you
+
+      ---
+
+      This message was sent by Elastic.",
+          "messageHTML": "<html><body><span>My HTML message</span></body></html>",
           "subject": "the subject",
         },
         "hasAuth": true,
@@ -591,9 +653,10 @@ describe('execute()', () => {
         "content": Object {
           "message": "a message to you
 
-      --
+      ---
 
       This message was sent by Elastic.",
+          "messageHTML": null,
           "subject": "the subject",
         },
         "hasAuth": false,
@@ -642,9 +705,10 @@ describe('execute()', () => {
         "content": Object {
           "message": "a message to you
 
-      --
+      ---
 
       This message was sent by Elastic.",
+          "messageHTML": null,
           "subject": "the subject",
         },
         "hasAuth": false,
@@ -705,6 +769,49 @@ describe('execute()', () => {
       bcc: ['jim', '{{rogue}}', 'bob'],
       subject: '{{rogue}}',
       message: '{{rogue}}',
+      messageHTML: null,
+      kibanaFooterLink: {
+        path: '/',
+        text: 'Go to Elastic',
+      },
+    };
+    const variables = {
+      rogue: '*bold*',
+    };
+    const renderedParams = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+
+    expect(renderedParams.message).toBe('\\*bold\\*');
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "bcc": Array [
+          "jim",
+          "*bold*",
+          "bob",
+        ],
+        "cc": Array [
+          "*bold*",
+        ],
+        "kibanaFooterLink": Object {
+          "path": "/",
+          "text": "Go to Elastic",
+        },
+        "message": "\\\\*bold\\\\*",
+        "messageHTML": null,
+        "subject": "*bold*",
+        "to": Array [],
+      }
+    `);
+  });
+
+  test('renders parameter templates with HTML as expected', async () => {
+    expect(connectorType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      to: [],
+      cc: ['{{rogue}}'],
+      bcc: ['jim', '{{rogue}}', 'bob'],
+      subject: '{{rogue}}',
+      message: '{{rogue}}',
+      messageHTML: `<html><body><span>{{rogue}}</span></body></html>`,
       kibanaFooterLink: {
         path: '/',
         text: 'Go to Elastic',
@@ -732,10 +839,33 @@ describe('execute()', () => {
           "text": "Go to Elastic",
         },
         "message": "\\\\*bold\\\\*",
+        "messageHTML": "<html><body><span>*bold*</span></body></html>",
         "subject": "*bold*",
         "to": Array [],
       }
     `);
+  });
+
+  test('provides no footer link when enableFooterInEmail is false', async () => {
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      configurationUtilities: {
+        ...configurationUtilities,
+        enableFooterInEmail: jest.fn().mockReturnValue(false),
+      },
+    };
+
+    const connectorTypeWithPublicUrl = getConnectorType({
+      publicBaseUrl: 'https://localhost:1234/foo/bar',
+    });
+
+    await connectorTypeWithPublicUrl.executor(customExecutorOptions);
+
+    expect(customExecutorOptions.configurationUtilities.enableFooterInEmail).toHaveBeenCalledTimes(
+      1
+    );
+    const sendMailCall = sendEmailMock.mock.calls[0][1];
+    expect(sendMailCall.content.message).toMatchInlineSnapshot(`"a message to you"`);
   });
 
   test('provides a footer link to Elastic when publicBaseUrl is defined', async () => {
@@ -750,7 +880,7 @@ describe('execute()', () => {
     expect(sendMailCall.content.message).toMatchInlineSnapshot(`
       "a message to you
 
-      --
+      ---
 
       This message was sent by Elastic. [Go to Elastic](https://localhost:1234/foo/bar)."
     `);
@@ -779,7 +909,7 @@ describe('execute()', () => {
     expect(sendMailCall.content.message).toMatchInlineSnapshot(`
       "a message to you
 
-      --
+      ---
 
       This message was sent by Elastic. [View this in Elastic](https://localhost:1234/foo/bar/my/app)."
     `);

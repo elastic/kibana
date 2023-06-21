@@ -15,13 +15,14 @@ import {
   toNdJsonString,
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
+  getImportExceptionsListItemNewerVersionSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
@@ -29,6 +30,9 @@ import {
   getWebHookAction,
   removeServerGeneratedProperties,
   ruleToNdjson,
+  createLegacyRuleAction,
+  getLegacyActionSO,
+  createRule,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
@@ -178,6 +182,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const es = getService('es');
 
   describe('import_rules', () => {
     describe('importing rules with different roles', () => {
@@ -194,7 +199,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
       it('should successfully import rules without actions when user has no actions privileges', async () => {
@@ -481,7 +486,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -716,6 +721,45 @@ export default ({ getService }: FtrProviderContext): void => {
         ruleOutput.name = 'some other name';
         ruleOutput.revision = 0;
         expect(bodyToCompare).to.eql(ruleOutput);
+      });
+
+      it('should migrate legacy actions in existing rule if overwrite is set to true', async () => {
+        const simpleRule = getSimpleRule('rule-1');
+
+        const [connector, createdRule] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(supertest, log, simpleRule),
+        ]);
+        await createLegacyRuleAction(supertest, createdRule.id, connector.body.id);
+
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+          createdRule.id
+        );
+
+        simpleRule.name = 'some other name';
+        const ndjson = ruleToNdjson(simpleRule);
+
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', ndjson, 'rules.ndjson')
+          .expect(200);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
       });
 
       it('should report a conflict if there is an attempt to import a rule with a rule_id that already exists, but still have some successes with other rules', async () => {
@@ -1378,6 +1422,53 @@ export default ({ getService }: FtrProviderContext): void => {
           await deleteAllExceptions(supertest, log);
         });
 
+        /* 
+          Following the release of version 8.7, this test can be considered as an evaluation of exporting 
+          an outdated List Item. A notable distinction lies in the absence of the "expire_time" property
+          within the getCreateExceptionListMinimalSchemaMock, which allows for differentiation between older
+          and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule, 
+          thereby enabling simulation of migration scenarios. 
+        */
+        it('should be able to import a rule and an old version exception list, then delete it successfully', async () => {
+          const simpleRule = getSimpleRule('rule-1');
+
+          // import old exception version
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .attach(
+              'file',
+              Buffer.from(
+                toNdJsonString([
+                  simpleRule,
+                  getImportExceptionsListSchemaMock('test_list_id'),
+                  getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
+                ])
+              ),
+              'rules.ndjson'
+            )
+            .expect(200);
+          expect(body).to.eql({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 1,
+            action_connectors_success: true,
+            action_connectors_success_count: 0,
+            action_connectors_errors: [],
+            action_connectors_warnings: [],
+          });
+
+          // delete the exception list item by its item_id
+          await supertest
+            .delete(`${EXCEPTION_LIST_ITEM_URL}?item_id=${'test_item_id'}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+        });
+
         it('should be able to import a rule and an exception list', async () => {
           const simpleRule = getSimpleRule('rule-1');
 
@@ -1390,7 +1481,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 toNdJsonString([
                   simpleRule,
                   getImportExceptionsListSchemaMock('test_list_id'),
-                  getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
+                  getImportExceptionsListItemNewerVersionSchemaMock('test_item_id', 'test_list_id'),
                 ])
               ),
               'rules.ndjson'

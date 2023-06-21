@@ -45,6 +45,18 @@ describe('getRuleRoute', () => {
           foo: true,
         },
         uuid: '123-456',
+        alertsFilter: {
+          query: {
+            kql: 'name:test',
+            dsl: '{"must": {"term": { "name": "test" }}}',
+            filters: [],
+          },
+          timeframe: {
+            days: [1],
+            hours: { start: '08:00', end: '17:00' },
+            timezone: 'UTC',
+          },
+        },
       },
     ],
     consumer: 'bar',
@@ -89,6 +101,7 @@ describe('getRuleRoute', () => {
         params: mockedAlert.actions[0].params,
         connector_type_id: mockedAlert.actions[0].actionTypeId,
         uuid: mockedAlert.actions[0].uuid,
+        alerts_filter: mockedAlert.actions[0].alertsFilter,
       },
     ],
   };

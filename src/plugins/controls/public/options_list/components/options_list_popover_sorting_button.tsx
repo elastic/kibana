@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import {
   EuiButtonGroupOptionProps,
@@ -21,38 +21,45 @@ import {
   Direction,
   EuiToolTip,
 } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import {
   getCompatibleSortingTypes,
   OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortBy,
 } from '../../../common/options_list/suggestions_sorting';
-import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 interface OptionsListSortingPopoverProps {
   showOnlySelected: boolean;
 }
+
 type SortByItem = EuiSelectableOption & {
   data: { sortBy: OptionsListSortBy };
 };
 
+const sortOrderOptions: EuiButtonGroupOptionProps[] = [
+  {
+    id: 'asc',
+    iconType: `sortAscending`,
+    'data-test-subj': `optionsList__sortOrder_asc`,
+    label: OptionsListStrings.editorAndPopover.sortOrder.asc.getSortOrderLabel(),
+  },
+  {
+    id: 'desc',
+    iconType: `sortDescending`,
+    'data-test-subj': `optionsList__sortOrder_desc`,
+    label: OptionsListStrings.editorAndPopover.sortOrder.desc.getSortOrderLabel(),
+  },
+];
+
 export const OptionsListPopoverSortingButton = ({
   showOnlySelected,
 }: OptionsListSortingPopoverProps) => {
-  // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { setSort },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const field = select((state) => state.componentState.field);
-  const sort = select((state) => state.explicitInput.sort ?? OPTIONS_LIST_DEFAULT_SORT);
+  const field = optionsList.select((state) => state.componentState.field);
+  const sort = optionsList.select((state) => state.explicitInput.sort ?? OPTIONS_LIST_DEFAULT_SORT);
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
@@ -68,28 +75,16 @@ export const OptionsListPopoverSortingButton = ({
     });
   });
 
-  const sortOrderOptions: EuiButtonGroupOptionProps[] = [
-    {
-      id: 'asc',
-      iconType: `sortAscending`,
-      'data-test-subj': `optionsList__sortOrder_asc`,
-      label: OptionsListStrings.editorAndPopover.sortOrder.asc.getSortOrderLabel(),
+  const onSortByChange = useCallback(
+    (updatedOptions: SortByItem[]) => {
+      setSortByOptions(updatedOptions);
+      const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
+      if (selectedOption) {
+        optionsList.dispatch.setSort({ by: selectedOption.data.sortBy });
+      }
     },
-    {
-      id: 'desc',
-      iconType: `sortDescending`,
-      'data-test-subj': `optionsList__sortOrder_desc`,
-      label: OptionsListStrings.editorAndPopover.sortOrder.desc.getSortOrderLabel(),
-    },
-  ];
-
-  const onSortByChange = (updatedOptions: SortByItem[]) => {
-    setSortByOptions(updatedOptions);
-    const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
-    if (selectedOption) {
-      dispatch(setSort({ by: selectedOption.data.sortBy }));
-    }
-  };
+    [optionsList.dispatch]
+  );
 
   const SortButton = () => (
     <EuiButtonEmpty
@@ -135,7 +130,9 @@ export const OptionsListPopoverSortingButton = ({
                 options={sortOrderOptions}
                 idSelected={sort.direction}
                 legend={OptionsListStrings.editorAndPopover.getSortDirectionLegend()}
-                onChange={(value) => dispatch(setSort({ direction: value as Direction }))}
+                onChange={(value) =>
+                  optionsList.dispatch.setSort({ direction: value as Direction })
+                }
               />
             </EuiFlexItem>
           </EuiFlexGroup>

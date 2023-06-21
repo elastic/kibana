@@ -19,10 +19,10 @@ export const allowedExperimentalValues = Object.freeze({
   experimentalDataStreamSettings: false,
   displayAgentMetrics: true,
   showIntegrationsSubcategories: true,
-  agentFqdnMode: false,
+  agentFqdnMode: true,
   showExperimentalShipperOptions: false,
-  fleetServerStandalone: false,
   agentTamperProtectionEnabled: false,
+  secretsStorage: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

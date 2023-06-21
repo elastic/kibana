@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEsSearch, useTheme } from '@kbn/observability-plugin/public';
+import { useEsSearch, useTheme } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
 import { useLocations } from './use_locations';
 import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';

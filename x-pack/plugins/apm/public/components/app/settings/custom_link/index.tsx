@@ -81,15 +81,6 @@ export function CustomLinkOverview() {
         />
       )}
 
-      <EuiText color="subdued">
-        {i18n.translate('xpack.apm.settings.customLink.info', {
-          defaultMessage:
-            'These links will be shown in the Actions context menu in selected areas of the app, e.g. by the transactions detail.',
-        })}
-      </EuiText>
-
-      <EuiSpacer size="m" />
-
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
@@ -110,6 +101,15 @@ export function CustomLinkOverview() {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.customLink.info', {
+          defaultMessage:
+            'These links will be shown in the Actions context menu in selected areas of the app, e.g. by the transactions detail.',
+        })}
+      </EuiText>
 
       <EuiSpacer size="m" />
 

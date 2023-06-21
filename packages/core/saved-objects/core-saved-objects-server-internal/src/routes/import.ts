@@ -47,11 +47,16 @@ export const registerImportRoute = (
           {
             overwrite: schema.boolean({ defaultValue: false }),
             createNewCopies: schema.boolean({ defaultValue: false }),
+            compatibilityMode: schema.boolean({ defaultValue: false }),
           },
           {
             validate: (object) => {
               if (object.overwrite && object.createNewCopies) {
                 return 'cannot use [overwrite] with [createNewCopies]';
+              }
+
+              if (object.createNewCopies && object.compatibilityMode) {
+                return 'cannot use [createNewCopies] with [compatibilityMode]';
               }
             },
           }
@@ -62,12 +67,17 @@ export const registerImportRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      const { overwrite, createNewCopies } = req.query;
+      const { overwrite, createNewCopies, compatibilityMode } = req.query;
       const { getClient, getImporter, typeRegistry } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
-        .incrementSavedObjectsImport({ request: req, createNewCopies, overwrite })
+        .incrementSavedObjectsImport({
+          request: req,
+          createNewCopies,
+          overwrite,
+          compatibilityMode,
+        })
         .catch(() => {});
 
       const file = req.body.file as FileStream;
@@ -99,6 +109,7 @@ export const registerImportRoute = (
           readStream,
           overwrite,
           createNewCopies,
+          compatibilityMode,
         });
 
         return res.ok({ body: result });

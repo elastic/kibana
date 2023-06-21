@@ -10,13 +10,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../../../common';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
 import { ServerError } from '../types';
-import { bulkGetCases, Case, CasesBulkGetResponse } from './api';
+import { bulkGetCases, Case, CasesBulkGetResponse } from './apis/bulk_get_cases';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',
 });
-
-const caseFields = ['title', 'description', 'status', 'totalComment', 'created_at', 'created_by'];
 
 const transformCases = (data: CasesBulkGetResponse): Map<string, Case> => {
   const casesMap = new Map();
@@ -38,7 +36,7 @@ export const useBulkGetCases = (caseIds: string[], fetchCases: boolean) => {
     triggersActionsUiQueriesKeys.casesBulkGet(caseIds),
     () => {
       const abortCtrlRef = new AbortController();
-      return bulkGetCases(http, { ids: caseIds, fields: caseFields }, abortCtrlRef.signal);
+      return bulkGetCases(http, { ids: caseIds }, abortCtrlRef.signal);
     },
     {
       enabled: caseIds.length > 0 && fetchCases,

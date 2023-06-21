@@ -9,8 +9,8 @@ import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DateRange } from '../../../../common';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -836,12 +836,16 @@ export function replaceColumn({
       { ...layer, columns: { ...layer.columns, [columnId]: newColumn } },
       columnId
     );
-    return adjustColumnReferencesForChangedColumn(
-      {
-        ...newLayer,
-        columnOrder: getColumnOrder(newLayer),
-      },
-      columnId
+
+    return updateDefaultLabels(
+      adjustColumnReferencesForChangedColumn(
+        {
+          ...newLayer,
+          columnOrder: getColumnOrder(newLayer),
+        },
+        columnId
+      ),
+      indexPattern
     );
   } else if (operationDefinition.input === 'managedReference') {
     // Just changing a param in a formula column should trigger
@@ -1576,7 +1580,8 @@ export function getErrorMessages(
           columnId,
           indexPattern,
           { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
-          operationDefinitionMap
+          operationDefinitionMap,
+          core.uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
         );
       }
     })

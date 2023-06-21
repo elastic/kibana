@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import {
-  BULK_GET_USER_PROFILES_API_TAG,
-  constructFilesHttpOperationTag,
-  SUGGEST_USER_PROFILES_API_TAG,
-} from '../constants';
+import { BULK_GET_USER_PROFILES_API_TAG, SUGGEST_USER_PROFILES_API_TAG } from '../constants';
 import { HttpApiTagOperation } from '../constants/types';
 import type { Owner } from '../constants/types';
+import { constructFilesHttpOperationTag } from '../files';
 
 export const getApiTags = (owner: Owner) => {
   const create = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Create);

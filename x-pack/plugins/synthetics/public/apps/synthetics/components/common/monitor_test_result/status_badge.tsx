@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, IconColor, EuiThemeComputed, EuiLoadingContent } from '@elastic/eui';
+import { EuiBadge, IconColor, EuiThemeComputed, EuiSkeletonText } from '@elastic/eui';
 
 type MonitorStatus = 'succeeded' | 'failed' | 'skipped' | 'unknown';
 export const StatusBadge = ({ status }: { status: MonitorStatus }) => {
   if (status === 'unknown') {
-    return <EuiLoadingContent lines={1} />;
+    return <EuiSkeletonText lines={1} />;
   }
 
   return (
-    <EuiBadge color={getBadgeColorForMonitorStatus(status)}>
+    <EuiBadge color={getBadgeColorForMonitorStatus(status)} css={{ maxWidth: 'max-content' }}>
       {status === 'succeeded' ? COMPLETE_LABEL : status === 'failed' ? FAILED_LABEL : SKIPPED_LABEL}
     </EuiBadge>
   );

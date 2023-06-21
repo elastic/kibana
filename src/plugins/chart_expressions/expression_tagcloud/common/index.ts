@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
+export { EXPRESSION_NAME, ScaleOptions, Orientation } from './constants';
 
-export * from './constants';
+export type { ExpressionTagcloudFunctionDefinition } from './types/expression_functions';

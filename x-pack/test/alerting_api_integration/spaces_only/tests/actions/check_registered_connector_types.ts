@@ -28,12 +28,14 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           .sort()
       ).to.eql(
         [
+          '.d3security',
           '.email',
           '.index',
           '.pagerduty',
           '.swimlane',
           '.server-log',
           '.slack',
+          '.slack_api',
           '.webhook',
           '.cases-webhook',
           '.xmatters',
@@ -46,6 +48,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.tines',
           '.torq',
           '.opsgenie',
+          '.gen-ai',
         ].sort()
       );
     });

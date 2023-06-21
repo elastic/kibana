@@ -6,8 +6,6 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { omit } from 'lodash';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { parseDuration } from '../../../common/parse_duration';
@@ -15,7 +13,12 @@ import { RawRule, SanitizedRule, RuleTypeParams, Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../lib';
 import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
-import { createRuleSavedObject, extractReferences, validateActions, addUuid } from '../lib';
+import {
+  createRuleSavedObject,
+  extractReferences,
+  validateActions,
+  addGeneratedActionValues,
+} from '../lib';
 import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { NormalizedAlertAction, RulesClientContext } from '../types';
@@ -35,6 +38,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'updatedAt'
     | 'apiKey'
     | 'apiKeyOwner'
+    | 'apiKeyCreatedByUser'
     | 'muteAll'
     | 'mutedInstanceIds'
     | 'actions'
@@ -53,7 +57,7 @@ export async function create<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   { data: initialData, options, allowMissingConnectorSecrets }: CreateOptions<Params>
 ): Promise<SanitizedRule<Params>> {
-  const data = { ...initialData, actions: addUuid(initialData.actions) };
+  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
 
   const id = options?.id || SavedObjectsUtils.generateId();
 
@@ -82,29 +86,27 @@ export async function create<Params extends RuleTypeParams = never>(
   // Throws an error if alert type isn't registered
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
-  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
+  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   const username = await context.getUserName();
 
   let createdAPIKey = null;
+  let isAuthTypeApiKey = false;
   try {
+    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
+    const name = generateAPIKeyName(ruleType.id, data.name);
     createdAPIKey = data.enabled
-      ? await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
-          context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
-        )
+      ? isAuthTypeApiKey
+        ? context.getAuthenticationAPIKey(`${name}-user-created`)
+        : await withSpan(
+            {
+              name: 'createAPIKey',
+              type: 'rules',
+            },
+            () => context.createAPIKey(name)
+          )
       : null;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
-  }
-
-  // TODO https://github.com/elastic/kibana/issues/148414
-  // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-  const firstFrequency = data.actions[0]?.frequency;
-  if (data.consumer === AlertConsumers.SIEM && firstFrequency) {
-    data.actions = data.actions.map((action) => omit(action, 'frequency'));
-    if (!data.notifyWhen) {
-      data.notifyWhen = firstFrequency.notifyWhen;
-      data.throttle = firstFrequency.throttle;
-    }
   }
 
   await withSpan({ name: 'validateActions', type: 'rules' }, () =>
@@ -139,7 +141,7 @@ export async function create<Params extends RuleTypeParams = never>(
 
   const rawRule: RawRule = {
     ...data,
-    ...apiKeyAsAlertAttributes(createdAPIKey, username),
+    ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
     legacyId,
     actions,
     createdBy: username,

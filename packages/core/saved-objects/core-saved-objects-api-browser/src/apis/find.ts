@@ -19,7 +19,12 @@ export type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-a
  */
 export type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'pit' | 'rootSearchFields' | 'searchAfter' | 'sortOrder' | 'typeToNamespacesMap'
+  | 'pit'
+  | 'rootSearchFields'
+  | 'searchAfter'
+  | 'sortOrder'
+  | 'typeToNamespacesMap'
+  | 'migrationVersionCompatibility'
 >;
 
 /**

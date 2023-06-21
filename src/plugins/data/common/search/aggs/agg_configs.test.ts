@@ -96,7 +96,7 @@ describe('AggConfigs', () => {
       ac.createAggConfig(
         new AggConfig(ac, {
           enabled: true,
-          type: typesRegistry.get('terms'),
+          type: typesRegistry.get('terms')!,
           params: {},
           schema: 'split',
         })

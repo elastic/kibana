@@ -6,6 +6,7 @@ value:
   name: new name
   enabled: true
   throttle: null
+  revision: 1
   running: false
   schedule:
     interval: 10m
@@ -40,6 +41,7 @@ value:
         level: info
         message: "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}"
       id: 96b668d0-a1b6-11ed-afdf-d39a49596974
+      uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
       connector_type_id: .server-log
       frequency:
         summary: false
@@ -55,3 +57,4 @@ value:
     warning: null
     outcome: succeeded
   next_run: '2023-01-31T23:49:42.432Z'
+  api_key_created_by_user: false

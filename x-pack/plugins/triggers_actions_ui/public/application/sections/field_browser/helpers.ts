@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
+import {
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  DefaultAlertFieldName,
+} from '@kbn/rule-data-utils';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { isEmpty } from 'lodash/fp';
-import { CASES } from '../translations';
+import { CASES, MAINTENANCE_WINDOWS } from '../translations';
 
 export const FIELD_BROWSER_WIDTH = 925;
 export const TABLE_HEIGHT = 260;
@@ -22,11 +27,21 @@ export const getFieldCount = (category: Partial<BrowserField> | undefined): numb
   category != null && category.fields != null ? Object.keys(category.fields).length : 0;
 
 const matchesSystemField = (field: string, searchTerm: string): boolean => {
-  const casesLabelI18n = CASES.toLocaleLowerCase();
-  const casesLabel = 'cases';
+  const termsToMatch = [
+    CASES.toLocaleLowerCase(),
+    MAINTENANCE_WINDOWS.toLocaleLowerCase(),
+    'cases',
+    'maintenance windows',
+  ];
+
+  const fieldsToMatch: DefaultAlertFieldName[] = [ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS];
+
   const term = searchTerm.toLocaleLowerCase();
 
-  return field === ALERT_CASE_IDS && (casesLabelI18n.includes(term) || casesLabel.includes(term));
+  const matchesField = fieldsToMatch.includes(field as DefaultAlertFieldName);
+  const matchesTerm = termsToMatch.some((termToMatch) => termToMatch.includes(term));
+
+  return matchesField && matchesTerm;
 };
 
 /**
@@ -169,6 +184,17 @@ export const getIconFromType = (type: string | null | undefined) => {
 };
 
 export const getEmptyValue = () => '—';
+
+export const getCategory = (fieldName: string) => {
+  const fieldNameArray = fieldName?.split('.');
+  if (fieldNameArray?.length === 1) {
+    return 'base';
+  }
+  return fieldNameArray?.[0] ?? '(unknown)';
+};
+
+export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMetadata>) =>
+  ecsFlat[fieldName]?.description ?? '';
 
 /** Returns example text, or an empty string if the field does not have an example */
 export const getExampleText = (example: string | number | null | undefined): string =>

@@ -36,14 +36,15 @@ export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate
 
 export const PageTitle: React.FC = ({ children }) => (
   <EuiTitle size="l">
-    <div>
-      {children}
-      <EuiSpacer />
-    </div>
+    <div>{children}</div>
   </EuiTitle>
 );
 
-export const PageTitleText = ({ title }: { title: React.ReactNode }) => <h2>{title}</h2>;
+export const PageTitleText = ({ title }: { title: React.ReactNode }) => (
+  <EuiText grow={false} size="s">
+    <h1>{title}</h1>
+  </EuiText>
+);
 
 export const getExpandColumn = <T extends unknown>({
   onClick,
@@ -81,7 +82,7 @@ const baseColumns = [
       />
     ),
     truncateText: true,
-    width: '150px',
+    width: '180px',
     sortable: true,
     render: (filename: string) => (
       <EuiToolTip position="top" content={filename} anchorClassName="eui-textTruncate">
@@ -94,7 +95,7 @@ const baseColumns = [
     name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel', {
       defaultMessage: 'Result',
     }),
-    width: '120px',
+    width: '80px',
     sortable: true,
     render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
       <CspEvaluationBadge type={type} />
@@ -118,6 +119,7 @@ const baseColumns = [
     ),
     sortable: true,
     truncateText: true,
+    width: '12%',
     render: (name: FindingsByResourcePage['resource.name']) => {
       if (!name) return;
 
@@ -149,6 +151,7 @@ const baseColumns = [
         defaultMessage: 'Rule Number',
       }
     ),
+    sortable: true,
     width: '120px',
   },
   {
@@ -174,6 +177,7 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
       { defaultMessage: 'CIS Section' }
     ),
+    width: '150px',
     sortable: true,
     truncateText: true,
     render: (section: string) => (

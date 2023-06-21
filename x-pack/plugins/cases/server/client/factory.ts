@@ -33,6 +33,7 @@ import type {
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { FilesStart } from '@kbn/files-plugin/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -66,6 +67,7 @@ interface CasesClientFactoryArgs {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
+  filesPluginStart: FilesStart;
 }
 
 /**
@@ -142,6 +144,8 @@ export class CasesClientFactory {
 
     const userInfo = await this.getUserInfo(request);
 
+    const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
+
     return createCasesClient({
       services,
       unsecuredSavedObjectsClient,
@@ -157,6 +161,7 @@ export class CasesClientFactory {
       spaceId:
         this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       savedObjectsSerializer,
+      fileService,
     });
   }
 

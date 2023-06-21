@@ -11,6 +11,7 @@
     "**/*.ts",
   ],
   "kbn_references": [
+    "@kbn/core-saved-objects-server",
     "@kbn/tooling-log",
     "@kbn/es-archiver",
     "@kbn/test"

@@ -54,7 +54,7 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
   secure: false,
 };
 
-const EMAIL_FOOTER_DIVIDER = '\n\n--\n\n';
+const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
 
 const ConfigSchemaProps = {
   service: schema.string({ defaultValue: 'other' }),
@@ -154,6 +154,7 @@ const ParamsSchemaProps = {
   bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
   subject: schema.string(),
   message: schema.string(),
+  messageHTML: schema.nullable(schema.string()),
   // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
   // provide a more contextual URL in the footer (ex: URL to the alert details page)
   kibanaFooterLink: schema.object({
@@ -319,10 +320,16 @@ async function executor(
     transport.service = config.service;
   }
 
-  const footerMessage = getFooterMessage({
-    publicBaseUrl,
-    kibanaFooterLink: params.kibanaFooterLink,
-  });
+  let actualMessage = params.message;
+  const actualHTMLMessage = params.messageHTML;
+
+  if (configurationUtilities.enableFooterInEmail()) {
+    const footerMessage = getFooterMessage({
+      publicBaseUrl,
+      kibanaFooterLink: params.kibanaFooterLink,
+    });
+    actualMessage = `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
+  }
 
   const sendEmailOptions: SendEmailOptions = {
     connectorId: actionId,
@@ -335,7 +342,8 @@ async function executor(
     },
     content: {
       subject: params.subject,
-      message: `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`,
+      message: actualMessage,
+      messageHTML: actualHTMLMessage,
     },
     hasAuth: config.hasAuth,
     configurationUtilities,

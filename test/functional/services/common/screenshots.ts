@@ -9,6 +9,7 @@
 import { resolve, dirname } from 'path';
 import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
+import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 
 import del from 'del';
 
@@ -92,6 +93,12 @@ export class ScreenshotsService extends FtrService {
     } catch (err) {
       this.log.error('SCREENSHOT FAILED');
       this.log.error(err);
+      if (err instanceof NoSuchSessionError) {
+        // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors/InvalidSessionID
+        this.log.error(
+          `WebDriver session is no longer valid.\nProbably Chrome process crashed when it tried to use more memory than what was available.`
+        );
+      }
     }
   }
 }

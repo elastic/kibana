@@ -32,7 +32,11 @@ import {
 export const strings = {
   getFilterSetButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
-      defaultMessage: 'Saved query menu',
+      defaultMessage: 'Query menu',
+    }),
+  getSavedQueryPopoverSaveChangesButtonText: () =>
+    i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText', {
+      defaultMessage: 'Update query',
     }),
 };
 
@@ -43,6 +47,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   toggleFilterBarMenuPopover: (value: boolean) => void;
   openQueryBarMenu: boolean;
   nonKqlMode?: 'lucene' | 'text';
+  disableQueryLanguageSwitcher?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   savedQueryService: SavedQueryService;
@@ -59,6 +64,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   showFilterBar?: boolean;
   showSaveQuery?: boolean;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   indexPatterns?: Array<DataView | string>;
   buttonProps?: Partial<EuiButtonIconProps>;
   isDisabled?: boolean;
@@ -67,6 +73,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
 function QueryBarMenuComponent({
   language,
   nonKqlMode,
+  disableQueryLanguageSwitcher,
   dateRangeFrom,
   dateRangeTo,
   onQueryChange,
@@ -88,6 +95,7 @@ function QueryBarMenuComponent({
   showSaveQuery,
   indexPatterns,
   timeRangeForSuggestionsOverride,
+  filtersForSuggestions,
   buttonProps,
   isDisabled,
   onCloseFilterPopover,
@@ -152,6 +160,7 @@ function QueryBarMenuComponent({
     manageFilterSetComponent,
     hiddenPanelOptions,
     nonKqlMode,
+    disableQueryLanguageSwitcher,
     closePopover: plainClosePopover,
     onQueryBarSubmit,
     onFiltersUpdated,
@@ -169,7 +178,10 @@ function QueryBarMenuComponent({
         );
       case 'saveForm':
         return (
-          <EuiContextMenuPanel items={[<div style={{ padding: 16 }}>{saveFormComponent}</div>]} />
+          <EuiContextMenuPanel
+            title={strings.getSavedQueryPopoverSaveChangesButtonText()}
+            items={[<div style={{ padding: 16 }}>{saveFormComponent}</div>]}
+          />
         );
       case 'saveAsNewForm':
         return (
@@ -186,6 +198,7 @@ function QueryBarMenuComponent({
                 indexPatterns={indexPatterns}
                 filters={filters!}
                 timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                filtersForSuggestions={filtersForSuggestions}
                 onFiltersUpdated={onFiltersUpdated}
                 onLocalFilterUpdate={onLocalFilterUpdate}
                 onLocalFilterCreate={onLocalFilterCreate}

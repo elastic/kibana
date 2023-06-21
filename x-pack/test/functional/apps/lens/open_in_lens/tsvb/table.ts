@@ -88,6 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setStaticValue(10);
       await header.waitUntilLoadingHasFinished();
       await visualBuilder.clickSeriesOption();
+      await header.waitUntilLoadingHasFinished();
       await visualBuilder.setFieldForAggregateBy('bytes');
       await visualBuilder.setFunctionForAggregateFunction('Sum');
       await header.waitUntilLoadingHasFinished();
@@ -215,6 +216,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           { stop: '', color: undefined },
         ]);
       });
+    });
+
+    it('should bring the ignore global filters configured at panel level over', async () => {
+      await visualBuilder.clickPanelOptions('table');
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('lnsDataTable');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
   });
 }

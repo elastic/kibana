@@ -73,3 +73,12 @@ export type FieldTypeKnown = Exclude<
 >;
 
 export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;
+
+export interface RenderFieldItemParams<T extends FieldListItem> {
+  field: T;
+  hideDetails?: boolean;
+  itemIndex: number;
+  groupIndex: number;
+  groupName: FieldsGroupNames;
+  fieldSearchHighlight?: string;
+}

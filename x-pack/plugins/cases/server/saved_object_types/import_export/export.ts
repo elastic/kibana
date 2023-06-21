@@ -13,7 +13,7 @@ import type {
   SavedObjectsExportTransformContext,
 } from '@kbn/core/server';
 import type {
-  CaseUserActionAttributesWithoutConnectorId,
+  CaseUserActionWithoutReferenceIds,
   CommentAttributesWithoutRefs,
 } from '../../../common/api';
 import {
@@ -25,7 +25,7 @@ import {
 } from '../../../common/constants';
 import { defaultSortField } from '../../common/utils';
 import { createCaseError } from '../../common/error';
-import type { ESCaseAttributes } from '../../services/cases/types';
+import type { CasePersistedAttributes } from '../../common/types/case';
 
 export async function handleExport({
   context,
@@ -34,13 +34,13 @@ export async function handleExport({
   logger,
 }: {
   context: SavedObjectsExportTransformContext;
-  objects: Array<SavedObject<ESCaseAttributes>>;
+  objects: Array<SavedObject<CasePersistedAttributes>>;
   coreSetup: CoreSetup;
   logger: Logger;
 }): Promise<
   Array<
     SavedObject<
-      ESCaseAttributes | CommentAttributesWithoutRefs | CaseUserActionAttributesWithoutConnectorId
+      CasePersistedAttributes | CommentAttributesWithoutRefs | CaseUserActionWithoutReferenceIds
     >
   >
 > {
@@ -73,9 +73,7 @@ export async function handleExport({
 async function getAttachmentsAndUserActionsForCases(
   savedObjectsClient: SavedObjectsClientContract,
   caseIds: string[]
-): Promise<
-  Array<SavedObject<CommentAttributesWithoutRefs | CaseUserActionAttributesWithoutConnectorId>>
-> {
+): Promise<Array<SavedObject<CommentAttributesWithoutRefs | CaseUserActionWithoutReferenceIds>>> {
   const [attachments, userActions] = await Promise.all([
     getAssociatedObjects<CommentAttributesWithoutRefs>({
       savedObjectsClient,
@@ -83,7 +81,7 @@ async function getAttachmentsAndUserActionsForCases(
       sortField: defaultSortField,
       type: CASE_COMMENT_SAVED_OBJECT,
     }),
-    getAssociatedObjects<CaseUserActionAttributesWithoutConnectorId>({
+    getAssociatedObjects<CaseUserActionWithoutReferenceIds>({
       savedObjectsClient,
       caseIds,
       sortField: defaultSortField,

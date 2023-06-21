@@ -66,3 +66,7 @@ export const ISSUE_TYPE = i18n.translate('xpack.cases.connectors.jira.issueTypes
 export const PARENT_ISSUE = i18n.translate('xpack.cases.connectors.jira.parentIssueSearchLabel', {
   defaultMessage: 'Parent issue',
 });
+
+export const ISSUE_TYPE_REQUIRED = i18n.translate('xpack.cases.connectors.jira.issueTypeRequired', {
+  defaultMessage: 'Issue type is required',
+});

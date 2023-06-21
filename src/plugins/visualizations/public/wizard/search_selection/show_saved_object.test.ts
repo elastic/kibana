@@ -7,7 +7,7 @@
  */
 
 import type { SimpleSavedObject } from '@kbn/core/public';
-import type { FinderAttributes } from '@kbn/saved-objects-plugin/public';
+import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import { showSavedObject } from './show_saved_object';
 
 describe('showSavedObject', () => {

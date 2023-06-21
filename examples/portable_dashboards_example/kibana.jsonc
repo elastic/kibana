@@ -20,7 +20,6 @@
       "unifiedSearch",
       "developerExamples",
       "embeddableExamples"
-    ],
-    "requiredBundles": ["presentationUtil"]
+    ]
   }
 }

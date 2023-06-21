@@ -12,7 +12,7 @@ import { mockTimelineData, mockTimelineModel, TestProviders } from '../../mock';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { licenseService } from '../../hooks/use_license';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { useTourContext } from '../guided_onboarding_tour';
 import { GuidedOnboardingTourStep, SecurityTourStep } from '../guided_onboarding_tour/tour_step';
 import { SecurityStepId } from '../guided_onboarding_tour/tour_config';
@@ -383,7 +383,8 @@ describe('Actions', () => {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id'] } },
+        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
+        _index: '.ds-logs-endpoint.events.process-default',
       };
 
       const wrapper = mount(
@@ -400,7 +401,8 @@ describe('Actions', () => {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id'] } },
+        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
+        _index: '.ds-logs-endpoint.events.process-default',
       };
 
       const wrapper = mount(
@@ -425,7 +427,8 @@ describe('Actions', () => {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id'] } },
+        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
+        _index: '.ds-logs-endpoint.events.process-default',
       };
 
       const wrapper = mount(

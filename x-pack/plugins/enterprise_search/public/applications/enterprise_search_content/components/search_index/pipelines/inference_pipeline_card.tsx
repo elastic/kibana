@@ -167,6 +167,12 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                       )}
                     >
                       <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
+                          {
+                            defaultMessage: 'Fix issue in Trained Models',
+                          }
+                        )}
                         data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
                         href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
                         display="base"

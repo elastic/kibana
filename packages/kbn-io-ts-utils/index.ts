@@ -7,7 +7,7 @@
  */
 
 export type { IndexPatternType } from './src/index_pattern_rt';
-export type { NonEmptyStringBrand } from './src/non_empty_string_rt';
+export type { NonEmptyString, NonEmptyStringBrand } from './src/non_empty_string_rt';
 
 export { deepExactRt } from './src/deep_exact_rt';
 export { indexPatternRt } from './src/index_pattern_rt';
@@ -20,3 +20,13 @@ export { toBooleanRt } from './src/to_boolean_rt';
 export { toJsonSchema } from './src/to_json_schema';
 export { nonEmptyStringRt } from './src/non_empty_string_rt';
 export { createLiteralValueFromUndefinedRT } from './src/literal_value_from_undefined_rt';
+export { createRouteValidationFunction } from './src/route_validation';
+export { inRangeRt, type InRangeBrand, type InRange, inRangeFromStringRt } from './src/in_range_rt';
+export { dateRt } from './src/date_rt';
+export {
+  isGreaterOrEqualRt,
+  type IsGreaterOrEqualBrand,
+  type IsGreaterOrEqual,
+} from './src/is_greater_or_equal';
+
+export { datemathStringRt } from './src/datemath_string_rt';

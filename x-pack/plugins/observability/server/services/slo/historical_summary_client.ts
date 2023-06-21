@@ -9,6 +9,7 @@ import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/typesWith
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   calendarAlignedTimeWindowSchema,
+  Duration,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
@@ -16,13 +17,11 @@ import {
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
-
-import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { DateRange, HistoricalSummary, SLO, SLOId } from '../../domain/models';
 import {
   computeSLI,
   computeSummaryStatus,
-  computeTotalSlicesFromDateRange,
   toDateRange,
   toErrorBudget,
 } from '../../domain/services';
@@ -53,13 +52,13 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
   async fetch(sloList: SLO[]): Promise<Record<SLOId, HistoricalSummary[]>> {
-    const dateRangeBySlo: Record<SLOId, DateRange> = sloList.reduce(
-      (acc, slo) => ({ [slo.id]: getDateRange(slo), ...acc }),
-      {}
-    );
+    const dateRangeBySlo = sloList.reduce<Record<SLOId, DateRange>>((acc, slo) => {
+      acc[slo.id] = getDateRange(slo);
+      return acc;
+    }, {});
 
     const searches = sloList.flatMap((slo) => [
-      { index: `${SLO_DESTINATION_INDEX_NAME}*` },
+      { index: SLO_DESTINATION_INDEX_PATTERN },
       generateSearchQuery(slo, dateRangeBySlo[slo.id]),
     ]);
 
@@ -98,11 +97,9 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
         }
 
         if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
-          const dateRange = dateRangeBySlo[slo.id];
           historicalSummaryBySlo[slo.id] = handleResultForCalendarAlignedAndOccurrences(
             slo,
-            buckets,
-            dateRange
+            buckets
           );
           continue;
         }
@@ -119,29 +116,15 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
 
 function handleResultForCalendarAlignedAndOccurrences(
   slo: SLO,
-  buckets: DailyAggBucket[],
-  dateRange: DateRange
+  buckets: DailyAggBucket[]
 ): HistoricalSummary[] {
   const initialErrorBudget = 1 - slo.objective.target;
 
   return buckets.map((bucket: DailyAggBucket): HistoricalSummary => {
     const good = bucket.cumulative_good?.value ?? 0;
     const total = bucket.cumulative_total?.value ?? 0;
-    const sliValue = computeSLI({ good, total });
-
-    const durationCalendarPeriod = moment(dateRange.to).diff(dateRange.from, 'minutes');
-    const bucketDate = moment(bucket.key_as_string).endOf('day');
-    const durationSinceBeginning = bucketDate.isAfter(dateRange.to)
-      ? durationCalendarPeriod
-      : moment(bucketDate).diff(dateRange.from, 'minutes');
-
-    const totalEventsEstimatedAtPeriodEnd = Math.round(
-      (total / durationSinceBeginning) * durationCalendarPeriod
-    );
-
-    const consumedErrorBudget =
-      (total - good) / (totalEventsEstimatedAtPeriodEnd * initialErrorBudget);
-
+    const sliValue = computeSLI(good, total);
+    const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
     const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget, true);
 
     return {
@@ -163,7 +146,7 @@ function handleResultForCalendarAlignedAndTimeslices(
   return buckets.map((bucket: DailyAggBucket): HistoricalSummary => {
     const good = bucket.cumulative_good?.value ?? 0;
     const total = bucket.cumulative_total?.value ?? 0;
-    const sliValue = computeSLI({ good, total });
+    const sliValue = computeSLI(good, total);
     const totalSlices = computeTotalSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!);
     const consumedErrorBudget = (total - good) / (totalSlices * initialErrorBudget);
     const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
@@ -183,13 +166,15 @@ function handleResultForRolling(slo: SLO, buckets: DailyAggBucket[]): Historical
     .duration(slo.timeWindow.duration.value, toMomentUnitOfTime(slo.timeWindow.duration.unit))
     .asDays();
 
+  const { bucketsPerDay } = getFixedIntervalAndBucketsPerDay(rollingWindowDurationInDays);
+
   return buckets
-    .slice(-rollingWindowDurationInDays)
+    .slice(-bucketsPerDay * rollingWindowDurationInDays)
     .map((bucket: DailyAggBucket): HistoricalSummary => {
       const good = bucket.cumulative_good?.value ?? 0;
       const total = bucket.cumulative_total?.value ?? 0;
-      const sliValue = computeSLI({ good, total });
-      const consumedErrorBudget = total === 0 ? 0 : (total - good) / (total * initialErrorBudget);
+      const sliValue = computeSLI(good, total);
+      const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
       const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
 
       return {
@@ -204,6 +189,9 @@ function handleResultForRolling(slo: SLO, buckets: DailyAggBucket[]): Historical
 function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearchBody {
   const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(slo.timeWindow.duration.value, unit).asDays();
+
+  const { fixedInterval, bucketsPerDay } =
+    getFixedIntervalAndBucketsPerDay(timeWindowDurationInDays);
 
   return {
     size: 0,
@@ -227,7 +215,7 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
       daily: {
         date_histogram: {
           field: '@timestamp',
-          fixed_interval: '1d',
+          fixed_interval: fixedInterval,
           extended_bounds: {
             min: dateRange.from.toISOString(),
             max: 'now/d',
@@ -261,7 +249,7 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
           cumulative_good: {
             moving_fn: {
               buckets_path: 'good',
-              window: timeWindowDurationInDays,
+              window: timeWindowDurationInDays * bucketsPerDay,
               shift: 1,
               script: 'MovingFunctions.sum(values)',
             },
@@ -269,7 +257,7 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
           cumulative_total: {
             moving_fn: {
               buckets_path: 'total',
-              window: timeWindowDurationInDays,
+              window: timeWindowDurationInDays * bucketsPerDay,
               shift: 1,
               script: 'MovingFunctions.sum(values)',
             },
@@ -281,9 +269,8 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
 }
 
 function getDateRange(slo: SLO) {
-  const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
-
   if (rollingTimeWindowSchema.is(slo.timeWindow)) {
+    const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
     const now = moment();
     return {
       from: now
@@ -299,4 +286,28 @@ function getDateRange(slo: SLO) {
   }
 
   assertNever(slo.timeWindow);
+}
+
+function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
+  const dateRangeDurationInUnit = moment(dateRange.to).diff(
+    dateRange.from,
+    toMomentUnitOfTime(timesliceWindow.unit)
+  );
+  return Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
+}
+
+export function getFixedIntervalAndBucketsPerDay(durationInDays: number): {
+  fixedInterval: string;
+  bucketsPerDay: number;
+} {
+  if (durationInDays <= 7) {
+    return { fixedInterval: '1h', bucketsPerDay: 24 };
+  }
+  if (durationInDays <= 30) {
+    return { fixedInterval: '4h', bucketsPerDay: 6 };
+  }
+  if (durationInDays <= 90) {
+    return { fixedInterval: '12h', bucketsPerDay: 2 };
+  }
+  return { fixedInterval: '1d', bucketsPerDay: 1 };
 }

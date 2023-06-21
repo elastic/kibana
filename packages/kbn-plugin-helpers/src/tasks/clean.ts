@@ -11,11 +11,11 @@ import { promisify } from 'util';
 
 import del from 'del';
 
-import { BuildContext } from '../build_context';
+import { TaskContext } from '../task_context';
 
 const asyncMkdir = promisify(Fs.mkdir);
 
-export async function initTargets({ log, sourceDir, buildDir }: BuildContext) {
+export async function initTargets({ log, sourceDir, buildDir }: TaskContext) {
   log.info('deleting the build and target directories');
   await del(['build', 'target'], {
     cwd: sourceDir,
@@ -23,4 +23,11 @@ export async function initTargets({ log, sourceDir, buildDir }: BuildContext) {
 
   log.debug(`creating build output dir [${buildDir}]`);
   await asyncMkdir(buildDir, { recursive: true });
+}
+
+export async function initDev({ log, sourceDir }: TaskContext) {
+  log.info('deleting the target folder');
+  await del(['target'], {
+    cwd: sourceDir,
+  });
 }

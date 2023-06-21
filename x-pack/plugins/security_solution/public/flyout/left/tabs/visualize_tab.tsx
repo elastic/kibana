@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import {
@@ -21,6 +21,8 @@ import {
   VISUALIZE_BUTTONGROUP_OPTIONS,
 } from './translations';
 import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
+import { ALERTS_ACTIONS } from '../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -40,9 +42,16 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
  */
 export const VisualizeTab: FC = memo(() => {
   const [activeVisualizationId, setActiveVisualizationId] = useState(SESSION_VIEW_ID);
-  const onChangeCompressed = (optionId: string) => {
-    setActiveVisualizationId(optionId);
-  };
+  const { startTransaction } = useStartTransaction();
+  const onChangeCompressed = useCallback(
+    (optionId: string) => {
+      setActiveVisualizationId(optionId);
+      if (optionId === ANALYZE_GRAPH_ID) {
+        startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
+      }
+    },
+    [startTransaction]
+  );
 
   return (
     <>

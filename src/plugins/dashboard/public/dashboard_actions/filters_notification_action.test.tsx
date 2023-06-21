@@ -17,9 +17,8 @@ import {
 import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
-import { getSampleDashboardInput } from '../mocks';
+import { buildMockDashboard } from '../mocks';
 import { pluginServices } from '../services/plugin_services';
-import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 import { FiltersNotificationAction } from './filters_notification_action';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
@@ -51,8 +50,7 @@ const getMockPhraseFilter = (key: string, value: string) => {
 };
 
 const buildEmbeddable = async (input?: Partial<ContactCardEmbeddableInput>) => {
-  const container = new DashboardContainer(getSampleDashboardInput());
-  await container.untilInitialized();
+  const container = buildMockDashboard();
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,

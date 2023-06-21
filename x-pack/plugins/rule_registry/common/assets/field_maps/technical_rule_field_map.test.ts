@@ -72,6 +72,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date",
       },
+      "kibana.alert.maintenance_window_ids": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.reason": Object {
         "array": false,
         "required": false,
@@ -269,6 +274,13 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date_range",
       },
+      "kibana.alert.url": Object {
+        "array": false,
+        "ignore_above": 2048,
+        "index": false,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.uuid": Object {
         "array": false,
         "required": true,
@@ -281,6 +293,11 @@ it('matches snapshot', () => {
       },
       "kibana.alert.workflow_status": Object {
         "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.workflow_tags": Object {
+        "array": true,
         "required": false,
         "type": "keyword",
       },

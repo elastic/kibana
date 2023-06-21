@@ -105,5 +105,8 @@ export function reducer(state: State, action: Action) {
         preview: [],
       };
     }
+
+    default:
+      return state;
   }
 }

@@ -42,7 +42,6 @@ jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/jira/use_get_issue_types');
 jest.mock('../connectors/jira/use_get_fields_by_issue_type');
-jest.mock('../connectors/jira/use_get_single_issue');
 jest.mock('../connectors/jira/use_get_issues');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;

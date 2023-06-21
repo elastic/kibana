@@ -28,6 +28,7 @@ export const getSavedObjects = (): SavedObject[] => [
     id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '7.11.0',
+    managed: false,
     references: [],
     type: 'index-pattern',
     updated_at: '2021-08-05T12:23:57.577Z',
@@ -50,6 +51,7 @@ export const getSavedObjects = (): SavedObject[] => [
     id: 'b80e6540-b891-11e8-a6d9-e546fe2bba5f',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '7.14.0',
+    managed: false,
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',

@@ -19,6 +19,7 @@ Any modifications made to this file will be overwritten.
   <h4><a href="#Connectors">Connectors</a></h4>
   <ul>
   <li><a href="#createConnector"><code><span class="http-method">post</span> /s/{spaceId}/api/actions/connector</code></a></li>
+  <li><a href="#createConnectorId"><code><span class="http-method">post</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
   <li><a href="#deleteConnector"><code><span class="http-method">delete</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
   <li><a href="#getConnector"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
   <li><a href="#getConnectorTypes"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connector_types</code></a></li>
@@ -47,6 +48,74 @@ Any modifications made to this file will be overwritten.
       <div class="param">spaceId (required)</div>
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">Create_connector_request_body_properties <a href="#Create_connector_request_body_properties">Create_connector_request_body_properties</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#connector_response_properties">connector_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>null</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#connector_response_properties">connector_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#Unauthorized_response">Unauthorized_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createConnectorId"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></pre></div>
+    <div class="method-summary">Creates a connector. (<span class="nickname">createConnectorId</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Actions and Connectors</strong> feature in the <strong>Management</strong> section of the Kibana feature privileges.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">connectorId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; A UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated. default: null </div>
     </div>  <!-- field-items -->
 
     <h3 class="field-label">Consumes</h3>
@@ -951,7 +1020,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#connector_response_properties_servicenow"><code>connector_response_properties_servicenow</code> - Connector response properties for a ServiceNow ITSM connector</a></li>
     <li><a href="#connector_response_properties_servicenow_itom"><code>connector_response_properties_servicenow_itom</code> - Connector response properties for a ServiceNow ITOM connector</a></li>
     <li><a href="#connector_response_properties_servicenow_sir"><code>connector_response_properties_servicenow_sir</code> - Connector response properties for a ServiceNow SecOps connector</a></li>
-    <li><a href="#connector_response_properties_slack"><code>connector_response_properties_slack</code> - Connector response properties for a Slack connector</a></li>
+    <li><a href="#connector_response_properties_slack_api"><code>connector_response_properties_slack_api</code> - Connector response properties for a Slack connector</a></li>
+    <li><a href="#connector_response_properties_slack_webhook"><code>connector_response_properties_slack_webhook</code> - Connector response properties for a Slack connector</a></li>
     <li><a href="#connector_response_properties_swimlane"><code>connector_response_properties_swimlane</code> - Connector response properties for a Swimlane connector</a></li>
     <li><a href="#connector_response_properties_teams"><code>connector_response_properties_teams</code> - Connector response properties for a Microsoft Teams connector</a></li>
     <li><a href="#connector_response_properties_tines"><code>connector_response_properties_tines</code> - Connector response properties for a Tines connector</a></li>
@@ -969,7 +1039,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#create_connector_request_servicenow"><code>create_connector_request_servicenow</code> - Create ServiceNow ITSM connector request</a></li>
     <li><a href="#create_connector_request_servicenow_itom"><code>create_connector_request_servicenow_itom</code> - Create ServiceNow ITOM connector request</a></li>
     <li><a href="#create_connector_request_servicenow_sir"><code>create_connector_request_servicenow_sir</code> - Create ServiceNow SecOps connector request</a></li>
-    <li><a href="#create_connector_request_slack"><code>create_connector_request_slack</code> - Create Slack connector request</a></li>
+    <li><a href="#create_connector_request_slack_api"><code>create_connector_request_slack_api</code> - Create Slack connector request</a></li>
+    <li><a href="#create_connector_request_slack_webhook"><code>create_connector_request_slack_webhook</code> - Create Slack connector request</a></li>
     <li><a href="#create_connector_request_swimlane"><code>create_connector_request_swimlane</code> - Create Swimlane connector request</a></li>
     <li><a href="#create_connector_request_teams"><code>create_connector_request_teams</code> - Create Microsoft Teams connector request</a></li>
     <li><a href="#create_connector_request_tines"><code>create_connector_request_tines</code> - Create Tines connector request</a></li>
@@ -1015,6 +1086,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#secrets_properties_opsgenie"><code>secrets_properties_opsgenie</code> - Connector secrets properties for an Opsgenie connector</a></li>
     <li><a href="#secrets_properties_resilient"><code>secrets_properties_resilient</code> - Connector secrets properties for IBM Resilient connector</a></li>
     <li><a href="#secrets_properties_servicenow"><code>secrets_properties_servicenow</code> - Connector secrets properties for ServiceNow ITOM, ServiceNow ITSM, and ServiceNow SecOps connectors</a></li>
+    <li><a href="#secrets_properties_slack_api"><code>secrets_properties_slack_api</code> - Connector secrets properties for a Web API Slack connector</a></li>
+    <li><a href="#secrets_properties_slack_webhook"><code>secrets_properties_slack_webhook</code> - Connector secrets properties for a Webhook Slack connector</a></li>
     <li><a href="#secrets_properties_swimlane"><code>secrets_properties_swimlane</code> - Connector secrets properties for a Swimlane connector</a></li>
     <li><a href="#updateConnector_400_response"><code>updateConnector_400_response</code> - </a></li>
     <li><a href="#update_connector_request_cases_webhook"><code>update_connector_request_cases_webhook</code> - Update Webhook - Case Managment connector request</a></li>
@@ -1025,6 +1098,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_connector_request_serverlog"><code>update_connector_request_serverlog</code> - Update server log connector request</a></li>
     <li><a href="#update_connector_request_servicenow"><code>update_connector_request_servicenow</code> - Update ServiceNow ITSM connector or ServiceNow SecOps request</a></li>
     <li><a href="#update_connector_request_servicenow_itom"><code>update_connector_request_servicenow_itom</code> - Create ServiceNow ITOM connector request</a></li>
+    <li><a href="#update_connector_request_slack_api"><code>update_connector_request_slack_api</code> - Update Slack connector request</a></li>
+    <li><a href="#update_connector_request_slack_webhook"><code>update_connector_request_slack_webhook</code> - Update Slack connector request</a></li>
     <li><a href="#update_connector_request_swimlane"><code>update_connector_request_swimlane</code> - Update Swimlane connector request</a></li>
   </ol>
 
@@ -1543,7 +1618,21 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="connector_response_properties_slack"><code>connector_response_properties_slack</code> - Connector response properties for a Slack connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="connector_response_properties_slack_api"><code>connector_response_properties_slack_api</code> - Connector response properties for a Slack connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.slack_api</div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. </div>
+<div class="param">is_deprecated </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is deprecated. </div>
+<div class="param">is_missing_secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type. </div>
+<div class="param">is_preconfigured </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured connector. If true, the <code>config</code> and <code>is_missing_secrets</code> properties are omitted from the response. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="connector_response_properties_slack_webhook"><code>connector_response_properties_slack_webhook</code> - Connector response properties for a Slack connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
@@ -1766,14 +1855,25 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="create_connector_request_slack"><code>create_connector_request_slack</code> - Create Slack connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="create_connector_request_slack_api"><code>create_connector_request_slack_api</code> - Create Slack connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The Slack connector uses Slack Incoming Webhooks.</div>
+    <div class="field-items">
+      <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.slack_api</div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_slack_api">secrets_properties_slack_api</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_connector_request_slack_webhook"><code>create_connector_request_slack_webhook</code> - Create Slack connector request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The Slack connector uses Slack Incoming Webhooks.</div>
     <div class="field-items">
       <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.slack</div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.slack</code>. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_slack_webhook">secrets_properties_slack_webhook</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2221,6 +2321,20 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="secrets_properties_slack_api"><code>secrets_properties_slack_api</code> - Connector secrets properties for a Web API Slack connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.slack</code>.</div>
+    <div class="field-items">
+      <div class="param">token </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Slack bot user OAuth token. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="secrets_properties_slack_webhook"><code>secrets_properties_slack_webhook</code> - Connector secrets properties for a Webhook Slack connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.slack</code>.</div>
+    <div class="field-items">
+      <div class="param">webhookUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Slack webhook url. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="secrets_properties_swimlane"><code>secrets_properties_swimlane</code> - Connector secrets properties for a Swimlane connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines secrets for connectors when type is <code>.swimlane</code>.</div>
     <div class="field-items">
@@ -2303,6 +2417,22 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_servicenow_itom">config_properties_servicenow_itom</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_servicenow">secrets_properties_servicenow</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_slack_api"><code>update_connector_request_slack_api</code> - Update Slack connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#">secrets_properties_slack_api</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_slack_webhook"><code>update_connector_request_slack_webhook</code> - Update Slack connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#">secrets_properties_slack_webhook</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

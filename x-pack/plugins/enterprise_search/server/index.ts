@@ -19,8 +19,11 @@ export const configSchema = schema.object({
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
   canDeployEntSearch: schema.boolean({ defaultValue: true }),
   customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  enabled: schema.boolean({ defaultValue: true }),
   hasConnectors: schema.boolean({ defaultValue: true }),
   hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
+  hasDocumentLevelSecurityEnabled: schema.boolean({ defaultValue: true }),
+  hasIncrementalSyncEnabled: schema.boolean({ defaultValue: true }),
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
   hasWebCrawler: schema.boolean({ defaultValue: true }),
   host: schema.maybe(schema.string()),
@@ -49,3 +52,4 @@ export const CURRENT_CONNECTORS_INDEX = '.elastic-connectors-v1';
 export const CONNECTORS_JOBS_INDEX = '.elastic-connectors-sync-jobs';
 export const CONNECTORS_VERSION = 1;
 export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';
+export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = 'search-acl-filter-';

@@ -42,6 +42,22 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
+export const ESRE_PLUGIN = {
+  ID: 'enterpriseSearchEsre',
+  NAME: i18n.translate('xpack.enterpriseSearch.esre.productName', {
+    defaultMessage: 'ESRE',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.esre.navTitle', {
+    defaultMessage: 'ESRE',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.esre.description', {
+    defaultMessage:
+      'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
+  }),
+  URL: '/app/enterprise_search/esre',
+  LOGO: 'logoEnterpriseSearch',
+};
+
 export const ANALYTICS_PLUGIN = {
   ID: 'enterpriseSearchAnalytics',
   NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
@@ -118,10 +134,17 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
   WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
 };
 
-export const ENGINES_PLUGIN = {
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.engines.navTitle', {
-    defaultMessage: 'Engines',
+export const APPLICATIONS_PLUGIN = {
+  ID: 'enterpriseSearchApplications',
+  LOGO: 'logoEnterpriseSearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
+    defaultMessage: 'Applications',
   }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
+    defaultMessage: 'Search Applications',
+  }),
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  URL: '/app/enterprise_search/applications',
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
@@ -157,16 +180,16 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
 };
 
 export enum INGESTION_METHOD_IDS {
-  api = 'api',
-  connector = 'connector',
-  crawler = 'crawler',
-  native_connector = 'native_connector',
+  API = 'api',
+  CONNECTOR = 'connector',
+  CRAWLER = 'crawler',
 }
 
 export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasConnectors: true,
   hasDefaultIngestPipeline: true,
+  hasDocumentLevelSecurityEnabled: true,
+  hasIncrementalSyncEnabled: true,
   hasNativeConnectors: true,
-  hasSearchApplications: false,
   hasWebCrawler: true,
 };

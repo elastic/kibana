@@ -26,7 +26,7 @@ exports[`<Toolbar /> is rendered 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-s-flexStart-center-row"
     />
   </div>
 </div>

@@ -90,6 +90,8 @@ exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Error ERROR_TYPE 1`] = `undefined`;
+
 exports[`Error EVENT_NAME 1`] = `undefined`;
 
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
@@ -156,9 +158,9 @@ exports[`Error LABEL_GC 1`] = `undefined`;
 
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
-exports[`Error LABEL_TYPE 1`] = `undefined`;
-
 exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
+
+exports[`Error LABEL_TYPE 1`] = `undefined`;
 
 exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
@@ -417,6 +419,8 @@ exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Span ERROR_TYPE 1`] = `undefined`;
+
 exports[`Span EVENT_NAME 1`] = `undefined`;
 
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
@@ -479,9 +483,9 @@ exports[`Span LABEL_GC 1`] = `undefined`;
 
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
-exports[`Span LABEL_TYPE 1`] = `undefined`;
-
 exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
+
+exports[`Span LABEL_TYPE 1`] = `undefined`;
 
 exports[`Span METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
@@ -740,6 +744,8 @@ exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Transaction ERROR_TYPE 1`] = `undefined`;
+
 exports[`Transaction EVENT_NAME 1`] = `undefined`;
 
 exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
@@ -812,9 +818,9 @@ exports[`Transaction LABEL_GC 1`] = `undefined`;
 
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 
-exports[`Transaction LABEL_TYPE 1`] = `undefined`;
-
 exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
+
+exports[`Transaction LABEL_TYPE 1`] = `undefined`;
 
 exports[`Transaction METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 

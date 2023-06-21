@@ -24,17 +24,18 @@ import {
   SERVICE_VERSION,
   FAAS_ID,
   FAAS_TRIGGER_TYPE,
+  LABEL_TELEMETRY_AUTO_VERSION,
 } from '../../../common/es_fields/apm';
 
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
+import { isOpenTelemetryAgentName } from '../../../common/agent_name';
 
 type ServiceMetadataDetailsRaw = Pick<
   TransactionRaw,
-  'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud'
+  'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud' | 'labels'
 >;
 
 export interface ServiceMetadataDetails {
@@ -49,6 +50,11 @@ export interface ServiceMetadataDetails {
       name: string;
       version: string;
     };
+  };
+  opentelemetry?: {
+    language?: string;
+    sdkVersion?: string;
+    autoVersion?: string;
   };
   container?: {
     ids?: string[];
@@ -81,13 +87,11 @@ export interface ServiceMetadataDetails {
 export async function getServiceMetadataDetails({
   serviceName,
   apmEventClient,
-  searchAggregatedTransactions,
   start,
   end,
 }: {
   serviceName: string;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }): Promise<ServiceMetadataDetails> {
@@ -99,16 +103,27 @@ export async function getServiceMetadataDetails({
   const params = {
     apm: {
       events: [
-        getProcessorEventForTransactions(searchAggregatedTransactions),
+        ProcessorEvent.transaction,
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
     },
-    sort: [{ '@timestamp': { order: 'desc' as const } }],
+    sort: [
+      { _score: { order: 'desc' as const } },
+      { '@timestamp': { order: 'desc' as const } },
+    ],
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
+      _source: [
+        SERVICE,
+        AGENT,
+        HOST,
+        CONTAINER,
+        KUBERNETES,
+        CLOUD,
+        LABEL_TELEMETRY_AUTO_VERSION,
+      ],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
@@ -178,8 +193,8 @@ export async function getServiceMetadataDetails({
     };
   }
 
-  const { service, agent, host, kubernetes, container, cloud } = response.hits
-    .hits[0]._source as ServiceMetadataDetailsRaw;
+  const { service, agent, host, kubernetes, container, cloud, labels } =
+    response.hits.hits[0]._source as ServiceMetadataDetailsRaw;
 
   const serviceMetadataDetails = {
     versions: response.aggregations?.serviceVersions.buckets.map(
@@ -189,6 +204,17 @@ export async function getServiceMetadataDetails({
     framework: service.framework?.name,
     agent,
   };
+
+  const otelDetails =
+    !!agent?.name && isOpenTelemetryAgentName(agent.name)
+      ? {
+          language: agent.name.startsWith('opentelemetry')
+            ? agent.name.replace(/^opentelemetry\//, '')
+            : undefined,
+          sdkVersion: agent?.version,
+          autoVersion: labels?.telemetry_auto_version as string,
+        }
+      : undefined;
 
   const totalNumberInstances =
     response.aggregations?.totalNumberInstances.value;
@@ -238,6 +264,7 @@ export async function getServiceMetadataDetails({
 
   return {
     service: serviceMetadataDetails,
+    opentelemetry: otelDetails,
     container: containerDetails,
     serverless: serverlessDetails,
     cloud: cloudDetails,

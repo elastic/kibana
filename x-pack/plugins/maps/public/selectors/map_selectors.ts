@@ -27,7 +27,7 @@ import { getTimeFilter } from '../kibana_services';
 import { getChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
 import { InnerJoin } from '../classes/joins/inner_join';
-import { getSourceByType } from '../classes/sources/source_registry';
+import { createSourceInstance } from '../classes/sources/create_source_instance';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   LAYER_TYPE,
@@ -40,7 +40,6 @@ import {
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
 import { MapStoreState } from '../reducers/store';
 import {
-  AbstractSourceDescriptor,
   DataRequestDescriptor,
   CustomIcon,
   DrawState,
@@ -126,17 +125,6 @@ export function createLayerInstance(
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
-}
-
-function createSourceInstance(sourceDescriptor: AbstractSourceDescriptor | null): ISource {
-  if (sourceDescriptor === null) {
-    throw new Error('Source-descriptor should be initialized');
-  }
-  const source = getSourceByType(sourceDescriptor.type);
-  if (!source) {
-    throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
-  }
-  return new source.ConstructorFunction(sourceDescriptor);
 }
 
 export const getMapSettings = ({ map }: MapStoreState): MapSettings => map.settings;
@@ -398,11 +386,15 @@ export const hasPreviewLayers = createSelector(getLayerList, (layerList) => {
   });
 });
 
-export const isLoadingPreviewLayers = createSelector(getLayerList, (layerList) => {
-  return layerList.some((layer) => {
-    return layer.isPreviewLayer() && layer.isLayerLoading();
-  });
-});
+export const isLoadingPreviewLayers = createSelector(
+  getLayerList,
+  getMapZoom,
+  (layerList, zoom) => {
+    return layerList.some((layer) => {
+      return layer.isPreviewLayer() && layer.isLayerLoading(zoom);
+    });
+  }
+);
 
 export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
   layerList
@@ -488,26 +480,21 @@ export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   });
 });
 
-export const areLayersLoaded = createSelector(
+export const isMapLoading = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
   getMapZoom,
   (layerList, waitingForMapReadyLayerList, zoom) => {
     if (waitingForMapReadyLayerList.length) {
-      return false;
+      return true;
     }
 
     for (let i = 0; i < layerList.length; i++) {
       const layer = layerList[i];
-      if (
-        layer.isVisible() &&
-        layer.showAtZoomLevel(zoom) &&
-        !layer.hasErrors() &&
-        !layer.isInitialDataLoadComplete()
-      ) {
-        return false;
+      if (!layer.hasErrors() && layer.isLayerLoading(zoom)) {
+        return true;
       }
     }
-    return true;
+    return false;
   }
 );

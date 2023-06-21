@@ -216,6 +216,9 @@ describe('mappingFromFieldMap', () => {
                 flapping_history: {
                   type: 'boolean',
                 },
+                maintenance_window_ids: {
+                  type: 'keyword',
+                },
                 instance: {
                   properties: {
                     id: {
@@ -278,10 +281,18 @@ describe('mappingFromFieldMap', () => {
                   type: 'date_range',
                   format: 'epoch_millis||strict_date_optional_time',
                 },
+                url: {
+                  ignore_above: 2048,
+                  index: false,
+                  type: 'keyword',
+                },
                 uuid: {
                   type: 'keyword',
                 },
                 workflow_status: {
+                  type: 'keyword',
+                },
+                workflow_tags: {
                   type: 'keyword',
                 },
               },

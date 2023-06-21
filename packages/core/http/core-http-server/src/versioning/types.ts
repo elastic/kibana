@@ -7,6 +7,7 @@
  */
 
 import type { Type } from '@kbn/config-schema';
+import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
   RouteConfig,
@@ -21,11 +22,7 @@ import type {
 
 type RqCtx = RequestHandlerContextBase;
 
-/**
- * Assuming that version will be a monotonically increasing number where: version > 0.
- * @experimental
- */
-export type ApiVersion = `${number}`;
+export type { ApiVersion };
 
 /**
  * Configuration for a versioned route
@@ -37,7 +34,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
 > & {
   options?: Omit<RouteConfigOptions<Method>, 'access'>;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
-  access: RouteConfigOptions<Method>['access'];
+  access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
 };
 
 /**
@@ -143,15 +140,30 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  * @experimental
  */
 export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   get: VersionedRouteRegistrar<'get', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   put: VersionedRouteRegistrar<'put', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   post: VersionedRouteRegistrar<'post', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   patch: VersionedRouteRegistrar<'patch', Ctx>;
-  /** @experimental */
+  /**
+   * @experimental
+   * @track-adoption
+   */
   delete: VersionedRouteRegistrar<'delete', Ctx>;
 }
 
@@ -159,8 +171,8 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
 
 /** @experimental */
-export interface VersionedRouteResponseValidation<R> {
-  [statusCode: number]: { body: RouteValidationFunction<R> | Type<R> };
+export interface VersionedRouteResponseValidation {
+  [statusCode: number]: { body: RouteValidationFunction<unknown> | Type<unknown> };
   unsafe?: { body?: boolean };
 }
 
@@ -168,7 +180,7 @@ export interface VersionedRouteResponseValidation<R> {
  * Versioned route validation
  * @experimental
  */
-interface FullValidationConfig<P, Q, B, R> {
+export interface FullValidationConfig<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @experimental
@@ -180,7 +192,7 @@ interface FullValidationConfig<P, Q, B, R> {
    *       for setting default values!
    * @experimental
    */
-  response?: VersionedRouteResponseValidation<R>;
+  response?: VersionedRouteResponseValidation;
 }
 
 /**
@@ -188,7 +200,7 @@ interface FullValidationConfig<P, Q, B, R> {
  * of an endpoint etc.
  * @experimental
  */
-export interface AddVersionOpts<P, Q, B, R> {
+export interface AddVersionOpts<P, Q, B> {
   /**
    * Version to assign to this route
    * @experimental
@@ -198,7 +210,7 @@ export interface AddVersionOpts<P, Q, B, R> {
    * Validation for this version of a route
    * @experimental
    */
-  validate: false | FullValidationConfig<P, Q, B, R>;
+  validate: false | FullValidationConfig<P, Q, B>;
 }
 
 /**
@@ -216,10 +228,8 @@ export interface VersionedRoute<
    * @returns A versioned route, allows for fluent chaining of version declarations
    * @experimental
    */
-  addVersion<P = unknown, Q = unknown, B = unknown, R = any>(
-    options: AddVersionOpts<P, Q, B, R>,
-    handler: (
-      ...params: Parameters<RequestHandler<P, Q, B, Ctx>>
-    ) => MaybePromise<IKibanaResponse<R>>
+  addVersion<P = unknown, Q = unknown, B = unknown>(
+    options: AddVersionOpts<P, Q, B>,
+    handler: (...params: Parameters<RequestHandler<P, Q, B, Ctx>>) => MaybePromise<IKibanaResponse>
   ): VersionedRoute<Method, Ctx>;
 }

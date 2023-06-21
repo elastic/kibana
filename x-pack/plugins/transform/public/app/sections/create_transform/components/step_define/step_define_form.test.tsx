@@ -63,7 +63,8 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-describe('Transform: <DefinePivotForm />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/150777
+describe.skip('Transform: <DefinePivotForm />', () => {
   test('Minimal initialization', async () => {
     // Arrange
     const mlSharedImports = await getMlSharedImports();

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
+import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 
 export function getQueryStringForInfluencers(
-  influencers: AnomaliesTableRecord['influencers'] = [],
+  influencers: MlAnomaliesTableRecord['influencers'] = [],
   entityName?: string
 ) {
   return influencers

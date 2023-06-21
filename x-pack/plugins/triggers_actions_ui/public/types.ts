@@ -23,6 +23,7 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridColumnCellAction,
   EuiDataGridToolBarVisibilityOptions,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
@@ -52,6 +53,7 @@ import {
   ActionVariable,
   RuleType as CommonRuleType,
   RuleLastRun,
+  MaintenanceWindow,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -88,7 +90,7 @@ import type {
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
-import { Case } from './application/sections/alerts_table/hooks/api';
+import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -253,7 +255,10 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
-  resetParamsOnConnectorChange?: (params: ActionParams) => ActionParams | {};
+  subtype?: Array<{ id: string; name: string }>;
+  convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
+  hideInUi?: boolean;
+  modalWidth?: number;
 }
 
 export interface GenericValidationResult<T> {
@@ -339,6 +344,11 @@ export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
 export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
 
+export type RuleSnoozeSettings = Pick<
+  Rule,
+  'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule'
+>;
+
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
   index: number;
@@ -346,7 +356,6 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
-  activeSnoozes?: string[];
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -373,6 +382,11 @@ export interface RuleTypeParamsExpressionProps<
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
+
+export type RuleParamsForRules = Record<
+  string,
+  Array<{ label: string; value: string | number | object }>
+>;
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
@@ -457,6 +471,7 @@ export enum AlertsField {
   name = 'kibana.alert.rule.name',
   reason = 'kibana.alert.reason',
   uuid = 'kibana.alert.rule.uuid',
+  case_ids = 'kibana.alert.case_ids',
 }
 
 export interface InspectQuery {
@@ -497,6 +512,10 @@ export type AlertsTableProps = {
     data: Map<string, Case>;
     isLoading: boolean;
   };
+  maintenanceWindows: {
+    data: Map<string, MaintenanceWindow>;
+    isLoading: boolean;
+  };
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
@@ -522,6 +541,10 @@ export type AlertsTableProps = {
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   showInspectButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
+  /**
+   * Allows to consumers of the table to decide to highlight a row based on the current alert.
+   */
+  shouldHighlightRow?: (alert: Alert) => boolean;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -548,18 +571,46 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (
+  onClick?: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,
     setIsBulkActionsLoading: (isLoading: boolean) => void,
     clearSelection: () => void,
     refresh: () => void
   ) => void;
+  panel?: number;
 }
+
+interface PanelConfig {
+  id: number;
+  title?: string;
+  'data-test-subj'?: string;
+}
+
+export interface RenderContentPanelProps {
+  alertItems: TimelineItem[];
+  setIsBulkActionsLoading: (isLoading: boolean) => void;
+  isAllSelected?: boolean;
+  clearSelection?: () => void;
+  refresh?: () => void;
+  closePopoverMenu: () => void;
+}
+
+interface ContentPanelConfig extends PanelConfig {
+  renderContent: (args: RenderContentPanelProps) => JSX.Element;
+  items?: never;
+}
+
+interface ItemsPanelConfig extends PanelConfig {
+  content?: never;
+  items: BulkActionsConfig[];
+}
+
+export type BulkActionsPanelConfig = ItemsPanelConfig | ContentPanelConfig;
 
 export type UseBulkActionsRegistry = (
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>
-) => BulkActionsConfig[];
+) => BulkActionsPanelConfig[];
 
 export type UseCellActions = (props: {
   columns: EuiDataGridColumn[];
@@ -687,13 +738,14 @@ export interface ConnectorServices {
 }
 
 export interface RulesListFilters {
-  searchText: string;
-  types: string[];
   actionTypes: string[];
   ruleExecutionStatuses: string[];
   ruleLastRunOutcomes: string[];
+  ruleParams: Record<string, string | number | object>;
   ruleStatuses: RuleStatus[];
+  searchText: string;
   tags: string[];
+  types: string[];
 }
 
 export type UpdateFiltersProps =
@@ -708,6 +760,10 @@ export type UpdateFiltersProps =
   | {
       filter: 'types' | 'actionTypes' | 'ruleExecutionStatuses' | 'ruleLastRunOutcomes' | 'tags';
       value: string[];
+    }
+  | {
+      filter: 'ruleParams';
+      value: Record<string, string | number | object>;
     };
 
 export interface RulesPageContainerState {
@@ -737,4 +793,10 @@ export interface TableUpdateHandlerArgs {
 
 export interface LazyLoadProps {
   hideLazyLoader?: boolean;
+}
+
+export interface NotifyWhenSelectOptions {
+  isSummaryOption?: boolean;
+  isForEachAlertOption?: boolean;
+  value: EuiSuperSelectOption<RuleNotifyWhenType>;
 }

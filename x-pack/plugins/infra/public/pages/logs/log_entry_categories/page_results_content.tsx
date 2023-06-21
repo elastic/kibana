@@ -14,7 +14,7 @@ import useInterval from 'react-use/lib/useInterval';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { TimeRange } from '../../../../common/time/time_range';
 import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';

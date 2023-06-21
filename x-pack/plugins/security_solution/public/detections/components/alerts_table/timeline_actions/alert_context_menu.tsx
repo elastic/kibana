@@ -7,13 +7,14 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip, EuiContextMenu } from '@elastic/eui';
 import { indexOf } from 'lodash';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
 import { isActiveTimeline } from '../../../../helpers';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
@@ -27,7 +28,6 @@ import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions
 import * as i18n from '../translations';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
-import { TableId } from '../../../../../common/types';
 import type { AlertData, EcsHit } from '../../../../detection_engine/rule_exceptions/utils/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
@@ -44,6 +44,8 @@ import { useAddToCaseActions } from './use_add_to_case_actions';
 import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 import { useOpenAlertDetailsAction } from './use_open_alert_details';
+import type { AlertTableContextMenuItem } from '../types';
+import { useAlertTagsActions } from './use_alert_tags_actions';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -220,12 +222,20 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ruleId,
   });
 
-  const items: React.ReactElement[] = useMemo(
+  const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
+    closePopover,
+    ecsRowData,
+    scopeId,
+    refetch: refetchAll,
+  });
+
+  const items: AlertTableContextMenuItem[] = useMemo(
     () =>
       !isEvent && ruleId
         ? [
             ...addToCaseActionItems,
             ...statusActionItems,
+            ...alertTagsItems,
             ...exceptionActionItems,
             ...(agentId ? osqueryActionItems : []),
             ...alertDetailsActionItems,
@@ -246,7 +256,19 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       alertDetailsActionItems,
       eventFilterActionItems,
       canCreateEndpointEventFilters,
+      alertTagsItems,
     ]
+  );
+
+  const panels = useMemo(
+    () => [
+      {
+        id: 0,
+        items,
+      },
+      ...alertTagsPanels,
+    ],
+    [alertTagsPanels, items]
   );
 
   const osqueryFlyout = useMemo(() => {
@@ -274,7 +296,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
               anchorPosition="downLeft"
               repositionOnScroll
             >
-              <EuiContextMenuPanel size="s" items={items} data-test-subj="actions-context-menu" />
+              <EuiContextMenu
+                size="s"
+                initialPanelId={0}
+                panels={panels}
+                data-test-subj="actions-context-menu"
+              />
             </EuiPopover>
           </EventsTdContent>
         </div>

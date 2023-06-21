@@ -40,6 +40,7 @@ import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
+import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -79,6 +80,7 @@ export interface ConstructorOptions {
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
   ruleDataService: IRuleDataService;
+  getRuleType: RuleTypeRegistry['get'];
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -103,6 +105,11 @@ interface MgetAndAuditAlert {
 export interface BulkUpdateCasesOptions {
   alerts: MgetAndAuditAlert[];
   caseIds: string[];
+}
+
+export interface RemoveCaseIdFromAlertsOptions {
+  alerts: MgetAndAuditAlert[];
+  caseId: string;
 }
 
 interface GetAlertParams {
@@ -144,6 +151,7 @@ export class AlertsClient {
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
+  private readonly getRuleType: RuleTypeRegistry['get'];
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;
@@ -154,6 +162,7 @@ export class AlertsClient {
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
+    this.getRuleType = options.getRuleType;
   }
 
   private getOutcome(
@@ -784,7 +793,6 @@ export class AlertsClient {
         const result = await this.esClient.updateByQuery({
           index,
           conflicts: 'proceed',
-          refresh: true,
           body: {
             script: {
               source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
@@ -844,6 +852,100 @@ export class AlertsClient {
       fieldToUpdate: (source) => this.getAlertCaseIdsFieldUpdate(source, caseIds),
       validate: (source) => this.validateTotalCasesPerAlert(source, caseIds),
     });
+  }
+
+  public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveCaseIdFromAlertsOptions) {
+    /**
+     * We intentionally do not perform any authorization
+     * on the alerts. Users should be able to remove
+     * cases from alerts when deleting a case or an
+     * attachment
+     */
+    try {
+      if (alerts.length === 0) {
+        return;
+      }
+
+      const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null) {
+        if (ctx._source['${ALERT_CASE_IDS}'].contains('${caseId}')) {
+          int index = ctx._source['${ALERT_CASE_IDS}'].indexOf('${caseId}');
+          ctx._source['${ALERT_CASE_IDS}'].remove(index);
+        }
+      }`;
+
+      const bulkUpdateRequest = [];
+
+      for (const alert of alerts) {
+        bulkUpdateRequest.push(
+          {
+            update: {
+              _index: alert.index,
+              _id: alert.id,
+            },
+          },
+          {
+            script: { source: painlessScript, lang: 'painless' },
+          }
+        );
+      }
+
+      await this.esClient.bulk({
+        refresh: 'wait_for',
+        body: bulkUpdateRequest,
+      });
+    } catch (error) {
+      this.logger.error(`Error removing case ${caseId} from alerts: ${error}`);
+      throw error;
+    }
+  }
+
+  public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }) {
+    /**
+     * We intentionally do not perform any authorization
+     * on the alerts. Users should be able to remove
+     * cases from alerts when deleting a case or an
+     * attachment
+     */
+    try {
+      if (caseIds.length === 0) {
+        return;
+      }
+
+      const index = `${this.ruleDataService.getResourcePrefix()}-*`;
+      const query = `${ALERT_CASE_IDS}: (${caseIds.join(' or ')})`;
+      const esQuery = buildEsQuery(undefined, { query, language: 'kuery' }, []);
+
+      const SCRIPT_PARAMS_ID = 'caseIds';
+
+      const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null && ctx._source['${ALERT_CASE_IDS}'].length > 0 && params['${SCRIPT_PARAMS_ID}'] != null && params['${SCRIPT_PARAMS_ID}'].length > 0) {
+        List storedCaseIds = ctx._source['${ALERT_CASE_IDS}'];
+        List caseIdsToRemove = params['${SCRIPT_PARAMS_ID}'];
+
+        for (int i=0; i < caseIdsToRemove.length; i++) {
+          if (storedCaseIds.contains(caseIdsToRemove[i])) {
+            int index = storedCaseIds.indexOf(caseIdsToRemove[i]);
+            storedCaseIds.remove(index);
+          }
+        }
+      }`;
+
+      await this.esClient.updateByQuery({
+        index,
+        conflicts: 'proceed',
+        body: {
+          script: {
+            source: painlessScript,
+            lang: 'painless',
+            params: { caseIds },
+          } as InlineScript,
+          query: esQuery,
+        },
+        ignore_unavailable: true,
+      });
+    } catch (err) {
+      this.logger.error(`Failed removing ${caseIds} from all alerts: ${err}`);
+      throw err;
+    }
   }
 
   public async find<Params extends RuleTypeParams = never>({
@@ -992,5 +1094,20 @@ export class AlertsClient {
     });
 
     return fieldDescriptorToBrowserFieldMapper(fields);
+  }
+
+  public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
+    const { producer, fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
+    const indices = await this.getAuthorizedAlertsIndices([producer]);
+    const o11yIndices = indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
+    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      pattern: o11yIndices,
+      metaFields: ['_id', '_index'],
+      fieldCapsOptions: { allow_no_indices: true },
+      fields: [...fieldsForAAD, 'kibana.*'],
+    });
+
+    return fields;
   }
 }

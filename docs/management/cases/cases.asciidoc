@@ -21,3 +21,4 @@ cases in *{stack-manage-app}*.
 * <<setup-cases>>
 * <<manage-cases>>
 * <<add-case-connectors>>
+* <<cases-settings>>

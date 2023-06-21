@@ -14,15 +14,8 @@ exports[`CertificatesSearch renders expected elements for valid props 1`] = `
     <div
       class="euiFormControlLayout__childrenWrapper"
     >
-      <input
-        aria-label="Search certificates"
-        class="euiFieldSearch euiFieldSearch--fullWidth"
-        data-test-subj="uptimeCertSearch"
-        placeholder="Search certificates"
-        type="search"
-      />
       <div
-        class="euiFormControlLayoutIcons"
+        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--left euiFormControlLayoutIcons--absolute"
       >
         <span
           class="euiFormControlLayoutCustomIcon"
@@ -34,6 +27,13 @@ exports[`CertificatesSearch renders expected elements for valid props 1`] = `
           />
         </span>
       </div>
+      <input
+        aria-label="Search certificates"
+        class="euiFieldSearch euiFieldSearch--fullWidth"
+        data-test-subj="uptimeCertSearch"
+        placeholder="Search certificates"
+        type="search"
+      />
     </div>
   </div>
 </div>

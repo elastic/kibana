@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export { createObservableMonitor } from './observable_monitor';
 export { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
-export { timeoutPromiseAfter } from './timeout_promise_after';
 export { delayOnClaimConflicts } from './delay_on_claim_conflicts';

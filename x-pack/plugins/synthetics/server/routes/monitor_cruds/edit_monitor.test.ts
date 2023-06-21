@@ -42,18 +42,13 @@ describe('syncEditedMonitor', () => {
       },
     },
     fleet: {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
         getByIDs: jest.fn().mockReturnValue([]),
         buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const editedMonitor = {
@@ -98,11 +93,13 @@ describe('syncEditedMonitor', () => {
       previousMonitor,
       decryptedPreviousMonitor:
         previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecrets>,
-      syntheticsMonitorClient,
-      server: serverMock,
-      request: {} as unknown as KibanaRequest,
-      savedObjectsClient:
-        serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      routeContext: {
+        syntheticsMonitorClient,
+        server: serverMock,
+        request: {} as unknown as KibanaRequest,
+        savedObjectsClient:
+          serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      } as any,
       spaceId: 'test-space',
     });
 

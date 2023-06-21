@@ -8,30 +8,28 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, MountPoint } from '@kbn/core/public';
-import { Case } from '@kbn/cases-plugin/common';
+import { CaseUI, CommentType } from '@kbn/cases-plugin/common';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';
-import { observabilityFeatureId } from '@kbn/observability-plugin/public';
-import { useKibana } from '../../../../utils/kibana_react';
+import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { ObservabilityAppServices } from '../../../../application/types';
 import { AddToCaseProps } from '../header/add_to_case_action';
 
 async function addToCase(
   http: HttpSetup,
-  theCase: Case,
+  theCase: CaseUI,
   attributes: TypedLensByValueInput['attributes'],
   timeRange?: { from: string; to: string },
   owner?: string
 ) {
   const apiPath = `/api/cases/${theCase?.id}/comments`;
 
-  const vizPayload = {
-    attributes,
-    timeRange,
-  };
-
   const payload = {
-    comment: `!{lens${JSON.stringify(vizPayload)}}`,
-    type: 'user',
+    persistableStateAttachmentState: { attributes, timeRange },
+    persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
+    type: CommentType.persistableState,
     owner: owner ?? observabilityFeatureId,
   };
 
@@ -46,7 +44,7 @@ export const useAddToCase = ({
   owner = observabilityFeatureId,
 }: AddToCaseProps & {
   appId?: 'securitySolutionUI' | 'observability';
-  getToastText: (thaCase: Case) => MountPoint<HTMLElement>;
+  getToastText: (thaCase: CaseUI) => MountPoint<HTMLElement>;
 }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isCasesOpen, setIsCasesOpen] = useState(false);
@@ -56,10 +54,10 @@ export const useAddToCase = ({
     application: { navigateToApp },
     notifications: { toasts },
     storage,
-  } = useKibana().services;
+  } = useKibana<ObservabilityAppServices>().services;
 
   const onCaseClicked = useCallback(
-    (theCase?: Case) => {
+    (theCase?: CaseUI) => {
       if (theCase && lensAttributes) {
         setIsCasesOpen(false);
         setIsSaving(true);

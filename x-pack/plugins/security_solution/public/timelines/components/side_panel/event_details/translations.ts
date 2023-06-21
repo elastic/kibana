@@ -48,3 +48,10 @@ export const ALERT_DETAILS = i18n.translate(
     defaultMessage: 'Alert details',
   }
 );
+
+export const SHARE_ALERT = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.shareAlert',
+  {
+    defaultMessage: 'Share alert',
+  }
+);

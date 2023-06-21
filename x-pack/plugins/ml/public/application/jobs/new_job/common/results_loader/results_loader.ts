@@ -6,16 +6,19 @@
  */
 
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
-import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
+
+import { getSeverityType, ES_AGGREGATION, ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
+
+import { parseInterval } from '../../../../../../common/util/parse_interval';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+
 import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
 import { TimeBuckets } from '../../../../util/time_buckets';
-import { getSeverityType } from '../../../../../../common/util/anomaly_utils';
-import { parseInterval } from '../../../../../../common/util/parse_interval';
-import { ANOMALY_SEVERITY } from '../../../../../../common/constants/anomalies';
-import { getScoresByRecord } from './searches';
+
+import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
 import { ChartLoader } from '../chart_loader';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
-import { ES_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
+
+import { getScoresByRecord } from './searches';
 
 export interface Results {
   progress: number;
@@ -33,7 +36,7 @@ export interface ModelItem {
 export interface Anomaly {
   time: number;
   value: number;
-  severity: ANOMALY_SEVERITY;
+  severity: ML_ANOMALY_SEVERITY;
 }
 
 const emptyModelItem = {

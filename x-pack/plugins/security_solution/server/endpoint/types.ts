@@ -7,6 +7,7 @@
 
 import type { LoggerFactory } from '@kbn/core/server';
 
+import type { DeepReadonly } from 'utility-types';
 import type { ConfigType } from '../config';
 import type { EndpointAppContextService } from './endpoint_app_context_services';
 import type { HostMetadata } from '../../common/endpoint/types';
@@ -17,7 +18,14 @@ import type { ExperimentalFeatures } from '../../common/experimental_features';
  */
 export interface EndpointAppContext {
   logFactory: LoggerFactory;
+
+  /**
+   * @deprecated use `EndpointAppContext.serverConfig` property instead
+   */
   config(): Promise<ConfigType>;
+
+  serverConfig: DeepReadonly<ConfigType>;
+
   experimentalFeatures: ExperimentalFeatures;
 
   /**

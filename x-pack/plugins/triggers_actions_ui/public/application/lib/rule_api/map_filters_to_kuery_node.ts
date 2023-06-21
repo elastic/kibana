@@ -13,6 +13,7 @@ export const mapFiltersToKueryNode = ({
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleLastRunOutcomesFilter,
+  ruleParamsFilter,
   ruleStatusesFilter,
   tagsFilter,
   searchText,
@@ -22,6 +23,7 @@ export const mapFiltersToKueryNode = ({
   tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
   ruleLastRunOutcomesFilter?: string[];
+  ruleParamsFilter?: Record<string, string | number | object>;
   ruleStatusesFilter?: RuleStatus[];
   searchText?: string;
 }): KueryNode | null => {
@@ -58,6 +60,19 @@ export const mapFiltersToKueryNode = ({
       nodeBuilder.or(
         ruleLastRunOutcomesFilter.map((resf) =>
           nodeBuilder.is('alert.attributes.lastRun.outcome', resf)
+        )
+      )
+    );
+  }
+
+  if (ruleParamsFilter && Object.keys(ruleParamsFilter).length) {
+    filterKueryNode.push(
+      nodeBuilder.and(
+        Object.keys(ruleParamsFilter).map((ruleParam) =>
+          nodeBuilder.is(
+            `alert.attributes.params.${ruleParam}`,
+            String(ruleParamsFilter[ruleParam])
+          )
         )
       )
     );

@@ -6,9 +6,9 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { TableId } from '@kbn/securitysolution-data-table';
 import React, { lazy, Suspense, useMemo } from 'react';
 import type { TimelineItem } from '../../../../common/search_strategy';
-import type { TableId } from '../../../../common/types';
 import type { AlertWorkflowStatus } from '../../types';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 

@@ -21,6 +21,7 @@ export const GetCertsParamsType = t.intersection([
     direction: t.string,
     size: t.number,
     filters: t.unknown,
+    monitorIds: t.array(t.string),
   }),
 ]);
 
@@ -29,6 +30,7 @@ export type GetCertsParams = t.TypeOf<typeof GetCertsParamsType>;
 export const CertMonitorType = t.partial({
   name: t.string,
   id: t.string,
+  configId: t.string,
   url: t.string,
 });
 
@@ -43,6 +45,10 @@ export const CertType = t.intersection([
     common_name: t.string,
     issuer: t.string,
     sha1: t.string,
+    monitorName: t.string,
+    monitorType: t.string,
+    monitorUrl: t.string,
+    locationName: t.string,
   }),
 ]);
 

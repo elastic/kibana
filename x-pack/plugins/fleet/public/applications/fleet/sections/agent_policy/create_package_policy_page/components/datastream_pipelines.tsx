@@ -31,6 +31,7 @@ import { usePackagePolicyEditorPageUrl } from './datastream_hooks';
 export interface PackagePolicyEditorDatastreamPipelinesProps {
   packageInfo: PackageInfo;
   packageInputStream: { id?: string; data_stream: { dataset: string; type: string } };
+  customDataset?: string;
 }
 
 interface PipelineItem {
@@ -92,8 +93,10 @@ function useDatastreamIngestPipelines(
 
 export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
   PackagePolicyEditorDatastreamPipelinesProps
-> = ({ packageInputStream, packageInfo }) => {
-  const dataStream = packageInputStream.data_stream;
+> = ({ packageInputStream, packageInfo, customDataset }) => {
+  const dataStream = customDataset
+    ? { ...packageInputStream.data_stream, dataset: customDataset }
+    : packageInputStream.data_stream;
   const { application, share, docLinks } = useStartServices();
   const ingestPipelineLocator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
 

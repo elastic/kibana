@@ -13,15 +13,16 @@ import {
   pluginStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
 import { appSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
+import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createGuides } from './helpers';
 
-const getGuidesPath = '/api/guided_onboarding/guides';
+const getGuidesPath = `${API_BASE_PATH}/guides`;
 export default function testGetGuidesState({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('GET /api/guided_onboarding/guides', () => {
+  describe(`GET ${getGuidesPath}`, () => {
     afterEach(async () => {
       // Clean up saved objects
       await kibanaServer.savedObjects.clean({

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiTitle, EuiSpacer, EuiPanel, EuiInMemoryTable, EuiLoadingContent } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiPanel, EuiInMemoryTable, EuiSkeletonText } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
 import * as i18n from './translations';
@@ -31,7 +31,7 @@ const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponent
   listAndReferences,
 }): JSX.Element => {
   const [message, setMessage] = useState<JSX.Element | string | undefined>(
-    <EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />
+    <EuiSkeletonText lines={4} data-test-subj="exceptionItemListsTableLoading" />
   );
   const [error, setError] = useState<string | undefined>(undefined);
 

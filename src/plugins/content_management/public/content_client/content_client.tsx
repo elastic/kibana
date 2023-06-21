@@ -11,7 +11,15 @@ import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import type { Version } from '@kbn/object-versioning';
 import { createQueryObservable } from './query_observable';
 import type { CrudClient } from '../crud_client';
-import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn } from '../../common';
+import type {
+  CreateIn,
+  GetIn,
+  UpdateIn,
+  DeleteIn,
+  SearchIn,
+  MSearchIn,
+  MSearchResult,
+} from '../../common';
 import type { ContentTypeRegistry } from '../registry';
 
 export const queryKeyBuilder = {
@@ -19,8 +27,8 @@ export const queryKeyBuilder = {
   item: (type: string, id: string) => {
     return [...queryKeyBuilder.all(type), id] as const;
   },
-  search: (type: string, query: unknown) => {
-    return [...queryKeyBuilder.all(type), 'search', query] as const;
+  search: (type: string, query: unknown, options?: object) => {
+    return [...queryKeyBuilder.all(type), 'search', query, options] as const;
   },
 };
 
@@ -73,7 +81,7 @@ const createQueryOptionBuilder = ({
       const input = addVersion(_input, contentTypeRegistry);
 
       return {
-        queryKey: queryKeyBuilder.search(input.contentTypeId, input.query),
+        queryKey: queryKeyBuilder.search(input.contentTypeId, input.query, input.options),
         queryFn: () => crudClientProvider(input.contentTypeId).search(input) as Promise<O>,
       };
     },
@@ -85,7 +93,7 @@ export class ContentClient {
   readonly queryOptionBuilder: ReturnType<typeof createQueryOptionBuilder>;
 
   constructor(
-    private readonly crudClientProvider: (contentType: string) => CrudClient,
+    private readonly crudClientProvider: (contentType?: string) => CrudClient,
     private readonly contentTypeRegistry: ContentTypeRegistry
   ) {
     this.queryClient = new QueryClient();
@@ -132,5 +140,19 @@ export class ContentClient {
       this.queryClient,
       this.queryOptionBuilder.search<I, O>(addVersion(input, this.contentTypeRegistry))
     );
+  }
+
+  mSearch<T = unknown>(input: MSearchIn): Promise<MSearchResult<T>> {
+    const crudClient = this.crudClientProvider();
+    if (!crudClient.mSearch) {
+      throw new Error('mSearch is not supported by provided crud client');
+    }
+
+    return crudClient.mSearch({
+      ...input,
+      contentTypes: input.contentTypes.map((contentType) =>
+        addVersion(contentType, this.contentTypeRegistry)
+      ),
+    }) as Promise<MSearchResult<T>>;
   }
 }

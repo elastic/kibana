@@ -61,6 +61,5 @@ A set of properties defining what's displayed in one of the flyout section.
 
 ## Future work
 
-- currently the panels are aware of their width. This should be changed and the width of the left, right and preview sections should be handled by the flyout itself
-- add the feature to save the flyout state (layout) to the url
+- add the feature to save the flyout state (layout) to the url (https://github.com/elastic/security-team/issues/6119)
 - introduce the notion of scope to be able to handle more than one flyout per plugin??

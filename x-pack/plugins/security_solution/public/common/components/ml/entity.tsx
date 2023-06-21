@@ -23,7 +23,7 @@ export const EntityComponent: React.FC<Props> = ({ entityName, entityValue }) =>
         aggregatable: true,
       }}
       triggerId={SecurityCellActionsTrigger.DEFAULT}
-      mode={CellActionsMode.HOVER}
+      mode={CellActionsMode.HOVER_DOWN}
       visibleCellActions={5}
     >
       {`${entityName}: "${entityValue}"`}

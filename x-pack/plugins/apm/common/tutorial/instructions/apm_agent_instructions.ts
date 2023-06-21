@@ -400,7 +400,7 @@ export const createJavaAgentInstructions = (
 Do **not** add the agent as a dependency to your application.',
       values: {
         mavenCentralLink:
-          'https://central.sonatype.com/search?q=g%253Aco.elastic.apm%2520a%253Aelastic-apm-agent&sort=published',
+          'https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=co.elastic.apm&a=elastic-apm-agent&v=LATEST',
       },
     }),
   },

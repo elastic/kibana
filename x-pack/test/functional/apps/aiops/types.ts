@@ -5,6 +5,43 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
+interface TestDataTableActionLogPatternAnalysis {
+  type: 'LogPatternAnalysis';
+  tableRowId: string;
+  expected: {
+    queryBar: string;
+    totalDocCount: string;
+  };
+}
+
+interface TestDataExpectedWithSampleProbability {
+  totalDocCountFormatted: string;
+  sampleProbabilityFormatted: string;
+  fieldSelectorPopover: string[];
+}
+
+export function isTestDataExpectedWithSampleProbability(
+  arg: unknown
+): arg is TestDataExpectedWithSampleProbability {
+  return isPopulatedObject(arg, ['sampleProbabilityFormatted']);
+}
+
+interface TestDataExpectedWithoutSampleProbability {
+  totalDocCountFormatted: string;
+  analysisGroupsTable: Array<{ group: string; docCount: string }>;
+  filteredAnalysisGroupsTable?: Array<{ group: string; docCount: string }>;
+  analysisTable: Array<{
+    fieldName: string;
+    fieldValue: string;
+    logRate: string;
+    pValue: string;
+    impact: string;
+  }>;
+  fieldSelectorPopover: string[];
+}
+
 export interface TestData {
   suiteTitle: string;
   dataGenerator: string;
@@ -12,18 +49,12 @@ export interface TestData {
   sourceIndexOrSavedSearch: string;
   rowsPerPage?: 10 | 25 | 50;
   brushBaselineTargetTimestamp?: number;
-  brushDeviationTargetTimestamp: number;
+  brushDeviationTargetTimestamp?: number;
   brushIntervalFactor: number;
   chartClickCoordinates: [number, number];
-  expected: {
-    totalDocCountFormatted: string;
-    analysisGroupsTable: Array<{ group: string; docCount: string }>;
-    analysisTable: Array<{
-      fieldName: string;
-      fieldValue: string;
-      logRate: string;
-      pValue: string;
-      impact: string;
-    }>;
-  };
+  fieldSelectorSearch: string;
+  fieldSelectorApplyAvailable: boolean;
+  query?: string;
+  action?: TestDataTableActionLogPatternAnalysis;
+  expected: TestDataExpectedWithSampleProbability | TestDataExpectedWithoutSampleProbability;
 }

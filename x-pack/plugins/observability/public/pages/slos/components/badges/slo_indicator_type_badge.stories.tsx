@@ -20,7 +20,7 @@ import { buildSlo } from '../../../../data/slo/slo';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/Badges/SloIndicatorTypeBadge',
+  title: 'app/SLO/Badges/SloIndicatorTypeBadge',
   decorators: [KibanaReactStorybookDecorator],
 };
 

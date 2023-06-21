@@ -14,6 +14,7 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import { RuntimeField } from '@kbn/data-views-plugin/public';
 import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
+import { getDataHandler } from '../../data_handler';
 import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
 import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
 import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
@@ -25,7 +26,6 @@ import {
   FieldFormatParams,
 } from '../../components/shared/exploratory_view/types';
 import { apmFieldFormats } from '../../components/shared/exploratory_view/configurations/apm/field_formats';
-import { getDataHandler } from '../../data_handler';
 import { infraMetricsFieldFormats } from '../../components/shared/exploratory_view/configurations/infra_metrics/field_formats';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
@@ -140,10 +140,15 @@ export class ObservabilityDataViews {
           timeFieldName: '@timestamp',
           fieldFormats: this.getFieldFormats(app),
           name: DataTypesLabels[app],
+          allowNoIndex: true,
         },
         false,
         false
       );
+
+      if (dataView.matchedIndices.length === 0) {
+        throw new DataViewMissingIndices('No indices match pattern');
+      }
 
       if (runtimeFields !== null) {
         runtimeFields.forEach(({ name, field }) => {
@@ -170,6 +175,7 @@ export class ObservabilityDataViews {
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
       name: DataTypesLabels[app],
+      allowNoIndex: true,
     });
   }
   // we want to make sure field formats remain same

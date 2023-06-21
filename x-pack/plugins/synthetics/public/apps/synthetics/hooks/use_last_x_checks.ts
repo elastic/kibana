@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { createEsParams } from '@kbn/observability-plugin/public';
+import { createEsParams } from '@kbn/observability-shared-plugin/public';
 import { useReduxEsSearch } from './use_redux_es_search';
 import { Ping } from '../../../../common/runtime_types';
 

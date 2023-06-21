@@ -11,6 +11,8 @@ import { OpenTelemetryInstructions } from './opentelemetry_instructions';
 import {
   getApmAgentCommands,
   getApmAgentVariables,
+  getApmAgentLineNumbers,
+  getApmAgentHighlightLang,
 } from './commands/get_apm_agent_commands';
 import { AgentConfigurationTable } from './agent_config_table';
 
@@ -50,6 +52,8 @@ export function AgentConfigInstructions({
   });
 
   const variables = getApmAgentVariables(variantId);
+  const lineNumbers = getApmAgentLineNumbers(variantId);
+  const highlightLang = getApmAgentHighlightLang(variantId);
 
   return (
     <>
@@ -62,8 +66,9 @@ export function AgentConfigInstructions({
 
       <EuiCodeBlock
         isCopyable
-        language={variantId === 'java' ? variantId : 'bash'}
+        language={highlightLang || 'bash'}
         data-test-subj="commands"
+        lineNumbers={lineNumbers}
       >
         {commands}
       </EuiCodeBlock>

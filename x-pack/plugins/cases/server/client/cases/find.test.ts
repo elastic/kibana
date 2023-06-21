@@ -6,8 +6,9 @@
  */
 import { v1 as uuidv1 } from 'uuid';
 
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/api';
 
+import { MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs, createCasesClientMockFindRequest } from '../mocks';
@@ -16,7 +17,7 @@ import { find } from './find';
 describe('find', () => {
   describe('constructSearch', () => {
     const clientArgs = createCasesClientMockArgs();
-    const casesMap = new Map<string, CaseResponse>(
+    const casesMap = new Map<string, Case>(
       mockCases.map((obj) => {
         return [obj.id, flattenCaseSavedObject({ savedObject: obj, totalComment: 2 })];
       })
@@ -61,6 +62,57 @@ describe('find', () => {
 
       expect(call.caseOptions.search).toBe(search);
       expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
+    });
+
+    it('should not have foo:bar attribute in request payload', async () => {
+      const search = 'sample_text';
+      const findRequest = createCasesClientMockFindRequest({ search });
+      await expect(
+        // @ts-expect-error foo is an invalid field
+        find({ ...findRequest, foo: 'bar' }, clientArgs)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
+      );
+    });
+  });
+
+  describe('searchFields errors', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('invalid searchFields with array', async () => {
+      const searchFields = ['foobar'];
+
+      // @ts-expect-error
+      const findRequest = createCasesClientMockFindRequest({ searchFields });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        'Error: Invalid value "foobar" supplied to "searchFields"'
+      );
+    });
+
+    it('invalid searchFields with single string', async () => {
+      const searchFields = 'foobar';
+
+      // @ts-expect-error
+      const findRequest = createCasesClientMockFindRequest({ searchFields });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        'Error: Invalid value "foobar" supplied to "searchFields"'
+      );
+    });
+
+    it(`throws an error when the category array has ${MAX_CATEGORY_FILTER_LENGTH} items`, async () => {
+      const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
+
+      const findRequest = createCasesClientMockFindRequest({ category });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        `Error: Too many categories provided. The maximum allowed is ${MAX_CATEGORY_FILTER_LENGTH}`
+      );
     });
   });
 });

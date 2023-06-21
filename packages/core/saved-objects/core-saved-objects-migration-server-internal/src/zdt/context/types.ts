@@ -7,12 +7,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { NodeRoles } from '@kbn/core-node-server';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
 import type {
-  ModelVersionMap,
+  VirtualVersionMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
@@ -30,8 +31,8 @@ export interface MigratorContext {
   readonly indexPrefix: string;
   /** Name of the types that are living in the index */
   readonly types: string[];
-  /** Model versions for the registered types */
-  readonly typeModelVersions: ModelVersionMap;
+  /** Virtual versions for the registered types */
+  readonly typeVirtualVersions: VirtualVersionMap;
   /** The client to use for communications with ES */
   readonly elasticsearchClient: ElasticsearchClient;
   /** The maximum number of retries to attempt for a failing action */
@@ -46,6 +47,10 @@ export interface MigratorContext {
   readonly typeRegistry: ISavedObjectTypeRegistry;
   /** List of types that are no longer registered */
   readonly deletedTypes: string[];
+  /** The number of documents to process at a time */
+  readonly batchSize: number;
   /** If true, corrupted objects will be discarded instead of failing the migration */
   readonly discardCorruptObjects: boolean;
+  /** The node roles of the Kibana instance */
+  readonly nodeRoles: NodeRoles;
 }

@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
@@ -77,7 +78,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  onClick={() => selectCaseModal.open({ attachments })}
+                  onClick={() => selectCaseModal.open({ getAttachments: () => attachments })}
                   data-test-subj="case-fixture-attach-to-existing-case"
                 >
                   {'Attach to an existing case'}
@@ -110,9 +111,11 @@ const CasesFixtureApp: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
           >
             <StyledComponentsThemeProvider>
               <Router history={history}>
-                <CasesContext owner={[]} permissions={permissions}>
-                  <CasesFixtureAppWithContext cases={cases} />
-                </CasesContext>
+                <CompatRouter>
+                  <CasesContext owner={[]} permissions={permissions}>
+                    <CasesFixtureAppWithContext cases={cases} />
+                  </CasesContext>
+                </CompatRouter>
               </Router>
             </StyledComponentsThemeProvider>
           </KibanaContextProvider>

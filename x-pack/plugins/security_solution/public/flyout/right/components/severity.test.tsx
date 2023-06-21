@@ -38,17 +38,13 @@ describe('<DocumentSeverity />', () => {
       getFieldsData: jest.fn(),
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <RightPanelContext.Provider value={contextValue}>
         <DocumentSeverity />
       </RightPanelContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render empty component if getFieldsData is invalid array', () => {
@@ -56,17 +52,13 @@ describe('<DocumentSeverity />', () => {
       getFieldsData: jest.fn().mockImplementation(() => ['abc']),
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <RightPanelContext.Provider value={contextValue}>
         <DocumentSeverity />
       </RightPanelContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render empty component if getFieldsData is invalid string', () => {
@@ -74,16 +66,12 @@ describe('<DocumentSeverity />', () => {
       getFieldsData: jest.fn().mockImplementation(() => 'abc'),
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <RightPanelContext.Provider value={contextValue}>
         <DocumentSeverity />
       </RightPanelContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 });

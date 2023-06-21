@@ -10,6 +10,7 @@ import type { CasesFeaturesAllRequired } from '../ui/types';
 export * from './owners';
 export * from './files';
 export * from './application';
+export { LENS_ATTACHMENT_TYPE } from './visualizations';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -47,6 +48,7 @@ export const CASE_CONFIGURE_DETAILS_URL = `${CASES_URL}/configure/{configuration
 export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors` as const;
 
 export const CASE_COMMENTS_URL = `${CASE_DETAILS_URL}/comments` as const;
+export const CASE_FIND_ATTACHMENTS_URL = `${CASE_COMMENTS_URL}/_find` as const;
 export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_COMMENT_DELETE_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_PUSH_URL = `${CASE_DETAILS_URL}/connector/{connector_id}/_push` as const;
@@ -78,6 +80,9 @@ export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as 
 export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_stats` as const;
 export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` as const;
+export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/attachments/files/_bulk_delete` as const;
+export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
 
 /**
  * Action routes
@@ -99,12 +104,14 @@ export const MAX_DOCS_PER_PAGE = 10000 as const;
 export const MAX_BULK_GET_ATTACHMENTS = MAX_DOCS_PER_PAGE;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 export const MAX_BULK_GET_CASES = 1000 as const;
+export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 
 /**
  * Validation
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_CATEGORY_LENGTH = 50 as const;
 
 /**
  * Cases features

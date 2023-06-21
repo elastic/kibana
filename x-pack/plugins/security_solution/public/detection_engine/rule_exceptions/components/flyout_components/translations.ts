@@ -20,9 +20,31 @@ export const VIEW_RULE_DETAIL_ACTION = i18n.translate(
     defaultMessage: 'View rule detail',
   }
 );
+
 export const LINK_COLUMN = i18n.translate(
   'xpack.securitySolution.rule_exceptions.flyoutComponents.addToRulesTableSelection.link_column',
   {
     defaultMessage: 'Link',
+  }
+);
+
+export const NAME_COLUMN = i18n.translate(
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToRulesTableSelection.name_column',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
+export const ACTION_COLUMN = i18n.translate(
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToRulesTableSelection.action_column',
+  {
+    defaultMessage: 'Action',
+  }
+);
+
+export const TAGS_COLUMN = i18n.translate(
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToRulesTableSelection.tags_column',
+  {
+    defaultMessage: 'Tags',
   }
 );

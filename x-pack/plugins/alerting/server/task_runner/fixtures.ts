@@ -156,6 +156,9 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,
+  validate: {
+    params: { validate: (params) => params },
+  },
 };
 
 export const mockRunNowResponse = {
@@ -233,7 +236,13 @@ export const mockTaskInstance = () => ({
   ownerId: null,
 });
 
-export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams = {}) => {
+export const generateAlertOpts = ({
+  action,
+  group,
+  state,
+  id,
+  maintenanceWindowIds,
+}: GeneratorParams = {}) => {
   id = id ?? '1';
   let message: string = '';
   switch (action) {
@@ -250,10 +259,12 @@ export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams 
   return {
     action,
     id,
+    uuid: expect.any(String),
     message,
     state,
     ...(group ? { group } : {}),
     flapping: false,
+    ...(maintenanceWindowIds ? { maintenanceWindowIds } : {}),
   };
 };
 
@@ -355,6 +366,7 @@ export const generateAlertInstance = (
 ) => ({
   [String(id)]: {
     meta: {
+      uuid: expect.any(String),
       lastScheduledActions: {
         date: new Date(DATE_1970),
         group: 'default',
@@ -362,6 +374,7 @@ export const generateAlertInstance = (
       },
       flappingHistory,
       flapping: false,
+      maintenanceWindowIds: [],
       pendingRecoveredCount: 0,
     },
     state: {
@@ -373,26 +386,35 @@ export const generateAlertInstance = (
 });
 
 export const mockAAD = {
-  'kibana.alert.rule.category': 'Metric threshold',
-  'kibana.alert.rule.consumer': 'alerts',
-  'kibana.alert.rule.execution.uuid': 'c35db7cc-5bf7-46ea-b43f-b251613a5b72',
-  'kibana.alert.rule.name': 'test-rule',
-  'kibana.alert.rule.producer': 'infrastructure',
-  'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
-  'kibana.alert.rule.uuid': '0de91960-7643-11ed-b719-bb9db8582cb6',
-  'kibana.space_ids': ['default'],
-  'kibana.alert.rule.tags': [],
   '@timestamp': '2022-12-07T15:38:43.472Z',
-  'kibana.alert.reason': 'system.cpu is 90% in the last 1 min for all hosts. Alert when > 50%.',
-  'kibana.alert.duration.us': 100000,
-  'kibana.alert.time_range': { gte: '2022-01-01T12:00:00.000Z' },
-  'kibana.alert.instance.id': '*',
-  'kibana.alert.start': '2022-12-07T15:23:13.488Z',
-  'kibana.alert.uuid': '2d3e8fe5-3e8b-4361-916e-9eaab0bf2084',
-  'kibana.alert.status': 'active',
-  'kibana.alert.workflow_status': 'open',
-  'event.kind': 'signal',
-  'event.action': 'active',
-  'kibana.version': '8.7.0',
-  'kibana.alert.flapping': false,
+  event: {
+    kind: 'signal',
+    action: 'active',
+  },
+  kibana: {
+    version: '8.7.0',
+    space_ids: ['default'],
+    alert: {
+      instance: { id: '*' },
+      uuid: '2d3e8fe5-3e8b-4361-916e-9eaab0bf2084',
+      status: 'active',
+      workflow_status: 'open',
+      reason: 'system.cpu is 90% in the last 1 min for all hosts. Alert when > 50%.',
+      time_range: { gte: '2022-01-01T12:00:00.000Z' },
+      start: '2022-12-07T15:23:13.488Z',
+      duration: { us: 100000 },
+      flapping: false,
+      rule: {
+        category: 'Metric threshold',
+        consumer: 'alerts',
+        execution: { uuid: 'c35db7cc-5bf7-46ea-b43f-b251613a5b72' },
+        name: 'test-rule',
+        producer: 'infrastructure',
+        revision: 0,
+        rule_type_id: 'metrics.alert.threshold',
+        uuid: '0de91960-7643-11ed-b719-bb9db8582cb6',
+        tags: [],
+      },
+    },
+  },
 };

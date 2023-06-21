@@ -49,7 +49,7 @@ const MONITOR_DETAILS_STEP = (readOnly: boolean = false): Step => ({
 });
 
 const SCRIPT_RECORDER_BTNS = (
-  <EuiFlexGroup justifyContent="flexStart">
+  <EuiFlexGroup justifyContent="flexStart" wrap={true}>
     <EuiFlexItem grow={false}>
       <EuiButton
         data-test-subj="syntheticsLaunchSyntheticsRecorderButton"
@@ -65,7 +65,7 @@ const SCRIPT_RECORDER_BTNS = (
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
         data-test-subj="syntheticsDownloadSyntheticsRecorderButton"
-        href="https://github.com/elastic/synthetics-recorder/releases/"
+        href="https://github.com/elastic/synthetics-recorder/blob/main/docs/DOWNLOAD.md"
         iconType="download"
       >
         {i18n.translate(

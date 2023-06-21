@@ -7,7 +7,7 @@
  */
 
 import { EditPanelAction } from './edit_panel_action';
-import { Embeddable, EmbeddableInput, SavedObjectEmbeddableInput } from '../embeddables';
+import { Embeddable, EmbeddableInput } from '../embeddables';
 import { ViewMode } from '../types';
 import { ContactCardEmbeddable } from '../test_samples';
 import { embeddablePluginMock } from '../../mocks';
@@ -42,7 +42,7 @@ test('is compatible when edit url is available, in edit mode and editable', asyn
   ).toBe(true);
 });
 
-test('redirects to app using state transfer with by value mode', async () => {
+test('redirects to app using state transfer', async () => {
   applicationMock.currentAppId$ = of('superCoolCurrentApp');
   const testPath = '/test-path';
   const action = new EditPanelAction(
@@ -73,32 +73,6 @@ test('redirects to app using state transfer with by value mode', async () => {
         coolInput1: 1,
         coolInput2: 2,
       },
-      originatingPath: testPath,
-    },
-  });
-});
-
-test('redirects to app using state transfer without by value mode', async () => {
-  applicationMock.currentAppId$ = of('superCoolCurrentApp');
-  const testPath = '/test-path';
-  const action = new EditPanelAction(
-    getFactory,
-    applicationMock,
-    stateTransferMock,
-    () => testPath
-  );
-  const embeddable = new EditableEmbeddable(
-    { id: '123', viewMode: ViewMode.EDIT, savedObjectId: '1234' } as SavedObjectEmbeddableInput,
-    true
-  );
-  embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
-  await action.execute({ embeddable });
-  expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
-    path: '/123',
-    state: {
-      originatingApp: 'superCoolCurrentApp',
-      embeddableId: '123',
-      valueInput: undefined,
       originatingPath: testPath,
     },
   });

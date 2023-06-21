@@ -15,8 +15,9 @@ import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
-  MAX_DOCS_PER_PAGE,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
+  INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '../../common/constants';
 
 import {
@@ -38,6 +39,8 @@ import {
   postComment,
   getCaseConnectors,
   getCaseUserActionsStats,
+  deleteFileAttachments,
+  getCategories,
 } from './api';
 
 import {
@@ -47,6 +50,7 @@ import {
   allCasesSnake,
   basicCaseSnake,
   pushedCaseSnake,
+  categories,
   casesStatus,
   casesSnake,
   cases,
@@ -60,13 +64,14 @@ import {
   caseUserActionsWithRegisteredAttachmentsSnake,
   basicPushSnake,
   getCaseUserActionsStatsResponse,
+  basicFileMock,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { getCasesStatus } from '../api';
 import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import type { CaseUserActionTypeWithAll } from './types';
 
 const abortCtrl = new AbortController();
@@ -148,7 +153,7 @@ describe('Cases API', () => {
   });
 
   describe('resolveCase', () => {
-    const targetAliasId = '12345';
+    const aliasTargetId = '12345';
     const basicResolveCase = {
       outcome: 'aliasMatch',
       case: basicCaseSnake,
@@ -157,7 +162,7 @@ describe('Cases API', () => {
 
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue({ ...basicResolveCase, target_alias_id: targetAliasId });
+      fetchMock.mockResolvedValue({ ...basicResolveCase, alias_target_id: aliasTargetId });
     });
 
     it('should be called with correct check url, method, signal', async () => {
@@ -171,21 +176,21 @@ describe('Cases API', () => {
 
     it('should return correct response', async () => {
       const resp = await resolveCase(caseId, true, abortCtrl.signal);
-      expect(resp).toEqual({ ...basicResolveCase, case: basicCase, targetAliasId });
+      expect(resp).toEqual({ ...basicResolveCase, case: basicCase, aliasTargetId });
     });
 
     it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue({
         ...basicResolveCase,
         case: caseWithRegisteredAttachmentsSnake,
-        target_alias_id: targetAliasId,
+        alias_target_id: aliasTargetId,
       });
 
       const resp = await resolveCase(caseId, true, abortCtrl.signal);
       expect(resp).toEqual({
         ...basicResolveCase,
         case: caseWithRegisteredAttachments,
-        targetAliasId,
+        aliasTargetId,
       });
     });
   });
@@ -213,7 +218,7 @@ describe('Cases API', () => {
       });
     });
 
-    it('should applies correct all filters', async () => {
+    it('should apply correctly all filters', async () => {
       await getCases({
         filterOptions: {
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
@@ -224,6 +229,7 @@ describe('Cases API', () => {
           severity: CaseSeverity.HIGH,
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],
+          category: [],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -432,6 +438,26 @@ describe('Cases API', () => {
       });
       expect(resp).toEqual({ ...allCases });
     });
+
+    it('should not send the category field if it is an empty array', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          category: [],
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
   });
 
   describe('getCasesStatus', () => {
@@ -469,8 +495,8 @@ describe('Cases API', () => {
   describe('findCaseUserActions', () => {
     const findCaseUserActionsSnake = {
       page: 1,
-      perPage: 1000,
-      total: 20,
+      perPage: 10,
+      total: 30,
       userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
     };
     const filterActionType: CaseUserActionTypeWithAll = 'all';
@@ -478,6 +504,8 @@ describe('Cases API', () => {
     const params = {
       type: filterActionType,
       sortOrder,
+      page: 1,
+      perPage: 10,
     };
 
     beforeEach(() => {
@@ -493,7 +521,8 @@ describe('Cases API', () => {
         query: {
           types: [],
           sortOrder: 'asc',
-          perPage: MAX_DOCS_PER_PAGE,
+          page: 1,
+          perPage: 10,
         },
       });
     });
@@ -501,7 +530,7 @@ describe('Cases API', () => {
     it('should be called with action type user action and desc sort order', async () => {
       await findCaseUserActions(
         basicCase.id,
-        { type: 'action', sortOrder: 'desc' },
+        { type: 'action', sortOrder: 'desc', page: 2, perPage: 15 },
         abortCtrl.signal
       );
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
@@ -510,7 +539,8 @@ describe('Cases API', () => {
         query: {
           types: ['action'],
           sortOrder: 'desc',
-          perPage: MAX_DOCS_PER_PAGE,
+          page: 2,
+          perPage: 15,
         },
       });
     });
@@ -523,7 +553,8 @@ describe('Cases API', () => {
         query: {
           types: ['user'],
           sortOrder: 'asc',
-          perPage: MAX_DOCS_PER_PAGE,
+          page: 1,
+          perPage: 10,
         },
       });
     });
@@ -589,6 +620,29 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(tags);
+    });
+  });
+
+  describe('getCategories', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(categories);
+    });
+
+    it('should be called with the correct check url, method, signal', async () => {
+      await getCategories(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_GET_CASE_CATEGORIES_URL, {
+        method: 'GET',
+        signal: abortCtrl.signal,
+        query: {
+          owner: [SECURITY_SOLUTION_OWNER],
+        },
+      });
+    });
+
+    it('should return the correct response', async () => {
+      const resp = await getCategories(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      expect(resp).toEqual(categories);
     });
   });
 
@@ -732,6 +786,7 @@ describe('Cases API', () => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(basicCaseSnake);
     });
+
     const data = {
       description: 'description',
       tags: ['tag'],
@@ -746,10 +801,12 @@ describe('Cases API', () => {
         syncAlerts: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
+      category: 'test',
     };
 
     it('should be called with correct check url, method, signal', async () => {
       await postCase(data, abortCtrl.signal);
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'POST',
         body: JSON.stringify(data),
@@ -766,6 +823,17 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await postCase(data, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
+
+    it('should default category to null if it is undefined', async () => {
+      const dataWithoutCategory = omit(data, 'category');
+      await postCase(dataWithoutCategory, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
+        method: 'POST',
+        body: JSON.stringify({ ...dataWithoutCategory, category: null }),
+        signal: abortCtrl.signal,
+      });
     });
   });
 
@@ -813,6 +881,30 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
+  });
+
+  describe('deleteFileAttachments', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(null);
+    });
+
+    it('should be called with correct url, method, signal and body', async () => {
+      const resp = await deleteFileAttachments({
+        caseId: basicCaseId,
+        fileIds: [basicFileMock.id],
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        INTERNAL_DELETE_FILE_ATTACHMENTS_URL.replace('{case_id}', basicCaseId),
+        {
+          method: 'POST',
+          body: JSON.stringify({ ids: [basicFileMock.id] }),
+          signal: abortCtrl.signal,
+        }
+      );
+      expect(resp).toBe(undefined);
     });
   });
 

@@ -14,6 +14,7 @@ import {
   EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
@@ -45,13 +46,14 @@ interface UnwrappedEmbeddableFactory {
 export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => {
   const {
     embeddable,
-    settings: { uiSettings },
     visualizations: {
       getAliases: getVisTypeAliases,
       getByGroup: getVisTypesByGroup,
       showNewVisModal,
     },
   } = pluginServices.getServices();
+
+  const { euiTheme } = useEuiTheme();
 
   const embeddableFactories = useMemo(
     () => Array.from(embeddable.getEmbeddableFactories()),
@@ -71,8 +73,6 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       setUnwrappedEmbeddableFactories(factories);
     });
   }, [embeddableFactories]);
-
-  const LABS_ENABLED = uiSettings.get('visualize:enableLabs');
 
   const createNewAggsBasedVis = useCallback(
     (visType?: BaseVisType) => () =>
@@ -96,9 +96,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
         }
         return 0;
       })
-      .filter(
-        ({ hidden, stage }: BaseVisType) => !(hidden || (!LABS_ENABLED && stage === 'experimental'))
-      );
+      .filter(({ disableCreate, stage }: BaseVisType) => !disableCreate);
 
   const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
@@ -220,29 +218,33 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   });
 
   const getEditorMenuPanels = (closePopover: () => void) => {
+    const initialPanelItems = [
+      ...visTypeAliases.map(getVisTypeAliasMenuItem),
+      ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
+        name: appName,
+        icon,
+        panel: panelId,
+        'data-test-subj': `dashboardEditorMenu-${id}Group`,
+      })),
+      ...ungroupedFactories.map((factory) => {
+        return getEmbeddableFactoryMenuItem(factory, closePopover);
+      }),
+      ...promotedVisTypes.map(getVisTypeMenuItem),
+    ];
+    if (aggsBasedVisTypes.length > 0) {
+      initialPanelItems.push({
+        name: aggsPanelTitle,
+        icon: 'visualizeApp',
+        panel: aggBasedPanelID,
+        'data-test-subj': `dashboardEditorAggBasedMenuItem`,
+      });
+    }
+    initialPanelItems.push(...toolVisTypes.map(getVisTypeMenuItem));
+
     return [
       {
         id: 0,
-        items: [
-          ...visTypeAliases.map(getVisTypeAliasMenuItem),
-          ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
-            name: appName,
-            icon,
-            panel: panelId,
-            'data-test-subj': `dashboardEditorMenu-${id}Group`,
-          })),
-          ...ungroupedFactories.map((factory) => {
-            return getEmbeddableFactoryMenuItem(factory, closePopover);
-          }),
-          ...promotedVisTypes.map(getVisTypeMenuItem),
-          {
-            name: aggsPanelTitle,
-            icon: 'visualizeApp',
-            panel: aggBasedPanelID,
-            'data-test-subj': `dashboardEditorAggBasedMenuItem`,
-          },
-          ...toolVisTypes.map(getVisTypeMenuItem),
-        ],
+        items: initialPanelItems,
       },
       {
         id: aggBasedPanelID,
@@ -262,6 +264,8 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   };
   return (
     <ToolbarPopover
+      zIndex={Number(euiTheme.levels.header) - 1}
+      repositionOnScroll
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Select type',

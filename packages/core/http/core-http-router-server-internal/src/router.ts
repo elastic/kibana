@@ -22,13 +22,15 @@ import type {
   RouterRoute,
   IRouter,
   RequestHandler,
+  VersionedRouter,
 } from '@kbn/core-http-server';
 import { validBodyOutput } from '@kbn/core-http-server';
+import { RouteValidator } from './validator';
+import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
-import { RouteValidator } from './validator';
 
 export type ContextEnhancer<
   P,
@@ -116,6 +118,17 @@ function validOptions(
   return { ...options, body };
 }
 
+/** @internal */
+export interface RouterOptions {
+  /** Whether we are running in development */
+  isDev?: boolean;
+  /**
+   * Which route resolution algo to use
+   * @default 'oldest'
+   */
+  versionedRouteResolution?: 'newest' | 'oldest';
+}
+
 /**
  * @internal
  */
@@ -132,7 +145,8 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   constructor(
     public readonly routerPath: string,
     private readonly log: Logger,
-    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>
+    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
+    private readonly options: RouterOptions
   ) {
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
@@ -201,6 +215,18 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       }
       return hapiResponseAdapter.toInternalError();
     }
+  }
+
+  private versionedRouter: undefined | VersionedRouter<Context> = undefined;
+  public get versioned(): VersionedRouter<Context> {
+    if (this.versionedRouter === undefined) {
+      this.versionedRouter = CoreVersionedRouter.from({
+        router: this,
+        isDev: this.options.isDev,
+        defaultHandlerResolutionStrategy: this.options.versionedRouteResolution,
+      });
+    }
+    return this.versionedRouter;
   }
 }
 

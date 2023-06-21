@@ -13,19 +13,26 @@ import type { PluginFunctionalProviderContext } from '../../services';
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('_bulk_get', () => {
     describe('saved objects with hidden type', () => {
-      before(() =>
-        esArchiver.load(
+      before(async () => {
+        await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-        )
-      );
-      after(() =>
-        esArchiver.unload(
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
+        );
+      });
+      after(async () => {
+        await esArchiver.unload(
           'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-        )
-      );
+        );
+        await kibanaServer.savedObjects.clean({
+          types: ['test-hidden-importable-exportable'],
+        });
+      });
       const URL = '/api/kibana/management/saved_objects/_bulk_get';
       const hiddenTypeExportableImportable = {
         type: 'test-hidden-importable-exportable',

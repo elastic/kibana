@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useHistory } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
@@ -126,6 +125,8 @@ describe('when on the package policy create page', () => {
     testRenderer = createFleetTestRendererMock();
     mockApiCalls(testRenderer.startServices.http);
     testRenderer.mountHistory.push(createPageUrlPath);
+
+    jest.mocked(useStartServices().application.navigateToApp).mockReset();
 
     mockPackageInfo = {
       data: {
@@ -308,6 +309,15 @@ describe('when on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
+        await waitFor(
+          async () => {
+            expect(
+              await renderResult.findByText(/Add Elastic Agent to your hosts/)
+            ).toBeInTheDocument();
+          },
+          { timeout: 10000 }
+        );
+
         await act(async () => {
           fireEvent.click(
             renderResult.getByText(/Add Elastic Agent to your hosts/).closest('button')!
@@ -330,12 +340,15 @@ describe('when on the package policy create page', () => {
       test('should navigate to save navigate path with query param if set', async () => {
         const routeState = {
           onSaveNavigateTo: [PLUGIN_ID, { path: '/save/url/here' }],
+          onSaveQueryParams: {
+            openEnrollmentFlyout: true,
+          },
         };
         const queryParamsPolicyId = 'agent-policy-1';
         await setupSaveNavigate(routeState, queryParamsPolicyId);
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
-          path: '/policies/agent-policy-1',
+          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
         });
       });
 
@@ -348,10 +361,12 @@ describe('when on the package policy create page', () => {
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
       });
 
-      test('should set history if no routeState', async () => {
+      test('should navigate to agent policy if no route state is set', async () => {
         await setupSaveNavigate({});
 
-        expect(useHistory().push).toHaveBeenCalledWith('/policies/agent-policy-1');
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
+          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
+        });
       });
     });
 

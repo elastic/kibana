@@ -39,7 +39,7 @@ describe('usePushToService', () => {
   const pushCaseToExternalService = jest.fn().mockReturnValue({});
   const mockPostPush = {
     isLoading: false,
-    pushCaseToExternalService,
+    mutateAsync: pushCaseToExternalService,
   };
 
   const caseConnectors = getCaseConnectorsMockResponse();

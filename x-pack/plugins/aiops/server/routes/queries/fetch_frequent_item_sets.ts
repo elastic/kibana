@@ -12,23 +12,16 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { type SignificantTerm, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { type SignificantTerm } from '@kbn/ml-agg-utils';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
+import { RANDOM_SAMPLER_SEED } from '../../../common/constants';
 import type { SignificantTermDuplicateGroup, ItemsetResult } from '../../../common/types';
 
 interface FrequentItemSetsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {
     buckets: Array<{ key: Record<string, string[]>; doc_count: number; support: number }>;
   };
-}
-
-interface RandomSamplerAggregation {
-  sample: FrequentItemSetsAggregation;
-}
-
-function isRandomSamplerAggregation(arg: unknown): arg is RandomSamplerAggregation {
-  return isPopulatedObject(arg, ['sample']);
 }
 
 export function groupDuplicates(
@@ -64,7 +57,7 @@ export function getShouldClauses(significantTerms: SignificantTerm[]) {
 export function getFrequentItemSetsAggFields(significantTerms: SignificantTerm[]) {
   return Array.from(
     group(significantTerms, ({ fieldName }) => fieldName),
-    ([field, values]) => ({ field, include: values.map((d) => d.fieldValue) })
+    ([field, values]) => ({ field, include: values.map((d) => String(d.fieldValue)) })
   );
 }
 
@@ -107,7 +100,6 @@ export async function fetchFrequentItemSets(
 
   const frequentItemSetsAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     fi: {
-      // @ts-expect-error `frequent_item_sets` is not yet part of `AggregationsAggregationContainer`
       frequent_item_sets: {
         minimum_set_size: 2,
         size: 200,
@@ -117,21 +109,14 @@ export async function fetchFrequentItemSets(
     },
   };
 
-  // frequent items can be slow, so sample and use 10% min_support
-  const randomSamplerAgg: Record<string, estypes.AggregationsAggregationContainer> = {
-    sample: {
-      // @ts-expect-error `random_sampler` is not yet part of `AggregationsAggregationContainer`
-      random_sampler: {
-        probability: sampleProbability,
-        seed: RANDOM_SAMPLER_SEED,
-      },
-      aggs: frequentItemSetsAgg,
-    },
-  };
+  const { wrap, unwrap } = createRandomSamplerWrapper({
+    probability: sampleProbability,
+    seed: RANDOM_SAMPLER_SEED,
+  });
 
   const esBody = {
     query,
-    aggs: sampleProbability < 1 ? randomSamplerAgg : frequentItemSetsAgg,
+    aggs: wrap(frequentItemSetsAgg),
     size: 0,
     track_total_hits: true,
   };
@@ -160,17 +145,17 @@ export async function fetchFrequentItemSets(
 
   const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
 
-  const frequentItemSets = isRandomSamplerAggregation(body.aggregations)
-    ? body.aggregations.sample.fi
-    : body.aggregations.fi;
+  const frequentItemSets = unwrap(
+    body.aggregations as Record<string, estypes.AggregationsAggregate>
+  ) as FrequentItemSetsAggregation;
 
-  const shape = frequentItemSets.buckets.length;
+  const shape = frequentItemSets.fi.buckets.length;
   let maximum = shape;
   if (maximum > 50000) {
     maximum = 50000;
   }
 
-  const fiss = frequentItemSets.buckets;
+  const fiss = frequentItemSets.fi.buckets;
   fiss.length = maximum;
 
   const results: ItemsetResult[] = [];

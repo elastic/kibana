@@ -23,7 +23,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
 import { siemMock } from '../../../../mocks';
 import { createMockConfig } from '../../../../config.mock';
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { detectionEngineHealthClientMock, ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { requestMock } from './request';
 import { internalFrameworkRequest } from '../../../framework';
 
@@ -58,6 +58,8 @@ export const createMockClients = () => {
 
     config: createMockConfig(),
     appClient: siemMock.createClient(),
+
+    detectionEngineHealthClient: detectionEngineHealthClientMock.create(),
     ruleExecutionLog: ruleExecutionLogMock.forRoutes.create(),
   };
 };
@@ -106,10 +108,10 @@ const createSecuritySolutionRequestContextMock = (
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
-  const licensing = licensingMock.createSetup();
 
   return {
     core,
+    getServerBasePath: jest.fn(() => ''),
     getEndpointAuthz: jest.fn(async () =>
       getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
     ),
@@ -130,16 +132,13 @@ const createSecuritySolutionRequestContextMock = (
     }),
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
+    getDetectionEngineHealthClient: jest.fn(() => clients.detectionEngineHealthClient),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
     getInternalFleetServices: jest.fn(() => {
       // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
       throw new Error('Not implemented');
     }),
-    getQueryRuleAdditionalOptions: {
-      licensing,
-      osqueryCreateAction: jest.fn(),
-    },
   };
 };
 

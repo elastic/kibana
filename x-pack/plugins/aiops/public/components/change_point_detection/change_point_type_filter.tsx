@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
-import { type ChangePointType } from './change_point_detection_context';
+import { type ChangePointType, CHANGE_POINT_TYPES } from './constants';
 
 export type ChangePointUIValue = ChangePointType | undefined;
 
@@ -29,32 +29,32 @@ interface ChangePointTypeFilterProps {
 
 const changePointTypes: Array<{ value: ChangePointType; description: string }> = [
   {
-    value: 'dip',
+    value: CHANGE_POINT_TYPES.DIP,
     description: i18n.translate('xpack.aiops.changePointDetection.dipDescription', {
       defaultMessage: 'A significant dip occurs at this point.',
     }),
   },
   {
-    value: 'spike',
+    value: CHANGE_POINT_TYPES.SPIKE,
     description: i18n.translate('xpack.aiops.changePointDetection.spikeDescription', {
       defaultMessage: 'A significant spike occurs at this point.',
     }),
   },
   {
-    value: 'distribution_change',
+    value: CHANGE_POINT_TYPES.DISTRIBUTION_CHANGE,
     description: i18n.translate('xpack.aiops.changePointDetection.distributionChangeDescription', {
       defaultMessage: 'The overall distribution of the values has changed significantly.',
     }),
   },
   {
-    value: 'step_change',
+    value: CHANGE_POINT_TYPES.STEP_CHANGE,
     description: i18n.translate('xpack.aiops.changePointDetection.stepChangeDescription', {
       defaultMessage:
         'The change indicates a statistically significant step up or down in value distribution.',
     }),
   },
   {
-    value: 'trend_change',
+    value: CHANGE_POINT_TYPES.TREND_CHANGE,
     description: i18n.translate('xpack.aiops.changePointDetection.trendChangeDescription', {
       defaultMessage: 'An overall trend change occurs at this point.',
     }),
@@ -134,6 +134,7 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
         isClearable
         data-test-subj="aiopsChangePointTypeFilter"
         renderOption={renderOption}
+        compressed
       />
     </EuiFormRow>
   );

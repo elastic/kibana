@@ -70,18 +70,19 @@ export const useAddToRulesTable = ({
       tags.forEach((tag) => acc.add(tag));
       return acc;
     }, new Set());
-    return [...uniqueTags].map((tag) => ({ value: tag, name: tag }));
+    return Array.from(uniqueTags).map((tag) => ({ value: tag, name: tag, field: 'tags' }));
   }, [sortedRulesByLinkedRulesOnTop]);
 
   const searchOptions = useMemo(
     () => ({
       box: {
         incremental: true,
+        schema: true,
       },
       filters: [
         {
           type: 'field_value_selection' as const,
-          field: 'tags',
+          operator: 'exact',
           name: i18n.translate(
             'xpack.securitySolution.exceptions.addToRulesTable.tagsFilterLabel',
             {
@@ -103,7 +104,7 @@ export const useAddToRulesTable = ({
         name: commonI18n.LINK_COLUMN,
         align: 'left' as HorizontalAlignment,
         'data-test-subj': 'ruleActionLinkRuleSwitch',
-        render: (_, rule: Rule) => (
+        render: (_: unknown, rule: Rule) => (
           <LinkRuleSwitch rule={rule} linkedRules={linkedRules} onRuleLinkChange={setLinkedRules} />
         ),
       },

@@ -11,7 +11,7 @@ import type { ITelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS, TASK_METRICS_CHANNEL } from '../constants';
-import { batchTelemetryRecords, tlog, createTaskMetric } from '../helpers';
+import { batchTelemetryRecords, createTaskMetric, processK8sUsernames, tlog } from '../helpers';
 import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
@@ -70,7 +70,12 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
         );
 
-        const enrichedAlerts = processedAlerts.map(
+        const sanitizedAlerts = processedAlerts.map(
+          (event: TelemetryEvent): TelemetryEvent =>
+            processK8sUsernames(clusterInfo?.cluster_uuid, event)
+        );
+
+        const enrichedAlerts = sanitizedAlerts.map(
           (event: TelemetryEvent): TelemetryEvent => ({
             ...event,
             licence_id: licenseInfo?.uid,

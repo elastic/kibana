@@ -11,11 +11,11 @@ import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
 
-import { BuildContext } from '../build_context';
+import { TaskContext } from '../task_context';
 
 const asyncPipeline = promisify(pipeline);
 
-export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: BuildContext) {
+export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: TaskContext) {
   if (!plugin.manifest.ui) {
     return;
   }

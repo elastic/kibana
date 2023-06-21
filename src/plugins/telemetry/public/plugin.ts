@@ -103,6 +103,8 @@ export interface TelemetryPluginConfig {
   hidePrivacyStatement?: boolean;
   /** Extra labels to add to the telemetry context */
   labels: Record<string, unknown>;
+  /** Whether to use Serverless-specific channels when reporting Snapshot Telemetry */
+  appendServerlessChannelsSuffix: boolean;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -171,7 +173,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     if (home && !this.config.hidePrivacyStatement) {
       home.welcomeScreen.registerOnRendered(() => {
         if (this.telemetryService?.userCanChangeSettings) {
-          this.telemetryNotifications?.setOptedInNoticeSeen();
+          this.telemetryNotifications?.setOptInStatusNoticeSeen();
         }
       });
 
@@ -230,14 +232,13 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       this.maybeStartTelemetryPoller();
       if (telemetryBanner) {
         this.maybeShowOptedInNotificationBanner();
-        this.maybeShowOptInBanner();
       }
     });
 
     return {
       telemetryService: this.getTelemetryServicePublicApis(),
       telemetryNotifications: {
-        setOptedInNoticeSeen: () => telemetryNotifications.setOptedInNoticeSeen(),
+        setOptedInNoticeSeen: () => telemetryNotifications.setOptInStatusNoticeSeen(),
       },
       telemetryConstants,
     };
@@ -300,19 +301,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     if (!this.telemetryNotifications) {
       return;
     }
-    const shouldShowBanner = this.telemetryNotifications.shouldShowOptedInNoticeBanner();
+    const shouldShowBanner = this.telemetryNotifications.shouldShowOptInStatusNoticeBanner();
     if (shouldShowBanner) {
-      this.telemetryNotifications.renderOptedInNoticeBanner();
-    }
-  }
-
-  private maybeShowOptInBanner() {
-    if (!this.telemetryNotifications) {
-      return;
-    }
-    const shouldShowBanner = this.telemetryNotifications.shouldShowOptInBanner();
-    if (shouldShowBanner) {
-      this.telemetryNotifications.renderOptInBanner();
+      this.telemetryNotifications.renderOptInStatusNoticeBanner();
     }
   }
 

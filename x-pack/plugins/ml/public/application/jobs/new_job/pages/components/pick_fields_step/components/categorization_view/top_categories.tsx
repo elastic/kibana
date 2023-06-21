@@ -8,13 +8,13 @@
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { Results } from '../../../../../common/results_loader';
 import { ml } from '../../../../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../../../../common/constants/categorization_job';
-import { extractErrorProperties } from '../../../../../../../../../common/util/errors';
 
 export const TopCategories: FC = () => {
   const { displayErrorToast } = useToastNotificationService();

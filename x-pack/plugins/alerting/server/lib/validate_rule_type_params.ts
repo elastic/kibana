@@ -17,7 +17,7 @@ export function validateRuleTypeParams<Params extends RuleTypeParams>(
   }
 
   try {
-    return validator.validate(params);
+    return validator.validate(params as Params);
   } catch (err) {
     throw Boom.badRequest(`params invalid: ${err.message}`);
   }

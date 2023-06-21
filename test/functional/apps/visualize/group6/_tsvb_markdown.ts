@@ -37,7 +37,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('markdown', () => {
       before(async () => {
         await visualize.initTests();
-        await visualBuilder.resetPage();
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisualBuilder();
+        await visualBuilder.checkVisualBuilderIsPresent();
         await visualBuilder.clickMarkdown();
         await timePicker.setAbsoluteRange(
           'Sep 22, 2015 @ 06:00:00.000',

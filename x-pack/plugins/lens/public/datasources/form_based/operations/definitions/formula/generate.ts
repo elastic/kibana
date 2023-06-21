@@ -6,7 +6,7 @@
  */
 
 import { isObject } from 'lodash';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 import {
   FieldBasedIndexPatternColumn,
   GenericOperationDefinition,

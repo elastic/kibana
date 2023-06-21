@@ -159,7 +159,7 @@ Default value: 50ms"
     <EuiFlexGroup>
       <FlexItemSetting
         formRowLabelText="Queue type"
-        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for in-memory based queuing, or persisted for disk-based ACKed queueing
 
 Default value: memory"
       >
@@ -450,7 +450,7 @@ Default value: 50ms"
     <EuiFlexGroup>
       <FlexItemSetting
         formRowLabelText="Queue type"
-        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for in-memory based queuing, or persisted for disk-based ACKed queueing
 
 Default value: memory"
       >
@@ -741,7 +741,7 @@ Default value: 50ms"
     <EuiFlexGroup>
       <FlexItemSetting
         formRowLabelText="Queue type"
-        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for in-memory based queuing, or persisted for disk-based ACKed queueing
 
 Default value: memory"
       >
@@ -1003,7 +1003,7 @@ Default value: 50ms"
     <EuiFlexGroup>
       <FlexItemSetting
         formRowLabelText="Queue type"
-        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for in-memory based queuing, or persisted for disk-based ACKed queueing
 
 Default value: memory"
       >
@@ -1305,7 +1305,7 @@ Default value: 50ms"
     <EuiFlexGroup>
       <FlexItemSetting
         formRowLabelText="Queue type"
-        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for in-memory based queuing, or persisted for disk-based ACKed queueing
 
 Default value: memory"
       >
@@ -1567,7 +1567,7 @@ Default value: 50ms"
     <EuiFlexGroup>
       <FlexItemSetting
         formRowLabelText="Queue type"
-        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+        formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for in-memory based queuing, or persisted for disk-based ACKed queueing
 
 Default value: memory"
       >

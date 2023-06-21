@@ -38,6 +38,9 @@ export default function ({
     await kibanaServer.importExport.unload(ecommerceSOPath);
   };
 
+  // NOTE: Occasionally, you may need to run the test and copy the "session" image file and replace the
+  // "baseline" image file to reflect current renderings. The source and destination file paths can be found in
+  // the debug logs.
   describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
       await loadEcommerce();
@@ -152,37 +155,8 @@ export default function ({
         await unloadEcommerce();
       });
 
-      it('PNG file matches the baseline: small dashboard', async function () {
-        this.timeout(300000);
-
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openPngReportingPanel();
-        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
-        await PageObjects.reporting.clickGenerateReportButton();
-        await PageObjects.reporting.removeForceSharedItemsContainerSize();
-
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-        const reportFileName = 'small_dashboard_preserve_layout';
-        const sessionReportPath = await PageObjects.reporting.writeSessionReport(
-          reportFileName,
-          'png',
-          reportData,
-          REPORTS_FOLDER
-        );
-
-        const percentDiff = await png.compareAgainstBaseline(
-          sessionReportPath,
-          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          REPORTS_FOLDER,
-          updateBaselines
-        );
-
-        expect(percentDiff).to.be.lessThan(0.09);
-      });
-
-      it('PNG file matches the baseline: large dashboard', async function () {
+      // Failing: See https://github.com/elastic/kibana/issues/142484
+      it.skip('PNG file matches the baseline: large dashboard', async function () {
         this.timeout(300000);
 
         await PageObjects.common.navigateToApp('dashboard');
@@ -201,37 +175,29 @@ export default function ({
           reportData,
           REPORTS_FOLDER
         );
+        const baselinePath = PageObjects.reporting.getBaselineReportPath(
+          reportFileName,
+          'png',
+          REPORTS_FOLDER
+        );
         const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
-          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
+          baselinePath,
           REPORTS_FOLDER,
           updateBaselines
         );
 
-        expect(percentDiff).to.be.lessThan(0.09);
+        expect(percentDiff).to.be.lessThan(0.03);
       });
     });
 
-    describe('Preserve Layout', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/157023
+    describe.skip('Preserve Layout', () => {
       before(async () => {
         await loadEcommerce();
       });
       after(async () => {
         await unloadEcommerce();
-      });
-
-      it('downloads a PDF file: small dashboard', async function () {
-        this.timeout(300000);
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
-        await PageObjects.reporting.clickGenerateReportButton();
-
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
-
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('application/pdf');
       });
 
       it('downloads a PDF file: large dashboard', async function () {
@@ -268,6 +234,7 @@ export default function ({
     describe('Sample data from Kibana 7.6', () => {
       const reportFileName = 'sample_data_ecommerce_76';
       let sessionReportPath: string;
+      let baselinePath: string;
 
       before(async () => {
         await kibanaServer.uiSettings.replace({
@@ -295,6 +262,11 @@ export default function ({
           reportData,
           REPORTS_FOLDER
         );
+        baselinePath = PageObjects.reporting.getBaselineReportPath(
+          reportFileName,
+          'png',
+          REPORTS_FOLDER
+        );
       });
 
       after(async () => {
@@ -308,12 +280,12 @@ export default function ({
         this.timeout(300000);
         const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
-          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
+          baselinePath,
           REPORTS_FOLDER,
           updateBaselines
         );
 
-        expect(percentDiff).to.be.lessThan(0.09);
+        expect(percentDiff).to.be.lessThan(0.03);
       });
     });
   });

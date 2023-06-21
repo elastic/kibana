@@ -109,8 +109,6 @@ describe('duplicateRule', () => {
       consumer: rule.consumer,
       schedule: rule.schedule,
       actions: rule.actions,
-      throttle: null, // TODO: fix?
-      notifyWhen: null, // TODO: fix?
       enabled: false, // covered in a separate test
     });
   });

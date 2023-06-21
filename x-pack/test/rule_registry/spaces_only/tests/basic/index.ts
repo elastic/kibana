@@ -18,8 +18,5 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     after(async () => {
       await deleteSpaces(getService);
     });
-
-    // Basic
-    loadTestFile(require.resolve('./bootstrap'));
   });
 };

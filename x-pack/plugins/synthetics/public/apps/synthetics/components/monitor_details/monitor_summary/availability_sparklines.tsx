@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ReportTypes, useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { AVAILABILITY_LABEL } from './availability_panel';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
@@ -22,7 +23,7 @@ interface AvailabilitySparklinesProps {
 export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
   const {
     services: {
-      observability: { ExploratoryViewEmbeddable },
+      exploratoryView: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
   const monitorId = useMonitorQueryId();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { INGEST_SAVED_OBJECT_INDEX } from '../../common/constants';
+
 export {
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
@@ -22,11 +24,12 @@ export {
   AUTO_UPDATE_PACKAGES,
   KEEP_POLICIES_UP_TO_DATE_PACKAGES,
   AUTO_UPGRADE_POLICIES_PACKAGES,
+  LOCATORS_IDS,
 } from '../../common/constants';
 
 export * from './page_paths';
 
-export const INDEX_NAME = '.kibana';
+export const INDEX_NAME = INGEST_SAVED_OBJECT_INDEX;
 
 export const CUSTOM_LOGS_INTEGRATION_NAME = 'log';
 
@@ -37,7 +40,3 @@ export const DURATION_APM_SETTINGS_VARS = {
   TAIL_SAMPLING_INTERVAL: 'tail_sampling_interval',
   WRITE_TIMEOUT: 'write_timeout',
 };
-
-export const LOCATORS_IDS = {
-  APM_LOCATOR: 'APM_LOCATOR',
-} as const;

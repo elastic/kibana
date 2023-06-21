@@ -19,7 +19,7 @@ import {
   createSignalsIndex,
   deleteAllRules,
   deleteAllEventLogExecutionEvents,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getRuleForSignalTesting,
   indexEventLogExecutionEvents,
   waitForEventLogExecuteComplete,
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     beforeEach(async () => {
@@ -72,7 +72,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return execution events for a rule that has executed successfully', async () => {
-      const rule = getRuleForSignalTesting(['auditbeat-*']);
+      const rule = {
+        ...getRuleForSignalTesting(['auditbeat-*']),
+        query: 'process.executable: "/usr/bin/sudo"',
+      };
       const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccess({ supertest, log, id });
       await waitForEventLogExecuteComplete(es, log, id);

@@ -158,11 +158,13 @@ describe('shows suggestions', () => {
         },
         title: 'Gauge',
         hide: true,
+        incomplete: true,
         previewIcon: IconChartHorizontalBullet,
         score: 0.5,
       },
       {
         hide: true,
+        incomplete: true,
         previewIcon: IconChartVerticalBullet,
         title: 'Gauge',
         score: 0.5,
@@ -208,6 +210,7 @@ describe('shows suggestions', () => {
         previewIcon: IconChartVerticalBullet,
         title: 'Gauge',
         hide: false, // shows suggestion when current is gauge
+        incomplete: false,
         score: 0.5,
       },
     ]);

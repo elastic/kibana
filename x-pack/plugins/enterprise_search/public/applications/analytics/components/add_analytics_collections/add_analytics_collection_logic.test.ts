@@ -77,7 +77,7 @@ describe('addAnalyticsCollectionLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
         jest.advanceTimersByTime(1000);
         await nextTick();
-        expect(navigateToUrl).toHaveBeenCalledWith('/collections/test/events');
+        expect(navigateToUrl).toHaveBeenCalledWith('/collections/test/overview');
         jest.useRealTimers();
       });
     });
@@ -149,6 +149,20 @@ describe('addAnalyticsCollectionLogic', () => {
         expect(AddAnalyticsCollectionLogic.actions.makeRequest).toHaveBeenCalledWith({
           name: 'test',
         });
+      });
+    });
+
+    describe('setNameValue', () => {
+      it('should call an error if name is not valid', () => {
+        AddAnalyticsCollectionLogic.actions.setNameValue('Invalid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeTruthy();
+      });
+
+      it('should remove error if name become valid', () => {
+        AddAnalyticsCollectionLogic.actions.setNameValue('Invalid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeTruthy();
+        AddAnalyticsCollectionLogic.actions.setNameValue('valid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeFalsy();
       });
     });
   });

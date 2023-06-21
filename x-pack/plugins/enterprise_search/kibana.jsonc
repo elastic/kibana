@@ -23,9 +23,11 @@
       "guidedOnboarding",
       "lens",
       "embeddable",
+      "share"
     ],
     "optionalPlugins": [
       "customIntegrations",
+      "globalSearch",
       "home",
       "ml",
       "spaces",

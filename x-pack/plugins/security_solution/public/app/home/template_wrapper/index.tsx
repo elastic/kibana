@@ -25,8 +25,7 @@ import {
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
-import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
-import { useIsGroupedNavigationEnabled } from '../../../common/components/navigation/helpers';
+import { useSyncFlyoutStateWithUrl } from '../../../flyout/url/use_sync_flyout_state_with_url';
 
 const NO_DATA_PAGE_MAX_WIDTH = 950;
 
@@ -58,22 +57,20 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
 
 export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplateProps, 'ref'>> =
   React.memo(({ children, ...rest }) => {
-    const solutionNav = useSecuritySolutionNavigation();
-    const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
+    const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
-    const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
-    const addBottomPadding =
-      isTimelineBottomBarVisible || isPolicySettingsVisible || isGroupedNavEnabled;
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
     const { colorMode: globalColorMode } = useEuiTheme();
 
     const showEmptyState = useShowPagesWithEmptyView() || rest.isEmptyState;
+
+    const [flyoutRef, handleFlyoutChangedOrClosed] = useSyncFlyoutStateWithUrl();
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -82,12 +79,15 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
      * between EuiPageTemplate and the security solution pages.
      */
     return (
-      <ExpandableFlyoutProvider>
+      <ExpandableFlyoutProvider
+        onChanges={handleFlyoutChangedOrClosed}
+        onClosePanels={handleFlyoutChangedOrClosed}
+        ref={flyoutRef}
+      >
         <StyledKibanaPageTemplate
-          $addBottomPadding={addBottomPadding}
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
           paddingSize="none"
-          solutionNav={solutionNav}
+          solutionNav={solutionNavProps}
           restrictWidth={showEmptyState ? NO_DATA_PAGE_MAX_WIDTH : false}
           {...rest}
         >
@@ -108,7 +108,11 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
               </EuiThemeProvider>
             </KibanaPageTemplate.BottomBar>
           )}
-          <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} onClose={() => {}} />
+          <ExpandableFlyout
+            registeredPanels={expandableFlyoutDocumentsPanels}
+            onClose={() => {}}
+            handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
+          />
         </StyledKibanaPageTemplate>
       </ExpandableFlyoutProvider>
     );

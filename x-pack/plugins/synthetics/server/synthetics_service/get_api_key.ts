@@ -56,7 +56,8 @@ export const getAPIKeyForSyntheticsService = async ({
       const hasPermissions =
         indexPermissions.auto_configure &&
         indexPermissions.create_doc &&
-        indexPermissions.view_index_metadata;
+        indexPermissions.view_index_metadata &&
+        indexPermissions.read;
 
       if (!hasPermissions) {
         return { isValid: false, apiKey };
@@ -78,11 +79,11 @@ export const getAPIKeyForSyntheticsService = async ({
 export const generateAPIKey = async ({
   server,
   request,
-  uptimePrivileges = false,
+  projectAPIKey = false,
 }: {
   server: UptimeServerSetup;
   request: KibanaRequest;
-  uptimePrivileges?: boolean;
+  projectAPIKey?: boolean;
 }) => {
   const { security } = server;
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
@@ -91,7 +92,8 @@ export const generateAPIKey = async ({
     throw new Error('Please enable API keys in kibana to use synthetics service.');
   }
 
-  if (uptimePrivileges) {
+  if (projectAPIKey) {
+    /* Exposed to the user. Must create directly with the user */
     return security.authc.apiKeys?.create(request, {
       name: 'synthetics-api-key (required for project monitors)',
       kibana_role_descriptors: {
@@ -103,8 +105,6 @@ export const generateAPIKey = async ({
               spaces: [ALL_SPACES_ID],
               feature: {
                 uptime: ['all'],
-                fleet: ['all'],
-                fleetv2: ['all'],
               },
             },
           ],
@@ -122,8 +122,9 @@ export const generateAPIKey = async ({
     throw new SyntheticsForbiddenError();
   }
 
-  return security.authc.apiKeys?.create(request, {
-    name: 'synthetics-api-key (required for monitor management)',
+  /* Not exposed to the user. May grant as internal user */
+  return security.authc.apiKeys?.grantAsInternalUser(request, {
+    name: 'synthetics-api-key (required for Synthetics App)',
     role_descriptors: {
       synthetics_writer: serviceApiKeyPrivileges,
     },
@@ -158,7 +159,7 @@ export const generateAndSaveServiceAPIKey = async ({
 };
 
 export const getSyntheticsEnablement = async ({ server }: { server: UptimeServerSetup }) => {
-  const { security } = server;
+  const { security, config } = server;
 
   const [apiKey, hasPrivileges, areApiKeysEnabled] = await Promise.all([
     getAPIKeyForSyntheticsService({ server }),
@@ -167,6 +168,17 @@ export const getSyntheticsEnablement = async ({ server }: { server: UptimeServer
   ]);
 
   const { canEnable, canManageApiKeys } = hasPrivileges;
+
+  if (!config.service?.manifestUrl && !config.service?.devUrl) {
+    return {
+      canEnable: true,
+      canManageApiKeys,
+      isEnabled: true,
+      isValidApiKey: true,
+      areApiKeysEnabled: true,
+    };
+  }
+
   return {
     canEnable,
     canManageApiKeys,
@@ -207,7 +219,7 @@ const hasEnablePermissions = async ({ uptimeEsClient }: UptimeServerSetup) => {
 
   return {
     canManageApiKeys,
-    canEnable: canManageApiKeys && hasClusterPermissions && hasIndexPermissions,
+    canEnable: hasClusterPermissions && hasIndexPermissions,
   };
 };
 

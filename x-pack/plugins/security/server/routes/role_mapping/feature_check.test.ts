@@ -21,6 +21,9 @@ interface TestOptions {
 }
 
 const defaultXpackUsageResponse = {
+  remote_clusters: {
+    size: 0,
+  },
   security: {
     realms: {
       native: {
@@ -94,6 +97,7 @@ describe('GET role mappings feature check', () => {
         canUseInlineScripts: true,
         canUseStoredScripts: true,
         hasCompatibleRealms: true,
+        canUseRemoteIndices: true,
       },
     },
   });
@@ -117,9 +121,30 @@ describe('GET role mappings feature check', () => {
         canUseInlineScripts: true,
         canUseStoredScripts: true,
         hasCompatibleRealms: true,
+        canUseRemoteIndices: true,
       },
     },
   });
+
+  getFeatureCheckTest(
+    'indicates canUseRemoteIndices=false when cluster does not support remote indices',
+    {
+      xpackUsageResponse: () => ({
+        ...defaultXpackUsageResponse,
+        remote_clusters: undefined,
+      }),
+      asserts: {
+        statusCode: 200,
+        result: {
+          canManageRoleMappings: true,
+          canUseInlineScripts: true,
+          canUseStoredScripts: true,
+          hasCompatibleRealms: true,
+          canUseRemoteIndices: false,
+        },
+      },
+    }
+  );
 
   getFeatureCheckTest('disallows stored scripts when disabled', {
     nodeSettingsResponse: () => ({
@@ -140,6 +165,7 @@ describe('GET role mappings feature check', () => {
         canUseInlineScripts: true,
         canUseStoredScripts: false,
         hasCompatibleRealms: true,
+        canUseRemoteIndices: true,
       },
     },
   });
@@ -163,12 +189,14 @@ describe('GET role mappings feature check', () => {
         canUseInlineScripts: false,
         canUseStoredScripts: true,
         hasCompatibleRealms: true,
+        canUseRemoteIndices: true,
       },
     },
   });
 
   getFeatureCheckTest('indicates incompatible realms when only native and file are enabled', {
     xpackUsageResponse: () => ({
+      ...defaultXpackUsageResponse,
       security: {
         realms: {
           native: {
@@ -189,6 +217,7 @@ describe('GET role mappings feature check', () => {
         canUseInlineScripts: true,
         canUseStoredScripts: true,
         hasCompatibleRealms: false,
+        canUseRemoteIndices: true,
       },
     },
   });
@@ -219,6 +248,7 @@ describe('GET role mappings feature check', () => {
           canUseInlineScripts: true,
           canUseStoredScripts: true,
           hasCompatibleRealms: false,
+          canUseRemoteIndices: false,
         },
       },
     }

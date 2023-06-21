@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -21,9 +21,9 @@ export default ({ getService }: FtrProviderContext) => {
     fields?: string[]
   ): Promise<{ indices: string[]; fields: any }> {
     const { body, status } = await supertest
-      .post(`/api/ml/indices/field_caps`)
+      .post(`/internal/ml/indices/field_caps`)
       .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send({ index, fields });
     ml.api.assertResponseStatusCode(200, status, body);
 

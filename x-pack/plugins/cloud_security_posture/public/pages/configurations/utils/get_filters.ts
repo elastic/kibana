@@ -14,7 +14,7 @@ import {
   FilterCompareOptions,
 } from '@kbn/es-query';
 import type { Serializable } from '@kbn/utility-types';
-import type { FindingsBaseProps } from '../types';
+import type { FindingsBaseProps } from '../../../common/types';
 
 const compareOptions: FilterCompareOptions = {
   negate: false,

@@ -55,7 +55,9 @@ export const buildBulkBody = (
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
   alertTimestampOverride: Date | undefined,
-  ruleExecutionLogger: IRuleExecutionLogForExecutors
+  ruleExecutionLogger: IRuleExecutionLogForExecutors,
+  alertUuid: string,
+  publicBaseUrl?: string
 ): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
 
@@ -111,6 +113,8 @@ export const buildBulkBody = (
         spaceId,
         reason,
         indicesToQuery,
+        alertUuid,
+        publicBaseUrl,
         alertTimestampOverride,
         overrides
       ),

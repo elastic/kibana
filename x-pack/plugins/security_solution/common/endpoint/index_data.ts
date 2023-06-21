@@ -48,6 +48,7 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param fleet
  * @param options
  * @param DocGenerator
+ * @param withResponseActions
  */
 export async function indexHostsAndAlerts(
   client: Client,
@@ -63,7 +64,8 @@ export async function indexHostsAndAlerts(
   fleet: boolean,
   options: TreeOptions = {},
   DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
-  startTransform = true
+  withResponseActions = true,
+  numResponseActions?: number
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
@@ -97,8 +99,11 @@ export async function indexHostsAndAlerts(
   // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
-  await waitForMetadataTransformsReady(client);
-  await stopMetadataTransforms(client);
+  const shouldWaitForEndpointMetadataDocs = fleet;
+  if (shouldWaitForEndpointMetadataDocs) {
+    await waitForMetadataTransformsReady(client);
+    await stopMetadataTransforms(client);
+  }
 
   for (let i = 0; i < numHosts; i++) {
     const generator = new DocGenerator(random);
@@ -112,6 +117,8 @@ export async function indexHostsAndAlerts(
       policyResponseIndex,
       enrollFleet: fleet,
       generator,
+      withResponseActions,
+      numResponseActions,
     });
 
     mergeAndAppendArrays(response, indexedHosts);
@@ -126,7 +133,7 @@ export async function indexHostsAndAlerts(
     });
   }
 
-  if (startTransform) {
+  if (shouldWaitForEndpointMetadataDocs) {
     await startMetadataTransforms(
       client,
       response.agents.map((agent) => agent.id)

@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('should be able to import 7.13 saved objects into 8.0.0 and verfiy the rendering of two dashboards', async function () {
+    it('should be able to import 7.13 saved objects into 8.0.0 and verfiy the rendering of three dashboards', async function () {
       const initialObjectCount = await PageObjects.savedObjects.getExportCount();
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', '_7.13_import_saved_objects.ndjson')
@@ -74,6 +74,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.expectOnDashboard('lens_combined_dashboard');
       // count of panels rendered completely
       await renderService.waitForRender(2);
+      // There should be 0 error embeddables on the dashboard
+      await PageObjects.dashboard.verifyNoRenderErrors();
+
+      // logstash_dashboardwithfilters
+      await PageObjects.dashboard.loadSavedDashboard('logstash_dashboardwithfilters');
+      await PageObjects.dashboard.expectOnDashboard('logstash_dashboardwithfilters');
+
+      // count of panels rendered completely
+      await renderService.waitForRender(20);
       // There should be 0 error embeddables on the dashboard
       await PageObjects.dashboard.verifyNoRenderErrors();
     });

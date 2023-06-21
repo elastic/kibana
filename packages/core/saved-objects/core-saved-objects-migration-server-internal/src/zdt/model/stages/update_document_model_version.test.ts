@@ -49,8 +49,8 @@ describe('Stage: updateDocumentModelVersion', () => {
   it('updates state.currentIndexMeta when successful', () => {
     const state = createState({
       currentIndexMeta: {
-        mappingVersions: { foo: 1, bar: 2 },
-        docVersions: { foo: 0, bar: 0 },
+        mappingVersions: { foo: '10.1.0', bar: '10.2.0' },
+        docVersions: { foo: '0.0.0', bar: '0.0.0' },
         migrationState: {
           convertingDocuments: true,
         },
@@ -63,8 +63,8 @@ describe('Stage: updateDocumentModelVersion', () => {
     const newState = updateDocumentModelVersion(state, res, context);
 
     expect(newState.currentIndexMeta).toEqual({
-      mappingVersions: { foo: 1, bar: 2 },
-      docVersions: { foo: 1, bar: 2 },
+      mappingVersions: { foo: '10.1.0', bar: '10.2.0' },
+      docVersions: { foo: '10.1.0', bar: '10.2.0' },
       migrationState: {
         convertingDocuments: false,
       },

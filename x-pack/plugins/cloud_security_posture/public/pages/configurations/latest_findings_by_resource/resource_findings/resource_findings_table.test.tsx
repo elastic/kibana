@@ -13,6 +13,7 @@ import { TestProvider } from '../../../../test/test_provider';
 import { capitalize } from 'lodash';
 import moment from 'moment';
 import { getFindingsFixture } from '../../../../test/fixtures/findings_fixture';
+import { EMPTY_STATE_TEST_SUBJ } from '../../../../components/test_subjects';
 
 describe('<ResourceFindingsTable />', () => {
   it('should render no findings empty state when status success and data has a length of zero ', async () => {
@@ -29,6 +30,7 @@ describe('<ResourceFindingsTable />', () => {
       onOpenFlyout: jest.fn(),
       onCloseFlyout: jest.fn(),
       onPaginateFlyout: jest.fn(),
+      onResetFilters: jest.fn(),
     };
 
     render(
@@ -37,9 +39,7 @@ describe('<ResourceFindingsTable />', () => {
       </TestProvider>
     );
 
-    expect(
-      screen.getByTestId(TEST_SUBJECTS.RESOURCES_FINDINGS_TABLE_EMPTY_STATE)
-    ).toBeInTheDocument();
+    expect(screen.getByTestId(EMPTY_STATE_TEST_SUBJ)).toBeInTheDocument();
   });
 
   it('should render resource finding table content when data has a non zero length', () => {
@@ -58,6 +58,7 @@ describe('<ResourceFindingsTable />', () => {
       onOpenFlyout: jest.fn(),
       onCloseFlyout: jest.fn(),
       onPaginateFlyout: jest.fn(),
+      onResetFilters: jest.fn(),
     };
 
     render(

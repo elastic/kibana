@@ -34,6 +34,7 @@ describe('Transform: Transform List Actions', () => {
       'transformActionEdit',
       'transformActionClone',
       'transformActionDelete',
+      'transformActionReauthorize',
       'transformActionReset',
     ]);
   });

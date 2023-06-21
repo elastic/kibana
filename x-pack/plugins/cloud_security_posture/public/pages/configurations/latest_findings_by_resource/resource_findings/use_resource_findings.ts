@@ -10,13 +10,14 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/co
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Pagination } from '@elastic/eui';
 import { number } from 'io-ts';
+import { getSafeKspmClusterIdRuntimeMapping } from '../../../../../common/runtime_mappings/get_safe_kspm_cluster_id_runtime_mapping';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils';
 import { useKibana } from '../../../../common/hooks/use_kibana';
-import { showErrorToast } from '../../latest_findings/use_latest_findings';
-import type { FindingsBaseEsQuery, Sort } from '../../types';
+import type { FindingsBaseEsQuery, Sort } from '../../../../common/types';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
+import { showErrorToast } from '../../../../common/utils/show_error_toast';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
@@ -49,6 +50,9 @@ const getResourceFindingsQuery = ({
   index: CSP_LATEST_FINDINGS_DATA_VIEW,
   body: {
     size: MAX_FINDINGS_TO_LOAD,
+    runtime_mappings: {
+      ...getSafeKspmClusterIdRuntimeMapping(),
+    },
     query: {
       ...query,
       bool: {
@@ -63,7 +67,7 @@ const getResourceFindingsQuery = ({
         terms: { field: 'cloud.account.name' },
       },
       clusterId: {
-        terms: { field: 'cluster_id' },
+        terms: { field: 'safe_kspm_cluster_id' },
       },
       resourceSubType: {
         terms: { field: 'resource.sub_type' },

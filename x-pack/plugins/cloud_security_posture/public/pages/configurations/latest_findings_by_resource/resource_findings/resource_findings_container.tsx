@@ -5,16 +5,12 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import {
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiPageHeader,
-  type EuiDescriptionListProps,
-} from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, type EuiDescriptionListProps } from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { CspInlineDescriptionList } from '../../../../components/csp_inline_description_list';
 import type { Evaluation } from '../../../../../common/types';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
@@ -23,23 +19,17 @@ import * as TEST_SUBJECTS from '../../test_subjects';
 import { LimitedResultsBar, PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
-import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import { usePageSlice } from '../../../../common/hooks/use_page_slice';
-import { usePageSize } from '../../../../common/hooks/use_page_size';
-import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
-import {
-  getFindingsPageSizeInfo,
-  getFilters,
-  getPaginationTableParams,
-  useBaseEsQuery,
-  usePersistedQuery,
-} from '../../utils/utils';
+import { getFindingsPageSizeInfo, getFilters } from '../../utils/utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';
 import { FindingsDistributionBar } from '../../layout/findings_distribution_bar';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../../common/constants';
-import { useLimitProperties } from '../../utils/get_limit_properties';
+import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../../../common/types';
+import { useCloudPostureTable } from '../../../../common/hooks/use_cloud_posture_table';
+import { useLimitProperties } from '../../../../common/utils/get_limit_properties';
+import { getPaginationTableParams } from '../../../../common/hooks/use_cloud_posture_table/utils';
 
 const getDefaultQuery = ({
   query,
@@ -55,7 +45,14 @@ const getDefaultQuery = ({
 
 const BackToResourcesButton = () => (
   <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
-    <EuiButtonEmpty iconType={'arrowLeft'}>
+    <EuiButtonEmpty
+      iconType="arrowLeft"
+      css={css`
+        & .euiButtonEmpty__content {
+          padding: 0;
+        }
+      `}
+    >
       <FormattedMessage
         id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
         defaultMessage="Back to resources"
@@ -101,30 +98,33 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
   const decodedResourceId = decodeURIComponent(params.resourceId);
 
-  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
-  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
-
-  /**
-   * Page URL query to ES query
-   */
-  const baseEsQuery = useBaseEsQuery({
+  const {
+    pageIndex,
+    sort,
+    query,
+    queryError,
+    pageSize,
+    setTableOptions,
+    urlQuery,
+    setUrlQuery,
+    onResetFilters,
+  } = useCloudPostureTable({
     dataView,
-    filters: urlQuery.filters,
-    query: urlQuery.query,
+    defaultQuery: getDefaultQuery,
+    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
   });
 
   /**
    * Page ES query result
    */
   const resourceFindings = useResourceFindings({
-    sort: urlQuery.sort,
-    query: baseEsQuery.query,
+    sort,
     resourceId: decodedResourceId,
-    enabled: !baseEsQuery.error,
+    enabled: !queryError,
+    query,
   });
 
-  const error = resourceFindings.error || baseEsQuery.error;
+  const error = resourceFindings.error || queryError;
 
   const slicedPage = usePageSlice(resourceFindings.data?.page, urlQuery.pageIndex, pageSize);
 
@@ -151,7 +151,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
 
   const pagination = getPaginationTableParams({
     pageSize,
-    pageIndex: urlQuery.pageIndex,
+    pageIndex,
     totalItemCount: limitedTotalItemCount,
   });
 
@@ -179,10 +179,10 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       const newFindingIndex = nextFindingIndex % pageSize;
 
       // if the finding is not in the current page, we need to change the page
-      const pageIndex = Math.floor(nextFindingIndex / pageSize);
+      const flyoutPageIndex = Math.floor(nextFindingIndex / pageSize);
 
       setUrlQuery({
-        pageIndex,
+        pageIndex: flyoutPageIndex,
         findingIndex: newFindingIndex,
       });
     },
@@ -192,14 +192,15 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   return (
     <div data-test-subj={TEST_SUBJECTS.RESOURCES_FINDINGS_CONTAINER}>
       <FindingsSearchBar
-        dataView={dataView}
-        setQuery={(query) => {
-          setUrlQuery({ ...query, pageIndex: 0 });
+        dataView={dataView!}
+        setQuery={(newQuery) => {
+          setUrlQuery({ ...newQuery, pageIndex: 0 });
         }}
         loading={resourceFindings.isFetching}
       />
+      <BackToResourcesButton />
+      <EuiSpacer size="xs" />
       <PageTitle>
-        <BackToResourcesButton />
         <PageTitleText
           title={
             <CloudPosturePageTitle
@@ -217,21 +218,19 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           }
         />
       </PageTitle>
-      <EuiPageHeader
-        description={
-          resourceFindings.data && (
-            <CspInlineDescriptionList
-              listItems={getResourceFindingSharedValues({
-                resourceId: decodedResourceId,
-                resourceName: resourceFindings.data?.resourceName || '',
-                resourceSubType: resourceFindings.data?.resourceSubType || '',
-                clusterId: resourceFindings.data?.clusterId || '',
-                cloudAccountName: resourceFindings.data?.cloudAccountName || '',
-              })}
-            />
-          )
-        }
-      />
+      <EuiSpacer />
+      {resourceFindings.data && (
+        <CspInlineDescriptionList
+          listItems={getResourceFindingSharedValues({
+            resourceId: decodedResourceId,
+            resourceName: resourceFindings.data?.resourceName || '',
+            resourceSubType: resourceFindings.data?.resourceSubType || '',
+            clusterId: resourceFindings.data?.clusterId || '',
+            cloudAccountName: resourceFindings.data?.cloudAccountName || '',
+          })}
+        />
+      )}
+
       <EuiSpacer />
       {error && <ErrorCallout error={error} />}
       {!error && (
@@ -259,6 +258,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             onCloseFlyout={onCloseFlyout}
             onPaginateFlyout={onPaginateFlyout}
             onOpenFlyout={onOpenFlyout}
+            onResetFilters={onResetFilters}
             flyoutFindingIndex={flyoutFindingIndex}
             loading={resourceFindings.isFetching}
             items={slicedPage}
@@ -266,10 +266,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             sorting={{
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
             }}
-            setTableOptions={({ page, sort }) => {
-              setPageSize(page.size);
-              setUrlQuery({ pageIndex: page.index, sort });
-            }}
+            setTableOptions={setTableOptions}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({
                 pageIndex: 0,

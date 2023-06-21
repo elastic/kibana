@@ -7,6 +7,7 @@
 
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -16,17 +17,12 @@ import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/cor
 import {
   elasticsearchServiceMock,
   httpServerMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import {
-  createMockConfig,
-  requestContextMock,
-} from '../../../lib/detection_engine/routes/__mocks__';
+import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import type { Agent } from '@kbn/fleet-plugin/common/types/models';
 import type { AgentClient } from '@kbn/fleet-plugin/server/services';
 import { get } from 'lodash';
@@ -172,14 +168,12 @@ describe('test policy response handler', () => {
 
     it('should return the summary of all the agent with the given policy name', async () => {
       mockAgentClient.listAgents
-        .mockImplementationOnce(() => Promise.resolve(agentListResult))
-        .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
+        .mockImplementation(() => Promise.resolve(emptyAgentListResult))
+        .mockImplementationOnce(() => Promise.resolve(agentListResult));
 
       const policySummarysHandler = getAgentPolicySummaryHandler({
-        logFactory: loggingSystemMock.create(),
+        ...createMockEndpointAppContext(),
         service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -209,10 +203,8 @@ describe('test policy response handler', () => {
         .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
 
       const agentPolicySummaryHandler = getAgentPolicySummaryHandler({
-        logFactory: loggingSystemMock.create(),
+        ...createMockEndpointAppContext(),
         service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({

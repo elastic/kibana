@@ -9,9 +9,9 @@ import * as rt from 'io-ts';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const DescriptionUserActionPayloadRt = rt.type({ description: rt.string });
+export const DescriptionUserActionPayloadRt = rt.strict({ description: rt.string });
 
-export const DescriptionUserActionRt = rt.type({
+export const DescriptionUserActionRt = rt.strict({
   type: rt.literal(ActionTypes.description),
   payload: DescriptionUserActionPayloadRt,
 });

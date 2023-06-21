@@ -12,13 +12,13 @@ import type {
   TableSuggestionColumn,
   VisualizationSuggestion,
 } from '../../types';
+import { PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  PieVisualizationState,
-} from '../../../common';
+} from '../../../common/constants';
 import { isPartitionShape } from '../../../common/visualizations';
 import type { PieChartType } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
@@ -93,6 +93,10 @@ export function suggestions({
   }
 
   if ((metrics.length > 1 && !isActive) || groups.length > maximumGroupLength) {
+    return [];
+  }
+
+  if (metrics.length > 1 && !state?.layers[0].allowMultipleMetrics) {
     return [];
   }
 
@@ -330,5 +334,6 @@ export function suggestions({
     .map((suggestion) => ({
       ...suggestion,
       hide: shouldHideSuggestion || incompleteConfiguration || suggestion.hide,
+      incomplete: incompleteConfiguration,
     }));
 }

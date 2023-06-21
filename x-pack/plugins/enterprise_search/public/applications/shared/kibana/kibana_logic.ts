@@ -22,6 +22,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
 
@@ -33,27 +34,27 @@ type RequiredFieldsOnly<T> = {
 };
 interface KibanaLogicProps {
   application: ApplicationStart;
-  config: ClientConfigType;
-  productAccess: ProductAccess;
-  productFeatures: ProductFeatures;
-  // Kibana core
   capabilities: Capabilities;
+  charts: ChartsPluginStart;
+  cloud?: CloudSetup;
+  config: ClientConfigType;
   data: DataPublicPluginStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
   history: ScopedHistory;
+  isSidebarEnabled: boolean;
   lens: LensPublicStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
+  productAccess: ProductAccess;
+  productFeatures: ProductFeatures;
+  renderHeaderActions(HeaderActions?: FC): void;
+  security: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
-  renderHeaderActions(HeaderActions: FC): void;
-  // Required plugins
-  charts: ChartsPluginStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
-  security: SecurityPluginStart;
+  share: SharePluginStart;
   uiSettings: IUiSettingsClient;
-  // Optional plugins
-  cloud?: CloudSetup;
 }
+
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
   data: DataPublicPluginStart;
@@ -67,12 +68,13 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   reducers: ({ props }) => ({
     application: [props.application || {}, {}],
     capabilities: [props.capabilities || {}, {}],
-    config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
+    config: [props.config || {}, {}],
     data: [props.data, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
+    isSidebarEnabled: [props.isSidebarEnabled, {}],
     lens: [props.lens, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
@@ -89,6 +91,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
+    share: [props.share, {}],
     uiSettings: [props.uiSettings, {}],
   }),
   selectors: ({ selectors }) => ({

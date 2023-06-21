@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import * as i18n from './translations';
+
 /**
  * as const
  *
@@ -39,6 +42,7 @@ export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
+export const DEFAULT_RISK_SCORE_PAGE_SIZE = 1000 as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100 as const;
@@ -61,6 +65,7 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
 export const SECURITY_FEATURE_ID = 'Security' as const;
 export const SECURITY_TAG_NAME = 'Security Solution' as const;
+export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
 
@@ -96,7 +101,7 @@ export enum SecurityPageName {
    * All cloud defend page names must match `CloudDefendPageId` in x-pack/plugins/cloud_defend/public/common/navigation/types.ts
    */
   cloudDefendPolicies = 'cloud_defend-policies',
-  dashboardsLanding = 'dashboards',
+  dashboards = 'dashboards',
   dataQuality = 'data_quality',
   detections = 'detections',
   detectionAndResponse = 'detection_response',
@@ -123,6 +128,7 @@ export enum SecurityPageName {
   policies = 'policy',
   responseActionsHistory = 'response_actions_history',
   rules = 'rules',
+  rulesAdd = 'rules-add',
   rulesCreate = 'rules-create',
   sessions = 'sessions',
   /*
@@ -153,7 +159,9 @@ export const DATA_QUALITY_PATH = '/data_quality' as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
+export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
 export const RULES_PATH = '/rules' as const;
+export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
@@ -215,9 +223,6 @@ export const INCLUDE_INDEX_PATTERN = [
 ];
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events, and the exclude index pattern */
 export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELASTIC_CLOUD_INDICES];
-
-/** This Kibana Advanced Setting enables the grouped navigation in Security Solution */
-export const ENABLE_GROUPED_NAVIGATION = 'securitySolution:enableGroupedNav' as const;
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
@@ -303,10 +308,16 @@ export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
 export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
 export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
+
+export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
+export const INTERNAL_TAGS_URL = `/internal/tags`;
+
 export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
 export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
 export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
 export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
+export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview`;
+
 /**
  * Internal detection engine routes
  */
@@ -351,6 +362,7 @@ export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/migration_status` as const;
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration` as const;
+export const DETECTION_ENGINE_ALERT_TAGS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/tags` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
@@ -372,8 +384,17 @@ export const ML_GROUP_ID = 'security' as const;
 export const LEGACY_ML_GROUP_ID = 'siem' as const;
 export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID] as const;
 
+/**
+ * Rule Actions
+ */
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;
+
+export const NOTIFICATION_DEFAULT_FREQUENCY = {
+  notifyWhen: RuleNotifyWhen.ACTIVE,
+  throttle: null,
+  summary: true,
+};
 
 export const showAllOthersBucket: string[] = [
   'destination.ip',
@@ -456,7 +477,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.6',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -487,6 +508,7 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     fieldName: 'kibana.alert.workflow_status',
     selectedOptions: ['open'],
     hideActionBar: true,
+    persist: true,
   },
   {
     title: 'Severity',
@@ -517,3 +539,10 @@ export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
   RULE_DETAILS: `${APP_ID}-rule-details`,
   CASE: `${APP_ID}-case`,
 } as const;
+
+export const DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
+export const DEFAULT_ALERT_TAGS_VALUE = [
+  i18n.DUPLICATE,
+  i18n.FALSE_POSITIVE,
+  i18n.FURTHER_INVESTIGATION_REQUIRED,
+] as const;

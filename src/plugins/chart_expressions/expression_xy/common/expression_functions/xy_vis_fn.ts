@@ -11,7 +11,7 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds, getAccessors, getShowLines, normalizeTable } from '../helpers';
-import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
+import type { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs, XYRender } from '../types';
 import {
   hasAreaLayer,
   hasBarLayer,
@@ -137,6 +137,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
       syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
+      overrides: handlers.variables?.overrides as XYRender['value']['overrides'],
     },
   };
 };

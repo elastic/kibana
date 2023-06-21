@@ -9,16 +9,15 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from 'styled-components';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
-import type { VisualizationAlertsByStatusResponse } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../store/inputs';
 import { DonutChartWrapper } from '../charts/donutchart';
-import { parseVisualizationData } from './utils';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 import { LensEmbeddable } from './lens_embeddable';
 import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
 import { useSourcererDataView } from '../../containers/sourcerer';
+import { useVisualizationResponse } from './use_visualization_response';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
   const dispatch = useDispatch();
@@ -40,10 +39,8 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
 
   const memorizedTimerange = useRef(lensProps.timerange);
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const { inspect, searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
-  const visualizationData = inspect?.response
-    ? parseVisualizationData<VisualizationAlertsByStatusResponse>(inspect?.response)
-    : null;
+  const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
+  const visualizationData = useVisualizationResponse({ visualizationId: id });
   const dataExists = visualizationData != null && visualizationData[0]?.hits?.total !== 0;
   const donutTextWrapperStyles = dataExists
     ? css`

@@ -5,35 +5,48 @@
  * 2.0.
  */
 
-jest.mock('../registry');
-
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common/types';
-
-import * as Registry from '../registry';
+import type { RegistryPackage } from '../../../../common/types';
+import type { PackagePolicySOAttributes } from '../../../types';
 
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
-
 import { PackageNotFoundError } from '../../../errors';
 
 import { getSettings } from '../../settings';
+import { auditLoggingService } from '../../audit_logging';
 
-import { getPackageInfo, getPackages, getPackageUsageStats } from './get';
+import * as Registry from '../registry';
+
+import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
+
+jest.mock('../registry');
+jest.mock('../../settings');
+jest.mock('../../audit_logging');
 
 const MockRegistry = jest.mocked(Registry);
 
-jest.mock('../../settings');
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
 const mockGetSettings = getSettings as jest.Mock;
 mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
 
 describe('When using EPM `get` services', () => {
+  beforeEach(() => {
+    const mockContract = createAppContextStartContractMock();
+    appContextService.start(mockContract);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    jest.clearAllMocks();
+  });
+
   describe('and invoking getPackageUsageStats()', () => {
     let soClient: jest.Mocked<SavedObjectsClientContract>;
 
@@ -188,14 +201,23 @@ describe('When using EPM `get` services', () => {
 
   describe('getPackages', () => {
     beforeEach(() => {
-      const mockContract = createAppContextStartContractMock();
-      appContextService.start(mockContract);
-      jest.clearAllMocks();
       MockRegistry.fetchList.mockResolvedValue([
         {
           name: 'nginx',
           version: '1.0.0',
           title: 'Nginx',
+        } as any,
+        {
+          id: 'profiler_symbolizer',
+          name: 'profiler_symbolizer',
+          version: '1.0.0',
+          title: 'Profiler Symbolizer',
+        } as any,
+        {
+          id: 'profiler_collector',
+          name: 'profiler_collector',
+          version: '1.0.0',
+          title: 'Profiler Collector',
         } as any,
       ]);
       MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
@@ -290,6 +312,251 @@ owner: elastic`,
         },
         { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
+    });
+
+    it('should call audit logger', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+            score: 0,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+
+      soClient.get.mockResolvedValue({
+        id: 'elasticsearch',
+        attributes: {},
+        references: [],
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+
+      await getPackages({ savedObjectsClient: soClient });
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'get',
+        id: 'elasticsearch',
+        savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    it('should hide profiling symbolizer', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'profiler_symbolizer',
+            attributes: {
+              name: 'profiler_symbolizer',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages.find((item) => item.id === 'profiler_symbolizer')).toBeUndefined();
+    });
+
+    it('should hide profiling collector', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'profiler_collector',
+            attributes: {
+              name: 'profiler_collector',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages.find((item) => item.id === 'profiler_collector')).toBeUndefined();
+    });
+  });
+
+  describe('getInstalledPackages', () => {
+    it('Passes the correct parameters to the SavedObjects client', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'elastic_agent',
+            attributes: {
+              es_index_patterns: {
+                apm_server_logs: 'logs-elastic_agent.apm_server-*',
+                apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
+              },
+              name: 'elastic_agent',
+              version: '1.7.0',
+              install_status: 'installed',
+            },
+            references: [],
+          },
+        ],
+      } as any);
+
+      await getInstalledPackages({
+        savedObjectsClient: soClient,
+        dataStreamType: 'logs',
+        nameQuery: 'nginx',
+        searchAfter: ['system'],
+        perPage: 10,
+        sortOrder: 'asc',
+      });
+      expect(soClient.find).toHaveBeenCalledWith({
+        filter: {
+          arguments: [
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.install_status',
+                },
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'installed',
+                },
+              ],
+              function: 'is',
+              type: 'function',
+            },
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.installed_es',
+                },
+                {
+                  arguments: [
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'type',
+                    },
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'index_template',
+                    },
+                  ],
+                  function: 'is',
+                  type: 'function',
+                },
+              ],
+              function: 'nested',
+              type: 'function',
+            },
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.installed_es',
+                },
+                {
+                  arguments: [
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'id',
+                    },
+                    {
+                      type: 'wildcard',
+                      value: 'logs-@kuery-wildcard@',
+                    },
+                  ],
+                  function: 'is',
+                  type: 'function',
+                },
+              ],
+              function: 'nested',
+              type: 'function',
+            },
+          ],
+          function: 'and',
+          type: 'function',
+        },
+        perPage: 10,
+        search: 'nginx* | nginx',
+        searchAfter: ['system'],
+        searchFields: ['name'],
+        sortField: 'name',
+        sortOrder: 'asc',
+        type: 'epm-packages',
+      });
+    });
+    it('Formats items correctly', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValue({
+        total: 5,
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'elastic_agent',
+            attributes: {
+              es_index_patterns: {
+                apm_server_logs: 'logs-elastic_agent.apm_server-*',
+                apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
+              },
+              name: 'elastic_agent',
+              version: '1.7.0',
+              install_status: 'installed',
+            },
+            references: [],
+            sort: ['elastic_agent'],
+          },
+        ],
+      } as any);
+
+      const results = await getInstalledPackages({
+        savedObjectsClient: soClient,
+        dataStreamType: 'logs',
+        nameQuery: 'nginx',
+        searchAfter: ['system'],
+        perPage: 10,
+        sortOrder: 'asc',
+      });
+
+      expect(results).toEqual({
+        items: [
+          {
+            dataStreams: [{ name: 'logs-elastic_agent.apm_server-*', title: 'apm_server_logs' }],
+            name: 'elastic_agent',
+            status: 'installed',
+            version: '1.7.0',
+          },
+        ],
+        searchAfter: ['elastic_agent'],
+        total: 5,
+      });
     });
   });
 

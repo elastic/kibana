@@ -8,6 +8,9 @@
 import type { AnyAction, Reducer } from 'redux';
 import { combineReducers } from 'redux';
 
+import type { DataTableState } from '@kbn/securitysolution-data-table';
+import { dataTableReducer } from '@kbn/securitysolution-data-table';
+import { enableMapSet } from 'immer';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
@@ -27,10 +30,12 @@ import { initDataView, SourcererScopeName } from './sourcerer/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
-import type { DataTableState } from './data_table/types';
-import { dataTableReducer } from './data_table/reducer';
 import { groupsReducer } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
+import { analyzerReducer } from '../../resolver/store/reducer';
+import type { AnalyzerOuterState } from '../../resolver/types';
+
+enableMapSet();
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &
@@ -57,7 +62,8 @@ export const createInitialState = (
     enableExperimental: ExperimentalFeatures;
   },
   dataTableState: DataTableState,
-  groupsState: GroupState
+  groupsState: GroupState,
+  analyzerState: AnalyzerOuterState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -112,6 +118,7 @@ export const createInitialState = (
     globalUrlParam: initialGlobalUrlParam,
     dataTable: dataTableState.dataTable,
     groups: groupsState.groups,
+    analyzer: analyzerState.analyzer,
   };
 
   return preloadedState;
@@ -131,5 +138,6 @@ export const createReducer: (
     globalUrlParam: globalUrlParamReducer,
     dataTable: dataTableReducer,
     groups: groupsReducer,
+    analyzer: analyzerReducer,
     ...pluginsReducer,
   });

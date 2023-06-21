@@ -2,3 +2,11 @@
 .presFieldPickerFieldButtonActive {
   background-color: transparentize($euiColorPrimary, .9);
 }
+
+.fieldPickerSelectable {
+  height: $euiSizeXXL * 9; // 40 * 9 = 360px
+
+  .euiSelectableMessage {
+    height: 100%;
+  }
+}

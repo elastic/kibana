@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import {
   addEndpointResponseAction,
   fillUpNewRule,
@@ -101,6 +102,8 @@ describe('Response actions', () => {
 
     it('edit response action inside of a rule', () => {
       visitRuleActions(ruleId);
+      cy.getByTestSubj('edit-rule-actions-tab').click();
+
       cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
         cy.getByTestSubj('input').should('have.value', 'Isolate host');
         cy.getByTestSubj('input').should('have.value', 'Isolate host');
@@ -125,6 +128,8 @@ describe('Response actions', () => {
 
     it('delete response action inside of a rule', () => {
       visitRuleActions(ruleId);
+      cy.getByTestSubj('edit-rule-actions-tab').click();
+
       cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
         cy.getByTestSubj('remove-response-action').click();
       });
@@ -151,7 +156,11 @@ describe('Response actions', () => {
     });
 
     it('All response action controls are disabled', () => {
+      cy.intercept('GET', `${FIELDS_FOR_WILDCARD_PATH}*`).as('getFieldsForWildcard');
       visitRuleActions(ruleId);
+      cy.wait('@getFieldsForWildcard');
+      cy.getByTestSubj('edit-rule-actions-tab').click();
+
       cy.getByTestSubj('response-actions-wrapper').within(() => {
         cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
           'be.disabled'

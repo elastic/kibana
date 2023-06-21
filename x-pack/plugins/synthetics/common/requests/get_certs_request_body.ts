@@ -31,6 +31,7 @@ function absoluteDate(relativeDate: string) {
 }
 
 export const getCertsRequestBody = ({
+  monitorIds,
   pageIndex,
   search,
   notValidBefore,
@@ -79,6 +80,9 @@ export const getCertsRequestBody = ({
             : {}),
           filter: [
             ...(filters ? [filters] : []),
+            ...(monitorIds && monitorIds.length > 0
+              ? [{ terms: { 'monitor.id': monitorIds } }]
+              : []),
             {
               exists: {
                 field: 'tls.server.hash.sha256',
@@ -129,6 +133,9 @@ export const getCertsRequestBody = ({
       _source: [
         'monitor.id',
         'monitor.name',
+        'monitor.type',
+        'url.full',
+        'observer.geo.name',
         'tls.server.x509.issuer.common_name',
         'tls.server.x509.subject.common_name',
         'tls.server.hash.sha1',
@@ -140,7 +147,7 @@ export const getCertsRequestBody = ({
         field: 'tls.server.hash.sha256',
         inner_hits: {
           _source: {
-            includes: ['monitor.id', 'monitor.name', 'url.full'],
+            includes: ['monitor.id', 'monitor.name', 'url.full', 'config_id'],
           },
           collapse: {
             field: 'monitor.id',
@@ -180,6 +187,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       return {
         name: monitorPing?.monitor.name,
         id: monitorPing?.monitor.id,
+        configId: monitorPing?.config_id,
         url: monitorPing?.url?.full,
       };
     });
@@ -192,6 +200,10 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       not_after: notAfter,
       not_before: notBefore,
       common_name: commonName,
+      monitorName: ping?.monitor?.name,
+      monitorUrl: ping?.url?.full,
+      monitorType: ping?.monitor?.type,
+      locationName: ping?.observer?.geo?.name,
     };
   });
   const total = result.aggregations?.total?.value ?? 0;

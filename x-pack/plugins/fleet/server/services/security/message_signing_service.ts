@@ -8,9 +8,14 @@
 import { generateKeyPairSync, createSign, randomBytes } from 'crypto';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+
+import { MessageSigningError } from '../../../common/errors';
 
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { appContextService } from '../app_context';
@@ -27,6 +32,7 @@ export interface MessageSigningServiceInterface {
   generateKeyPair(
     providedPassphrase?: string
   ): Promise<{ privateKey: string; publicKey: string; passphrase: string }>;
+  rotateKeyPair(): Promise<void>;
   sign(message: Buffer | Record<string, unknown>): Promise<{ data: Buffer; signature: string }>;
   getPublicKey(): Promise<string>;
 }
@@ -36,44 +42,19 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
 
-  public get isEncryptionAvailable(): boolean {
+  public get isEncryptionAvailable(): MessageSigningServiceInterface['isEncryptionAvailable'] {
     return appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt ?? false;
   }
 
-  public async generateKeyPair(providedPassphrase?: string): Promise<{
-    privateKey: string;
-    publicKey: string;
-    passphrase: string;
-  }> {
-    let passphrase = providedPassphrase || this.generatePassphrase();
-
-    const currentKeyPair = await this.getCurrentKeyPair();
-    if (
-      currentKeyPair.privateKey &&
-      currentKeyPair.publicKey &&
-      (currentKeyPair.passphrase || currentKeyPair.passphrasePlain)
-    ) {
-      passphrase = currentKeyPair.passphrase || currentKeyPair.passphrasePlain;
-
-      // newly configured encryption key, encrypt the passphrase
-      if (currentKeyPair.passphrasePlain && this.isEncryptionAvailable) {
-        await this.soClient.update<MessageSigningKeys>(
-          MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
-          currentKeyPair.id,
-          {
-            passphrase,
-            passphrase_plain: '',
-          }
-        );
-      }
-
-      return {
-        privateKey: currentKeyPair.privateKey,
-        publicKey: currentKeyPair.publicKey,
-        passphrase,
-      };
+  public async generateKeyPair(
+    providedPassphrase?: string
+  ): ReturnType<MessageSigningServiceInterface['generateKeyPair']> {
+    const existingKeyPair = await this.checkForExistingKeyPair();
+    if (existingKeyPair) {
+      return existingKeyPair;
     }
 
+    const passphrase = providedPassphrase || this.generatePassphrase();
     const keyPair = generateKeyPairSync('ec', {
       namedCurve: 'prime256v1',
       privateKeyEncoding: {
@@ -101,21 +82,25 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         }
       : { ...keypairSoObject, passphrase_plain: passphrase };
 
-    await this.soClient.create<Partial<MessageSigningKeys>>(
-      MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
-      keypairSoObject
-    );
+    try {
+      await this.soClient.create<Partial<MessageSigningKeys>>(
+        MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+        keypairSoObject
+      );
 
-    return {
-      privateKey,
-      publicKey,
-      passphrase,
-    };
+      return {
+        privateKey,
+        publicKey,
+        passphrase,
+      };
+    } catch (error) {
+      throw new MessageSigningError(`Error creating key pair: ${error.message}`, error);
+    }
   }
 
   public async sign(
     message: Buffer | Record<string, unknown>
-  ): Promise<{ data: Buffer; signature: string }> {
+  ): ReturnType<MessageSigningServiceInterface['sign']> {
     const { privateKey: serializedPrivateKey, passphrase } = await this.generateKeyPair();
 
     const msgBuffer = Buffer.isBuffer(message)
@@ -144,7 +129,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     };
   }
 
-  public async getPublicKey(): Promise<string> {
+  public async getPublicKey(): ReturnType<MessageSigningServiceInterface['getPublicKey']> {
     const { publicKey } = await this.generateKeyPair();
 
     if (!publicKey) {
@@ -154,7 +139,34 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return publicKey;
   }
 
-  private get soClient() {
+  public async rotateKeyPair(): ReturnType<MessageSigningServiceInterface['rotateKeyPair']> {
+    try {
+      await this.removeKeyPair();
+      await this.generateKeyPair();
+    } catch (error) {
+      throw new MessageSigningError(`Error rotating key pair: ${error.message}`, error);
+    }
+  }
+
+  private async removeKeyPair(): Promise<void> {
+    let currentKeyPair: Awaited<ReturnType<typeof this.getCurrentKeyPairObj>>;
+    try {
+      currentKeyPair = await this.getCurrentKeyPairObj();
+      if (!currentKeyPair) {
+        throw new MessageSigningError('No current key pair found!');
+      }
+    } catch (error) {
+      throw new MessageSigningError(`Error fetching current key pair: ${error.message}`, error);
+    }
+
+    try {
+      await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
+    } catch (error) {
+      throw new MessageSigningError(`Error deleting current key pair: ${error.message}`, error);
+    }
+  }
+
+  private get soClient(): SavedObjectsClientContract {
     if (this._soClient) {
       return this._soClient;
     }
@@ -176,13 +188,9 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return this._soClient;
   }
 
-  private async getCurrentKeyPair(): Promise<{
-    id: string;
-    privateKey: string;
-    publicKey: string;
-    passphrase: string;
-    passphrasePlain: string;
-  }> {
+  private async getCurrentKeyPairObj(): Promise<
+    SavedObjectsFindResult<MessageSigningKeys> | undefined
+  > {
     const finder =
       await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<MessageSigningKeys>({
         type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
@@ -190,30 +198,59 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         sortField: 'created_at',
         sortOrder: 'desc',
       });
-    let keyPair = {
-      id: '',
-      privateKey: '',
-      publicKey: '',
-      passphrase: '',
-      passphrasePlain: '',
-    };
+    let soDoc: SavedObjectsFindResult<MessageSigningKeys> | undefined;
     for await (const result of finder.find()) {
-      const savedObject = result.saved_objects[0];
-      const attributes = savedObject?.attributes;
-      if (!attributes?.private_key) {
-        break;
-      }
-      keyPair = {
-        id: savedObject.id,
-        privateKey: attributes.private_key,
-        publicKey: attributes.public_key,
-        passphrase: attributes.passphrase,
-        passphrasePlain: attributes.passphrase_plain,
-      };
+      soDoc = result.saved_objects[0];
       break;
     }
+    finder.close();
 
-    return keyPair;
+    return soDoc;
+  }
+
+  private async checkForExistingKeyPair(): Promise<
+    | {
+        privateKey: string;
+        publicKey: string;
+        passphrase: string;
+      }
+    | undefined
+  > {
+    const currentKeyPair = await this.getCurrentKeyPairObj();
+    if (!currentKeyPair) {
+      return;
+    }
+
+    const { attributes } = currentKeyPair;
+    if (!attributes) {
+      return;
+    }
+
+    const {
+      private_key: privateKey,
+      public_key: publicKey,
+      passphrase: passphraseEncrypted,
+      passphrase_plain: passphrasePlain,
+    } = attributes;
+    const passphrase = passphraseEncrypted || passphrasePlain;
+    if (!privateKey || !publicKey || !passphrase) {
+      return;
+    }
+
+    // newly configured encryption key, encrypt the passphrase
+    if (passphrasePlain && this.isEncryptionAvailable) {
+      await this.soClient.update<MessageSigningKeys>(
+        MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+        currentKeyPair?.id,
+        { ...attributes, passphrase, passphrase_plain: '' }
+      );
+    }
+
+    return {
+      privateKey,
+      publicKey,
+      passphrase,
+    };
   }
 
   private generatePassphrase(): string {

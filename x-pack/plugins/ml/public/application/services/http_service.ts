@@ -20,19 +20,31 @@ function getFetchOptions(options: HttpFetchOptionsWithPath): {
   path: string;
   fetchOptions: HttpFetchOptions;
 } {
-  if (!options.path) {
+  const { path, method, headers, body, query, version } = options;
+  if (!path) {
     throw new Error('URL path is missing');
   }
+
+  const fetchOptions: HttpFetchOptions = {
+    asSystemRequest: true,
+    credentials: 'same-origin',
+    method: method || 'GET',
+    headers: getResultHeaders(headers ?? {}),
+  };
+
+  if (body) {
+    fetchOptions.body = body;
+  }
+  if (query) {
+    fetchOptions.query = query;
+  }
+  if (version) {
+    fetchOptions.version = version;
+  }
+
   return {
-    path: options.path,
-    fetchOptions: {
-      asSystemRequest: true,
-      credentials: 'same-origin',
-      method: options.method || 'GET',
-      ...(options.body ? { body: options.body } : {}),
-      ...(options.query ? { query: options.query } : {}),
-      headers: getResultHeaders(options.headers ?? {}),
-    },
+    path,
+    fetchOptions,
   };
 }
 
@@ -119,33 +131,6 @@ export class HttpService {
     this.getLoadingCount$ = httpStart.getLoadingCount$();
   }
 
-  private getResultHeaders(headers: HeadersInit): HeadersInit {
-    return {
-      'Content-Type': 'application/json',
-      ...headers,
-    } as HeadersInit;
-  }
-
-  private getFetchOptions(options: HttpFetchOptionsWithPath): {
-    path: string;
-    fetchOptions: HttpFetchOptions;
-  } {
-    if (!options.path) {
-      throw new Error('URL path is missing');
-    }
-    return {
-      path: options.path,
-      fetchOptions: {
-        asSystemRequest: true,
-        credentials: 'same-origin',
-        method: options.method || 'GET',
-        ...(options.body ? { body: options.body } : {}),
-        ...(options.query ? { query: options.query } : {}),
-        headers: this.getResultHeaders(options.headers ?? {}),
-      },
-    };
-  }
-
   /**
    * Creates an Observable from Kibana's HttpHandler.
    */
@@ -202,7 +187,7 @@ export class HttpService {
    * Wrapper for Kibana's HttpHandler.
    */
   public async http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
-    const { path, fetchOptions } = this.getFetchOptions(options);
+    const { path, fetchOptions } = getFetchOptions(options);
     return this.httpStart.fetch<T>(path, fetchOptions);
   }
 
@@ -211,7 +196,7 @@ export class HttpService {
    * with request cancellation support.
    */
   public http$<T>(options: HttpFetchOptionsWithPath): Observable<T> {
-    const { path, fetchOptions } = this.getFetchOptions(options);
+    const { path, fetchOptions } = getFetchOptions(options);
     return this.fromHttpHandler<T>(path, fetchOptions);
   }
 }

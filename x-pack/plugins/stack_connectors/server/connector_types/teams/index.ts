@@ -71,6 +71,7 @@ export function getConnectorType(): TeamsConnectorType {
       SecurityConnectorFeatureId,
     ],
     validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
       secrets: {
         schema: SecretsSchema,
         customValidator: validateConnectorTypeConfig,

@@ -10,108 +10,19 @@ import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Grouping } from './grouping';
-import { createGroupFilter } from './accordion_panel/helpers';
+import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getTelemetryEvent } from '../telemetry/const';
+
+import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn();
 const mockTracker = jest.fn();
-const rule1Name = 'Rule 1 name';
-const rule1Desc = 'Rule 1 description';
-const rule2Name = 'Rule 2 name';
-const rule2Desc = 'Rule 2 description';
 
 const testProps = {
-  data: {
-    groupsCount: {
-      value: 2,
-    },
-    groupByFields: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [
-        {
-          key: [rule1Name, rule1Desc],
-          key_as_string: `${rule1Name}|${rule1Desc}`,
-          doc_count: 1,
-          hostsCountAggregation: {
-            value: 1,
-          },
-          ruleTags: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
-          alertsCount: {
-            value: 1,
-          },
-          severitiesSubAggregation: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'low',
-                doc_count: 1,
-              },
-            ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
-          usersCountAggregation: {
-            value: 1,
-          },
-        },
-        {
-          key: [rule2Name, rule2Desc],
-          key_as_string: `${rule2Name}|${rule2Desc}`,
-          doc_count: 1,
-          hostsCountAggregation: {
-            value: 1,
-          },
-          ruleTags: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
-          unitsCount: {
-            value: 1,
-          },
-          severitiesSubAggregation: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'low',
-                doc_count: 1,
-              },
-            ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
-          usersCountAggregation: {
-            value: 1,
-          },
-        },
-      ],
-    },
-    unitsCount: {
-      value: 2,
-    },
-  },
-  groupingId: 'test-grouping-id',
-  isLoading: false,
-  pagination: {
-    pageIndex: 0,
-    pageSize: 25,
-    onChangeItemsPerPage: jest.fn(),
-    onChangePage: jest.fn(),
-    itemsPerPageOptions: [10, 25, 50, 100],
-  },
+  ...mockGroupingProps,
   renderChildComponent,
-  selectedGroup: 'kibana.alert.rule.name',
   takeActionItems,
   tracker: mockTracker,
 };
@@ -126,9 +37,9 @@ describe('grouping container', () => {
         <Grouping {...testProps} />
       </I18nProvider>
     );
-    expect(getByTestId('unit-count').textContent).toBe('2 events');
-    expect(getByTestId('group-count').textContent).toBe('2 groups');
-    expect(getAllByTestId('grouping-accordion').length).toBe(2);
+    expect(getByTestId('unit-count').textContent).toBe('14 events');
+    expect(getByTestId('group-count').textContent).toBe('3 groups');
+    expect(getAllByTestId('grouping-accordion').length).toBe(3);
     expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
   });
 
@@ -168,12 +79,12 @@ describe('grouping container', () => {
     fireEvent.click(group1);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       1,
-      createGroupFilter(testProps.selectedGroup, rule1Name)
+      createGroupFilter(testProps.selectedGroup, [host1Name])
     );
     fireEvent.click(group2);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       2,
-      createGroupFilter(testProps.selectedGroup, rule2Name)
+      createGroupFilter(testProps.selectedGroup, [host2Name])
     );
   });
 
@@ -204,5 +115,25 @@ describe('grouping container', () => {
         groupNumber: 0,
       })
     );
+  });
+
+  it('Renders a null group and passes the correct filter to take actions and child component', () => {
+    takeActionItems.mockReturnValue([]);
+    const { getAllByTestId, getByTestId } = render(
+      <I18nProvider>
+        <Grouping {...testProps} />
+      </I18nProvider>
+    );
+    expect(getByTestId('null-group-icon')).toBeInTheDocument();
+
+    let lastGroup = getAllByTestId('grouping-accordion').at(-1);
+    fireEvent.click(within(lastGroup!).getByTestId('take-action-button'));
+
+    expect(takeActionItems).toHaveBeenCalledWith(getNullGroupFilter('host.name'), 2);
+
+    lastGroup = getAllByTestId('grouping-accordion').at(-1);
+    fireEvent.click(within(lastGroup!).getByTestId('group-panel-toggle'));
+
+    expect(renderChildComponent).toHaveBeenCalledWith(getNullGroupFilter('host.name'));
   });
 });

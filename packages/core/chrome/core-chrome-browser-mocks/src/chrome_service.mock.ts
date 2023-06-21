@@ -61,6 +61,14 @@ const createStartContractMock = () => {
     setHeaderBanner: jest.fn(),
     hasHeaderBanner$: jest.fn(),
     getBodyClasses$: jest.fn(),
+    getChromeStyle$: jest.fn(),
+    setChromeStyle: jest.fn(),
+    project: {
+      setHome: jest.fn(),
+      setNavigation: jest.fn(),
+      setSideNavComponent: jest.fn(),
+      setBreadcrumbs: jest.fn(),
+    },
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
@@ -79,6 +87,7 @@ const createStartContractMock = () => {
 type ChromeServiceContract = PublicMethodsOf<ChromeService>;
 const createMock = () => {
   const mocked: jest.Mocked<ChromeServiceContract> = {
+    setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };

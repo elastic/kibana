@@ -428,4 +428,19 @@ describe('HeatmapComponent', function () {
     expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
     expect(component.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
   });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallowWithIntl(
+        <HeatmapComponent
+          {...wrapperProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
+  });
 });

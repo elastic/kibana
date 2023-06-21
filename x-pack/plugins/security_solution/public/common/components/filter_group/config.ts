@@ -6,6 +6,6 @@
  */
 
 export const NUM_OF_CONTROLS = {
-  MIN: 2,
-  MAX: 6,
+  MIN: 0,
+  MAX: 4,
 };

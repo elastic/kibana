@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { type TypeOf } from '@kbn/config-schema';
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
+import { CspRuleTemplate } from './schemas';
+import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
+import { getComplianceDashboardSchema } from './schemas/stats';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
@@ -74,7 +77,7 @@ export interface IndexDetails {
   status: IndexStatus;
 }
 
-interface BaseCspSetupBothPolicy {
+export interface BaseCspSetupBothPolicy {
   status: CspStatusCode;
   installedPackagePolicies: number;
   healthyAgents: number;
@@ -87,6 +90,7 @@ export interface BaseCspSetupStatus {
   kspm: BaseCspSetupBothPolicy;
   vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
+  installedPackageVersion?: string | undefined;
 }
 
 export type CspSetupStatus = BaseCspSetupStatus;
@@ -107,6 +111,90 @@ export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
 export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
 
-// Vulnerability Integration Types
-export type CVSSVersion = '2.0' | '3.0';
-export type SeverityStatus = 'Low' | 'Medium' | 'High' | 'Critical';
+export interface BenchmarkResponse {
+  items: Benchmark[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export type GetCspRuleTemplateRequest = TypeOf<typeof findCspRuleTemplateRequest>;
+
+export type GetComplianceDashboardRequest = TypeOf<typeof getComplianceDashboardSchema>;
+
+export interface GetCspRuleTemplateResponse {
+  items: CspRuleTemplate[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+// CNVM DASHBOARD
+
+export interface VulnScoreTrend {
+  '@timestamp': string;
+  policy_template: 'vuln_mgmt';
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+}
+
+export interface CnvmStatistics {
+  criticalCount: number | undefined;
+  highCount: number | undefined;
+  mediumCount: number | undefined;
+  resourcesScanned: number | undefined;
+  cloudRegions: number | undefined;
+}
+
+export interface CnvmDashboardData {
+  cnvmStatistics: CnvmStatistics;
+  vulnTrends: VulnScoreTrend[];
+  topVulnerableResources: VulnerableResourceStat[];
+  topPatchableVulnerabilities: PatchableVulnerabilityStat[];
+  topVulnerabilities: VulnerabilityStat[];
+}
+
+export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+
+export interface VulnerableResourceStat {
+  vulnerabilityCount: number | undefined;
+  resource: {
+    id: string | undefined;
+    name: string | undefined;
+  };
+  cloudRegion: string | undefined;
+}
+
+export interface PatchableVulnerabilityStat {
+  vulnerabilityCount: number | undefined;
+  packageFixVersion: string | undefined;
+  cve: string | undefined;
+  cvss: {
+    score: number | undefined;
+    version: string | undefined;
+  };
+}
+
+export interface VulnerabilityStat {
+  packageFixVersion: string | undefined;
+  packageName: string | undefined;
+  packageVersion: string | undefined;
+  severity: string | undefined;
+  vulnerabilityCount: number | undefined;
+  cvss: {
+    score: number | undefined;
+    version: string | undefined;
+  };
+  cve: string | undefined;
+}
+
+export interface AggFieldBucket {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: Array<{
+    key?: string;
+    doc_count?: string;
+  }>;
+}

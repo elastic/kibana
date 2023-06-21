@@ -6,7 +6,7 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { CasePostRequest, CaseResponse } from '@kbn/cases-plugin/common/api';
+import { CasePostRequest, Case } from '@kbn/cases-plugin/common/api';
 import type SuperTest from 'supertest';
 import { User } from '../authentication/types';
 
@@ -19,7 +19,7 @@ export const createCase = async (
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
   headers: Record<string, unknown> = {}
-): Promise<CaseResponse> => {
+): Promise<Case> => {
   const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
 
   setupAuth({ apiCall, headers, auth });

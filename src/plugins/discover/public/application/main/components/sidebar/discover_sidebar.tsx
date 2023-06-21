@@ -9,12 +9,7 @@
 import './discover_sidebar.scss';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageSidebar } from '@elastic/eui';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import {
@@ -40,6 +35,7 @@ import {
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../services/discover_data_state_container';
+import { useDiscoverCustomization } from '../../../../customizations';
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
@@ -101,7 +97,6 @@ export function DiscoverSidebarComponent({
   isProcessing,
   alwaysShowActionButtons = false,
   columns,
-  documents$,
   allFields,
   onAddField,
   onAddFilter,
@@ -125,7 +120,6 @@ export function DiscoverSidebarComponent({
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
 
-  const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
     INITIAL_SELECTED_FIELDS_RESULT
   );
@@ -223,7 +217,7 @@ export function DiscoverSidebarComponent({
   });
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
-    ({ field, groupName, fieldSearchHighlight }) => (
+    ({ field, groupName, groupIndex, itemIndex, fieldSearchHighlight }) => (
       <li key={`field${field.name}`} data-attr-field={field.name}>
         <DiscoverField
           alwaysShowActionButton={alwaysShowActionButtons}
@@ -233,14 +227,15 @@ export function DiscoverSidebarComponent({
           onAddField={onAddField}
           onRemoveField={onRemoveField}
           onAddFilter={onAddFilter}
-          documents$={documents$}
           trackUiMetric={trackUiMetric}
           multiFields={multiFieldsMap?.get(field.name)} // ideally we better calculate multifields when they are requested first from the popover
           onEditField={editField}
           onDeleteField={deleteField}
-          showFieldStats={showFieldStats}
           contextualFields={columns}
-          selected={
+          groupIndex={groupIndex}
+          itemIndex={itemIndex}
+          isEmpty={groupName === FieldsGroupNames.EmptyFields}
+          isSelected={
             groupName === FieldsGroupNames.SelectedFields ||
             Boolean(selectedFieldsState.selectedFieldsMap[field.name])
           }
@@ -253,23 +248,23 @@ export function DiscoverSidebarComponent({
       onAddField,
       onRemoveField,
       onAddFilter,
-      documents$,
       trackUiMetric,
       multiFieldsMap,
       editField,
       deleteField,
-      showFieldStats,
       columns,
       selectedFieldsState.selectedFieldsMap,
     ]
   );
+
+  const searchBarCustomization = useDiscoverCustomization('search_bar');
 
   if (!selectedDataView) {
     return null;
   }
 
   return (
-    <EuiPageSideBar
+    <EuiPageSidebar
       className="dscSidebar"
       aria-label={i18n.translate('discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel', {
         defaultMessage: 'Index and fields',
@@ -284,20 +279,23 @@ export function DiscoverSidebarComponent({
         gutterSize="s"
         responsive={false}
       >
-        {Boolean(showDataViewPicker) && (
-          <DataViewPicker
-            currentDataViewId={selectedDataView.id}
-            onChangeDataView={onChangeDataView}
-            onAddField={editField}
-            onDataViewCreated={createNewDataView}
-            trigger={{
-              label: selectedDataView?.getName() || '',
-              'data-test-subj': 'dataView-switch-link',
-              title: selectedDataView?.getIndexPattern() || '',
-              fullWidth: true,
-            }}
-          />
-        )}
+        {Boolean(showDataViewPicker) &&
+          (searchBarCustomization?.CustomDataViewPicker ? (
+            <searchBarCustomization.CustomDataViewPicker />
+          ) : (
+            <DataViewPicker
+              currentDataViewId={selectedDataView.id}
+              onChangeDataView={onChangeDataView}
+              onAddField={editField}
+              onDataViewCreated={createNewDataView}
+              trigger={{
+                label: selectedDataView?.getName() || '',
+                'data-test-subj': 'dataView-switch-link',
+                title: selectedDataView?.getIndexPattern() || '',
+                fullWidth: true,
+              }}
+            />
+          ))}
         <EuiFlexItem>
           <FieldList
             isProcessing={isProcessing}
@@ -330,7 +328,7 @@ export function DiscoverSidebarComponent({
           </FieldList>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageSideBar>
+    </EuiPageSidebar>
   );
 }
 

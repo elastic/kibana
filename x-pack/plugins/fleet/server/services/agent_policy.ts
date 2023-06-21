@@ -15,11 +15,16 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
+
+import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -62,6 +67,7 @@ import {
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
   PackagePolicyRestrictionRelatedError,
+  FleetUnauthorizedError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -83,6 +89,8 @@ import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
+import { auditLoggingService } from './audit_logging';
+import { licenseService } from './license';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -106,6 +114,12 @@ class AgentPolicyService {
     user?: AuthenticatedUser,
     options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentPolicy> {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     const existingAgentPolicy = await this.get(soClient, id, true);
 
     if (!existingAgentPolicy) {
@@ -201,8 +215,25 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     agentPolicy: NewAgentPolicy,
-    options?: { id?: string; user?: AuthenticatedUser }
+    options: {
+      id?: string;
+      user?: AuthenticatedUser;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
+    } = {}
   ): Promise<AgentPolicy> {
+    // Ensure an ID is provided, so we can include it in the audit logs below
+    if (!options.id) {
+      options.id = SavedObjectsUtils.generateId();
+    }
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'create',
+      id: options.id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    });
+
+    this.checkTamperProtectionLicense(agentPolicy);
+
     await this.requireUniqueName(soClient, agentPolicy);
 
     await validateOutputForPolicy(soClient, agentPolicy);
@@ -217,10 +248,12 @@ class AgentPolicyService {
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
         schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+        is_protected: agentPolicy.is_protected ?? false,
       } as AgentPolicy,
       options
     );
 
+    await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
 
     return { id: newSo.id, ...newSo.attributes };
@@ -270,6 +303,12 @@ class AgentPolicyService {
         (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
     }
 
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     return agentPolicy;
   }
 
@@ -313,7 +352,19 @@ class AgentPolicyService {
       { concurrency: 50 }
     );
 
-    return agentPolicies.filter((agentPolicy): agentPolicy is AgentPolicy => agentPolicy !== null);
+    const result = agentPolicies.filter(
+      (agentPolicy): agentPolicy is AgentPolicy => agentPolicy !== null
+    );
+
+    for (const agentPolicy of result) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: agentPolicy.id,
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return result;
   }
 
   public async list(
@@ -321,6 +372,8 @@ class AgentPolicyService {
     options: ListWithKuery & {
       withPackagePolicies?: boolean;
       fields?: string[];
+      esClient?: ElasticsearchClient;
+      withAgentCount?: boolean;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -336,6 +389,8 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
+      esClient,
+      withAgentCount = false,
     } = options;
 
     const baseFindParams = {
@@ -349,7 +404,10 @@ class AgentPolicyService {
     const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
     let agentPoliciesSO;
     try {
-      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({ ...baseFindParams, filter });
+      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+        ...baseFindParams,
+        filter,
+      });
     } catch (e) {
       const isBadRequest = e.output?.statusCode === 400;
       const isKQLSyntaxError = e.message?.startsWith('KQLSyntaxError');
@@ -372,19 +430,26 @@ class AgentPolicyService {
           ...agentPolicySO.attributes,
         };
         if (withPackagePolicies) {
-          const agentPolicyWithPackagePolicies = await this.get(
-            soClient,
-            agentPolicySO.id,
-            withPackagePolicies
-          );
-          if (agentPolicyWithPackagePolicies) {
-            agentPolicy.package_policies = agentPolicyWithPackagePolicies.package_policies;
-          }
+          agentPolicy.package_policies =
+            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
         return agentPolicy;
       },
       { concurrency: 50 }
     );
+
+    for (const agentPolicy of agentPolicies) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: agentPolicy.id,
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+    if (esClient && withAgentCount) {
+      await populateAssignedAgentsCount(esClient, soClient, agentPolicies);
+    } else {
+      agentPolicies.forEach((item) => (item.agents = 0));
+    }
 
     return {
       items: agentPolicies,
@@ -399,7 +464,12 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicy>,
-    options?: { user?: AuthenticatedUser; force?: boolean; spaceId?: string }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      spaceId?: string;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
+    }
   ): Promise<AgentPolicy> {
     if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
@@ -413,6 +483,8 @@ class AgentPolicyService {
     if (!existingAgentPolicy) {
       throw new Error('Agent policy not found');
     }
+
+    this.checkTamperProtectionLicense(agentPolicy);
 
     if (existingAgentPolicy.is_managed && !options?.force) {
       Object.entries(agentPolicy)
@@ -434,6 +506,7 @@ class AgentPolicyService {
         esClient,
         packagesToInstall,
         spaceId: options?.spaceId || DEFAULT_SPACE_ID,
+        authorizationHeader: options?.authorizationHeader,
       });
     }
 
@@ -659,8 +732,14 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { force?: boolean; removeFleetServerDocuments?: boolean }
+    options?: { force?: boolean; removeFleetServerDocuments?: boolean; user?: AuthenticatedUser }
   ): Promise<DeleteAgentPolicyResponse> {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'delete',
+      id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
       throw new Error('Agent policy not found');
@@ -736,6 +815,12 @@ class AgentPolicyService {
       return;
     }
 
+    for (const policyId of agentPolicyIds) {
+      auditLoggingService.writeCustomAuditLog({
+        message: `User deploying policy [id=${policyId}]`,
+      });
+    }
+
     const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
     const policiesMap = keyBy(policies, 'id');
     const fullPolicies = await Promise.all(
@@ -770,7 +855,8 @@ class AgentPolicyService {
         fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
       }
 
-      return [...acc, fleetServerPolicy];
+      acc.push(fleetServerPolicy);
+      return acc;
     }, [] as FleetServerPolicy[]);
 
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
@@ -799,7 +885,8 @@ class AgentPolicyService {
           return acc;
         }
 
-        return [...acc, value];
+        acc.push(value);
+        return acc;
       }, [] as BulkResponseItem[]);
 
       logger.debug(
@@ -835,6 +922,10 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     agentPolicyId: string
   ) {
+    auditLoggingService.writeCustomAuditLog({
+      message: `User deleting policy [id=${agentPolicyId}]`,
+    });
+
     await esClient.deleteByQuery({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
@@ -1054,6 +1145,12 @@ class AgentPolicyService {
       inactivityTimeout: parseInt(inactivityTimeout, 10),
       policyIds: policies.map((policy) => policy.id),
     }));
+  }
+
+  private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
+    if (agentPolicy?.is_protected && !licenseService.isPlatinum()) {
+      throw new FleetUnauthorizedError('Tamper protection requires Platinum license');
+    }
   }
 }
 

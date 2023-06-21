@@ -16,7 +16,7 @@ import { SettingsTemplate } from './settings_template';
 type Args = ComponentProps<typeof SettingsTemplate>;
 
 const coreMock = {
-  observability: {
+  observabilityShared: {
     navigation: {
       PageTemplate: () => {
         return <>hello world</>;
@@ -24,6 +24,13 @@ const coreMock = {
     },
   },
 } as unknown as Partial<CoreStart>;
+
+const configMock = {
+  featureFlags: {
+    agentConfigurationAvailable: true,
+    configurableIndicesAvailable: true,
+  },
+};
 
 const stories: Meta<Args> = {
   title: 'routing/templates/SettingsTemplate',
@@ -36,7 +43,12 @@ const stories: Meta<Args> = {
 
       return (
         <MockApmPluginStorybook
-          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
+          apmContext={
+            {
+              core: coreMock,
+              config: configMock,
+            } as unknown as ApmPluginContextValue
+          }
         >
           <StoryComponent />
         </MockApmPluginStorybook>
