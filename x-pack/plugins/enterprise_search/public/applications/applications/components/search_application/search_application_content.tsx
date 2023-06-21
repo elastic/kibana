@@ -28,7 +28,7 @@ import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndices } from './engine_indices';
 import { EngineIndicesLogic } from './engine_indices_logic';
 import { SearchApplicationError } from './search_application_error';
-import { EngineSchema } from './search_application_schema';
+import { SearchApplicationSchema } from './search_application_schema';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
 import './search_application_layout.scss';
 
@@ -163,7 +163,7 @@ export const SearchApplicationContent = () => {
       hasSchemaConflicts={hasSchemaConflicts}
     >
       {contentTabId === SearchApplicationContentTabs.INDICES && <EngineIndices />}
-      {contentTabId === SearchApplicationContentTabs.SCHEMA && <EngineSchema />}
+      {contentTabId === SearchApplicationContentTabs.SCHEMA && <SearchApplicationSchema />}
       {addIndicesFlyoutOpen && <AddIndicesFlyout onClose={closeAddIndicesFlyout} />}
     </EnterpriseSearchApplicationsPageTemplate>
   );

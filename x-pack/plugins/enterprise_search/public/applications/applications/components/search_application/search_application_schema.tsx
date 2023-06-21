@@ -55,7 +55,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
     {
       field: 'name',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.engine.schema.fieldIndices.index.columnTitle',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.index.columnTitle',
         {
           defaultMessage: 'Parent index',
         }
@@ -74,7 +74,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
     {
       field: 'type',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.engine.schema.fieldIndices.type.columnTitle',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.type.columnTitle',
         {
           defaultMessage: 'Field mapped as',
         }
@@ -84,7 +84,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
           return (
             <EuiBadge color="warning">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.schema.fieldIndices.type.unmapped"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.type.unmapped"
                 defaultMessage="Unmapped"
               />
             </EuiBadge>
@@ -120,7 +120,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
             iconType="iInCircle"
             title={
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.schema.fieldIndices.notInAllIndices.title"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.title"
                 defaultMessage="This field is not mapped in every index."
               />
             }
@@ -128,12 +128,12 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.engine.schema.fieldIndices.notInAllIndices.description"
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.description"
                   defaultMessage="Learn more about field mapping in"
                 />{' '}
                 <EuiLink href={docLinks.elasticsearchMapping} target="_blank">
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.content.engine.schema.fieldIndices.notInAllIndices.link"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.link"
                     defaultMessage="our documentation."
                   />
                 </EuiLink>
@@ -152,7 +152,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
   );
 };
 
-export const EngineSchema: React.FC = () => {
+export const SearchApplicationSchema: React.FC = () => {
   const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
   const { isLoadingSearchApplicationSchema, schemaFields, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
@@ -222,9 +222,12 @@ export const EngineSchema: React.FC = () => {
       width: '24px',
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.content.engine.schema.field_name.columnTitle', {
-        defaultMessage: 'Field name',
-      }),
+      name: i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.searchApplication.schema.field_name.columnTitle',
+        {
+          defaultMessage: 'Field name',
+        }
+      ),
       render: ({ name, type }: SchemaField) => (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {name.includes('.') && <EuiIcon type="sortRight" color="subdued" />}
@@ -235,16 +238,19 @@ export const EngineSchema: React.FC = () => {
       ),
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.content.engine.schema.field_type.columnTitle', {
-        defaultMessage: 'Field type',
-      }),
+      name: i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.searchApplication.schema.field_type.columnTitle',
+        {
+          defaultMessage: 'Field type',
+        }
+      ),
       render: ({ type }: SchemaField) => {
         if (type === 'conflict') {
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiBadge color="danger">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.engine.schema.field_type.conflict"
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.field_type.conflict"
                   defaultMessage="Conflict"
                 />
               </EuiBadge>
@@ -265,7 +271,7 @@ export const EngineSchema: React.FC = () => {
     },
     {
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.engine.schema.field_indices.columnTitle',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.schema.field_indices.columnTitle',
         {
           defaultMessage: 'In all indices?',
         }
@@ -276,7 +282,7 @@ export const EngineSchema: React.FC = () => {
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.schema.field_indices.yes"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.field_indices.yes"
                 defaultMessage="Yes"
               />
             </p>
@@ -284,7 +290,7 @@ export const EngineSchema: React.FC = () => {
         ) : (
           <EuiBadge color="hollow">
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.engine.schema.field_indices.no"
+              id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.field_indices.no"
               defaultMessage="No"
             />
           </EuiBadge>
@@ -310,7 +316,7 @@ export const EngineSchema: React.FC = () => {
                 }}
               >
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.engine.schema.field_indices.moreInfo"
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.field_indices.moreInfo"
                   defaultMessage="More info"
                 />
               </EuiButtonEmpty>
@@ -332,9 +338,12 @@ export const EngineSchema: React.FC = () => {
       numActiveFilters={filteredDataTypes.length}
       isSelected={isFilterByPopoverOpen}
     >
-      {i18n.translate('xpack.enterpriseSearch.content.engine.schema.filters', {
-        defaultMessage: 'Field types',
-      })}
+      {i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters',
+        {
+          defaultMessage: 'Field types',
+        }
+      )}
     </EuiFilterButton>
   );
 
@@ -369,7 +378,7 @@ export const EngineSchema: React.FC = () => {
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiSwitch
             label={i18n.translate(
-              'xpack.enterpriseSearch.content.engine.schema.onlyShowConflicts',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.schema.onlyShowConflicts',
               {
                 defaultMessage: 'Only show conflicts',
               }
@@ -379,9 +388,12 @@ export const EngineSchema: React.FC = () => {
           />
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
             <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.enterpriseSearch.content.engine.schema.filters.label', {
-                defaultMessage: 'Filter By',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.label',
+                {
+                  defaultMessage: 'Filter By',
+                }
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
@@ -395,7 +407,7 @@ export const EngineSchema: React.FC = () => {
                   searchable
                   searchProps={{
                     placeholder: i18n.translate(
-                      'xpack.enterpriseSearch.content.engine.schema.filters.searchPlaceholder',
+                      'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.searchPlaceholder',
                       {
                         defaultMessage: 'Filter list ',
                       }
@@ -420,7 +432,7 @@ export const EngineSchema: React.FC = () => {
                       onClick={() => setSelectedEsFieldTypes(esFieldTypes)}
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.engine.schema.filters.clearAll',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.clearAll',
                         {
                           defaultMessage: 'Clear all ',
                         }
@@ -446,7 +458,7 @@ export const EngineSchema: React.FC = () => {
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.title"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.title"
                 defaultMessage="There are {totalConflictsHiddenByTypeFilters, number} more {totalConflictsHiddenByTypeFilters, plural, one {conflict} other {conflicts}}   not displayed here"
                 values={{ totalConflictsHiddenByTypeFilters }}
               />
@@ -456,7 +468,7 @@ export const EngineSchema: React.FC = () => {
           >
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.subTitle',
+                'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.subTitle',
                 {
                   defaultMessage:
                     'In order to see all field conflicts you must clear your field filters',
@@ -465,7 +477,7 @@ export const EngineSchema: React.FC = () => {
             </p>
             <EuiButton fill color="danger" onClick={() => setSelectedEsFieldTypes(esFieldTypes)}>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.clearFilters',
+                'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.clearFilters',
                 {
                   defaultMessage: 'Clear filters ',
                 }
