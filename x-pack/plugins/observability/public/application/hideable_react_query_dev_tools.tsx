@@ -20,6 +20,7 @@ export function HideableReactQueryDevTools() {
         color="primary"
         style={{ zIndex: 99999, position: 'fixed', bottom: '40px', left: '40px' }}
         onClick={() => setIsHidden(!isHidden)}
+        aria-label="Hide react query"
       />
       <ReactQueryDevtools />
     </div>

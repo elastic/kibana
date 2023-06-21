@@ -48,6 +48,8 @@ export function createCoPilotService({ enabled, http }: { enabled: boolean; http
 
             const chunks: CreateChatCompletionResponseChunk[] = [];
 
+            let prev: string = '';
+
             function read() {
               reader!.read().then(({ done, value }) => {
                 try {
@@ -61,10 +63,20 @@ export function createCoPilotService({ enabled, http }: { enabled: boolean; http
                     return;
                   }
 
-                  const lines = decoder
-                    .decode(value)
-                    .trim()
-                    .split('\n')
+                  let lines = (prev + decoder.decode(value)).split('\n');
+
+                  const lastLine = lines[lines.length - 1];
+
+                  const isPartialChunk = !!lastLine && lastLine !== 'data: [DONE]';
+
+                  if (isPartialChunk) {
+                    prev = lastLine;
+                    lines.pop();
+                  } else {
+                    prev = '';
+                  }
+
+                  lines = lines
                     .map((str) => str.substr(6))
                     .filter((str) => !!str && str !== '[DONE]');
 
