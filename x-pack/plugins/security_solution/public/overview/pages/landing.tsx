@@ -14,8 +14,8 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 
 export const LandingPage = memo(() => {
   return (
-    <SecuritySolutionPageWrapper>
-      <LandingPageComponent withPadding={false} />
+    <SecuritySolutionPageWrapper noPadding>
+      <LandingPageComponent />
       <Chat />
       <SpyRoute pageName={SecurityPageName.landing} />
     </SecuritySolutionPageWrapper>
