@@ -135,7 +135,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('using a pinned filter that excludes all data', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/159931
+    // FLAKY: https://github.com/elastic/kibana/issues/159932
+    describe.skip('using a pinned filter that excludes all data', () => {
       before(async () => {
         // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
         await populateDashboard();
