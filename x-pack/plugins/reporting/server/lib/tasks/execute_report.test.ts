@@ -11,19 +11,33 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecuteReportTask } from '.';
 import { ReportingCore } from '../..';
 import { ReportingConfigType } from '../../config';
-import { PdfExportType } from '../../export_types/printable_pdf_v2';
+import { PdfExportType, TaskPayloadPDFV2 } from '../../export_types/printable_pdf_v2';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import type { SavedReport } from '../store';
 import { getContentStream } from '../content_stream';
+import { cryptoFactory } from '../crypto';
+import { LocatorParams } from '../../../common';
 
 const logger = loggingSystemMock.createLogger();
+const mockEncryptionKey = 'testencryptionkey';
+const encryptHeaders = async (headers: Record<string, string>) => {
+  const crypto = cryptoFactory(mockEncryptionKey);
+  return await crypto.encrypt(headers);
+};
+
+const getBasePayload = (baseObj: any) =>
+  ({
+    params: { forceNow: 'test' },
+    ...baseObj,
+  } as TaskPayloadPDFV2);
 
 describe('Execute Report Task', () => {
   let mockReporting: ReportingCore;
   let configType: ReportingConfigType;
   let pdfExport: PdfExportType;
   beforeAll(async () => {
-    configType = createMockConfigSchema();
+    configType = createMockConfigSchema({ encryptionKey: mockEncryptionKey });
+
     mockReporting = await createMockReportingCore(configType);
     const mockCoreSetup = coreMock.createSetup();
     const mockLogger = loggingSystemMock.createLogger();
@@ -77,18 +91,7 @@ describe('Execute Report Task', () => {
   });
 
   it('throws during reporting if Kibana starts shutting down', async () => {
-    mockReporting.getExportTypesRegistry().register({
-      id: 'noop',
-      name: 'Noop',
-      jobContentExtension: 'pdf' as const,
-      jobType: 'noop',
-      validLicenses: [],
-      setup: jest.fn(),
-      start: jest.fn(),
-      createJob: jest.fn(),
-      runTask: jest.fn(),
-      getSpaceId: jest.fn(),
-    });
+    const encryptedHeaders = await encryptHeaders({});
     const store = await mockReporting.getStore();
     store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
     const task = new ExecuteReportTask(mockReporting, configType, logger);
@@ -100,21 +103,13 @@ describe('Execute Report Task', () => {
     const stream = await getContentStream(mockReporting, { id: 'test', index: '0' });
 
     const taskPromise = pdfExport.runTask(
-      {
-        layout: {
-          id: undefined,
-          dimensions: undefined,
-          selectors: undefined,
-          zoom: undefined,
-        },
-        forceNow: '',
-        headers: 'cool-encryption-key-where-did-you-find-it',
-        objectType: '',
-        title: '',
-        browserTimezone: '',
-        version: '',
-        locatorParams: [],
-      },
+      getBasePayload({
+        forceNow: 'test',
+        title: 'PDF Params Timezone Test',
+        locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
+        browserTimezone: 'UTC',
+        headers: encryptedHeaders,
+      }),
       'test',
       new CancellationToken(),
       stream
