@@ -55,6 +55,7 @@ import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
+import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import type {
@@ -106,6 +107,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly appClientFactory: AppClientFactory;
   private readonly appFeatures: AppFeatures;
 
+  private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
@@ -129,6 +131,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.appClientFactory = new AppClientFactory();
     this.appFeatures = new AppFeatures(this.logger, this.config.experimentalFeatures);
 
+    this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
@@ -157,8 +160,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     initUiSettings(core.uiSettings, experimentalFeatures);
     appFeatures.init(plugins.features);
 
-    const ruleMonitoringService = createRuleMonitoringService(config, logger, core, plugins);
-    ruleMonitoringService.registerEventLogProvider();
+    this.ruleMonitoringService.setup(core, plugins);
 
     this.riskEngineDataClient = new RiskEngineDataClient({
       logger: this.logger,
@@ -178,7 +180,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       plugins,
       endpointAppContextService: this.endpointAppContextService,
-      ruleMonitoringService,
+      ruleMonitoringService: this.ruleMonitoringService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
       riskEngineDataClient: this.riskEngineDataClient,
@@ -249,7 +251,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       config: this.config,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       ruleDataClient,
-      ruleExecutionLoggerFactory: ruleMonitoringService.createRuleExecutionLogClientForExecutors,
+      ruleExecutionLoggerFactory:
+        this.ruleMonitoringService.createRuleExecutionLogClientForExecutors,
       version: pluginContext.env.packageInfo.version,
     };
 
@@ -412,6 +415,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
     const { config, logger } = this;
+
+    this.ruleMonitoringService.start(core, plugins);
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
