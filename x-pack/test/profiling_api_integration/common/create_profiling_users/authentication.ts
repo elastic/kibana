@@ -22,5 +22,3 @@ export const profilingUsers: Record<ProfilingUsername, { builtInRoleNames?: stri
     builtInRoleNames: ['editor'],
   },
 };
-
-export const APM_TEST_PASSWORD = 'changeme';
