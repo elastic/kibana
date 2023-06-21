@@ -54,7 +54,7 @@ export function GeoLineForm(props: Props) {
       props.onSplitFieldChange(fieldName);
     }
   }
-  
+
   return (
     <>
       {isTimeseries && (
@@ -79,57 +79,56 @@ export function GeoLineForm(props: Props) {
           </EuiToolTip>
         </EuiFormRow>
       )}
-      {props.groupByTimeseries
-        ? (
-            <EuiFormRow
-              label={i18n.translate('xpack.maps.esGeoLine.lineSImplificationSizeLabel', {
-                defaultMessage: 'Line simplification threshold',
+      {props.groupByTimeseries ? (
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.esGeoLine.lineSImplificationSizeLabel', {
+            defaultMessage: 'Line simplification threshold',
+          })}
+          helpText={i18n.translate('xpack.maps.esGeoLine.lineSImplificationSizeHelpText', {
+            defaultMessage:
+              'The maximum number of points for each track. Track is simplifed when threshold is exceeded.',
+          })}
+        >
+          <SizeSlider
+            value={props.lineSimplificationSize}
+            onChange={props.onLineSimplificationSizeChange}
+          />
+        </EuiFormRow>
+      ) : (
+        <>
+          <EuiFormRow label={ENTITY_INPUT_LABEL}>
+            <SingleFieldSelect
+              placeholder={i18n.translate('xpack.maps.source.esGeoLine.splitFieldPlaceholder', {
+                defaultMessage: 'Select entity field',
               })}
-              helpText={i18n.translate('xpack.maps.esGeoLine.lineSImplificationSizeHelpText', {
-                defaultMessage: 'The maximum number of points for each track. Track is simplifed when threshold is exceeded.',
-              })}
-            >
-              <SizeSlider
-                value={props.lineSimplificationSize}
-                onChange={props.onLineSimplificationSizeChange}
-              />
-            </EuiFormRow>
-          )
-        : (
-            <>
-              <EuiFormRow label={ENTITY_INPUT_LABEL}>
-                <SingleFieldSelect
-                  placeholder={i18n.translate('xpack.maps.source.esGeoLine.splitFieldPlaceholder', {
-                    defaultMessage: 'Select entity field',
-                  })}
-                  value={props.splitField}
-                  onChange={onSplitFieldChange}
-                  fields={getTermsFields(props.indexPattern.fields)}
-                  isClearable={false}
-                />
-              </EuiFormRow>
+              value={props.splitField}
+              onChange={onSplitFieldChange}
+              fields={getTermsFields(props.indexPattern.fields)}
+              isClearable={false}
+            />
+          </EuiFormRow>
 
-              <EuiFormRow label={SORT_INPUT_LABEL}>
-                <SingleFieldSelect
-                  placeholder={i18n.translate('xpack.maps.source.esGeoLine.sortFieldPlaceholder', {
-                    defaultMessage: 'Select sort field',
-                  })}
-                  value={props.sortField}
-                  onChange={onSortFieldChange}
-                  fields={props.indexPattern.fields.filter((field) => {
-                    const isSplitField = props.splitField ? field.name === props.splitField : false;
-                    return (
-                      !isSplitField &&
-                      field.sortable &&
-                      !indexPatterns.isNestedField(field) &&
-                      ['number', 'date'].includes(field.type)
-                    );
-                  })}
-                  isClearable={false}
-                />
-              </EuiFormRow>
-            </>
-          )}
+          <EuiFormRow label={SORT_INPUT_LABEL}>
+            <SingleFieldSelect
+              placeholder={i18n.translate('xpack.maps.source.esGeoLine.sortFieldPlaceholder', {
+                defaultMessage: 'Select sort field',
+              })}
+              value={props.sortField}
+              onChange={onSortFieldChange}
+              fields={props.indexPattern.fields.filter((field) => {
+                const isSplitField = props.splitField ? field.name === props.splitField : false;
+                return (
+                  !isSplitField &&
+                  field.sortable &&
+                  !indexPatterns.isNestedField(field) &&
+                  ['number', 'date'].includes(field.type)
+                );
+              })}
+              isClearable={false}
+            />
+          </EuiFormRow>
+        </>
+      )}
     </>
   );
 }
