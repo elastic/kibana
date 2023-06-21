@@ -71,9 +71,9 @@ export type UptimeRoute<ClientContract = unknown> = UMRouteDefinition<
 export type UMRestApiRouteFactory<ClientContract = unknown> = (
   libs: UMServerLibs
 ) => UptimeRoute<ClientContract>;
-export type SyntheticsRestApiRouteFactory<ClientContract = any> = (
+export type SyntheticsRestApiRouteFactory<ClientContract = any, QueryParams = unknown> = (
   libs: UMServerLibs
-) => SyntheticsRoute<ClientContract>;
+) => SyntheticsRoute<ClientContract, QueryParams>;
 export type SyntheticsStreamingRouteFactory = (libs: UMServerLibs) => SyntheticsStreamingRoute;
 
 /**
@@ -85,8 +85,8 @@ export type UMKibanaRouteWrapper = (
   server: UptimeServerSetup
 ) => UMKibanaRoute;
 
-export type SyntheticsRoute<ClientContract = unknown> = UMRouteDefinition<
-  SyntheticsRouteHandler<ClientContract>
+export type SyntheticsRoute<ClientContract = unknown, QueryParams = unknown> = UMRouteDefinition<
+  SyntheticsRouteHandler<ClientContract, QueryParams>
 >;
 export type SyntheticsStreamingRoute = UMRouteDefinition<SyntheticsStreamingRouteHandler>;
 
@@ -119,7 +119,7 @@ export type UMRouteHandler<ClientContract = unknown> = ({
   subject,
 }: UptimeRouteContext) => Promise<IKibanaResponse<ClientContract> | ClientContract>;
 
-export interface RouteContext<Query = Record<string, any>> {
+export interface RouteContext<Query = unknown> {
   uptimeEsClient: UptimeEsClient;
   context: UptimeRequestHandlerContext;
   request: KibanaRequest<Record<string, any>, Query, Record<string, any>>;
@@ -131,7 +131,7 @@ export interface RouteContext<Query = Record<string, any>> {
   spaceId: string;
 }
 
-export type SyntheticsRouteHandler<ClientContract = unknown> = ({
+export type SyntheticsRouteHandler<ClientContract = unknown, Query = unknown> = ({
   uptimeEsClient,
   context,
   request,
@@ -139,7 +139,7 @@ export type SyntheticsRouteHandler<ClientContract = unknown> = ({
   server,
   savedObjectsClient,
   subject: Subject,
-}: RouteContext) => Promise<IKibanaResponse<ClientContract> | ClientContract>;
+}: RouteContext<Query>) => Promise<IKibanaResponse<ClientContract> | ClientContract>;
 
 export type SyntheticsStreamingRouteHandler = ({
   uptimeEsClient,
