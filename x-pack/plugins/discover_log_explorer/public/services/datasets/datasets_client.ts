@@ -24,7 +24,7 @@ import { decodeOrThrow } from '../../../common/runtime_types';
 import { IDatasetsClient } from './types';
 
 const defaultIntegrationsParams = {
-  datasetType: 'logs',
+  dataStreamType: 'logs',
 };
 
 const defaultDatasetsParams = {

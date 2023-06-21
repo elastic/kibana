@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const DISCOVER_LOG_EXPLORER_PROFILE_ID = 'discover-log-explorer';
+export const LOG_EXPLORER_PROFILE_ID = 'log-explorer';
