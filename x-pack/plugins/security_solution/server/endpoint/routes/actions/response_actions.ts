@@ -110,18 +110,25 @@ export function registerResponseActionRoutes(
       )
     );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: UNISOLATE_HOST_ROUTE_V2,
-      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canUnIsolateHost'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'unisolate')
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: NoParametersRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canUnIsolateHost'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'unisolate')
+      )
+    );
 
   router.post(
     {

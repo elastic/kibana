@@ -373,6 +373,7 @@ describe('Response actions', () => {
     it('sends the unisolate command payload from the unisolate route', async () => {
       const ctx = await callRoute(UNISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -442,6 +443,7 @@ describe('Response actions', () => {
           UNISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -701,6 +703,7 @@ describe('Response actions', () => {
           UNISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
             idxResponse: {
               statusCode: 500,
               body: {
@@ -744,6 +747,7 @@ describe('Response actions', () => {
         licenseEmitter.next(Gold);
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
+          version: '2023-10-31',
           license: Gold,
         });
         expect(mockResponse.ok).toBeCalled();
@@ -762,6 +766,7 @@ describe('Response actions', () => {
       it('allows user to perform unisolation when canUnIsolateHost is true', async () => {
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
+          version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
       });
@@ -779,6 +784,7 @@ describe('Response actions', () => {
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canUnIsolateHost: false },
+          version: '2023-10-31',
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
