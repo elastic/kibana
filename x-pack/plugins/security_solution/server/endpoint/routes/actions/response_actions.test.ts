@@ -421,6 +421,7 @@ describe('Response actions', () => {
     it('sends the get-file command payload from the get file route', async () => {
       const ctx = await callRoute(GET_FILE_ROUTE, {
         body: { endpoint_ids: ['XYZ'], parameters: { path: '/one/two/three' } },
+        version: '2023-10-31',
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -591,6 +592,7 @@ describe('Response actions', () => {
           GET_FILE_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters: { path: '/one/two/three' } },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );

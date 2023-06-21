@@ -196,18 +196,25 @@ export function registerResponseActionRoutes(
       )
     );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: GET_FILE_ROUTE,
-      validate: EndpointActionGetFileSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'get-file')
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionGetFileSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'get-file')
+      )
+    );
 
   router.post(
     {

@@ -127,6 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: GET_FILE_ROUTE,
         body: { endpoint_ids: ['one'], parameters: { path: '/opt/file/doc.txt' } },
+        version: '2023-10-31',
       },
     ];
 
