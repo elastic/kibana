@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -71,6 +72,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
   const { permissions } = useCasesContext();
   const [isEditCategory, setIsEditCategory] = useState(false);
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
+  const [isHovering, setIsHovering] = useState(false);
 
   const [formState, setFormState] = useState<CategoryFormState>({
     isValid: undefined,
@@ -84,6 +86,14 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
   const onCancel = () => {
     setIsEditCategory(false);
   };
+
+  const removeCategory = () => {
+    onSubmit(null);
+    setIsEditCategory(false);
+  };
+
+  const onFocus = () => setIsHovering(true);
+  const onFocusLeave = () => setIsHovering(false);
 
   const onSubmitCategory = async () => {
     const { isValid, data } = await formState.submit();
@@ -129,7 +139,38 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
           {!isEditCategory && (
             <EuiFlexItem>
               {category ? (
-                <CategoryViewer category={category} />
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  justifyContent="spaceBetween"
+                  onMouseEnter={onFocus}
+                  onMouseLeave={onFocusLeave}
+                >
+                  <EuiFlexItem grow={false}>
+                    <CategoryViewer category={category} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      position="left"
+                      content={i18n.REMOVE_CATEGORY}
+                      data-test-subj="remove-category-cross-tooltip"
+                    >
+                      <EuiButtonIcon
+                        css={{
+                          opacity: isHovering ? 1 : 0,
+                        }}
+                        onFocus={onFocus}
+                        onBlur={onFocusLeave}
+                        data-test-subj="remove-category-cross-button"
+                        aria-label={i18n.REMOVE_CATEGORY_ARIA_LABEL}
+                        iconType="cross"
+                        color="danger"
+                        iconSize="m"
+                        onClick={removeCategory}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ) : (
                 <EuiText size="xs" data-test-subj="no-categories">
                   {i18n.NO_CATEGORIES}

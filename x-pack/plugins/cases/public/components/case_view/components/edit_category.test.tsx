@@ -213,7 +213,7 @@ describe('EditCategory ', () => {
     expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
   });
 
-  it('should disabled the save button on when not changing category', async () => {
+  it('should disabled the save button when not changing category', async () => {
     appMockRender.render(<EditCategory {...defaultProps} category={'My category'} />);
 
     userEvent.click(screen.getByTestId('category-edit-button'));
@@ -256,5 +256,17 @@ describe('EditCategory ', () => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
       expect(screen.getByText('category from the API')).toBeInTheDocument();
     });
+  });
+
+  it('removes the category correctly using the cross button', async () => {
+    appMockRender.render(<EditCategory {...defaultProps} category="My category" />);
+
+    await waitFor(() => {
+      expect(screen.getByText('My category')).toBeInTheDocument();
+    });
+
+    userEvent.click(screen.getByTestId('remove-category-cross-button'));
+
+    await waitFor(() => expect(onSubmit).toBeCalledWith(null));
   });
 });

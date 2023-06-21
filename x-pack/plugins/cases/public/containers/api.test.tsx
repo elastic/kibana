@@ -439,7 +439,7 @@ describe('Cases API', () => {
       expect(resp).toEqual({ ...allCases });
     });
 
-    it('should not send the category field if it an empty array', async () => {
+    it('should not send the category field if it is an empty array', async () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
