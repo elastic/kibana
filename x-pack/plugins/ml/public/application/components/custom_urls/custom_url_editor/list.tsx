@@ -27,7 +27,6 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
-jest.mock('../../../contexts/kibana');
 
 import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';

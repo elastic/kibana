@@ -11,6 +11,8 @@ import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 import { CustomUrlList, CustomUrlListProps } from './list';
 
+jest.mock('../../../contexts/kibana');
+
 function prepareTest(setCustomUrlsFn: jest.Mock) {
   const customUrls = [
     {
