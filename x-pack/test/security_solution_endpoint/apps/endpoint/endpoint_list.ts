@@ -85,7 +85,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('endpoint list', function () {
-    const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
       before(async () => {
