@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpIllustration from '../../../../assets/images/nlp.svg';
+import { docLinks } from '../../../shared/doc_links';
 import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchVectorSearchPageTemplate } from '../layout/page_template';
 
@@ -80,8 +81,8 @@ export const VectorSearchGuide: React.FC = () => (
           <FormattedMessage
             id="xpack.enterpriseSearch.vectorSearch.guide.description"
             defaultMessage="Elasticsearch can be used as a vector database and search along with other semantic search methods."
-          />
-          <EuiLink>
+          />{' '}
+          <EuiLink href={docLinks.knnSearch} target="_blank">
             <FormattedMessage
               id="xpack.enterpriseSearch.vectorSearch.guide.descriptionLink"
               defaultMessage="Learn more about vector searches."
@@ -212,7 +213,7 @@ export const VectorSearchGuide: React.FC = () => (
             }
           />
           <EuiCard
-            href="https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-model-ref.html#ml-nlp-model-ref-text-embedding"
+            href={docLinks.textEmbedding}
             target="_blank"
             layout="horizontal"
             titleSize="s"
