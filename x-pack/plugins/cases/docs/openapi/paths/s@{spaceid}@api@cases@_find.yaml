@@ -18,6 +18,16 @@ get:
           - type: array
             items:
               type: string
+    - name: category
+      in: query
+      description: Filters the returned cases by category. Limited to 100 categories.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+      example: my-category
     - name: defaultSearchOperator
       in: query
       description: The default operator to use for the simple_query_string.
