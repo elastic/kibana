@@ -14,6 +14,7 @@ import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
@@ -40,6 +41,7 @@ import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { RecentlyAccessedService } from './recently_accessed';
 import { Header, ProjectHeader, ProjectSideNavigation } from './ui';
+import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -48,6 +50,10 @@ const SNAPSHOT_REGEX = /-snapshot/i;
 interface ConstructorParams {
   browserSupportsCsp: boolean;
   kibanaVersion: string;
+}
+
+export interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
 }
 
 export interface StartDeps {
@@ -104,6 +110,11 @@ export class ChromeService {
     );
   }
 
+  public setup({ analytics }: SetupDeps) {
+    const docTitle = this.docTitle.setup({ document: window.document });
+    registerAnalyticsContextProvider(analytics, docTitle.title$);
+  }
+
   public async start({
     application,
     docLinks,
@@ -155,7 +166,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const projectNavigation = this.projectNavigation.start({ application, navLinks, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
-    const docTitle = this.docTitle.start({ document: window.document });
+    const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
 
     // erase chrome fields from a previous app while switching to a next app
