@@ -29,8 +29,8 @@ export function createFlyout(
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
-  lens?: LensPublicStart,
-  dashboardService?: DashboardStart
+  dashboardService: DashboardStart,
+  lens?: LensPublicStart
 ): Promise<void> {
   const {
     http,
