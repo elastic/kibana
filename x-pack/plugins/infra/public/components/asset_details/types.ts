@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { InventoryItemType } from '../../../common/inventory_models/types';
-import { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
+import type { LogViewReference } from '../../../common/log_views';
+import type { InventoryItemType } from '../../../common/inventory_models/types';
+import type { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
 type HostMetrics = Record<InfraAssetMetricType, number | null>;
@@ -54,6 +55,13 @@ export interface TabState {
   };
   alertRule?: {
     onCreateRuleClick?: () => void;
+  };
+  logs?: {
+    query?: string;
+    logView?: {
+      reference?: LogViewReference | null;
+      loading?: boolean;
+    };
   };
 }
 
