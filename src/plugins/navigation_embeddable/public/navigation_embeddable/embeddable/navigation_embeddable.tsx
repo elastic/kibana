@@ -11,9 +11,11 @@ import ReactDOM from 'react-dom';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
-import { NavigationEmbeddableDashboardPicker } from '../components/navigation_embeddable_dashboard_picker';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+
+import { DashboardList } from '../types';
 import { dashboardServices, untilPluginStartServicesReady } from '../services/services';
-import { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public/services/dashboard_content_management/lib/find_dashboards';
+import { NavigationEmbeddableDashboardPicker } from '../components/navigation_embeddable_dashboard_picker';
 
 export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
 
@@ -35,17 +37,32 @@ export class NavigationEmbeddable extends Embeddable {
     ReactDOM.render(<NavigationEmbeddableDashboardPicker embeddable={this} />, node);
   }
 
-  public async getDashboardList(
-    search: string = '',
-    size: number = 10
-  ): Promise<SearchDashboardsResponse> {
+  public async getDashboardList(search: string = '', size: number = 10): Promise<DashboardList> {
     await untilPluginStartServicesReady();
     const findDashboardsService = await dashboardServices.findDashboardsService();
     const responses = await findDashboardsService.search({
       search,
       size,
     });
-    return responses;
+
+    const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
+      .componentState.lastSavedId;
+
+    let currentDashboard: DashboardList['currentDashboard'];
+    const otherDashboards: DashboardList['otherDashboards'] = [];
+    responses.hits.forEach((hit) => {
+      if (hit.id === parentDashboardId) {
+        currentDashboard = hit;
+      } else {
+        otherDashboards.push(hit);
+      }
+    });
+
+    return {
+      otherDashboards,
+      currentDashboard,
+      total: responses.total,
+    };
   }
 
   public reload() {}

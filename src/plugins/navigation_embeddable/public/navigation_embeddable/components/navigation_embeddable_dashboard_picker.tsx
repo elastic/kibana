@@ -22,15 +22,20 @@ export const NavigationEmbeddableDashboardPicker = ({ embeddable }: Props) => {
     return await embeddable.getDashboardList();
   }, []);
 
-  useEffect(() => {
-    console.log('dashboardList', dashboardList);
-  }, [dashboardList]);
+  // useEffect(() => {
+  //   console.log('dashboardList', dashboardList);
+  // }, [dashboardList]);
 
   return loadingDashboardList ? (
     <EuiLoadingSpinner />
   ) : (
     <EuiPanel>
-      {(dashboardList?.hits ?? []).map((hit) => (
+      {dashboardList?.currentDashboard && (
+        <li key={dashboardList.currentDashboard.id}>
+          <b>{dashboardList.currentDashboard.attributes.title}</b>
+        </li>
+      )}
+      {(dashboardList?.otherDashboards ?? []).map((hit) => (
         <li key={hit.id}>{hit.attributes.title}</li>
       ))}
     </EuiPanel>
