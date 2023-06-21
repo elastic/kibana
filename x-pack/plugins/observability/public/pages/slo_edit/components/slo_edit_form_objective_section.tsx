@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import {
   EuiFieldNumber,
   EuiFlexGrid,
@@ -18,33 +17,62 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-
-import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
 import {
   BUDGETING_METHOD_OPTIONS,
   CALENDARALIGNED_TIMEWINDOW_OPTIONS,
   ROLLING_TIMEWINDOW_OPTIONS,
   TIMEWINDOW_TYPE_OPTIONS,
 } from '../constants';
-import { maxWidth } from './slo_edit_form';
 import { CreateSLOForm } from '../types';
+import { maxWidth } from './slo_edit_form';
+import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
 
 export function SloEditFormObjectiveSection() {
-  const { control, watch, getFieldState, resetField } = useFormContext<CreateSLOForm>();
+  const {
+    control,
+    watch,
+    getFieldState,
+    setValue,
+    formState: { defaultValues },
+  } = useFormContext<CreateSLOForm>();
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowTypeSelect = useGeneratedHtmlId({ prefix: 'timeWindowTypeSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
   const timeWindowType = watch('timeWindow.type');
 
+  /**
+   * Two flow to handle: Create and Edit
+   * On create: the default value is set to rolling & 30d (useForm)
+   * When we change the window type (from rolling to calendar for example), we want to select a default duration (picking item 1 in the options)
+   * If we don't, the select will show the option as selected, but the value is still the one from the previous window type, until the user manually changes the value
+   *
+   * On edit: the default value is set with the slo value
+   * When we change the window type, we want to change the selected value as we do in the create flow, but we also want to fallback on the initial default value
+   *
+   */
   useEffect(() => {
-    resetField('timeWindow.duration', {
-      defaultValue:
-        timeWindowType === 'calendarAligned'
-          ? CALENDARALIGNED_TIMEWINDOW_OPTIONS[1].value
-          : ROLLING_TIMEWINDOW_OPTIONS[1].value,
-    });
-  }, [timeWindowType, resetField]);
+    if (timeWindowType === 'calendarAligned') {
+      const exists = CALENDARALIGNED_TIMEWINDOW_OPTIONS.map((opt) => opt.value).includes(
+        defaultValues?.timeWindow?.duration ?? ''
+      );
+      setValue(
+        'timeWindow.duration',
+        // @ts-ignore
+        exists ? defaultValues?.timeWindow?.duration : CALENDARALIGNED_TIMEWINDOW_OPTIONS[1].value
+      );
+    } else {
+      const exists = ROLLING_TIMEWINDOW_OPTIONS.map((opt) => opt.value).includes(
+        defaultValues?.timeWindow?.duration ?? ''
+      );
+      setValue(
+        'timeWindow.duration',
+        // @ts-ignore
+        exists ? defaultValues?.timeWindow?.duration : ROLLING_TIMEWINDOW_OPTIONS[1].value
+      );
+    }
+  }, [timeWindowType, setValue, defaultValues]);
 
   return (
     <EuiPanel
@@ -85,7 +113,7 @@ export function SloEditFormObjectiveSection() {
                   id={timeWindowTypeSelect}
                   data-test-subj="sloFormTimeWindowTypeSelect"
                   options={TIMEWINDOW_TYPE_OPTIONS}
-                  value={String(field.value)}
+                  value={field.value}
                 />
               )}
             />
@@ -110,25 +138,42 @@ export function SloEditFormObjectiveSection() {
               </span>
             }
           >
-            <Controller
-              name="timeWindow.duration"
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { ref, ...field } }) => (
-                <EuiSelect
-                  {...field}
-                  required
-                  id={timeWindowSelect}
-                  data-test-subj="sloFormTimeWindowDurationSelect"
-                  options={
-                    timeWindowType === 'calendarAligned'
-                      ? CALENDARALIGNED_TIMEWINDOW_OPTIONS
-                      : ROLLING_TIMEWINDOW_OPTIONS
-                  }
-                  value={String(field.value)}
+            <>
+              {timeWindowType === 'calendarAligned' && (
+                <Controller
+                  name="timeWindow.duration"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field: { ref, ...field } }) => (
+                    <EuiSelect
+                      {...field}
+                      required
+                      id={timeWindowSelect}
+                      data-test-subj="sloFormTimeWindowDurationSelect"
+                      options={CALENDARALIGNED_TIMEWINDOW_OPTIONS}
+                      value={field.value}
+                    />
+                  )}
                 />
               )}
-            />
+              {timeWindowType === 'rolling' && (
+                <Controller
+                  name="timeWindow.duration"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field: { ref, ...field } }) => (
+                    <EuiSelect
+                      {...field}
+                      required
+                      id={timeWindowSelect}
+                      data-test-subj="sloFormTimeWindowDurationSelect"
+                      options={ROLLING_TIMEWINDOW_OPTIONS}
+                      value={field.value}
+                    />
+                  )}
+                />
+              )}
+            </>
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGrid>
