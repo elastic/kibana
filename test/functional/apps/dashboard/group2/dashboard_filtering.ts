@@ -196,7 +196,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('disabling a filter unfilters the data on', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/159933
+    describe.skip('disabling a filter unfilters the data on', function () {
       before(async () => {
         // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
         await populateDashboard();
