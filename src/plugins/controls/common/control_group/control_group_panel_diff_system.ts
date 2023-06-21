@@ -11,6 +11,7 @@ import { omit, isEqual } from 'lodash';
 import { OPTIONS_LIST_DEFAULT_SORT } from '../options_list/suggestions_sorting';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../options_list/types';
 import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from '../range_slider/types';
+import { TimeSliderControlEmbeddableInput, TIME_SLIDER_CONTROL } from '../time_slider/types';
 
 import { ControlPanelState } from './types';
 
@@ -85,6 +86,31 @@ export const ControlPanelDiffSystems: {
         deepEqual(sortA ?? OPTIONS_LIST_DEFAULT_SORT, sortB ?? OPTIONS_LIST_DEFAULT_SORT) &&
         isEqual(selectedA ?? [], selectedB ?? []) &&
         deepEqual(inputA, inputB)
+      );
+    },
+  },
+  [TIME_SLIDER_CONTROL]: {
+    getPanelIsEqual: (initialInput, newInput) => {
+      if (!deepEqual(omit(initialInput, 'explicitInput'), omit(newInput, 'explicitInput'))) {
+        return false;
+      }
+
+      const {
+        isAnchored: isAnchoredA,
+        timesliceStartAsPercentageOfTimeRange: startA,
+        timesliceEndAsPercentageOfTimeRange: endA,
+      }: Partial<TimeSliderControlEmbeddableInput> = initialInput.explicitInput;
+      const {
+        isAnchored: isAnchoredB,
+        timesliceStartAsPercentageOfTimeRange: startB,
+        timesliceEndAsPercentageOfTimeRange: endB,
+      }: Partial<TimeSliderControlEmbeddableInput> = newInput.explicitInput;
+      return (
+        Boolean(isAnchoredA) === Boolean(isAnchoredB) &&
+        Boolean(startA) === Boolean(startB) &&
+        startA === startB &&
+        Boolean(endA) === Boolean(endB) &&
+        endA === endB
       );
     },
   },

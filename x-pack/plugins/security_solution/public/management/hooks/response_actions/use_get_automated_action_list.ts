@@ -32,6 +32,9 @@ interface GetAutomatedActionsListOptions {
   enabled: boolean;
 }
 
+// Make sure we keep this and ACTIONS_QUERY_KEY in osquery_flyout.tsx in sync.
+const ACTIONS_QUERY_KEY = 'actions';
+
 export const useGetAutomatedActionList = (
   query: EndpointAutomatedActionListRequestQuery,
   { enabled }: GetAutomatedActionsListOptions
@@ -40,7 +43,7 @@ export const useGetAutomatedActionList = (
 
   const { alertIds } = query;
   return useQuery({
-    queryKey: ['get-automated-action-list', { alertIds }],
+    queryKey: [ACTIONS_QUERY_KEY, { alertId: alertIds[0] }],
     queryFn: async () => {
       const responseData = await lastValueFrom(
         data.search.search<ActionRequestOptions, ActionRequestStrategyResponse>(
