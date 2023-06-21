@@ -14,11 +14,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
-import {
-  Aggregators,
-  Comparator,
-  MetricsSourceConfiguration,
-} from '../../../../common/threshold_rule/types';
+import { Aggregators, Comparator } from '../../../../common/threshold_rule/types';
 
 const mockStartServices = mockCoreMock.createStart();
 
@@ -57,24 +53,10 @@ describe('ExpressionChart', () => {
       fields: [],
     };
 
-    const source: MetricsSourceConfiguration = {
-      id: 'default',
-      origin: 'fallback',
-      configuration: {
-        name: 'default',
-        description: 'The default configuration',
-        metricAlias: 'metricbeat-*',
-        inventoryDefaultView: 'host',
-        metricsExplorerDefaultView: 'host',
-        anomalyThreshold: 20,
-      },
-    };
-
     const wrapper = mountWithIntl(
       <ExpressionChart
         expression={expression}
         derivedIndexPattern={derivedIndexPattern}
-        source={source}
         filterQuery={filterQuery}
         groupBy={groupBy}
         annotations={annotations}
