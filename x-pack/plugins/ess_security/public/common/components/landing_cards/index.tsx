@@ -85,11 +85,7 @@ export const LandingCards = memo(() => {
   const href = useMemo(() => prepend(addIntegrationsUrl), [prepend, addIntegrationsUrl]);
 
   return (
-    <EuiFlexGroup
-      data-test-subj="siem-landing-page"
-      direction="column"
-      gutterSize="m"
-    >
+    <EuiFlexGroup data-test-subj="siem-landing-page" direction="column" gutterSize="m">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
