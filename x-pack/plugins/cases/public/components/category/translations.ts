@@ -25,7 +25,7 @@ export const REMOVE_CATEGORY = i18n.translate('xpack.cases.caseView.removeCatego
 });
 
 export const REMOVE_CATEGORY_ARIA_LABEL = i18n.translate(
-  'xpack.cases.userProfile.removeCategoryAriaLabel',
+  'xpack.cases.caseView.removeCategoryAriaLabel',
   {
     defaultMessage: 'click to remove category',
   }
