@@ -55,6 +55,7 @@ import {
   PackageOutdatedError,
   PackagePolicyValidationError,
   ConcurrentInstallOperationError,
+  FleetUnauthorizedError,
 } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
@@ -88,6 +89,7 @@ import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackages } from './bundled_packages';
 import { withPackageSpan } from './utils';
+import { getFilteredInstallPackages } from '../filtered_packages';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -471,6 +473,11 @@ async function installPackageCommon(options: {
       packageVersion: pkgVersion,
       installType,
     });
+
+    const filteredPackages = getFilteredInstallPackages();
+    if (filteredPackages.includes(pkgName)) {
+      throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
+    }
 
     // if the requested version is the same as installed version, check if we allow it based on
     // current installed package status and force flag, if we don't allow it,

@@ -21,6 +21,7 @@ import {
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
+  FLEET_SERVER_PACKAGE,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
 import type {
@@ -52,6 +53,7 @@ import { normalizeKuery } from '../../saved_object';
 import { auditLoggingService } from '../../audit_logging';
 
 import { createInstallableFrom } from '.';
+import { getFilteredSearchPackages } from '../filtered_packages';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
@@ -114,6 +116,7 @@ export async function getPackages(
     { concurrency: 10 }
   );
 
+  const filteredPackages = getFilteredSearchPackages();
   const packageList = registryItems
     .map((item) =>
       createInstallableFrom(
@@ -122,8 +125,7 @@ export async function getPackages(
       )
     )
     .concat(uploadedPackagesNotInRegistry as Installable<any>)
-    // hides profiling collector and symbolizer packages
-    .filter((item) => item.id !== 'profiler_collector' && item.id !== 'profiler_symbolizer')
+    .filter((item) => !filteredPackages.includes(item.id))
     .sort(sortByName);
 
   for (const pkg of packageList) {
