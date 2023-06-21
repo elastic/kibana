@@ -15,12 +15,16 @@ import React, {
   useEffect,
   forwardRef,
   useImperativeHandle,
+  useCallback,
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
 import useUnmount from 'react-use/lib/useUnmount';
 
+import { i18n } from '@kbn/i18n';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import {
@@ -50,6 +54,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     const [screenshotMode, setScreenshotMode] = useState(false);
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
     const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
+    const [dashboardMissing, setDashboardMissing] = useState(false);
 
     useImperativeHandle(
       ref,
@@ -71,19 +76,30 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     const id = useMemo(() => uuidv4(), []);
 
     useEffect(() => {
+      /**
+       * Here we attempt to build a dashboard or navigate to a new dashboard. Clear all error states
+       * if they exist in case this dashboard loads correctly.
+       */
+      fatalError?.destroy();
+      setDashboardMissing(false);
+      setFatalError(undefined);
+
       if (dashboardContainer) {
         // When a dashboard already exists, don't rebuild it, just set a new id.
-        dashboardContainer.navigateToDashboard(savedObjectId);
-
+        dashboardContainer.navigateToDashboard(savedObjectId).catch((e) => {
+          dashboardContainer?.destroy();
+          setDashboardContainer(undefined);
+          setFatalError(new ErrorEmbeddable(e, { id }));
+          if (e instanceof SavedObjectNotFound) {
+            setDashboardMissing(true);
+          }
+        });
         return;
       }
       setLoading(true);
 
       let canceled = false;
       (async () => {
-        fatalError?.destroy();
-        setFatalError(undefined);
-
         const creationOptions = await getCreationOptions?.();
 
         // Lazy loading all services is required in this component because it is exported and contributes to the bundle size.
@@ -109,6 +125,10 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 
         if (isErrorEmbeddable(container)) {
           setFatalError(container);
+          if (container.error instanceof SavedObjectNotFound) {
+            console.log('\n\n\n MISSING \n\n\n');
+            setDashboardMissing(true);
+          }
           return;
         }
 
@@ -143,6 +163,20 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     );
 
     const renderDashboardContents = () => {
+      if (dashboardMissing) {
+        console.log('\n\n\n returning empty prompt\n\n\n');
+        return (
+          <NotFoundPrompt
+            title={i18n.translate('dashboard.renderer.404Title', {
+              defaultMessage: 'Dashboard not found',
+            })}
+            body={i18n.translate('dashboard.renderer.404Body', {
+              defaultMessage:
+                "Sorry, the dashboard you're looking for can't be found. It might have been removed or renamed, or maybe it never existed at all.",
+            })}
+          />
+        );
+      }
       if (fatalError) return fatalError.render();
       if (loading) return loadingSpinner;
       return <div ref={dashboardRoot} />;

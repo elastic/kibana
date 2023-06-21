@@ -11,7 +11,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { DashboardRedirect } from '../types';
 import { pluginServices } from '../../services/plugin_services';
 import { createDashboardEditUrl } from '../../dashboard_constants';
-import { getDashboardURL404String } from '../_dashboard_app_strings';
 import { useDashboardMountContext } from './dashboard_mount_context';
 import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
 
@@ -39,8 +38,6 @@ export const useDashboardOutcomeValidation = ({
   const validateOutcome = useCallback(
     ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardReturn) => {
       if (!dashboardFound) {
-        toasts.addDanger(getDashboardURL404String());
-        redirectTo({ destination: 'listing' });
         return false; // redirected. Stop loading dashboard.
       }
 
@@ -64,7 +61,7 @@ export const useDashboardOutcomeValidation = ({
       }
       return true;
     },
-    [scopedHistory, redirectTo, screenshotMode, spaces, toasts]
+    [scopedHistory, screenshotMode, spaces]
   );
 
   const getLegacyConflictWarning = useMemo(() => {
