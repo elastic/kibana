@@ -15,6 +15,11 @@ import { dataPluginMock } from '../../mocks';
 
 import { registerSessionRoutes } from './session';
 
+enum GetHandlerIndex {
+  ID,
+  STATUS,
+}
+
 enum PostHandlerIndex {
   SAVE,
   FIND,
@@ -43,7 +48,8 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, saveHandler] = mockRouter.post.mock.calls[PostHandlerIndex.SAVE];
+    const [[, saveHandler]] =
+      mockRouter.versioned.post.mock.results[PostHandlerIndex.SAVE].value.addVersion.mock.calls;
 
     await saveHandler(mockContext, mockRequest, mockResponse);
 
@@ -58,7 +64,7 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[, getHandler]] = mockRouter.get.mock.calls;
+    const [[, getHandler]] = mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls;
 
     await getHandler(mockContext, mockRequest, mockResponse);
 
@@ -73,10 +79,12 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[], [, statusHandler]] = mockRouter.get.mock.calls;
+    const [[, statusHandler]] =
+      mockRouter.versioned.get.mock.results[GetHandlerIndex.STATUS].value.addVersion.mock.calls;
 
     await statusHandler(mockContext, mockRequest, mockResponse);
 
+    expect(mockContext.search!.getSessionStatus).toHaveBeenCalled();
     expect(mockContext.search!.getSessionStatus).toHaveBeenCalledWith(id);
   });
 
@@ -92,7 +100,8 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, findHandler] = mockRouter.post.mock.calls[PostHandlerIndex.FIND];
+    const [[, findHandler]] =
+      mockRouter.versioned.post.mock.results[PostHandlerIndex.FIND].value.addVersion.mock.calls;
 
     await findHandler(mockContext, mockRequest, mockResponse);
 
@@ -110,7 +119,8 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, updateHandler] = mockRouter.put.mock.calls[0];
+    const [[, updateHandler]] =
+      mockRouter.versioned.put.mock.results[0].value.addVersion.mock.calls;
 
     await updateHandler(mockContext, mockRequest, mockResponse);
 
@@ -125,7 +135,8 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, cancelHandler] = mockRouter.post.mock.calls[PostHandlerIndex.CANCEL];
+    const [[, cancelHandler]] =
+      mockRouter.versioned.post.mock.results[PostHandlerIndex.CANCEL].value.addVersion.mock.calls;
 
     await cancelHandler(mockContext, mockRequest, mockResponse);
 
@@ -140,7 +151,8 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, deleteHandler] = mockRouter.delete.mock.calls[0];
+    const [[, deleteHandler]] =
+      mockRouter.versioned.delete.mock.results[0].value.addVersion.mock.calls;
 
     await deleteHandler(mockContext, mockRequest, mockResponse);
 
@@ -157,7 +169,8 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, extendHandler] = mockRouter.post.mock.calls[PostHandlerIndex.EXTEND];
+    const [[, extendHandler]] =
+      mockRouter.versioned.post.mock.results[PostHandlerIndex.EXTEND].value.addVersion.mock.calls;
 
     await extendHandler(mockContext, mockRequest, mockResponse);
 

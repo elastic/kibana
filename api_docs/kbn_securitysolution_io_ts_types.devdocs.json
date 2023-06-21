@@ -1012,6 +1012,24 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.NumberBetweenZeroAndOneInclusive",
+        "type": "Object",
+        "tags": [],
+        "label": "NumberBetweenZeroAndOneInclusive",
+        "description": [
+          "\nTypes a number between 0 and 1 inclusive. Useful for specifying a probability, weighting, etc."
+        ],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/number_between_zero_and_one_inclusive/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
         "id": "def-common.OnlyFalseAllowed",
         "type": "Object",
         "tags": [],

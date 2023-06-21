@@ -35,6 +35,32 @@ export async function waitForRuleStatus({
   );
 }
 
+export async function runRuleSoon({
+  ruleId,
+  supertest,
+}: {
+  ruleId: string;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+}): Promise<Record<string, any>> {
+  return pRetry(
+    async () => {
+      try {
+        const response = await supertest
+          .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
+        if (response.status !== 204) {
+          throw new Error(`runRuleSoon got ${response.status} status`);
+        }
+        return response;
+      } catch (error) {
+        throw new Error(`[Rule] Running a rule ${ruleId} failed: ${error}`);
+      }
+    },
+    { retries: 10 }
+  );
+}
+
 export async function waitForDocumentInIndex<T>({
   es,
   indexName,

@@ -36,6 +36,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       url: string;
       method?: 'get' | 'post' | 'delete' | 'put';
       body?: any;
+      headers?: Record<string, string>;
     };
     expectForbidden: (result: any) => void;
     expectResponse: (result: any) => void;
@@ -43,10 +44,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   function createAgent(
-    body: APIClientRequestParamsOf<'PUT /api/apm/settings/agent-configuration 2023-05-22'>['params']['body']
+    body: APIClientRequestParamsOf<'PUT /api/apm/settings/agent-configuration 2023-10-31'>['params']['body']
   ) {
     return apmApiClient.writeUser({
-      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
       params: {
         body,
       },
@@ -54,10 +55,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   function deleteAgent(
-    body: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration 2023-05-22'>['params']['body']
+    body: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration 2023-10-31'>['params']['body']
   ) {
     return apmApiClient.writeUser({
-      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
       params: {
         body,
       },
@@ -160,6 +161,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         method: 'post',
         url: `/api/apm/settings/agent-configuration/search`,
         body: { service: { name: 'test-service' }, etag: 'abc' },
+        headers: {
+          'elastic-api-version': '2023-10-31',
+        },
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -203,7 +207,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   };
 
   async function executeAsUser(
-    { method = 'get', url, body }: Endpoint['req'],
+    { method = 'get', url, body, headers }: Endpoint['req'],
     username: string,
     password: string,
     spaceId?: string
@@ -220,6 +224,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     return await request
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
+      .set(headers ?? {})
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   }

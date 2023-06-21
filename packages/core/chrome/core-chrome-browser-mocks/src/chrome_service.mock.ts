@@ -87,6 +87,7 @@ const createStartContractMock = () => {
 type ChromeServiceContract = PublicMethodsOf<ChromeService>;
 const createMock = () => {
   const mocked: jest.Mocked<ChromeServiceContract> = {
+    setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
