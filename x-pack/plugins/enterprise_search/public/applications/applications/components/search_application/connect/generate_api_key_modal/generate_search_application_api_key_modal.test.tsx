@@ -49,7 +49,7 @@ describe('GenerateSearchApplicationApiKeyModal', () => {
       expect(wrapper.find('[data-test-subj="generateApiKeyButton"]')).toHaveLength(1);
     });
 
-    it('pre-set the key name with engine name', () => {
+    it('pre-set the key name with search application name', () => {
       mount(
         <GenerateSearchApplicationApiKeyModal
           searchApplicationName="puggles"
@@ -73,7 +73,11 @@ describe('GenerateSearchApplicationApiKeyModal', () => {
     });
 
     it('should trigger api call from the form', () => {
-      setMockValues({ ...mockValues, engineName: 'test-123', keyName: '    with-spaces    ' });
+      setMockValues({
+        ...mockValues,
+        searchApplicationName: 'test-123',
+        keyName: '    with-spaces    ',
+      });
       const wrapper = shallow(
         <GenerateSearchApplicationApiKeyModal
           searchApplicationName="puggles"
@@ -92,7 +96,7 @@ describe('GenerateSearchApplicationApiKeyModal', () => {
       setMockValues({
         ...mockValues,
         apiKey: 'apiKeyFromBackend123123==',
-        engineName: 'test-123',
+        searchApplicationName: 'test-123',
         isSuccess: true,
         keyName: 'keyname',
       });

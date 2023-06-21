@@ -33,7 +33,7 @@ export const GenerateApiKeyModalLogic = kea<
   connect: {
     values: [GenerateSearchApplicationApiKeyLogic, ['data', 'status']],
   },
-  path: ['enterprise_search', 'engines', 'api', 'generate_api_key_modal'],
+  path: ['enterprise_search', 'search_applications', 'api', 'generate_api_key_modal'],
   reducers: () => ({
     keyName: [
       '',

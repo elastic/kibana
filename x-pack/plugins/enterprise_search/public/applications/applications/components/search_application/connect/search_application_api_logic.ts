@@ -44,7 +44,7 @@ export const SearchApplicationApiLogic = kea<
       actions.apiReset();
     },
   }),
-  path: ['enterprise_search', 'content', 'engine_api_logic'],
+  path: ['enterprise_search', 'content', 'search_application_api_logic'],
   reducers: () => ({
     isGenerateModalOpen: [
       false,

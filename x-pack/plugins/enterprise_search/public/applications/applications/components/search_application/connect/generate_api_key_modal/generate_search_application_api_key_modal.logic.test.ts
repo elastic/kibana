@@ -21,7 +21,7 @@ const DEFAULT_VALUES = {
   status: Status.IDLE,
 };
 
-describe('GenerateEngineApiKeyModal Logic', () => {
+describe('GenerateApiKeyModalLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(GenerateSearchApplicationApiKeyLogic);
   const { mount } = new LogicMounter(GenerateApiKeyModalLogic);
 
