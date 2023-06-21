@@ -5,34 +5,35 @@
  * 2.0.
  */
 
+import { useKibana } from '../../../utils/kibana_react';
+import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
-import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 
-import { Expressions } from './expression';
+import Expressions from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { MetricsExplorerMetric } from '../../../../common/threshold_rule/metrics_explorer';
 import { Comparator } from '../../../../common/threshold_rule/types';
 
-jest.mock('../helpers/source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
-  }),
-}));
+jest.mock('../../../utils/kibana_react');
 
-jest.mock('../../../utils/kibana_react', () => ({
-  useKibana: () => ({
-    services: mockCoreMock.createStart(),
-  }),
-}));
+const useKibanaMock = useKibana as jest.Mock;
+
+const mockKibana = () => {
+  useKibanaMock.mockReturnValue({
+    ...kibanaStartMock.startContract(),
+  });
+};
 
 const dataViewMock = dataViewPluginMocks.createStartContract();
 
 describe('Expression', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockKibana();
+  });
+
   async function setup(currentOptions: {
     metrics?: MetricsExplorerMetric[];
     filterQuery?: string;
@@ -43,6 +44,7 @@ describe('Expression', () => {
       groupBy: undefined,
       filterQueryText: '',
       sourceId: 'default',
+      searchConfiguration: {},
     };
     const wrapper = mountWithIntl(
       <Expressions
@@ -55,8 +57,10 @@ describe('Expression', () => {
         setRuleProperty={() => {}}
         metadata={{
           currentOptions,
+          adHocDataViewList: [],
         }}
         dataViews={dataViewMock}
+        onChangeMetaData={jest.fn()}
       />
     );
 
