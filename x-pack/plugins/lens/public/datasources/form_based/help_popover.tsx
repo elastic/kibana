@@ -18,9 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import './help_popover.scss';
-import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { ThemeServiceStart } from '@kbn/core/public';
 
 export const HelpPopoverButton = ({
   children,
