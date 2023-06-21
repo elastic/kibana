@@ -10,6 +10,7 @@ import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import { run as cypressRun } from 'cypress-cloud';
 import { fork } from 'child_process';
+import type { IOType } from 'child_process';
 
 export const cli = () => {
   run(
@@ -28,13 +29,12 @@ export const cli = () => {
             KIBANA_INSTALL_DIR: process.env.KIBANA_INSTALL_DIR,
             CI: process.env.CI,
           },
-          stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+          stdio: ['inherit' as IOType, 'inherit' as IOType, 'inherit' as IOType, 'ipc' as const],
         };
 
         const child = fork(program, parameters, options);
 
         child.on('message', (message) => {
-          console.log('message from child:', message);
           resolve(message);
         });
       });
@@ -45,7 +45,9 @@ export const cli = () => {
         batchSize: 1,
         projectId: (argv.projectId as string) ?? 'security_solution',
         recordKey: 'xxx',
-        cloudServiceUrl: 'https://cypress-director.herokuapp.com',
+        cloudServiceUrl: process.env.DOCKER_SERVICE_IP
+          ? `http://${process.env.DOCKER_SERVICE_IP}:1234`
+          : 'https://cypress-director.herokuapp.com',
         configFile: path.resolve(argv.configFile as string),
         parallel: true,
         record: true,
