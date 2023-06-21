@@ -14,7 +14,7 @@ export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 
   id: string;
   loading: boolean;
   value: number;
-  toolTip: string;
+  toolTip: React.ReactNode;
   ['data-test-subj']?: string;
 }
 

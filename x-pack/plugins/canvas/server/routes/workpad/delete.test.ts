@@ -32,7 +32,8 @@ describe('DELETE workpad', () => {
     const routerDeps = getMockedRouterDeps();
     initializeDeleteWorkpadRoute(routerDeps);
 
-    routeHandler = routerDeps.router.delete.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.delete.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   it(`returns 200 ok when the workpad is deleted`, async () => {

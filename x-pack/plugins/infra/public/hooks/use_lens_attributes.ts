@@ -58,13 +58,13 @@ export const useLensAttributes = ({
   const { navigateToPrefilledEditor } = lens;
   const { value, error } = useAsync(lens.stateHelperApi, [lens]);
   const { formula: formulaAPI } = value ?? {};
+  const lensChartConfig = hostLensFormulas[type];
 
   const attributes = useMemo(() => {
     if (!dataView || !formulaAPI) {
       return null;
     }
 
-    const lensChartConfig = hostLensFormulas[type];
     const VisualizationType = visualizationTypes[visualizationType];
 
     const visualizationAttributes = buildLensAttributes(
@@ -72,7 +72,7 @@ export const useLensAttributes = ({
     );
 
     return visualizationAttributes;
-  }, [dataView, formulaAPI, options, type, visualizationType]);
+  }, [dataView, formulaAPI, options, visualizationType, lensChartConfig]);
 
   const injectFilters = ({
     filters,
@@ -141,6 +141,9 @@ export const useLensAttributes = ({
       },
     };
   };
+  const {
+    formula: { formula },
+  } = lensChartConfig;
 
-  return { attributes, getExtraActions, error };
+  return { formula, attributes, getExtraActions, error };
 };

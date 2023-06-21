@@ -23,6 +23,7 @@
       "alerting",
       "actions",
       "dashboard",
+      "licensing",
     ],
     "optionalPlugins": [
       "cloud",
