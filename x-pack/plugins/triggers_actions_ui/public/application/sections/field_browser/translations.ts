@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export { CASES } from '../translations';
+export { CASES, MAINTENANCE_WINDOWS } from '../translations';
 
 export const CATEGORY = i18n.translate('xpack.triggersActionsUI.fieldBrowser.categoryLabel', {
   defaultMessage: 'Category',

@@ -23,7 +23,7 @@ import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import { MaintenanceWindowStatus } from '../../../../common';
+import { MaintenanceWindowStatus, MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
 import { StatusFilter } from './status_filter';
 import { TableActionsPopover } from './table_actions_popover';
 import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
@@ -61,7 +61,9 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     render: (startDate: string, item: MaintenanceWindowFindResponse) => {
       return (
         <EuiFlexGroup responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>{formatDate(startDate, 'MM/DD/YY hh:mm A')}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {formatDate(startDate, MAINTENANCE_WINDOW_DATE_FORMAT)}
+          </EuiFlexItem>
           {item.events.length > 1 ? (
             <EuiFlexItem grow={false}>
               <UpcomingEventsPopover maintenanceWindowFindResponse={item} />
@@ -76,7 +78,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
     field: 'eventEndTime',
     name: i18n.TABLE_END_TIME,
     dataType: 'date',
-    render: (endDate: string) => formatDate(endDate, 'MM/DD/YY hh:mm A'),
+    render: (endDate: string) => formatDate(endDate, MAINTENANCE_WINDOW_DATE_FORMAT),
   },
 ];
 
