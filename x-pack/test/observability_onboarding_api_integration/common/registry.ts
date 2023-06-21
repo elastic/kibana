@@ -5,27 +5,15 @@
  * 2.0.
  */
 
-import Path from 'path';
 import { castArray, groupBy } from 'lodash';
 import callsites from 'callsites';
-import { maybe } from '@kbn/apm-plugin/common/utils/maybe';
-import { joinByKey } from '@kbn/apm-plugin/common/utils/join_by_key';
 import { FtrProviderContext } from './ftr_provider_context';
 import { ObservabilityOnboardingFtrConfigName } from '../configs';
-
-type ArchiveName =
-  | 'apm_8.0.0'
-  | '8.0.0'
-  | 'metrics_8.0.0'
-  | 'infra_metrics_and_apm'
-  | 'ml_8.0.0'
-  | 'observability_overview'
-  | 'rum_8.0.0'
-  | 'rum_test_data';
+import { maybe } from './utils/maybe';
+import { joinByKey } from './utils/join_by_key';
 
 interface RunCondition {
   config: ObservabilityOnboardingFtrConfigName;
-  archives: ArchiveName[];
 }
 
 export function RegistryProvider({ getService }: FtrProviderContext) {
@@ -102,20 +90,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
     run: () => {
       running = true;
 
-      const esArchiver = getService('esArchiver');
-      const logger = getService('log');
-
-      const logWithTimer = () => {
-        const start = process.hrtime();
-
-        return (message: string) => {
-          const diff = process.hrtime(start);
-          const time = `${Math.round(diff[0] * 1000 + diff[1] / 1e6)}ms`;
-          logger.info(`(${time}) ${message}`);
-        };
-      };
-
-      const groups = joinByKey(callbacks, ['config', 'archives'], (a, b) => ({
+      const groups = joinByKey(callbacks, ['config'], (a, b) => ({
         ...a,
         ...b,
         runs: a.runs.concat(b.runs),
@@ -134,49 +109,10 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
           config,
           () => {
             groupsForConfig.forEach((group) => {
-              const { runs, ...condition } = group;
+              const { runs } = group;
 
-              const runBefore = async () => {
-                const log = logWithTimer();
-                for (const archiveName of condition.archives) {
-                  log(`Loading ${archiveName}`);
-
-                  await esArchiver.load(
-                    Path.join(
-                      'x-pack/test/apm_api_integration/common/fixtures/es_archiver',
-                      archiveName
-                    )
-                  );
-                }
-                if (condition.archives.length) {
-                  log('Loaded all archives');
-                }
-              };
-
-              const runAfter = async () => {
-                const log = logWithTimer();
-                for (const archiveName of condition.archives) {
-                  log(`Unloading ${archiveName}`);
-                  await esArchiver.unload(
-                    Path.join(
-                      'x-pack/test/apm_api_integration/common/fixtures/es_archiver',
-                      archiveName
-                    )
-                  );
-                }
-                if (condition.archives.length) {
-                  log('Unloaded all archives');
-                }
-              };
-
-              describe(condition.archives.join(',') || 'no archive', () => {
-                before(runBefore);
-
-                runs.forEach((run) => {
-                  run.cb();
-                });
-
-                after(runAfter);
+              runs.forEach((run) => {
+                run.cb();
               });
             });
           }
