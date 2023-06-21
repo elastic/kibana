@@ -376,7 +376,7 @@
             "section": "def-common.CaseSeverity",
             "text": "CaseSeverity"
           },
-          " | undefined; category?: string | undefined; }, \"description\" | \"title\"> | undefined; }"
+          " | undefined; category?: string | null | undefined; }, \"description\" | \"title\"> | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
