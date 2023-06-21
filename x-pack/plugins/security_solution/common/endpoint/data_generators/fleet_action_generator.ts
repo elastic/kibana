@@ -21,10 +21,8 @@ import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/
 
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action (isolate or unisolate) */
-  generate(overrides: DeepPartial<EndpointAction> = {}, index: number = 0): EndpointAction {
+  generate(overrides: DeepPartial<EndpointAction> = {}, index?: number): EndpointAction {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
-    const command = this.randomResponseActionCommandByIndex(index);
-
     return merge(
       {
         action_id: this.seededUUIDv4(),
@@ -35,7 +33,9 @@ export class FleetActionGenerator extends BaseDataGenerator {
         agents: [this.seededUUIDv4()],
         user_id: 'elastic',
         data: {
-          command,
+          command: overrides.data?.command
+            ? overrides.data?.command
+            : this.randomResponseActionCommand(),
           comment: this.randomString(15),
           parameter: undefined,
           output: undefined,
@@ -145,13 +145,5 @@ export class FleetActionGenerator extends BaseDataGenerator {
 
   protected randomResponseActionCommand() {
     return this.randomChoice(RESPONSE_ACTION_API_COMMANDS_NAMES);
-  }
-
-  protected randomResponseActionCommandByIndex(index: number) {
-    const newIndex =
-      index > RESPONSE_ACTION_API_COMMANDS_NAMES.length
-        ? index - RESPONSE_ACTION_API_COMMANDS_NAMES.length
-        : index;
-    return RESPONSE_ACTION_API_COMMANDS_NAMES[newIndex];
   }
 }

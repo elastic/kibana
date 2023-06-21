@@ -207,6 +207,11 @@ export async function indexEndpointHostDocs({
           {
             alertIds,
             numResponseActions,
+            overrides: {
+              data: {
+                command: 'isolate',
+              },
+            },
           }
         );
         mergeAndAppendArrays(response, actionsResponse);
