@@ -40,20 +40,16 @@ import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { mergeExecutionContext } from '../execution_context_utils';
 import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_strings';
+import {
+  DEFAULT_LINE_SIMPLIFICATION_SIZE,
+  MAX_TERMS_TRACKS,
+  TIME_SERIES_ID_FIELD_NAME,
+} from './constants';
 
 type ESGeoLineSourceSyncMeta = Pick<
   ESGeoLineSourceDescriptor,
-  'groupByTimeseries' | 'splitField' | 'sortField'
+  'groupByTimeseries' | 'lineSimplificationSize' | 'splitField' | 'sortField'
 >;
-
-// geo_line aggregation without time series buckets uses lots of resources
-// limit resource consumption by limiting number of tracks to smaller amount
-const MAX_TERMS_TRACKS = 250;
-
-// Constant is used to identify time series id field in UIs, tooltips, and styling.
-// Constant is not passed to Elasticsearch APIs and is not related to '_tsid' document metadata field.
-// Constant value of '_tsid' is arbitrary.
-const TIME_SERIES_ID_FIELD_NAME = '_tsid';
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
@@ -88,6 +84,9 @@ export class ESGeoLineSource extends AbstractESAggSource {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_LINE,
       groupByTimeseries,
+      lineSimplificationSize: typeof normalizedDescriptor.lineSimplificationSize === 'number'
+        ? normalizedDescriptor.lineSimplificationSize 
+        : DEFAULT_LINE_SIMPLIFICATION_SIZE,
       geoField: normalizedDescriptor.geoField!,
       splitField: normalizedDescriptor.splitField,
       sortField: normalizedDescriptor.sortField,
@@ -116,6 +115,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         onChange={onChange}
         metrics={this._descriptor.metrics}
         groupByTimeseries={this._descriptor.groupByTimeseries}
+        lineSimplificationSize={this._descriptor.lineSimplificationSize}
         splitField={this._descriptor.splitField ?? ''}
         sortField={this._descriptor.sortField ?? ''}
       />
@@ -125,6 +125,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
   getSyncMeta(): ESGeoLineSourceSyncMeta {
     return {
       groupByTimeseries: this._descriptor.groupByTimeseries,
+      lineSimplificationSize: this._descriptor.lineSimplificationSize,
       splitField: this._descriptor.splitField,
       sortField: this._descriptor.sortField,
     };
@@ -252,6 +253,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
               point: {
                 field: this._descriptor.geoField,
               },
+              size: this._descriptor.lineSimplificationSize,
             },
           },
           ...this.getValueAggsDsl(indexPattern),

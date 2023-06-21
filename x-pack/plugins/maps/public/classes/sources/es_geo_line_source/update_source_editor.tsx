@@ -20,6 +20,7 @@ interface Props {
   bucketsName: string;
   indexPatternId: string;
   groupByTimeseries: boolean;
+  lineSimplificationSize: number;
   splitField: string;
   sortField: string;
   metrics: AggDescriptor[];
@@ -70,16 +71,20 @@ export class UpdateSourceEditor extends Component<Props, State> {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
-  _onGroupByTimeseriesChange = (groupByTimeseries: boolean) => {
-    this.props.onChange({ propName: 'groupByTimeseries', value: groupByTimeseries });
+  _onGroupByTimeseriesChange = (value: boolean) => {
+    this.props.onChange({ propName: 'groupByTimeseries', value });
   };
 
-  _onSplitFieldChange = (fieldName: string) => {
-    this.props.onChange({ propName: 'splitField', value: fieldName });
+  _onLineSimplificationSizeChange = (value: number) => {
+    this.props.onChange({ propName: 'lineSimplificationSize', value });
   };
 
-  _onSortFieldChange = (fieldName: string) => {
-    this.props.onChange({ propName: 'sortField', value: fieldName });
+  _onSplitFieldChange = (value: string) => {
+    this.props.onChange({ propName: 'splitField', value });
+  };
+
+  _onSortFieldChange = (value: string) => {
+    this.props.onChange({ propName: 'sortField', value });
   };
 
   render() {
@@ -123,9 +128,11 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <GeoLineForm
             indexPattern={this.state.indexPattern}
             onGroupByTimeseriesChange={this._onGroupByTimeseriesChange}
+            onLineSimplificationSizeChange={this._onLineSimplificationSizeChange}
             onSortFieldChange={this._onSortFieldChange}
             onSplitFieldChange={this._onSplitFieldChange}
             groupByTimeseries={this.props.groupByTimeseries}
+            lineSimplificationSize={this.props.lineSimplificationSize}
             sortField={this.props.sortField}
             splitField={this.props.splitField}
           />

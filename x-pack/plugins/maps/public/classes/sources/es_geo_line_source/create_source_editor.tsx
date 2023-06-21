@@ -14,6 +14,7 @@ import { GeoFieldSelect } from '../../../components/geo_field_select';
 import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
 import { getGeoPointFields, getIsTimeseries } from '../../../index_pattern_util';
 import { GeoLineForm } from './geo_line_form';
+import { DEFAULT_LINE_SIMPLIFICATION_SIZE } from './constants';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<ESGeoLineSourceDescriptor> | null) => void;
@@ -26,6 +27,7 @@ interface State {
   groupByTimeseries: boolean;
   splitField: string;
   sortField: string;
+  lineSimplificationSize: number;
 }
 
 export class CreateSourceEditor extends Component<Props, State> {
@@ -36,6 +38,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     groupByTimeseries: false,
     splitField: '',
     sortField: '',
+    lineSimplificationSize: DEFAULT_LINE_SIMPLIFICATION_SIZE,
   };
 
   _onIndexPatternSelect = (indexPattern: DataView) => {
@@ -74,6 +77,15 @@ export class CreateSourceEditor extends Component<Props, State> {
     );
   };
 
+  _onLineSimplificationSizeChange = (lineSimplificationSize: boolean) => {
+    this.setState(
+      {
+        lineSimplificationSize,
+      },
+      this.previewLayer
+    );
+  };
+
   _onSplitFieldSelect = (newValue: string) => {
     this.setState(
       {
@@ -93,14 +105,21 @@ export class CreateSourceEditor extends Component<Props, State> {
   };
 
   previewLayer = () => {
-    const { indexPattern, geoField, groupByTimeseries, splitField, sortField } = this.state;
+    const { indexPattern, geoField, groupByTimeseries, splitField, sortField, lineSimplificationSize } = this.state;
 
     const sourceConfig =
       indexPattern &&
       indexPattern.id &&
       geoField &&
       (groupByTimeseries || (splitField && sortField))
-        ? { indexPatternId: indexPattern.id, geoField, groupByTimeseries, splitField, sortField }
+        ? {
+            indexPatternId: indexPattern.id, 
+            geoField, 
+            groupByTimeseries, 
+            lineSimplificationSize,
+            splitField, 
+            sortField,
+          }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
   };
@@ -129,9 +148,11 @@ export class CreateSourceEditor extends Component<Props, State> {
       <GeoLineForm
         indexPattern={this.state.indexPattern}
         onGroupByTimeseriesChange={this._onGroupByTimeseriesChange}
+        onLineSimplificationSizeChange={this._onLineSimplificationSizeChange}
         onSortFieldChange={this._onSortFieldSelect}
         onSplitFieldChange={this._onSplitFieldSelect}
         groupByTimeseries={this.state.groupByTimeseries}
+        lineSimplificationSize={this.state.lineSimplificationSize}
         sortField={this.state.sortField}
         splitField={this.state.splitField}
       />
