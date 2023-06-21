@@ -11,7 +11,7 @@ import React, { Children } from 'react';
 // eslint-disable-next-line no-restricted-imports
 import { Switch, useRouteMatch } from 'react-router-dom';
 import { Routes as ReactRouterRoutes, Route } from 'react-router-dom-v5-compat';
-import { MatchPropagator } from './route';
+import { Route as LegacyRoute, MatchPropagator } from './route';
 
 export const Routes = ({
   legacySwitch = true,
@@ -26,24 +26,31 @@ export const Routes = ({
     <Switch>{children}</Switch>
   ) : (
     <ReactRouterRoutes>
-      {Children.map(children, (child) => (
-        <Route
-          path={
-            /* @ts-expect-error */
-            replace(child?.props.path, match.url + '/', '')
-          }
-          element={
-            <>
-              <MatchPropagator />
+      {Children.map(children, (child) => {
+        if (React.isValidElement(child) && child.type === LegacyRoute) {
+          const path = replace(child?.props.path, match.url + '/', '');
+          const renderFunction =
+            typeof child?.props.children === 'function'
+              ? child?.props.children
+              : child?.props.render;
 
-              {
-                /* @ts-expect-error */
-                child?.props?.children
+          return (
+            <Route
+              path={path}
+              element={
+                <>
+                  <MatchPropagator />
+                  {(child?.props?.component && <child.props.component />) ||
+                    (renderFunction && renderFunction()) ||
+                    children}
+                </>
               }
-            </>
-          }
-        />
-      ))}
+            />
+          );
+        } else {
+          return child;
+        }
+      })}
     </ReactRouterRoutes>
   );
 };

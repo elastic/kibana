@@ -10,13 +10,7 @@ import type { RouteProps } from 'react-router-dom';
 import { type Location } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 
-import type {
-  AppMountParameters,
-  IUiSettingsClient,
-  ChromeStart,
-  ChromeBreadcrumb,
-} from '@kbn/core/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { AppMountParameters, ChromeStart, ChromeBreadcrumb } from '@kbn/core/public';
 
 import { EuiSkeletonText } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
@@ -60,10 +54,8 @@ export interface PageProps {
 }
 
 export interface PageDependencies {
-  config: IUiSettingsClient;
   history: AppMountParameters['history'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 

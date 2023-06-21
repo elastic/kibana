@@ -28,6 +28,7 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
+  getExistsFilter,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { isRuntimeField, isScriptedField } from './terms/helpers';
@@ -141,13 +142,6 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
     showArrayValues: boolean;
     // last value on numeric fields can be formatted
     format?: ValueFormatConfig;
-  };
-}
-
-function getExistsFilter(field: string) {
-  return {
-    query: `${field}: *`,
-    language: 'kuery',
   };
 }
 

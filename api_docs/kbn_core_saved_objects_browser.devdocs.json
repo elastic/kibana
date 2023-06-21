@@ -82,14 +82,6 @@
             "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
           },
           {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/platform.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/platform.ts"
-          },
-          {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
           },

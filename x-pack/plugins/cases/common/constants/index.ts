@@ -10,6 +10,7 @@ import type { CasesFeaturesAllRequired } from '../ui/types';
 export * from './owners';
 export * from './files';
 export * from './application';
+export { LENS_ATTACHMENT_TYPE } from './visualizations';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -103,12 +104,15 @@ export const MAX_DOCS_PER_PAGE = 10000 as const;
 export const MAX_BULK_GET_ATTACHMENTS = MAX_DOCS_PER_PAGE;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 export const MAX_BULK_GET_CASES = 1000 as const;
+export const MAX_COMMENTS_PER_PAGE = 100 as const;
+export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 
 /**
  * Validation
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_CATEGORY_LENGTH = 50 as const;
 
 /**
  * Cases features

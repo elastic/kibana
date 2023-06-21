@@ -21,12 +21,26 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { DimensionButtonIcon } from './dimension_button_icon';
 import { PaletteIndicator } from './palette_indicator';
 import type { AccessorConfig, Message } from './types';
+import { emptyTitleText } from './constants';
 
 const triggerLinkA11yText = (label: string) =>
   i18n.translate('visualizationUiComponents.dimensionButton.editConfig', {
     defaultMessage: 'Edit {label} configuration',
-    values: { label },
+    values: {
+      label: label.trim().length ? label : emptyTitleText,
+    },
   });
+
+export interface DimensionButtonProps {
+  className?: string;
+  groupLabel: string;
+  children: React.ReactElement;
+  onClick: (id: string) => void;
+  onRemoveClick: (id: string) => void;
+  accessorConfig: AccessorConfig;
+  label: string;
+  message?: Message;
+}
 
 export function DimensionButton({
   groupLabel,
@@ -37,16 +51,7 @@ export function DimensionButton({
   label,
   message,
   ...otherProps // from Drag&Drop integration
-}: {
-  className?: string;
-  groupLabel: string;
-  children: React.ReactElement;
-  onClick: (id: string) => void;
-  onRemoveClick: (id: string) => void;
-  accessorConfig: AccessorConfig;
-  label: string;
-  message?: Message;
-}) {
+}: DimensionButtonProps) {
   return (
     <div
       {...otherProps}

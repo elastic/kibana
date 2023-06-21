@@ -12,4 +12,5 @@ export * from './components/basic/indicators/execution_status_indicator';
 export * from './components/execution_events_table/execution_events_table';
 export * from './components/execution_results_table/use_execution_results';
 
+export * from './logic/detection_engine_health/use_setup_detection_engine_health_api';
 export * from './logic/execution_settings/use_execution_settings';
