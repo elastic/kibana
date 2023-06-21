@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LogViewReference } from '../../../common/log_views';
+import { LogViewReference } from '@kbn/logs-shared-plugin/common';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import type { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 

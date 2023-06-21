@@ -9,11 +9,6 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
-import type {
-  DEFAULT_LOG_VIEW,
-  LogIndexReference,
-  LogViewReference,
-} from '@kbn/logs-shared-plugin/common';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
