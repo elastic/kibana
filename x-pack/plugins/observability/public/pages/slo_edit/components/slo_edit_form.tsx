@@ -51,9 +51,9 @@ const CREATE_RULE_SEARCH_PARAM = 'create-rule';
 
 export function SloEditForm({ slo }: Props) {
   const {
-    notifications,
     application: { navigateToUrl },
     http: { basePath },
+    notifications,
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 

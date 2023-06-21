@@ -35,8 +35,10 @@ export function IndexSelection() {
   });
 
   useEffect(() => {
-    setDataViewOptions(createDataViewOptions(dataViews));
-  }, [dataViews, dataViews.length]);
+    if (dataViews.length > 0) {
+      setDataViewOptions(createDataViewOptions(dataViews));
+    }
+  }, [dataViews]);
 
   useEffect(() => {
     if (indices.length === 0) {
@@ -67,7 +69,7 @@ export function IndexSelection() {
         ],
       });
     }
-  }, [searchValue, indices, indices.length]);
+  }, [indices.length, searchValue]);
 
   const onDataViewSearchChange = useMemo(
     () => debounce((value: string) => setSearchValue(value), 300),
@@ -155,20 +157,19 @@ function createDataViewLabel(dataView: DataView) {
 
 function createDataViewOptions(dataViews: DataView[]): Option[] {
   const options = [];
-  if (dataViews.length > 0) {
-    options.push({
-      label: i18n.translate(
-        'xpack.observability.slo.sloEdit.customKql.indexSelection.dataViewOptionsLabel',
-        { defaultMessage: 'Select an existing Data View' }
-      ),
-      options: dataViews
-        .map((view) => ({
-          label: createDataViewLabel(view),
-          value: view.getIndexPattern(),
-        }))
-        .sort((a, b) => String(a.label).localeCompare(b.label)),
-    });
-  }
+
+  options.push({
+    label: i18n.translate(
+      'xpack.observability.slo.sloEdit.customKql.indexSelection.dataViewOptionsLabel',
+      { defaultMessage: 'Select an existing Data View' }
+    ),
+    options: dataViews
+      .map((view) => ({
+        label: createDataViewLabel(view),
+        value: view.getIndexPattern(),
+      }))
+      .sort((a, b) => String(a.label).localeCompare(b.label)),
+  });
 
   return options;
 }
