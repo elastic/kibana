@@ -171,6 +171,7 @@ export const CategoryTable: FC<Props> = ({
           description: labels.singleSelect.in,
           icon: 'plusInCircle',
           type: 'icon',
+          'data-test-subj': 'aiopsLogPatternsActionFilterInButton',
           onClick: (category) => openInDiscover(QUERY_MODE.INCLUDE, category),
         },
         {
@@ -178,6 +179,7 @@ export const CategoryTable: FC<Props> = ({
           description: labels.singleSelect.out,
           icon: 'minusInCircle',
           type: 'icon',
+          'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
           onClick: (category) => openInDiscover(QUERY_MODE.EXCLUDE, category),
         },
       ],
@@ -232,6 +234,7 @@ export const CategoryTable: FC<Props> = ({
         onTableChange={onTableChange}
         pagination={pagination}
         sorting={sorting}
+        data-test-subj="aiopsLogPatternsTable"
         rowProps={(category) => {
           return enableRowActions
             ? {
