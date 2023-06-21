@@ -513,8 +513,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('terms and match should have the same alerts with pagination', async () => {
       const termRule: ThreatMatchRuleCreateProps = createThreatMatchRule({
+        query: 'source.ip: 8.42.77.171', // narrow amount of alerts to 6
         override: {
-          items_per_search: 1,
+          items_per_search: 2,
           concurrent_searches: 1,
         },
       });
@@ -524,6 +525,7 @@ export default ({ getService }: FtrProviderContext) => {
           items_per_search: 1,
           concurrent_searches: 1,
         },
+        query: 'source.ip: 8.42.77.171', // narrow amount of alerts to 6
         name: 'Math rule',
         rule_id: 'rule-2',
         threat_mapping: [
