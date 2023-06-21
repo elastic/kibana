@@ -34,6 +34,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import deepEqual from 'fast-deep-equal';
 
 import { AndOrBadge } from '../and_or_badge';
 
@@ -41,7 +42,6 @@ import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
 import { getTotalErrorExist } from './selectors';
 import { EntryFieldError, State, exceptionsBuilderReducer } from './reducer';
-
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
 `;
@@ -414,10 +414,12 @@ export const ExceptionBuilderComponent = ({
    * It's important to differentiate this case from when the user
    * deletes all the entries and the "exceptionListItems" has pre-filled values.
    * that's why "allEntriesDeleted" is used
+   *
+   *  deepEqual(exceptionListItems, exceptions) to handle the exceptionListItems in
+   * the EventFiltersFlyout
    */
-
   useEffect(() => {
-    if (!exceptionListItems.length) return;
+    if (!exceptionListItems.length || deepEqual(exceptionListItems, exceptions)) return;
     const exceptionsEntriesPopulated = exceptions.some((exception) =>
       exception.entries.some((entry) => entry.field)
     );
