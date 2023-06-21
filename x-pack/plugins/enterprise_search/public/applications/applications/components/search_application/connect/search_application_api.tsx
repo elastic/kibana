@@ -29,7 +29,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
-import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/generate_engine_api_key_modal';
+import { GenerateEngineApiKeyModal } from './generate_api_key_modal/generate_search_application_api_key_modal';
 import { SearchApplicationApiIntegrationStage } from './search_application_api_integration';
 import { SearchApplicationApiLogic } from './search_application_api_logic';
 

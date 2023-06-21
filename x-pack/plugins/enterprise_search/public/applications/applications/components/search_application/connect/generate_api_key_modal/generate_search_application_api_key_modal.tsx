@@ -33,7 +33,7 @@ import { i18n } from '@kbn/i18n';
 
 import { GenerateEngineApiKeyLogic } from '../../../../../enterprise_search_content/api/generate_engine_api_key/generate_engine_api_key_logic';
 
-import { GenerateApiKeyModalLogic } from './generate_engine_api_key_modal.logic';
+import { GenerateApiKeyModalLogic } from './generate_search_application_api_key_modal.logic';
 
 interface GenerateEngineApiKeyModalProps {
   onClose(): void;

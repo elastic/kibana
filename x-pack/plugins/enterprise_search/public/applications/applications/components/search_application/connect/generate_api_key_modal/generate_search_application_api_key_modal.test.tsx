@@ -17,7 +17,7 @@ const mockActions = { makeRequest: jest.fn(), setKeyName: jest.fn() };
 
 const mockValues = { apiKey: '', isLoading: false, isSuccess: false, keyName: '' };
 
-import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal';
+import { GenerateEngineApiKeyModal } from './generate_search_application_api_key_modal';
 
 const onCloseMock = jest.fn();
 describe('GenerateEngineApiKeyModal', () => {

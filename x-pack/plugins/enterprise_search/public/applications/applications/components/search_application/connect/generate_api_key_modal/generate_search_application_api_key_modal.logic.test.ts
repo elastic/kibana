@@ -10,7 +10,7 @@ import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 import { Status } from '../../../../../../../common/types/api';
 import { GenerateEngineApiKeyLogic } from '../../../../../enterprise_search_content/api/generate_engine_api_key/generate_engine_api_key_logic';
 
-import { GenerateApiKeyModalLogic } from './generate_engine_api_key_modal.logic';
+import { GenerateApiKeyModalLogic } from './generate_search_application_api_key_modal.logic';
 
 const DEFAULT_VALUES = {
   apiKey: '',
