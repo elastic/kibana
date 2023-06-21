@@ -164,8 +164,12 @@ export class CsvSearchsourceExportType
     return fakeRequest;
   }
 
-  public async createJob(jobParams: JobParamsCSV) {
-    return { searchsource: jobParams.searchSource, ...jobParams };
+  /**
+   * @param jobParamsCSV
+   * @returns jobParams
+   */
+  public createJob(jobParams: JobParamsCSV) {
+    return { ...jobParams, isDeprecated: false };
   }
 
   public async runTask(
@@ -174,8 +178,7 @@ export class CsvSearchsourceExportType
     cancellationToken: CancellationToken,
     stream: Writable
   ) {
-    const config = this.config;
-    const { encryptionKey, csv: csvConfig } = config;
+    const { encryptionKey, csv: csvConfig } = this.config;
     const logger = this.logger.get(`execute-job:${jobId}`);
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
