@@ -176,18 +176,25 @@ export function registerResponseActionRoutes(
       )
     );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: GET_PROCESSES_ROUTE,
-      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canGetRunningProcesses'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'running-processes')
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: NoParametersRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canGetRunningProcesses'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'running-processes')
+      )
+    );
 
   router.post(
     {

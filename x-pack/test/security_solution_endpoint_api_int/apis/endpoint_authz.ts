@@ -106,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: GET_PROCESSES_ROUTE,
         body: { endpoint_ids: ['one'] },
+        version: '2023-10-31',
       },
       {
         method: 'post',
