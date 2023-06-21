@@ -112,14 +112,14 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
 
   const timeRange = {
-    min: alertStart.clone().subtract(20 * intervalFactor, 'minutes'),
-    max: alertEnd ? alertEnd.clone().add(5 * intervalFactor, 'minutes') : moment(new Date()),
+    min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
+    max: alertEnd ? alertEnd.clone().add(1 * intervalFactor, 'minutes') : moment(new Date()),
   };
 
   const initialAnalysisStart = {
     baselineMin: alertStart
       .clone()
-      .subtract(10 * intervalFactor, 'minutes')
+      .subtract(13 * intervalFactor, 'minutes')
       .valueOf(),
     baselineMax: alertStart
       .clone()
@@ -131,12 +131,12 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
       .valueOf(),
     deviationMax: alertStart
       .clone()
-      .add(10 * intervalFactor, 'minutes')
+      .add(3 * intervalFactor, 'minutes')
       .isAfter(moment(new Date()))
       ? moment(new Date()).valueOf()
       : alertStart
           .clone()
-          .add(10 * intervalFactor, 'minutes')
+          .add(3 * intervalFactor, 'minutes')
           .valueOf(),
   };
 
