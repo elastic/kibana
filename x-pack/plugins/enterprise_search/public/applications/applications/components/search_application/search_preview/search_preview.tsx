@@ -12,11 +12,13 @@ import { useActions, useValues } from 'kea';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFieldSearch,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
@@ -63,6 +65,8 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_temp
 import { SearchApplicationIndicesLogic } from '../search_application_indices_logic';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
+import { APICallData, APICallFlyout } from './api_call_flyout';
+
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
 import { SearchApplicationSearchPreviewLogic } from './search_preview_logic';
@@ -81,7 +85,8 @@ import '../search_application_layout.scss';
 class InternalSearchApplicationTransporter implements Transporter {
   constructor(
     private http: HttpSetup,
-    private searchApplicationName: string // uncomment and add setLastAPICall to constructor when view this API call is needed // private setLastAPICall?: (apiCallData: APICallData) => void
+    private searchApplicationName: string,
+    private setLastAPICall: (apiCallData: APICallData) => void
   ) {}
 
   async performRequest(request: SearchRequest) {
@@ -91,7 +96,7 @@ class InternalSearchApplicationTransporter implements Transporter {
       body: JSON.stringify(request),
     });
 
-    // this.setLastAPICall({ request, response }); Uncomment when view this API call is needed
+    this.setLastAPICall({ request, response });
 
     const withUniqueIds = {
       ...response,
@@ -347,9 +352,9 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
 };
 export const SearchApplicationSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
-  // const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);    Uncomment when view this API call is needed
+  const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
-  // const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null); Uncomment when view this API call is needed
+  const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null);
   const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
   );
@@ -357,7 +362,11 @@ export const SearchApplicationSearchPreview: React.FC = () => {
   const { searchApplicationData } = useValues(SearchApplicationIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
-    const transporter = new InternalSearchApplicationTransporter(http, searchApplicationName);
+    const transporter = new InternalSearchApplicationTransporter(
+      http,
+      searchApplicationName,
+      setLastAPICall
+    );
     const connector = new EnginesAPIConnector(transporter);
 
     return {
@@ -368,7 +377,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
         result_fields: resultFields,
       },
     };
-  }, [http, searchApplicationName, resultFields]);
+  }, [http, searchApplicationName, setLastAPICall, resultFields]);
 
   if (!searchApplicationData) return null;
 
@@ -407,7 +416,45 @@ export const SearchApplicationSearchPreview: React.FC = () => {
         <SearchProvider config={config}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <SearchBox inputView={InputView} />
+              <SearchBox
+                inputView={({ getInputProps }) => (
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFieldSearch
+                      fullWidth
+                      placeholder={i18n.translate(
+                        'xpack.enterpriseSearch.content.engine.searchPreview.inputView.placeholder',
+                        { defaultMessage: 'Search' }
+                      )}
+                      {...getInputProps({
+                        append: (
+                          <EuiButtonEmpty
+                            color="primary"
+                            iconType="eye"
+                            onClick={() => setShowAPICallFlyout(true)}
+                            isLoading={lastAPICall == null}
+                          >
+                            {i18n.translate(
+                              'xpack.enterpriseSearch.content.engine.searchPreview.inputView.appendButtonLabel',
+                              { defaultMessage: 'View API call' }
+                            )}
+                          </EuiButtonEmpty>
+                        ),
+                      })}
+                      isClearable
+                      aria-label={i18n.translate(
+                        'xpack.enterpriseSearch.content.engine.searchPreview.inputView.label',
+                        { defaultMessage: 'Search Input' }
+                      )}
+                    />
+                    <EuiButton type="submit" color="primary" fill>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.engine.searchPreview.inputView.searchLabel',
+                        { defaultMessage: 'Search' }
+                      )}
+                    </EuiButton>
+                  </EuiFlexGroup>
+                )}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
@@ -432,9 +479,6 @@ export const SearchApplicationSearchPreview: React.FC = () => {
           </EuiFlexGroup>
         </SearchProvider>
         <DocumentFlyout />
-        {/*
-        Uncomment when view this API call needed
-
         {showAPICallFlyout && lastAPICall && (
           <APICallFlyout
             onClose={() => setShowAPICallFlyout(false)}
@@ -442,7 +486,6 @@ export const SearchApplicationSearchPreview: React.FC = () => {
             searchApplicationName={searchApplicationName}
           />
         )}
-        */}
       </DocumentProvider>
     </EnterpriseSearchApplicationsPageTemplate>
   );

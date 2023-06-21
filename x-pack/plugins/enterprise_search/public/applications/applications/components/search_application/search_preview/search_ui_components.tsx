@@ -13,9 +13,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiButton,
   EuiComboBox,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -28,7 +26,6 @@ import {
 } from '@elastic/eui';
 import { withSearch } from '@elastic/react-search-ui';
 import type {
-  InputViewProps,
   PagingInfoViewProps,
   ResultViewProps,
   ResultsPerPageViewProps,
@@ -144,29 +141,6 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
         </EuiFlexGroup>
       </EuiPanel>
     </button>
-  );
-};
-
-export const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
-  return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFieldSearch
-        fullWidth
-        placeholder={i18n.translate(
-          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.inputView.placeholder',
-          { defaultMessage: 'Search' }
-        )}
-        {...getInputProps({})}
-        isClearable
-        aria-label={i18n.translate(
-          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.inputView.label',
-          { defaultMessage: 'Search Input' }
-        )}
-      />
-      <EuiButton type="submit" color="primary" fill>
-        Search
-      </EuiButton>
-    </EuiFlexGroup>
   );
 };
 
