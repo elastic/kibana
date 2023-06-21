@@ -22,7 +22,9 @@ import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 describe('Import Lists', () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
-
+  before(() => {
+    cy.task('esArchiverResetKibana');
+  });
   beforeEach(() => {
     login();
     visitWithoutDateRange(EXCEPTIONS_URL);

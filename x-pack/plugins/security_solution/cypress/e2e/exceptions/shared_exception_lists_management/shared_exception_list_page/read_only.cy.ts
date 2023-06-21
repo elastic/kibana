@@ -23,6 +23,10 @@ import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
 describe('Shared exception lists - read only', () => {
+  before(() => {
+    cy.task('esArchiverResetKibana');
+  });
+
   beforeEach(() => {
     deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);
 

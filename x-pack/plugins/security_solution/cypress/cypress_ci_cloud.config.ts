@@ -34,7 +34,6 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
     specPattern: ['./cypress/e2e', '!./cypress/e2e/investigations', '!./cypress/e2e/explore'],
-    supportFile: './cypress/support/e2e_cloud.js',
     env: {
       FORCE_COLOR: '1',
       CYPRESS_BASE_URL: 'http://elastic:changeme@localhost:5622',

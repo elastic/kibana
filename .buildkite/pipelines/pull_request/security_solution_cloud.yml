@@ -8,5 +8,5 @@ steps:
     parallelism: 5
     plugins:
       - improbable-eng/docker-service#v0.3.0:
-        container: agoldis/sorry-cypress-director
+          container: agoldis/sorry-cypress-director
 
