@@ -27,8 +27,8 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_templat
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndices } from './engine_indices';
 import { EngineIndicesLogic } from './engine_indices_logic';
-import { EngineSchema } from './engine_schema';
 import { SearchApplicationError } from './search_application_error';
+import { EngineSchema } from './search_application_schema';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
 import './search_application_layout.scss';
 
