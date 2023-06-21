@@ -25,25 +25,22 @@ export const registerActionFileDownloadRoutes = (
 ) => {
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
-  router.versioned
-    .get({
-      access: 'public',
+  // NOTE:
+  // This API (as of today - 2023-06-21) can not be versioned because it is used
+  // to download files from the UI, where its used as part of a `<a>` anchor, which
+  // has no way to define the version header.
+  router.get(
+    {
       path: ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
+      validate: EndpointActionFileDownloadSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: EndpointActionFileDownloadSchema,
-        },
-      },
-      withEndpointAuthz(
-        { all: ['canWriteFileOperations'] },
-        logger,
-        getActionFileDownloadRouteHandler(endpointContext)
-      )
-    );
+    },
+    withEndpointAuthz(
+      { all: ['canWriteFileOperations'] },
+      logger,
+      getActionFileDownloadRouteHandler(endpointContext)
+    )
+  );
 };
 
 export const getActionFileDownloadRouteHandler = (
