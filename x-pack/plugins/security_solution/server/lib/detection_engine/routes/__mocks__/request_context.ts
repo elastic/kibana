@@ -34,6 +34,7 @@ import type {
 
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+import { riskEngineDataClientMock } from '../../../risk_engine/__mocks__/risk_engine_data_client_mock';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -61,6 +62,7 @@ export const createMockClients = () => {
 
     detectionEngineHealthClient: detectionEngineHealthClientMock.create(),
     ruleExecutionLog: ruleExecutionLogMock.forRoutes.create(),
+    riskEngineDataClient: riskEngineDataClientMock.create(),
   };
 };
 
@@ -139,6 +141,7 @@ const createSecuritySolutionRequestContextMock = (
       // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
       throw new Error('Not implemented');
     }),
+    getRiskEngineDataClient: jest.fn(() => clients.riskEngineDataClient),
   };
 };
 
