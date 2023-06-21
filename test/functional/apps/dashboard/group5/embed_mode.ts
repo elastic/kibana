@@ -24,7 +24,7 @@ export default function ({
   const screenshot = getService('screenshots');
   const log = getService('log');
 
-  describe.only('embed mode', () => {
+  describe('embed mode', () => {
     const urlParamExtensions = [
       'show-top-menu=true',
       'show-query-input=true',
