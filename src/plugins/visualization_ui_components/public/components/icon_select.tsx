@@ -26,7 +26,6 @@ export type IconSet<T> = Array<{
   label: string;
   icon?: T | IconType;
   shouldRotate?: boolean;
-  canFill?: boolean;
 }>;
 
 const IconView = (props: { value?: string; label: string; icon?: IconType }) => {
