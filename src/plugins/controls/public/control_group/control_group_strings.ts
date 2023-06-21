@@ -285,11 +285,16 @@ export const ControlGroupStrings = {
   floatingActions: {
     getEditButtonTitle: () =>
       i18n.translate('controls.controlGroup.floatingActions.editTitle', {
-        defaultMessage: 'Edit control',
+        defaultMessage: 'Edit',
       }),
     getRemoveButtonTitle: () =>
       i18n.translate('controls.controlGroup.floatingActions.removeTitle', {
-        defaultMessage: 'Remove control',
+        defaultMessage: 'Delete',
+      }),
+
+    getClearButtonTitle: () =>
+      i18n.translate('controls.controlGroup.floatingActions.clearTitle', {
+        defaultMessage: 'Clear',
       }),
   },
   ariaActions: {
