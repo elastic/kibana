@@ -19,20 +19,17 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import type { LicenseService } from '../../common/services/license';
 
-import type { PackagePolicy } from '../../common/types';
-
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../common';
-
-import type { PackagePolicyClient } from './package_policy_service';
+import type { AgentPolicy } from '../../common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 
 export class PolicyWatcher {
   private logger: Logger;
   private esClient: ElasticsearchClient;
-  private policyService: PackagePolicyClient;
+  private policyService: AgentPolicyService;
   private subscription: Subscription | undefined;
   private soStart: SavedObjectsServiceStart;
   constructor(
-    policyService: PackagePolicyClient,
+    policyService: AgentPolicyService,
     soStart: SavedObjectsServiceStart,
     esStart: ElasticsearchServiceStart,
     logger: Logger
@@ -75,7 +72,7 @@ export class PolicyWatcher {
   public async watch(license: ILicense) {
     let page = 1;
     let response: {
-      items: PackagePolicy[];
+      items: AgentPolicy[];
       total: number;
       page: number;
       perPage: number;
@@ -86,18 +83,19 @@ export class PolicyWatcher {
         response = await this.policyService.list(this.makeInternalSOClient(this.soStart), {
           page: page++,
           perPage: 100,
-          kuery: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          kuery: AGENT_POLICY_SAVED_OBJECT_TYPE,
         });
+        this.logger.info(`this is the response' ${response}`);
       } catch (e) {
         this.logger.warn(
-          `Unable to verify package policies in line with license change: failed to fetch package policies: ${e.message}`
+          `Unable to verify agent policies in line with license change: failed to fetch agent policies: ${e.message}`
         );
         return;
       }
 
-      for (const policy of response.items as PackagePolicy[]) {
-        const updatePolicy = getPolicyDataForUpdate(policy);
-        const policyConfig = updatePolicy.inputs[0].config.policy.value;
+      /* for (const policy of response.items as PackagePolicy[]) {
+        // const updatePolicy = getAgentPolicyDataForUpdate(policy);
+        // const policyConfig = updatePolicy.inputs[0].config.policy.value;
 
         try {
           if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
@@ -133,7 +131,7 @@ export class PolicyWatcher {
           );
           this.logger.warn(error);
         }
-      }
+      } */
     } while (response.page * response.perPage < response.total);
   }
 }

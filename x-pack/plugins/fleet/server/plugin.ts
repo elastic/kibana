@@ -126,6 +126,7 @@ import {
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
 import type { FilesClientFactory } from './services/files/types';
+import { PolicyWatcher } from './services/policy_watch';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -254,6 +255,7 @@ export class FleetPlugin
   private agentService?: AgentService;
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
+  private policyWatcher?: PolicyWatcher;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -520,6 +522,14 @@ export class FleetPlugin
           )
           .toPromise();
 
+        this.policyWatcher = new PolicyWatcher(
+          agentPolicyService,
+          core.savedObjects,
+          core.elasticsearch,
+          logger
+        );
+
+        this.policyWatcher.start(licenseService);
         await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
           core.elasticsearch.client.asInternalUser
@@ -586,6 +596,7 @@ export class FleetPlugin
 
   public async stop() {
     appContextService.stop();
+    this.policyWatcher?.stop();
     licenseService.stop();
     this.telemetryEventsSender.stop();
     this.fleetStatus$.complete();
