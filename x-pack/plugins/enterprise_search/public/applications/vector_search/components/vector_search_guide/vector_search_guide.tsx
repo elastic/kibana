@@ -8,6 +8,7 @@
 import React from 'react';
 
 import {
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -114,9 +115,7 @@ export const VectorSearchGuide: React.FC = () => (
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={6}>
-        <pre>
-          <code>{CREATE_INDEX_SNIPPET}</code>
-        </pre>
+        <EuiCodeBlock>{CREATE_INDEX_SNIPPET}</EuiCodeBlock>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiHorizontalRule />
@@ -140,9 +139,7 @@ export const VectorSearchGuide: React.FC = () => (
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={6}>
-        <pre>
-          <code>{INGEST_SNIPPET}</code>
-        </pre>
+        <EuiCodeBlock>{INGEST_SNIPPET}</EuiCodeBlock>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiHorizontalRule />
@@ -166,9 +163,7 @@ export const VectorSearchGuide: React.FC = () => (
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={6}>
-        <pre>
-          <code>{QUERY_SNIPPET}</code>
-        </pre>
+        <EuiCodeBlock>{QUERY_SNIPPET}</EuiCodeBlock>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiHorizontalRule />
