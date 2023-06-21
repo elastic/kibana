@@ -430,7 +430,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
-              <span className="lnsIndexPatternDimensionEditor__operationLabel">{label}</span>
+              <span
+                css={css`
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                `}
+              >
+                {label}
+              </span>
             </EuiFlexItem>
             {shouldDisplayDots && (
               <EuiFlexItem grow={false}>
