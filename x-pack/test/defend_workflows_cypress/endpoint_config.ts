@@ -34,6 +34,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...config.kbnTestServer,
       serverArgs: [
         ...config.kbnTestServer.serverArgs,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://${hostIp}:8220"]`,
+        `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${defendWorkflowsCypressConfig.get(
+          'servers.elasticsearch.port'
+        )}`,
         // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
         '--xpack.securitySolution.packagerTaskInterval=5s',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(enabledFeatureFlags)}`,

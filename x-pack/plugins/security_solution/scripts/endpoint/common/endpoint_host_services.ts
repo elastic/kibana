@@ -20,7 +20,7 @@ import {
   waitForHostToEnroll,
 } from './fleet_services';
 
-const VAGRANT_CWD = `${process.cwd()}/scripts/endpoint/endpoint_agent_runner/`;
+const VAGRANT_CWD = `${__dirname}/../endpoint_agent_runner/`;
 
 export interface CreateAndEnrollEndpointHostOptions
   extends Pick<CreateMultipassVmOptions, 'disk' | 'cpus' | 'memory'> {
@@ -171,7 +171,8 @@ const createMultipassVm = async ({
   memory = '1G',
 }: CreateMultipassVmOptions): Promise<CreateMultipassVmResponse> => {
   if (process.env.CI) {
-    // await execa.command(`vagrant up --provider qemu --provision`, {
+    console.log('VAGRANT_CWD', VAGRANT_CWD, __dirname);
+    // await execa.command(`vagrant up --provider qemu`, {
     await execa.command(`vagrant up`, {
       env: {
         VAGRANT_CWD,
@@ -237,22 +238,19 @@ const enrollHostWithFleet = async ({
     log.verbose(`downloading and installing agent from URL [${agentDownloadUrl}]`);
 
     if (process.env.CI) {
-      await execa.command(
-        `vagrant ssh test -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`,
-        {
-          env: {
-            VAGRANT_CWD,
-          },
-          stdio: ['inherit', 'inherit', 'inherit'],
-        }
-      );
-      await execa.command(`vagrant ssh test -- tar -zxf ${agentDownloadedFile}`, {
+      await execa.command(`vagrant ssh -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`, {
         env: {
           VAGRANT_CWD,
         },
         stdio: ['inherit', 'inherit', 'inherit'],
       });
-      await execa.command(`vagrant ssh test -- rm -f ${agentDownloadedFile}`, {
+      await execa.command(`vagrant ssh -- tar -zxf ${agentDownloadedFile}`, {
+        env: {
+          VAGRANT_CWD,
+        },
+        stdio: ['inherit', 'inherit', 'inherit'],
+      });
+      await execa.command(`vagrant ssh -- rm -f ${agentDownloadedFile}`, {
         env: {
           VAGRANT_CWD,
         },
@@ -290,16 +288,12 @@ const enrollHostWithFleet = async ({
   if (process.env.CI) {
     log.verbose(`Command: vagrant ${agentInstallArguments.join(' ')}`);
 
-    await execa(
-      `vagrant`,
-      ['ssh', 'test', '--', `cd ${vmDirName} && ${agentInstallArguments.join(' ')}`],
-      {
-        env: {
-          VAGRANT_CWD,
-        },
-        stdio: ['inherit', 'inherit', 'inherit'],
-      }
-    );
+    await execa(`vagrant`, ['ssh', '--', `cd ${vmDirName} && ${agentInstallArguments.join(' ')}`], {
+      env: {
+        VAGRANT_CWD,
+      },
+      stdio: ['inherit', 'inherit', 'inherit'],
+    });
   } else {
     log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
 

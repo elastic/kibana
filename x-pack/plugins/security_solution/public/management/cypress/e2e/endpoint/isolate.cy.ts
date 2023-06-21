@@ -23,7 +23,6 @@ import {
   waitForReleaseOption,
 } from '../../tasks/isolate';
 import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
-import { ENDPOINT_VM_NAME } from '../../tasks/common';
 import { login } from '../../tasks/login';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
@@ -34,7 +33,7 @@ import {
 } from '../../tasks/fleet';
 
 describe('Isolate command', () => {
-  const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
+  const endpointHostname = 'dev-m1';
   const isolateComment = `Isolating ${endpointHostname}`;
   const releaseComment = `Releasing ${endpointHostname}`;
 

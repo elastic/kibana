@@ -7,7 +7,6 @@
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
-import { ENDPOINT_VM_NAME } from '../../tasks/common';
 import {
   createAgentPolicyTask,
   getAgentByHostName,
@@ -28,7 +27,7 @@ import {
 } from '../../screens/fleet';
 
 describe('Endpoints page', () => {
-  const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
+  const endpointHostname = 'dev-m1';
 
   beforeEach(() => {
     login();

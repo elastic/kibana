@@ -9,6 +9,8 @@
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
 import execa from 'execa';
+import { startRuntimeServices } from '../../../../scripts/endpoint/endpoint_agent_runner/runtime';
+import { runFleetServerIfNeeded } from '../../../../scripts/endpoint/endpoint_agent_runner/fleet_server';
 import {
   sendEndpointActionResponse,
   sendFleetActionResponse,
@@ -202,6 +204,8 @@ export const dataLoadersForRealEndpoints = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
+  let fleetServerContainerId: string | undefined;
+
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
@@ -210,6 +214,30 @@ export const dataLoadersForRealEndpoints = (
     password: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
   });
+
+  on('before:run', async () => {
+    const test = await startRuntimeServices({
+      kibanaUrl: config.env.KIBANA_URL,
+      elasticUrl: config.env.ELASTICSEARCH_URL,
+      fleetServerUrl: config.env.FLEET_SERVER_URL,
+      username: config.env.ELASTICSEARCH_USERNAME,
+      password: config.env.ELASTICSEARCH_PASSWORD,
+      asSuperuser: true,
+    });
+    console.error('test', test);
+    const data = await runFleetServerIfNeeded();
+    console.error('data', data);
+    // .then(runFleetServerIfNeeded)
+    // .then((result) => {
+    //   fleetServerContainerId = result?.fleetServerContainerId;
+    // });
+  });
+
+  // on('after:run', () => {
+  //   if (fleetServerContainerId) {
+  //     execa.sync('docker', ['kill', fleetServerContainerId]);
+  //   }
+  // });
 
   on('task', {
     createEndpointHost: async (

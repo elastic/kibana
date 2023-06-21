@@ -37,6 +37,8 @@ export default defineCypressConfig({
   },
 
   e2e: {
+    experimentalMemoryManagement: true,
+    experimentalInteractiveRunEvents: true,
     baseUrl: 'http://localhost:5620',
     supportFile: 'public/management/cypress/support/e2e.ts',
     specPattern: 'public/management/cypress/e2e/endpoint/*.cy.{js,jsx,ts,tsx}',

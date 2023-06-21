@@ -23,13 +23,12 @@ import {
 } from '../../tasks/isolate';
 
 import { login } from '../../tasks/login';
-import { ENDPOINT_VM_NAME } from '../../tasks/common';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 
 describe('Response console', () => {
-  const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
+  const endpointHostname = 'dev-m1';
 
   beforeEach(() => {
     login();

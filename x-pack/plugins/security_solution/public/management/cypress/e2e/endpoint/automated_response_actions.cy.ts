@@ -10,7 +10,6 @@ import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { ENDPOINT_VM_NAME } from '../../tasks/common';
 import { login } from '../../tasks/login';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
@@ -22,7 +21,7 @@ import {
 import { changeAlertsFilter } from '../../tasks/alerts';
 
 describe('Automated Response Actions', () => {
-  const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
+  const endpointHostname = 'dev-m1';
   const hostname = Cypress.env('hostname');
   const fleetHostname = `dev-fleet-server.${hostname}`;
 

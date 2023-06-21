@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const ENDPOINT_VM_NAME = 'ENDPOINT_VM_NAME';
-
 export const API_AUTH = Object.freeze({
   user: Cypress.env('ELASTICSEARCH_USERNAME'),
   pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
