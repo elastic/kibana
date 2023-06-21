@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import { MAX_DOCS_PER_PAGE, MAX_COMMENTS_PER_PAGE } from '../../../common/constants';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
@@ -51,7 +51,13 @@ export const validateFindCommentsPagination = (params?: FindCommentsQueryParams)
   const pageAsNumber = params.page ?? 0;
   const perPageAsNumber = params.perPage ?? 0;
 
-  if (Math.max(pageAsNumber, perPageAsNumber, pageAsNumber * perPageAsNumber) > MAX_DOCS_PER_PAGE) {
+  if (perPageAsNumber > MAX_COMMENTS_PER_PAGE) {
+    throw Boom.badRequest(
+      `The provided perPage value was too high. The maximum allowed perPage value is ${MAX_COMMENTS_PER_PAGE}.`
+    );
+  }
+
+  if (Math.max(pageAsNumber, pageAsNumber * perPageAsNumber) > MAX_DOCS_PER_PAGE) {
     throw Boom.badRequest(
       'The number of documents is too high. Paginating through more than 10,000 documents is not possible.'
     );
