@@ -6214,25 +6214,39 @@ describe(`#auditObjectsForSpaceDeletion`, () => {
     expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, the addAudit method is called directly
     expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length - 1);
     expect(auditLogger.log).toHaveBeenCalledTimes(objects.length - 1);
-    let i = 0;
-    for (const obj of objects) {
-      if (i === 0) continue; // The first object namespaces includes '*', so there will not be an audit for it
 
-      expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
-        error: undefined,
-        event: {
-          action: AuditAction.UPDATE_OBJECTS_SPACES,
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['change'],
-        },
-        kibana: {
-          add_to_spaces: undefined,
-          delete_from_spaces: obj.namespaces!.length > 1 ? obj.namespaces : undefined,
-          saved_object: undefined,
-        },
-        message: `User is updating spaces of dashboard [id=${obj.id}]`,
-      });
-    }
+    // The first object's namespaces includes '*', so there will not be an audit for it
+
+    // The second object only exists in the space we're deleting, so it is audited as a delete
+    expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+      error: undefined,
+      event: {
+        action: AuditAction.DELETE,
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['deletion'],
+      },
+      kibana: {
+        delete_from_spaces: undefined,
+        saved_object: { type: objects[1].type, id: objects[1].id },
+      },
+      message: `User is deleting dashboard [id=${objects[1].id}]`,
+    });
+
+    // The third object exists in spaces other than what we're deleting, so it is audited as a change
+    expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+      error: undefined,
+      event: {
+        action: AuditAction.UPDATE_OBJECTS_SPACES,
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['change'],
+      },
+      kibana: {
+        delete_from_spaces: [spaceId],
+        saved_object: { type: objects[2].type, id: objects[2].id },
+      },
+      message: `User is updating spaces of dashboard [id=${objects[2].id}]`,
+    });
   });
 });
