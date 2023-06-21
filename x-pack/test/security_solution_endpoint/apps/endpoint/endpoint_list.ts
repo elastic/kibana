@@ -19,6 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
   const endpointTestResources = getService('endpointTestResources');
   const policyTestResources = getService('policyTestResources');
 
@@ -256,11 +257,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             );
             // select the same endpoint in the endpoint list
             await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-            await sleep(500); // give page time to refresh and verify it did not change
-            const endpointDetailTitleNew = await testSubjects.getVisibleText(
-              'endpointDetailsFlyoutTitle'
+            await retry.waitForWithTimeout(
+              'endpoint details flyout title to exist',
+              1500,
+              async () => {
+                return (await testSubjects.getVisibleText('endpointDetailsFlyoutTitle')) !== '';
+                expect(testSubjects.getVisibleText('endpointDetailsFlyoutTitle')).to.equal(
+                  endpointDetailTitleInitial
+                );
+              }
             );
-            expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
           });
         });
       });
