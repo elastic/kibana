@@ -129,13 +129,14 @@ export class ProjectNavigationService {
     let requiresUpdate = activeNodes.length !== this.activeNodes$.value.length;
 
     if (!requiresUpdate) {
-      this.activeNodes$.value.forEach((nodesBranch, i) => {
-        nodesBranch.forEach((node, j) => {
+      for (const [i, nodesBranch] of this.activeNodes$.value.entries()) {
+        for (const [j, node] of nodesBranch.entries()) {
           if (node.id !== activeNodes[i][j]?.id) {
             requiresUpdate = true;
+            break;
           }
-        });
-      });
+        }
+          }
     }
 
     if (!requiresUpdate) return;
