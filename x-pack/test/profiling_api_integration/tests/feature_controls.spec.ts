@@ -67,7 +67,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     { url: profilingRoutePaths.SetupDataCollectionInstructions },
     { url: profilingRoutePaths.HasSetupESResources },
-    { url: profilingRoutePaths.HasSetupESResources, method: 'POST' },
   ];
 
   async function executeRequests({
