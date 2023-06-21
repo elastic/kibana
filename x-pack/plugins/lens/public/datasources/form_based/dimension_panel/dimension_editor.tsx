@@ -502,6 +502,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                           helpPopoverContainer.current = null;
                         }
                       }}
+                      theme={props.core.theme}
                     >
                       <HelpComponent />
                     </WrappingHelpPopover>
