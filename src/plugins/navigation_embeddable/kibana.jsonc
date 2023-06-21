@@ -7,11 +7,8 @@
     "id": "navigationEmbeddable",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "embeddable"
-    ],
+    "requiredPlugins": ["embeddable", "dashboard"],
     "optionalPlugins": [],
-    "requiredBundles": [
-    ]
+    "requiredBundles": []
   }
 }
