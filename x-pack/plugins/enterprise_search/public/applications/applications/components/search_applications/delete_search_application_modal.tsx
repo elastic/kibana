@@ -25,7 +25,7 @@ export const DeleteSearchApplicationModal: React.FC<DeleteSearchApplicationModal
   searchApplicationName,
   onClose,
 }) => {
-  const { deleteSearchApplication: deleteEngine } = useActions(SearchApplicationsListLogic);
+  const { deleteSearchApplication } = useActions(SearchApplicationsListLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { isDeleteLoading } = useValues(SearchApplicationsListLogic);
   return (
@@ -38,7 +38,7 @@ export const DeleteSearchApplicationModal: React.FC<DeleteSearchApplicationModal
       )}
       onCancel={onClose}
       onConfirm={() => {
-        deleteEngine({ searchApplicationName });
+        deleteSearchApplication({ searchApplicationName });
         sendEnterpriseSearchTelemetry({
           action: 'clicked',
           metric: 'entSearchApplications-deleteSearchApplicationConfirm',

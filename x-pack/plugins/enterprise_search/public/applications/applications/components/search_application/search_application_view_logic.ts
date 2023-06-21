@@ -92,7 +92,7 @@ export const SearchApplicationViewLogic = kea<
       actions.fetchSearchApplicationSchema({ name });
     },
   }),
-  path: ['enterprise_search', 'content', 'engine_view_logic'],
+  path: ['enterprise_search', 'content', 'search_application_view_logic'],
   reducers: () => ({
     isDeleteModalVisible: [
       false,

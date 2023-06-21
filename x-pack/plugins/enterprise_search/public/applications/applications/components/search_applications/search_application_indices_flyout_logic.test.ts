@@ -26,7 +26,7 @@ const DEFAULT_VALUES: SearchApplicationIndicesFlyoutValues = {
   searchApplicationData: undefined,
   searchApplicationName: null,
 };
-const mockEngineData: EnterpriseSearchApplicationDetails = {
+const mockSearchApplicationData: EnterpriseSearchApplicationDetails = {
   indices: [
     {
       count: 10,
@@ -39,7 +39,7 @@ const mockEngineData: EnterpriseSearchApplicationDetails = {
       name: 'search-002',
     },
   ],
-  name: 'my-test-engine',
+  name: 'my-test-search-application',
   template: {
     script: {
       lang: 'mustache',
@@ -50,7 +50,7 @@ const mockEngineData: EnterpriseSearchApplicationDetails = {
   updated_at_millis: 1679337823167,
 };
 
-describe('EngineListFlyoutLogic', () => {
+describe('SearchApplicationIndicesFlyoutLogic', () => {
   const { mount } = new LogicMounter(SearchApplicationIndicesFlyoutLogic);
   const { mount: apiLogicMount } = new LogicMounter(FetchSearchApplicationApiLogic);
 
@@ -65,49 +65,49 @@ describe('EngineListFlyoutLogic', () => {
   });
 
   describe('actions', () => {
-    describe('closeFetchEngineIndicesFlyout', () => {
-      it('set isFetchEngineFlyoutVisible to false and fetchEngineName to empty string', () => {
+    describe('closeFlyout', () => {
+      it('set isFlyoutVisible to false and searchApplicationName is null', () => {
         SearchApplicationIndicesFlyoutLogic.actions.closeFlyout();
         expect(SearchApplicationIndicesFlyoutLogic.values).toEqual(DEFAULT_VALUES);
       });
     });
-    describe('openFetchEngineIndicesFlyout', () => {
-      it('set isFetchEngineFlyoutVisible to true and sets fetchEngineName to engine name', () => {
-        SearchApplicationIndicesFlyoutLogic.actions.openFlyout('my-test-engine');
+    describe('openFlyout', () => {
+      it('set isFlyoutVisible to true and sets searchApplicationName to search application name', () => {
+        SearchApplicationIndicesFlyoutLogic.actions.openFlyout('my-test-search-application');
         expect(SearchApplicationIndicesFlyoutLogic.values).toEqual({
           ...DEFAULT_VALUES,
           fetchSearchApplicationApiStatus: Status.LOADING,
           isFlyoutVisible: true,
           isSearchApplicationLoading: true,
-          searchApplicationName: 'my-test-engine',
+          searchApplicationName: 'my-test-search-application',
         });
       });
     });
   });
 
   describe('selectors', () => {
-    it('receives fetchEngine indices data on success', () => {
+    it('receives fetchSearchApplication indices data on success', () => {
       expect(SearchApplicationIndicesFlyoutLogic.values).toEqual(DEFAULT_VALUES);
-      FetchSearchApplicationApiLogic.actions.apiSuccess(mockEngineData);
+      FetchSearchApplicationApiLogic.actions.apiSuccess(mockSearchApplicationData);
       expect(SearchApplicationIndicesFlyoutLogic.values).toEqual({
         ...DEFAULT_VALUES,
         fetchSearchApplicationApiStatus: Status.SUCCESS,
-        searchApplicationData: mockEngineData,
+        searchApplicationData: mockSearchApplicationData,
       });
     });
   });
   describe('listeners', () => {
     beforeEach(() => {
-      FetchSearchApplicationApiLogic.actions.apiSuccess(mockEngineData);
+      FetchSearchApplicationApiLogic.actions.apiSuccess(mockSearchApplicationData);
     });
-    it('fetch engines flyout when flyout is visible', async () => {
+    it('fetch search applications flyout when flyout is visible', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       SearchApplicationIndicesFlyoutLogic.actions.openFlyout = jest.fn();
-      SearchApplicationIndicesFlyoutLogic.actions.openFlyout('my-test-engine');
+      SearchApplicationIndicesFlyoutLogic.actions.openFlyout('my-test-search-application');
       await nextTick();
       expect(SearchApplicationIndicesFlyoutLogic.actions.openFlyout).toHaveBeenCalledTimes(1);
       expect(SearchApplicationIndicesFlyoutLogic.actions.openFlyout).toHaveBeenCalledWith(
-        'my-test-engine'
+        'my-test-search-application'
       );
     });
   });

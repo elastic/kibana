@@ -53,7 +53,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
 const RESULT_FIELDS_TRUNCATE_AT = 4;
 
 export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
-  const { searchApplicationData: engineData } = useValues(SearchApplicationViewLogic);
+  const { searchApplicationData } = useValues(SearchApplicationViewLogic);
   const { setSelectedDocument } = useSelectedDocument();
 
   const { fields, index } = convertResultToFieldsAndIndex(result);
@@ -63,7 +63,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   const truncatedFields = fields.slice(0, RESULT_FIELDS_TRUNCATE_AT);
   const hiddenFields = fields.length - truncatedFields.length;
 
-  const indexHealth = engineData?.indices.find((i) => i.name === index)?.health;
+  const indexHealth = searchApplicationData?.indices.find((i) => i.name === index)?.health;
   const badgeColor =
     !indexHealth || indexHealth === 'unknown' ? 'hollow' : indexHealthToHealthColor(indexHealth);
 
@@ -71,7 +71,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     {
       field: 'field',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.engine.searchPreview.result.nameColumn',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.nameColumn',
         { defaultMessage: 'Field' }
       ),
       render: (field: string) => {
@@ -89,7 +89,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     {
       field: 'value',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.engine.searchPreview.result.valueColumn',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.valueColumn',
         { defaultMessage: 'Value' }
       ),
       render: (value: FieldValue) => (
@@ -109,7 +109,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
           <EuiFlexGroup justifyContent="spaceBetween">
             <code>
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.searchPreview.result.id"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.id"
                 defaultMessage="ID: {id}"
                 values={{ id }}
               />
@@ -118,7 +118,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 <code>
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.content.engine.searchPreview.result.fromIndex"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.fromIndex"
                     defaultMessage="from"
                   />
                 </code>
@@ -133,7 +133,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
               <EuiTextColor color="subdued">
                 <code>
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.content.engine.searchPreview.result.moreFieldsButton"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.moreFieldsButton"
                     defaultMessage="{count} {count, plural, one {More Field} other {More Fields}}"
                     values={{ count: hiddenFields }}
                   />
@@ -153,13 +153,13 @@ export const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
       <EuiFieldSearch
         fullWidth
         placeholder={i18n.translate(
-          'xpack.enterpriseSearch.content.engine.searchPreview.inputView.placeholder',
+          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.inputView.placeholder',
           { defaultMessage: 'Search' }
         )}
         {...getInputProps({})}
         isClearable
         aria-label={i18n.translate(
-          'xpack.enterpriseSearch.content.engine.searchPreview.inputView.label',
+          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.inputView.label',
           { defaultMessage: 'Search Input' }
         )}
       />
@@ -174,7 +174,7 @@ export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, tota
   <EuiText size="s">
     <FormattedHTMLMessage
       tagName="p"
-      id="xpack.enterpriseSearch.content.engine.searchPreview.pagingInfo.text"
+      id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.pagingInfo.text"
       defaultMessage="Showing <strong>{start}-{end}</strong> of {totalResults}"
       values={{ end, start, totalResults }}
     />
@@ -193,7 +193,7 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
       <EuiTitle size="xxxs">
         <label htmlFor="results-per-page">
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.label"
+            id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.resultsPerPage.label"
             defaultMessage="Show"
           />
         </label>
@@ -203,7 +203,7 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
         options={
           options?.map((option) => ({
             text: i18n.translate(
-              'xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.option.label',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.resultsPerPage.option.label',
               {
                 defaultMessage: '{value} {value, plural, one {Result} other {Results}}',
                 values: { value: option },
@@ -225,7 +225,7 @@ export const Sorting = withSearch<
 >(({ setSort, sortList }) => ({ setSort, sortList }))(({ sortableFields, sortList, setSort }) => {
   const [{ direction, field }] = !sortList?.length ? [{ direction: '', field: '' }] : sortList;
   const relevance = i18n.translate(
-    'xpack.enterpriseSearch.content.engine.searchPreivew.sortingView.relevanceLabel',
+    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.sortingView.relevanceLabel',
     { defaultMessage: 'Relevance' }
   );
 
@@ -235,7 +235,7 @@ export const Sorting = withSearch<
         <EuiTitle size="xxxs">
           <label htmlFor="sorting-field">
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.engine.searchPreview.sortingView.fieldLabel"
+              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.sortingView.fieldLabel"
               defaultMessage="Sort By"
             />
           </label>
@@ -261,7 +261,7 @@ export const Sorting = withSearch<
             <EuiTitle size="xxxs">
               <label htmlFor="sorting-direction">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.engine.searchPreview.sortingView.directionLabel"
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.sortingView.directionLabel"
                   defaultMessage="Order By"
                 />
               </label>
@@ -280,14 +280,14 @@ export const Sorting = withSearch<
               options={[
                 {
                   text: i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.searchPreview.sortingView.ascLabel',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.sortingView.ascLabel',
                     { defaultMessage: 'Ascending' }
                   ),
                   value: 'asc',
                 },
                 {
                   text: i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.searchPreview.sortingView.descLabel',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.sortingView.descLabel',
                     { defaultMessage: 'Descending' }
                   ),
                   value: 'desc',

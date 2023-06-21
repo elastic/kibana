@@ -48,7 +48,7 @@ export const SearchApplicationSearchPreviewLogic = kea<
       }
     },
   }),
-  path: ['enterprise_search', 'content', 'engine_search_preview_logic'],
+  path: ['enterprise_search', 'content', 'search_application_search_preview_logic'],
   selectors: ({ selectors }) => ({
     fieldTypesByIndex: [
       () => [selectors.searchApplicationFieldCapabilitiesData],

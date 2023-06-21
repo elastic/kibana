@@ -29,12 +29,15 @@ export const DeleteSearchApplicationAPILogic = createApiLogic(
   deleteSearchApplication,
   {
     showSuccessFlashFn: ({ searchApplicationName }) =>
-      i18n.translate('xpack.enterpriseSearch.content.engineList.deleteEngine.successToast.title', {
-        defaultMessage: '{searchApplicationName} has been deleted',
-        values: {
-          searchApplicationName,
-        },
-      }),
+      i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.list.deleteSearchApplication.successToast.title',
+        {
+          defaultMessage: '{searchApplicationName} has been deleted',
+          values: {
+            searchApplicationName,
+          },
+        }
+      ),
   }
 );
 

@@ -198,7 +198,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 onClick={setCloseConfiguration}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.buttonTitle',
                   {
                     defaultMessage: 'Configuration',
                   }
@@ -213,7 +213,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.contentTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.contentTitle',
                   {
                     defaultMessage: 'Content',
                   }
@@ -236,7 +236,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             }
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Indices',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.content.Indices',
               {
                 defaultMessage: 'Indices',
               }
@@ -256,13 +256,13 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           >
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.schema"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.content.schema"
                 defaultMessage="Schema"
               />
               {hasSchemaConflicts && (
                 <EuiText size="s" color="danger">
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.schemaConflict"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.content.schemaConflict"
                     defaultMessage="Conflict"
                   />
                 </EuiText>
@@ -274,7 +274,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.connectTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.connectTitle',
                   {
                     defaultMessage: 'Connect',
                   }
@@ -296,7 +296,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             }
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.connect.Api',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.connect.Api',
               {
                 defaultMessage: 'API',
               }
@@ -307,7 +307,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.settingsTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.settingsTitle',
                   {
                     defaultMessage: 'Settings',
                   }
@@ -324,7 +324,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 openDeleteSearchApplicationModal();
                 sendEnterpriseSearchTelemetry({
                   action: 'clicked',
-                  metric: 'entSearchApplications-engineView-deleteEngine',
+                  metric: 'entSearchApplications-searchApplicationView-deleteSearchApplication',
                 });
               }
             }}
@@ -332,7 +332,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTextColor color="danger">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.settings.delete',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.settings.delete',
                   {
                     defaultMessage: 'Delete this app',
                   }
@@ -376,9 +376,12 @@ export const SearchApplicationSearchPreview: React.FC = () => {
     <EnterpriseSearchApplicationsPageTemplate
       pageChrome={[
         searchApplicationName,
-        i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageChrome', {
-          defaultMessage: 'Search Preview',
-        }),
+        i18n.translate(
+          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.pageChrome',
+          {
+            defaultMessage: 'Search Preview',
+          }
+        ),
       ]}
       pageViewTelemetry={SearchApplicationViewTabs.PREVIEW}
       isLoading={isLoadingSearchApplication}
@@ -416,7 +419,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
               <EuiSpacer size="m" />
               <EuiLink href={docLinks.searchTemplates} target="_blank">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.engine.searchPreview.improveResultsLink"
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.improveResultsLink"
                   defaultMessage="Improve these results"
                 />
               </EuiLink>

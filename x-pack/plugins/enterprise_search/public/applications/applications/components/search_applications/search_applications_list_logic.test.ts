@@ -33,7 +33,7 @@ const DEFAULT_VALUES = {
   searchQuery: '',
   status: Status.IDLE,
 };
-// may need to call mock engines response when ready
+// may need to call mock search applications response when ready
 const results: EnterpriseSearchApplication[] = [
   {
     indices: ['index-18', 'index-23'],
@@ -57,7 +57,7 @@ const mockData = {
   results,
 };
 
-describe('EnginesListLogic', () => {
+describe('SearchApplicationsListLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(FetchSearchApplicationsAPILogic);
   const { mount } = new LogicMounter(SearchApplicationsListLogic);
 
@@ -79,7 +79,7 @@ describe('EnginesListLogic', () => {
         });
       });
 
-      it('has engine data', () => {
+      it('has search applications data', () => {
         expect(SearchApplicationsListLogic.values.data).toEqual({ ...mockData, count: 11 });
       });
       it('updates meta with newPageIndex', () => {
@@ -182,7 +182,7 @@ describe('EnginesListLogic', () => {
           params: { from: 10, size: 20 },
         });
       });
-      it('has engine data', () => {
+      it('has search applications data', () => {
         expect(SearchApplicationsListLogic.values.data).toEqual({
           ...mockData,
           params: { from: 10, size: 20 },
@@ -228,8 +228,8 @@ describe('EnginesListLogic', () => {
         });
       });
     });
-    describe('request to delete Engine', () => {
-      it('should set isDeleteLoading to true on delete engine request', () => {
+    describe('request to delete Search Application', () => {
+      it('should set isDeleteLoading to true on delete search application request', () => {
         SearchApplicationsListLogic.actions.deleteSearchApplication({
           searchApplicationName: results[0].name,
         });
@@ -263,7 +263,7 @@ describe('EnginesListLogic', () => {
           deleteStatus: Status.SUCCESS,
           isDeleteLoading: false,
           isLoading: true,
-          status: Status.LOADING, // fetchEngine api status
+          status: Status.LOADING, // fetchSearchApplication api status
         });
       });
     });
@@ -321,7 +321,7 @@ describe('EnginesListLogic', () => {
     });
   });
   describe('listeners', () => {
-    it('calls flashSuccessToast, closeDeleteEngineModal and fetchSearchApplications on deleteSuccess', () => {
+    it('calls flashSuccessToast, closeDeleteSearchApplicationModal and fetchSearchApplications on deleteSuccess', () => {
       SearchApplicationsListLogic.actions.fetchSearchApplications = jest.fn();
       SearchApplicationsListLogic.actions.closeDeleteSearchApplicationModal = jest.fn();
       SearchApplicationsListLogic.actions.deleteSuccess({ searchApplicationName: results[0].name });
@@ -344,7 +344,7 @@ describe('EnginesListLogic', () => {
     });
   });
   describe('selectors', () => {
-    describe('enginesList', () => {
+    describe('data', () => {
       // response without search query parameter
       it('updates when apiSuccess with no search query', () => {
         expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
@@ -386,7 +386,7 @@ describe('EnginesListLogic', () => {
           count: 0,
           params: {
             from: DEFAULT_META.from,
-            q: 'engine',
+            q: 'application',
             size: DEFAULT_META.size,
           },
           results,
@@ -397,7 +397,7 @@ describe('EnginesListLogic', () => {
             count: 0,
             params: {
               from: DEFAULT_META.from,
-              q: 'engine',
+              q: 'application',
               size: DEFAULT_META.size,
             },
             results,
@@ -449,9 +449,9 @@ describe('EnginesListLogic', () => {
       });
     });
     describe('hasNoSearchApplications', () => {
-      describe('no engines to list ', () => {
-        // when all engines are deleted from list page, redirect to empty engine prompt
-        it('updates to true when all engines are deleted  ', () => {
+      describe('no search applications to list ', () => {
+        // when all search applications are deleted from list page, redirect to empty search application prompt
+        it('updates to true when all search applications are deleted  ', () => {
           expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
           SearchApplicationsListLogic.actions.apiSuccess({
             count: 0,
@@ -480,7 +480,7 @@ describe('EnginesListLogic', () => {
             status: Status.SUCCESS,
           });
         });
-        // when no engines to list, redirect to empty engine prompt
+        // when no search applications to list, redirect to empty search application prompt
         it('updates to true when isFirstRequest is true  ', () => {
           SearchApplicationsListLogic.actions.apiSuccess({
             count: 0,
@@ -511,7 +511,7 @@ describe('EnginesListLogic', () => {
           });
         });
 
-        // when search query returns no engines, show engine list table
+        // when search query returns no search applications, show search application list table
         it('updates to false for a search query ', () => {
           expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
           SearchApplicationsListLogic.actions.apiSuccess({
@@ -546,8 +546,8 @@ describe('EnginesListLogic', () => {
           });
         });
       });
-      describe('with engines to list', () => {
-        // when no search query, show table with list of engines
+      describe('with search applications to list', () => {
+        // when no search query, show table with list of search applications
         it('updates to false without search query ', () => {
           expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
           SearchApplicationsListLogic.actions.apiSuccess({
@@ -577,7 +577,7 @@ describe('EnginesListLogic', () => {
             status: Status.SUCCESS,
           });
         });
-        // with search query, show table with list of engines
+        // with search query, show table with list of search applications
         it('updates to false with search query ', () => {
           expect(SearchApplicationsListLogic.values).toEqual(DEFAULT_VALUES);
           SearchApplicationsListLogic.actions.apiSuccess({

@@ -36,12 +36,12 @@ const DEFAULT_VALUES: SearchApplicationViewValues = {
 
 describe('SearchApplicationViewLogic', () => {
   const { mount } = new LogicMounter(SearchApplicationViewLogic);
-  const { mount: mountEnginesListLogic } = new LogicMounter(SearchApplicationsListLogic);
+  const { mount: mountSearchApplicationsListLogic } = new LogicMounter(SearchApplicationsListLogic);
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
 
-    mountEnginesListLogic();
+    mountSearchApplicationsListLogic();
     mount(
       { searchApplicationName: DEFAULT_VALUES.searchApplicationName },
       { searchApplicationName: DEFAULT_VALUES.searchApplicationName }
@@ -54,7 +54,7 @@ describe('SearchApplicationViewLogic', () => {
 
   describe('listeners', () => {
     describe('deleteSuccess', () => {
-      it('should navigate to the engines list when an engine is deleted', () => {
+      it('should navigate to the search applications list when an search application is deleted', () => {
         jest.spyOn(SearchApplicationViewLogic.actions, 'deleteSuccess');
         jest
           .spyOn(KibanaLogic.values, 'navigateToUrl')

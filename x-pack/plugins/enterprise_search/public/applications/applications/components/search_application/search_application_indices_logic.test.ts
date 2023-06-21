@@ -19,10 +19,10 @@ const DEFAULT_VALUES: SearchApplicationIndicesLogicValues = {
   addIndicesFlyoutOpen: false,
   isLoadingSearchApplication: true,
   searchApplicationData: undefined,
-  searchApplicationName: 'my-test-engine',
+  searchApplicationName: 'my-test-search-application',
 };
 
-const mockEngineData: EnterpriseSearchApplicationDetails = {
+const mockSearchApplicationData: EnterpriseSearchApplicationDetails = {
   indices: [
     {
       count: 10,
@@ -73,19 +73,21 @@ describe('SearchApplicationViewLogic', () => {
 
   describe('listeners', () => {
     beforeEach(() => {
-      FetchSearchApplicationApiLogic.actions.apiSuccess(mockEngineData);
+      FetchSearchApplicationApiLogic.actions.apiSuccess(mockSearchApplicationData);
     });
-    it('has engine data', () => {
-      expect(SearchApplicationIndicesLogic.values.searchApplicationData).toEqual(mockEngineData);
+    it('has search application data', () => {
+      expect(SearchApplicationIndicesLogic.values.searchApplicationData).toEqual(
+        mockSearchApplicationData
+      );
     });
 
-    describe('engineUpdated', () => {
-      it('fetches new engine details', () => {
+    describe('searchApplicationUpdated', () => {
+      it('fetches new search application details', () => {
         jest.spyOn(SearchApplicationIndicesLogic.actions, 'fetchSearchApplication');
 
         SearchApplicationIndicesLogic.actions.searchApplicationUpdated({
-          ...mockEngineData,
-          indices: mockEngineData.indices.map((index) => index.name),
+          ...mockSearchApplicationData,
+          indices: mockSearchApplicationData.indices.map((index) => index.name),
         });
 
         expect(SearchApplicationIndicesLogic.actions.fetchSearchApplication).toHaveBeenCalledTimes(
@@ -96,12 +98,12 @@ describe('SearchApplicationViewLogic', () => {
         });
       });
     });
-    describe('removeIndexFromEngine', () => {
-      it('updated engine removing the given index', () => {
+    describe('removeIndexFromSearchApplication', () => {
+      it('updated search application removing the given index', () => {
         jest.spyOn(SearchApplicationIndicesLogic.actions, 'updateSearchApplicationRequest');
 
         SearchApplicationIndicesLogic.actions.removeIndexFromSearchApplication(
-          mockEngineData.indices[0].name
+          mockSearchApplicationData.indices[0].name
         );
 
         expect(
@@ -115,8 +117,8 @@ describe('SearchApplicationViewLogic', () => {
         });
       });
     });
-    describe('addIndicesToEngine', () => {
-      it('updated engine removing the given index', () => {
+    describe('addIndicesToSearchApplication', () => {
+      it('updated search application removing the given index', () => {
         jest.spyOn(SearchApplicationIndicesLogic.actions, 'updateSearchApplicationRequest');
 
         SearchApplicationIndicesLogic.actions.addIndicesToSearchApplication(['search-003']);

@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { SetEnterpriseSearchEnginesChrome } from '../../../shared/kibana_chrome';
+import { SetEnterpriseSearchApplicationsChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchApplicationNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
@@ -41,7 +41,7 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       restrictWidth
-      setPageChrome={pageChrome && <SetEnterpriseSearchEnginesChrome trail={pageChrome} />}
+      setPageChrome={pageChrome && <SetEnterpriseSearchApplicationsChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (
         <SendEnterpriseSearchTelemetry action="viewed" metric={pageViewTelemetry} />

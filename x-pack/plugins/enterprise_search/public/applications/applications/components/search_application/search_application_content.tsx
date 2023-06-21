@@ -131,7 +131,7 @@ export const SearchApplicationContent = () => {
         rightSideItems: [
           <EuiButton
             data-telemetry-id="entSearchApplications-indices-addNewIndices"
-            data-test-subj="engine-add-new-indices-btn"
+            data-test-subj="search-application-add-new-indices-btn"
             iconType="plusInCircle"
             fill
             onClick={openAddIndicesFlyout}
