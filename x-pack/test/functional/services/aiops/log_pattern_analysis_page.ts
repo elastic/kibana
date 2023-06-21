@@ -30,7 +30,6 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
         await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
-        // await testSubjects.existOrFail('aiopsChangePointResultsTable loaded');
         await this.assertTotalDocumentCount('14,005');
       });
     },

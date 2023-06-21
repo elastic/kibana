@@ -13,8 +13,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const aiops = getService('aiops');
   const browser = getService('browser');
   const retry = getService('retry');
-
-  // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
