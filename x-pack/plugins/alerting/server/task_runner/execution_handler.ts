@@ -220,12 +220,12 @@ export class ExecutionHandler<
             this.rule.schedule,
             this.previousStartedAt
           );
+          const ruleUrl = this.buildRuleUrl(spaceId, start, end);
           const actionToRun = {
             ...action,
             params: injectActionParams({
-              ruleId,
-              spaceId,
               actionTypeId,
+              ruleUrl,
               actionParams: transformSummaryActionParams({
                 alerts: summarizedAlerts,
                 rule: this.rule,
@@ -236,7 +236,7 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl: this.buildRuleUrl(spaceId, start, end),
+                ruleUrl,
               }),
             }),
           };
@@ -261,12 +261,12 @@ export class ExecutionHandler<
           });
         } else {
           const executableAlert = alert!;
+          const ruleUrl = this.buildRuleUrl(spaceId);
           const actionToRun = {
             ...action,
             params: injectActionParams({
-              ruleId,
-              spaceId,
               actionTypeId,
+              ruleUrl,
               actionParams: transformActionParams({
                 actionsPlugin,
                 alertId: ruleId,
@@ -286,7 +286,7 @@ export class ExecutionHandler<
                 alertParams: this.rule.params,
                 actionParams: action.params,
                 flapping: executableAlert.getFlapping(),
-                ruleUrl: this.buildRuleUrl(spaceId),
+                ruleUrl,
               }),
             }),
           };
