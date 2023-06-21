@@ -72,6 +72,10 @@ describe('validators', () => {
     it('returns true if the category is an empty string', () => {
       expect(isCategoryFieldInvalidString('')).toBe(true);
     });
+
+    it('returns true if the string contains only spaces', () => {
+      expect(isCategoryFieldInvalidString(' ')).toBe(true);
+    });
   });
 
   describe('isCategoryFieldTooLong', () => {
