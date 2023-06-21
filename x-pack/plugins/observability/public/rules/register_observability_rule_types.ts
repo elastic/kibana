@@ -83,12 +83,13 @@ export const registerObservabilityRuleTypes = (
       description: i18n.translate(
         'xpack.observability.threshold.rule.alertFlyout.alertDescription',
         {
-          defaultMessage: 'Alert when threshold breached.',
+          defaultMessage:
+            'Alert when any Observability data type reaches or exceeds a given value.',
         }
       ),
       iconClass: 'bell',
       documentationUrl(docLinks) {
-        return `${docLinks.links.observability.metricsThreshold}`;
+        return `${docLinks.links.observability.threshold}`;
       },
       ruleParamsExpression: lazy(() => import('../pages/threshold/components/expression')),
       validate: validateMetricThreshold,
