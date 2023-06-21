@@ -16,7 +16,7 @@ import {
   buildMetricThresholdAlert,
   buildMetricThresholdRule,
 } from '../mocks/metric_threshold_rule';
-import { AlertDetailsAppSection } from './alert_details_app_section';
+import AlertDetailsAppSection from './alert_details_app_section';
 import { ExpressionChart } from './expression_chart';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
@@ -40,14 +40,6 @@ jest.mock('../../../utils/kibana_react', () => ({
       ...mockCoreMock.createStart(),
       charts: mockedChartStartContract,
     },
-  }),
-}));
-
-jest.mock('../helpers/source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
   }),
 }));
 
