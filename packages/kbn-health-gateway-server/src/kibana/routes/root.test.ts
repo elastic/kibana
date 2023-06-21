@@ -8,6 +8,7 @@
 
 import { Server } from '@hapi/hapi';
 import { duration } from 'moment';
+import { URL } from 'url';
 import fetch, { Response } from 'node-fetch';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type { KibanaConfig } from '../kibana_config';
@@ -246,6 +247,28 @@ describe('RootRoute', () => {
             ]),
           }),
         })
+      );
+    });
+
+    it('should calls the host with the correct path', async () => {
+      kibanaConfig.hosts.splice(0, kibanaConfig.hosts.length);
+      kibanaConfig.hosts.push('http://localhost:5601', 'http://localhost:5602');
+
+      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(new Response('', ok));
+
+      await server.inject({
+        method: 'get',
+        url: '/',
+      });
+
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(fetch).toHaveBeenCalledWith(
+        new URL('http://localhost:5601/api/status'),
+        expect.any(Object)
+      );
+      expect(fetch).toHaveBeenCalledWith(
+        new URL('http://localhost:5602/api/status'),
+        expect.any(Object)
       );
     });
   });

@@ -16,6 +16,8 @@ import type { KibanaConfig } from '../kibana_config';
 
 type Status = 'healthy' | 'unhealthy' | 'failure' | 'timeout';
 
+const statusApiPath = '/api/status';
+
 interface RootRouteResponse {
   status: Status;
   hosts?: HostStatus[];
@@ -112,8 +114,9 @@ export class RootRoute implements ServerRoute {
     }
   }
 
-  private async fetch(url: string) {
-    const { protocol } = new URL(url);
+  private async fetch(host: string) {
+    const url = new URL(host);
+    url.pathname = statusApiPath;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(
@@ -123,7 +126,7 @@ export class RootRoute implements ServerRoute {
 
     try {
       return await nodeFetch(url, {
-        agent: protocol === 'https:' ? this.getAgent() : undefined,
+        agent: url.protocol === 'https:' ? this.getAgent() : undefined,
         signal: controller.signal,
         redirect: 'manual',
       });
