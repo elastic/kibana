@@ -28,7 +28,7 @@ describe('get', () => {
       await expect(() =>
         findComment({ caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9001 } }, clientArgs)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find comments case id: mock-id: Error: Too many comments perPage provided, The maximum allowed perPage is 100."`
+        `"Failed to find comments case id: mock-id: Error: The provided perPage value was too high. The maximum allowed perPage value is 100."`
       );
     });
 
