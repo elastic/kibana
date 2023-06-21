@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 
@@ -26,7 +26,6 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const ref = useRef<HTMLDivElement>(null);
-  const [flyoutPaneWidth, setFlyoutPaneWidth] = useState(ref.current?.offsetWidth);
   const timeline = useMemo(
     () => (
       <StatefulTimeline
@@ -37,18 +36,6 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
     ),
     [timelineId]
   );
-
-  const handleResize = useCallback(() => {
-    setFlyoutPaneWidth(ref.current?.offsetWidth);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [handleResize]);
 
   return (
     <div data-test-subj="flyout-pane" ref={ref}>
@@ -66,8 +53,6 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
             width: 100%;
             z-index: ${euiTheme.levels.flyout};
             display: ${visible ? 'block' : 'none'};
-            right: 0;
-            ${flyoutPaneWidth ? `width: ${flyoutPaneWidth}px` : ''};
           `}
         >
           {timeline}
