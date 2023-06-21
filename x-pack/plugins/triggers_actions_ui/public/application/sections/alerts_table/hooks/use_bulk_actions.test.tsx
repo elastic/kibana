@@ -10,7 +10,7 @@ import { useBulkActions, useBulkAddToCaseActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
 
-jest.mock('./api');
+jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
 
 const mockCaseService = createCasesServiceMock();
@@ -262,20 +262,25 @@ describe('bulk action hooks', () => {
       expect(result.current.bulkActions).toMatchInlineSnapshot(`
         Array [
           Object {
-            "data-test-subj": "attach-new-case",
-            "disableOnQuery": true,
-            "disabledLabel": "Add to new case",
-            "key": "attach-new-case",
-            "label": "Add to new case",
-            "onClick": [Function],
-          },
-          Object {
-            "data-test-subj": "attach-existing-case",
-            "disableOnQuery": true,
-            "disabledLabel": "Add to existing case",
-            "key": "attach-existing-case",
-            "label": "Add to existing case",
-            "onClick": [Function],
+            "id": 0,
+            "items": Array [
+              Object {
+                "data-test-subj": "attach-new-case",
+                "disableOnQuery": true,
+                "disabledLabel": "Add to new case",
+                "key": "attach-new-case",
+                "label": "Add to new case",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "attach-existing-case",
+                "disableOnQuery": true,
+                "disabledLabel": "Add to existing case",
+                "key": "attach-existing-case",
+                "label": "Add to existing case",
+                "onClick": [Function],
+              },
+            ],
           },
         ]
       `);
