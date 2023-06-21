@@ -21,12 +21,21 @@ export const PRODUCT_ORIGIN_HEADER = 'x-elastic-product-origin';
 /**
  * @internal
  */
+export const INTERNAL_ORIGIN_HEADER = 'x-elastic-internal-origin';
+
+/**
+ * @internal
+ */
 export const USER_AGENT_HEADER = 'user-agent';
 
 /**
  * @internal
  */
-export const RESERVED_HEADERS = deepFreeze([PRODUCT_ORIGIN_HEADER, USER_AGENT_HEADER]);
+export const RESERVED_HEADERS = deepFreeze([
+  PRODUCT_ORIGIN_HEADER,
+  INTERNAL_ORIGIN_HEADER,
+  USER_AGENT_HEADER,
+]);
 
 /**
  * @internal
@@ -35,6 +44,9 @@ export const DEFAULT_HEADERS = deepFreeze({
   // Elasticsearch uses this to identify when a request is coming from Kibana, to allow Kibana to
   // access system indices using the standard ES APIs.
   [PRODUCT_ORIGIN_HEADER]: 'kibana',
+  // Elasticsearch uses this to identify when a request is coming from Kibana, to allow Kibana to
+  // access internal ES APIs.
+  [INTERNAL_ORIGIN_HEADER]: 'kibana',
 });
 
 /**
