@@ -29,9 +29,8 @@ import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
-import { EngineApiLogic } from './engine_api_logic';
-
 import { elasticsearchUrl } from './search_application_api';
+import { EngineApiLogic } from './search_application_api_logic';
 
 const clientSnippet = (esUrl: string, searchApplicationName: string, apiKey: string) => `
 import Client from '@elastic/search-application-client'
