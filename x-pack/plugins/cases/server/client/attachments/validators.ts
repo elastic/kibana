@@ -51,9 +51,9 @@ export const validateFindCommentsPagination = (params?: FindCommentsQueryParams)
   const pageAsNumber = params.page ?? 0;
   const perPageAsNumber = params.perPage ?? 0;
 
-  if (Math.max(perPageAsNumber, 0) > MAX_COMMENTS_PER_PAGE) {
+  if (perPageAsNumber > MAX_COMMENTS_PER_PAGE) {
     throw Boom.badRequest(
-      `Too many comments perPage provided, The maximum allowed perPage is ${MAX_COMMENTS_PER_PAGE}.`
+      `The provided perPage value was too high. The maximum allowed perPage value is ${MAX_COMMENTS_PER_PAGE}.`
     );
   }
 

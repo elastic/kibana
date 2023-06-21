@@ -11,7 +11,7 @@ import { MAX_COMMENTS_PER_PAGE } from '../../../common/constants';
 const ERROR_MSG =
   'The number of documents is too high. Paginating through more than 10,000 documents is not possible.';
 
-const ERROR_MSG_PER_PAGE = `Too many comments perPage provided, The maximum allowed perPage is ${MAX_COMMENTS_PER_PAGE}.`;
+const ERROR_MSG_PER_PAGE = `The provided perPage value was too high. The maximum allowed perPage value is ${MAX_COMMENTS_PER_PAGE}.`;
 
 describe('validators', () => {
   describe('validateFindCommentsPagination', () => {
@@ -29,6 +29,12 @@ describe('validators', () => {
 
     it('returns if page and perPage are undefined', () => {
       expect(() => validateFindCommentsPagination({})).not.toThrowError();
+    });
+
+    it('returns if perPage < 0', () => {
+      expect(() =>
+        validateFindCommentsPagination({ perPage: -1 })
+      ).not.toThrowError();
     });
 
     it('throws if page > 10k', () => {
