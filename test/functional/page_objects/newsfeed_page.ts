@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrService } from '../ftr_provider_context';
 
 export class NewsfeedPageObject extends FtrService {
@@ -16,8 +16,13 @@ export class NewsfeedPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
 
+  async sleep(sleepMilliseconds: number) {
+    this.log.debug(`... sleep(${sleepMilliseconds}) start`);
+    await setTimeoutAsync(sleepMilliseconds);
+    this.log.debug(`... sleep(${sleepMilliseconds}) end`);
+  }
   async resetPage() {
-    await this.common.navigateToApp('home', { disableWelcomePrompt: true });
+    await this.common.navigateToUrl('home'); // navigateToApp sets `disableWelcomePrompt` to true under the hood. `navigateToUrl` explicitly disables the welcome screen.
   }
 
   async closeNewsfeedPanel() {
