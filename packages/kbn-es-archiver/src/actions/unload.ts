@@ -11,8 +11,9 @@ import { createReadStream } from 'fs';
 import { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { KbnClient } from '@kbn/test';
-import { createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
+import type { KbnClient } from '@kbn/test';
+import { createPromiseFromStreams } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import {
   isGzip,

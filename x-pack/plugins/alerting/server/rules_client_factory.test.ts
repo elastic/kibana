@@ -25,6 +25,7 @@ import { alertingAuthorizationMock } from './authorization/alerting_authorizatio
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
 import { AlertingAuthorization } from './authorization';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -95,7 +96,7 @@ test('creates a rules client with proper constructor arguments when security is 
   factory.create(request, savedObjectsService);
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
-    excludedWrappers: ['security'],
+    excludedExtensions: [SECURITY_EXTENSION_ID],
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
@@ -121,6 +122,8 @@ test('creates a rules client with proper constructor arguments when security is 
     encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
     kibanaVersion: '7.10.0',
     minimumScheduleInterval: { value: '1m', enforce: false },
+    isAuthenticationTypeAPIKey: expect.any(Function),
+    getAuthenticationAPIKey: expect.any(Function),
   });
 });
 
@@ -137,7 +140,7 @@ test('creates a rules client with proper constructor arguments', async () => {
   factory.create(request, savedObjectsService);
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
-    excludedWrappers: ['security'],
+    excludedExtensions: [SECURITY_EXTENSION_ID],
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
@@ -159,6 +162,8 @@ test('creates a rules client with proper constructor arguments', async () => {
     getEventLogClient: expect.any(Function),
     kibanaVersion: '7.10.0',
     minimumScheduleInterval: { value: '1m', enforce: false },
+    isAuthenticationTypeAPIKey: expect.any(Function),
+    getAuthenticationAPIKey: expect.any(Function),
   });
 });
 

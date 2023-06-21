@@ -142,7 +142,7 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
 
     // Set error message based on the root cause
     if (root_cause?.[0]) {
-      boomError.message = extractErrorMessage(root_cause[0]);
+      boomError.message = extractErrorMessageBasedOnRootCause(root_cause[0]);
     }
 
     return boomError;
@@ -165,7 +165,7 @@ interface EsError {
 /**
  * Returns an error message based on the root cause
  */
-function extractErrorMessage({ type, reason, script, line, col }: EsError): string {
+function extractErrorMessageBasedOnRootCause({ type, reason, script, line, col }: EsError): string {
   let message = `[${type}] ${reason}`;
 
   if (line !== undefined && col !== undefined) {

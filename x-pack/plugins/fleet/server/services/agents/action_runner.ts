@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
@@ -21,6 +20,8 @@ import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
+import type { RetryParams } from './retry_helper';
+import { getRetryParams, MAX_RETRY_COUNT } from './retry_helper';
 
 export interface ActionParams {
   kuery: string;
@@ -30,13 +31,6 @@ export interface ActionParams {
   actionId?: string;
   // additional parameters specific to an action e.g. reassign to new policy id
   [key: string]: any;
-}
-
-export interface RetryParams {
-  pitId: string;
-  searchAfter?: SortResults;
-  retryCount?: number;
-  taskId?: string;
 }
 
 export abstract class ActionRunner {
@@ -57,7 +51,7 @@ export abstract class ActionRunner {
   ) {
     this.esClient = esClient;
     this.soClient = soClient;
-    this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuid() };
+    this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuidv4() };
     this.retryParams = retryParams;
   }
 
@@ -77,7 +71,9 @@ export abstract class ActionRunner {
     appContextService
       .getLogger()
       .info(
-        `Running action asynchronously, actionId: ${this.actionParams.actionId}, total agents: ${this.actionParams.total}`
+        `Running action asynchronously, actionId: ${this.actionParams.actionId}${
+          this.actionParams.total ? ', total agents:' + this.actionParams.total : ''
+        }`
       );
 
     if (!this.bulkActionsResolver) {
@@ -110,21 +106,33 @@ export abstract class ActionRunner {
                 `Retry #${this.retryParams.retryCount} of task ${this.retryParams.taskId} failed: ${error.message}`
               );
 
-            if (this.retryParams.retryCount === 3) {
-              const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
+            if (this.retryParams.retryCount === MAX_RETRY_COUNT) {
+              const errorMessage = `Stopping after retry #${MAX_RETRY_COUNT}. Error: ${error.message}`;
               appContextService.getLogger().warn(errorMessage);
+
+              // clean up tasks after last retry reached
+              await Promise.all([
+                this.bulkActionsResolver!.removeIfExists(this.checkTaskId!),
+                this.bulkActionsResolver!.removeIfExists(this.retryParams.taskId!),
+              ]);
+
               return;
             }
           } else {
             appContextService.getLogger().error(`Action failed: ${error.message}`);
           }
-          const taskId = await this.bulkActionsResolver!.run(
+          const taskId = this.bulkActionsResolver!.getTaskId(
+            this.actionParams.actionId!,
+            this.getTaskType()
+          );
+          await this.bulkActionsResolver!.run(
             this.actionParams,
             {
               ...this.retryParams,
               retryCount: (this.retryParams.retryCount ?? 0) + 1,
             },
-            this.getTaskType()
+            this.getTaskType(),
+            taskId
           );
 
           appContextService.getLogger().info(`Retrying in task: ${taskId}`);
@@ -135,13 +143,20 @@ export abstract class ActionRunner {
   }
 
   private async createCheckResultTask() {
+    const taskId = this.bulkActionsResolver!.getTaskId(
+      this.actionParams.actionId!,
+      this.getTaskType() + ':check'
+    );
+    const retryParams: RetryParams = getRetryParams(this.getTaskType(), this.retryParams);
+
     return await this.bulkActionsResolver!.run(
       this.actionParams,
       {
-        ...this.retryParams,
+        ...retryParams,
         retryCount: 1,
       },
       this.getTaskType(),
+      taskId,
       moment(new Date()).add(5, 'm').toDate()
     );
   }
@@ -151,10 +166,17 @@ export abstract class ActionRunner {
       try {
         const actions = await getAgentActions(this.esClient, this.actionParams!.actionId!);
 
-        // skipping batch if there is already an action document present with last agent ids
         for (const action of actions) {
           if (action.agents?.[0] === agents[0].id) {
-            return { actionId: this.actionParams.actionId! };
+            if (action.type !== 'UPDATE_TAGS') {
+              appContextService
+                .getLogger()
+                .debug(
+                  `skipping batch as there is already an action document present with last agent ids, actionId: ${this
+                    .actionParams!.actionId!}`
+                );
+              return { actionId: this.actionParams.actionId! };
+            }
           }
         }
       } catch (error) {
@@ -171,8 +193,10 @@ export abstract class ActionRunner {
 
     const perPage = this.actionParams.batchSize ?? SO_SEARCH_LIMIT;
 
+    appContextService.getLogger().debug('kuery: ' + this.actionParams.kuery);
+
     const getAgents = () =>
-      getAgentsByKuery(this.esClient, {
+      getAgentsByKuery(this.esClient, this.soClient, {
         kuery: this.actionParams.kuery,
         showInactive: this.actionParams.showInactive ?? false,
         page: 1,
@@ -214,7 +238,9 @@ export abstract class ActionRunner {
       }
     }
 
-    await closePointInTime(this.esClient, pitId!);
+    if (pitId) {
+      await closePointInTime(this.esClient, pitId!);
+    }
 
     appContextService
       .getLogger()

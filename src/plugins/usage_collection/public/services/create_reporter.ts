@@ -8,6 +8,7 @@
 
 import { Reporter, Storage } from '@kbn/analytics';
 import { HttpSetup } from '@kbn/core/public';
+import { UiCounters } from '../../common/types';
 
 interface AnalyicsReporterConfig {
   localStorage: Storage;
@@ -27,8 +28,8 @@ export function createReporter(config: AnalyicsReporterConfig): Reporter {
         body: JSON.stringify({ report }),
         asSystemRequest: true,
       });
-
-      if (response.status !== 'ok') {
+      const okStatus: UiCounters.v1.UiCountersResponseOk = response.status;
+      if (response.status !== okStatus) {
         throw Error('Unable to store report.');
       }
       return response;

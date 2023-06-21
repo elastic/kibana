@@ -2,7 +2,5 @@
   "type": "shared-common",
   "id": "@kbn/repo-source-classifier",
   "devOnly": true,
-  "owner": "@elastic/kibana-operations",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-operations"
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { registerTestBed, TestBed, findTestSubject } from '@kbn/test-jest-helpers';
@@ -22,6 +23,23 @@ export interface DomFields {
     fields?: DomFields;
   };
 }
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
 
 const createActions = (testBed: TestBed<TestSubjects>) => {
   const { find, exists, form, component } = testBed;
@@ -113,12 +131,14 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   const addField = async (name: string, type: string, subType?: string) => {
     await act(async () => {
       form.setInputValue('nameParameterInput', name);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       find('createFieldForm.fieldType').simulate('change', [
         {
           label: type,
           value: type,
         },
       ]);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
 
     component.update();
@@ -127,11 +147,22 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
       await act(async () => {
         // subType is a text input
         form.setInputValue('createFieldForm.fieldSubType', subType);
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
     }
 
     await act(async () => {
       find('createFieldForm.addButton').simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+    });
+
+    component.update();
+  };
+
+  const updateFieldName = async (name: string) => {
+    await act(async () => {
+      form.setInputValue('nameParameterInput', name);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
 
     component.update();
@@ -141,6 +172,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     const { testSubject } = getFieldAt(path);
     await act(async () => {
       find(`${testSubject}.editFieldButton` as TestSubjects).simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
     component.update();
   };
@@ -148,9 +180,13 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   const updateFieldAndCloseFlyout = async () => {
     await act(async () => {
       find('mappingsEditorFieldEdit.editFieldUpdateButton').simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
     component.update();
   };
+
+  const isUpdateButtonDisabled = () =>
+    find('mappingsEditorFieldEdit.editFieldUpdateButton').props().disabled;
 
   const showAdvancedSettings = async () => {
     if (find('mappingsEditorFieldEdit.advancedSettings').props().style.display === 'block') {
@@ -187,7 +223,12 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     await act(async () => {
       form.setInputValue('runtimeFieldEditor.nameField.input', field.name);
-      form.setInputValue('runtimeFieldEditor.scriptField', field.script.source);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      find('runtimeFieldEditor.scriptField')
+        .getDOMNode()
+        .setAttribute('data-currentvalue', field.script.source);
+      find('runtimeFieldEditor.scriptField').simulate('change');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       find('typeField').simulate('change', [
         {
           label: valueToLabelMap[field.type],
@@ -219,6 +260,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     await act(async () => {
       find('runtimeFieldEditor.saveFieldButton').simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
     component.update();
   };
@@ -269,12 +311,14 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     await act(async () => {
       tabElement.simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
     component.update();
   };
 
   const updateJsonEditor = (testSubject: TestSubjects, value: object) => {
-    find(testSubject).simulate('change', { jsonString: JSON.stringify(value) });
+    find(testSubject).getDOMNode().setAttribute('data-currentvalue', JSON.stringify(value));
+    find(testSubject).simulate('change');
   };
 
   const getJsonEditorValue = (testSubject: TestSubjects) => {
@@ -312,8 +356,10 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     getFieldAt,
     addField,
     expandAllFieldsAndReturnMetadata,
+    updateFieldName,
     startEditField,
     updateFieldAndCloseFlyout,
+    isUpdateButtonDisabled,
     showAdvancedSettings,
     updateJsonEditor,
     getJsonEditorValue,
@@ -367,7 +413,9 @@ export const getMappingsEditorDataFactory = (onChangeHandler: jest.MockedFunctio
 
     if (isMappingsValid === undefined) {
       await act(async () => {
-        isMappingsValid = await validate();
+        const validatePromise = validate();
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+        isMappingsValid = await validatePromise;
       });
       component.update();
     }

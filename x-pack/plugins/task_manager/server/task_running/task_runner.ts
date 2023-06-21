@@ -12,7 +12,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity, defaults, flow, omit } from 'lodash';
 import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';
@@ -51,10 +51,8 @@ import {
   TaskStatus,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { isUnrecoverableError } from './errors';
+import { isRetryableError, isUnrecoverableError } from './errors';
 import type { EventLoopDelayConfig } from '../config';
-
-const defaultBackoffPerFailure = 5 * 60 * 1000;
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
 export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
@@ -75,6 +73,8 @@ export interface TaskRunner {
   isEphemeral?: boolean;
   toString: () => string;
   isSameTask: (executionId: string) => boolean;
+  isAdHocTaskAndOutOfAttempts: boolean;
+  removeTask: () => Promise<void>;
 }
 
 export enum TaskRunningStage {
@@ -185,7 +185,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
-    this.uuid = uuid.v4();
+    this.uuid = uuidv4();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
   }
 
@@ -261,6 +261,14 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   /**
+   * Returns true whenever the task is ad hoc and has ran out of attempts. When true before
+   * running a task, the task should be deleted instead of ran.
+   */
+  public get isAdHocTaskAndOutOfAttempts() {
+    return !this.instance.task.schedule && this.instance.task.attempts >= this.getMaxAttempts();
+  }
+
+  /**
    * Returns a log-friendly representation of this task.
    */
   public toString() {
@@ -329,6 +337,19 @@ export class TaskManagerRunner implements TaskRunner {
       return processedResult;
     } finally {
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
+    }
+  }
+
+  public async removeTask(): Promise<void> {
+    await this.bufferedTaskStore.remove(this.id);
+    if (this.task?.cleanup) {
+      try {
+        await this.task.cleanup();
+      } catch (e) {
+        this.logger.error(
+          `Error encountered when running onTaskRemoved() hook for ${this}: ${e.message}`
+        );
+      }
     }
   }
 
@@ -476,8 +497,7 @@ export class TaskManagerRunner implements TaskRunner {
       return false;
     }
 
-    const maxAttempts = this.definition.maxAttempts || this.defaultMaxAttempts;
-    return this.instance.task.attempts < maxAttempts;
+    return this.instance.task.attempts < this.getMaxAttempts();
   }
 
   private rescheduleFailedRun = (
@@ -538,7 +558,17 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    if (!this.isExpired) {
+    if (this.isExpired) {
+      this.usageCounter?.incrementCounter({
+        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+    } else if (fieldUpdates.status === TaskStatus.Failed) {
+      // Delete the SO instead so it doesn't remain in the index forever
+      this.instance = asRan(this.instance.task);
+      await this.removeTask();
+    } else {
       this.instance = asRan(
         await this.bufferedTaskStore.update(
           defaults(
@@ -553,12 +583,6 @@ export class TaskManagerRunner implements TaskRunner {
           )
         )
       );
-    } else {
-      this.usageCounter?.incrementCounter({
-        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
-        counterType: 'taskManagerTaskRunner',
-        incrementBy: 1,
-      });
     }
 
     return fieldUpdates.status === TaskStatus.Failed
@@ -571,8 +595,8 @@ export class TaskManagerRunner implements TaskRunner {
   private async processResultWhenDone(): Promise<TaskRunResult> {
     // not a recurring task: clean up by removing the task instance from store
     try {
-      await this.bufferedTaskStore.remove(this.id);
       this.instance = asRan(this.instance.task);
+      await this.removeTask();
     } catch (err) {
       if (err.statusCode === 404) {
         this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
@@ -647,14 +671,13 @@ export class TaskManagerRunner implements TaskRunner {
     attempts: number;
     addDuration?: string;
   }): Date | undefined {
-    // Use custom retry logic, if any, otherwise we'll use the default logic
-    const retry: boolean | Date = this.definition.getRetry?.(attempts, error) ?? true;
+    const retry: boolean | Date = isRetryableError(error) ?? true;
 
     let result;
     if (retry instanceof Date) {
       result = retry;
     } else if (retry === true) {
-      result = new Date(Date.now() + attempts * defaultBackoffPerFailure);
+      result = new Date(Date.now() + calculateDelay(attempts));
     }
 
     // Add a duration to the result
@@ -662,6 +685,12 @@ export class TaskManagerRunner implements TaskRunner {
       result = intervalFromDate(result, addDuration)!;
     }
     return result;
+  }
+
+  private getMaxAttempts() {
+    return this.definition.maxAttempts !== undefined
+      ? this.definition.maxAttempts
+      : this.defaultMaxAttempts;
   }
 }
 
@@ -716,4 +745,14 @@ export function asRan(task: InstanceOf<TaskRunningStage.RAN, RanTask>): RanTask 
     stage: TaskRunningStage.RAN,
     task,
   };
+}
+
+export function calculateDelay(attempts: number) {
+  if (attempts === 1) {
+    return 30 * 1000; // 30s
+  } else {
+    // get multiples of 5 min
+    const defaultBackoffPerFailure = 5 * 60 * 1000;
+    return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
+  }
 }

@@ -32,7 +32,7 @@ describe('SearchTimeoutError', () => {
     const component = mount(e.getErrorMessage(startMock.application));
 
     expect(component.find('EuiButton').length).toBe(1);
-    component.find('EuiButton').simulate('click');
+    component.find('button[data-test-subj="searchTimeoutError"]').simulate('click');
     expect(startMock.application.navigateToApp).toHaveBeenCalledWith('management', {
       path: '/kibana/settings',
     });

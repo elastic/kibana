@@ -37,7 +37,7 @@ export function runRoute(
 ) {
   router.post(
     {
-      path: '/api/timelion/run',
+      path: '/internal/timelion/run',
       validate: {
         body: schema.object({
           sheet: schema.arrayOf(schema.string()),

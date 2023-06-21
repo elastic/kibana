@@ -20,7 +20,11 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
+import {
+  getAnalysisType,
+  type DataFrameAnalyticsId,
+  type DataFrameAnalyticsStats,
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
@@ -28,7 +32,6 @@ import {
   isDataFrameAnalyticsStopped,
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
-  DataFrameAnalyticsStats,
 } from './common';
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
@@ -198,7 +201,7 @@ export const useColumns = (
                   values: { analyticsId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
         />
       ),
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',

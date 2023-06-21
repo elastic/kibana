@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,10 +23,18 @@ import {
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
-import { useLicense } from '../../../../hooks';
-import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common/constants';
+import { useLicense, sendGetAgents, sendGetAgentPolicies } from '../../../../hooks';
+import {
+  LICENSE_FOR_SCHEDULE_UPGRADE,
+  AGENTS_PREFIX,
+  SO_SEARCH_LIMIT,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../../../../common/constants';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 import { getCommonTags } from '../utils';
+
+import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
@@ -67,6 +75,66 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
   const [updateModalState, setUpgradeModalState] = useState({ isOpen: false, isScheduled: false });
   const [isTagAddVisible, setIsTagAddVisible] = useState<boolean>(false);
+  const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
+    useState<boolean>(false);
+  const [managedAgents, setManagedAgents] = useState<string[]>([]);
+
+  // get all the managed policies
+  const fetchManagedAgents = useCallback(async () => {
+    if (selectionMode === 'query') {
+      const managedPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`;
+
+      const agentPoliciesResponse = await sendGetAgentPolicies({
+        kuery: managedPoliciesKuery,
+        perPage: SO_SEARCH_LIMIT,
+        full: false,
+      });
+
+      if (agentPoliciesResponse.error) {
+        throw new Error(agentPoliciesResponse.error.message);
+      }
+
+      const managedPolicies = agentPoliciesResponse.data?.items ?? [];
+
+      // find all the agents that have those policies and are not unenrolled
+      const policiesKuery = managedPolicies
+        .map((policy) => `policy_id:"${policy.id}"`)
+        .join(' or ');
+      const kuery = `NOT (status:unenrolled) and ${policiesKuery}`;
+      const response = await sendGetAgents({
+        kuery,
+        perPage: SO_SEARCH_LIMIT,
+        showInactive: true,
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      return response.data?.items ?? [];
+    }
+    return [];
+  }, [selectionMode]);
+
+  useEffect(() => {
+    async function fetchDataAsync() {
+      const allManagedAgents = await fetchManagedAgents();
+      setManagedAgents(allManagedAgents?.map((agent) => agent.id));
+    }
+    fetchDataAsync();
+  }, [fetchManagedAgents]);
+
+  // update the query removing the "managed" agents
+  const selectionQuery = useMemo(() => {
+    if (managedAgents.length) {
+      const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${managedAgents
+        .map((id) => `"${id}"`)
+        .join(' or ')})`;
+      return `${currentQuery} AND NOT (${excludedKuery})`;
+    } else {
+      return currentQuery;
+    }
+  }, [currentQuery, managedAgents]);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
@@ -74,99 +142,127 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       ? !!selectedAgents.find((agent) => agent.active)
       : totalAgents > totalInactiveAgents;
   const totalActiveAgents = totalAgents - totalInactiveAgents;
-  const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
-  const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
+
+  const agentCount =
+    selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents - managedAgents?.length;
+
+  const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
+
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
+  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
+
+  const menuItems = [
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.addRemoveTags"
+          data-test-subj="agentBulkActionsAddRemoveTags"
+          defaultMessage="Add / remove tags"
+        />
+      ),
+      icon: <EuiIcon type="tag" size="m" />,
+      disabled: !atLeastOneActiveAgentSelected,
+      onClick: (event: any) => {
+        setTagsPopoverButton((event.target as Element).closest('button')!);
+        setIsTagAddVisible(!isTagAddVisible);
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.reassignPolicy"
+          data-test-subj="agentBulkActionsReassign"
+          defaultMessage="Assign to new policy"
+        />
+      ),
+      icon: <EuiIcon type="pencil" size="m" />,
+      disabled: !atLeastOneActiveAgentSelected,
+      onClick: () => {
+        closeMenu();
+        setIsReassignFlyoutOpen(true);
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.unenrollAgents"
+          data-test-subj="agentBulkActionsUnenroll"
+          defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="trash" size="m" />,
+      disabled: !atLeastOneActiveAgentSelected,
+      onClick: () => {
+        closeMenu();
+        setIsUnenrollModalOpen(true);
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.upgradeAgents"
+          data-test-subj="agentBulkActionsUpgrade"
+          defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="refresh" size="m" />,
+      disabled: !atLeastOneActiveAgentSelected,
+      onClick: () => {
+        closeMenu();
+        setUpgradeModalState({ isOpen: true, isScheduled: false });
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
+          data-test-subj="agentBulkActionsScheduleUpgrade"
+          defaultMessage="Schedule upgrade for {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="timeRefresh" size="m" />,
+      disabled: !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade,
+      onClick: () => {
+        closeMenu();
+        setUpgradeModalState({ isOpen: true, isScheduled: true });
+      },
+    },
+  ];
+
+  if (diagnosticFileUploadEnabled) {
+    menuItems.push({
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.requestDiagnostics"
+          data-test-subj="agentBulkActionsRequestDiagnostics"
+          defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="download" size="m" />,
+      disabled: !atLeastOneActiveAgentSelected,
+      onClick: () => {
+        closeMenu();
+        setIsRequestDiagnosticsModalOpen(true);
+      },
+    });
+  }
 
   const panels = [
     {
       id: 0,
-      items: [
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.agentBulkActions.addRemoveTags"
-              data-test-subj="agentBulkActionsAddRemoveTags"
-              defaultMessage="Add / remove tags"
-            />
-          ),
-          icon: <EuiIcon type="tag" size="m" />,
-          disabled: !atLeastOneActiveAgentSelected,
-          onClick: (event: any) => {
-            setTagsPopoverButton((event.target as Element).closest('button')!);
-            setIsTagAddVisible(!isTagAddVisible);
-          },
-        },
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.agentBulkActions.reassignPolicy"
-              data-test-subj="agentBulkActionsReassign"
-              defaultMessage="Assign to new policy"
-            />
-          ),
-          icon: <EuiIcon type="pencil" size="m" />,
-          disabled: !atLeastOneActiveAgentSelected,
-          onClick: () => {
-            closeMenu();
-            setIsReassignFlyoutOpen(true);
-          },
-        },
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.agentBulkActions.unenrollAgents"
-              data-test-subj="agentBulkActionsUnenroll"
-              defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
-              values={{
-                agentCount,
-              }}
-            />
-          ),
-          icon: <EuiIcon type="trash" size="m" />,
-          disabled: !atLeastOneActiveAgentSelected,
-          onClick: () => {
-            closeMenu();
-            setIsUnenrollModalOpen(true);
-          },
-        },
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.agentBulkActions.upgradeAgents"
-              data-test-subj="agentBulkActionsUpgrade"
-              defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
-              values={{
-                agentCount,
-              }}
-            />
-          ),
-          icon: <EuiIcon type="refresh" size="m" />,
-          disabled: !atLeastOneActiveAgentSelected,
-          onClick: () => {
-            closeMenu();
-            setUpgradeModalState({ isOpen: true, isScheduled: false });
-          },
-        },
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
-              data-test-subj="agentBulkActionsScheduleUpgrade"
-              defaultMessage="Schedule upgrade for {agentCount, plural, one {# agent} other {# agents}}"
-              values={{
-                agentCount,
-              }}
-            />
-          ),
-          icon: <EuiIcon type="timeRefresh" size="m" />,
-          disabled: !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade,
-          onClick: () => {
-            closeMenu();
-            setUpgradeModalState({ isOpen: true, isScheduled: true });
-          },
-        },
-      ],
+      items: menuItems,
     },
   ];
 
@@ -227,6 +323,17 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             closeMenu();
           }}
         />
+      )}
+      {isRequestDiagnosticsModalOpen && (
+        <EuiPortal>
+          <AgentRequestDiagnosticsModal
+            agents={agents}
+            agentCount={agentCount}
+            onClose={() => {
+              setIsRequestDiagnosticsModalOpen(false);
+            }}
+          />
+        </EuiPortal>
       )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>

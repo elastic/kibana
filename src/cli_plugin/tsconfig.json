@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "install/**/*",
+    "lib/**/*",
+    "list/**/*",
+    "remove/**/*",
+    "*.js",
+  ],
+  "kbn_references": [
+    { "path": "../cli/tsconfig.json" },
+    "@kbn/utils",
+    "@kbn/repo-info",
+    "@kbn/jest-serializers",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

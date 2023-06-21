@@ -10,19 +10,21 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { durationAnomalyAlertFactory } from './duration_anomaly';
-import { DURATION_ANOMALY } from '../../../../common/constants/alerts';
-import { AnomaliesTableRecord, AnomalyRecordDoc } from '@kbn/ml-plugin/common/types/anomalies';
+import { DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
+import {
+  getSeverityType,
+  type MlAnomaliesTableRecord,
+  type MlAnomalyRecordDoc,
+} from '@kbn/ml-anomaly-utils';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
-import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
 import { Ping } from '../../../../common/runtime_types/ping';
-import { ALERT_REASON_MSG, VIEW_IN_APP_URL } from './action_variables';
 
 interface MockAnomaly {
-  severity: AnomaliesTableRecord['severity'];
-  source: Partial<AnomalyRecordDoc>;
-  actualSort: AnomaliesTableRecord['actualSort'];
-  typicalSort: AnomaliesTableRecord['typicalSort'];
-  entityValue: AnomaliesTableRecord['entityValue'];
+  severity: MlAnomaliesTableRecord['severity'];
+  source: Partial<MlAnomalyRecordDoc>;
+  actualSort: MlAnomaliesTableRecord['actualSort'];
+  typicalSort: MlAnomaliesTableRecord['typicalSort'];
+  entityValue: MlAnomaliesTableRecord['entityValue'];
 }
 
 interface MockAnomalyResult {
@@ -66,6 +68,7 @@ const mockPing: Partial<Ping> = {
 };
 
 const mockRecoveredAlerts = mockAnomaliesResult.anomalies.map((result) => ({
+  alertDetailsUrl: 'mockedAlertsLocator > getLocation',
   firstCheckedAt: 'date',
   firstTriggeredAt: undefined,
   lastCheckedAt: 'date',
@@ -106,6 +109,7 @@ const mockOptions = (
     state,
     services,
     setContext,
+    startedAt: new Date(),
   };
 };
 
@@ -233,18 +237,19 @@ Response times as high as ${slowestResponse} ms have been detected from location
         Array [
           "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
+            "alertDetailsUrl": "mockedAlertsLocator > getLocation",
             "anomalyStartTimestamp": "date",
             "bucketSpan": 900,
             "expectedResponseTime": "10 ms",
             "monitor": "uptime-monitor",
             "monitorUrl": "https://elastic.co",
             "observerLocation": "harrisburg",
-            "${ALERT_REASON_MSG}": "Abnormal (minor level) response time detected on uptime-monitor with url https://elastic.co at date. Anomaly severity score is 25.
+            "reason": "Abnormal (minor level) response time detected on uptime-monitor with url https://elastic.co at date. Anomaly severity score is 25.
         Response times as high as 200 ms have been detected from location harrisburg. Expected response time is 10 ms.",
             "severity": "minor",
             "severityScore": 25,
             "slowestAnomalyResponse": "200 ms",
-            "${VIEW_IN_APP_URL}": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MA==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
+            "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MA==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
           },
         ]
       `);
@@ -252,18 +257,19 @@ Response times as high as ${slowestResponse} ms have been detected from location
         Array [
           "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
+            "alertDetailsUrl": "mockedAlertsLocator > getLocation",
             "anomalyStartTimestamp": "date",
             "bucketSpan": 900,
             "expectedResponseTime": "20 ms",
             "monitor": "uptime-monitor",
             "monitorUrl": "https://elastic.co",
             "observerLocation": "fairbanks",
-            "${ALERT_REASON_MSG}": "Abnormal (warning level) response time detected on uptime-monitor with url https://elastic.co at date. Anomaly severity score is 10.
+            "reason": "Abnormal (warning level) response time detected on uptime-monitor with url https://elastic.co at date. Anomaly severity score is 10.
         Response times as high as 300 ms have been detected from location fairbanks. Expected response time is 20 ms.",
             "severity": "warning",
             "severityScore": 10,
             "slowestAnomalyResponse": "300 ms",
-            "${VIEW_IN_APP_URL}": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
+            "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
           },
         ]
       `);

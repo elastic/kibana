@@ -34,6 +34,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./input_control_vis'));
       loadTestFile(require.resolve('./controls'));
       loadTestFile(require.resolve('./_markdown_vis'));
+      loadTestFile(require.resolve('./image_embeddable'));
     });
   });
 }

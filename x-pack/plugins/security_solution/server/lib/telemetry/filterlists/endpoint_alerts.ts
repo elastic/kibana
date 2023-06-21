@@ -15,26 +15,34 @@ const baseAllowlistFields: AllowlistFields = {
   executable: true,
   code_signature: true,
   command_line: true,
+  env_vars: true,
   hash: true,
   pid: true,
   pe: true,
   uptime: true,
   Ext: {
+    ancestry: true,
+    api: true,
     architecture: true,
     code_signature: true,
     dll: true,
     malware_signature: true,
     memory_region: true,
     protection: true,
+    session_info: true,
     real: {
       entity_id: true,
     },
+    relative_file_creation_time: true,
+    relative_file_name_modify_time: true,
     token: {
       elevation: true,
       elevation_type: true,
       integrity_level_name: true,
       security_attributes: true,
     },
+    effective_parent: true,
+    device: true,
   },
   thread: true,
   working_directory: true,
@@ -43,6 +51,7 @@ const baseAllowlistFields: AllowlistFields = {
 // Allow list for event-related fields, which can also be nested under events[]
 const allowlistBaseEventFields: AllowlistFields = {
   credential_access: true,
+  destination: true,
   dll: {
     name: true,
     path: true,
@@ -50,6 +59,13 @@ const allowlistBaseEventFields: AllowlistFields = {
     hash: true,
     malware_signature: true,
     pe: true,
+    Ext: {
+      code_signature: true,
+      device: true,
+      load_index: true,
+      relative_file_creation_time: true,
+      relative_file_name_modify_time: true,
+    },
   },
   dns: true,
   event: true,
@@ -81,9 +97,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     parent: baseAllowlistFields,
     ...baseAllowlistFields,
   },
-  network: {
-    direction: true,
-  },
+  network: true,
   registry: {
     data: {
       strings: true,
@@ -93,16 +107,20 @@ const allowlistBaseEventFields: AllowlistFields = {
     path: true,
     value: true,
   },
+  source: true,
   Target: {
     process: {
       parent: baseAllowlistFields,
       ...baseAllowlistFields,
     },
   },
+  url: true,
   user: {
     id: true,
   },
   Persistence: true,
+  /* eslint-disable @typescript-eslint/naming-convention */
+  Effective_process: true,
 };
 
 // Allow list for the data we include in the events. True means that it is deep-cloned
@@ -133,7 +151,10 @@ export const endpointAllowlistFields: AllowlistFields = {
     version: true,
   },
   host: {
+    architecture: true,
+    id: true,
     os: true,
   },
+  package_version: true,
   ...allowlistBaseEventFields,
 };

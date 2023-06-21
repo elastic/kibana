@@ -13,7 +13,7 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { NavigationSection } from '@kbn/observability-plugin/public';
+import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
 import { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
 import { getServices } from './services';
@@ -50,31 +50,34 @@ export class ProfilingPlugin implements Plugin {
     const kuerySubject = new BehaviorSubject<string>('');
 
     const section$ = combineLatest([from(coreSetup.getStartServices()), kuerySubject]).pipe(
-      map(([_, kuery]) => {
-        const sections: NavigationSection[] = [
-          {
-            // TODO: add beta badge to section label, needs support in Observability plugin
-            label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
-              defaultMessage: 'Universal Profiling',
-            }),
-            entries: links.map((link) => {
-              return {
-                app: 'profiling',
-                label: link.title,
-                path: `${link.path}?kuery=${kuery ?? ''}`,
-                matchPath: (path) => {
-                  return path.startsWith(link.path);
-                },
-              };
-            }),
-            sortKey: 700,
-          },
-        ];
-        return sections;
+      map(([[coreStart], kuery]) => {
+        if (coreStart.application.capabilities.profiling.show) {
+          const sections: NavigationSection[] = [
+            {
+              label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
+                defaultMessage: 'Universal Profiling',
+              }),
+              isBetaFeature: true,
+              entries: links.map((link) => {
+                return {
+                  app: 'profiling',
+                  label: link.title,
+                  path: `${link.path}?kuery=${kuery ?? ''}`,
+                  matchPath: (path) => {
+                    return path.startsWith(link.path);
+                  },
+                };
+              }),
+              sortKey: 700,
+            },
+          ];
+          return sections;
+        }
+        return [];
       })
     );
 
-    pluginsSetup.observability.navigation.registerSections(section$);
+    pluginsSetup.observabilityShared.navigation.registerSections(section$);
 
     coreSetup.application.register({
       id: 'profiling',
@@ -83,7 +86,7 @@ export class ProfilingPlugin implements Plugin {
       appRoute: '/app/profiling',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: links,
-      async mount({ element, history, theme$ }: AppMountParameters) {
+      async mount({ element, history, theme$, setHeaderActionMenu }: AppMountParameters) {
         const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
           CoreStart,
           ProfilingPluginPublicStartDeps,
@@ -111,6 +114,7 @@ export class ProfilingPlugin implements Plugin {
             pluginsSetup,
             history,
             theme$,
+            setHeaderActionMenu,
           },
           element
         );

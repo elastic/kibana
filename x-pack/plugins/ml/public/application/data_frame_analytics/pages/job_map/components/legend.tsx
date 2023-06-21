@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { EuiThemeType } from '../../../../components/color_range_legend';
 
 const getJobTypeList = () => (

@@ -39,6 +39,7 @@ describe('anomaly_scores', () => {
         endDate={endDate}
         isLoading={false}
         narrowDateRange={narrowDateRange}
+        jobNameById={{}}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -53,6 +54,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={true}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );
@@ -68,6 +70,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );
@@ -83,6 +86,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );
@@ -99,6 +103,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );
@@ -119,6 +124,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );
@@ -134,6 +140,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );

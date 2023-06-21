@@ -22,6 +22,8 @@ import {
   BehaviorSubject,
   exhaustMap,
   mergeMap,
+  skip,
+  firstValueFrom,
 } from 'rxjs';
 import type {
   AnalyticsClientInitContext,
@@ -63,6 +65,8 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private readonly internalQueue: Event[] = [];
   private readonly shutdown$ = new ReplaySubject<void>(1);
+  private readonly flush$ = new Subject<void>();
+  private readonly inFlightRequests$ = new BehaviorSubject<number>(0);
   private readonly isOptedIn$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   private readonly url: string;
@@ -153,11 +157,32 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   /**
+   * Triggers a flush of the internal queue to attempt to send any events held in the queue
+   * and resolves the returned promise once the queue is emptied.
+   */
+  public async flush() {
+    if (this.flush$.isStopped) {
+      // If called after shutdown, return straight away
+      return;
+    }
+
+    const promise = firstValueFrom(
+      this.inFlightRequests$.pipe(
+        skip(1), // Skipping the first value because BehaviourSubjects always emit the current value on subscribe.
+        filter((count) => count === 0) // Wait until all the inflight requests are completed.
+      )
+    );
+    this.flush$.next();
+    await promise;
+  }
+
+  /**
    * Shuts down the shipper.
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
     this.shutdown$.next();
+    this.flush$.complete();
     this.shutdown$.complete();
     this.isOptedIn$.complete();
   }
@@ -226,17 +251,26 @@ export class ElasticV3ServerShipper implements IShipper {
         takeUntil(this.shutdown$),
         map(() => ({ shouldFlush: false }))
       ),
+      // Whenever a `flush` request comes in
+      this.flush$.pipe(map(() => ({ shouldFlush: true }))),
       // Attempt to send one last time on shutdown, flushing the queue
       this.shutdown$.pipe(map(() => ({ shouldFlush: true })))
     )
       .pipe(
         // Only move ahead if it's opted-in and online, and there are some events in the queue
-        filter(
-          () =>
+        filter(() => {
+          const shouldSendAnything =
             this.isOptedIn$.value === true &&
             this.firstTimeOffline === null &&
-            this.internalQueue.length > 0
-        ),
+            this.internalQueue.length > 0;
+
+          // If it should not send anything, re-emit the inflight request observable just in case it's already 0
+          if (!shouldSendAnything) {
+            this.inFlightRequests$.next(this.inFlightRequests$.value);
+          }
+
+          return shouldSendAnything;
+        }),
 
         // Send the events:
         // 1. Set lastBatchSent and retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
@@ -298,6 +332,7 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private async sendEvents(events: Event[]) {
     this.initContext.logger.debug(`Reporting ${events.length} events...`);
+    this.inFlightRequests$.next(this.inFlightRequests$.value + 1);
     try {
       const code = await this.makeRequest(events);
       this.reportTelemetryCounters(events, { code });
@@ -308,6 +343,7 @@ export class ElasticV3ServerShipper implements IShipper {
       this.reportTelemetryCounters(events, { code: error.code, error });
       this.firstTimeOffline = undefined;
     }
+    this.inFlightRequests$.next(Math.max(0, this.inFlightRequests$.value - 1));
   }
 
   private async makeRequest(events: Event[]): Promise<string> {

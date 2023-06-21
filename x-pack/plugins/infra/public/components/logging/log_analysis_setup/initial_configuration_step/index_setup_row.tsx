@@ -78,7 +78,7 @@ export const IndexSetupRow: React.FC<{
                     defaultMessage="While analyzing the log messages from these indices we've detected some problems which might indicate a reduced quality of the results. Consider excluding these indices or problematic datasets from the analysis."
                   />
                 }
-                type="alert"
+                type="warning"
                 color="warning"
               />
             ) : null}

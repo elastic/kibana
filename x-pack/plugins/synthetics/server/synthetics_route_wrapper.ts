@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
-import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
-import { createUptimeESClient, inspectableEsQueriesMap } from './legacy_uptime/lib/lib';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
+import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
+import { isTestUser, UptimeEsClient } from './legacy_uptime/lib/lib';
 import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
 import { SyntheticsRouteWrapper, SyntheticsStreamingRouteHandler } from './legacy_uptime/routes';
-import { API_URLS } from '../common/constants';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   uptimeRoute,
@@ -31,25 +32,15 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
 
-    const isInspectorEnabled = await coreContext.uiSettings.client.get<boolean>(
-      enableInspectEsQueries
-    );
-
-    const uptimeEsClient = createUptimeESClient({
+    const uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient.asCurrentUser, {
       request,
-      savedObjectsClient,
-      isInspectorEnabled,
-      esClient: esClient.asCurrentUser,
+      isDev: false,
+      uiSettings: coreContext.uiSettings,
     });
 
     server.uptimeEsClient = uptimeEsClient;
 
-    if (
-      (isInspectorEnabled || server.isDev) &&
-      server.config.service?.username !== 'localKibanaIntegrationTestsUser'
-    ) {
-      inspectableEsQueriesMap.set(request, []);
-    }
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     const res = await (uptimeRoute.handler as SyntheticsStreamingRouteHandler)({
       uptimeEsClient,
@@ -59,61 +50,67 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       server,
       syntheticsMonitorClient,
       subject,
+      spaceId,
     });
 
     return res;
   },
   handler: async (context, request, response) => {
-    const coreContext = await context.core;
-    const { client: esClient } = coreContext.elasticsearch;
-    const savedObjectsClient = coreContext.savedObjects.getClient({
+    const { elasticsearch, savedObjects, uiSettings } = await context.core;
+
+    const { client: esClient } = elasticsearch;
+    const savedObjectsClient = savedObjects.getClient({
       includedHiddenTypes: [syntheticsServiceApiKey.name],
     });
 
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
 
-    const isInspectorEnabled = await coreContext.uiSettings.client.get<boolean>(
-      enableInspectEsQueries
-    );
-
-    const uptimeEsClient = createUptimeESClient({
+    const uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient.asCurrentUser, {
       request,
-      savedObjectsClient,
-      isInspectorEnabled,
-      esClient: esClient.asCurrentUser,
+      uiSettings,
+      isDev: Boolean(server.isDev) && !isTestUser(server),
+      heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
     });
 
     server.uptimeEsClient = uptimeEsClient;
 
-    if (
-      (isInspectorEnabled || server.isDev) &&
-      server.config.service?.username !== 'localKibanaIntegrationTestsUser'
-    ) {
-      inspectableEsQueriesMap.set(request, []);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+    try {
+      const res = await uptimeRoute.handler({
+        uptimeEsClient,
+        savedObjectsClient,
+        context,
+        request,
+        response,
+        server,
+        spaceId,
+        syntheticsMonitorClient,
+      });
+      if (res instanceof KibanaResponse) {
+        return res;
+      }
+
+      return response.ok({
+        body: {
+          ...res,
+          ...(await uptimeEsClient.getInspectData(uptimeRoute.path)),
+        },
+      });
+    } catch (e) {
+      if (e.statusCode === 403) {
+        const privileges = await checkIndicesReadPrivileges(uptimeEsClient);
+        if (!privileges.has_all_requested) {
+          return response.forbidden({
+            body: {
+              message:
+                'MissingIndicesPrivileges: You do not have permission to read from the synthetics-* indices. Please contact your administrator.',
+            },
+          });
+        }
+      }
+      throw e;
     }
-
-    const res = await uptimeRoute.handler({
-      uptimeEsClient,
-      savedObjectsClient,
-      context,
-      request,
-      response,
-      server,
-      syntheticsMonitorClient,
-    });
-
-    if (res instanceof KibanaResponse) {
-      return res;
-    }
-
-    return response.ok({
-      body: {
-        ...res,
-        ...((isInspectorEnabled || server.isDev) && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
-          ? { _inspect: inspectableEsQueriesMap.get(request) }
-          : {}),
-      },
-    });
   },
 });

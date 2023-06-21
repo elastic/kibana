@@ -7,7 +7,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import stripAnsi from 'strip-ansi';
 import { SessionViewSearchBar } from '../session_view_search_bar';
-import { IOLine } from '../../../common/types/process_tree';
+import type { IOLine } from '../../../common';
 
 interface SearchResult {
   line: IOLine;
@@ -20,6 +20,8 @@ export interface TTYSearchBarDeps {
   seekToLine(index: number): void;
   xTermSearchFn(query: string, index: number): void;
   setIsPlaying(value: boolean): void;
+  searchQuery: string;
+  setSearchQuery(value: string): void;
 }
 
 const STRIP_NEWLINES_REGEX = /^(\r\n|\r|\n|\n\r)/;
@@ -29,9 +31,10 @@ export const TTYSearchBar = ({
   seekToLine,
   xTermSearchFn,
   setIsPlaying,
+  searchQuery,
+  setSearchQuery,
 }: TTYSearchBarDeps) => {
   const [currentMatch, setCurrentMatch] = useState<SearchResult | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const jumpToMatch = useCallback(
     (match) => {
@@ -105,7 +108,7 @@ export const TTYSearchBar = ({
       setSearchQuery(query);
       setCurrentMatch(null);
     },
-    [setIsPlaying]
+    [setIsPlaying, setSearchQuery]
   );
 
   const onSetCurrentMatch = useCallback(

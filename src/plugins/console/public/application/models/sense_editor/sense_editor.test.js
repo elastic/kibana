@@ -83,9 +83,10 @@ describe('Editor', () => {
       data = prefix;
     }
 
-    test('Utils test ' + id + ' : ' + name, async function (done) {
-      await input.update(data, true);
-      testToRun(done);
+    test('Utils test ' + id + ' : ' + name, function (done) {
+      input.update(data, true).then(() => {
+        testToRun(done);
+      });
     });
   }
 

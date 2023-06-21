@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { NavLinksBuilder } from '../../common/nav_links_builder';
 import { FeaturesService } from '../../common/services';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import { UnreachableError } from '../../common/lib';
 import { SpaceScenarios } from '../scenarios';
 
 export default function navLinksTests({ getService }: FtrProviderContext) {
@@ -21,6 +22,8 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
     'enterpriseSearch',
     'enterpriseSearchContent',
     'enterpriseSearchAnalytics',
+    'enterpriseSearchApplications',
+    'enterpriseSearchEsre',
     'appSearch',
     'workplaceSearch',
   ];

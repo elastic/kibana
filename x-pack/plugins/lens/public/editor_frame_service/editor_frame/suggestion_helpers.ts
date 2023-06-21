@@ -9,6 +9,7 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type {
   Visualization,
@@ -21,9 +22,7 @@ import type {
   Suggestion,
   DatasourceLayers,
 } from '../../types';
-import type { DragDropIdentifier } from '../../drag_drop';
-import type { LayerType } from '../../../common';
-import { getLayerType } from './config_panel/add_layer';
+import type { LayerType } from '../../../common/types';
 import {
   LensDispatch,
   switchVisualization,
@@ -53,6 +52,7 @@ export function getSuggestions({
   activeData,
   dataViews,
   mainPalette,
+  allowMixed,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
@@ -65,6 +65,7 @@ export function getSuggestions({
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
   mainPalette?: PaletteOutput;
+  allowMixed?: boolean;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -77,7 +78,7 @@ export function getSuggestions({
     }
     const layers = datasource.getLayers(datasourceState);
     for (const layerId of layers) {
-      const type = getLayerType(activeVisualization, visualizationState, layerId);
+      const type = activeVisualization.getLayerType(layerId, visualizationState) || LayerTypes.DATA;
       memo[layerId] = type;
     }
     return memo;
@@ -164,7 +165,8 @@ export function getSuggestions({
             subVisualizationId,
             palette,
             visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
-            activeData
+            activeData,
+            allowMixed
           );
         });
     })
@@ -233,7 +235,8 @@ function getVisualizationSuggestions(
   subVisualizationId?: string,
   mainPalette?: PaletteOutput,
   isFromContext?: boolean,
-  activeData?: Record<string, Datatable>
+  activeData?: Record<string, Datatable>,
+  allowMixed?: boolean
 ) {
   try {
     return visualization
@@ -245,6 +248,7 @@ function getVisualizationSuggestions(
         mainPalette,
         isFromContext,
         activeData,
+        allowMixed,
       })
       .map(({ state, ...visualizationSuggestion }) => ({
         ...visualizationSuggestion,
@@ -296,7 +300,8 @@ export function getTopSuggestionForField(
   visualizationMap: Record<string, Visualization<unknown>>,
   datasource: Datasource,
   field: DragDropIdentifier,
-  dataViews: DataViewsState
+  dataViews: DataViewsState,
+  allowMixed?: boolean
 ) {
   const hasData = Object.values(datasourceLayers).some(
     (datasourceLayer) => datasourceLayer && datasourceLayer.getTableSpec().length > 0
@@ -319,6 +324,7 @@ export function getTopSuggestionForField(
     field,
     mainPalette,
     dataViews,
+    allowMixed,
   });
   return (
     suggestions.find((s) => s.visualizationId === visualization.activeId) ||

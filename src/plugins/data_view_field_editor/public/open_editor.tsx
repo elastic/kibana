@@ -72,11 +72,12 @@ export const getFieldEditorOpener =
     apiService,
   }: Dependencies) =>
   (options: OpenFieldEditorOptions): CloseEditor => {
-    const { uiSettings, overlays, docLinks, notifications } = core;
+    const { uiSettings, overlays, docLinks, notifications, settings } = core;
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings,
       docLinks,
       http: core.http,
+      settings,
     });
 
     let overlayRef: OverlayRef | null = null;
@@ -162,6 +163,9 @@ export const getFieldEditorOpener =
           // Runtime field
           field = {
             name: fieldNameToEdit!,
+            customLabel: dataViewField.customLabel,
+            popularity: dataViewField.count,
+            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             ...dataView.getRuntimeField(fieldNameToEdit!)!,
           };
         } else {

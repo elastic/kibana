@@ -552,7 +552,13 @@
             "label": "history",
             "description": [],
             "signature": [
-              "ScopedHistory",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ScopedHistory",
+                "text": "ScopedHistory"
+              },
               "<unknown>"
             ],
             "path": "src/plugins/management/public/types.ts",
@@ -569,7 +575,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/management/public/types.ts",
@@ -760,7 +772,40 @@
       "path": "src/plugins/management/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "management",
+          "id": "def-public.ManagementStart.setIsSidebarEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "setIsSidebarEnabled",
+          "description": [],
+          "signature": [
+            "(enabled: boolean) => void"
+          ],
+          "path": "src/plugins/management/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "management",
+              "id": "def-public.ManagementStart.setIsSidebarEnabled.$1",
+              "type": "boolean",
+              "tags": [],
+              "label": "enabled",
+              "description": [],
+              "signature": [
+                "boolean"
+              ],
+              "path": "src/plugins/management/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

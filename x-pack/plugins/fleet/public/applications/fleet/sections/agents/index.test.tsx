@@ -9,15 +9,12 @@ import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../mock';
 import { useFleetStatus } from '../../../../hooks/use_fleet_status';
-import { useGetSettings } from '../../../../hooks/use_request/settings';
 import { useAuthz } from '../../../../hooks/use_authz';
 
 import { AgentsApp } from '.';
 
 jest.mock('../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
+  ...jest.requireActual('../../../../hooks/use_fleet_status'),
   useFleetStatus: jest.fn().mockReturnValue({}),
 }));
 jest.mock('../../../../hooks/use_request/settings');
@@ -35,7 +32,6 @@ jest.mock('./agent_list_page', () => {
 });
 
 const mockedUsedFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
-const mockedUseGetSettings = useGetSettings as jest.MockedFunction<typeof useGetSettings>;
 const mockedUseAuthz = useAuthz as jest.MockedFunction<typeof useAuthz>;
 
 function renderAgentsApp() {
@@ -48,12 +44,6 @@ function renderAgentsApp() {
 }
 describe('AgentApp', () => {
   beforeEach(() => {
-    mockedUseGetSettings.mockReturnValue({
-      isLoading: false,
-      data: {
-        item: {},
-      },
-    } as any);
     mockedUseAuthz.mockReturnValue({
       fleet: {
         all: true,

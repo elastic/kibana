@@ -6,35 +6,37 @@
  */
 
 import React, { FC, VFC } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { IndicatorsBarChartWrapper } from '../components/barchart';
-import { IndicatorsTable } from '../components/table';
+import { useBlockListContext } from '../hooks/use_block_list_context';
+import { BlockListProvider } from '../containers/block_list_provider';
+import { BlockListFlyout } from '../../block_list/containers/flyout';
+import { IndicatorsBarChartWrapper } from '../components/barchart/wrapper';
+import { IndicatorsTable } from '../components/table/table';
+import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
 import { useIndicators } from '../hooks/use_indicators';
-import { DefaultPageLayout } from '../../../components/layout';
-import { useFilters } from '../../query_bar';
-import { FiltersGlobal } from '../../../containers/filters_global';
 import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
+import { DefaultPageLayout } from '../../../components/layout';
+import { useFilters } from '../../query_bar/hooks/use_filters';
+import { FiltersGlobal } from '../../../containers/filters_global';
 import { FieldTypesProvider } from '../../../containers/field_types_provider';
 import { InspectorProvider } from '../../../containers/inspector';
-import { useColumnSettings } from '../components/table/hooks';
-import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
+import { useColumnSettings } from '../hooks/use_column_settings';
 import { IndicatorsFilters } from '../containers/filters';
-import { useSecurityContext } from '../../../hooks/use_security_context';
 import { UpdateStatus } from '../../../components/update_status';
-
-const queryClient = new QueryClient();
+import { QueryBar } from '../../query_bar/components/query_bar';
 
 const IndicatorsPageProviders: FC = ({ children }) => (
-  <QueryClientProvider client={queryClient}>
-    <IndicatorsFilters>
-      <FieldTypesProvider>
-        <InspectorProvider>{children}</InspectorProvider>
-      </FieldTypesProvider>
-    </IndicatorsFilters>
-  </QueryClientProvider>
+  <IndicatorsFilters>
+    <FieldTypesProvider>
+      <InspectorProvider>
+        <BlockListProvider>{children}</BlockListProvider>
+      </InspectorProvider>
+    </FieldTypesProvider>
+  </IndicatorsFilters>
 );
 
 const IndicatorsPageContent: VFC = () => {
+  const { blockListIndicatorValue } = useBlockListContext();
+
   const { browserFields, indexPattern } = useSourcererDataView();
 
   const columnSettings = useColumnSettings();
@@ -50,6 +52,7 @@ const IndicatorsPageContent: VFC = () => {
     isLoading: isLoadingIndicators,
     isFetching: isFetchingIndicators,
     dataUpdatedAt,
+    query: indicatorListQuery,
   } = useIndicators({
     filters,
     filterQuery,
@@ -64,13 +67,12 @@ const IndicatorsPageContent: VFC = () => {
     onFieldChange,
     isLoading: isLoadingAggregatedIndicators,
     isFetching: isFetchingAggregatedIndicators,
+    query: indicatorChartQuery,
   } = useAggregatedIndicators({
     timeRange,
     filters,
     filterQuery,
   });
-
-  const { SiemSearchBar } = useSecurityContext();
 
   return (
     <FieldTypesProvider>
@@ -79,7 +81,10 @@ const IndicatorsPageContent: VFC = () => {
         subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
       >
         <FiltersGlobal>
-          <SiemSearchBar indexPattern={indexPattern} id="global" />
+          <QueryBar
+            queries={[indicatorChartQuery, indicatorListQuery]}
+            indexPattern={indexPattern}
+          />
         </FiltersGlobal>
 
         <IndicatorsBarChartWrapper
@@ -105,6 +110,8 @@ const IndicatorsPageContent: VFC = () => {
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
         />
+
+        {blockListIndicatorValue && <BlockListFlyout indicatorFileHash={blockListIndicatorValue} />}
       </DefaultPageLayout>
     </FieldTypesProvider>
   );
@@ -115,7 +122,3 @@ export const IndicatorsPage: VFC = () => (
     <IndicatorsPageContent />
   </IndicatorsPageProviders>
 );
-
-// Note: This is for lazy loading
-// eslint-disable-next-line import/no-default-export
-export default IndicatorsPage;

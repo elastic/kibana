@@ -22,7 +22,7 @@ export function useLocationName({ locationId }: { locationId: string }) {
     if (!locationsLoaded) {
       return undefined;
     } else {
-      return locations.find((location) => location.id === locationId)?.label || locationId;
+      return locations.find((location) => location.id === locationId);
     }
   }, [locationsLoaded, locations, locationId]);
 }

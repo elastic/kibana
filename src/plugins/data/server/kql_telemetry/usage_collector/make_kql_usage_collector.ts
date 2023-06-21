@@ -9,10 +9,13 @@
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { fetchProvider, Usage } from './fetch';
 
-export function makeKQLUsageCollector(usageCollection: UsageCollectionSetup, kibanaIndex: string) {
+export function makeKQLUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  getIndexForType: (type: string) => Promise<string>
+) {
   const kqlUsageCollector = usageCollection.makeUsageCollector<Usage>({
     type: 'kql',
-    fetch: fetchProvider(kibanaIndex),
+    fetch: fetchProvider(getIndexForType),
     isReady: () => true,
     schema: {
       optInCount: { type: 'long' },

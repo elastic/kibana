@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AppStateKey } from '../url_state';
 import { TABLE_INTERVAL_DEFAULT } from '../../components/controls/select_interval/select_interval';
 
 export const useUrlState = jest.fn((accessor: '_a' | '_g') => {
@@ -14,7 +13,7 @@ export const useUrlState = jest.fn((accessor: '_a' | '_g') => {
   }
 });
 
-export const usePageUrlState = jest.fn((pageKey: AppStateKey) => {
+export const usePageUrlState = jest.fn((pageKey: string) => {
   let state: unknown;
   switch (pageKey) {
     case 'timeseriesexplorer':

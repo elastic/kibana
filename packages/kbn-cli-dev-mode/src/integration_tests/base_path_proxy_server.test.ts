@@ -46,6 +46,7 @@ describe('BasePathProxyServer', () => {
       },
       ssl: { enabled: false },
       maxPayload: new ByteSizeValue(1024),
+      restrictInternalApis: false,
     };
 
     const serverOptions = getServerOptions(config);
@@ -81,10 +82,10 @@ describe('BasePathProxyServer', () => {
     await proxySupertest.get('/').expect(302);
   });
 
-  test('root URL will return a redirect location with exactly 3 characters that are a-z', async () => {
+  test('root URL will return a redirect location with exactly 3 characters that are a-z (or spalger)', async () => {
     const res = await proxySupertest.get('/');
     const location = res.header.location;
-    expect(location).toMatch(/[a-z]{3}/);
+    expect(location).toMatch(/^\/(spalger|[a-z]{3})$/);
   });
 
   test('forwards request with the correct path', async () => {

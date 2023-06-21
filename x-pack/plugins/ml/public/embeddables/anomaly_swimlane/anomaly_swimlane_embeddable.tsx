@@ -49,6 +49,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
       initialInput,
       {
         defaultTitle: initialInput.title,
+        defaultDescription: initialInput.description,
       },
       parent
     );

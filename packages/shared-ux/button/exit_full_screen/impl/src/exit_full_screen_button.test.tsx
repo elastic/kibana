@@ -17,6 +17,7 @@ import {
 
 import { ExitFullScreenButton } from './exit_full_screen_button';
 import { ExitFullScreenButtonKibanaProvider, ExitFullScreenButtonProvider } from './services';
+import { of } from 'rxjs';
 
 const componentServices = getExitFullScreenButtonServicesMock();
 const kibanaServices = getExitFullScreenButtonKibanaDependenciesMock();
@@ -41,7 +42,7 @@ describe('<ExitFullScreenButton />', () => {
   describe('with manual services', () => {
     test('is rendered', () => {
       const component = componentMount(<ExitFullScreenButton onExit={jest.fn()} />);
-      expect(component).toMatchSnapshot();
+      expect(component.render()).toMatchSnapshot();
     });
 
     test('passing `false` to toggleChrome does not toggle chrome', () => {
@@ -90,7 +91,7 @@ describe('<ExitFullScreenButton />', () => {
   describe('with kibana services', () => {
     test('is rendered', () => {
       const component = kibanaMount(<ExitFullScreenButton onExit={jest.fn()} />);
-      expect(component).toMatchSnapshot();
+      expect(component.render()).toMatchSnapshot();
     });
 
     test('passing `false` to toggleChrome does not toggle chrome', () => {
@@ -101,6 +102,16 @@ describe('<ExitFullScreenButton />', () => {
 
       component.unmount();
       expect(kibanaServices.coreStart.chrome.setIsVisible).toHaveBeenCalledTimes(0);
+    });
+
+    test('renders custom logo', () => {
+      kibanaServices.coreStart.customBranding.customBranding$ = of({
+        logo: 'imageSrcAsBase64encodedstring',
+      });
+      const component = kibanaMount(
+        <ExitFullScreenButton onExit={jest.fn()} toggleChrome={false} />
+      );
+      expect(component.render()).toMatchSnapshot();
     });
 
     describe('onExit', () => {

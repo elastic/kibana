@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-require('./no_transpilation');
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+// development env setup includes babel/register after the env is initialized
+require('./setup_env');
+require('@kbn/babel-register').install();
+require('./polyfill');

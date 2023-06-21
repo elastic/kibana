@@ -72,7 +72,6 @@ export function readFieldCapsResponse(
   fieldCapsResponse: estypes.FieldCapsResponse
 ): FieldDescriptor[] {
   const capsByNameThenType = fieldCapsResponse.fields;
-
   const kibanaFormattedCaps = Object.keys(capsByNameThenType).reduce<{
     array: FieldDescriptor[];
     hash: Record<string, FieldDescriptor>;
@@ -111,13 +110,10 @@ export function readFieldCapsResponse(
           searchable: isSearchable,
           aggregatable: isAggregatable,
           readFromDocValues: false,
-          conflictDescriptions: types.reduce(
-            (acc, esType) => ({
-              ...acc,
-              [esType]: capsByType[esType].indices,
-            }),
-            {}
-          ),
+          conflictDescriptions: types.reduce((acc, esType) => {
+            acc[esType] = capsByType[esType].indices;
+            return acc;
+          }, {} as Record<string, estypes.Indices | undefined>),
           metadata_field: capsByType[types[0]].metadata_field,
         };
         // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes

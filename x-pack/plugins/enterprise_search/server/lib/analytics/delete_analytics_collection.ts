@@ -7,24 +7,16 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
-
 import { ErrorCode } from '../../../common/types/error_codes';
+import { isResourceNotFoundException } from '../../utils/identify_exceptions';
 
-import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
-
-export const deleteAnalyticsCollectionByName = async (
-  client: IScopedClusterClient,
-  name: string
-) => {
-  const analyticsCollection = await fetchAnalyticsCollectionByName(client, name);
-
-  if (!analyticsCollection) {
-    throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
+export const deleteAnalyticsCollectionById = async (client: IScopedClusterClient, name: string) => {
+  try {
+    await client.asCurrentUser.searchApplication.deleteBehavioralAnalytics({ name });
+  } catch (error) {
+    if (isResourceNotFoundException(error)) {
+      throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
+    }
+    throw error;
   }
-
-  await client.asCurrentUser.delete({
-    id: analyticsCollection.id,
-    index: ANALYTICS_COLLECTIONS_INDEX,
-  });
 };

@@ -540,6 +540,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
                 onChange={handleOnPolicyChange}
                 isLoading={policiesIsLoading}
                 description={POLICY_SELECT_DESCRIPTION}
+                data-test-subj={getTestId('effectedPolicies')}
               />
             </EuiFormRow>
           </>

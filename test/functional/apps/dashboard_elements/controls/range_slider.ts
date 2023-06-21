@@ -15,10 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const { dashboardControls, timePicker, common, dashboard } = getPageObjects([
+  const { dashboardControls, timePicker, common, dashboard, header } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -80,6 +81,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
+      it('can select a range', async () => {
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.rangeSliderSetLowerBound(firstId, '50');
+        await dashboardControls.rangeSliderSetUpperBound(firstId, '100');
+        await dashboardControls.validateRange('value', firstId, '50', '100');
+
+        await dashboard.clearUnsavedChanges();
+      });
+
       it('can add a second range list control with a non-default data view', async () => {
         await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
@@ -90,22 +100,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dashboardControls.getControlsCount()).to.be(2);
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await dashboardControls.validateRange('placeholder', secondId, '100', '1200');
+
+        await dashboardControls.rangeSliderSetLowerBound(secondId, '200');
+        await dashboardControls.rangeSliderSetUpperBound(secondId, '1000');
+        await dashboardControls.validateRange('value', secondId, '200', '1000');
+
         // data views should be properly propagated from the control group to the dashboard
         expect(await filterBar.getIndexPatterns()).to.be('logstash-*,kibana_sample_data_flights');
         await dashboard.clearUnsavedChanges();
       });
 
-      it('renames an existing control', async () => {
+      it('edits title and size of an existing control and retains existing range selection', async () => {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         const newTitle = 'Average ticket price';
         await dashboardControls.editExistingControl(secondId);
         await dashboardControls.controlEditorSetTitle(newTitle);
+        await dashboardControls.controlEditorSetWidth('large');
         await dashboardControls.controlEditorSave();
         expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
+        await dashboardControls.validateRange('value', secondId, '200', '1000');
         await dashboard.clearUnsavedChanges();
       });
 
-      it('can edit range slider control', async () => {
+      it('can change data view and field of range slider control and clears existing selection', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.editExistingControl(firstId);
 
@@ -115,8 +132,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(false);
         await dashboardControls.controlsEditorSetfield('dayOfWeek', RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();
-        await dashboardControls.rangeSliderWaitForLoading();
+        await dashboardControls.rangeSliderWaitForLoading(firstId);
         await dashboardControls.validateRange('placeholder', firstId, '0', '6');
+        await dashboardControls.validateRange('value', firstId, '', '');
 
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
         await retry.try(async () => {
@@ -146,43 +164,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'value'
         );
         expect(upperBoundSelection).to.be('2');
+        await dashboardControls.rangeSliderWaitForLoading(firstId);
       });
 
       it('applies filter from the first control on the second control', async () => {
-        await dashboardControls.rangeSliderWaitForLoading();
         const secondId = (await dashboardControls.getAllControlIds())[1];
+        await dashboardControls.rangeSliderWaitForLoading(secondId);
         await dashboardControls.validateRange('placeholder', secondId, '100', '1000');
-      });
-
-      it('editing field clears selections', async () => {
-        const secondId = (await dashboardControls.getAllControlIds())[1];
-        await dashboardControls.editExistingControl(secondId);
-        await dashboardControls.controlsEditorSetfield('FlightDelayMin', RANGE_SLIDER_CONTROL);
-        await dashboardControls.controlEditorSave();
-
-        await dashboardControls.rangeSliderWaitForLoading();
-        await dashboardControls.validateRange('value', secondId, '', '');
-      });
-
-      it('editing other control settings keeps selections', async () => {
-        const secondId = (await dashboardControls.getAllControlIds())[1];
-        await dashboardControls.rangeSliderSetLowerBound(secondId, '50');
-        await dashboardControls.rangeSliderSetUpperBound(secondId, '100');
-        await dashboardControls.rangeSliderWaitForLoading();
-
-        await dashboardControls.editExistingControl(secondId);
-        await dashboardControls.controlEditorSetTitle('Minimum Flight Delay');
-        await dashboardControls.controlEditorSetWidth('large');
-        await dashboardControls.controlEditorSave();
-
-        await dashboardControls.rangeSliderWaitForLoading();
-        await dashboardControls.validateRange('value', secondId, '50', '100');
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can clear out selections by clicking the reset button', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
-        await dashboardControls.rangeSliderClearSelection(firstId);
+        await dashboardControls.clearControlSelections(firstId);
+        await dashboardControls.rangeSliderOpenPopover(firstId);
         await dashboardControls.validateRange('value', firstId, '', '');
+        await dashboardControls.rangeSliderEnsurePopoverIsClosed(firstId);
+        await dashboard.clearUnsavedChanges();
+      });
+
+      it('making changes to range causes unsaved changes', async () => {
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.rangeSliderSetLowerBound(firstId, '2');
+        await dashboardControls.rangeSliderSetUpperBound(firstId, '3');
+        await dashboardControls.rangeSliderWaitForLoading(firstId);
+        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      });
+
+      it('changes to range can be discarded', async () => {
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.validateRange('value', firstId, '2', '3');
+        await dashboard.clickCancelOutOfEditMode();
+        await dashboardControls.validateRange('value', firstId, '', '');
+      });
+
+      it('dashboard does not load with unsaved changes when changes are discarded', async () => {
+        await dashboard.switchToEditMode();
+        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
 
       it('deletes an existing control', async () => {
@@ -200,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetUpperBound(firstId, '400');
       });
 
-      it('disables range slider when no data available', async () => {
+      it('hides range slider in popover when no data available', async () => {
         await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
@@ -210,10 +228,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await dashboardControls.rangeSliderOpenPopover(secondId);
         await dashboardControls.rangeSliderPopoverAssertOpen();
-        expect(
-          await dashboardControls.rangeSliderGetDualRangeAttribute(secondId, 'disabled')
-        ).to.be('true');
+        await testSubjects.missingOrFail('rangeSlider__slider');
         expect((await testSubjects.getVisibleText('rangeSlider__helpText')).length).to.be.above(0);
+      });
+    });
+
+    describe('interaction', async () => {
+      it('Malformed query throws an error', async () => {
+        await queryBar.setQuery('AvgTicketPrice <= 300 error');
+        await queryBar.submitQuery();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('control-frame-error');
+      });
+
+      it('Can recover from malformed query error', async () => {
+        await queryBar.setQuery('AvgTicketPrice <= 300');
+        await queryBar.submitQuery();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('control-frame-error');
+      });
+
+      it('Applies dashboard query to range slider control', async () => {
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.rangeSliderWaitForLoading(firstId);
+        await dashboardControls.validateRange('placeholder', firstId, '100', '300');
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
       });
     });
   });

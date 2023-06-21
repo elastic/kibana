@@ -13,12 +13,17 @@ import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { maplibregl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
-import { getPreserveDrawingBuffer, isScreenshotMode } from '../../kibana_services';
+import {
+  getPreserveDrawingBuffer,
+  getUsageCollection,
+  isScreenshotMode,
+} from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import {
   CustomIcon,
@@ -28,24 +33,25 @@ import {
   Timeslice,
 } from '../../../common/descriptor_types';
 import {
+  APP_ID,
   CUSTOM_ICON_SIZE,
   DECIMAL_DEGREES_PRECISION,
   MAKI_ICON_SIZE,
   RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
-import { getGlyphUrl } from '../../util';
+import { getCanAccessEmsFonts, getGlyphs, getKibanaFontsGlyphUrl } from './glyphs';
 import { syncLayerOrder } from './sort_layers';
 
-import { removeOrphanedSourcesAndLayers } from './utils';
+import { removeOrphanedSourcesAndLayers } from './remove_orphaned';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
 import type { MapExtentState } from '../../reducers/map/types';
-// @ts-expect-error
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
+import { transformRequest } from './transform_request';
 
 export interface Props {
   isMapReady: boolean;
@@ -149,12 +155,14 @@ export class MbMap extends Component<Props, State> {
   }
 
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
+    this._reportUsage();
     return new Promise((resolve) => {
+      const glyphs = getGlyphs();
       const mbStyle = {
         version: 8 as 8,
         sources: {},
         layers: [],
-        glyphs: getGlyphUrl(),
+        glyphs: glyphs.glyphUrlTemplate,
       };
 
       const options: MapOptions = {
@@ -164,6 +172,7 @@ export class MbMap extends Component<Props, State> {
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
+        transformRequest,
       };
       if (initialView) {
         options.zoom = initialView.zoom;
@@ -193,6 +202,20 @@ export class MbMap extends Component<Props, State> {
         emptyImage.crossOrigin = 'anonymous';
         resolve(mbMap);
       });
+
+      if (glyphs.isEmsFont) {
+        getCanAccessEmsFonts().then((canAccessEmsFonts: boolean) => {
+          if (!this._isMounted || canAccessEmsFonts) {
+            return;
+          }
+
+          // fallback to kibana fonts when EMS fonts are not accessable to prevent layers from not displaying
+          mbMap.setStyle({
+            ...mbMap.getStyle(),
+            glyphs: getKibanaFontsGlyphUrl(),
+          });
+        });
+      }
     });
   }
 
@@ -262,12 +285,29 @@ export class MbMap extends Component<Props, State> {
   }
 
   _initResizerChecker() {
+    this.state.mbMap?.resize(); // ensure map is sized for container prior to monitoring
     this._checker = new ResizeChecker(this._containerRef!);
     this._checker.on('resize', () => {
-      if (this.state.mbMap) {
-        this.state.mbMap.resize();
-      }
+      this.state.mbMap?.resize();
     });
+  }
+
+  _reportUsage() {
+    const usageCollector = getUsageCollection();
+    if (!usageCollector) return;
+
+    const webglSupport = maplibregl.supported();
+
+    usageCollector.reportUiCounter(
+      APP_ID,
+      METRIC_TYPE.LOADED,
+      webglSupport ? 'gl_webglSupported' : 'gl_webglNotSupported'
+    );
+
+    // Report low system performance or no hardware GPU
+    if (webglSupport && !maplibregl.supported({ failIfMajorPerformanceCaveat: true })) {
+      usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, 'gl_majorPerformanceCaveat');
+    }
   }
 
   async _loadMakiSprites(mbMap: MapboxMap) {
@@ -278,10 +318,12 @@ export class MbMap extends Component<Props, State> {
       for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
         if (!mbMap.hasImage(symbolId)) {
           const imageData = await createSdfIcon({ renderSize: MAKI_ICON_SIZE, svg });
-          mbMap.addImage(symbolId, imageData, {
-            pixelRatio,
-            sdf: true,
-          });
+          if (imageData) {
+            mbMap.addImage(symbolId, imageData, {
+              pixelRatio,
+              sdf: true,
+            });
+          }
         }
       }
     }
@@ -387,7 +429,10 @@ export class MbMap extends Component<Props, State> {
       const mbMap = this.state.mbMap;
       for (const { symbolId, svg, cutoff, radius } of this.props.customIcons) {
         createSdfIcon({ svg, renderSize: CUSTOM_ICON_SIZE, cutoff, radius }).then(
-          (imageData: ImageData) => {
+          (imageData: ImageData | null) => {
+            if (!imageData) {
+              return;
+            }
             if (mbMap.hasImage(symbolId)) mbMap.updateImage(symbolId, imageData);
             else
               mbMap.addImage(symbolId, imageData, {

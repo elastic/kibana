@@ -105,6 +105,7 @@ export default function (providerContext: FtrProviderContext) {
     return await supertest.get(`/api/fleet/data_streams`).set('kbn-xsrf', 'xxxx');
   };
 
+  // Failing ES Promotion: https://github.com/elastic/kibana/issues/151756
   describe('data_streams_list', async () => {
     skipIfNoDockerRegistry(providerContext);
 

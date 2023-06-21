@@ -17,6 +17,25 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { Primitive } from 'utility-types';
 
+export function groupByKey<T>(
+  items: T[],
+  getKey: (item: T) => string | undefined
+): Record<string, T[]> {
+  const groups: Record<string, T[]> = {};
+
+  items.forEach((item) => {
+    const key = getKey(item);
+    if (key) {
+      if (!(key in groups)) {
+        groups[key] = [];
+      }
+      groups[key].push(item);
+    }
+  });
+
+  return groups;
+}
+
 /**
  * Computes a group-by key for an agg expression builder based on distinctive expression function arguments
  */

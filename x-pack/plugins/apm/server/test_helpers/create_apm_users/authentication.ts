@@ -15,7 +15,8 @@ export enum ApmUsername {
   apmReadUserWithoutMlAccess = 'apm_read_user_without_ml_access',
   apmManageOwnAgentKeys = 'apm_manage_own_agent_keys',
   apmManageOwnAndCreateAgentKeys = 'apm_manage_own_and_create_agent_keys',
-  apmMonitorIndices = 'apm_monitor_indices',
+  apmMonitorClusterAndIndices = 'apm_monitor_cluster_and_indices',
+  apmManageServiceAccount = 'apm_manage_service_account',
 }
 
 export enum ApmCustomRolename {
@@ -23,7 +24,8 @@ export enum ApmCustomRolename {
   apmAnnotationsWriteUser = 'apm_annotations_write_user',
   apmManageOwnAgentKeys = 'apm_manage_own_agent_keys',
   apmManageOwnAndCreateAgentKeys = 'apm_manage_own_and_create_agent_keys',
-  apmMonitorIndices = 'apm_monitor_indices',
+  apmMonitorClusterAndIndices = 'apm_monitor_cluster_and_indices',
+  apmManageServiceAccount = 'apm_manage_service_account',
 }
 
 export const customRoles = {
@@ -77,7 +79,7 @@ export const customRoles = {
       },
     ],
   },
-  [ApmCustomRolename.apmMonitorIndices]: {
+  [ApmCustomRolename.apmMonitorClusterAndIndices]: {
     elasticsearch: {
       indices: [
         {
@@ -85,6 +87,12 @@ export const customRoles = {
           privileges: ['monitor'],
         },
       ],
+      cluster: ['monitor'],
+    },
+  },
+  [ApmCustomRolename.apmManageServiceAccount]: {
+    elasticsearch: {
+      cluster: ['manage_service_account'],
     },
   },
 };
@@ -118,9 +126,13 @@ export const users: Record<
       ApmCustomRolename.apmManageOwnAndCreateAgentKeys,
     ],
   },
-  [ApmUsername.apmMonitorIndices]: {
+  [ApmUsername.apmMonitorClusterAndIndices]: {
     builtInRoleNames: ['viewer'],
-    customRoleNames: [ApmCustomRolename.apmMonitorIndices],
+    customRoleNames: [ApmCustomRolename.apmMonitorClusterAndIndices],
+  },
+  [ApmUsername.apmManageServiceAccount]: {
+    builtInRoleNames: ['editor'],
+    customRoleNames: [ApmCustomRolename.apmManageServiceAccount],
   },
 };
 

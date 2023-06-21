@@ -69,10 +69,16 @@ export function injectReferences(
 ) {
   const layers: Record<string, FormBasedLayer> = {};
   Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
-    layers[layerId] = {
-      ...persistedLayer,
-      indexPatternId: references.find(({ name }) => name === getLayerReferenceName(layerId))!.id,
-    };
+    const indexPatternId = references.find(
+      ({ name }) => name === getLayerReferenceName(layerId)
+    )?.id;
+
+    if (indexPatternId) {
+      layers[layerId] = {
+        ...persistedLayer,
+        indexPatternId,
+      };
+    }
   });
   return {
     layers,
@@ -109,9 +115,7 @@ function getUsedIndexPatterns({
   const indexPatternIds = [];
   if (initialContext) {
     if ('isVisualizeAction' in initialContext) {
-      for (const { indexPatternId } of initialContext.layers) {
-        indexPatternIds.push(indexPatternId);
-      }
+      indexPatternIds.push(...initialContext.indexPatternIds);
     } else {
       indexPatternIds.push(initialContext.dataViewSpec.id!);
     }

@@ -60,7 +60,12 @@ export function PolicySelector({
       labelAppend={
         fleetLink && (
           <EuiText size="xs">
-            <EuiLink href={fleetLink.href}>{fleetLink.label}</EuiLink>
+            <EuiLink
+              data-test-subj="apmPolicySelectorLink"
+              href={fleetLink.href}
+            >
+              {fleetLink.label}
+            </EuiLink>
           </EuiText>
         )
       }

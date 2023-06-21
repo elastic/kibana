@@ -1,0 +1,23 @@
+{
+  "indices.field_usage_stats": {
+    "url_params": {
+      "fields": [],
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "{indices}/_field_usage_stats"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/field-usage-stats.html"
+  }
+}

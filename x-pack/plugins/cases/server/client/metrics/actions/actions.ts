@@ -25,7 +25,6 @@ export class Actions extends SingleCaseAggregationHandler {
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
     const {
-      unsecuredSavedObjectsClient,
       authorization,
       services: { attachmentService },
       logger,
@@ -44,11 +43,10 @@ export class Actions extends SingleCaseAggregationHandler {
       );
 
       const aggregations = this.aggregationBuilders.reduce((aggs, aggregator) => {
-        return { ...aggs, ...aggregator.build() };
+        return Object.assign(aggs, aggregator.build());
       }, {});
 
       const response = await attachmentService.executeCaseActionsAggregations({
-        unsecuredSavedObjectsClient,
         caseId: theCase.id,
         filter: authorizationFilter,
         aggregations,

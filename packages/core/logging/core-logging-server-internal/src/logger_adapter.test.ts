@@ -7,11 +7,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { loggerMock } from '@kbn/logging-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { LoggerAdapter } from './logger_adapter';
 
 describe('LoggerAdapter', () => {
-  let internalLogger: Logger;
+  let internalLogger: MockedLogger;
 
   beforeEach(() => {
     internalLogger = loggerMock.create();
@@ -47,6 +47,11 @@ describe('LoggerAdapter', () => {
     adapter.get('context');
     expect(internalLogger.get).toHaveBeenCalledTimes(1);
     expect(internalLogger.get).toHaveBeenCalledWith('context');
+
+    internalLogger.isLevelEnabled.mockReturnValue(false);
+    expect(adapter.isLevelEnabled('info')).toEqual(false);
+    expect(internalLogger.isLevelEnabled).toHaveBeenCalledTimes(1);
+    expect(internalLogger.isLevelEnabled).toHaveBeenCalledWith('info');
   });
 
   test('forwards all method calls to new internal logger if it is updated.', () => {
@@ -57,7 +62,7 @@ describe('LoggerAdapter', () => {
     adapter.trace('trace-message');
     expect(internalLogger.trace).toHaveBeenCalledTimes(1);
     expect(internalLogger.trace).toHaveBeenCalledWith('trace-message', undefined);
-    (internalLogger.trace as jest.Mock<() => void>).mockReset();
+    internalLogger.trace.mockReset();
 
     adapter.updateLogger(newInternalLogger);
     adapter.trace('trace-message');

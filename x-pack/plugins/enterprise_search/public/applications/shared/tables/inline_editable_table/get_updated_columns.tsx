@@ -17,6 +17,7 @@ import { InlineEditableTableColumn } from './types';
 interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   displayedItems: Item[];
+  emptyPropertyAllowed?: boolean;
   isActivelyEditing: (item: Item) => boolean;
   canRemoveLastItem?: boolean;
   isLoading?: boolean;
@@ -27,6 +28,7 @@ interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
 export const getUpdatedColumns = <Item extends ItemWithAnID>({
   columns,
   displayedItems,
+  emptyPropertyAllowed = false,
   isActivelyEditing,
   canRemoveLastItem,
   isLoading = false,
@@ -52,6 +54,7 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
       render: (item: Item) => (
         <ActionColumn
           displayedItems={displayedItems}
+          emptyPropertyAllowed={emptyPropertyAllowed ?? false}
           isActivelyEditing={isActivelyEditing}
           isLoading={isLoading}
           canRemoveLastItem={canRemoveLastItem}

@@ -66,20 +66,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
     <>
       <OldAlertCallOut isOldAlert={isOldAlert} />
 
-      <EuiCallOut
-        size="s"
-        title={
-          <span>
-            <FormattedMessage
-              id="xpack.synthetics.alerts.monitorStatus.monitorCallOut.title"
-              defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
-              values={{ snapshotCount: snapshotLoading ? '...' : snapshotCount }}
-            />{' '}
-            {snapshotLoading && <EuiLoadingSpinner />}
-          </span>
-        }
-        iconType="iInCircle"
-      />
+      <AlertMonitorCount count={snapshotCount} loading={snapshotLoading} />
 
       <EuiSpacer size="s" />
 
@@ -126,5 +113,24 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <EuiSpacer size="m" />
     </>
+  );
+};
+
+export const AlertMonitorCount = ({ count, loading }: { count: number; loading?: boolean }) => {
+  return (
+    <EuiCallOut
+      size="s"
+      title={
+        <span data-test-subj="alertSnapShotCount">
+          <FormattedMessage
+            id="xpack.synthetics.alerts.monitorStatus.monitorCallOut.title"
+            defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
+            values={{ snapshotCount: loading ? '...' : count }}
+          />{' '}
+          {loading && <EuiLoadingSpinner />}
+        </span>
+      }
+      iconType="iInCircle"
+    />
   );
 };

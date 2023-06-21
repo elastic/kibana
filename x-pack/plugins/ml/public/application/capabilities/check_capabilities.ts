@@ -6,14 +6,111 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import { BehaviorSubject, combineLatest, from, type Subscription, timer } from 'rxjs';
+import { distinctUntilChanged, retry, switchMap, tap } from 'rxjs/operators';
+import { isEqual } from 'lodash';
+import useObservable from 'react-use/lib/useObservable';
+import { useMemo, useRef } from 'react';
+import { useMlKibana } from '../contexts/kibana';
 import { hasLicenseExpired } from '../license';
 
-import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/capabilities';
+import {
+  getDefaultCapabilities,
+  MlCapabilities,
+  MlCapabilitiesKey,
+} from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
-import type { MlApiServices } from '../services/ml_api_service';
+import { type MlApiServices } from '../services/ml_api_service';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
+
+const CAPABILITIES_REFRESH_INTERVAL = 60000;
+
+export class MlCapabilitiesService {
+  private _isLoading$ = new BehaviorSubject<boolean>(true);
+
+  /**
+   * Updates on manual request, e.g. in the route resolver.
+   * @private
+   */
+  private _updateRequested$ = new BehaviorSubject<number>(Date.now());
+
+  private _capabilities$ = new BehaviorSubject<MlCapabilities | null>(null);
+
+  public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
+
+  private _subscription: Subscription | undefined;
+
+  constructor(private readonly mlApiServices: MlApiServices) {
+    this.init();
+  }
+
+  private init() {
+    this._subscription = combineLatest([
+      this._updateRequested$,
+      timer(0, CAPABILITIES_REFRESH_INTERVAL),
+    ])
+      .pipe(
+        tap(() => {
+          this._isLoading$.next(true);
+        }),
+        switchMap(() => from(this.mlApiServices.checkMlCapabilities())),
+        retry({ delay: CAPABILITIES_REFRESH_INTERVAL })
+      )
+      .subscribe((results) => {
+        this._capabilities$.next(results.capabilities);
+        this._isLoading$.next(false);
+
+        /**
+         * To support legacy use of {@link checkPermission}
+         */
+        _capabilities = results.capabilities;
+      });
+  }
+
+  public getCapabilities(): MlCapabilities | null {
+    return this._capabilities$.getValue();
+  }
+
+  public refreshCapabilities() {
+    this._updateRequested$.next(Date.now());
+  }
+
+  public destroy() {
+    if (this._subscription) {
+      this._subscription.unsubscribe();
+    }
+  }
+}
+
+/**
+ * Check the privilege type and the license to see whether a user has permission to access a feature.
+ *
+ * @param capability
+ */
+export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesKey[]>(
+  capability: T
+): T extends MlCapabilitiesKey ? boolean : boolean[] {
+  const {
+    services: {
+      mlServices: { mlCapabilities: mlCapabilitiesService },
+    },
+  } = useMlKibana();
+
+  // Memoize argument, in case it's an array to preserve the reference.
+  const requestedCapabilities = useRef(capability);
+
+  const capabilities = useObservable(
+    mlCapabilitiesService.capabilities$,
+    mlCapabilitiesService.getCapabilities()
+  );
+
+  return useMemo(() => {
+    return Array.isArray(requestedCapabilities.current)
+      ? requestedCapabilities.current.map((c) => capabilities[c])
+      : capabilities[requestedCapabilities.current];
+  }, [capabilities]);
+}
 
 export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiServices) {
   return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
@@ -30,32 +127,6 @@ export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiS
         }
       })
       .catch((e) => {
-        return reject();
-      });
-  });
-}
-
-export function checkGetJobsCapabilitiesResolver(
-  redirectToMlAccessDeniedPage: () => Promise<void>
-): Promise<MlCapabilities> {
-  return new Promise((resolve, reject) => {
-    getCapabilities()
-      .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
-        _capabilities = capabilities;
-        // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
-        // all other functionality is controlled by the return capabilities object.
-        // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
-        // allow the promise to resolve as the separate license check will redirect then user to
-        // a basic feature
-        if (_capabilities.canGetJobs || isPlatinumOrTrialLicense === false) {
-          return resolve(_capabilities);
-        } else {
-          await redirectToMlAccessDeniedPage();
-          return reject();
-        }
-      })
-      .catch(async (e) => {
-        await redirectToMlAccessDeniedPage();
         return reject();
       });
   });
@@ -87,31 +158,10 @@ export function checkCreateJobsCapabilitiesResolver(
   });
 }
 
-export function checkFindFileStructurePrivilegeResolver(
-  redirectToMlAccessDeniedPage: () => Promise<void>
-): Promise<MlCapabilities> {
-  return new Promise((resolve, reject) => {
-    getCapabilities()
-      .then(async ({ capabilities }) => {
-        _capabilities = capabilities;
-        // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
-        // all other functionality is controlled by the return _capabilities object
-        if (_capabilities.canFindFileStructure) {
-          return resolve(_capabilities);
-        } else {
-          await redirectToMlAccessDeniedPage();
-          return reject();
-        }
-      })
-      .catch(async (e) => {
-        await redirectToMlAccessDeniedPage();
-        return reject();
-      });
-  });
-}
-
-// check the privilege type and the license to see whether a user has permission to access a feature.
-// takes the name of the privilege variable as specified in get_privileges.js
+/**
+ * @deprecated use {@link usePermissionCheck} instead.
+ * @param capability
+ */
 export function checkPermission(capability: keyof MlCapabilities) {
   const licenseHasExpired = hasLicenseExpired();
   return _capabilities[capability] === true && licenseHasExpired !== true;

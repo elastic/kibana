@@ -78,7 +78,9 @@
         "label": "withSolutionNav",
         "description": [],
         "signature": [
-          "<P extends TemplateProps>(WrappedComponent: React.ComponentType<P>) => { (props: Props<P>): JSX.Element; displayName: string; }"
+          "<P extends ",
+          "TemplateProps",
+          ">(WrappedComponent: React.ComponentType<P>) => { (props: Props<P>): JSX.Element; displayName: string; }"
         ],
         "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
         "deprecated": false,

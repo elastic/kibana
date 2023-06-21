@@ -5,24 +5,35 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'react';
-import React, { useState, useEffect, useReducer } from 'react';
+import type { Dispatch, ReactNode } from 'react';
+
 import { merge } from 'lodash';
+import React, { useCallback, useEffect, useState, useReducer } from 'react';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import { DEFAULT_FEATURES } from '../../../common/constants';
-import { DEFAULT_BASE_PATH } from '../../common/navigation';
-import { useApplication } from './use_application';
+
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
+
+import { FilesContext } from '@kbn/shared-ux-file-context';
+
+import { QueryClientProvider } from '@tanstack/react-query';
 import type { CasesContextStoreAction } from './cases_context_reducer';
-import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
 import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
   CasesPermissions,
 } from '../../containers/types';
-import { CasesGlobalComponents } from './cases_global_components';
 import type { ReleasePhase } from '../types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+
+import { CasesGlobalComponents } from './cases_global_components';
+import { DEFAULT_FEATURES } from '../../../common/constants';
+import { constructFileKindIdByOwner } from '../../../common/files';
+import { DEFAULT_BASE_PATH } from '../../common/navigation';
+import { useApplication } from './use_application';
+import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
+import { isRegisteredOwner } from '../../files';
+import { casesQueryClient } from './query_client';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
@@ -50,6 +61,7 @@ export interface CasesContextProps
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
+  getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
@@ -69,6 +81,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     basePath = DEFAULT_BASE_PATH,
     features = {},
     releasePhase = 'ga',
+    getFilesClient,
   },
 }) => {
   const { appId, appTitle } = useApplication();
@@ -114,11 +127,38 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     }
   }, [appTitle, appId]);
 
+  const applyFilesContext = useCallback(
+    (contextChildren: ReactNode) => {
+      if (owner.length === 0) {
+        return contextChildren;
+      }
+
+      if (isRegisteredOwner(owner[0])) {
+        return (
+          <FilesContext client={getFilesClient(constructFileKindIdByOwner(owner[0]))}>
+            {contextChildren}
+          </FilesContext>
+        );
+      } else {
+        throw new Error(
+          'Invalid owner provided to cases context. See https://github.com/elastic/kibana/blob/main/x-pack/plugins/cases/README.md#casescontext-setup'
+        );
+      }
+    },
+    [getFilesClient, owner]
+  );
+
   return isCasesContextValue(value) ? (
-    <CasesContext.Provider value={value}>
-      <CasesGlobalComponents state={state} />
-      {children}
-    </CasesContext.Provider>
+    <QueryClientProvider client={casesQueryClient}>
+      <CasesContext.Provider value={value}>
+        {applyFilesContext(
+          <>
+            <CasesGlobalComponents state={state} />
+            {children}
+          </>
+        )}
+      </CasesContext.Provider>
+    </QueryClientProvider>
   ) : null;
 };
 CasesProvider.displayName = 'CasesProvider';

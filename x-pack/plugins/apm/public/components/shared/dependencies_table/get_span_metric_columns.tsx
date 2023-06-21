@@ -20,7 +20,7 @@ import {
 } from '../charts/helper/get_timeseries_color';
 import { ListMetric } from '../list_metric';
 import { ITableColumn } from '../managed_table';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
 import {
   asMillisecondDuration,
   asPercent,
@@ -61,9 +61,8 @@ export function getSpanMetricColumns({
 }): Array<ITableColumn<SpanMetricGroup>> {
   const { isLarge } = breakpoints;
   const shouldShowSparkPlots = !isLarge;
-  const isLoading =
-    comparisonFetchStatus === FETCH_STATUS.LOADING ||
-    comparisonFetchStatus === FETCH_STATUS.NOT_INITIATED;
+  const isLoading = isPending(comparisonFetchStatus);
+
   return [
     {
       field: 'latency',

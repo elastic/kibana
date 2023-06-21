@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/management-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "management",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "share"
+    ],
+    "optionalPlugins": [
+      "home"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  }
+}

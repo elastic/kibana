@@ -7,12 +7,44 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { CONNECTORS_JOBS_INDEX } from '../..';
+
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
+import { ConnectorSyncJobDocument, SyncStatus } from '../../../common/types/connectors';
 import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
 import { mapIndexStats } from './utils/map_index_stats';
+
+const hasInProgressSyncs = async (
+  client: IScopedClusterClient,
+  connectorId: string
+): Promise<{ inProgress: boolean; pending: boolean }> => {
+  const syncs = await client.asCurrentUser.search<ConnectorSyncJobDocument>({
+    index: CONNECTORS_JOBS_INDEX,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'connector.id': connectorId } },
+          {
+            dis_max: {
+              queries: [
+                { term: { status: SyncStatus.IN_PROGRESS } },
+                { term: { status: SyncStatus.PENDING } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  });
+  const inProgress = syncs.hits.hits.some(
+    (sync) => sync._source?.status === SyncStatus.IN_PROGRESS
+  );
+  const pending = syncs.hits.hits.some((sync) => sync._source?.status === SyncStatus.PENDING);
+  return { inProgress, pending };
+};
 
 export const fetchIndex = async (
   client: IScopedClusterClient,
@@ -28,12 +60,19 @@ export const fetchIndex = async (
     throw new Error('404');
   }
   const indexStats = indices[index];
+
+  const connector = await fetchConnectorByIndexName(client, index);
+  const hasInProgressSyncsResult = connector
+    ? await hasInProgressSyncs(client, connector.id)
+    : { inProgress: false, pending: false };
+
   const indexResult = {
     count,
     ...mapIndexStats(indexData, indexStats, index),
+    has_in_progress_syncs: hasInProgressSyncsResult.inProgress,
+    has_pending_syncs: hasInProgressSyncsResult.pending,
   };
 
-  const connector = await fetchConnectorByIndexName(client, index);
   if (connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE) {
     return {
       ...indexResult,

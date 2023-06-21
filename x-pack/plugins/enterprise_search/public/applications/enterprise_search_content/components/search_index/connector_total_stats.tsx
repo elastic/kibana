@@ -21,6 +21,8 @@ import { i18n } from '@kbn/i18n';
 
 import { isConnectorIndex } from '../../utils/indices';
 
+import { languageToText } from '../../utils/language_to_text';
+
 import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
 import { NATIVE_CONNECTORS } from './connector/constants';
 import { NameAndDescriptionStats } from './name_and_description_stats';
@@ -34,8 +36,9 @@ export const ConnectorTotalStats: React.FC = () => {
     return <></>;
   }
 
-  const stats: EuiStatProps[] = [
+  const stats: EuiStatProps[] & { 'data-test-subj'?: string } = [
     {
+      'data-test-subj': 'entSearchContent-indexOverview-totalStats-ingestionType',
       description: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
         {
@@ -51,6 +54,7 @@ export const ConnectorTotalStats: React.FC = () => {
       ),
     },
     {
+      'data-test-subj': 'entSearchContent-indexOverview-totalStats-connectorType',
       description: i18n.translate('xpack.enterpriseSearch.connector.connectorTypePanel.title', {
         defaultMessage: 'Connector type',
       }),
@@ -71,11 +75,7 @@ export const ConnectorTotalStats: React.FC = () => {
         }
       ),
       isLoading: hideStats,
-      title:
-        indexData.connector.language ??
-        i18n.translate('xpack.enterpriseSearch.content.searchIndex.totalStats.noneLabel', {
-          defaultMessage: 'None',
-        }),
+      title: languageToText(indexData.connector.language ?? ''),
     },
   ];
 
@@ -87,7 +87,7 @@ export const ConnectorTotalStats: React.FC = () => {
         {stats.map((item, index) => (
           <EuiFlexItem key={index}>
             <EuiPanel color="primary" hasShadow={false} paddingSize="l">
-              <EuiStat {...item} />
+              <EuiStat titleSize="m" {...item} />
             </EuiPanel>
           </EuiFlexItem>
         ))}

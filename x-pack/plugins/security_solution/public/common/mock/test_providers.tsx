@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AssistantProvider } from '@kbn/elastic-assistant';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -16,9 +17,13 @@ import type { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
 import { createStore } from '../store';
@@ -39,6 +44,7 @@ interface Props {
   children?: React.ReactNode;
   store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
+  cellActions?: Action[];
 }
 
 export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
@@ -53,26 +59,47 @@ const { storage } = createSecuritySolutionStorageMock();
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  ),
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
+  cellActions = [],
 }) => {
   const queryClient = new QueryClient();
+  const actionTypeRegistry = actionTypeRegistryMock.create();
+  const mockGetInitialConversations = jest.fn(() => ({}));
+  const mockGetComments = jest.fn(() => []);
+  const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <QueryClientProvider client={queryClient}>
-              <ConsoleManager>
-                <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-              </ConsoleManager>
-            </QueryClientProvider>
+            <AssistantProvider
+              actionTypeRegistry={actionTypeRegistry}
+              augmentMessageCodeBlocks={jest.fn()}
+              baseAllow={[]}
+              baseAllowReplacement={[]}
+              defaultAllow={[]}
+              defaultAllowReplacement={[]}
+              getComments={mockGetComments}
+              getInitialConversations={mockGetInitialConversations}
+              setConversations={jest.fn()}
+              setDefaultAllow={jest.fn()}
+              setDefaultAllowReplacement={jest.fn()}
+              http={mockHttp}
+            >
+              <QueryClientProvider client={queryClient}>
+                <ExpandableFlyoutProvider>
+                  <ConsoleManager>
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                    >
+                      <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                    </CellActionsProvider>
+                  </ConsoleManager>
+                </ExpandableFlyoutProvider>
+              </QueryClientProvider>
+            </AssistantProvider>
           </ThemeProvider>
         </ReduxStoreProvider>
       </MockKibanaContextProvider>
@@ -86,34 +113,55 @@ export const TestProvidersComponent: React.FC<Props> = ({
  */
 const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   children,
-  store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  ),
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
-}) => (
-  <I18nProvider>
-    <MockKibanaContextProvider>
-      <ReduxStoreProvider store={store}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <UserPrivilegesProvider
-            kibanaCapabilities={
-              {
-                siem: { show: true, crud: true },
-                [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
-              } as unknown as Capabilities
-            }
-          >
-            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-          </UserPrivilegesProvider>
-        </ThemeProvider>
-      </ReduxStoreProvider>
-    </MockKibanaContextProvider>
-  </I18nProvider>
-);
+  cellActions = [],
+}) => {
+  const actionTypeRegistry = actionTypeRegistryMock.create();
+  const mockGetInitialConversations = jest.fn(() => ({}));
+  const mockGetComments = jest.fn(() => []);
+  const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+
+  return (
+    <I18nProvider>
+      <MockKibanaContextProvider>
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <AssistantProvider
+              actionTypeRegistry={actionTypeRegistry}
+              augmentMessageCodeBlocks={jest.fn()}
+              baseAllow={[]}
+              baseAllowReplacement={[]}
+              defaultAllow={[]}
+              defaultAllowReplacement={[]}
+              getComments={mockGetComments}
+              getInitialConversations={mockGetInitialConversations}
+              setConversations={jest.fn()}
+              setDefaultAllow={jest.fn()}
+              setDefaultAllowReplacement={jest.fn()}
+              http={mockHttp}
+            >
+              <UserPrivilegesProvider
+                kibanaCapabilities={
+                  {
+                    siem: { show: true, crud: true },
+                    [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+                  } as unknown as Capabilities
+                }
+              >
+                <CellActionsProvider
+                  getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                >
+                  <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                </CellActionsProvider>
+              </UserPrivilegesProvider>
+            </AssistantProvider>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      </MockKibanaContextProvider>
+    </I18nProvider>
+  );
+};
 
 export const TestProviders = React.memo(TestProvidersComponent);
 export const TestProvidersWithPrivileges = React.memo(TestProvidersWithPrivilegesComponent);

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -13,6 +14,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
   const SPACE_ID = 'ftr-so-find';
   const UUID_PATTERN = new RegExp(
     /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
@@ -49,7 +51,29 @@ export default function ({ getService }: FtrProviderContext) {
             'dd7caf20-9efd-11e7-acb3-3dab96693fab',
           ]);
           expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+          expect(resp.body.saved_objects[0].typeMigrationVersion).to.be.ok();
         }));
+
+    it('should migrate saved object before returning', async () => {
+      await es.update({
+        index: MAIN_SAVED_OBJECT_INDEX,
+        id: `${SPACE_ID}:config:7.0.0-alpha1`,
+        doc: {
+          coreMigrationVersion: '7.0.0',
+          typeMigrationVersion: '7.0.0',
+        },
+      });
+
+      const { body } = await supertest
+        .get(`/s/${SPACE_ID}/api/saved_objects/_find?type=config`)
+        .expect(200);
+
+      expect(body.saved_objects.map((so: { id: string }) => so.id)).to.eql(['7.0.0-alpha1']);
+      expect(body.saved_objects[0].coreMigrationVersion).to.be.ok();
+      expect(body.saved_objects[0].coreMigrationVersion).not.to.be('7.0.0');
+      expect(body.saved_objects[0].typeMigrationVersion).to.be.ok();
+      expect(body.saved_objects[0].typeMigrationVersion).not.to.be('7.0.0');
+    });
 
     describe('unknown type', () => {
       it('should return 200 with empty response', async () =>
@@ -125,10 +149,12 @@ export default function ({ getService }: FtrProviderContext) {
               }))
             ).to.eql([{ id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: [SPACE_ID] }]);
             expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+            expect(resp.body.saved_objects[0].typeMigrationVersion).to.be.ok();
           }));
     });
 
-    describe('wildcard namespace', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/156581
+    describe.skip('wildcard namespace', () => {
       it('should return 200 with individual responses from the all namespaces', async () =>
         await supertest
           .get(

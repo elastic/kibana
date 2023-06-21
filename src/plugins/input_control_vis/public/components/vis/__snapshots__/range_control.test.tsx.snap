@@ -12,6 +12,8 @@ exports[`disabled 1`] = `
     compressed={false}
     disabled={true}
     fullWidth={false}
+    max={100}
+    min={0}
     showInput={true}
   />
 </FormRow>

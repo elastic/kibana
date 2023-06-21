@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './log_position_state';
-export * from './with_log_position_url_state';
+export * from './use_log_position';

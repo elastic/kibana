@@ -21,24 +21,31 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
 // EPM API routes
 const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
+const EPM_PACKAGES_INSTALLED = `${EPM_API_ROOT}/packages/installed`;
 const EPM_PACKAGES_BULK = `${EPM_PACKAGES_MANY}/_bulk`;
 const EPM_PACKAGES_ONE_DEPRECATED = `${EPM_PACKAGES_MANY}/{pkgkey}`;
 const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}`;
 export const EPM_API_ROUTES = {
   BULK_INSTALL_PATTERN: EPM_PACKAGES_BULK,
   LIST_PATTERN: EPM_PACKAGES_MANY,
+  INSTALLED_LIST_PATTERN: EPM_PACKAGES_INSTALLED,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
   INFO_PATTERN: EPM_PACKAGES_ONE,
+  DATA_STREAMS_PATTERN: `${EPM_API_ROOT}/data_streams`,
   INSTALL_FROM_REGISTRY_PATTERN: EPM_PACKAGES_ONE,
   INSTALL_BY_UPLOAD_PATTERN: EPM_PACKAGES_MANY,
   DELETE_PATTERN: EPM_PACKAGES_ONE,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
+  VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
+  BULK_ASSETS_PATTERN: `${EPM_API_ROOT}/bulk_assets`,
 
   INFO_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
   INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
   DELETE_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
+
+  REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
 };
 
 // Data stream API routes
@@ -97,6 +104,14 @@ export const FLEET_SERVER_HOST_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
 };
 
+export const FLEET_PROXY_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/proxies`,
+  CREATE_PATTERN: `${API_ROOT}/proxies`,
+  INFO_PATTERN: `${API_ROOT}/proxies/{itemId}`,
+  UPDATE_PATTERN: `${API_ROOT}/proxies/{itemId}`,
+  DELETE_PATTERN: `${API_ROOT}/proxies/{itemId}`,
+};
+
 // Settings API routes
 export const SETTINGS_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/settings`,
@@ -127,6 +142,8 @@ export const AGENT_API_ROUTES = {
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
+  REQUEST_DIAGNOSTICS_PATTERN: `${API_ROOT}/agents/{agentId}/request_diagnostics`,
+  BULK_REQUEST_DIAGNOSTICS_PATTERN: `${API_ROOT}/agents/bulk_request_diagnostics`,
   AVAILABLE_VERSIONS_PATTERN: `${API_ROOT}/agents/available_versions`,
   STATUS_PATTERN: `${API_ROOT}/agent_status`,
   DATA_PATTERN: `${API_ROOT}/agent_status/data`,
@@ -134,9 +151,10 @@ export const AGENT_API_ROUTES = {
   STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
-  CURRENT_UPGRADES_PATTERN: `${API_ROOT}/agents/current_upgrades`,
   ACTION_STATUS_PATTERN: `${API_ROOT}/agents/action_status`,
   LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
+  LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
+  GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
@@ -151,10 +169,19 @@ export const ENROLLMENT_API_KEY_ROUTES = {
   DELETE_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
 };
 
+export const UNINSTALL_TOKEN_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/uninstall_tokens`,
+};
+
 // Agents setup API routes
 export const AGENTS_SETUP_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/agents/setup`,
   CREATE_PATTERN: `${API_ROOT}/agents/setup`,
+};
+
+// Message signing service
+export const MESSAGE_SIGNING_SERVICE_API_ROUTES = {
+  ROTATE_KEY_PAIR: `${API_ROOT}/message_signing_service/rotate_key_pair`,
 };
 
 export const SETUP_API_ROUTE = `${API_ROOT}/setup`;
@@ -163,7 +190,6 @@ export const INSTALL_SCRIPT_API_ROUTES = `${API_ROOT}/install/{osType}`;
 
 // Policy preconfig API routes
 export const PRECONFIGURATION_API_ROUTES = {
-  UPDATE_PATTERN: `${API_ROOT}/setup/preconfiguration`,
   RESET_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies`,
   RESET_ONE_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies/{agentPolicyId}`,
 };

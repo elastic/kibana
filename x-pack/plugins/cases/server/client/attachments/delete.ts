@@ -6,44 +6,18 @@
  */
 
 import Boom from '@hapi/boom';
-import pMap from 'p-map';
 
-import type { SavedObject } from '@kbn/core/server';
-import type { CommentAttributes } from '../../../common/api';
-import { Actions, ActionTypes } from '../../../common/api';
-import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import type { CommentRequest, CommentRequestAlertType } from '../../../common/api';
+import { Actions, ActionTypes, CommentRequestRt, decodeOrThrow } from '../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
-
-/**
- * Parameters for deleting all comments of a case.
- */
-export interface DeleteAllArgs {
-  /**
-   * The case ID to delete all attachments for
-   */
-  caseID: string;
-}
-
-/**
- * Parameters for deleting a single attachment of a case.
- */
-export interface DeleteArgs {
-  /**
-   * The case ID to delete an attachment from
-   */
-  caseID: string;
-  /**
-   * The attachment ID to delete
-   */
-  attachmentID: string;
-}
+import type { DeleteAllArgs, DeleteArgs } from './types';
 
 /**
  * Delete all comments for a case.
- *
- * @ignore
  */
 export async function deleteAll(
   { caseID }: DeleteAllArgs,
@@ -51,8 +25,7 @@ export async function deleteAll(
 ): Promise<void> {
   const {
     user,
-    unsecuredSavedObjectsClient,
-    services: { caseService, attachmentService, userActionService },
+    services: { caseService, attachmentService, userActionService, alertsService },
     logger,
     authorization,
   } = clientArgs;
@@ -74,20 +47,12 @@ export async function deleteAll(
       })),
     });
 
-    const mapper = async (comment: SavedObject<CommentAttributes>) =>
-      attachmentService.delete({
-        unsecuredSavedObjectsClient,
-        attachmentId: comment.id,
-        refresh: false,
-      });
-
-    // Ensuring we don't too many concurrent deletions running.
-    await pMap(comments.saved_objects, mapper, {
-      concurrency: MAX_CONCURRENT_SEARCHES,
+    await attachmentService.bulkDelete({
+      attachmentIds: comments.saved_objects.map((so) => so.id),
+      refresh: false,
     });
 
-    await userActionService.bulkCreateAttachmentDeletion({
-      unsecuredSavedObjectsClient,
+    await userActionService.creator.bulkCreateAttachmentDeletion({
       caseId: caseID,
       attachments: comments.saved_objects.map((comment) => ({
         id: comment.id,
@@ -96,6 +61,10 @@ export async function deleteAll(
       })),
       user,
     });
+
+    const attachments = comments.saved_objects.map((comment) => comment.attributes);
+
+    await handleAlerts({ alertsService, attachments, caseId: caseID });
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete all comments case id: ${caseID}: ${error}`,
@@ -107,8 +76,6 @@ export async function deleteAll(
 
 /**
  * Deletes an attachment
- *
- * @ignore
  */
 export async function deleteComment(
   { caseID, attachmentID }: DeleteArgs,
@@ -116,51 +83,54 @@ export async function deleteComment(
 ) {
   const {
     user,
-    unsecuredSavedObjectsClient,
-    services: { attachmentService, userActionService },
+    services: { attachmentService, userActionService, alertsService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const myComment = await attachmentService.get({
-      unsecuredSavedObjectsClient,
+    const attachment = await attachmentService.getter.get({
       attachmentId: attachmentID,
     });
 
-    if (myComment == null) {
+    if (attachment == null) {
       throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
-      entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
+      entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
       operation: Operations.deleteComment,
     });
 
     const type = CASE_SAVED_OBJECT;
     const id = caseID;
 
-    const caseRef = myComment.references.find((c) => c.type === type);
+    const caseRef = attachment.references.find((c) => c.type === type);
     if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
       throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}.`);
     }
 
-    await attachmentService.delete({
-      unsecuredSavedObjectsClient,
-      attachmentId: attachmentID,
+    await attachmentService.bulkDelete({
+      attachmentIds: [attachmentID],
       refresh: false,
     });
 
-    await userActionService.createUserAction({
+    // we only want to store the fields related to the original request of the attachment, not fields like
+    // created_at etc. So we'll use the decode to strip off the other fields. This is necessary because we don't know
+    // what type of attachment this is. Depending on the type it could have various fields.
+    const attachmentRequestAttributes = decodeOrThrow(CommentRequestRt)(attachment.attributes);
+
+    await userActionService.creator.createUserAction({
       type: ActionTypes.comment,
       action: Actions.delete,
-      unsecuredSavedObjectsClient,
       caseId: id,
       attachmentId: attachmentID,
-      payload: { attachment: { ...myComment.attributes } },
+      payload: { attachment: attachmentRequestAttributes },
       user,
-      owner: myComment.attributes.owner,
+      owner: attachment.attributes.owner,
     });
+
+    await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete comment: ${caseID} comment id: ${attachmentID}: ${error}`,
@@ -169,3 +139,22 @@ export async function deleteComment(
     });
   }
 }
+
+interface HandleAlertsArgs {
+  alertsService: CasesClientArgs['services']['alertsService'];
+  attachments: CommentRequest[];
+  caseId: string;
+}
+
+const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
+  const alertAttachments = attachments.filter((attachment): attachment is CommentRequestAlertType =>
+    isCommentRequestTypeAlert(attachment)
+  );
+
+  if (alertAttachments.length === 0) {
+    return;
+  }
+
+  const alerts = getAlertInfoFromComments(alertAttachments);
+  await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
+};

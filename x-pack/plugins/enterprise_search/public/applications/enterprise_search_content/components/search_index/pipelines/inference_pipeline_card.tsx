@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
@@ -36,7 +35,9 @@ import { IndexNameLogic } from '../index_name_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
 
+import { DeleteInferencePipelineButton } from './delete_inference_pipeline_button';
 import { TrainedModelHealth } from './ml_model_health';
+import { MLModelTypeBadge } from './ml_model_type_badge';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => {
@@ -45,7 +46,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
   const { ingestionMethod } = useValues(IndexViewLogic);
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const { deleteMlPipeline } = useActions(PipelinesLogic);
+  const { deleteMlPipeline, detachMlPipeline } = useActions(PipelinesLogic);
   const showConfirmDeleteModal = () => {
     setShowConfirmDelete(true);
     setIsPopOverOpen(false);
@@ -110,18 +111,30 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexItem>
                     <div>
                       <EuiButtonEmpty
-                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
                         size="s"
                         flush="both"
-                        iconType="trash"
+                        iconType="unlink"
                         color="text"
-                        onClick={showConfirmDeleteModal}
+                        onClick={() => {
+                          detachMlPipeline({ indexName, pipelineName });
+                          setIsPopOverOpen(false);
+                        }}
                       >
                         {i18n.translate(
-                          'xpack.enterpriseSearch.inferencePipelineCard.action.delete',
-                          { defaultMessage: 'Delete pipeline' }
+                          'xpack.enterpriseSearch.inferencePipelineCard.action.detach',
+                          { defaultMessage: 'Detach pipeline' }
                         )}
                       </EuiButtonEmpty>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div>
+                      <DeleteInferencePipelineButton
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
+                        onClick={showConfirmDeleteModal}
+                        pipeline={pipeline}
+                      />
                     </div>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -139,7 +152,10 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <TrainedModelHealth {...pipeline} />
+                  <TrainedModelHealth
+                    modelState={pipeline.modelState}
+                    modelStateReason={pipeline.modelStateReason}
+                  />
                 </EuiFlexItem>
                 {pipeline.modelState === TrainedModelState.NotDeployed && (
                   <EuiFlexItem grow={false} style={{ paddingRight: '1rem' }}>
@@ -151,6 +167,12 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                       )}
                     >
                       <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
+                          {
+                            defaultMessage: 'Fix issue in Trained Models',
+                          }
+                        )}
                         data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
                         href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
                         display="base"
@@ -164,7 +186,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
                       <span>
-                        <EuiBadge color="hollow">{modelType}</EuiBadge>
+                        <MLModelTypeBadge type={modelType} />
                       </span>
                     </EuiFlexItem>
                   </EuiFlexGroup>

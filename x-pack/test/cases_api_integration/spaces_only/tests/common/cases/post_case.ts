@@ -14,7 +14,7 @@ import {
   createCase,
   removeServerGeneratedPropertiesFromCase,
   getAuthWithSuperUser,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

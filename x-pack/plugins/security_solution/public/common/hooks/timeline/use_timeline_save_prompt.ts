@@ -11,7 +11,8 @@ import type { AppLeaveHandler } from '@kbn/core-application-browser';
 import { useHistory } from 'react-router-dom';
 import { useShowTimelineForGivenPath } from '../../utils/timeline/use_show_timeline_for_path';
 import type { TimelineId } from '../../../../common/types';
-import { TimelineStatus, TimelineTabs } from '../../../../common/types';
+import { TimelineTabs } from '../../../../common/types';
+import { TimelineStatus } from '../../../../common/types/timeline/api';
 import { useKibana } from '../../lib/kibana';
 import { useDeepEqualSelector } from '../use_selector';
 import { APP_ID, APP_PATH } from '../../../../common/constants';
@@ -30,7 +31,7 @@ export const useTimelineSavePrompt = (
   onAppLeave: (handler: AppLeaveHandler) => void
 ) => {
   const dispatch = useDispatch();
-  const { overlays, application } = useKibana().services;
+  const { overlays, application, http } = useKibana().services;
   const getIsTimelineVisible = useShowTimelineForGivenPath();
   const history = useHistory();
 
@@ -66,10 +67,12 @@ export const useTimelineSavePrompt = (
 
         if (confirmRes) {
           unblock();
-
-          application.navigateToUrl(location.pathname + location.hash + location.search, {
-            state: location.state,
-          });
+          application.navigateToUrl(
+            http.basePath.get() + location.pathname + location.hash + location.search,
+            {
+              state: location.state,
+            }
+          );
         } else {
           showSaveTimelineModal();
         }
@@ -92,6 +95,7 @@ export const useTimelineSavePrompt = (
     };
   }, [
     history,
+    http.basePath,
     application,
     overlays,
     showSaveTimelineModal,

@@ -12,13 +12,16 @@ import type {
   IScopedClusterClient,
   RequestHandler,
   SavedObjectsClientContract,
+  CoreSetup,
 } from '@kbn/core/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { createExecutionContext } from '@kbn/ml-route-utils';
+
+import { PLUGIN_ID } from '../../common/constants/app';
 import { mlSavedObjectServiceFactory, MLSavedObjectService } from '../saved_objects';
 import type { MlLicense } from '../../common/license';
 
@@ -51,6 +54,7 @@ export class RouteGuard {
   private _authorization: SecurityPluginSetup['authz'] | undefined;
   private _isMlReady: () => Promise<void>;
   private _getDataViews: GetDataViews;
+  private _getStartServices: CoreSetup['getStartServices'];
 
   constructor(
     mlLicense: MlLicense,
@@ -59,7 +63,8 @@ export class RouteGuard {
     spacesPlugin: SpacesPluginSetup | undefined,
     authorization: SecurityPluginSetup['authz'] | undefined,
     isMlReady: () => Promise<void>,
-    getDataViews: GetDataViews
+    getDataViews: GetDataViews,
+    getStartServices: CoreSetup['getStartServices']
   ) {
     this._mlLicense = mlLicense;
     this._getMlSavedObjectClient = getSavedObject;
@@ -68,6 +73,7 @@ export class RouteGuard {
     this._authorization = authorization;
     this._isMlReady = isMlReady;
     this._getDataViews = getDataViews;
+    this._getStartServices = getStartServices;
   }
 
   public fullLicenseAPIGuard<P, Q, B>(handler: Handler<P, Q, B>) {
@@ -88,8 +94,11 @@ export class RouteGuard {
         return response.forbidden();
       }
 
-      const { elasticsearch, savedObjects } = await context.core;
-      const client = elasticsearch.client;
+      const {
+        elasticsearch: { client },
+        savedObjects: { client: savedObjectClient },
+      } = await context.core;
+
       const mlSavedObjectClient = this._getMlSavedObjectClient(request);
       const internalSavedObjectsClient = this._getInternalSavedObjectClient();
       if (mlSavedObjectClient === null || internalSavedObjectsClient === null) {
@@ -107,20 +116,25 @@ export class RouteGuard {
         this._isMlReady
       );
 
-      return handler({
-        client,
-        request,
-        response,
-        context,
-        mlSavedObjectService,
-        mlClient: getMlClient(client, mlSavedObjectService),
-        getDataViewsService: getDataViewsServiceFactory(
-          this._getDataViews,
-          savedObjects.client,
+      const [coreStart] = await this._getStartServices();
+      const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
+
+      return await coreStart.executionContext.withContext(executionContext, () =>
+        handler({
           client,
-          request
-        ),
-      });
+          request,
+          response,
+          context,
+          mlSavedObjectService,
+          mlClient: getMlClient(client, mlSavedObjectService),
+          getDataViewsService: getDataViewsServiceFactory(
+            this._getDataViews,
+            savedObjectClient,
+            client,
+            request
+          ),
+        })
+      );
     };
   }
 }

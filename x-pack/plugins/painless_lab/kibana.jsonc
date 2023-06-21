@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/painless-lab-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "painlessLab",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "painless_lab"
+    ],
+    "requiredPlugins": [
+      "devTools",
+      "licensing",
+      "home"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

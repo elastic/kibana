@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Redirect, Switch, useRouteMatch } from 'react-router-dom';
+import { Redirect, Switch, useRouteMatch } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';

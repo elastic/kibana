@@ -8,13 +8,16 @@
 
 import { omit } from 'lodash';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '../types';
+
+import { DashboardPanelMap, DashboardPanelState } from '..';
+import { SavedDashboardPanel } from '../content_management';
 
 export function convertSavedDashboardPanelToPanelState<
   TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 >(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
   return {
     type: savedDashboardPanel.type,
+    version: savedDashboardPanel.version,
     gridData: savedDashboardPanel.gridData,
     panelRefName: savedDashboardPanel.panelRefName,
     explicitInput: {
@@ -28,11 +31,11 @@ export function convertSavedDashboardPanelToPanelState<
 
 export function convertPanelStateToSavedDashboardPanel(
   panelState: DashboardPanelState,
-  version: string
+  version?: string
 ): SavedDashboardPanel {
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
-    version,
+    version: version ?? (panelState.version as string), // temporary cast. Version will be mandatory at a later date.
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
@@ -51,8 +54,11 @@ export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): Da
   return panelsMap;
 };
 
-export const convertPanelMapToSavedPanels = (panels: DashboardPanelMap, version: string) => {
+export const convertPanelMapToSavedPanels = (
+  panels: DashboardPanelMap,
+  versionOverride?: string
+) => {
   return Object.values(panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, version)
+    convertPanelStateToSavedDashboardPanel(panel, versionOverride)
   );
 };

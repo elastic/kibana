@@ -15,26 +15,53 @@ import {
   getConfirmFleetServerConnectionStep,
   getInstallFleetServerStep,
 } from './steps';
+import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
 
-export const QuickStartTab: React.FunctionComponent = () => {
-  const quickStartCreateForm = useQuickStartCreateForm();
+interface Props {
+  onClose: () => void;
+}
+
+export const QuickStartTab: React.FunctionComponent<Props> = ({ onClose }) => {
+  const {
+    fleetServerHost,
+    setFleetServerHost,
+    fleetServerHosts,
+    fleetServerPolicyId,
+    serviceToken,
+    status,
+    error,
+    submit,
+    inputs,
+  } = useQuickStartCreateForm();
+
   const { isFleetServerReady } = useWaitForFleetServer();
+  const { hasRecentlyEnrolledFleetServers } = useLatestFleetServers();
 
   const steps = [
     getGettingStartedStep({
-      quickStartCreateForm,
+      fleetServerHosts,
+      fleetServerHost,
+      setFleetServerHost,
+      fleetServerPolicyId,
+      serviceToken,
+      status,
+      error,
+      submit,
+      isFleetServerHostSubmitted: false,
+      inputs,
+      onClose,
     }),
     getInstallFleetServerStep({
       isFleetServerReady,
-      fleetServerHost: quickStartCreateForm.fleetServerHost,
-      fleetServerPolicyId: quickStartCreateForm.fleetServerPolicyId,
-      serviceToken: quickStartCreateForm.serviceToken,
+      fleetServerHost: fleetServerHost?.host_urls[0],
+      fleetServerPolicyId,
+      serviceToken,
       deploymentMode: 'quickstart',
-      disabled: quickStartCreateForm.status !== 'success',
+      disabled: status !== 'success',
     }),
     getConfirmFleetServerConnectionStep({
-      isFleetServerReady,
-      disabled: quickStartCreateForm.status !== 'success',
+      hasRecentlyEnrolledFleetServers,
+      disabled: status !== 'success',
     }),
   ];
 

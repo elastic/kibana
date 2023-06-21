@@ -8,168 +8,70 @@
 
 import './discover_field.scss';
 
-import React, { useState, useCallback, memo, useMemo } from 'react';
-import { EuiButtonIcon, EuiToolTip, EuiTitle, EuiIcon, EuiSpacer } from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
-import classNames from 'classnames';
-import { FieldButton, FieldIcon } from '@kbn/react-field';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
-  FieldStats,
+  FieldItemButton,
+  type FieldItemButtonProps,
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
-  FieldPopoverVisualize,
+  FieldPopoverFooter,
 } from '@kbn/unified-field-list-plugin/public';
-import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
-import { DiscoverFieldDetails } from './discover_field_details';
-import { FieldDetails } from './types';
-import { getFieldTypeName } from '../../../../utils/get_field_type_name';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
+import { DragDrop } from '@kbn/dom-drag-drop';
+import { DiscoverFieldStats } from './discover_field_stats';
+import { PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
 
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
-}
-
-const FieldInfoIcon: React.FC = memo(() => (
-  <EuiToolTip
-    position="bottom"
-    content={i18n.translate('discover.field.mappingConflict', {
-      defaultMessage:
-        'This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
-        'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
-    })}
-  >
-    <EuiIcon
-      tabIndex={0}
-      type="alert"
-      title={i18n.translate('discover.field.mappingConflict.title', {
-        defaultMessage: 'Mapping Conflict',
-      })}
-      size="s"
-    />
-  </EuiToolTip>
-));
-
-const DiscoverFieldTypeIcon: React.FC<{ field: DataViewField }> = memo(({ field }) => {
-  const typeForIcon = getTypeForFieldIcon(field);
-  return (
-    <FieldIcon type={typeForIcon} label={getFieldTypeName(typeForIcon)} scripted={field.scripted} />
-  );
-});
-
-const FieldName: React.FC<{ field: DataViewField }> = memo(({ field }) => {
-  const title =
-    field.displayName !== field.name
-      ? i18n.translate('discover.field.title', {
-          defaultMessage: '{fieldName} ({fieldDisplayName})',
-          values: {
-            fieldName: field.name,
-            fieldDisplayName: field.displayName,
-          },
-        })
-      : field.displayName;
-
-  return (
-    <span data-test-subj={`field-${field.name}`} title={title} className="dscSidebarField__name">
-      {wrapOnDot(field.displayName)}
-    </span>
-  );
-});
-
-interface ActionButtonProps {
+interface GetCommonFieldItemButtonPropsParams {
   field: DataViewField;
-  isSelected?: boolean;
-  alwaysShow: boolean;
+  isSelected: boolean;
   toggleDisplay: (field: DataViewField, isSelected?: boolean) => void;
 }
 
-const ActionButton: React.FC<ActionButtonProps> = memo(
-  ({ field, isSelected, alwaysShow, toggleDisplay }) => {
-    const actionBtnClassName = classNames('dscSidebarItem__action', {
-      ['dscSidebarItem__mobile']: alwaysShow,
-    });
-    if (field.name === '_source') {
-      return null;
-    }
-    if (!isSelected) {
-      return (
-        <EuiToolTip
-          delay="long"
-          content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
-            defaultMessage: 'Add field as column',
-          })}
-        >
-          <EuiButtonIcon
-            iconType="plusInCircleFilled"
-            className={actionBtnClassName}
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
-              toggleDisplay(field, isSelected);
-            }}
-            data-test-subj={`fieldToggle-${field.name}`}
-            aria-label={i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
-              defaultMessage: 'Add {field} to table',
-              values: { field: field.name },
-            })}
-          />
-        </EuiToolTip>
-      );
-    } else {
-      return (
-        <EuiToolTip
-          delay="long"
-          content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
-            defaultMessage: 'Remove field from table',
-          })}
-        >
-          <EuiButtonIcon
-            color="danger"
-            iconType="cross"
-            className={actionBtnClassName}
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
-              toggleDisplay(field, isSelected);
-            }}
-            data-test-subj={`fieldToggle-${field.name}`}
-            aria-label={i18n.translate(
-              'discover.fieldChooser.discoverField.removeButtonAriaLabel',
-              {
-                defaultMessage: 'Remove {field} from table',
-                values: { field: field.name },
-              }
-            )}
-          />
-        </EuiToolTip>
-      );
-    }
-  }
-);
+function getCommonFieldItemButtonProps({
+  field,
+  isSelected,
+  toggleDisplay,
+}: GetCommonFieldItemButtonPropsParams): {
+  field: FieldItemButtonProps<DataViewField>['field'];
+  isSelected: FieldItemButtonProps<DataViewField>['isSelected'];
+  buttonAddFieldToWorkspaceProps: FieldItemButtonProps<DataViewField>['buttonAddFieldToWorkspaceProps'];
+  buttonRemoveFieldFromWorkspaceProps: FieldItemButtonProps<DataViewField>['buttonRemoveFieldFromWorkspaceProps'];
+  onAddFieldToWorkspace: FieldItemButtonProps<DataViewField>['onAddFieldToWorkspace'];
+  onRemoveFieldFromWorkspace: FieldItemButtonProps<DataViewField>['onRemoveFieldFromWorkspace'];
+} {
+  const handler =
+    field.name === '_source' ? undefined : (f: DataViewField) => toggleDisplay(f, isSelected);
+  return {
+    field,
+    isSelected,
+    buttonAddFieldToWorkspaceProps: {
+      'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+        defaultMessage: 'Add field as column',
+      }),
+    },
+    buttonRemoveFieldFromWorkspaceProps: {
+      'aria-label': i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
+        defaultMessage: 'Remove field from table',
+      }),
+    },
+    onAddFieldToWorkspace: handler,
+    onRemoveFieldFromWorkspace: handler,
+  };
+}
 
 interface MultiFieldsProps {
   multiFields: NonNullable<DiscoverFieldProps['multiFields']>;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
-  isDocumentRecord: boolean;
 }
 
 const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ multiFields, toggleDisplay, alwaysShowActionButton, isDocumentRecord }) => (
+  ({ multiFields, toggleDisplay, alwaysShowActionButton }) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>
@@ -180,22 +82,20 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
       </EuiTitle>
       <EuiSpacer size="xs" />
       {multiFields.map((entry) => (
-        <FieldButton
-          size="s"
-          className="dscSidebarItem dscSidebarItem--multi"
-          isActive={false}
-          dataTestSubj={`field-${entry.field.name}-showDetails`}
-          fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={entry.field} />}
-          fieldAction={
-            <ActionButton
-              field={entry.field}
-              isSelected={entry.isSelected}
-              alwaysShow={alwaysShowActionButton}
-              toggleDisplay={toggleDisplay}
-            />
-          }
-          fieldName={<FieldName field={entry.field} />}
+        <FieldItemButton
           key={entry.field.name}
+          size="xs"
+          className="dscSidebarItem dscSidebarItem--multi"
+          flush="both"
+          isEmpty={false}
+          isActive={false}
+          shouldAlwaysShowAction={alwaysShowActionButton}
+          onClick={undefined}
+          {...getCommonFieldItemButtonProps({
+            field: entry.field,
+            isSelected: entry.isSelected,
+            toggleDisplay,
+          })}
         />
       ))}
     </React.Fragment>
@@ -224,18 +124,18 @@ export interface DiscoverFieldProps {
    */
   onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
   /**
-   * Callback to remove/deselect a the field
+   * Callback to remove a field column from the table
    * @param fieldName
    */
   onRemoveField: (fieldName: string) => void;
   /**
-   * Retrieve details data for the field
+   * Determines whether the field is empty
    */
-  getDetails: (field: DataViewField) => FieldDetails;
+  isEmpty: boolean;
   /**
    * Determines whether the field is selected
    */
-  selected?: boolean;
+  isSelected: boolean;
   /**
    * Metric tracking function
    * @param metricType
@@ -258,37 +158,46 @@ export interface DiscoverFieldProps {
   onDeleteField?: (fieldName: string) => void;
 
   /**
-   * Optionally show or hide field stats in the popover
-   */
-  showFieldStats?: boolean;
-  /**
    * Columns
    */
   contextualFields: string[];
+
+  /**
+   * Search by field name
+   */
+  highlight?: string;
+
+  /**
+   * Group index in the field list
+   */
+  groupIndex: number;
+
+  /**
+   * Item index in the field list
+   */
+  itemIndex: number;
 }
 
 function DiscoverFieldComponent({
   alwaysShowActionButton = false,
   field,
+  highlight,
   dataView,
   onAddField,
   onRemoveField,
   onAddFilter,
-  getDetails,
-  selected,
+  isEmpty,
+  isSelected,
   trackUiMetric,
   multiFields,
   onEditField,
   onDeleteField,
-  showFieldStats,
   contextualFields,
+  groupIndex,
+  itemIndex,
 }: DiscoverFieldProps) {
-  const services = useDiscoverServices();
-  const { data } = services;
   const [infoIsOpen, setOpen] = useState(false);
   const isDocumentRecord = !!onAddFilter;
-  const query = useAppStateSelector((state) => state.query);
-  const filters = useAppStateSelector((state) => state.filters);
 
   const addFilterAndClosePopover: typeof onAddFilter | undefined = useMemo(
     () =>
@@ -309,7 +218,7 @@ function DiscoverFieldComponent({
     setOpen(false);
   }, [setOpen]);
 
-  const toggleDisplay: ActionButtonProps['toggleDisplay'] = useCallback(
+  const toggleDisplay: GetCommonFieldItemButtonPropsParams['toggleDisplay'] = useCallback(
     (f, isCurrentlySelected) => {
       closePopover();
       if (isCurrentlySelected) {
@@ -343,113 +252,28 @@ function DiscoverFieldComponent({
     [field.name]
   );
 
-  if (field.type === '_source') {
-    return (
-      <FieldButton
-        size="s"
-        className="dscSidebarItem"
-        dataTestSubj={`field-${field.name}-showDetails`}
-        fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={field} />}
-        fieldAction={
-          <ActionButton
-            field={field}
-            isSelected={selected}
-            alwaysShow={alwaysShowActionButton}
-            toggleDisplay={toggleDisplay}
-          />
-        }
-        fieldName={<FieldName field={field} />}
-      />
-    );
-  }
-
-  const button = (
-    <FieldButton
-      size="s"
-      className="dscSidebarItem"
-      isActive={infoIsOpen}
-      onClick={togglePopover}
-      dataTestSubj={`field-${field.name}-showDetails`}
-      fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={field} />}
-      fieldAction={
-        <ActionButton
-          field={field}
-          isSelected={selected}
-          alwaysShow={alwaysShowActionButton}
-          toggleDisplay={toggleDisplay}
-        />
-      }
-      fieldName={<FieldName field={field} />}
-      fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
-    />
-  );
-
-  if (!isDocumentRecord) {
-    return button;
-  }
-
   const renderPopover = () => {
-    const dateRange = data?.query?.timefilter.timefilter.getAbsoluteTime();
-    // prioritize an aggregatable multi field if available or take the parent field
-    const fieldForStats =
-      (multiFields?.length &&
-        multiFields.find((multiField) => multiField.field.aggregatable)?.field) ||
-      field;
-    const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);
-
     return (
       <>
-        {showLegacyFieldStats ? (
-          <>
-            {showFieldStats && (
-              <>
-                <EuiTitle size="xxxs">
-                  <h5>
-                    {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-                      defaultMessage: 'Top 5 values',
-                    })}
-                  </h5>
-                </EuiTitle>
-                <DiscoverFieldDetails
-                  dataView={dataView}
-                  field={field}
-                  details={getDetails(field)}
-                  onAddFilter={onAddFilter}
-                />
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            {Boolean(dateRange) && (
-              <FieldStats
-                services={services}
-                query={query!}
-                filters={filters!}
-                fromDate={dateRange.from}
-                toDate={dateRange.to}
-                dataViewOrDataViewId={dataView}
-                field={fieldForStats}
-                data-test-subj="dscFieldStats"
-                onAddFilter={addFilterAndClosePopover}
-              />
-            )}
-          </>
-        )}
+        <DiscoverFieldStats
+          field={field}
+          multiFields={multiFields}
+          dataView={dataView}
+          onAddFilter={addFilterAndClosePopover}
+        />
 
         {multiFields && (
           <>
-            {(showFieldStats || !showLegacyFieldStats) && <EuiSpacer size="m" />}
+            <EuiSpacer size="m" />
             <MultiFields
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
-              isDocumentRecord={isDocumentRecord}
             />
           </>
         )}
 
-        <FieldPopoverVisualize
+        <FieldPopoverFooter
           field={field}
           dataView={dataView}
           multiFields={rawMultiFields}
@@ -457,29 +281,63 @@ function DiscoverFieldComponent({
           contextualFields={contextualFields}
           originatingApp={PLUGIN_ID}
           uiActions={getUiActions()}
+          closePopover={() => closePopover()}
         />
       </>
     );
   };
 
+  const value = useMemo(
+    () => ({
+      id: field.name,
+      humanData: {
+        label: field.displayName,
+        position: itemIndex + 1,
+      },
+    }),
+    [field, itemIndex]
+  );
+  const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
+
   return (
     <FieldPopover
       isOpen={infoIsOpen}
-      button={button}
+      button={
+        <DragDrop
+          draggable
+          order={order}
+          value={value}
+          onDragStart={closePopover}
+          isDisabled={alwaysShowActionButton}
+          dataTestSubj={`dscFieldListPanelField-${field.name}`}
+        >
+          <FieldItemButton
+            size="xs"
+            fieldSearchHighlight={highlight}
+            className="dscSidebarItem"
+            isEmpty={isEmpty}
+            isActive={infoIsOpen}
+            flush={alwaysShowActionButton ? 'both' : undefined}
+            shouldAlwaysShowAction={alwaysShowActionButton}
+            onClick={field.type !== '_source' ? togglePopover : undefined}
+            {...getCommonFieldItemButtonProps({ field, isSelected, toggleDisplay })}
+          />
+        </DragDrop>
+      }
       closePopover={closePopover}
       data-test-subj="discoverFieldListPanelPopover"
       renderHeader={() => (
         <FieldPopoverHeader
           field={field}
           closePopover={closePopover}
-          onAddFieldToWorkspace={!selected ? toggleDisplay : undefined}
+          onAddFieldToWorkspace={!isSelected ? toggleDisplay : undefined}
           onAddFilter={onAddFilter}
           onEditField={onEditField}
           onDeleteField={onDeleteField}
           {...customPopoverHeaderProps}
         />
       )}
-      renderContent={renderPopover}
+      renderContent={isDocumentRecord ? renderPopover : undefined}
     />
   );
 }

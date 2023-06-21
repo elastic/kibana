@@ -7,7 +7,7 @@
  */
 
 import { resolve } from 'path';
-import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 
 export const REPO_ROOT = KIBANA_ROOT;
 export const ASSET_DIR = resolve(KIBANA_ROOT, 'built_assets/storybook');

@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/expression-metric-vis-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "description": "Adds a `metric` renderer and function to the expression plugin. The renderer will display the `metric` chart.",
+  "plugin": {
+    "id": "expressionMetricVis",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "expressions",
+      "fieldFormats",
+      "charts",
+      "visualizations",
+      "presentationUtil"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact"
+    ]
+  }
+}

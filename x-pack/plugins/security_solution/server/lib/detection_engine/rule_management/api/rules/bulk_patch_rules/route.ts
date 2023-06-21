@@ -24,9 +24,9 @@ import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { patchRules } from '../../../logic/crud/patch_rules';
 import { readRules } from '../../../logic/crud/read_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
+import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
+import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
@@ -54,7 +54,6 @@ export const bulkPatchRulesRoute = (
       const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
 
       const rulesClient = ctx.alerting.getRulesClient();
-      const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
       const savedObjectsClient = ctx.core.savedObjects.client;
 
       const mlAuthz = buildMlAuthz({
@@ -63,6 +62,7 @@ export const bulkPatchRulesRoute = (
         request,
         savedObjectsClient,
       });
+
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
@@ -83,20 +83,26 @@ export const bulkPatchRulesRoute = (
               throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
             }
 
-            const migratedRule = await legacyMigrate({
+            validateRulesWithDuplicatedDefaultExceptionsList({
+              allRules: request.body,
+              exceptionsList: payloadRule.exceptions_list,
+              ruleId: idOrRuleIdOrUnknown,
+            });
+
+            await validateRuleDefaultExceptionList({
+              exceptionsList: payloadRule.exceptions_list,
               rulesClient,
-              savedObjectsClient,
-              rule: existingRule,
+              ruleRuleId: payloadRule.rule_id,
+              ruleId: payloadRule.id,
             });
 
             const rule = await patchRules({
-              existingRule: migratedRule,
+              existingRule,
               rulesClient,
               nextParams: payloadRule,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-              return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
+              return transformValidateBulkError(rule.id, rule);
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

@@ -32,7 +32,7 @@ export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) =>
         {isLoading ? (
           <EuiLoadingSpinner size="m" />
         ) : response && response.error ? (
-          <EuiIcon type="alert" color="danger" />
+          <EuiIcon type="warning" color="danger" />
         ) : (
           <EuiIcon type="check" color="success" />
         )}

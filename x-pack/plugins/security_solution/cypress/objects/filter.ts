@@ -7,7 +7,8 @@
 
 export interface SearchBarFilter {
   key: string;
-  value: string;
+  value?: string;
+  operator?: 'is' | 'is not' | 'is one of' | 'is not one of' | 'exists' | 'does not exist';
 }
 
 export const getHostIpFilter = (): SearchBarFilter => ({

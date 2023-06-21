@@ -6,21 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
   describe('resolve', () => {
-    let KIBANA_VERSION: string;
-
-    before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
-    });
-
     describe('with kibana index', () => {
       before(async () => {
         await kibanaServer.importExport.load(
@@ -49,7 +44,9 @@ export default function ({ getService }: FtrProviderContext) {
                 created_at: '2015-01-01T00:00:00.000Z',
                 version: resp.body.saved_object.version,
                 migrationVersion: resp.body.saved_object.migrationVersion,
-                coreMigrationVersion: KIBANA_VERSION,
+                coreMigrationVersion: '8.8.0',
+                typeMigrationVersion: resp.body.saved_object.typeMigrationVersion,
+                managed: resp.body.saved_object.managed,
                 attributes: {
                   title: 'Count of requests',
                   description: '',
@@ -71,7 +68,29 @@ export default function ({ getService }: FtrProviderContext) {
               outcome: 'exactMatch',
             });
             expect(resp.body.saved_object.migrationVersion).to.be.ok();
+            expect(resp.body.saved_object.typeMigrationVersion).to.be.ok();
+            expect(resp.body.saved_object.managed).to.not.be.ok();
           }));
+
+      it('should migrate saved object before returning', async () => {
+        await es.update({
+          index: MAIN_SAVED_OBJECT_INDEX,
+          id: 'config:7.0.0-alpha1',
+          doc: {
+            coreMigrationVersion: '7.0.0',
+            typeMigrationVersion: '7.0.0',
+          },
+        });
+
+        const { body } = await supertest
+          .get(`/api/saved_objects/resolve/config/7.0.0-alpha1`)
+          .expect(200);
+
+        expect(body.saved_object.coreMigrationVersion).to.be.ok();
+        expect(body.saved_object.coreMigrationVersion).not.to.be('7.0.0');
+        expect(body.saved_object.typeMigrationVersion).to.be.ok();
+        expect(body.saved_object.typeMigrationVersion).not.to.be('7.0.0');
+      });
 
       describe('doc does not exist', () => {
         it('should return same generic error as when index does not exist', async () =>

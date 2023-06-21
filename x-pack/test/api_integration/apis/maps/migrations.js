@@ -45,7 +45,7 @@ export default function ({ getService }) {
             type: 'index-pattern',
           },
         ]);
-        expect(resp.body.migrationVersion).to.eql({ map: '8.4.0' }); // migrtionVersion is derived from both "migrations" and "convertToMultiNamespaceVersion" fields when the object is registered
+        expect(resp.body.typeMigrationVersion).to.be('8.4.0'); // typeMigrationVersion is derived from both "migrations" and "convertToMultiNamespaceVersion" fields when the object is registered
         expect(resp.body.attributes.layerListJSON.includes('indexPatternRefName')).to.be(true);
       });
 

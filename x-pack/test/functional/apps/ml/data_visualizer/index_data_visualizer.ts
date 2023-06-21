@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
@@ -14,7 +14,7 @@ import {
   farequoteKQLSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
-} from './index_test_data';
+} from './index_test_data_random_sampler';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
@@ -34,6 +34,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
         testData.sourceIndexOrSavedSearch
       );
+      await headerPage.waitUntilLoadingHasFinished();
     });
 
     it(`${testData.suiteTitle} displays index details`, async () => {
@@ -62,7 +63,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       }
 
       await ml.dataVisualizerTable.assertSearchPanelExist();
-      await ml.dataVisualizerTable.assertSampleSizeInputExists();
       await ml.dataVisualizerTable.assertFieldTypeInputExists();
       await ml.dataVisualizerTable.assertFieldNameInputExists();
 
@@ -110,18 +110,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           fieldRow.viewableInLens,
           false,
           fieldRow.exampleContent
-        );
-      }
-
-      await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} sample size control changes non-metric fields`
-      );
-      for (const sampleSizeCase of testData.sampleSizeValidations) {
-        const { size, expected } = sampleSizeCase;
-        await ml.dataVisualizerTable.setSampleSizeInputValue(
-          size,
-          expected.field,
-          expected.docCountFormatted
         );
       }
 

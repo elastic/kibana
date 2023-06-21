@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -18,8 +19,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '../../services/field_stats';
-import FieldStats from './field_stats';
-import type { FieldStatsProps } from './field_stats';
+import FieldStats, { FieldStatsWithKbnQuery } from './field_stats';
 
 jest.mock('../../services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
@@ -34,7 +34,7 @@ const mockedServices = {
 };
 
 describe('UnifiedFieldList <FieldStats />', () => {
-  let defaultProps: FieldStatsProps;
+  let defaultProps: FieldStatsWithKbnQuery;
   let dataView: DataView;
 
   beforeEach(() => {
@@ -99,6 +99,18 @@ describe('UnifiedFieldList <FieldStats />', () => {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'bytes_counter',
+          timeSeriesMetric: 'counter',
+          type: 'number',
+          esTypes: ['long'],
+          aggregatable: true,
+          searchable: true,
+          count: 10,
+          readFromDocValues: true,
+          scripted: false,
+          isMapped: true,
+        },
       ],
       getFormatterForField: jest.fn(() => ({
         convert: jest.fn((s: unknown) => JSON.stringify(s)),
@@ -121,6 +133,18 @@ describe('UnifiedFieldList <FieldStats />', () => {
     });
   });
 
+  async function mountComponent(component: React.ReactElement): Promise<ReactWrapper> {
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(component);
+      // wait for lazy modules if any
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await wrapper.update();
+    });
+
+    return wrapper!;
+  }
+
   beforeEach(() => {
     (loadFieldStats as jest.Mock).mockReset();
     (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
@@ -135,7 +159,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       });
     });
 
-    const wrapper = mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats
         {...defaultProps}
         query={{ query: 'geo.src : "US"', language: 'kuery' }}
@@ -149,8 +173,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
         toDate="now-7d"
       />
     );
-
-    await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
@@ -202,34 +224,86 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
   });
 
+  it('should request field stats with dsl query', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const wrapper = mountWithIntl(
+      <FieldStats
+        {...{
+          services: mockedServices,
+          dataViewOrDataViewId: dataView,
+          field: dataView.fields.find((f) => f.name === 'bytes')!,
+          'data-test-subj': 'testing',
+        }}
+        dslQuery={{ bool: { filter: { range: { field: 'duration', gte: 3000 } } } }}
+        fromDate="now-14d"
+        toDate="now-7d"
+      />
+    );
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalledWith({
+      abortController: new AbortController(),
+      services: { data: mockedServices.data },
+      dataView,
+      dslQuery: { bool: { filter: { range: { field: 'duration', gte: 3000 } } } },
+      fromDate: 'now-14d',
+      toDate: 'now-7d',
+      field: defaultProps.field,
+    });
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 4633,
+        sampledDocuments: 4633,
+        sampledValues: 4633,
+        histogram: {
+          buckets: [{ count: 705, key: 0 }],
+        },
+        topValues: {
+          buckets: [{ count: 147, key: 0 }],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+  });
+
   it('should not request field stats for range fields', async () => {
-    const wrapper = await mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'ip_range')!} />
     );
 
-    await wrapper.update();
-
     expect(loadFieldStats).toHaveBeenCalled();
 
     expect(wrapper.text()).toBe('Analysis is not available for this field.');
   });
 
-  it('should not request field stats for geo fields', async () => {
-    const wrapper = await mountWithIntl(
+  it('should request field examples for geo fields', async () => {
+    const wrapper = await mountComponent(
       <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'geo_shape')!} />
     );
 
-    await wrapper.update();
-
     expect(loadFieldStats).toHaveBeenCalled();
 
-    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+    expect(wrapper.text()).toBe('No field data for the current search.');
   });
 
   it('should render a message if no data is found', async () => {
-    const wrapper = await mountWithIntl(<FieldStats {...defaultProps} />);
-
-    await wrapper.update();
+    const wrapper = await mountComponent(<FieldStats {...defaultProps} />);
 
     expect(loadFieldStats).toHaveBeenCalled();
 
@@ -245,9 +319,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       });
     });
 
-    const wrapper = mountWithIntl(<FieldStats {...defaultProps} />);
-
-    await wrapper.update();
+    const wrapper = await mountComponent(<FieldStats {...defaultProps} />);
 
     await act(async () => {
       resolveFunction!({
@@ -273,7 +345,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       });
     });
 
-    const wrapper = mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats
         {...defaultProps}
         query={{ language: 'kuery', query: '' }}
@@ -282,8 +354,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
         toDate="now"
       />
     );
-
-    await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
@@ -376,7 +446,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       });
     });
 
-    const wrapper = mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats
         {...defaultProps}
         field={
@@ -388,8 +458,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
         }
       />
     );
-
-    await wrapper.update();
 
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
@@ -450,7 +518,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       });
     });
 
-    const wrapper = mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats
         {...defaultProps}
         field={dataView.fields[0]}
@@ -460,8 +528,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
         toDate="now"
       />
     );
-
-    await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
@@ -558,7 +624,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     const field = dataView.fields.find((f) => f.name === 'machine.ram')!;
 
-    const wrapper = mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats
         {...defaultProps}
         field={field}
@@ -568,8 +634,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
         toDate="now"
       />
     );
-
-    await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
@@ -631,5 +695,137 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(wrapper.text()).toBe(
       'Toggle either theTop valuesDistribution1273.9%1326.1%Calculated from 23 sample records.'
     );
+  });
+
+  it('should override the top value bar props with overrideFieldTopValueBar', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const field = dataView.fields.find((f) => f.name === 'machine.ram')!;
+
+    const wrapper = mountWithIntl(
+      <FieldStats
+        {...defaultProps}
+        field={field}
+        query={{ language: 'kuery', query: '' }}
+        filters={[]}
+        fromDate="now-1h"
+        toDate="now"
+        color={'red'}
+        overrideFieldTopValueBar={(params) => ({ color: 'accent' })}
+      />
+    );
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 100,
+        sampledDocuments: 23,
+        sampledValues: 23,
+        histogram: {
+          buckets: [
+            {
+              count: 17,
+              key: 12,
+            },
+            {
+              count: 6,
+              key: 13,
+            },
+          ],
+        },
+        topValues: {
+          buckets: [
+            {
+              count: 17,
+              key: 12,
+            },
+            {
+              count: 6,
+              key: 13,
+            },
+          ],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.find(EuiProgress)).toHaveLength(2);
+    expect(wrapper.find(EuiProgress).first().props()).toHaveProperty('color', 'accent');
+  });
+
+  it('should render a number summary for some fields (time series metric counter)', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const field = dataView.fields.find((f) => f.name === 'bytes_counter')!;
+
+    const wrapper = await mountComponent(
+      <FieldStats
+        {...defaultProps}
+        field={field}
+        query={{ language: 'kuery', query: '' }}
+        filters={[]}
+        fromDate="now-1h"
+        toDate="now"
+      />
+    );
+
+    expect(loadFieldStats).toHaveBeenCalledWith({
+      abortController: new AbortController(),
+      services: { data: mockedServices.data },
+      dataView,
+      fromDate: 'now-1h',
+      toDate: 'now',
+      dslQuery: {
+        bool: {
+          must: [],
+          filter: [],
+          should: [],
+          must_not: [],
+        },
+      },
+      field,
+    });
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        numberSummary: {
+          maxValue: 36821994,
+          minValue: 29674,
+        },
+        sampledDocuments: 5000,
+        sampledValues: 5000,
+        totalDocuments: 6460,
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.text()).toBe('Summarymin29674max36821994Calculated from 5000 sample records.');
   });
 });

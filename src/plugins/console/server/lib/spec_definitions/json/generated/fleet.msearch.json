@@ -1,0 +1,12 @@
+{
+  "fleet.msearch": {
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_fleet/_fleet_msearch",
+      "{indices}/_fleet/_fleet_msearch"
+    ]
+  }
+}

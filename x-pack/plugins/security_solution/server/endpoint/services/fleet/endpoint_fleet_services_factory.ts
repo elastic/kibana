@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  SavedObjectsServiceStart,
-} from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
 import type {
   AgentClient,
   AgentPolicyServiceInterface,
@@ -20,8 +16,6 @@ import type {
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 
 export interface EndpointFleetServicesFactoryInterface {
-  asScoped(req: KibanaRequest): EndpointScopedFleetServicesInterface;
-
   asInternalUser(): EndpointInternalFleetServicesInterface;
 }
 
@@ -33,24 +27,6 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     >,
     private savedObjectsStart: SavedObjectsServiceStart
   ) {}
-
-  asScoped(req: KibanaRequest): EndpointScopedFleetServicesInterface {
-    const {
-      agentPolicyService: agentPolicy,
-      packagePolicyService: packagePolicy,
-      agentService,
-      packageService,
-    } = this.fleetDependencies;
-
-    return {
-      agent: agentService.asScoped(req),
-      agentPolicy,
-      packages: packageService.asScoped(req),
-      packagePolicy,
-
-      asInternal: this.asInternalUser.bind(this),
-    };
-  }
 
   asInternalUser(): EndpointInternalFleetServicesInterface {
     const {
@@ -66,7 +42,6 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       packages: packageService.asInternalUser,
       packagePolicy,
 
-      asScoped: this.asScoped.bind(this),
       internalReadonlySoClient: createInternalReadonlySoClient(this.savedObjectsStart),
     };
   }
@@ -82,19 +57,7 @@ export interface EndpointFleetServicesInterface {
   packagePolicy: PackagePolicyClient;
 }
 
-export interface EndpointScopedFleetServicesInterface extends EndpointFleetServicesInterface {
-  /**
-   * get internal fleet services instance
-   */
-  asInternal: EndpointFleetServicesFactoryInterface['asInternalUser'];
-}
-
 export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
-  /**
-   * get scoped endpoint fleet services instance
-   */
-  asScoped: EndpointFleetServicesFactoryInterface['asScoped'];
-
   /**
    * An internal SO client (readonly) that can be used with the Fleet services that require it
    */

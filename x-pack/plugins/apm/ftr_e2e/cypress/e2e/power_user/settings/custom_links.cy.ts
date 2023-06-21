@@ -6,6 +6,7 @@
  */
 
 const basePath = '/app/apm/settings/custom-links';
+
 const deleteAllCustomLinks = () => {
   // delete customLink if exists
   const kibanaUrl = Cypress.env('KIBANA_URL');

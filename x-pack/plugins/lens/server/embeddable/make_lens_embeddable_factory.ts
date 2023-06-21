@@ -7,12 +7,12 @@
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 import {
   commonEnhanceTableRowHeight,
   commonPreserveOldLegendSizeDefault,
@@ -32,7 +32,9 @@ import {
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
+  commonMigratePartitionMetrics,
   commonMigrateIndexPatternDatasource,
+  commonMigrateMetricFormatter,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
@@ -41,6 +43,7 @@ import {
   LensDocShape810,
   LensDocShape850,
   LensDocShapePre712,
+  LensDocShape860,
   VisState716,
   VisState810,
   VisState850,
@@ -160,12 +163,22 @@ export const makeLensEmbeddableFactory =
               '8.6.0': (state) => {
                 const lensState = state as unknown as SavedObject<LensDocShape850<VisState850>>;
 
-                const migratedLensState = commonMigrateIndexPatternDatasource(lensState.attributes);
+                let migratedLensState = commonMigrateIndexPatternDatasource(lensState.attributes);
+                migratedLensState = commonMigratePartitionMetrics(migratedLensState);
                 return {
                   ...lensState,
                   attributes: migratedLensState,
                 } as unknown as SerializableRecord;
               },
+              '8.9.0': (state) => {
+                const lensState = state as unknown as SavedObject<LensDocShape860>;
+                return {
+                  ...lensState,
+                  attributes: commonMigrateMetricFormatter(lensState.attributes),
+                } as unknown as SerializableRecord;
+              },
+              // FOLLOW THESE GUIDELINES IF YOU ARE ADDING A NEW MIGRATION!
+              // 1. Make sure you are applying migrations for a given version in the same order here as they are applied in x-pack/plugins/lens/server/migrations/saved_object_migrations.ts
             }),
             getLensCustomVisualizationMigrations(customVisualizationMigrations)
           ),

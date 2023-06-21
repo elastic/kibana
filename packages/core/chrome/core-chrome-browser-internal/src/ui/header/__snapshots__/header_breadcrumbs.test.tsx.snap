@@ -3,6 +3,7 @@
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = `
 <li
   class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
 >
   <span
     aria-current="page"
@@ -18,6 +19,7 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 2`] = `
 <li
   class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
 >
   <span
     aria-current="page"
@@ -33,6 +35,7 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 2`] = 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 3`] = `
 <li
   class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
 >
   <span
     class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncated-firstChild-euiTextColor-subdued"
@@ -47,6 +50,7 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 3`] = 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 4`] = `
 <li
   class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
 >
   <span
     class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncated-firstChild-euiTextColor-subdued"
@@ -61,6 +65,7 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 4`] = 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 5`] = `
 <li
   class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
 >
   <span
     aria-current="page"
@@ -76,6 +81,7 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 5`] = 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 6`] = `
 <li
   class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
 >
   <span
     aria-current="page"
@@ -91,6 +97,7 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 6`] = 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 7`] = `
 <li
   class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
 >
   <span
     aria-current="page"
@@ -106,6 +113,7 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 7`] = 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 8`] = `
 <li
   class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
 >
   <span
     aria-current="page"

@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export const sampleAreaVis = {
+
+const mockUiStateGet = jest.fn().mockReturnValue(() => {});
+export const sampleHeatmapVis = {
   type: {
     name: 'heatmap',
     title: 'Heatmap',
@@ -104,7 +106,7 @@ export const sampleAreaVis = {
             title: 'X-axis',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geotile_grid', '!filter'],
             editor: false,
             params: [],
           },
@@ -114,7 +116,7 @@ export const sampleAreaVis = {
             title: 'Split series',
             min: 0,
             max: 3,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geotile_grid', '!filter'],
             editor: false,
             params: [],
           },
@@ -124,7 +126,7 @@ export const sampleAreaVis = {
             title: 'Split chart',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: ['!geotile_grid', '!filter'],
             params: [
               {
                 name: 'row',
@@ -1788,5 +1790,10 @@ export const sampleAreaVis = {
     },
   },
   isHierarchical: () => false,
-  uiState: {},
+  uiState: {
+    vis: {
+      legendOpen: false,
+    },
+    get: mockUiStateGet,
+  },
 };

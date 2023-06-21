@@ -13,7 +13,6 @@ import { get } from 'lodash';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Capabilities,
-  SavedObjectsClientContract,
   OverlayStart,
   NotificationsStart,
   ScopedHistory,
@@ -21,10 +20,12 @@ import {
   IUiSettingsClient,
   DocLinksStart,
 } from '@kbn/core/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { Header, Inspect, NotFoundErrors } from './components';
-import { bulkGetObjects } from '../../lib/bulk_get_objects';
+import { bulkDeleteObjects, bulkGetObjects } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import './saved_object_view.scss';
+
 export interface SavedObjectEditionProps {
   id: string;
   savedObjectType: string;
@@ -33,10 +34,10 @@ export interface SavedObjectEditionProps {
   overlays: OverlayStart;
   notifications: NotificationsStart;
   notFoundType?: string;
-  savedObjectsClient: SavedObjectsClientContract;
   history: ScopedHistory;
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart['links'];
+  settings: SettingsStart;
 }
 export interface SavedObjectEditionState {
   type: string;
@@ -93,12 +94,12 @@ export class SavedObjectEdition extends Component<
   }
 
   render() {
-    const { capabilities, notFoundType, http, uiSettings, docLinks } = this.props;
+    const { capabilities, notFoundType, http, uiSettings, docLinks, settings } = this.props;
     const { object } = this.state;
     const { delete: canDelete } = capabilities.savedObjectsManagement as Record<string, boolean>;
     const canView = this.canViewInApp(capabilities, object);
     return (
-      <KibanaContextProvider services={{ uiSettings }}>
+      <KibanaContextProvider services={{ uiSettings, settings }}>
         <EuiFlexGroup
           direction="column"
           data-test-subject="savedObjectsEdit"
@@ -129,7 +130,7 @@ export class SavedObjectEdition extends Component<
   }
 
   async delete() {
-    const { id, savedObjectsClient, overlays, notifications } = this.props;
+    const { http, id, overlays, notifications } = this.props;
     const { type, object } = this.state;
 
     const confirmed = await overlays.openConfirm(
@@ -146,17 +147,37 @@ export class SavedObjectEdition extends Component<
         title: i18n.translate('savedObjectsManagement.deleteConfirm.modalTitle', {
           defaultMessage: `Delete '{title}'?`,
           values: {
-            title: object?.attributes?.title || 'saved Kibana object',
+            title: object?.meta?.title || 'saved Kibana object',
           },
         }),
         buttonColor: 'danger',
       }
     );
-    if (confirmed) {
-      await savedObjectsClient.delete(type, id);
-      notifications.toasts.addSuccess(`Deleted '${object!.attributes.title}' ${type} object`);
-      this.redirectToListing();
+    if (!confirmed) {
+      return;
     }
+
+    const [{ success, error }] = await bulkDeleteObjects(http, [{ id, type }]);
+    if (!success) {
+      notifications.toasts.addDanger({
+        title: i18n.translate(
+          'savedObjectsManagement.objectView.unableDeleteSavedObjectNotificationMessage',
+          {
+            defaultMessage: `Failed to delete '{title}' {type} object`,
+            values: {
+              type,
+              title: object?.meta?.title,
+            },
+          }
+        ),
+        text: error?.message,
+      });
+
+      return;
+    }
+
+    notifications.toasts.addSuccess(`Deleted '${object?.meta?.title}' ${type} object`);
+    this.redirectToListing();
   }
 
   redirectToListing() {

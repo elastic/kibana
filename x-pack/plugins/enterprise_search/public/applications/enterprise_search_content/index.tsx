@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { Route, Redirect, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
 
 import { useValues } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -30,7 +32,7 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
   const showView = () => {
-    if (!config.host) {
+    if (!config.host && config.canDeployEntSearch) {
       return <EnterpriseSearchContentUnconfigured />;
     } else if (incompatibleVersions) {
       return (

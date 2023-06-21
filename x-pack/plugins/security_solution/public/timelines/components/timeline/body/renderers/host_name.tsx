@@ -9,10 +9,10 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { StatefulEventContext } from '@kbn/timelines-plugin/public';
+import type { ExpandedDetailType } from '../../../../../../common/types';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getScopedActions } from '../../../../../helpers';
 import { HostDetailsLink } from '../../../../../common/components/links';
-import type { TimelineExpandedDetailType } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -60,7 +60,7 @@ const HostNameComponent: React.FC<Props> = ({
       }
       if (eventContext && isInTimelineContext) {
         const { timelineID, tabType } = eventContext;
-        const updatedExpandedDetail: TimelineExpandedDetailType = {
+        const updatedExpandedDetail: ExpandedDetailType = {
           panelView: 'hostDetail',
           params: {
             hostName,

@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import './engine_creation.scss';
+import { healthColorsMapSelectable } from '../../../shared/constants/health_colors';
 
 export interface SearchIndexSelectableOption {
   label: string;
@@ -47,16 +48,6 @@ export interface SearchIndexSelectableOption {
   checked?: 'on';
   count: number;
 }
-
-const healthColorsMap = {
-  red: 'danger',
-  RED: 'danger',
-  green: 'success',
-  GREEN: 'success',
-  yellow: 'warning',
-  YELLOW: 'warning',
-};
-
 interface IndexStatusDetailsProps {
   option?: SearchIndexSelectableOption;
 }
@@ -67,7 +58,7 @@ export const IndexStatusDetails: React.FC<IndexStatusDetailsProps> = ({ option }
   ) : (
     <EuiFlexGroup className="entSearch__indexListItem" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiHealth color={option.health ? healthColorsMap[option.health] : ''}>
+        <EuiHealth color={option.health ? healthColorsMapSelectable[option.health] : ''}>
           {option.health ?? '-'}
         </EuiHealth>
       </EuiFlexItem>

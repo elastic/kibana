@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-
+import { ProfilingConfig } from '.';
 import { PROFILING_FEATURE } from './feature';
 import { registerRoutes } from './routes';
 import {
@@ -16,6 +16,7 @@ import {
   ProfilingPluginStartDeps,
   ProfilingRequestHandlerContext,
 } from './types';
+import { createProfilingEsClient } from './utils/create_profiling_es_client';
 
 export class ProfilingPlugin
   implements
@@ -28,23 +29,48 @@ export class ProfilingPlugin
 {
   private readonly logger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext<ProfilingConfig>) {
+    this.initializerContext = initializerContext;
     this.logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup<ProfilingPluginStartDeps>, deps: ProfilingPluginSetupDeps) {
-    this.logger.debug('profiling: Setup');
     const router = core.http.createRouter<ProfilingRequestHandlerContext>();
 
     deps.features.registerKibanaFeature(PROFILING_FEATURE);
 
-    core.getStartServices().then(([_, depsStart]) => {
+    const config = this.initializerContext.config.get();
+
+    core.getStartServices().then(([coreStart, depsStart]) => {
+      const profilingSpecificEsClient = config.elasticsearch
+        ? coreStart.elasticsearch.createClient('profiling', {
+            hosts: [config.elasticsearch.hosts],
+            username: config.elasticsearch.username,
+            password: config.elasticsearch.password,
+          })
+        : undefined;
+
       registerRoutes({
         router,
         logger: this.logger!,
         dependencies: {
           start: depsStart,
           setup: deps,
+          config,
+        },
+        services: {
+          createProfilingEsClient: ({
+            request,
+            esClient: defaultEsClient,
+            useDefaultAuth = false,
+          }) => {
+            const esClient =
+              profilingSpecificEsClient && !useDefaultAuth
+                ? profilingSpecificEsClient.asScoped(request).asInternalUser
+                : defaultEsClient;
+
+            return createProfilingEsClient({ request, esClient });
+          },
         },
       });
     });
@@ -53,7 +79,6 @@ export class ProfilingPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('profiling: Started');
     return {};
   }
 

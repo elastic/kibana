@@ -6,10 +6,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { readKibanaConfig } from './tasks/read_kibana_config';
-
 const MANIFEST_KEY = 'xpack.uptime.service.manifestUrl';
 const SERVICE_PASSWORD = 'xpack.uptime.service.password';
 const SERVICE_USERNAME = 'xpack.uptime.service.username';
@@ -43,7 +41,9 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
-      sourceArgs: [...xpackFunctionalTestsConfig.get('kbnTestServer.sourceArgs'), '--no-watch'],
+      sourceArgs: process.env.WATCH_ENABLED
+        ? []
+        : [...xpackFunctionalTestsConfig.get('kbnTestServer.sourceArgs'), '--no-watch'],
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--csp.strict=false',
@@ -51,7 +51,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        `--elasticsearch.ignoreVersionMismatch=${process.env.CI ? 'false' : 'true'}`,
+        // `--elasticsearch.ignoreVersionMismatch=${process.env.CI ? 'false' : 'true'}`,
         `--elasticsearch.username=kibana_system`,
         `--elasticsearch.password=changeme`,
         '--xpack.reporting.enabled=false',
@@ -64,6 +64,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         }`,
         `--xpack.uptime.service.password=${servicePassword}`,
         `--xpack.uptime.service.showExperimentalLocations=${true}`,
+        '--uiSettings.overrides.observability:enableLegacyUptimeApp=true',
       ],
     },
   };

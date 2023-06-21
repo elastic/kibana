@@ -15,16 +15,12 @@
     padding: 0;
   }
 
-  .dscDiscoverGrid__textLanguageMode .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
-    padding: $euiSizeXS;
-  }
-
   .euiDataGridRowCell.euiDataGridRowCell--lastColumn {
     border-right: none;
   }
 
-  .dscDiscoverGrid__documentsMode .euiDataGridRowCell:first-of-type,
-  .dscDiscoverGrid__documentsMode .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
+  .dscDiscoverGrid__table .euiDataGridRowCell:first-of-type,
+  .dscDiscoverGrid__table .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
     border-left: none;
     border-right: none;
   }
@@ -37,6 +33,14 @@
 
 .dscDiscoverGrid__cellValue {
   font-family: $euiCodeFontFamily;
+}
+
+.dscDiscoverGrid__cellPopover {
+  // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
+  .lines-content.monaco-editor-background {
+    overflow: unset !important;
+    contain: unset !important;
+  }
 }
 
 .dscDiscoverGrid__cellPopoverValue {

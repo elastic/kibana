@@ -35,25 +35,27 @@ export default function ({ getPageObjects, getService }) {
         mapboxStyle = await PageObjects.maps.getMapboxStyle();
       });
 
-      it('should request tiles from /api/maps/mvt/getTile', async () => {
+      it('should request tiles from /internal/maps/mvt/getTile', async () => {
         const tileUrl = new URL(
           mapboxStyle.sources[VECTOR_SOURCE_ID].tiles[0],
           'http://absolute_path'
         );
         const searchParams = Object.fromEntries(tileUrl.searchParams);
 
-        expect(tileUrl.pathname).to.equal('/api/maps/mvt/getTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf');
+        expect(tileUrl.pathname).to.equal('/internal/maps/mvt/getTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf');
 
         // token is an unique id that changes between runs
         expect(typeof searchParams.token).to.equal('string');
         delete searchParams.token;
 
         expect(searchParams).to.eql({
+          buffer: '4',
+          executionContextId: 'bff99716-e3dc-11ea-87d0-0242ac130003',
           geometryFieldName: 'geometry',
           hasLabels: 'false',
           index: 'geo_shapes*',
           requestBody:
-            '(_source:!f,fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10001)',
+            '(fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10001)',
         });
       });
 

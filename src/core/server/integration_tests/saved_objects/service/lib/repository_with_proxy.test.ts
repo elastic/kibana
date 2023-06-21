@@ -9,11 +9,16 @@
 import Hapi from '@hapi/hapi';
 import h2o2 from '@hapi/h2o2';
 import { URL } from 'url';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObject, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { InternalCoreSetup, InternalCoreStart } from '../../../../internal_types';
-import { Root } from '../../../../root';
-import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
+import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import { Root } from '@kbn/core-root-server-internal';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import {
   declareGetRoute,
   declareDeleteRoute,
@@ -26,9 +31,10 @@ import {
   declarePostUpdateByQueryRoute,
   declarePassthroughRoute,
   setProxyInterrupt,
+  allCombinationsPermutations,
 } from './repository_with_proxy_utils';
 
-let esServer: kbnTestServer.TestElasticsearchUtils;
+let esServer: TestElasticsearchUtils;
 let hapiServer: Hapi.Server;
 
 const registerSOTypes = (setup: InternalCoreSetup) => {
@@ -74,7 +80,7 @@ describe('404s from proxies', () => {
   beforeAll(async () => {
     setProxyInterrupt(null);
 
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
     });
     esServer = await startES();
@@ -94,23 +100,30 @@ describe('404s from proxies', () => {
     await hapiServer.register(h2o2);
     // register specific routes to modify the response and a catch-all to relay the request/response as-is
 
-    declareGetRoute(hapiServer, esHostname, esPort);
-    declareDeleteRoute(hapiServer, esHostname, esPort);
-    declarePostUpdateRoute(hapiServer, esHostname, esPort);
+    allCombinationsPermutations(
+      ALL_SAVED_OBJECT_INDICES.map((indexPattern) => `${indexPattern}_${pkg.version}`)
+    )
+      .map((indices) => indices.join(','))
+      .forEach((kbnIndexPath) => {
+        declareGetRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declareDeleteRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declarePostUpdateRoute(hapiServer, esHostname, esPort, kbnIndexPath);
 
-    declareGetSearchRoute(hapiServer, esHostname, esPort);
-    declarePostSearchRoute(hapiServer, esHostname, esPort);
+        declareGetSearchRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declarePostSearchRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declarePostPitRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+      });
+
+    // register index-agnostic routes
     declarePostBulkRoute(hapiServer, esHostname, esPort);
     declarePostMgetRoute(hapiServer, esHostname, esPort);
-    declarePostPitRoute(hapiServer, esHostname, esPort);
-    declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort);
-
     declarePassthroughRoute(hapiServer, esHostname, esPort);
 
     await hapiServer.start();
 
     // Setup kibana configured to use proxy as ES backend
-    root = kbnTestServer.createRootWithCorePlugins({
+    root = createRootWithCorePlugins({
       elasticsearch: {
         hosts: [`http://${esHostname}:${proxyPort}`],
       },
@@ -126,9 +139,11 @@ describe('404s from proxies', () => {
   });
 
   afterAll(async () => {
-    await root.shutdown();
-    await hapiServer.stop({ timeout: 1000 });
-    await esServer.stop();
+    if (root) {
+      await root.shutdown();
+      await hapiServer.stop({ timeout: 1000 });
+      await esServer.stop();
+    }
   });
 
   describe('requests when a proxy relays request/responses with the correct product header', () => {

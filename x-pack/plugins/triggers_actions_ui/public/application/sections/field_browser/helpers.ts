@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
+import {
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  DefaultAlertFieldName,
+} from '@kbn/rule-data-utils';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { isEmpty } from 'lodash/fp';
+import { CASES, MAINTENANCE_WINDOWS } from '../translations';
 
 export const FIELD_BROWSER_WIDTH = 925;
 export const TABLE_HEIGHT = 260;
@@ -18,6 +25,24 @@ export const categoryHasFields = (category: Partial<BrowserField>): boolean =>
 /** Returns the count of fields in the specified category */
 export const getFieldCount = (category: Partial<BrowserField> | undefined): number =>
   category != null && category.fields != null ? Object.keys(category.fields).length : 0;
+
+const matchesSystemField = (field: string, searchTerm: string): boolean => {
+  const termsToMatch = [
+    CASES.toLocaleLowerCase(),
+    MAINTENANCE_WINDOWS.toLocaleLowerCase(),
+    'cases',
+    'maintenance windows',
+  ];
+
+  const fieldsToMatch: DefaultAlertFieldName[] = [ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS];
+
+  const term = searchTerm.toLocaleLowerCase();
+
+  const matchesField = fieldsToMatch.includes(field as DefaultAlertFieldName);
+  const matchesTerm = termsToMatch.some((termToMatch) => termToMatch.includes(term));
+
+  return matchesField && matchesTerm;
+};
 
 /**
  * Filters the specified `BrowserFields` to return a new collection where every
@@ -59,7 +84,11 @@ export function filterBrowserFieldsByFieldName({
       }
 
       // Check if this field matches (via substring comparison) the passed substring
-      if (fieldNameFromDescriptor !== null && fieldNameFromDescriptor.includes(trimmedSubstring)) {
+      if (
+        fieldNameFromDescriptor !== null &&
+        (fieldNameFromDescriptor.includes(trimmedSubstring) ||
+          matchesSystemField(fieldNameFromDescriptor, trimmedSubstring))
+      ) {
         // this field is a match, so we should emit this category into the result object.
         hadAMatch = true;
 
@@ -155,6 +184,17 @@ export const getIconFromType = (type: string | null | undefined) => {
 };
 
 export const getEmptyValue = () => '—';
+
+export const getCategory = (fieldName: string) => {
+  const fieldNameArray = fieldName?.split('.');
+  if (fieldNameArray?.length === 1) {
+    return 'base';
+  }
+  return fieldNameArray?.[0] ?? '(unknown)';
+};
+
+export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMetadata>) =>
+  ecsFlat[fieldName]?.description ?? '';
 
 /** Returns example text, or an empty string if the field does not have an example */
 export const getExampleText = (example: string | number | null | undefined): string =>

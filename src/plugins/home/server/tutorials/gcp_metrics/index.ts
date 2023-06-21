@@ -59,6 +59,6 @@ export function gcpMetricsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['google_cloud', 'cloud', 'network', 'security'],
+    integrationBrowserCategories: ['google_cloud', 'observability'],
   };
 }

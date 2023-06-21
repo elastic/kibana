@@ -87,7 +87,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const editorInstanceRef = useRef<senseEditor.SenseEditor | null>(null);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
-  useUIAceKeyboardMode(textArea);
+  useUIAceKeyboardMode(textArea, settings.isAccessibilityOverlayEnabled);
 
   const openDocumentation = useCallback(async () => {
     const documentation = await getDocumentation(editorInstanceRef.current!, docLinkVersion);
@@ -115,7 +115,9 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
 
     const loadBufferFromRemote = (url: string) => {
       const coreEditor = editor.getCoreEditor();
-      if (/^https?:\/\//.test(url)) {
+      // Normalize and encode the URL to avoid issues with spaces and other special characters.
+      const encodedUrl = new URL(url).toString();
+      if (/^https?:\/\//.test(encodedUrl)) {
         const loadFrom: Record<string, any> = {
           url,
           // Having dataType here is required as it doesn't allow jQuery to `eval` content

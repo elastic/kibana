@@ -7,7 +7,6 @@ exports[`FlexItemSetting component renders a null label if label/tooltip text no
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={true}
     label={null}
@@ -27,7 +26,6 @@ exports[`FlexItemSetting component renders component and children as expected 1`
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={

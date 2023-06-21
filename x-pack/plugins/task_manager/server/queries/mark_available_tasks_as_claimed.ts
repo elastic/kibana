@@ -120,7 +120,6 @@ export interface UpdateFieldsAndMarkAsFailedOpts {
   fieldUpdates: {
     [field: string]: string | number | Date;
   };
-  claimTasksById: string[];
   claimableTaskTypes: string[];
   skippedTaskTypes: string[];
   unusedTaskTypes: string[];
@@ -129,7 +128,6 @@ export interface UpdateFieldsAndMarkAsFailedOpts {
 
 export const updateFieldsAndMarkAsFailed = ({
   fieldUpdates,
-  claimTasksById,
   claimableTaskTypes,
   skippedTaskTypes,
   unusedTaskTypes,
@@ -148,12 +146,6 @@ export const updateFieldsAndMarkAsFailed = ({
   return {
     source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
-      if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-        ${setScheduledAtAndMarkAsClaimed}
-      } else {
-        ctx._source.task.status = "failed";
-      }
-    } else if (params.skippedTaskTypes.contains(ctx._source.task.taskType) && params.claimTasksById.contains(ctx._id)) {
       ${setScheduledAtAndMarkAsClaimed}
     } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
@@ -164,7 +156,6 @@ export const updateFieldsAndMarkAsFailed = ({
     params: {
       now: new Date().getTime(),
       fieldUpdates,
-      claimTasksById,
       claimableTaskTypes,
       skippedTaskTypes,
       unusedTaskTypes,

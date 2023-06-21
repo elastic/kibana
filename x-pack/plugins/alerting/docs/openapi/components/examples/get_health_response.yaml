@@ -1,0 +1,14 @@
+summary: Retrieve information about the health of the alerting framework.
+value:
+  is_sufficiently_secure: true
+  has_permanent_encryption_key: true
+  alerting_framework_health:
+    decryption_health:
+      status: ok
+      timestamp: '2023-01-13T01:28:00.280Z'
+    execution_health:
+      status: ok
+      timestamp: '2023-01-13T01:28:00.280Z'
+    read_health:
+      status: ok
+      timestamp: '2023-01-13T01:28:00.280Z'

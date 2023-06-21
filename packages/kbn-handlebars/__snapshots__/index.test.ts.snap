@@ -1,19 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Handlebars.compileAST invalid template 1`] = `
-"Parse error on line 1:
-{{value
---^
-Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'"
-`;
-
-exports[`Handlebars.compileAST invalid template 2`] = `
-"Parse error on line 1:
-{{value
---^
-Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'"
-`;
-
 exports[`Handlebars.create 1`] = `
 HandlebarsEnvironment {
   "AST": Object {

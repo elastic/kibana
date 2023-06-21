@@ -13,7 +13,6 @@ import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style
 import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
 import { IStyleProperty } from '../../../styles/vector/properties/style_property';
 import {
-  COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
   GRID_RESOLUTION,
   LAYER_TYPE,
@@ -67,7 +66,6 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,
-      label: COUNT_PROP_LABEL,
     },
     ...documentStyle.getDynamicPropertiesArray().map((dynamicProperty) => {
       return {
@@ -234,14 +232,6 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       : displayName;
   }
 
-  showJoinEditor() {
-    return true;
-  }
-
-  getJoinsDisabledReason() {
-    return this._documentSource.getJoinsDisabledReason();
-  }
-
   getJoins() {
     return [];
   }
@@ -267,9 +257,9 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     return [clonedDescriptor];
   }
 
-  getSource(): IVectorSource {
+  getSource = () => {
     return this._isClustered ? this._clusterSource : this._documentSource;
-  }
+  };
 
   getSourceForEditing() {
     // Layer is based on this._documentSource

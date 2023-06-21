@@ -14,7 +14,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../functional/config.base.js')
   );
 
+  const kibanaCommonTestsConfig = await readConfigFile(
+    require.resolve('../../../test/common/config.js')
+  );
   return {
+    // common test config
+    ...kibanaCommonTestsConfig.getAll(),
+
     // default to the xpack functional config
     ...xPackFunctionalConfig.getAll(),
     services,

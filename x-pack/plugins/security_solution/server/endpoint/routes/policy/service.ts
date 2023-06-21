@@ -113,11 +113,9 @@ export async function agentVersionsMap(
   const result: Map<string, number> = new Map<string, number>();
   let hasMore = true;
   while (hasMore) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const queryResult = await endpointAppContext.service
-      .getAgentService()!
-      .asScoped(request)
-      .listAgents(searchOptions(page++));
+      .getInternalFleetServices()
+      .agent.listAgents(searchOptions(page++));
     queryResult.agents.forEach((agent: Agent) => {
       const agentVersion = agent.local_metadata?.elastic?.agent?.version;
       if (result.has(agentVersion)) {

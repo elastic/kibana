@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/files-example-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Example plugin integrating with files plugin",
+  "plugin": {
+    "id": "filesExample",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "files",
+      "developerExamples"
+    ]
+  }
+}

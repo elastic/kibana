@@ -22,15 +22,25 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+
+export type ErrorGroupMainStatisticsResponse = Array<{
+  groupId: string;
+  name: string;
+  lastSeen: number;
+  occurrences: number;
+  culprit: string | undefined;
+  handled: boolean | undefined;
+  type: string | undefined;
+}>;
 
 export async function getErrorGroupMainStatistics({
   kuery,
   serviceName,
-  setup,
+  apmEventClient,
   environment,
   sortField,
   sortDirection = 'desc',
@@ -42,7 +52,7 @@ export async function getErrorGroupMainStatistics({
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
@@ -51,9 +61,7 @@ export async function getErrorGroupMainStatistics({
   maxNumberOfErrorGroups?: number;
   transactionName?: string;
   transactionType?: string;
-}) {
-  const { apmEventClient } = setup;
-
+}): Promise<ErrorGroupMainStatisticsResponse> {
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'lastSeen';
 

@@ -6,18 +6,32 @@
  */
 import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { Rule, RuleAction, ResolvedRule } from '../../../types';
+import type { Rule, RuleAction, ResolvedRule, RuleLastRun } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleAction> = ({
+  uuid,
   group,
   id,
   connector_type_id: actionTypeId,
   params,
+  frequency,
+  alerts_filter: alertsFilter,
 }) => ({
   group,
   id,
   params,
   actionTypeId,
+  ...(frequency
+    ? {
+        frequency: {
+          summary: frequency.summary,
+          notifyWhen: frequency.notify_when,
+          throttle: frequency.throttle,
+        },
+      }
+    : {}),
+  ...(alertsFilter ? { alertsFilter } : {}),
+  ...(uuid && { uuid }),
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
@@ -30,6 +44,18 @@ const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
   ...rest,
 });
 
+const transformLastRun: RewriteRequestCase<RuleLastRun> = ({
+  outcome_msg: outcomeMsg,
+  outcome_order: outcomeOrder,
+  alerts_count: alertsCount,
+  ...rest
+}) => ({
+  outcomeMsg,
+  outcomeOrder,
+  alertsCount,
+  ...rest,
+});
+
 export const transformRule: RewriteRequestCase<Rule> = ({
   rule_type_id: ruleTypeId,
   created_by: createdBy,
@@ -37,6 +63,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   created_at: createdAt,
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
+  api_key_created_by_user: apiKeyCreatedByUser,
   notify_when: notifyWhen,
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
@@ -46,6 +73,8 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   snooze_schedule: snoozeSchedule,
   is_snoozed_until: isSnoozedUntil,
   active_snoozes: activeSnoozes,
+  last_run: lastRun,
+  next_run: nextRun,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -65,6 +94,9 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   scheduledTaskId,
   isSnoozedUntil,
   activeSnoozes,
+  ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
+  ...(nextRun ? { nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...rest,
 });
 

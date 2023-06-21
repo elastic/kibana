@@ -71,7 +71,7 @@ export const CalloutWarning = ({
           title={i18n.translate('xpack.lens.indexPattern.staticValueWarning', {
             defaultMessage: 'Static value currently applied',
           })}
-          iconType="alert"
+          iconType="warning"
           color="warning"
         >
           <p>
@@ -91,7 +91,7 @@ export const CalloutWarning = ({
         title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
           defaultMessage: 'Formula currently applied',
         })}
-        iconType="alert"
+        iconType="warning"
         color="warning"
       >
         {temporaryStateType !== 'quickFunctions' ? (

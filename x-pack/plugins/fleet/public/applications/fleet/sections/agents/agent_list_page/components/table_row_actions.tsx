@@ -9,25 +9,32 @@ import React, { useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+
 import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz, useLink, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 export const TableRowActions: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
   onReassignClick: () => void;
   onUnenrollClick: () => void;
+  onGetUninstallCommandClick: () => void;
   onUpgradeClick: () => void;
   onAddRemoveTagsClick: (button: HTMLElement) => void;
+  onRequestDiagnosticsClick: () => void;
 }> = ({
   agent,
   agentPolicy,
   onReassignClick,
   onUnenrollClick,
+  onGetUninstallCommandClick,
   onUpgradeClick,
   onAddRemoveTagsClick,
+  onRequestDiagnosticsClick,
 }) => {
   const { getHref } = useLink();
   const hasFleetAllPrivileges = useAuthz().fleet.all;
@@ -35,6 +42,8 @@ export const TableRowActions: React.FunctionComponent<{
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { diagnosticFileUploadEnabled, agentTamperProtectionEnabled } =
+    ExperimentalFeaturesService.get();
   const menuItems = [
     <EuiContextMenuItem
       icon="inspect"
@@ -74,6 +83,7 @@ export const TableRowActions: React.FunctionComponent<{
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
+        key="agentUnenrollBtn"
         disabled={!hasFleetAllPrivileges || !agent.active}
         icon="trash"
         onClick={() => {
@@ -93,6 +103,7 @@ export const TableRowActions: React.FunctionComponent<{
         )}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
+        key="agentUpgradeBtn"
         icon="refresh"
         disabled={!isAgentUpgradeable(agent, kibanaVersion)}
         onClick={() => {
@@ -105,7 +116,47 @@ export const TableRowActions: React.FunctionComponent<{
         />
       </EuiContextMenuItem>
     );
+
+    if (agentTamperProtectionEnabled && agent.policy_id) {
+      menuItems.push(
+        <EuiContextMenuItem
+          icon="minusInCircle"
+          onClick={() => {
+            onGetUninstallCommandClick();
+            setIsMenuOpen(false);
+          }}
+          disabled={!agent.active}
+          key="getUninstallCommand"
+          data-test-subj="uninstallAgentMenuItem"
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.getUninstallCommand"
+            defaultMessage="Uninstall agent"
+          />
+        </EuiContextMenuItem>
+      );
+    }
   }
+
+  if (diagnosticFileUploadEnabled) {
+    menuItems.push(
+      <EuiContextMenuItem
+        key="requestAgentDiagnosticsBtn"
+        icon="download"
+        data-test-subj="requestAgentDiagnosticsBtn"
+        disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
+        onClick={() => {
+          onRequestDiagnosticsClick();
+        }}
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.diagnosticsOneButton"
+          defaultMessage="Request diagnostics .zip"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
   return (
     <ContextMenuActions
       isOpen={isMenuOpen}

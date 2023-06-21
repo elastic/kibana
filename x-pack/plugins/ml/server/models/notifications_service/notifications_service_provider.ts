@@ -154,18 +154,35 @@ export class NotificationsService {
       sortField: keyof NotificationItem,
       sortDirection: 'asc' | 'desc'
     ): (a: NotificationItem, b: NotificationItem) => number {
-      if (sortField === 'timestamp') {
-        if (sortDirection === 'asc') {
-          return (a, b) => a.timestamp - b.timestamp;
-        } else {
-          return (a, b) => b.timestamp - a.timestamp;
-        }
-      } else {
-        if (sortDirection === 'asc') {
-          return (a, b) => (a[sortField] ?? '').localeCompare(b[sortField]);
-        } else {
-          return (a, b) => (b[sortField] ?? '').localeCompare(a[sortField]);
-        }
+      switch (sortField) {
+        case 'timestamp':
+          if (sortDirection === 'asc') {
+            return (a, b) => a.timestamp - b.timestamp;
+          } else {
+            return (a, b) => b.timestamp - a.timestamp;
+          }
+        case 'level':
+          if (sortDirection === 'asc') {
+            const levelOrder: Record<NotificationSource['level'], number> = {
+              error: 0,
+              warning: 1,
+              info: 2,
+            };
+            return (a, b) => levelOrder[b.level] - levelOrder[a.level];
+          } else {
+            const levelOrder: Record<NotificationSource['level'], number> = {
+              error: 2,
+              warning: 1,
+              info: 0,
+            };
+            return (a, b) => levelOrder[b.level] - levelOrder[a.level];
+          }
+        default:
+          if (sortDirection === 'asc') {
+            return (a, b) => (a[sortField] ?? '').localeCompare(b[sortField]);
+          } else {
+            return (a, b) => (b[sortField] ?? '').localeCompare(a[sortField]);
+          }
       }
     }
 

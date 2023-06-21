@@ -16,7 +16,9 @@ import {
 type Params = Pick<RedirectAppLinksServices, 'navigateToUrl'>;
 
 const defaultParams: Params = {
-  navigateToUrl: jest.fn(),
+  navigateToUrl: (url: string) => {
+    return new Promise<void>(() => {});
+  },
 };
 
 /**

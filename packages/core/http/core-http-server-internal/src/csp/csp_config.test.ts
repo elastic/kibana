@@ -8,7 +8,6 @@
 
 import { CspConfig } from './csp_config';
 import { cspConfig, CspConfigType } from './config';
-import { mockConfig } from './csp_config.test.mocks';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
@@ -34,6 +33,7 @@ describe('CspConfig', () => {
     expect(CspConfig.DEFAULT).toMatchInlineSnapshot(`
       CspConfig {
         "disableEmbedding": false,
+        "disableUnsafeEval": true,
         "header": "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "strict": true,
         "warnLegacyBrowsers": true,
@@ -140,36 +140,15 @@ describe('CspConfig', () => {
         );
       });
 
-      test('when "disableUnsafeEval" is not set, and the default value is "false", the `unsafe-eval` CSP should be set', () => {
-        // The default value for `disableUnsafeEval` depends on whether Kibana is a distributable or not. To test both scenarios, we mock the config.
-        const mockedConfig = mockConfig.create(false).schema.validate({});
-
+      test('when "disableUnsafeEval" is not set, the `unsafe-eval` CSP should not be set', () => {
         const config = new CspConfig({
-          ...mockedConfig,
-          script_src: ['foo', 'bar'],
-        });
-
-        expect(config.header).toEqual(
-          `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
-
-        mockConfig.reset();
-      });
-
-      test('when "disableUnsafeEval" is not set, and the default value is "true", the `unsafe-eval` CSP should not be set', () => {
-        // The default value for `disableUnsafeEval` depends on whether Kibana is a distributable or not. To test both scenarios, we mock the config.
-        const mockedConfig = mockConfig.create(true).schema.validate({});
-
-        const config = new CspConfig({
-          ...mockedConfig,
+          ...defaultConfig,
           script_src: ['foo', 'bar'],
         });
 
         expect(config.header).toEqual(
           `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
-
-        mockConfig.reset();
       });
     });
 

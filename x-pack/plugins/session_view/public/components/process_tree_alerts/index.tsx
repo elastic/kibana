@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useRef, MouseEvent, useCallback } from 'react';
+import React, { useState, useEffect, useRef, MouseEvent, useCallback, useMemo } from 'react';
 import { useStyles } from './styles';
-import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
+import type {
+  ProcessEventAlertCategory,
+  ProcessEvent,
+  ProcessEventAlert,
+  AlertTypeCount,
+} from '../../../common';
 import { ProcessTreeAlert } from '../process_tree_alert';
-import { MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
+import { DEFAULT_ALERT_FILTER_VALUE, MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
+import { ProcessTreeAlertsFilter } from '../process_tree_alerts_filter';
 
 export interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
   investigatedAlertId?: string;
   isProcessSelected?: boolean;
+  alertTypeCounts: AlertTypeCount[];
   onAlertSelected: (e: MouseEvent) => void;
   onShowAlertDetails: (alertUuid: string) => void;
 }
@@ -23,10 +30,13 @@ export function ProcessTreeAlerts({
   alerts,
   investigatedAlertId,
   isProcessSelected = false,
+  alertTypeCounts,
   onAlertSelected,
   onShowAlertDetails,
 }: ProcessTreeAlertsDeps) {
   const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(null);
+  const [selectedProcessEventAlertCategory, setSelectedProcessEventAlertCategory] =
+    useState<ProcessEventAlertCategory>(DEFAULT_ALERT_FILTER_VALUE);
   const styles = useStyles();
 
   useEffect(() => {
@@ -70,6 +80,20 @@ export function ProcessTreeAlerts({
     [onAlertSelected]
   );
 
+  const handleProcessEventAlertCategorySelected = useCallback((eventCategory) => {
+    setSelectedProcessEventAlertCategory(eventCategory);
+  }, []);
+
+  const filteredProcessEventAlerts = useMemo(() => {
+    return alerts?.filter((processEventAlert: ProcessEvent) => {
+      const processEventAlertCategory = processEventAlert.event?.category?.[0];
+      if (selectedProcessEventAlertCategory === DEFAULT_ALERT_FILTER_VALUE) {
+        return true;
+      }
+      return processEventAlertCategory === selectedProcessEventAlertCategory;
+    });
+  }, [selectedProcessEventAlertCategory, alerts]);
+
   if (alerts.length === 0) {
     return null;
   }
@@ -80,7 +104,14 @@ export function ProcessTreeAlerts({
       css={styles.container}
       data-test-subj="sessionView:sessionViewAlertDetails"
     >
-      {alerts.map((alert: ProcessEvent, idx: number) => {
+      <ProcessTreeAlertsFilter
+        totalAlertsCount={alerts.length}
+        alertTypeCounts={alertTypeCounts}
+        filteredAlertsCount={filteredProcessEventAlerts.length}
+        onAlertEventCategorySelected={handleProcessEventAlertCategorySelected}
+      />
+
+      {filteredProcessEventAlerts.map((alert: ProcessEvent, idx: number) => {
         const alertUuid = alert.kibana?.alert?.uuid || null;
 
         return (

@@ -76,6 +76,7 @@ import { IField } from '../classes/fields/field';
 import type { IESSource } from '../classes/sources/es_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
+import { isSpatialJoin } from '../classes/joins/is_spatial_join';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -228,6 +229,9 @@ export function removePreviewLayers() {
   ) => {
     getLayerList(getState()).forEach((layer) => {
       if (layer.isPreviewLayer()) {
+        if (isLayerGroup(layer)) {
+          dispatch(ungroupLayer(layer.getId()));
+        }
         dispatch(removeLayer(layer.getId()));
       }
     });
@@ -450,15 +454,16 @@ function updateSourcePropWithoutSync(
         });
         await dispatch(updateStyleProperties(layerId));
       } else if (value === SCALING_TYPES.MVT) {
-        if (joins.length > 1) {
-          // Maplibre feature-state join uses promoteId and there is a limit to one promoteId
-          // Therefore, Vector tile scaling supports only one join
-          dispatch({
-            type: SET_JOINS,
-            layerId,
-            joins: [joins[0]],
-          });
-        }
+        const filteredJoins = joins.filter((joinDescriptor) => {
+          return !isSpatialJoin(joinDescriptor);
+        });
+        // Maplibre feature-state join uses promoteId and there is a limit to one promoteId
+        // Therefore, Vector tile scaling supports only one join
+        dispatch({
+          type: SET_JOINS,
+          layerId,
+          joins: filteredJoins.length ? [filteredJoins[0]] : [],
+        });
         // update style props regardless of updating joins
         // Allow style to clean-up data driven style properties with join fields that do not support feature-state.
         await dispatch(updateStyleProperties(layerId));
@@ -613,11 +618,21 @@ export function setLayerQuery(id: string, query: Query) {
 }
 
 export function setLayerParent(id: string, parent: string | undefined) {
-  return {
-    type: UPDATE_LAYER_PROP,
-    id,
-    propName: 'parent',
-    newValue: parent,
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'parent',
+      newValue: parent,
+    });
+
+    if (parent) {
+      // Open parent layer details. Without opening parent details, layer disappears from legend and this confuses users
+      dispatch(showTOCDetails(parent));
+    }
   };
 }
 
@@ -751,7 +766,7 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
   };
 }
 
-export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
+export function setJoinsForLayer(layer: ILayer, joins: Array<Partial<JoinDescriptor>>) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     const previousFields = await (layer as IVectorLayer).getFields();
     dispatch({
@@ -860,6 +875,22 @@ export function createLayerGroup(draggedLayerId: string, combineLayerId: string)
 
     // Move dragged-layer to left of combine-layer
     dispatch(moveLayerToLeftOfTarget(draggedLayerId, combineLayerId));
+  };
+}
+
+export function ungroupLayer(layerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerList(getState()).find((findLayer) => findLayer.getId() === layerId);
+    if (!layer || !isLayerGroup(layer)) {
+      return;
+    }
+
+    (layer as LayerGroup).getChildren().forEach((childLayer) => {
+      dispatch(setLayerParent(childLayer.getId(), layer.getParent()));
+    });
   };
 }
 

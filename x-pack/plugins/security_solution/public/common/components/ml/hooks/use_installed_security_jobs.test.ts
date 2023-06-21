@@ -15,6 +15,7 @@ import { useAppToastsMock } from '../../../hooks/use_app_toasts.mock';
 import { mockJobsSummaryResponse } from '../../ml_popover/api.mock';
 import { getJobsSummary } from '../api/get_jobs_summary';
 import { useInstalledSecurityJobs } from './use_installed_security_jobs';
+import { TestProviders } from '../../../mock';
 
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 jest.mock('../../../../../common/machine_learning/has_ml_license');
@@ -37,7 +38,9 @@ describe('useInstalledSecurityJobs', () => {
     });
 
     it('returns jobs and permissions', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs());
+      const { result, waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs(), {
+        wrapper: TestProviders,
+      });
       await waitForNextUpdate();
 
       expect(result.current.jobs).toHaveLength(3);
@@ -68,7 +71,9 @@ describe('useInstalledSecurityJobs', () => {
     });
 
     it('filters out non-security jobs', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs());
+      const { result, waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs(), {
+        wrapper: TestProviders,
+      });
       await waitForNextUpdate();
 
       expect(result.current.jobs.length).toBeGreaterThan(0);
@@ -77,7 +82,9 @@ describe('useInstalledSecurityJobs', () => {
 
     it('renders a toast error if the ML call fails', async () => {
       (getJobsSummary as jest.Mock).mockRejectedValue('whoops');
-      const { waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs());
+      const { waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs(), {
+        wrapper: TestProviders,
+      });
       await waitForNextUpdate();
 
       expect(appToastsMock.addError).toHaveBeenCalledWith('whoops', {
@@ -93,7 +100,9 @@ describe('useInstalledSecurityJobs', () => {
     });
 
     it('returns empty jobs and false predicates', () => {
-      const { result } = renderHook(() => useInstalledSecurityJobs());
+      const { result } = renderHook(() => useInstalledSecurityJobs(), {
+        wrapper: TestProviders,
+      });
 
       expect(result.current.jobs).toEqual([]);
       expect(result.current.isMlUser).toEqual(false);

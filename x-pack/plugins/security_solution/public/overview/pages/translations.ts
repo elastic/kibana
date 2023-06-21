@@ -7,8 +7,54 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADD_TO_CASE_SUCCESS = i18n.translate(
+  'xpack.securitySolution.dataQualityDashboard.addToCaseSuccessToast',
+  {
+    defaultMessage: 'Successfully added data quality results to the case',
+  }
+);
+
+export const BETA = i18n.translate('xpack.securitySolution.dataQualityDashboard.betaBadge', {
+  defaultMessage: 'Beta',
+});
+
+export const COLD = i18n.translate('xpack.securitySolution.overview.ilmPhaseCold', {
+  defaultMessage: 'cold',
+});
+
+export const DATA_QUALITY_TITLE = i18n.translate(
+  'xpack.securitySolution.dataQualityDashboard.pageTitle',
+  {
+    defaultMessage: 'Data Quality',
+  }
+);
+
+export const ELASTIC_COMMON_SCHEMA = i18n.translate(
+  'xpack.securitySolution.dataQualityDashboard.elasticCommonSchemaReferenceLink',
+  {
+    defaultMessage: 'Elastic Common Schema (ECS)',
+  }
+);
+
+export const SECURITY_SOLUTION_DEFAULT_INDEX_TOOLTIP = (settingName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.dataQualityDashboard.securitySolutionDefaultIndexTooltip',
+    {
+      values: { settingName },
+      defaultMessage: `Indices and patterns from the {settingName} setting`,
+    }
+  );
+
 export const EVENTS = i18n.translate('xpack.securitySolution.overview.eventsTitle', {
   defaultMessage: 'Event count',
+});
+
+export const FROZEN = i18n.translate('xpack.securitySolution.overview.ilmPhaseFrozen', {
+  defaultMessage: 'frozen',
+});
+
+export const HOT = i18n.translate('xpack.securitySolution.overview.ilmPhaseHot', {
+  defaultMessage: 'hot',
 });
 
 export const NEWS_FEED_TITLE = i18n.translate(
@@ -35,12 +81,20 @@ export const TOP = (fieldName: string) =>
     defaultMessage: `Top {fieldName}`,
   });
 
+export const UNMANAGED = i18n.translate('xpack.securitySolution.overview.ilmPhaseUnmanaged', {
+  defaultMessage: 'unmanaged',
+});
+
 export const VIEW_ALERTS = i18n.translate('xpack.securitySolution.overview.viewAlertsButtonLabel', {
   defaultMessage: 'View alerts',
 });
 
 export const VIEW_EVENTS = i18n.translate('xpack.securitySolution.overview.viewEventsButtonLabel', {
   defaultMessage: 'View events',
+});
+
+export const WARM = i18n.translate('xpack.securitySolution.overview.ilmPhaseWarm', {
+  defaultMessage: 'warm',
 });
 
 export const DETECTION_RESPONSE_TITLE = i18n.translate(
@@ -53,28 +107,7 @@ export const DETECTION_RESPONSE_TITLE = i18n.translate(
 export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
   'xpack.securitySolution.entityAnalytics.pageDesc',
   {
-    defaultMessage:
-      'Detect threats from users and devices within your network with Entity Analytics',
-  }
-);
-
-export const NO_PERMISSIONS_MSG = i18n.translate(
-  'xpack.securitySolution.detectionResponse.noPagePermissionsMessage',
-  {
-    defaultMessage:
-      'To view this page you must update privileges. For more information, contact your Kibana administrator.',
-  }
-);
-export const NO_PERMISSIONS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.noPermissionsTitle',
-  {
-    defaultMessage: 'Privileges required',
-  }
-);
-export const GO_TO_DOCUMENTATION = i18n.translate(
-  'xpack.securitySolution.detectionResponse.goToDocumentationButton',
-  {
-    defaultMessage: 'View documentation',
+    defaultMessage: 'Detect threats from users and hosts within your network with Entity Analytics',
   }
 );
 

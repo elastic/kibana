@@ -7,7 +7,10 @@
  */
 
 export type { SavedObjectsClientContract } from './src/saved_objects_client';
-export type { ISavedObjectsRepository } from './src/saved_objects_repository';
+export type {
+  ISavedObjectsRepository,
+  SavedObjectsFindInternalOptions,
+} from './src/saved_objects_repository';
 export type {
   MutatingOperationRefreshSetting,
   SavedObjectsBaseOptions,
@@ -41,6 +44,7 @@ export type {
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsPitParams,
+  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesResponseObject,
@@ -51,9 +55,18 @@ export type {
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
+  SavedObjectsGetOptions,
   SavedObjectsPointInTimeFinderClient,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteStatus,
   SavedObjectsBulkDeleteResponse,
 } from './src/apis';
+
+export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-common/src/server_types';

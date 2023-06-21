@@ -11,21 +11,17 @@ import {
   createOrUpdateIndex,
   Mappings,
 } from '@kbn/observability-plugin/server';
-import { APMConfig } from '../../..';
-import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
+import { APM_CUSTOM_LINK_INDEX } from '../apm_indices/get_apm_indices';
 
 export const createApmCustomLinkIndex = async ({
   client,
-  config,
   logger,
 }: {
   client: ElasticsearchClient;
-  config: APMConfig;
   logger: Logger;
 }) => {
-  const index = getApmIndicesConfig(config).apmCustomLinkIndex;
   return createOrUpdateIndex({
-    index,
+    index: APM_CUSTOM_LINK_INDEX,
     client,
     logger,
     mappings,

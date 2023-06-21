@@ -10,7 +10,8 @@ import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
 } from './dashboard_panel_converters';
-import { SavedDashboardPanel, DashboardPanelState } from '../types';
+import { SavedDashboardPanel } from '../content_management';
+import { DashboardPanelState } from '../dashboard_container/types';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 
 test('convertSavedDashboardPanelToPanelState', () => {
@@ -45,6 +46,8 @@ test('convertSavedDashboardPanelToPanelState', () => {
       savedObjectId: 'savedObjectId',
     },
     type: 'search',
+    panelRefName: undefined,
+    version: '7.0.0',
   });
 });
 

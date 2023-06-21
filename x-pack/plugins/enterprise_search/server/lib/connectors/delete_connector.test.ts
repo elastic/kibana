@@ -11,6 +11,11 @@ import { CONNECTORS_INDEX } from '../..';
 
 import { deleteConnectorById } from './delete_connector';
 
+jest.mock('./post_cancel_syncs', () => ({
+  cancelSyncs: jest.fn(),
+}));
+import { cancelSyncs } from './post_cancel_syncs';
+
 describe('deleteConnector lib function', () => {
   const mockClient = {
     asCurrentUser: {
@@ -21,16 +26,19 @@ describe('deleteConnector lib function', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
   });
 
-  it('should delete connector', async () => {
+  it('should delete connector and cancel syncs', async () => {
     mockClient.asCurrentUser.delete.mockImplementation(() => true);
-    await expect(
-      deleteConnectorById(mockClient as unknown as IScopedClusterClient, 'connectorId')
-    ).resolves.toEqual(true);
+
+    await deleteConnectorById(mockClient as unknown as IScopedClusterClient, 'connectorId');
+    expect(cancelSyncs as jest.Mock).toHaveBeenCalledWith(mockClient, 'connectorId');
     expect(mockClient.asCurrentUser.delete).toHaveBeenCalledWith({
       id: 'connectorId',
       index: CONNECTORS_INDEX,
+      refresh: 'wait_for',
     });
+    jest.useRealTimers();
   });
 });

@@ -35,6 +35,8 @@ export {
   PRECONFIGURATION_API_ROUTES,
   DOWNLOAD_SOURCE_API_ROOT,
   DOWNLOAD_SOURCE_API_ROUTES,
+  // Saved Object indices
+  INGEST_SAVED_OBJECT_INDEX,
   // Saved object types
   SO_SEARCH_LIMIT,
   AGENTS_PREFIX,
@@ -44,6 +46,8 @@ export {
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   // Defaults
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
@@ -67,8 +71,14 @@ export {
   // Fleet server host
   DEFAULT_FLEET_SERVER_HOST_ID,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  // Proxy
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
   // Authz
   ENDPOINT_PRIVILEGES,
+  // Message signing service
+  MESSAGE_SIGNING_SERVICE_API_ROUTES,
+  // secrets
+  SECRETS_INDEX,
 } from '../../common/constants';
 
 export {
@@ -83,3 +93,5 @@ export {
   FLEET_INSTALL_FORMAT_VERSION,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
 } from './fleet_es_assets';
+export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
+export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';

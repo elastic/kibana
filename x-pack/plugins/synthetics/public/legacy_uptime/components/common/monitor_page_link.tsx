@@ -6,8 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiLink } from '@elastic/eui';
-import { Link } from 'react-router-dom';
+import { ReactRouterEuiLink } from './react_router_helpers';
 
 interface DetailPageLinkProps {
   /**
@@ -31,11 +30,10 @@ export const MonitorPageLink: FC<DetailPageLinkProps> = ({
       ? `/monitor/${btoa(monitorId)}/${linkParameters}`
       : `/monitor/${btoa(monitorId)}`;
   };
+
   return (
-    <EuiLink>
-      <Link data-test-subj={`monitor-page-link-${monitorId}`} to={getLocationTo()}>
-        {children}
-      </Link>
-    </EuiLink>
+    <ReactRouterEuiLink data-test-subj={`monitor-page-link-${monitorId}`} to={getLocationTo()}>
+      {children}
+    </ReactRouterEuiLink>
   );
 };

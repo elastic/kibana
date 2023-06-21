@@ -5,6 +5,9 @@
  * 2.0.
  */
 import { Subject } from 'rxjs';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { registerSyntheticsTLSCheckRule } from './alert_rules/tls_rule/tls_rule';
+import { registerSyntheticsStatusCheckRule } from './alert_rules/status_rule/monitor_status_rule';
 import { UptimeRequestHandlerContext } from './types';
 import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -18,7 +21,8 @@ import type { SyntheticsRequest } from './legacy_uptime/routes/types';
 export const initSyntheticsServer = (
   server: UptimeServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient,
-  plugins: UptimeCorePluginsSetup
+  plugins: UptimeCorePluginsSetup,
+  ruleDataClient: IRuleDataClient
 ) => {
   const libs = {
     requests: uptimeRequests,
@@ -55,6 +59,30 @@ export const initSyntheticsServer = (
         throw new Error(`Handler for method ${method} is not defined`);
     }
   });
+
+  const {
+    alerting: { registerType },
+  } = plugins;
+
+  const statusAlert = registerSyntheticsStatusCheckRule(
+    server,
+    libs,
+    plugins,
+    syntheticsMonitorClient,
+    ruleDataClient
+  );
+
+  registerType(statusAlert);
+
+  const tlsRule = registerSyntheticsTLSCheckRule(
+    server,
+    libs,
+    plugins,
+    syntheticsMonitorClient,
+    ruleDataClient
+  );
+
+  registerType(tlsRule);
 
   syntheticsAppStreamingApiRoutes.forEach((route) => {
     const { method, streamHandler, path, options } = syntheticsRouteWrapper(

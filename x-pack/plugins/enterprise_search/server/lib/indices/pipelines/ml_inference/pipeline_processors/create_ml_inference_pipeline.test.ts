@@ -58,9 +58,11 @@ describe('createMlInferencePipeline lib function', () => {
 
     const actualResult = await createMlInferencePipeline(
       pipelineName,
+      undefined,
       modelId,
       sourceField,
       destinationField,
+      undefined, // Omitted inference config
       mockClient as unknown as ElasticsearchClient
     );
 
@@ -71,9 +73,11 @@ describe('createMlInferencePipeline lib function', () => {
   it('should convert spaces to underscores in the pipeline name', async () => {
     await createMlInferencePipeline(
       'my pipeline with spaces  ',
+      undefined,
       modelId,
       sourceField,
       destinationField,
+      undefined, // Omitted inference config
       mockClient as unknown as ElasticsearchClient
     );
 
@@ -90,9 +94,11 @@ describe('createMlInferencePipeline lib function', () => {
 
     await createMlInferencePipeline(
       pipelineName,
+      undefined,
       modelId,
       sourceField,
       undefined, // Omitted destination field
+      undefined, // Omitted inference config
       mockClient as unknown as ElasticsearchClient
     );
 
@@ -110,6 +116,42 @@ describe('createMlInferencePipeline lib function', () => {
     );
   });
 
+  it('should set inference config when provided', async () => {
+    mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
+    mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
+
+    await createMlInferencePipeline(
+      pipelineName,
+      undefined,
+      modelId,
+      sourceField,
+      destinationField,
+      {
+        zero_shot_classification: {
+          labels: ['foo', 'bar'],
+        },
+      },
+      mockClient as unknown as ElasticsearchClient
+    );
+
+    // Verify the object passed to pipeline creation contains the default target field name
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(
+      expect.objectContaining({
+        processors: expect.arrayContaining([
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              inference_config: {
+                zero_shot_classification: {
+                  labels: ['foo', 'bar'],
+                },
+              },
+            }),
+          }),
+        ]),
+      })
+    );
+  });
+
   it('should throw an error without creating the pipeline if it already exists', () => {
     mockClient.ingest.getPipeline.mockImplementation(() =>
       Promise.resolve({
@@ -119,9 +161,11 @@ describe('createMlInferencePipeline lib function', () => {
 
     const actualResult = createMlInferencePipeline(
       pipelineName,
+      undefined,
       modelId,
       sourceField,
       destinationField,
+      undefined, // Omitted inference config
       mockClient as unknown as ElasticsearchClient
     );
 

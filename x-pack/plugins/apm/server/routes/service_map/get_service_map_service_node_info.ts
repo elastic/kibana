@@ -9,22 +9,15 @@ import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
-  METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
-  METRIC_SYSTEM_FREE_MEMORY,
-  METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { NodeStats } from '../../../common/service_map';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup } from '../../lib/helpers/setup_request';
 import {
   getDocumentTypeFilterForTransactions,
   getDurationFieldForTransactions,
@@ -32,13 +25,13 @@ import {
 } from '../../lib/helpers/transactions';
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
-import {
-  percentCgroupMemoryUsedScript,
-  percentSystemMemoryUsedScript,
-} from '../metrics/by_agent/shared/memory';
+import { systemMemory, cgroupMemory } from '../metrics/by_agent/shared/memory';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 interface Options {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: string;
   serviceName: string;
   searchAggregatedTransactions: boolean;
@@ -53,7 +46,7 @@ interface TaskParameters {
   searchAggregatedTransactions: boolean;
   minutes: number;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   intervalString: string;
@@ -62,10 +55,10 @@ interface TaskParameters {
   offsetInMs: number;
 }
 
-export function getServiceMapServiceNodeInfo({
+function getServiceMapServiceNodeInfoForTimeRange({
   environment,
   serviceName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
@@ -99,7 +92,7 @@ export function getServiceMapServiceNodeInfo({
       searchAggregatedTransactions,
       minutes,
       serviceName,
-      setup,
+      apmEventClient,
       start: startWithOffset,
       end: endWithOffset,
       intervalString,
@@ -125,7 +118,7 @@ export function getServiceMapServiceNodeInfo({
 }
 
 async function getFailedTransactionsRateStats({
-  setup,
+  apmEventClient,
   serviceName,
   environment,
   searchAggregatedTransactions,
@@ -137,14 +130,27 @@ async function getFailedTransactionsRateStats({
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
     const { average, timeseries } = await getFailedTransactionRate({
       environment,
-      setup,
+      apmEventClient,
       serviceName,
-      searchAggregatedTransactions,
       start,
       end,
       kuery: '',
-      numBuckets,
-      transactionTypes: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
+      transactionTypes: defaultTransactionTypes,
+      bucketSizeInSeconds: getBucketSizeForAggregatedTransactions({
+        start,
+        end,
+        numBuckets,
+        searchAggregatedTransactions,
+      }).bucketSize,
+      ...(searchAggregatedTransactions
+        ? {
+            documentType: ApmDocumentType.TransactionMetric,
+            rollupInterval: RollupInterval.OneMinute,
+          }
+        : {
+            documentType: ApmDocumentType.TransactionEvent,
+            rollupInterval: RollupInterval.None,
+          }),
     });
     return {
       value: average,
@@ -154,7 +160,7 @@ async function getFailedTransactionsRateStats({
 }
 
 async function getTransactionStats({
-  setup,
+  apmEventClient,
   filter,
   minutes,
   searchAggregatedTransactions,
@@ -163,8 +169,6 @@ async function getTransactionStats({
   intervalString,
   offsetInMs,
 }: TaskParameters): Promise<NodeStats['transactionStats']> {
-  const { apmEventClient } = setup;
-
   const durationField = getDurationFieldForTransactions(
     searchAggregatedTransactions
   );
@@ -185,10 +189,7 @@ async function getTransactionStats({
             ),
             {
               terms: {
-                [TRANSACTION_TYPE]: [
-                  TRANSACTION_REQUEST,
-                  TRANSACTION_PAGE_LOAD,
-                ],
+                [TRANSACTION_TYPE]: defaultTransactionTypes,
               },
             },
           ],
@@ -241,15 +242,13 @@ async function getTransactionStats({
 }
 
 async function getCpuStats({
-  setup,
+  apmEventClient,
   filter,
   intervalString,
   start,
   end,
   offsetInMs,
 }: TaskParameters): Promise<NodeStats['cpuUsage']> {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search(
     'get_avg_cpu_usage_for_service_map_node',
     {
@@ -295,7 +294,7 @@ async function getCpuStats({
 }
 
 function getMemoryStats({
-  setup,
+  apmEventClient,
   filter,
   intervalString,
   start,
@@ -303,16 +302,12 @@ function getMemoryStats({
   offsetInMs,
 }: TaskParameters) {
   return withApmSpan('get_memory_stats_for_service_map_node', async () => {
-    const { apmEventClient } = setup;
-
     const getMemoryUsage = async ({
       additionalFilters,
       script,
     }: {
       additionalFilters: ESFilter[];
-      script:
-        | typeof percentCgroupMemoryUsedScript
-        | typeof percentSystemMemoryUsedScript;
+      script: typeof cgroupMemory.script | typeof systemMemory.script;
     }): Promise<NodeStats['memoryUsage']> => {
       const response = await apmEventClient.search(
         'get_avg_memory_for_service_map_node',
@@ -355,22 +350,50 @@ function getMemoryStats({
     };
 
     let memoryUsage = await getMemoryUsage({
-      additionalFilters: [
-        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
-      ],
-      script: percentCgroupMemoryUsedScript,
+      script: cgroupMemory.script,
+      additionalFilters: [cgroupMemory.filter],
     });
 
     if (!memoryUsage) {
       memoryUsage = await getMemoryUsage({
-        additionalFilters: [
-          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-        ],
-        script: percentSystemMemoryUsedScript,
+        script: systemMemory.script,
+        additionalFilters: [systemMemory.filter],
       });
     }
 
     return memoryUsage;
   });
+}
+
+export interface ServiceMapServiceNodeInfoResponse {
+  currentPeriod: NodeStats;
+  previousPeriod: NodeStats | undefined;
+}
+
+export async function getServiceMapServiceNodeInfo({
+  environment,
+  apmEventClient,
+  serviceName,
+  searchAggregatedTransactions,
+  start,
+  end,
+  offset,
+}: Options): Promise<ServiceMapServiceNodeInfoResponse> {
+  const commonProps = {
+    environment,
+    apmEventClient,
+    serviceName,
+    searchAggregatedTransactions,
+    start,
+    end,
+  };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    getServiceMapServiceNodeInfoForTimeRange(commonProps),
+    offset
+      ? getServiceMapServiceNodeInfoForTimeRange({ ...commonProps, offset })
+      : undefined,
+  ]);
+
+  return { currentPeriod, previousPeriod };
 }

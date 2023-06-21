@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { bulkGetObjectsMock } from './saved_object_view.test.mocks';
+import { bulkDeleteObjectsMock, bulkGetObjectsMock } from './saved_object_view.test.mocks';
 
 import React from 'react';
 import { ShallowWrapper } from 'enzyme';
@@ -16,18 +16,19 @@ import {
   httpServiceMock,
   overlayServiceMock,
   notificationServiceMock,
-  savedObjectsServiceMock,
   applicationServiceMock,
   uiSettingsServiceMock,
   scopedHistoryMock,
   docLinksServiceMock,
 } from '@kbn/core/public/mocks';
 
+import type { SavedObjectWithMetadata } from '../../types';
 import {
   SavedObjectEdition,
   SavedObjectEditionProps,
   SavedObjectEditionState,
 } from './saved_object_view';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const resolvePromises = () => new Promise((resolve) => process.nextTick(resolve));
 
@@ -36,11 +37,11 @@ describe('SavedObjectEdition', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
-  let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
   let uiSettings: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
   let history: ReturnType<typeof scopedHistoryMock.create>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let docLinks: ReturnType<typeof docLinksServiceMock.createStartContract>;
+  let settings: ReturnType<typeof settingsServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectEditionProps> = {}) => {
     return shallowWithI18nProvider(
@@ -56,8 +57,8 @@ describe('SavedObjectEdition', () => {
     http = httpServiceMock.createStartContract();
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
-    savedObjects = savedObjectsServiceMock.createStartContract();
     uiSettings = uiSettingsServiceMock.createStartContract();
+    settings = settingsServiceMock.createStartContract();
     history = scopedHistoryMock.create();
     docLinks = docLinksServiceMock.createStartContract();
     applications = applicationServiceMock.createStartContract();
@@ -81,35 +82,33 @@ describe('SavedObjectEdition', () => {
       capabilities: applications.capabilities,
       overlays,
       notifications,
-      savedObjectsClient: savedObjects.client,
       history,
       uiSettings,
       docLinks: docLinks.links,
+      settings,
     };
 
-    bulkGetObjectsMock.mockImplementation(() => [{}]);
+    bulkDeleteObjectsMock.mockResolvedValue([{}]);
   });
 
   it('should render normally', async () => {
-    bulkGetObjectsMock.mockImplementation(() =>
-      Promise.resolve([
-        {
-          id: '1',
-          type: 'dashboard',
-          attributes: {
-            title: `MyDashboard*`,
-          },
-          meta: {
-            title: `MyDashboard*`,
-            icon: 'dashboardApp',
-            inAppUrl: {
-              path: '/app/dashboards#/view/1',
-              uiCapabilitiesPath: 'management.kibana.dashboard',
-            },
+    bulkGetObjectsMock.mockResolvedValue([
+      {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          title: `MyDashboard*`,
+        },
+        meta: {
+          title: `MyDashboard*`,
+          icon: 'dashboardApp',
+          inAppUrl: {
+            path: '/app/dashboards#/view/1',
+            uiCapabilitiesPath: 'management.kibana.dashboard',
           },
         },
-      ])
-    );
+      } as SavedObjectWithMetadata,
+    ]);
     const component = shallowRender();
     // Ensure all promises resolve
     await resolvePromises();
@@ -119,15 +118,15 @@ describe('SavedObjectEdition', () => {
   });
 
   it('should add danger toast when bulk get fails', async () => {
-    bulkGetObjectsMock.mockImplementation(() =>
-      Promise.resolve([
-        {
-          error: {
-            message: 'Not found',
-          },
+    bulkGetObjectsMock.mockResolvedValue([
+      {
+        error: {
+          error: '',
+          message: 'Not found',
+          statusCode: 404,
         },
-      ])
-    );
+      } as SavedObjectWithMetadata,
+    ]);
     const component = shallowRender({ notFoundType: 'does_not_exist' });
 
     await resolvePromises();
@@ -165,8 +164,8 @@ describe('SavedObjectEdition', () => {
         },
         hiddenType: false,
       },
-    };
-    bulkGetObjectsMock.mockImplementation(() => Promise.resolve([savedObjectItem]));
+    } as SavedObjectWithMetadata;
+    bulkGetObjectsMock.mockResolvedValue([savedObjectItem]);
     applications.capabilities = {
       navLinks: {},
       management: {},
@@ -232,14 +231,9 @@ describe('SavedObjectEdition', () => {
         },
         hiddenType: false,
       },
-    };
+    } as SavedObjectWithMetadata;
 
-    it('should display a confirmation message on deleting the saved object', async () => {
-      bulkGetObjectsMock.mockImplementation(() => Promise.resolve([savedObjectItem]));
-      const mockSavedObjectsClient = {
-        ...defaultProps.savedObjectsClient,
-        delete: jest.fn().mockImplementation(() => ({})),
-      };
+    beforeEach(() => {
       applications.capabilities = {
         navLinks: {},
         management: {},
@@ -250,13 +244,13 @@ describe('SavedObjectEdition', () => {
           delete: true,
         },
       };
-      overlays.openConfirm.mockResolvedValue(false);
-      const component = shallowRender({
-        capabilities: applications.capabilities,
-        savedObjectsClient: mockSavedObjectsClient,
-        overlays,
-      });
+    });
 
+    it('should display a confirmation message on deleting the saved object', async () => {
+      bulkGetObjectsMock.mockResolvedValue([savedObjectItem]);
+      overlays.openConfirm.mockResolvedValue(false);
+
+      const component = shallowRender();
       await resolvePromises();
 
       component.update();
@@ -272,28 +266,10 @@ describe('SavedObjectEdition', () => {
     });
 
     it('should route back if action is confirm and user accepted', async () => {
-      bulkGetObjectsMock.mockImplementation(() => Promise.resolve([savedObjectItem]));
-      const mockSavedObjectsClient = {
-        ...defaultProps.savedObjectsClient,
-        delete: jest.fn().mockImplementation(() => ({})),
-      };
-      applications.capabilities = {
-        navLinks: {},
-        management: {},
-        catalogue: {},
-        savedObjectsManagement: {
-          read: true,
-          edit: false,
-          delete: true,
-        },
-      };
+      bulkGetObjectsMock.mockResolvedValue([savedObjectItem]);
       overlays.openConfirm.mockResolvedValue(true);
-      const component = shallowRender({
-        capabilities: applications.capabilities,
-        savedObjectsClient: mockSavedObjectsClient,
-        overlays,
-      });
 
+      const component = shallowRender();
       await resolvePromises();
 
       component.update();
@@ -303,27 +279,34 @@ describe('SavedObjectEdition', () => {
     });
 
     it('should not enable delete if the saved object is hidden', async () => {
-      bulkGetObjectsMock.mockImplementation(() =>
-        Promise.resolve([{ ...savedObjectItem, meta: { hiddenType: true } }])
-      );
-      applications.capabilities = {
-        navLinks: {},
-        management: {},
-        catalogue: {},
-        savedObjectsManagement: {
-          read: true,
-          edit: false,
-          delete: true,
-        },
-      };
-      const component = shallowRender({
-        capabilities: applications.capabilities,
-      });
+      bulkGetObjectsMock.mockResolvedValue([{ ...savedObjectItem, meta: { hiddenType: true } }]);
 
+      const component = shallowRender();
       await resolvePromises();
 
       component.update();
       expect(component.find('Header').prop('canDelete')).toBe(false);
+    });
+
+    it('should show a danger toast when bulk deletion fails', async () => {
+      bulkGetObjectsMock.mockResolvedValue([savedObjectItem]);
+      bulkDeleteObjectsMock.mockResolvedValue([
+        {
+          error: { message: 'Something went wrong.' },
+          success: false,
+        },
+      ]);
+
+      const component = shallowRender();
+      await resolvePromises();
+
+      component.update();
+      await component.instance().delete();
+      expect(notifications.toasts.addDanger).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'Something went wrong.',
+        })
+      );
     });
   });
 });

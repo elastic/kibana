@@ -21,13 +21,15 @@ import {
   EuiButton,
   EuiIcon,
   EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
+import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { bulkUpdateAPIKey, deleteRules } from '../../../lib/rule_api';
-import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
+import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { RuleActionsPopover } from './rule_actions_popover';
 import {
   hasAllPrivilege,
@@ -50,7 +52,7 @@ import {
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
 import { RuleEdit } from '../../rule_form';
-import { routeToRuleDetails, routeToRules } from '../../../constants';
+import { routeToRules } from '../../../constants';
 import {
   rulesErrorReasonTranslationsMapping,
   rulesWarningReasonTranslationsMapping,
@@ -60,14 +62,25 @@ import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import { runRule } from '../../../lib/run_rule';
+import {
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
+} from '../../rules_list/translations';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { RefreshToken } from './types';
 
 export type RuleDetailsProps = {
   rule: Rule;
   ruleType: RuleType;
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
-  refreshToken?: number;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+  refreshToken?: RefreshToken;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'bulkDisableRules' | 'bulkEnableRules' | 'bulkDeleteRules' | 'snoozeRule' | 'unsnoozeRule'
+>;
 
 const ruleDetailStyle = {
   minWidth: 0,
@@ -77,8 +90,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
   actionTypes,
-  disableRule,
-  enableRule,
+  bulkDisableRules,
+  bulkEnableRules,
+  bulkDeleteRules,
   snoozeRule,
   unsnoozeRule,
   requestRefresh,
@@ -144,7 +158,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const canSaveRule =
-    hasAllPrivilege(rule, ruleType) &&
+    hasAllPrivilege(rule.consumer, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
 
@@ -209,7 +223,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   }, [rule.schedule.interval, config.minimumScheduleInterval, toasts, hasEditButton]);
 
   const setRule = async () => {
-    history.push(routeToRuleDetails.replace(`:ruleId`, rule.id));
+    history.push(getRuleDetailsRoute(rule.id));
   };
 
   const goToRulesList = () => {
@@ -262,29 +276,41 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     </>
   ) : null;
 
+  const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
+  const { showToast } = useBulkOperationToast({});
+
+  const onDeleteConfirm = async () => {
+    setIsDeleteModalVisibility(false);
+    const { errors, total } = await bulkDeleteRules({
+      ids: rulesToDelete,
+    });
+    showToast({ action: 'DELETE', errors, total });
+    setRulesToDelete([]);
+    goToRulesList();
+  };
+  const onDeleteCancel = () => {
+    setIsDeleteModalVisibility(false);
+    setRulesToDelete([]);
+  };
+
   return (
     <>
-      <DeleteModalConfirmation
-        onDeleted={async () => {
-          setRulesToDelete([]);
-          goToRulesList();
-        }}
-        onErrors={async () => {
-          // Refresh the rule from the server, it may have been deleted
-          await requestRefresh();
-          setRulesToDelete([]);
-        }}
-        onCancel={() => {
-          setRulesToDelete([]);
-        }}
-        apiDeleteCall={deleteRules}
-        idsToDelete={rulesToDelete}
-        singleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
-          defaultMessage: 'rule',
-        })}
-        multipleTitle=""
-        setIsLoadingState={() => {}}
-      />
+      {isDeleteModalFlyoutVisible && (
+        <RulesDeleteModalConfirmation
+          onConfirm={onDeleteConfirm}
+          onCancel={onDeleteCancel}
+          confirmButtonText={getConfirmDeletionButtonText(
+            rulesToDelete.length,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+          confirmModalText={getConfirmDeletionModalText(
+            rulesToDelete.length,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+        />
+      )}
       <UpdateApiKeyModalConfirmation
         onCancel={() => {
           setRulesToUpdateAPIKey([]);
@@ -342,6 +368,20 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
                       <b>{rule.apiKeyOwner}</b>
+                      {rule.apiKeyCreatedByUser ? (
+                        <>
+                          &nbsp;
+                          <EuiIconTip
+                            position="right"
+                            content={i18n.translate(
+                              'xpack.triggersActionsUI.sections.ruleDetails.userManagedApikey',
+                              {
+                                defaultMessage: 'This rule is associated with an API key.',
+                              }
+                            )}
+                          />
+                        </>
+                      ) : null}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -354,6 +394,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             canSaveRule={canSaveRule}
             rule={rule}
             onDelete={(ruleId) => {
+              setIsDeleteModalVisibility(true);
               setRulesToDelete([ruleId]);
             }}
             onApiKeyUpdate={(ruleId) => {
@@ -361,9 +402,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             }}
             onEnableDisable={async (enable) => {
               if (enable) {
-                await enableRule(rule);
+                await bulkEnableRules({ ids: [rule.id] });
               } else {
-                await disableRule(rule);
+                await bulkDisableRules({ ids: [rule.id] });
               }
               requestRefresh();
             }}
@@ -393,7 +434,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             <EuiFlexItem>
               <EuiCallOut color="danger" data-test-subj="ruleErrorBanner" size="s" iconType="rule">
                 <p>
-                  <EuiIcon color="danger" type="alert" />
+                  <EuiIcon color="danger" type="warning" />
                   &nbsp;
                   <b>{getRuleStatusErrorReasonText()}</b>&#44;&nbsp;
                   {rule.executionStatus.error?.message}
@@ -420,10 +461,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 color="warning"
                 data-test-subj="ruleWarningBanner"
                 size="s"
-                iconType="alert"
+                iconType="warning"
               >
                 <p>
-                  <EuiIcon color="warning" type="alert" />
+                  <EuiIcon color="warning" type="warning" />
                   &nbsp;
                   {getRuleStatusWarningReasonText()}
                   &nbsp;
@@ -443,7 +484,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 size="s"
               >
                 <p>
-                  <EuiIcon color="warning" type="alert" />
+                  <EuiIcon color="warning" type="warning" />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"

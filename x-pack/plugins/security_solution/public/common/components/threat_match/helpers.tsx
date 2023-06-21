@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import type { ThreatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -28,7 +28,7 @@ export const getFormattedEntry = (
   threatIndexPatterns: DataViewBase,
   item: Entry,
   itemIndex: number,
-  uuidGen: () => string = uuid.v4
+  uuidGen: () => string = uuidv4
 ): FormattedEntry => {
   const { fields } = indexPattern;
   const { fields: threatFields } = threatIndexPatterns;

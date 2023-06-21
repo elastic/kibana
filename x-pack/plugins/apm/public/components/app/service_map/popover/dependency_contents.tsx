@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { NodeDataDefinition } from 'cytoscape';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { ContentsProps } from '.';
@@ -39,7 +39,8 @@ export function DependencyContents({
 
   const { query } = useAnyOfApmParams(
     '/service-map',
-    '/services/{serviceName}/service-map'
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
   );
 
   const { offset, comparisonEnabled } = query;
@@ -91,6 +92,7 @@ export function DependencyContents({
       <EuiFlexItem>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
         <EuiButton
+          data-test-subj="apmDependencyContentsDependencyDetailsButton"
           href={detailsUrl}
           fill={true}
           onClick={() => {

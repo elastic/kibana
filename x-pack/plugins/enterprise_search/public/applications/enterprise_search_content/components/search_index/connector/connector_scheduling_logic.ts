@@ -7,15 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
-import { ConnectorScheduling } from '../../../../../../common/types/connectors';
+import { ConnectorScheduling, SyncJobType } from '../../../../../../common/types/connectors';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import {
-  clearFlashMessages,
-  flashAPIErrors,
-  flashSuccessToast,
-} from '../../../../shared/flash_messages';
 
 import {
   UpdateConnectorSchedulingApiLogic,
@@ -24,40 +17,92 @@ import {
 
 type ConnectorSchedulingActions = Pick<
   Actions<UpdateConnectorSchedulingArgs, ConnectorScheduling>,
-  'apiError' | 'apiSuccess' | 'makeRequest'
-> & { setHasChanges: (hasChanges: boolean) => { hasChanges: boolean } };
+  'apiSuccess'
+> & {
+  clearHasChanges: (type: SyncJobType) => { type: SyncJobType };
+  makeRequest: typeof UpdateConnectorSchedulingApiLogic.actions.makeRequest;
+  setHasChanges: (type: SyncJobType) => { type: SyncJobType };
+  updateScheduling: (
+    type: SyncJobType,
+    payload: UpdateConnectorSchedulingArgs
+  ) => { payload: UpdateConnectorSchedulingArgs; type: SyncJobType };
+};
 
 interface ConnectorSchedulingValues {
+  hasAccessSyncChanges: boolean;
   hasChanges: boolean;
+  hasFullSyncChanges: boolean;
+  hasIncrementalSyncChanges: boolean;
+  makeRequestType: SyncJobType | null;
 }
 
 export const ConnectorSchedulingLogic = kea<
   MakeLogicType<ConnectorSchedulingValues, ConnectorSchedulingActions>
 >({
   actions: {
-    setHasChanges: (hasChanges) => ({ hasChanges }),
+    clearHasChanges: (type) => ({ type }),
+    setHasChanges: (type) => ({ type }),
+    updateScheduling: (type, payload) => ({ payload, type }),
   },
   connect: {
-    actions: [UpdateConnectorSchedulingApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
+    actions: [UpdateConnectorSchedulingApiLogic, ['apiSuccess', 'makeRequest']],
   },
-  listeners: {
-    apiError: (error) => flashAPIErrors(error),
-    apiSuccess: () =>
-      flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.content.indices.configurationConnector.scheduling.successToast.title',
-          { defaultMessage: 'Scheduling successfully updated' }
-        )
-      ),
-    makeRequest: () => clearFlashMessages(),
-  },
+  listeners: ({ actions, values }) => ({
+    apiSuccess: () => {
+      if (values.makeRequestType) {
+        actions.clearHasChanges(values.makeRequestType);
+      }
+    },
+    updateScheduling: ({ payload }) => {
+      actions.makeRequest(payload);
+    },
+  }),
   reducers: {
-    hasChanges: [
+    hasAccessSyncChanges: [
       false,
       {
-        apiSuccess: () => false,
-        setHasChanges: (_, { hasChanges }) => hasChanges,
+        clearHasChanges: (current, { type }) =>
+          type === SyncJobType.ACCESS_CONTROL ? false : current,
+        setHasChanges: (current, { type }) =>
+          type === SyncJobType.ACCESS_CONTROL ? true : current,
+      },
+    ],
+    hasFullSyncChanges: [
+      false,
+      {
+        clearHasChanges: (current, { type }) => (type === SyncJobType.FULL ? false : current),
+        setHasChanges: (current, { type }) => (type === SyncJobType.FULL ? true : current),
+      },
+    ],
+    hasIncrementalSyncChanges: [
+      false,
+      {
+        clearHasChanges: (current, { type }) =>
+          type === SyncJobType.INCREMENTAL ? false : current,
+        setHasChanges: (current, { type }) => (type === SyncJobType.INCREMENTAL ? true : current),
+      },
+    ],
+    makeRequestType: [
+      null,
+      {
+        updateScheduling: (_, { type }) => type,
       },
     ],
   },
+  selectors: ({ selectors }) => ({
+    hasChanges: [
+      () => [
+        selectors.hasFullSyncChanges,
+        selectors.hasAccessSyncChanges,
+        selectors.hasIncrementalSyncChanges,
+      ],
+      (
+        hasFullSyncChanges: boolean,
+        hasAccessSyncChanges: boolean,
+        hasIncrementalSyncChanges: boolean
+      ) => {
+        return hasFullSyncChanges || hasAccessSyncChanges || hasIncrementalSyncChanges;
+      },
+    ],
+  }),
 });

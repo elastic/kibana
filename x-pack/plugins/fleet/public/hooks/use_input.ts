@@ -9,6 +9,18 @@ import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 
+export interface FormInput {
+  validate: () => boolean;
+}
+
+export function validateInputs(inputs: { [k: string]: FormInput }) {
+  return Object.values(inputs).reduce((acc, input) => {
+    const res = input.validate();
+
+    return acc === false ? acc : res;
+  }, true);
+}
+
 export function useInput(
   defaultValue = '',
   validate?: (value: string) => string[] | undefined,
@@ -88,6 +100,8 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
     setValue(newValue);
   };
 
+  const validate = useCallback(() => true, []);
+
   return {
     value,
     props: {
@@ -95,6 +109,7 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
       checked: value,
       disabled,
     },
+    validate,
     formRowProps: {},
     setValue,
     hasChanged,
@@ -166,5 +181,92 @@ export function useComboInput(
     setValue,
     validate: validateCallback,
     hasChanged,
+  };
+}
+
+export function useNumberInput(
+  defaultValue: number | undefined,
+  validate?: (value: number) => number[] | undefined,
+  disabled: boolean = false
+) {
+  const [value, setValue] = useState<number | undefined>(defaultValue);
+  const [errors, setErrors] = useState<number[] | undefined>();
+  const [hasChanged, setHasChanged] = useState(false);
+
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const newValue = e.target.value ? Number(e.target.value) : undefined;
+      setValue(newValue);
+      if (newValue && errors && validate && validate(newValue) === undefined) {
+        setErrors(undefined);
+      }
+    },
+    [errors, validate]
+  );
+
+  useEffect(() => {
+    if (hasChanged) {
+      return;
+    }
+    if (value !== defaultValue) {
+      setHasChanged(true);
+    }
+  }, [hasChanged, value, defaultValue]);
+
+  const isInvalid = errors !== undefined;
+
+  return {
+    value,
+    errors,
+    props: {
+      onChange,
+      value,
+      isInvalid,
+      disabled,
+    },
+    formRowProps: {
+      error: errors,
+      isInvalid,
+    },
+    clear: () => {
+      setValue(undefined);
+    },
+    validate: () => {
+      if (validate && value) {
+        const newErrors = validate(value);
+        setErrors(newErrors);
+        return newErrors === undefined;
+      }
+
+      return true;
+    },
+    setValue,
+    hasChanged,
+  };
+}
+
+export function useSelectInput(
+  options: Array<{ value: string; text: string }>,
+  defaultValue: string = '',
+  disabled = false
+) {
+  const [value, setValue] = useState<string>(defaultValue);
+
+  const onChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setValue(e.target.value);
+  }, []);
+
+  return {
+    props: {
+      options,
+      value,
+      onChange,
+      disabled,
+    },
+    value,
+    clear: () => {
+      setValue('');
+    },
+    setValue,
   };
 }

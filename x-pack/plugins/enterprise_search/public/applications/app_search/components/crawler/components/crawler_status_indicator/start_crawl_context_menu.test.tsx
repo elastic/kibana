@@ -12,7 +12,6 @@ import React from 'react';
 import { ReactWrapper, shallow } from 'enzyme';
 
 import {
-  EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
@@ -52,7 +51,7 @@ describe('StartCrawlContextMenu', () => {
     beforeEach(() => {
       wrapper = mountWithIntl(<StartCrawlContextMenu />);
 
-      wrapper.find(EuiButton).simulate('click');
+      wrapper.find('button').simulate('click');
 
       menuItems = wrapper
         .find(EuiContextMenuPanel)

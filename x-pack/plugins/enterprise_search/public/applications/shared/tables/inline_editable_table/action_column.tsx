@@ -24,6 +24,7 @@ import { InlineEditableTableLogic } from './inline_editable_table_logic';
 
 interface ActionColumnProps<Item extends ItemWithAnID> {
   displayedItems: Item[];
+  emptyPropertyAllowed?: boolean;
   isActivelyEditing: (i: Item) => boolean;
   isLoading?: boolean;
   item: Item;
@@ -33,6 +34,7 @@ interface ActionColumnProps<Item extends ItemWithAnID> {
 }
 
 export const ActionColumn = <Item extends ItemWithAnID>({
+  emptyPropertyAllowed = false,
   displayedItems,
   isActivelyEditing,
   isLoading = false,
@@ -61,7 +63,11 @@ export const ActionColumn = <Item extends ItemWithAnID>({
             color="primary"
             iconType="checkInCircleFilled"
             onClick={isEditingUnsavedItem ? saveNewItem : saveExistingItem}
-            disabled={isLoading || isInvalid || doesEditingItemValueContainEmptyProperty}
+            disabled={
+              isLoading ||
+              isInvalid ||
+              (doesEditingItemValueContainEmptyProperty && !emptyPropertyAllowed)
+            }
           >
             {SAVE_BUTTON_LABEL}
           </EuiButtonEmpty>
@@ -70,7 +76,7 @@ export const ActionColumn = <Item extends ItemWithAnID>({
           <EuiButtonEmpty
             data-test-subj="cancelButton"
             color="danger"
-            iconType="crossInACircleFilled"
+            iconType="cross"
             onClick={doneEditing}
             disabled={isLoading}
           >

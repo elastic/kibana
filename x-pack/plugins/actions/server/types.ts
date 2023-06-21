@@ -127,10 +127,10 @@ export interface ActionType<
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
-  validate?: {
-    params?: ValidatorType<Params>;
-    config?: ValidatorType<Config>;
-    secrets?: ValidatorType<Secrets>;
+  validate: {
+    params: ValidatorType<Params>;
+    config: ValidatorType<Config>;
+    secrets: ValidatorType<Secrets>;
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
 
@@ -155,6 +155,7 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   apiKey?: string;
   executionId?: string;
   consumer?: string;
+  source?: string;
 }
 
 interface PersistedActionTaskExecutorParams {

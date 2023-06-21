@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 const dataConfig = {
   serviceName: 'synth-python',
@@ -33,6 +33,8 @@ export function generateData({ start, end }: { start: number; end: number }) {
         .transaction({ transactionName: transaction.name })
         .defaults({
           'service.runtime.name': 'AWS_Lambda_python3.8',
+          'cloud.provider': 'aws',
+          'cloud.service.name': 'lambda',
           'faas.coldstart': true,
         })
         .timestamp(timestamp)

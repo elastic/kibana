@@ -105,6 +105,7 @@ const createStartContractMock = () => {
               referrerPolicy: 'no-referrer-when-downgrade',
               permissionsPolicyConfigured: false,
               disableEmbedding: false,
+              crossOriginOpenerPolicy: 'same-origin',
             },
             xsrf: {
               disableProtection: false,

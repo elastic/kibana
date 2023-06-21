@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiText,
+} from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -33,16 +40,54 @@ export const SubFeatureForm = (props: Props) => {
     .getPrivilegeGroups()
     .filter((group) => group.privileges.length > 0);
 
+  const getTooltip = () => {
+    if (!props.subFeature.privilegesTooltip) {
+      return null;
+    }
+    const tooltipContent = (
+      <EuiText>
+        <p>{props.subFeature.privilegesTooltip}</p>
+      </EuiText>
+    );
+    return (
+      <EuiIconTip
+        iconProps={{
+          className: 'eui-alignTop',
+        }}
+        type="iInCircle"
+        color="subdued"
+        content={tooltipContent}
+      />
+    );
+  };
+
   if (groupsWithPrivileges.length === 0) {
     return null;
   }
-
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiText size="s">{props.subFeature.name}</EuiText>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={3}>
+        <EuiFlexGroup gutterSize="none" direction="column">
+          <EuiFlexItem>
+            <EuiText size="s">
+              {props.subFeature.name} {getTooltip()}
+            </EuiText>
+          </EuiFlexItem>
+          {props.subFeature.description && (
+            <EuiFlexItem>
+              <EuiText
+                color={'subdued'}
+                size={'xs'}
+                data-test-subj="subFeatureDescription"
+                aria-describedby={`${props.subFeature.name} description text`}
+              >
+                {props.subFeature.description}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
+      <EuiFlexItem grow={2}>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -127,6 +172,7 @@ export const SubFeatureForm = (props: Props) => {
         key={index}
         buttonSize="compressed"
         data-test-subj="mutexSubFeaturePrivilegeControl"
+        isFullWidth
         options={options}
         idSelected={firstSelectedPrivilege?.id ?? NO_PRIVILEGE_VALUE}
         isDisabled={props.disabled}

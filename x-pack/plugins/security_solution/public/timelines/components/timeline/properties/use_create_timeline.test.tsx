@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { mount, shallow } from 'enzyme';
 
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import { TestProviders } from '../../../../common/mock';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -93,9 +93,7 @@ describe('useCreateTimelineButton', () => {
         fill: false,
       });
       const wrapper = shallow(button);
-      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('fill')).toEqual(
-        false
-      );
+      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('fill')).toBeFalsy();
     });
   });
 

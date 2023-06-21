@@ -6,7 +6,11 @@
  */
 
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import {
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+  INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
+} from '@kbn/securitysolution-list-constants';
 import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
@@ -216,6 +220,24 @@ export const exceptionsPostCreateListHttpMock =
     },
   ]);
 
+export type ExceptionsPostInternalCreateListHttpMockInterface = ResponseProvidersInterface<{
+  exceptionInternalCreateList: (options: HttpFetchOptionsWithPath) => ExceptionListSchema;
+}>;
+/**
+ * HTTP mock that support creating the list via the internal Lists route
+ */
+export const exceptionsPostInternalCreateListHttpMock =
+  httpHandlerMockFactory<ExceptionsPostInternalCreateListHttpMockInterface>([
+    {
+      id: 'exceptionInternalCreateList',
+      path: INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
+      method: 'post',
+      handler: (): ExceptionListSchema => {
+        return getExceptionListSchemaMock();
+      },
+    },
+  ]);
+
 export type ExceptionsGetSummaryHttpMockInterface = ResponseProvidersInterface<{
   exceptionsSummary: (options: HttpFetchOptionsWithPath) => ExceptionListSummarySchema;
 }>;
@@ -245,6 +267,7 @@ export type ExceptionsListAllHttpMocksInterface = ExceptionsFindHttpMocksInterfa
   ExceptionsDeleteOneHttpMocksInterface &
   ExceptionsPostHttpMocksInterface &
   ExceptionsPostCreateListHttpMockInterface &
+  ExceptionsPostInternalCreateListHttpMockInterface &
   ExceptionsGetSummaryHttpMockInterface;
 /** Use this HTTP mock when wanting to mock the API calls done by the Exception Http service */
 export const exceptionsListAllHttpMocks =
@@ -254,6 +277,7 @@ export const exceptionsListAllHttpMocks =
     exceptionPutHttpMocks,
     exceptionPostHttpMocks,
     exceptionsPostCreateListHttpMock,
+    exceptionsPostInternalCreateListHttpMock,
     exceptionsDeleteOneHttpMocks,
     exceptionsGetSummaryHttpMock,
   ]);

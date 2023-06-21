@@ -17,7 +17,7 @@ import {
   enrichEndpointItems,
   enrichItemsForDefaultRuleList,
   enrichItemsForSharedLists,
-  entrichNewExceptionItems,
+  enrichNewExceptionItems,
 } from './utils';
 
 const getExceptionItems = (): ExceptionsBuilderReturnExceptionItem[] => [
@@ -30,7 +30,7 @@ describe('add_exception_flyout#utils', () => {
       const items = getExceptionItems();
 
       expect(
-        entrichNewExceptionItems({
+        enrichNewExceptionItems({
           itemName: 'My item',
           commentToAdd: 'New comment',
           addToRules: true,
@@ -39,6 +39,7 @@ describe('add_exception_flyout#utils', () => {
           selectedOs: [],
           listType: ExceptionListTypeEnum.RULE_DEFAULT,
           items,
+          expireTime: undefined,
         })
       ).toEqual([
         {
@@ -66,7 +67,7 @@ describe('add_exception_flyout#utils', () => {
       ];
 
       expect(
-        entrichNewExceptionItems({
+        enrichNewExceptionItems({
           itemName: 'My item',
           commentToAdd: 'New comment',
           addToRules: false,
@@ -75,6 +76,7 @@ describe('add_exception_flyout#utils', () => {
           selectedOs: [],
           listType: ExceptionListTypeEnum.DETECTION,
           items,
+          expireTime: undefined,
         })
       ).toEqual([
         {
@@ -105,7 +107,7 @@ describe('add_exception_flyout#utils', () => {
       ];
 
       expect(
-        entrichNewExceptionItems({
+        enrichNewExceptionItems({
           itemName: 'My item',
           commentToAdd: 'New comment',
           addToRules: false,
@@ -114,6 +116,7 @@ describe('add_exception_flyout#utils', () => {
           selectedOs: ['windows'],
           listType: ExceptionListTypeEnum.ENDPOINT,
           items,
+          expireTime: undefined,
         })
       ).toEqual([
         {

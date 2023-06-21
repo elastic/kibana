@@ -11,8 +11,8 @@ import { DETECTION_ENGINE_RULES_BULK_CREATE } from '@kbn/security-solution-plugi
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -26,6 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('create_rules_bulk', () => {
     describe('creating rules in bulk', () => {
@@ -42,8 +43,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {

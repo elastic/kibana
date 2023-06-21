@@ -60,6 +60,7 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -70,6 +71,7 @@ describe('config schema', () => {
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
+        "showNavLinks": true,
       }
     `);
 
@@ -113,6 +115,7 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -123,6 +126,7 @@ describe('config schema', () => {
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
+        "showNavLinks": true,
       }
     `);
 
@@ -166,6 +170,7 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "enabled": true,
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -175,6 +180,7 @@ describe('config schema', () => {
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
+        "showNavLinks": true,
       }
     `);
   });
@@ -1406,11 +1412,83 @@ describe('config schema', () => {
     });
   });
 
+  describe('ui', () => {
+    it('should not allow xpack.security.ui.* to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            ui: {
+              userManagementEnabled: false,
+              roleManagementEnabled: false,
+              roleMappingManagementEnabled: false,
+            },
+          },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(`"[ui]: a value wasn't expected to be present"`);
+    });
+
+    it('should allow xpack.security.ui.* to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            ui: {
+              userManagementEnabled: false,
+              roleManagementEnabled: false,
+              roleMappingManagementEnabled: false,
+            },
+          },
+          { serverless: true }
+        ).ui
+      ).toMatchInlineSnapshot(`
+        Object {
+          "roleManagementEnabled": false,
+          "roleMappingManagementEnabled": false,
+          "userManagementEnabled": false,
+        }
+      `);
+    });
+  });
+
   describe('session', () => {
     it('should throw error if xpack.security.session.cleanupInterval is less than 10 seconds', () => {
       expect(() => ConfigSchema.validate({ session: { cleanupInterval: '9s' } })).toThrow(
         '[session.cleanupInterval]: the value must be greater or equal to 10 seconds.'
       );
+    });
+
+    it('should throw error if xpack.security.session.concurrentSessions.maxSessions is less than 1 or greater than 1000', () => {
+      expect(() =>
+        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: -1 } } })
+      ).toThrow(
+        '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
+      );
+
+      expect(() =>
+        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 0 } } })
+      ).toThrow(
+        '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
+      );
+
+      expect(() =>
+        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 1001 } } })
+      ).toThrow(
+        '[session.concurrentSessions.maxSessions]: Value must be equal to or lower than [1000].'
+      );
+    });
+
+    it('can be successfully validate valid xpack.security.session.concurrentSessions.maxSessions', () => {
+      expect(ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }).session)
+        .toMatchInlineSnapshot(`
+        Object {
+          "cleanupInterval": "PT1H",
+          "concurrentSessions": Object {
+            "maxSessions": 3,
+          },
+          "idleTimeout": "PT8H",
+          "lifespan": "P30D",
+        }
+      `);
     });
   });
 });
@@ -1463,6 +1541,40 @@ describe('createConfig()', () => {
                           ],
                         ]
                 `);
+  });
+
+  it('should log a warning if both concurrent sessions limit and HTTP authentication are configured', async () => {
+    const logger = loggingSystemMock.create();
+    const config = createConfig(
+      ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }),
+      logger.get(),
+      { isTLSEnabled: true }
+    );
+    expect(config.session.concurrentSessions?.maxSessions).toBe(3);
+    expect(config.authc.http.enabled).toBe(true);
+
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Both concurrent user sessions limit and HTTP authentication are configured. The limit does not apply to HTTP authentication.",
+        ],
+      ]
+    `);
+
+    loggingSystemMock.clear(logger);
+
+    const configWithoutHTTPAuth = createConfig(
+      ConfigSchema.validate({
+        session: { concurrentSessions: { maxSessions: 3 } },
+        authc: { http: { enabled: false } },
+      }),
+      logger.get(),
+      { isTLSEnabled: true }
+    );
+    expect(configWithoutHTTPAuth.session.concurrentSessions?.maxSessions).toBe(3);
+    expect(configWithoutHTTPAuth.authc.http.enabled).toBe(false);
+
+    expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
   });
 
   it('should set xpack.security.secureCookies if SSL is configured', async () => {

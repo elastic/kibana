@@ -29,7 +29,7 @@ const collectors: TelemetryCollector[] = [workpadCollector, customElementCollect
 */
 export function registerCanvasUsageCollector(
   usageCollection: UsageCollectionSetup | undefined,
-  kibanaIndex: string
+  getIndexForType: (type: string) => Promise<string>
 ) {
   if (!usageCollection) {
     return;
@@ -40,11 +40,11 @@ export function registerCanvasUsageCollector(
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext) => {
       const collectorResults = await Promise.all(
-        collectors.map((collector) => collector(kibanaIndex, esClient))
+        collectors.map((collector) => collector(getIndexForType, esClient))
       );
 
       return collectorResults.reduce((reduction, usage) => {
-        return { ...reduction, ...usage };
+        return Object.assign(reduction, usage);
       }, {}) as CanvasUsage; // We need the casting because `TelemetryCollector` claims it returns `Record<string, any>`
     },
     schema: { ...workpadSchema, ...customElementSchema },

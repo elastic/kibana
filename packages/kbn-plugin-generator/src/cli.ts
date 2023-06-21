@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 

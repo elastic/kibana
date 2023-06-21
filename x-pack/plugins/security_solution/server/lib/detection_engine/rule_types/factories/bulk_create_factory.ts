@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash';
 import type { PersistenceAlertService } from '@kbn/rule-registry-plugin/server';
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { makeFloatString } from '../../signals/utils';
+import { makeFloatString } from '../utils/utils';
 import type { RefreshTypes } from '../../types';
 import type {
   BaseFieldsLatest,

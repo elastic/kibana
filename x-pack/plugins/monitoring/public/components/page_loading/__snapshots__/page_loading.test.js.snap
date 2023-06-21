@@ -13,16 +13,16 @@ exports[`PageLoading should show a simple page loading component 1`] = `
       role="main"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceAround-stretch-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <span
                 aria-label="Loading"
@@ -31,7 +31,7 @@ exports[`PageLoading should show a simple page loading component 1`] = `
               />
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               Loading…
             </div>

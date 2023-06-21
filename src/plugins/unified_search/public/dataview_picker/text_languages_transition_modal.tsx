@@ -41,14 +41,12 @@ export default function TextBasedLanguagesTransitionModal({
     <EuiModal onClose={() => setIsTextLangTransitionModalVisible(false)} style={{ width: 700 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>
-            {i18n.translate(
-              'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalTitle',
-              {
-                defaultMessage: 'Your query will be removed',
-              }
-            )}
-          </h1>
+          {i18n.translate(
+            'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalTitle',
+            {
+              defaultMessage: 'Your query will be removed',
+            }
+          )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 

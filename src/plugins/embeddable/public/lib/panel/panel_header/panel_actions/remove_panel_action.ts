@@ -8,26 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { Action, IncompatibleActionError } from '../../../ui_actions';
-import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';
 import { IEmbeddable } from '../../../embeddables';
 
 export const REMOVE_PANEL_ACTION = 'deletePanel';
 
-interface ExpandedPanelInput extends ContainerInput {
-  expandedPanelId: string;
-}
-
 interface ActionContext {
   embeddable: IEmbeddable;
 }
-
-function hasExpandedPanelInput(
-  container: IContainer
-): container is IContainer<{}, ExpandedPanelInput> {
-  return (container as IContainer<{}, ExpandedPanelInput>).getInput().expandedPanelId !== undefined;
-}
-
 export class RemovePanelAction implements Action<ActionContext> {
   public readonly type = REMOVE_PANEL_ACTION;
   public readonly id = REMOVE_PANEL_ACTION;
@@ -47,9 +35,11 @@ export class RemovePanelAction implements Action<ActionContext> {
 
   public async isCompatible({ embeddable }: ActionContext) {
     const isPanelExpanded =
-      embeddable.parent &&
-      hasExpandedPanelInput(embeddable.parent) &&
-      embeddable.parent.getInput().expandedPanelId === embeddable.id;
+      // TODO - we need a common embeddable extension pattern to allow actions to call methods on generic embeddables
+      // Casting to a type that has the method will do for now.
+      (
+        embeddable.parent as unknown as { getExpandedPanelId: () => string | undefined }
+      )?.getExpandedPanelId?.() === embeddable.id;
 
     return Boolean(
       embeddable.parent && embeddable.getInput().viewMode === ViewMode.EDIT && !isPanelExpanded

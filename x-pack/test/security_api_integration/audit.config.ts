@@ -11,8 +11,8 @@ import { FtrConfigProviderContext } from '@kbn/test';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const auditLogPlugin = resolve(__dirname, './fixtures/audit/audit_log');
-  const auditLogPath = resolve(__dirname, './fixtures/audit/audit.log');
+  const auditLogPlugin = resolve(__dirname, './plugins/audit_log');
+  const auditLogPath = resolve(__dirname, './plugins/audit_log/audit.log');
 
   return {
     testFiles: [require.resolve('./tests/audit')],

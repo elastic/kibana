@@ -35,9 +35,8 @@ export const SampleDataCard = ({
 }: Props) => {
   const { name: title, description, id } = sampleDataSet;
 
-  const betaBadgeProps = {
-    label: sampleDataSet.status === INSTALLED_STATUS ? INSTALLED_STATUS : null,
-  };
+  const betaBadgeProps =
+    sampleDataSet.status === INSTALLED_STATUS ? { label: INSTALLED_STATUS } : undefined;
 
   const footer = <Footer {...{ sampleDataSet, onAction }} />;
 

@@ -204,6 +204,7 @@ export const ConfigSchema = schema.object({
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
   showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),
+  showNavLinks: schema.boolean({ defaultValue: true }),
   cookieName: schema.string({ defaultValue: 'sid' }),
   encryptionKey: schema.conditional(
     schema.contextRef('dist'),
@@ -226,6 +227,11 @@ export const ConfigSchema = schema.object({
         }
       },
     }),
+    concurrentSessions: schema.maybe(
+      schema.object({
+        maxSessions: schema.number({ min: 1, max: 1000 }),
+      })
+    ),
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
   sameSiteCookies: schema.maybe(
@@ -290,6 +296,19 @@ export const ConfigSchema = schema.object({
       )
     ),
   }),
+  enabled: schema.boolean({ defaultValue: true }),
+
+  // Setting only allowed in the Serverless offering
+  ui: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.object({
+      userManagementEnabled: schema.boolean({ defaultValue: false }),
+      roleManagementEnabled: schema.boolean({ defaultValue: false }),
+      roleMappingManagementEnabled: schema.boolean({ defaultValue: false }),
+    }),
+    schema.never()
+  ),
 });
 
 export function createConfig(
@@ -400,6 +419,13 @@ export function createConfig(
       },
     } as AppenderConfigType);
 
+  const session = getSessionConfig(config.session, providers);
+  if (session.concurrentSessions?.maxSessions != null && config.authc.http.enabled) {
+    logger.warn(
+      'Both concurrent user sessions limit and HTTP authentication are configured. The limit does not apply to HTTP authentication.'
+    );
+  }
+
   return {
     ...config,
     audit: {
@@ -412,7 +438,7 @@ export function createConfig(
       sortedProviders: Object.freeze(sortedProviders),
       http: config.authc.http,
     },
-    session: getSessionConfig(config.session, providers),
+    session,
     encryptionKey,
     secureCookies,
   };
@@ -420,6 +446,7 @@ export function createConfig(
 
 function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
   return {
+    concurrentSessions: session.concurrentSessions,
     cleanupInterval: session.cleanupInterval,
     getExpirationTimeouts(provider: AuthenticationProvider | undefined) {
       // Both idle timeout and lifespan from the provider specific session config can have three

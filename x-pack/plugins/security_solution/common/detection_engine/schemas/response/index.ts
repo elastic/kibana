@@ -6,3 +6,4 @@
  */
 
 export * from './error_schema';
+export * from './warning_schema';

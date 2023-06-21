@@ -163,6 +163,7 @@ describe('math operation', () => {
           arguments: {
             id: ['myColumnId'],
             name: ['Math'],
+            castColumns: [],
             expression: [
               '(((((((((((((((("columnX0" + "columnX1") + "columnX2") + "columnX3") + "columnX4") + "columnX5") + "columnX6") + "columnX7") + "columnX8") + "columnX9") + "columnX10") + "columnX11") + "columnX12") + "columnX13") + "columnX14") + "columnX15") + "columnX16")',
             ],
@@ -243,6 +244,7 @@ describe('math operation', () => {
           arguments: {
             id: ['myColumnId'],
             name: ['Math'],
+            castColumns: [],
             expression: [
               `("columnX0" + (("columnX1" - "columnX2") / ("columnX3" - ("columnX4" * "columnX5"))))`,
             ],
@@ -298,6 +300,7 @@ describe('math operation', () => {
           arguments: {
             id: ['myColumnId'],
             name: ['Math'],
+            castColumns: [],
             expression: [`max(min("columnX0","columnX1"),abs("columnX2"))`],
             onError: ['null'],
           },
@@ -342,6 +345,7 @@ describe('math operation', () => {
           arguments: {
             id: ['myColumnId'],
             name: ['Math'],
+            castColumns: [],
             expression: [`(5 + (3 / 8))`],
             onError: ['null'],
           },
@@ -425,6 +429,7 @@ describe('math operation', () => {
           arguments: {
             id: ['myColumnId'],
             name: ['Math'],
+            castColumns: [],
             expression: [
               'ifelse(("columnX0" == 0),ifelse(("columnX1" < 0),ifelse(("columnX2" <= 0),"columnX3","columnX4"),"columnX5"),ifelse(("columnX6" > 0),ifelse(("columnX7" >= 0),"columnX8","columnX9"),"columnX10"))',
             ],

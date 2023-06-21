@@ -27,7 +27,6 @@ import { validateEsPrivilegeResponse } from './validate_es_response';
 
 interface CheckPrivilegesActions {
   login: string;
-  version: string;
 }
 
 export function checkPrivilegesFactory(
@@ -35,14 +34,6 @@ export function checkPrivilegesFactory(
   getClusterClient: () => Promise<IClusterClient>,
   applicationName: string
 ) {
-  const hasIncompatibleVersion = (
-    applicationPrivilegesResponse: HasPrivilegesResponseApplication
-  ) => {
-    return Object.values(applicationPrivilegesResponse).some(
-      (resource) => !resource[actions.version] && resource[actions.login]
-    );
-  };
-
   const createApplicationPrivilegesCheck = (
     resources: string[],
     kibanaPrivileges: string | string[],
@@ -56,7 +47,6 @@ export function checkPrivilegesFactory(
       application: applicationName,
       resources,
       privileges: uniq([
-        actions.version,
         ...(requireLoginAction ? [actions.login] : []),
         ...normalizedKibanaPrivileges,
       ]),
@@ -78,7 +68,10 @@ export function checkPrivilegesFactory(
 
       const response = await clusterClient.asInternalUser.transport.request<{
         has_privilege_uids: string[];
-        error_uids?: string[];
+        errors: {
+          count: number;
+          details: Record<string, { type: string; reason: string }>;
+        };
       }>({
         method: 'POST',
         path: '_security/profile/_has_privileges',
@@ -90,7 +83,7 @@ export function checkPrivilegesFactory(
 
       return {
         hasPrivilegeUids: response.has_privilege_uids,
-        errorUids: response.error_uids ?? [],
+        ...(response.errors && { errors: response.errors }),
       };
     };
 
@@ -159,12 +152,6 @@ export function checkPrivilegesFactory(
           })),
         };
       }, {});
-
-      if (hasIncompatibleVersion(applicationPrivilegesResponse)) {
-        throw new Error(
-          'Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.'
-        );
-      }
 
       // we need to filter out the non requested privileges from the response
       const resourcePrivileges = transform(applicationPrivilegesResponse, (result, value, key) => {

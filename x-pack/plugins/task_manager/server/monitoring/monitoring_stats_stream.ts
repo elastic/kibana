@@ -30,12 +30,18 @@ import {
   TaskRunStat,
   SummarizedTaskRunStat,
 } from './task_run_statistics';
+import {
+  BackgroundTaskUtilizationStat,
+  createBackgroundTaskUtilizationAggregator,
+} from './background_task_utilization_statistics';
+
 import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
+import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 
 export type { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 
@@ -46,6 +52,7 @@ export interface MonitoringStats {
     workload?: MonitoredStat<WorkloadStat>;
     runtime?: MonitoredStat<TaskRunStat>;
     ephemeral?: MonitoredStat<EphemeralTaskStat>;
+    utilization?: MonitoredStat<BackgroundTaskUtilizationStat>;
   };
 }
 
@@ -55,12 +62,13 @@ export enum HealthStatus {
   Error = 'error',
 }
 
-interface MonitoredStat<T> {
+export interface MonitoredStat<T> {
   timestamp: string;
   value: T;
 }
 export type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
   status: HealthStatus;
+  reason?: string;
 };
 
 export interface RawMonitoringStats {
@@ -80,6 +88,7 @@ export function createAggregators(
   config: TaskManagerConfig,
   managedConfig: ManagedConfiguration,
   logger: Logger,
+  adHocTaskCounter: AdHocTaskCounter,
   taskPollingLifecycle?: TaskPollingLifecycle,
   ephemeralTaskLifecycle?: EphemeralTaskLifecycle
 ): AggregatedStatProvider {
@@ -96,7 +105,13 @@ export function createAggregators(
   ];
   if (taskPollingLifecycle) {
     aggregators.push(
-      createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window)
+      createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window),
+      createBackgroundTaskUtilizationAggregator(
+        taskPollingLifecycle,
+        adHocTaskCounter,
+        config.poll_interval,
+        config.worker_utilization_running_average_window
+      )
     );
   }
   if (ephemeralTaskLifecycle && ephemeralTaskLifecycle.enabled) {
@@ -145,7 +160,7 @@ export function summarizeMonitoringStats(
   {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     last_update,
-    stats: { runtime, workload, configuration, ephemeral },
+    stats: { runtime, workload, configuration, ephemeral, utilization },
   }: MonitoringStats,
   config: TaskManagerConfig
 ): RawMonitoringStats {

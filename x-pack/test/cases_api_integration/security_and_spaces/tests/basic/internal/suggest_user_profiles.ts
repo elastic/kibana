@@ -6,8 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { deleteAllCaseItems } from '../../../../common/lib/utils';
-import { suggestUserProfiles } from '../../../../common/lib/user_profiles';
+import { deleteAllCaseItems, suggestUserProfiles } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

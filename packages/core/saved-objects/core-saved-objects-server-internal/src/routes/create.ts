@@ -7,18 +7,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerCreateRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
+  const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/{type}/{id?}',
@@ -34,6 +43,7 @@ export const registerCreateRoute = (
           attributes: schema.recordOf(schema.string(), schema.any()),
           migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
           coreMigrationVersion: schema.maybe(schema.string()),
+          typeMigrationVersion: schema.maybe(schema.string()),
           references: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -48,23 +58,40 @@ export const registerCreateRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logWarnOnExternalRequest({
+        method: 'post',
+        path: '/api/saved_objects/{type}/{id?}',
+        req,
+        logger,
+      });
       const { type, id } = req.params;
       const { overwrite } = req.query;
-      const { attributes, migrationVersion, coreMigrationVersion, references, initialNamespaces } =
-        req.body;
+      const {
+        attributes,
+        migrationVersion,
+        coreMigrationVersion,
+        typeMigrationVersion,
+        references,
+        initialNamespaces,
+      } = req.body;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
 
+      const { savedObjects } = await context.core;
+      if (!allowHttpApiAccess) {
+        throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
+      }
       const options = {
         id,
         overwrite,
         migrationVersion,
         coreMigrationVersion,
+        typeMigrationVersion,
         references,
         initialNamespaces,
+        migrationVersionCompatibility: 'compatible' as const,
       };
-      const { savedObjects } = await context.core;
       const result = await savedObjects.client.create(type, attributes, options);
       return res.ok({ body: result });
     })

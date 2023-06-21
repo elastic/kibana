@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ToolbarPopover, TooltipWrapper } from '../../../shared_components';
+import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
+import { ToolbarPopover } from '../../../shared_components';
 import { TitlePositionOptions } from './title_position_option';
 import { FramePublicAPI } from '../../../types';
 import type { LegacyMetricState } from '../../../../common/types';

@@ -16,6 +16,11 @@ import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiSpacer,
+  EuiCode,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import useObservable from 'react-use/lib/useObservable';
@@ -30,9 +35,10 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
   const { guidedOnboardingApi } = guidedOnboarding;
 
   const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
+  const [indexName, setIndexName] = useState('test1234');
 
   const isTourActive = useObservable(
-    guidedOnboardingApi!.isGuideStepActive$('search', 'add_data'),
+    guidedOnboardingApi!.isGuideStepActive$('testGuide', 'step1'),
     false
   );
   useEffect(() => {
@@ -45,7 +51,7 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
           <h2>
             <FormattedMessage
               id="guidedOnboardingExample.stepOne.title"
-              defaultMessage="Example step Add data"
+              defaultMessage="Example step 1"
             />
           </h2>
         </EuiTitle>
@@ -56,33 +62,62 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
             <FormattedMessage
               id="guidedOnboardingExample.guidesSelection.stepOne.explanation"
               defaultMessage="The code on this page is listening to the guided setup state with a useObservable hook. If the state is set to
-              Search guide, step Add data, a EUI tour will be displayed, pointing to the button below."
+              Test guide, step 1, a EUI tour will be displayed, pointing to the button below."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="guidedOnboardingExample.guidesSelection.stepOne.dynamicParamsExplanation"
+              defaultMessage="There is also an input field to provide a dynamic parameter {indexName} for step 4."
+              values={{
+                indexName: <EuiCode language="javascript">indexName</EuiCode>,
+              }}
             />
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiTourStep
-          content={
-            <EuiText>
-              <p>Click this button to complete step 1.</p>
-            </EuiText>
-          }
-          isStepOpen={isTourStepOpen}
-          minWidth={300}
-          onFinish={() => setIsTourStepOpen(false)}
-          step={1}
-          stepsTotal={1}
-          title="Step Add data"
-          anchorPosition="rightUp"
-        >
-          <EuiButton
-            onClick={async () => {
-              await guidedOnboardingApi?.completeGuideStep('search', 'add_data');
-            }}
-          >
-            Complete step 1
-          </EuiButton>
-        </EuiTourStep>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="guidedOnboardingExample.guidesSelection.stepOne.indexNameInputLabel"
+                  defaultMessage="indexName"
+                />
+              }
+            >
+              <EuiFieldText value={indexName} onChange={(e) => setIndexName(e.target.value)} />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiTourStep
+                content={
+                  <EuiText>
+                    <p>Click this button to complete step 1.</p>
+                  </EuiText>
+                }
+                isStepOpen={isTourStepOpen}
+                minWidth={300}
+                onFinish={() => setIsTourStepOpen(false)}
+                step={1}
+                stepsTotal={1}
+                title="Step 1"
+                anchorPosition="rightUp"
+              >
+                <EuiButton
+                  onClick={async () => {
+                    await guidedOnboardingApi?.completeGuideStep('testGuide', 'step1', {
+                      indexName,
+                    });
+                  }}
+                >
+                  Complete step 1
+                </EuiButton>
+              </EuiTourStep>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageContentBody>
     </>
   );

@@ -14,7 +14,13 @@ const http = httpServiceMock.createStartContract();
 describe('loadRuleSummary', () => {
   test('should call rule summary API', async () => {
     const resolvedValue: RuleSummary = {
-      alerts: {},
+      alerts: {
+        '1': {
+          flapping: true,
+          status: 'OK',
+          muted: false,
+        },
+      },
       consumer: 'alerts',
       enabled: true,
       errorMessages: [],
@@ -22,6 +28,7 @@ describe('loadRuleSummary', () => {
       lastRun: '2021-04-01T22:18:27.609Z',
       muteAll: false,
       name: 'test',
+      revision: 0,
       ruleTypeId: '.index-threshold',
       status: 'OK',
       statusEndDate: '2021-04-01T22:19:25.174Z',
@@ -35,7 +42,13 @@ describe('loadRuleSummary', () => {
     };
 
     http.get.mockResolvedValueOnce({
-      alerts: {},
+      alerts: {
+        '1': {
+          flapping: true,
+          status: 'OK',
+          muted: false,
+        },
+      },
       consumer: 'alerts',
       enabled: true,
       error_messages: [],
@@ -43,6 +56,7 @@ describe('loadRuleSummary', () => {
       last_run: '2021-04-01T22:18:27.609Z',
       mute_all: false,
       name: 'test',
+      revision: 0,
       rule_type_id: '.index-threshold',
       status: 'OK',
       status_end_date: '2021-04-01T22:19:25.174Z',

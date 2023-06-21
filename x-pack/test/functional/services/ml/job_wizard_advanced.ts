@@ -17,7 +17,7 @@ export function MachineLearningJobWizardAdvancedProvider(
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const aceEditor = getService('aceEditor');
+  const monacoEditor = getService('monacoEditor');
 
   return {
     async getValueOrPlaceholder(inputLocator: string): Promise<string> {
@@ -30,13 +30,11 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async assertDatafeedQueryEditorExists() {
-      await testSubjects.existOrFail('mlAdvancedDatafeedQueryEditor > codeEditorContainer');
+      await testSubjects.existOrFail('mlAdvancedDatafeedQueryEditor > codeEditorHint');
     },
 
     async assertDatafeedQueryEditorValue(expectedValue: string) {
-      const actualValue = await aceEditor.getValue(
-        'mlAdvancedDatafeedQueryEditor > codeEditorContainer'
-      );
+      const actualValue = await monacoEditor.getCodeEditorValue();
       expect(actualValue).to.eql(
         expectedValue,
         `Expected datafeed query editor value to be '${expectedValue}' (got '${actualValue}')`

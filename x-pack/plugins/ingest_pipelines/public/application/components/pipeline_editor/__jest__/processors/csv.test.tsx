@@ -29,7 +29,7 @@ describe('Processor: CSV', () => {
   const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

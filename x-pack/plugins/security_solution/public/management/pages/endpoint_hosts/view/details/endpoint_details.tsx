@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlyoutBody, EuiFlyoutFooter, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -43,14 +43,14 @@ export const EndpointDetails = memo(() => {
   const policyInfo = useEndpointSelector(policyVersionInfo);
   const hostStatus = useEndpointSelector(hostStatusInfo);
   const show = useEndpointSelector(showView);
-  const { canReadActionsLogManagement } = useUserPrivileges().endpointPrivileges;
+  const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
 
   const ContentLoadingMarkup = useMemo(
     () => (
       <>
-        <EuiLoadingContent lines={3} />
+        <EuiSkeletonText lines={3} />
         <EuiSpacer size="l" />
-        <EuiLoadingContent lines={3} />
+        <EuiSkeletonText lines={3} />
       </>
     ),
     []
@@ -82,7 +82,7 @@ export const EndpointDetails = memo(() => {
 
       // show the response actions history tab
       // only when the user has the required permission
-      if (canReadActionsLogManagement) {
+      if (canAccessEndpointActionsLogManagement) {
         tabs.push({
           id: EndpointDetailsTabsTypes.activityLog,
           name: i18.ACTIVITY_LOG.tabTitle,
@@ -97,7 +97,7 @@ export const EndpointDetails = memo(() => {
       return tabs;
     },
     [
-      canReadActionsLogManagement,
+      canAccessEndpointActionsLogManagement,
       ContentLoadingMarkup,
       hostDetails,
       policyInfo,
@@ -133,7 +133,7 @@ export const EndpointDetails = memo(() => {
       )}
       {hostDetails === undefined ? (
         <EuiFlyoutBody>
-          <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
+          <EuiSkeletonText lines={3} /> <EuiSpacer size="l" /> <EuiSkeletonText lines={3} />
         </EuiFlyoutBody>
       ) : (
         <>
@@ -142,7 +142,7 @@ export const EndpointDetails = memo(() => {
               hostname={hostDetails.host.hostname}
               // show overview tab if forcing response actions history
               // tab via URL without permission
-              show={!canReadActionsLogManagement ? 'details' : show}
+              show={!canAccessEndpointActionsLogManagement ? 'details' : show}
               tabs={getTabs(hostDetails.agent.id)}
             />
           )}

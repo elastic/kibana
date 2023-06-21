@@ -15,8 +15,14 @@ import {
 import { Connector } from './connectors';
 import { Crawler } from './crawler';
 
+export interface AlwaysShowPattern {
+  alias_pattern: string;
+  index_pattern: string;
+}
 export interface ElasticsearchIndex {
   count: number; // Elasticsearch _count
+  has_in_progress_syncs?: boolean; // these default to false if not a connector or crawler
+  has_pending_syncs?: boolean;
   health?: HealthStatus;
   hidden: boolean;
   name: IndexName;
@@ -38,8 +44,8 @@ export interface ConnectorIndex extends ElasticsearchIndex {
 }
 
 export interface CrawlerIndex extends ElasticsearchIndex {
+  connector: Connector;
   crawler: Crawler;
-  connector?: Connector;
 }
 
 export interface ElasticsearchIndexWithPrivileges extends ElasticsearchIndex {

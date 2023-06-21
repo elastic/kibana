@@ -45,7 +45,7 @@ describe('EnterpriseSearchContent', () => {
   });
 
   it('renders EnterpriseSearchContentUnconfigured when config.host is not set', () => {
-    setMockValues({ config: { host: '' } });
+    setMockValues({ config: { canDeployEntSearch: true, host: '' } });
     const wrapper = shallow(<EnterpriseSearchContent />);
 
     expect(wrapper.find(EnterpriseSearchContentUnconfigured)).toHaveLength(1);
@@ -60,7 +60,17 @@ describe('EnterpriseSearchContent', () => {
   });
 
   it('renders EnterpriseSearchContentConfigured when config.host is set & available', () => {
-    setMockValues({ errorConnectingMessage: '', config: { host: 'some.url' } });
+    setMockValues({
+      config: { canDeployEntSearch: true, host: 'some.url' },
+      errorConnectingMessage: '',
+    });
+    const wrapper = shallow(<EnterpriseSearchContent />);
+
+    expect(wrapper.find(EnterpriseSearchContentConfigured)).toHaveLength(1);
+  });
+
+  it('renders EnterpriseSearchContentConfigured when config.host is not set & Ent Search cannot be deployed', () => {
+    setMockValues({ errorConnectingMessage: '', config: { canDeployEntSearch: false, host: '' } });
     const wrapper = shallow(<EnterpriseSearchContent />);
 
     expect(wrapper.find(EnterpriseSearchContentConfigured)).toHaveLength(1);

@@ -8,10 +8,10 @@ exports[`Intro component renders correctly 1`] = `
     class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+      class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <h1
           class="euiTitle emotion-euiTitle-l"
@@ -20,59 +20,49 @@ exports[`Intro component renders correctly 1`] = `
         </h1>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-danger"
+              data-test-subj="savedObjectEditDelete"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  color="inherit"
+                  data-euiicon-type="trash"
+                />
+                Delete
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <a
-              class="euiButton euiButton--primary euiButton--small"
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
               data-test-subj="savedObjectEditViewInApp"
               href="/some-url"
               rel="noreferrer"
             >
               <span
-                class="euiButtonContent euiButton__content"
+                class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent__icon"
                   color="inherit"
                   data-euiicon-type="eye"
                 />
-                <span
-                  class="euiButton__text"
-                >
-                  View saved object
-                </span>
+                View saved object
               </span>
             </a>
-          </div>
-          <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <button
-              class="euiButton euiButton--danger euiButton--small"
-              data-test-subj="savedObjectEditDelete"
-              type="button"
-            >
-              <span
-                class="euiButtonContent euiButton__content"
-              >
-                <span
-                  class="euiButtonContent__icon"
-                  color="inherit"
-                  data-euiicon-type="trash"
-                />
-                <span
-                  class="euiButton__text"
-                >
-                  Delete
-                </span>
-              </span>
-            </button>
           </div>
         </div>
       </div>

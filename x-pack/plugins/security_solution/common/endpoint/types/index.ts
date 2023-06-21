@@ -212,6 +212,8 @@ export interface OSFields {
   platform: string;
   family: string;
   Ext: OSFieldsExt;
+  kernel?: string;
+  type?: string;
 }
 
 /**
@@ -471,8 +473,10 @@ export type PolicyInfo = Immutable<{
   id: string;
 }>;
 
-export type HostInfo = Immutable<{
-  metadata: HostMetadata;
+// Host Information as returned by the Host Details API.
+// NOTE:  `HostInfo` type is the original and defined as Immutable.
+export interface HostInfoInterface {
+  metadata: HostMetadataInterface;
   host_status: HostStatus;
   policy_info?: {
     agent: {
@@ -490,7 +494,9 @@ export type HostInfo = Immutable<{
      */
     endpoint: PolicyInfo;
   };
-}>;
+}
+
+export type HostInfo = Immutable<HostInfoInterface>;
 
 // Host metadata document streamed up to ES by the Endpoint running on host machines.
 // NOTE:  `HostMetadata` type is the original and defined as Immutable. If needing to
@@ -697,6 +703,7 @@ export type SafeEndpointEvent = Partial<{
   }>;
   event: Partial<{
     category: ECSField<string>;
+    outcome: ECSField<string>;
     type: ECSField<string>;
     id: ECSField<string>;
     kind: ECSField<string>;
@@ -765,6 +772,7 @@ export type SafeEndpointEvent = Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
       pid: ECSField<number>;
+      start: ECSField<string[]>;
     }>;
     group_leader: Partial<{
       entity_id: ECSField<string>;
@@ -920,6 +928,10 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  * Endpoint Policy configuration
  */
 export interface PolicyConfig {
+  meta: {
+    license: string;
+    cloud: boolean;
+  };
   windows: {
     advanced?: {
       [key: string]: unknown;
@@ -933,6 +945,7 @@ export interface PolicyConfig {
       };
     };
     events: {
+      credential_access: boolean;
       dll_and_driver_load: boolean;
       dns: boolean;
       file: boolean;
@@ -1224,6 +1237,19 @@ export interface HostPolicyResponse {
             events: HostPolicyResponseConfigurationStatus;
             logging: HostPolicyResponseConfigurationStatus;
             streaming: HostPolicyResponseConfigurationStatus;
+            behavior_protection: HostPolicyResponseConfigurationStatus;
+            attack_surface_reduction: HostPolicyResponseConfigurationStatus;
+            antivirus_registration: HostPolicyResponseConfigurationStatus;
+            host_isolation: HostPolicyResponseConfigurationStatus;
+            response_actions: HostPolicyResponseConfigurationStatus;
+            ransomware: HostPolicyResponseConfigurationStatus;
+            memory_protection: HostPolicyResponseConfigurationStatus;
+          };
+          diagnostic: {
+            behavior_protection: HostPolicyResponseConfigurationStatus;
+            malware: HostPolicyResponseConfigurationStatus;
+            ransomware: HostPolicyResponseConfigurationStatus;
+            memory_protection: HostPolicyResponseConfigurationStatus;
           };
         };
         artifacts: {

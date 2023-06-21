@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 import {
+  checkHitCount,
   sendCompleteMsg,
   sendErrorMsg,
+  sendErrorTo,
   sendLoadingMsg,
   sendNoResultsFoundMsg,
   sendPartialMsg,
 } from './use_saved_search_messages';
 import { FetchStatus } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { DataMainMsg, RecordRawType } from './use_saved_search';
+import { DataMainMsg, RecordRawType } from '../services/discover_data_state_container';
 import { filter } from 'rxjs/operators';
 
 describe('test useSavedSearch message generators', () => {
@@ -62,7 +64,10 @@ describe('test useSavedSearch message generators', () => {
         done();
       }
     });
-    sendLoadingMsg(main$, RecordRawType.DOCUMENT);
+    sendLoadingMsg(main$, {
+      foundDocuments: true,
+      recordRawType: RecordRawType.DOCUMENT,
+    });
   });
   test('sendErrorMsg', (done) => {
     const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.PARTIAL });
@@ -91,5 +96,35 @@ describe('test useSavedSearch message generators', () => {
       }
     });
     sendCompleteMsg(main$, false);
+  });
+
+  test('sendErrorTo', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.PARTIAL });
+    const error = new Error('Pls help!');
+    main$.subscribe((value) => {
+      expect(value.fetchStatus).toBe(FetchStatus.ERROR);
+      expect(value.error).toBe(error);
+      done();
+    });
+    sendErrorTo(main$)(error);
+  });
+
+  test('checkHitCount with hits', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.LOADING });
+    main$.subscribe((value) => {
+      expect(value.fetchStatus).toBe(FetchStatus.PARTIAL);
+      done();
+    });
+    checkHitCount(main$, 100);
+  });
+
+  test('checkHitCount without hits', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.LOADING });
+    main$.subscribe((value) => {
+      expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      expect(value.foundDocuments).toBe(false);
+      done();
+    });
+    checkHitCount(main$, 0);
   });
 });

@@ -30,20 +30,30 @@ import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  ExploratoryViewPublicSetup,
+  ExploratoryViewPublicStart,
+} from '@kbn/exploratory-view-plugin/public';
 import { MapsStartApi } from '@kbn/maps-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
 
 export interface ApmPluginSetupDeps {
   data: DataPublicPluginSetup;
+  exploratoryView: ExploratoryViewPublicSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -54,6 +64,8 @@ export interface ApmPluginStartDeps {
   maps?: MapsStartApi;
   inspector: InspectorPluginStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
+  exploratoryView: ExploratoryViewPublicStart;
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
 }
@@ -97,10 +109,30 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
           });
         },
       });
+
+      plugins.exploratoryView.register({
+        appName: 'ux',
+        hasData: async (params?: HasDataParams) => {
+          const dataHelper = await getUxDataHelper();
+          const dataStartPlugin = await getDataStartPlugin(core);
+          return dataHelper.hasRumData({
+            ...params!,
+            dataStartPlugin,
+          });
+        },
+        fetchData: async (params: FetchDataParams) => {
+          const dataStartPlugin = await getDataStartPlugin(core);
+          const dataHelper = await getUxDataHelper();
+          return dataHelper.fetchUxOverviewDate({
+            ...params,
+            dataStartPlugin,
+          });
+        },
+      });
     }
 
     // register observability nav if user has access to plugin
-    plugins.observability.navigation.registerSections(
+    plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(([coreStart]) => {
           // checking apm capability, since ux for now doesn't have it's

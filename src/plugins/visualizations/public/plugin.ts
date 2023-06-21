@@ -24,6 +24,7 @@ import {
   Storage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
@@ -42,6 +43,7 @@ import type {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '@kbn/inspector-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -55,9 +57,19 @@ import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/publ
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
-import { aggBasedVisualizationTrigger, visualizeEditorTrigger } from './triggers';
+import {
+  aggBasedVisualizationTrigger,
+  dashboardVisualizationPanelTrigger,
+  visualizeEditorTrigger,
+} from './triggers';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
 import { VisualizeLocatorDefinition } from '../common/locator';
@@ -91,8 +103,15 @@ import {
   setExecutionContext,
   setFieldFormats,
   setSavedObjectTagging,
+  setUsageCollection,
+  setSavedObjectsManagement,
+  setContentManagement,
+  setSavedSearch,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
+import { EditInLensAction } from './actions/edit_in_lens_action';
+import { ListingViewRegistry } from './types';
+import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -100,8 +119,10 @@ import { VisualizeConstants } from '../common/constants';
  * @public
  */
 
-export type VisualizationsSetup = TypesSetup & { visEditorsRegistry: VisEditorsRegistry };
-
+export type VisualizationsSetup = TypesSetup & {
+  visEditorsRegistry: VisEditorsRegistry;
+  listingViewRegistry: ListingViewRegistry;
+};
 export interface VisualizationsStart extends TypesStart {
   showNewVisModal: typeof showNewVisModal;
 }
@@ -115,6 +136,7 @@ export interface VisualizationsSetupDeps {
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   share?: SharePluginSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 export interface VisualizationsStartDeps {
@@ -131,6 +153,7 @@ export interface VisualizationsStartDeps {
   presentationUtil: PresentationUtilPluginStart;
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
+  savedSearch: SavedSearchPublicPluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   share?: SharePluginStart;
@@ -138,6 +161,9 @@ export interface VisualizationsStartDeps {
   screenshotMode: ScreenshotModePluginStart;
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  usageCollection: UsageCollectionStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 /**
@@ -175,6 +201,7 @@ export class VisualizationsPlugin
       urlForwarding,
       share,
       uiActions,
+      contentManagement,
     }: VisualizationsSetupDeps
   ): VisualizationsSetup {
     const {
@@ -208,7 +235,13 @@ export class VisualizationsPlugin
         if (this.isLinkedToOriginatingApp?.()) {
           return core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH);
         }
-        return urlToSave;
+        const tableListUrlState = ['s', 'title', 'sort', 'sortdir'];
+        return replaceUrlHashQuery(urlToSave, (query) => {
+          tableListUrlState.forEach((param) => {
+            delete query[param];
+          });
+          return query;
+        });
       },
     });
     this.stopUrlTracking = () => {
@@ -216,6 +249,7 @@ export class VisualizationsPlugin
     };
 
     const start = createStartServicesGetter(core.getStartServices);
+    const listingViewRegistry: ListingViewRegistry = new Set();
     const visEditorsRegistry = createVisEditorsRegistry();
 
     core.application.register({
@@ -286,10 +320,12 @@ export class VisualizationsPlugin
           restorePreviousUrl,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
+          savedSearch: pluginsStart.savedSearch,
           presentationUtil: pluginsStart.presentationUtil,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,
+          listingViewRegistry,
           unifiedSearch: pluginsStart.unifiedSearch,
         };
 
@@ -340,12 +376,24 @@ export class VisualizationsPlugin
     expressions.registerFunction(xyDimensionExpressionFunction);
     uiActions.registerTrigger(aggBasedVisualizationTrigger);
     uiActions.registerTrigger(visualizeEditorTrigger);
+    uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
+    const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
+    uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+
+    contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: 'Visualize Library',
+    });
 
     return {
       ...this.types.setup(),
       visEditorsRegistry,
+      listingViewRegistry,
     };
   }
 
@@ -360,6 +408,10 @@ export class VisualizationsPlugin
       spaces,
       savedObjectsTaggingOss,
       fieldFormats,
+      usageCollection,
+      savedObjectsManagement,
+      contentManagement,
+      savedSearch,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -379,6 +431,10 @@ export class VisualizationsPlugin
     setExecutionContext(core.executionContext);
     setChrome(core.chrome);
     setFieldFormats(fieldFormats);
+    setUsageCollection(usageCollection);
+    setSavedObjectsManagement(savedObjectsManagement);
+    setContentManagement(contentManagement);
+    setSavedSearch(savedSearch);
 
     if (spaces) {
       setSpaces(spaces);

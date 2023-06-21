@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EntityIterable } from '../../..';
-import { apm } from '../../lib/apm';
-import { ApmFields } from '../../lib/apm/apm_fields';
-import { timerange } from '../../lib/timerange';
+import { apm, ApmFields, SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
 
 describe('simple trace', () => {
-  let iterable: EntityIterable<ApmFields>;
+  let iterable: SynthtraceGenerator<ApmFields>;
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {
@@ -45,7 +42,8 @@ describe('simple trace', () => {
               .timestamp(timestamp + 50)
           )
       );
-    events = iterable.toArray();
+
+    events = Array.from(iterable).flatMap((event) => event.serialize());
   });
 
   // TODO this is not entirely factual, since id's are generated of a global sequence number
@@ -84,6 +82,7 @@ describe('simple trace', () => {
       'service.environment': 'production',
       'service.name': 'opbeans-java',
       'service.node.name': 'instance-1',
+      'timestamp.us': 1609459200000000,
       'trace.id': '00000000000000000000000000000241',
       'transaction.duration.us': 1000000,
       'transaction.id': '0000000000000240',
@@ -113,6 +112,7 @@ describe('simple trace', () => {
       'span.name': 'GET apm-*/_search',
       'span.subtype': 'elasticsearch',
       'span.type': 'db',
+      'timestamp.us': 1609459200050000,
       'trace.id': '00000000000000000000000000000301',
       'transaction.id': '0000000000000300',
     });

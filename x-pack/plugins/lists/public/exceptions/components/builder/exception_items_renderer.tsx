@@ -22,6 +22,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   CreateExceptionListItemBuilderSchema,
+  DataViewField,
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
   OperatorOption,
@@ -38,7 +39,8 @@ import { AndOrBadge } from '../and_or_badge';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
-import { State, exceptionsBuilderReducer } from './reducer';
+import { getTotalErrorExist } from './selectors';
+import { EntryFieldError, State, exceptionsBuilderReducer } from './reducer';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -60,7 +62,7 @@ const initialState: State = {
   disableAnd: false,
   disableNested: false,
   disableOr: false,
-  errorExists: 0,
+  errors: {},
   exceptions: [],
   exceptionsToDelete: [],
   warningExists: 0,
@@ -97,6 +99,7 @@ export interface ExceptionBuilderProps {
   operatorsList?: OperatorOption[];
   exceptionItemName?: string;
   allowCustomFieldOptions?: boolean;
+  getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
 export const ExceptionBuilderComponent = ({
@@ -120,31 +123,32 @@ export const ExceptionBuilderComponent = ({
   osTypes,
   operatorsList,
   allowCustomFieldOptions = false,
+  getExtendedFields,
 }: ExceptionBuilderProps): JSX.Element => {
-  const [
-    {
-      addNested,
-      andLogicIncluded,
-      disableAnd,
-      disableNested,
-      disableOr,
-      errorExists,
-      warningExists,
-      exceptions,
-      exceptionsToDelete,
-    },
-    dispatch,
-  ] = useReducer(exceptionsBuilderReducer(), {
+  const [state, dispatch] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
     disableAnd: isAndDisabled,
     disableNested: isNestedDisabled,
     disableOr: isOrDisabled,
   });
 
+  const {
+    addNested,
+    andLogicIncluded,
+    disableAnd,
+    disableNested,
+    disableOr,
+    warningExists,
+    exceptions,
+    exceptionsToDelete,
+  } = state;
+
+  const errorExists = getTotalErrorExist(state);
+
   const setErrorsExist = useCallback(
-    (hasErrors: boolean): void => {
+    (error: EntryFieldError): void => {
       dispatch({
-        errorExists: hasErrors,
+        error,
         type: 'setErrorsExist',
       });
     },
@@ -441,6 +445,7 @@ export const ExceptionBuilderComponent = ({
                 isDisabled={isDisabled}
                 operatorsList={operatorsList}
                 allowCustomOptions={allowCustomFieldOptions}
+                getExtendedFields={getExtendedFields}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

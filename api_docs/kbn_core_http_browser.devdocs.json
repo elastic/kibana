@@ -195,14 +195,52 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.HttpFetchOptions.rawResponse",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rawResponse",
+            "description": [
+              "\nWhen true, the response from the `fetch` call will be returned as is, without being awaited or processed.\nDefaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
             "id": "def-common.HttpFetchOptions.context",
             "type": "Object",
             "tags": [],
             "label": "context",
             "description": [],
             "signature": [
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               " | undefined"
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.HttpFetchOptions.version",
+            "type": "string",
+            "tags": [
+              "experimental"
+            ],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
@@ -271,12 +309,12 @@
             "id": "def-common.HttpFetchQuery.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string]: string | number | boolean | string[] | number[] | boolean[] | null | undefined",
+            "label": "[key: string]: string | number | boolean | string[] | boolean[] | number[] | null | undefined",
             "description": [
               "\nTypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter\ndefinition, so to avoid TypeScript errors, we'll restrict our version.\n\n[key: string]:\n  | string\n  | number\n  | boolean\n  | Array<string | number | boolean>\n  | undefined\n  | null;"
             ],
             "signature": [
-              "[key: string]:  string | number | boolean | string[] | number[] | boolean[] | null | undefined"
+              "[key: string]:  string | number | boolean | string[] | boolean[] | number[] | null | undefined"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
@@ -364,7 +402,7 @@
         "tags": [],
         "label": "HttpHeadersInit",
         "description": [
-          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error."
+          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error.\nIncludes the required Header that validates internal requests to internal APIs"
         ],
         "path": "packages/core/http/core-http-browser/src/types.ts",
         "deprecated": false,
@@ -427,7 +465,13 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              "MaybePromise",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
               "<Partial<",
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -518,7 +562,13 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              "MaybePromise",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
               "<Partial<",
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -609,7 +659,13 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              "MaybePromise",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
               "<",
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -701,7 +757,13 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              "MaybePromise",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
               "<",
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -803,9 +865,15 @@
                 "section": "def-common.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
-              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
-              "KibanaExecutionContext",
-              " | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly rawResponse?: boolean | undefined; readonly context?: ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined; readonly version?: string | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
@@ -1174,9 +1242,15 @@
                 "section": "def-common.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
-              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
-              "KibanaExecutionContext",
-              " | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly rawResponse?: boolean | undefined; readonly context?: ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined; readonly version?: string | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
@@ -1956,42 +2030,6 @@
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpFetchError.req",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "req",
-            "description": [],
-            "signature": [
-              "Request"
-            ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
-            "trackAdoption": false,
-            "references": []
-          },
-          {
-            "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpFetchError.res",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "res",
-            "description": [],
-            "signature": [
-              "Response | undefined"
-            ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
-            "trackAdoption": false,
-            "references": []
           },
           {
             "parentPluginId": "@kbn/core-http-browser",

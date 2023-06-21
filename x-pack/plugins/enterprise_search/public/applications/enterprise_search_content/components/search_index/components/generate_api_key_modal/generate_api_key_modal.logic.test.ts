@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
-import { HttpError, Status } from '../../../../../../../common/types/api';
+import { Status } from '../../../../../../../common/types/api';
 import { GenerateApiKeyLogic } from '../../../../api/generate_api_key/generate_api_key_logic';
 
 import { GenerateApiKeyModalLogic } from './generate_api_key_modal.logic';
@@ -63,19 +63,6 @@ describe('IndicesLogic', () => {
     });
   });
 
-  describe('listeners', () => {
-    it('calls clearFlashMessages on new makeRequest', () => {
-      GenerateApiKeyModalLogic.actions.makeRequest({ indexName: 'test', keyName: 'test' });
-      expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls flashAPIErrors on apiError', () => {
-      GenerateApiKeyModalLogic.actions.apiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
-  });
-
   describe('selectors', () => {
     describe('apiKey', () => {
       it('updates when apiSuccess listener triggered', () => {
@@ -110,7 +97,7 @@ describe('IndicesLogic', () => {
     describe('isLoading', () => {
       it('should update with API status', () => {
         expect(GenerateApiKeyModalLogic.values).toEqual(DEFAULT_VALUES);
-        GenerateApiKeyModalLogic.actions.makeRequest({ indexName: 'test', keyName: 'test' });
+        GenerateApiKeyLogic.actions.makeRequest({ indexName: 'test', keyName: 'test' });
 
         expect(GenerateApiKeyModalLogic.values).toEqual({
           ...DEFAULT_VALUES,

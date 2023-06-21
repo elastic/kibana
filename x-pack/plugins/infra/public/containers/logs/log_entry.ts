@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+import { LogViewReference } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   logEntrySearchRequestParamsRT,
@@ -19,23 +20,26 @@ import {
 } from '../../utils/data_search';
 
 export const useLogEntry = ({
-  sourceId,
+  logViewReference,
   logEntryId,
 }: {
-  sourceId: string | null | undefined;
+  logViewReference: LogViewReference | null | undefined;
   logEntryId: string | null | undefined;
 }) => {
   const { search: fetchLogEntry, requests$: logEntrySearchRequests$ } = useDataSearch({
     getRequest: useCallback(() => {
-      return !!logEntryId && !!sourceId
+      return !!logEntryId && !!logViewReference
         ? {
             request: {
-              params: logEntrySearchRequestParamsRT.encode({ sourceId, logEntryId }),
+              params: logEntrySearchRequestParamsRT.encode({
+                logView: logViewReference,
+                logEntryId,
+              }),
             },
             options: { strategy: LOG_ENTRY_SEARCH_STRATEGY },
           }
         : null;
-    }, [sourceId, logEntryId]),
+    }, [logViewReference, logEntryId]),
     parseResponses: parseLogEntrySearchResponses,
   });
 

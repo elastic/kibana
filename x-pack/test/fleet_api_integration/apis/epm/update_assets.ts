@@ -136,6 +136,7 @@ export default function (providerContext: FtrProviderContext) {
         resPackage.body.component_templates[0].component_template.template.mappings.properties
       ).eql({
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
         },
         test_logs2: {
@@ -217,10 +218,12 @@ export default function (providerContext: FtrProviderContext) {
       expect(resPackage.body.component_templates[0].component_template.template.settings).eql({
         index: {
           codec: 'best_compression',
+          default_pipeline: 'logs-all_assets.test_logs-0.2.0',
           lifecycle: {
             name: 'reference2',
           },
           mapping: {
+            ignore_malformed: `true`,
             total_fields: {
               limit: '10000',
             },
@@ -234,6 +237,7 @@ export default function (providerContext: FtrProviderContext) {
         dynamic: true,
         properties: {
           '@timestamp': {
+            ignore_malformed: false,
             type: 'date',
           },
           data_stream: {
@@ -300,6 +304,7 @@ export default function (providerContext: FtrProviderContext) {
         resPackage.body.component_templates[0].component_template.template.mappings.properties
       ).eql({
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
         },
         metrics_test_name2: {

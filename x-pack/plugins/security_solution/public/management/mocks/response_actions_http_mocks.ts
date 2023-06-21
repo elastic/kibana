@@ -11,12 +11,15 @@ import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
   GET_PROCESSES_ROUTE,
-  ENDPOINTS_ACTION_LIST_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   GET_FILE_ROUTE,
+  ACTION_AGENT_FILE_INFO_ROUTE,
+  EXECUTE_ROUTE,
+  UPLOAD_ROUTE,
 } from '../../../common/endpoint/constants';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
@@ -29,6 +32,11 @@ import type {
   GetProcessesActionOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  ActionFileInfoApiResponse,
+  ResponseActionExecuteOutputContent,
+  ResponseActionsExecuteParameters,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -49,6 +57,15 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   processes: () => ActionDetailsApiResponse<GetProcessesActionOutputContent>;
 
   getFile: () => ActionDetailsApiResponse<ResponseActionGetFileOutputContent>;
+
+  fileInfo: () => ActionFileInfoApiResponse;
+
+  execute: () => ActionDetailsApiResponse<ResponseActionExecuteOutputContent>;
+
+  upload: () => ActionDetailsApiResponse<
+    ResponseActionUploadOutputContent,
+    ResponseActionUploadParameters
+  >;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -103,7 +120,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
   },
   {
     id: 'actionList',
-    path: ENDPOINTS_ACTION_LIST_ROUTE,
+    path: BASE_ENDPOINT_ACTION_ROUTE,
     method: 'get',
     handler: (): ActionListApiResponse => {
       const response = new EndpointActionGenerator('seed').generateActionDetails();
@@ -170,6 +187,62 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
         ResponseActionGetFileParameters
       >({
         command: 'get-file',
+      });
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'fileInfo',
+    path: ACTION_AGENT_FILE_INFO_ROUTE,
+    method: 'get',
+    handler: (): ActionFileInfoApiResponse => {
+      return {
+        data: {
+          created: '2022-10-10T14:57:30.682Z',
+          actionId: 'abc',
+          agentId: '123',
+          id: '123',
+          mimeType: 'text/plain',
+          name: 'test.txt',
+          size: 1234,
+          status: 'READY',
+        },
+      };
+    },
+  },
+  {
+    id: 'execute',
+    path: EXECUTE_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<ResponseActionExecuteOutputContent> => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionExecuteOutputContent,
+        ResponseActionsExecuteParameters
+      >({
+        outputs: {
+          'a.b.c': generator.generateExecuteActionResponseOutput(),
+        },
+      });
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'upload',
+    path: UPLOAD_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<
+      ResponseActionUploadOutputContent,
+      ResponseActionUploadParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionUploadOutputContent,
+        ResponseActionUploadParameters
+      >({
+        command: 'upload',
       });
 
       return { data: response };

@@ -20,16 +20,21 @@ import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
+  AggregationType,
   builtInComparators,
   IErrorObject,
   OfExpression,
   ThresholdExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { Comparator } from '../../../../common/alerting/metrics';
+import { DataViewBase } from '@kbn/es-query';
+import useToggle from 'react-use/lib/useToggle';
+import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
+import { CustomEquationEditor } from './custom_equation';
+import { CUSTOM_EQUATION } from '../i18n_strings';
 
 const customComparators = {
   ...builtInComparators,
@@ -51,6 +56,7 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setRuleParams(id: number, params: MetricExpression): void;
+  dataView: DataViewBase;
 }
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
@@ -69,10 +75,20 @@ const StyledHealth = euiStyled(EuiHealth)`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const [isExpanded, setRowState] = useState(true);
-  const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
-  const { children, setRuleParams, expression, errors, expressionId, remove, fields, canDelete } =
-    props;
+  const [isExpanded, toggle] = useToggle(true);
+
+  const {
+    dataView,
+    children,
+    setRuleParams,
+    expression,
+    errors,
+    expressionId,
+    remove,
+    fields,
+    canDelete,
+  } = props;
+
   const {
     aggType = AGGREGATION_TYPES.MAX,
     metric,
@@ -92,7 +108,10 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       setRuleParams(expressionId, {
         ...expression,
         aggType: at as MetricExpression['aggType'],
-        metric: at === 'count' ? undefined : expression.metric,
+        metric: ['custom', 'count'].includes(at) ? undefined : expression.metric,
+        customMetrics: at === 'custom' ? expression.customMetrics : undefined,
+        equation: at === 'custom' ? expression.equation : undefined,
+        label: at === 'custom' ? expression.label : undefined,
       });
     },
     [expressionId, expression, setRuleParams]
@@ -166,6 +185,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     expressionId,
   ]);
 
+  const handleCustomMetricChange = useCallback(
+    (exp) => {
+      setRuleParams(expressionId, exp);
+    },
+    [expressionId, setRuleParams]
+  );
+
   const criticalThresholdExpression = (
     <ThresholdElement
       comparator={comparator}
@@ -188,20 +214,26 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     />
   );
 
+  const normalizedFields = fields.map((f) => ({
+    normalizedType: f.type,
+    name: f.name,
+  }));
+
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={toggleRowState}
+            onClick={toggle}
+            data-test-subj="expandRow"
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <StyledExpressionRow>
+          <StyledExpressionRow style={{ gap: aggType !== 'custom' ? 24 : 12 }}>
             <StyledExpression>
               <WhenExpression
                 customAggTypesOptions={aggregationType}
@@ -209,15 +241,12 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 onChangeSelectedAggType={updateAggType}
               />
             </StyledExpression>
-            {aggType !== 'count' && (
+            {!['count', 'custom'].includes(aggType) && (
               <StyledExpression>
                 <OfExpression
                   customAggTypesOptions={aggregationType}
                   aggField={metric}
-                  fields={fields.map((f) => ({
-                    normalizedType: f.type,
-                    name: f.name,
-                  }))}
+                  fields={normalizedFields}
                   aggType={aggType}
                   errors={errors}
                   onChangeSelectedAggField={updateMetric}
@@ -228,6 +257,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                       values={{
                         documentationLink: (
                           <EuiLink
+                            data-test-subj="infraExpressionRowLearnHowToAddMoreDataLink"
                             href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
                             target="BLANK"
                           >
@@ -245,6 +275,26 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               </StyledExpression>
             )}
             {!displayWarningThreshold && criticalThresholdExpression}
+            {!displayWarningThreshold && (
+              <>
+                <EuiSpacer size={'xs'} />
+                <StyledExpressionRow>
+                  <EuiButtonEmpty
+                    data-test-subj="infraExpressionRowAddWarningThresholdButton"
+                    color={'primary'}
+                    flush={'left'}
+                    size="xs"
+                    iconType={'plusInCircleFilled'}
+                    onClick={toggleWarningThreshold}
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.metrics.alertFlyout.addWarningThreshold"
+                      defaultMessage="Add warning threshold"
+                    />
+                  </EuiButtonEmpty>
+                </StyledExpressionRow>
+              </>
+            )}
           </StyledExpressionRow>
           {displayWarningThreshold && (
             <>
@@ -274,30 +324,26 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   )}
                   iconSize="s"
                   color="text"
-                  iconType={'crossInACircleFilled'}
+                  iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
                 />
               </StyledExpressionRow>
             </>
           )}
-          {!displayWarningThreshold && (
+          {aggType === Aggregators.CUSTOM && (
             <>
-              {' '}
-              <EuiSpacer size={'xs'} />
+              <EuiSpacer size={'m'} />
               <StyledExpressionRow>
-                <EuiButtonEmpty
-                  color={'primary'}
-                  flush={'left'}
-                  size="xs"
-                  iconType={'plusInCircleFilled'}
-                  onClick={toggleWarningThreshold}
-                >
-                  <FormattedMessage
-                    id="xpack.infra.metrics.alertFlyout.addWarningThreshold"
-                    defaultMessage="Add warning threshold"
-                  />
-                </EuiButtonEmpty>
+                <CustomEquationEditor
+                  expression={expression}
+                  fields={normalizedFields}
+                  aggregationTypes={aggregationType}
+                  onChange={handleCustomMetricChange}
+                  errors={errors}
+                  dataView={dataView}
+                />
               </StyledExpressionRow>
+              <EuiSpacer size={'s'} />
             </>
           )}
         </EuiFlexItem>
@@ -358,7 +404,7 @@ const ThresholdElement: React.FC<{
   );
 };
 
-export const aggregationType: { [key: string]: any } = {
+export const aggregationType: { [key: string]: AggregationType } = {
   avg: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.avg', {
       defaultMessage: 'Average',
@@ -389,7 +435,7 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.CARDINALITY,
-    validNormalizedTypes: ['number'],
+    validNormalizedTypes: ['number', 'string', 'ip', 'date'],
   },
   rate: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.rate', {
@@ -429,6 +475,12 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.P99,
+    validNormalizedTypes: ['number', 'histogram'],
+  },
+  custom: {
+    text: CUSTOM_EQUATION,
+    fieldRequired: false,
+    value: AGGREGATION_TYPES.CUSTOM,
     validNormalizedTypes: ['number', 'histogram'],
   },
 };

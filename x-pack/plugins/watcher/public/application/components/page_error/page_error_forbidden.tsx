@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 export function PageErrorForbidden() {
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       title={
         <h1>
           <FormattedMessage

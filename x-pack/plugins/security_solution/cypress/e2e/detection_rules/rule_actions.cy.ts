@@ -32,30 +32,28 @@ describe('Rule actions during detection rule creation', () => {
 
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     deleteConnectors();
     deleteIndex(indexConnector.index);
     deleteDataView(indexConnector.index);
   });
 
-  const rule = {
-    ...getSimpleCustomQueryRule(),
-    actions: { throttle: 'rule', connectors: [indexConnector] },
-  };
-  const index = rule.actions.connectors[0].index;
+  const rule = getSimpleCustomQueryRule();
+  const actions = { connectors: [indexConnector] };
+  const index = actions.connectors[0].index;
   const initialNumberOfDocuments = 0;
-  const expectedJson = JSON.parse(rule.actions.connectors[0].document);
+  const expectedJson = JSON.parse(actions.connectors[0].document);
 
   it('Indexes a new document after the index action is triggered ', function () {
     visit(RULE_CREATION);
     fillDefineCustomRuleAndContinue(rule);
     fillAboutRuleAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
-    fillRuleAction(rule);
+    fillRuleAction(actions);
     createAndEnableRule();
     goToRuleDetails();
 

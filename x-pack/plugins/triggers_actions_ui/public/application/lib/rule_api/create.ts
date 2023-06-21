@@ -12,21 +12,31 @@ import { transformRule } from './common_transformations';
 
 type RuleCreateBody = Omit<
   RuleUpdates,
-  'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'muteAll'
+  | 'mutedInstanceIds'
+  | 'executionStatus'
+  | 'lastRun'
+  | 'nextRun'
 >;
 const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ruleTypeId,
-  notifyWhen,
   actions,
   ...res
 }): any => ({
   ...res,
   rule_type_id: ruleTypeId,
-  notify_when: notifyWhen,
-  actions: actions.map(({ group, id, params }) => ({
+  actions: actions.map(({ group, id, params, frequency, alertsFilter }) => ({
     group,
     id,
     params,
+    frequency: {
+      notify_when: frequency!.notifyWhen,
+      throttle: frequency!.throttle,
+      summary: frequency!.summary,
+    },
+    alerts_filter: alertsFilter,
   })),
 });
 

@@ -20,7 +20,8 @@ import React, { useMemo } from 'react';
 import * as i18n from './translations';
 import { Blockquote, ResetButton } from './helpers';
 import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
-import { TimelineId, TimelineType } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types';
+import { TimelineType } from '../../../../common/types/timeline/api';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -111,7 +112,7 @@ export const TemporarySourcererComp = React.memo<Props>(
         <EuiCallOut
           color="warning"
           data-test-subj="sourcerer-deprecated-callout"
-          iconType="alert"
+          iconType="warning"
           size="s"
           title={translations[isModified].title[timelineType]}
         />

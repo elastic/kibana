@@ -17,5 +17,6 @@
   "limits": {
     "max_model_memory_limit": "128mb"
   },
-  "cloudId": "cloud_message_test:ZXUtd2VzdC0yLmF3cy5jbG91ZC5lcy5pbyQ4NWQ2NjZmMzM1MGM0NjllOGMzMjQyZDc2YTdmNDU5YyQxNmI1ZDM2ZGE1Mzk0YjlkYjIyZWJlNDk1OWY1OGQzMg=="
+  "cloudId": "cloud_message_test:ZXUtd2VzdC0yLmF3cy5jbG91ZC5lcy5pbyQ4NWQ2NjZmMzM1MGM0NjllOGMzMjQyZDc2YTdmNDU5YyQxNmI1ZDM2ZGE1Mzk0YjlkYjIyZWJlNDk1OWY1OGQzMg==",
+  "isCloudTrial": true
 }

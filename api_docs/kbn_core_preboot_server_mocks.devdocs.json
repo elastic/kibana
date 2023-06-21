@@ -13,10 +13,18 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-preboot-server-mocks",
-        "id": "def-server.InternalPrebootServicePrebootMock",
+        "id": "def-common.InternalPrebootServicePrebootMock",
         "type": "Type",
         "tags": [],
         "label": "InternalPrebootServicePrebootMock",
@@ -32,14 +40,20 @@
       },
       {
         "parentPluginId": "@kbn/core-preboot-server-mocks",
-        "id": "def-server.PrebootServicePrebootMock",
+        "id": "def-common.PrebootServicePrebootMock",
         "type": "Type",
         "tags": [],
         "label": "PrebootServicePrebootMock",
         "description": [],
         "signature": [
           "{ readonly isSetupOnHold: jest.MockInstance<boolean, []>; readonly holdSetupUntilResolved: jest.MockInstance<void, [reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>]>; } & ",
-          "PrebootServicePreboot"
+          {
+            "pluginId": "@kbn/core-preboot-server",
+            "scope": "common",
+            "docId": "kibKbnCorePrebootServerPluginApi",
+            "section": "def-common.PrebootServicePreboot",
+            "text": "PrebootServicePreboot"
+          }
         ],
         "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
         "deprecated": false,
@@ -50,7 +64,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-preboot-server-mocks",
-        "id": "def-server.prebootServiceMock",
+        "id": "def-common.prebootServiceMock",
         "type": "Object",
         "tags": [],
         "label": "prebootServiceMock",
@@ -61,7 +75,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-preboot-server-mocks",
-            "id": "def-server.prebootServiceMock.create",
+            "id": "def-common.prebootServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -77,7 +91,7 @@
           },
           {
             "parentPluginId": "@kbn/core-preboot-server-mocks",
-            "id": "def-server.prebootServiceMock.createInternalPrebootContract",
+            "id": "def-common.prebootServiceMock.createInternalPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalPrebootContract",
@@ -86,9 +100,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-preboot-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCorePrebootServerMocksPluginApi",
-                "section": "def-server.InternalPrebootServicePrebootMock",
+                "section": "def-common.InternalPrebootServicePrebootMock",
                 "text": "InternalPrebootServicePrebootMock"
               }
             ],
@@ -100,7 +114,7 @@
           },
           {
             "parentPluginId": "@kbn/core-preboot-server-mocks",
-            "id": "def-server.prebootServiceMock.createPrebootContract",
+            "id": "def-common.prebootServiceMock.createPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createPrebootContract",
@@ -109,9 +123,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-preboot-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCorePrebootServerMocksPluginApi",
-                "section": "def-server.PrebootServicePrebootMock",
+                "section": "def-common.PrebootServicePrebootMock",
                 "text": "PrebootServicePrebootMock"
               }
             ],
@@ -125,13 +139,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

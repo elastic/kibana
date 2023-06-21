@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,13 +36,12 @@ const HelpTextComponent: React.FC<{ href: string; notRunningJobIds: string[] }> 
     />
     {notRunningJobIds.length > 0 && (
       <HelpTextWarningContainer data-test-subj="ml-warning-not-running-jobs">
-        <EuiText size="xs" color="warning">
-          <EuiIcon type="alert" />
+        <EuiText size="xs">
           <span>
             {notRunningJobIds.length === 1 ? (
               <FormattedMessage
                 id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobSingle"
-                defaultMessage="The selected ML job, {jobName}, is not currently running. Please set {jobName} to run via 'ML job settings' before enabling this rule."
+                defaultMessage="The selected ML job, {jobName}, is not currently running. We will start {jobName} when you enable this rule."
                 values={{
                   jobName: notRunningJobIds[0],
                 }}
@@ -50,7 +49,7 @@ const HelpTextComponent: React.FC<{ href: string; notRunningJobIds: string[] }> 
             ) : (
               <FormattedMessage
                 id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobMulti"
-                defaultMessage="The selected ML jobs, {jobNames}, are not currently running. Please set all of these jobs to run via 'ML job settings' before enabling this rule."
+                defaultMessage="The selected ML jobs, {jobNames}, are not currently running. We will start all of these jobs when you enable this rule."
                 values={{
                   jobNames: notRunningJobIds.reduce(
                     (acc, value, i, array) => acc + (i < array.length - 1 ? ', ' : ', and ') + value

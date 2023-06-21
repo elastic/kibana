@@ -30,8 +30,7 @@ export const registerSettings = (uiSettings: UiSettingsServiceSetup, config: Ban
         defaultMessage: 'Banner placement',
       }),
       description: i18n.translate('xpack.banners.settings.placement.description', {
-        defaultMessage:
-          'Display a top banner for this space, above the Elastic header. {subscriptionLink}',
+        defaultMessage: 'Display a top banner above the Elastic header. {subscriptionLink}',
         values: {
           subscriptionLink,
         },

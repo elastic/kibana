@@ -34,7 +34,7 @@ export const getConfiguration = (
     maxAccessor,
     shape: 'horizontalBullet',
     ticksPosition: 'bands',
-    labelMajorMode: showLabels ? 'auto' : 'none',
+    labelMajorMode: 'auto',
     colorMode: palette ? 'palette' : 'none',
     labelMinor: showLabels ? params.gauge.style.subText : undefined,
   };

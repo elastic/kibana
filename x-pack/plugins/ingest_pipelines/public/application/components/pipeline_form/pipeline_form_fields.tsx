@@ -9,9 +9,10 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { Processor } from '../../../../common/types';
 
-import { getUseField, getFormRow, Field } from '../../../shared_imports';
+import { getUseField, getFormRow, Field, JsonEditorField } from '../../../shared_imports';
 
 import {
   ProcessorsEditorContextProvider,
@@ -26,6 +27,7 @@ interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
   onProcessorsUpdate: OnUpdateHandler;
   hasVersion: boolean;
+  hasMeta: boolean;
   onEditorFlyoutOpen: () => void;
   isEditing?: boolean;
   canEditName?: boolean;
@@ -41,10 +43,13 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   onProcessorsUpdate,
   isEditing,
   hasVersion,
+  hasMeta,
   onEditorFlyoutOpen,
   canEditName,
 }) => {
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
+
+  const [isMetaVisible, setIsMetaVisible] = useState<boolean>(hasMeta);
 
   return (
     <>
@@ -124,6 +129,51 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
       >
         <PipelineEditor onLoadJson={onLoadJson} />
       </ProcessorsEditorContextProvider>
+
+      {/* _meta field */}
+      <FormRow
+        title={
+          <FormattedMessage id="xpack.ingestPipelines.form.metaTitle" defaultMessage="Metadata" />
+        }
+        description={
+          <>
+            <FormattedMessage
+              id="xpack.ingestPipelines.form.metaDescription"
+              defaultMessage="Any additional information about the ingest pipeline. This information is stored in the cluster state, so best to keep it short."
+            />
+
+            <EuiSpacer size="m" />
+
+            <EuiSwitch
+              label={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.metaSwitchCaption"
+                  defaultMessage="Add metadata"
+                />
+              }
+              checked={isMetaVisible}
+              onChange={(e) => setIsMetaVisible(e.target.checked)}
+              data-test-subj="metaToggle"
+            />
+          </>
+        }
+      >
+        {isMetaVisible && (
+          <UseField
+            path="_meta"
+            component={JsonEditorField}
+            componentProps={{
+              codeEditorProps: {
+                'data-test-subj': 'metaEditor',
+                height: '200px',
+                'aria-label': i18n.translate('xpack.ingestPipelines.form.metaAriaLabel', {
+                  defaultMessage: '_meta field data editor',
+                }),
+              },
+            }}
+          />
+        )}
+      </FormRow>
     </>
   );
 };

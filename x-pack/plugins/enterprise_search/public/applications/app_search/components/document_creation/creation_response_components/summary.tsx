@@ -60,7 +60,7 @@ export const FlyoutBody: React.FC = () => {
   const { summary } = useValues(DocumentCreationLogic);
   const hasInvalidDocuments = summary.invalidDocuments.total > 0;
   const invalidDocumentsBanner = (
-    <EuiCallOut color="danger" iconType="alert" title={DOCUMENT_CREATION_ERRORS.TITLE} />
+    <EuiCallOut color="danger" iconType="warning" title={DOCUMENT_CREATION_ERRORS.TITLE} />
   );
 
   return (

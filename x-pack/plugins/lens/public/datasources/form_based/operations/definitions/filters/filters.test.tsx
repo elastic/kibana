@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -25,7 +25,6 @@ const uiSettingsMock = {} as IUiSettingsClient;
 const defaultProps = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -38,14 +37,6 @@ const defaultProps = {
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
-  existingFields: {
-    my_index_pattern: {
-      timestamp: true,
-      bytes: true,
-      memory: true,
-      source: true,
-    },
-  },
 };
 
 // mocking random id generator function

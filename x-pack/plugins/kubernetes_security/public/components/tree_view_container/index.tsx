@@ -14,9 +14,11 @@ import { Breadcrumb } from './breadcrumb';
 import { TreeViewContextProvider, useTreeViewContext } from './contexts';
 import { EmptyState } from './empty_state';
 
-export interface TreeViewContainerDeps {
-  globalFilter: GlobalFilter;
+export interface TreeViewContainerComponentDeps {
   renderSessionsView: (sessionsFilterQuery: string | undefined) => JSX.Element;
+}
+export interface TreeViewContainerDeps extends TreeViewContainerComponentDeps {
+  globalFilter: GlobalFilter;
   indexPattern?: IndexPattern;
 }
 
@@ -32,31 +34,23 @@ export const TreeViewContainer = ({
   );
 };
 
-const TreeViewContainerComponent = ({
-  renderSessionsView,
-}: Pick<TreeViewContainerDeps, 'renderSessionsView'>) => {
+const TreeViewContainerComponent = ({ renderSessionsView }: TreeViewContainerComponentDeps) => {
   const styles = useStyles();
 
-  const { hasSelection, treeNavSelection, sessionViewFilter, onTreeNavSelect, noResults } =
-    useTreeViewContext();
+  const { treeNavSelection, sessionViewFilter, onTreeNavSelect, noResults } = useTreeViewContext();
 
   return (
     <EuiSplitPanel.Outer direction="row" hasBorder borderRadius="m" css={styles.outerPanel}>
-      {noResults ? (
-        <EmptyState />
-      ) : (
-        <>
-          <EuiSplitPanel.Inner color="subdued" grow={false} css={styles.navPanel}>
-            <EuiText>
-              <TreeNav />
-            </EuiText>
-          </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner css={styles.sessionsPanel}>
-            <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onTreeNavSelect} />
-            {hasSelection && renderSessionsView(sessionViewFilter)}
-          </EuiSplitPanel.Inner>
-        </>
-      )}
+      {noResults && <EmptyState />}
+      <EuiSplitPanel.Inner hidden={noResults} color="subdued" grow={false} css={styles.navPanel}>
+        <EuiText>
+          <TreeNav />
+        </EuiText>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner hidden={noResults} css={styles.sessionsPanel}>
+        <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onTreeNavSelect} />
+        {renderSessionsView(sessionViewFilter)}
+      </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );
 };

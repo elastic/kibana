@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/core-saved-objects-api-server';
+import { KueryNode } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get, isEmpty } from 'lodash';
@@ -18,6 +18,7 @@ const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const RULE_ID_FIELD = 'rule.id';
+const SPACE_ID_FIELD = 'kibana.space_ids';
 const RULE_NAME_FIELD = 'rule.name';
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';
@@ -40,6 +41,7 @@ const NUMBER_OF_NEW_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_co
 const NUMBER_OF_RECOVERED_ALERTS_FIELD =
   'kibana.alert.rule.execution.metrics.alert_counts.recovered';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
+const MAINTENANCE_WINDOW_IDS_FIELD = 'kibana.alert.maintenance_window_ids';
 
 const Millis2Nanos = 1000 * 1000;
 
@@ -68,6 +70,7 @@ interface IExecutionUuidKpiAggBucket extends estypes.AggregationsStringTermsBuck
     ruleExecutionOutcomes: IActionExecution;
   };
 }
+
 interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketKeys {
   timeoutMessage: estypes.AggregationsMultiBucketBase;
   ruleExecution: {
@@ -81,7 +84,8 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     numActiveAlerts: estypes.AggregationsMaxAggregate;
     numRecoveredAlerts: estypes.AggregationsMaxAggregate;
     numNewAlerts: estypes.AggregationsMaxAggregate;
-    outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
+    outcomeMessageAndMaintenanceWindow: estypes.AggregationsTopHitsAggregate;
+    maintenanceWindowIds: estypes.AggregationsTopHitsAggregate;
   };
   actionExecution: {
     actionOutcomes: IActionExecution;
@@ -400,7 +404,7 @@ export function getExecutionLogAggregation({
                     field: DURATION_FIELD,
                   },
                 },
-                outcomeAndMessage: {
+                outcomeMessageAndMaintenanceWindow: {
                   top_hits: {
                     size: 1,
                     _source: {
@@ -410,8 +414,10 @@ export function getExecutionLogAggregation({
                         ERROR_MESSAGE_FIELD,
                         VERSION_FIELD,
                         RULE_ID_FIELD,
+                        SPACE_ID_FIELD,
                         RULE_NAME_FIELD,
                         ALERTING_OUTCOME_FIELD,
+                        MAINTENANCE_WINDOW_IDS_FIELD,
                       ],
                     },
                   },
@@ -443,7 +449,7 @@ export function getExecutionLogAggregation({
 function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
   try {
     const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
-    return filter ? toElasticsearchQuery(filterKueryNode) : undefined;
+    return filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
   }
@@ -483,19 +489,30 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const actionExecutionError =
     actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
 
-  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source ?? {};
-  let status = outcomeAndMessage.kibana?.alerting?.outcome ?? '';
+  const outcomeMessageAndMaintenanceWindow =
+    bucket?.ruleExecution?.outcomeMessageAndMaintenanceWindow?.hits?.hits[0]?._source ?? {};
+  let status = outcomeMessageAndMaintenanceWindow.kibana?.alerting?.outcome ?? '';
   if (isEmpty(status)) {
-    status = outcomeAndMessage.event?.outcome ?? '';
+    status = outcomeMessageAndMaintenanceWindow.event?.outcome ?? '';
   }
-  const outcomeMessage = outcomeAndMessage.message ?? '';
-  const outcomeErrorMessage = outcomeAndMessage.error?.message ?? '';
+  const outcomeMessage = outcomeMessageAndMaintenanceWindow.message ?? '';
+  const outcomeErrorMessage = outcomeMessageAndMaintenanceWindow.error?.message ?? '';
   const message =
     status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
-  const version = outcomeAndMessage.kibana?.version ?? '';
+  const version = outcomeMessageAndMaintenanceWindow.kibana?.version ?? '';
 
-  const ruleId = outcomeAndMessage.rule?.id ?? '';
-  const ruleName = outcomeAndMessage.rule?.name ?? '';
+  const ruleId = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow?.rule?.id ?? ''
+    : '';
+  const spaceIds = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow?.kibana?.space_ids ?? []
+    : [];
+  const maintenanceWindowIds = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow.kibana?.alert?.maintenance_window_ids ?? []
+    : [];
+  const ruleName = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow.rule?.name ?? ''
+    : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
@@ -515,7 +532,9 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     timed_out: timedOut,
     rule_id: ruleId,
+    space_ids: spaceIds,
     rule_name: ruleName,
+    maintenance_window_ids: maintenanceWindowIds,
   };
 }
 
@@ -614,18 +633,18 @@ export function getNumExecutions(dateStart: Date, dateEnd: Date, ruleSchedule: s
 
 export function formatSortForBucketSort(sort: estypes.Sort) {
   return (sort as estypes.SortCombinations[]).map((s) =>
-    Object.keys(s).reduce(
-      (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, curr) }),
-      {}
-    )
+    Object.keys(s).reduce((acc, curr) => {
+      (acc as Record<string, unknown>)[ExecutionLogSortFields[curr]] = get(s, curr);
+      return acc;
+    }, {})
   );
 }
 
 export function formatSortForTermSort(sort: estypes.Sort) {
   return (sort as estypes.SortCombinations[]).map((s) =>
-    Object.keys(s).reduce(
-      (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, `${curr}.order`) }),
-      {}
-    )
+    Object.keys(s).reduce((acc, curr) => {
+      (acc as Record<string, unknown>)[ExecutionLogSortFields[curr]] = get(s, `${curr}.order`);
+      return acc;
+    }, {})
   );
 }

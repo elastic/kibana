@@ -8,10 +8,10 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
-  calculatePermissionsFromCapabilities,
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
@@ -22,6 +22,7 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
+  RULES_ADD_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -29,6 +30,7 @@ import {
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
+  ADD_RULES,
   BLOCKLIST,
   CREATE_NEW_RULE,
   ENDPOINTS,
@@ -48,6 +50,7 @@ import {
   manageCategories as cloudSecurityPostureCategories,
   manageLinks as cloudSecurityPostureLinks,
 } from '../cloud_security_posture/links';
+import { manageLinks as cloudDefendLinks } from '../cloud_defend/links';
 import { IconActionHistory } from './icons/action_history';
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
@@ -58,7 +61,6 @@ import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 const categories = [
   {
@@ -116,6 +118,13 @@ export const links: LinkItem = {
       ],
       links: [
         {
+          id: SecurityPageName.rulesAdd,
+          title: ADD_RULES,
+          path: RULES_ADD_PATH,
+          skipUrlState: true,
+          hideTimeline: true,
+        },
+        {
           id: SecurityPageName.rulesCreate,
           title: CREATE_NEW_RULE,
           path: RULES_CREATE_PATH,
@@ -128,7 +137,8 @@ export const links: LinkItem = {
       id: SecurityPageName.exceptions,
       title: EXCEPTIONS,
       description: i18n.translate('xpack.securitySolution.appLinks.exceptionsDescription', {
-        defaultMessage: 'Create and manage exceptions to prevent the creation of unwanted alerts.',
+        defaultMessage:
+          'Create and manage shared exception lists to prevent the creation of unwanted alerts.',
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
@@ -162,7 +172,6 @@ export const links: LinkItem = {
       path: POLICIES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      experimentalKey: 'policyListEnabled',
     },
     {
       id: SecurityPageName.trustedApps,
@@ -224,6 +233,7 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     cloudSecurityPostureLinks,
+    cloudDefendLinks,
   ],
 };
 
@@ -232,55 +242,61 @@ const excludeLinks = (linkIds: SecurityPageName[]) => ({
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
 
-const getHostIsolationExceptionTotal = async (http: CoreStart['http']) => {
-  const hostIsolationExceptionsApiClientInstance =
-    HostIsolationExceptionsApiClient.getInstance(http);
-  const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
-  return summaryResponse.total;
-};
-
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
-  const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
-  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
-  const linksToExclude: SecurityPageName[] = [];
-
-  try {
-    const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const { canReadActionsLogManagement, canIsolateHost, canUnIsolateHost } = fleetAuthz
-      ? calculateEndpointAuthz(
-          licenseService,
-          fleetAuthz,
-          currentUserResponse.roles,
-          isEndpointRbacEnabled,
-          endpointPermissions
-        )
+  const currentUser = await plugins.security.authc.getCurrentUser();
+  const {
+    canReadActionsLogManagement,
+    canAccessHostIsolationExceptions,
+    canReadHostIsolationExceptions,
+    canReadEndpointList,
+    canReadTrustedApplications,
+    canReadEventFilters,
+    canReadBlocklist,
+    canReadPolicyManagement,
+  } =
+    fleetAuthz && currentUser
+      ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
 
-    if (!canReadActionsLogManagement) {
-      linksToExclude.push(SecurityPageName.responseActionsHistory);
-    }
+  const showHostIsolationExceptions =
+    canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
+    // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
+    // however, in this situation we allow to access only when there is data, otherwise the link won't be accessible.
+    (canReadHostIsolationExceptions &&
+      (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
 
-    if (!canIsolateHost && canUnIsolateHost) {
-      let shouldSeeHIEToBeAbleToDeleteEntries: boolean;
-      try {
-        const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
-        shouldSeeHIEToBeAbleToDeleteEntries = hostExceptionCount !== 0;
-      } catch {
-        shouldSeeHIEToBeAbleToDeleteEntries = false;
-      }
+  const linksToExclude: SecurityPageName[] = [];
 
-      if (!shouldSeeHIEToBeAbleToDeleteEntries) {
-        linksToExclude.push(SecurityPageName.hostIsolationExceptions);
-      }
-    } else if (!canIsolateHost) {
-      linksToExclude.push(SecurityPageName.hostIsolationExceptions);
-    }
-  } catch {
+  if (!canReadEndpointList) {
+    linksToExclude.push(SecurityPageName.endpoints);
+  }
+
+  if (!canReadPolicyManagement) {
+    linksToExclude.push(SecurityPageName.policies);
+  }
+
+  if (!canReadActionsLogManagement) {
+    linksToExclude.push(SecurityPageName.responseActionsHistory);
+  }
+
+  if (!showHostIsolationExceptions) {
     linksToExclude.push(SecurityPageName.hostIsolationExceptions);
+  }
+
+  if (!canReadTrustedApplications) {
+    linksToExclude.push(SecurityPageName.trustedApps);
+  }
+
+  if (!canReadEventFilters) {
+    linksToExclude.push(SecurityPageName.eventFilters);
+  }
+
+  if (!canReadBlocklist) {
+    linksToExclude.push(SecurityPageName.blocklist);
   }
 
   return excludeLinks(linksToExclude);

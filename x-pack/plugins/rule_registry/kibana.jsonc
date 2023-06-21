@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/rule-registry-plugin",
+  "owner": [
+    "@elastic/response-ops",
+    "@elastic/actionable-observability"
+  ],
+  "plugin": {
+    "id": "ruleRegistry",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "ruleRegistry"
+    ],
+    "requiredPlugins": [
+      "alerting",
+      "data",
+      "triggersActionsUi"
+    ],
+    "optionalPlugins": [
+      "security",
+      "spaces"
+    ]
+  }
+}

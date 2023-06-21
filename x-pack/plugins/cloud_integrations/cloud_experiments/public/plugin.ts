@@ -9,7 +9,6 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { get, has } from 'lodash';
 import { duration } from 'moment';
 import { concatMap } from 'rxjs';
-import { Sha256 } from '@kbn/crypto-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
@@ -78,12 +77,12 @@ export class CloudExperimentsPlugin
    * @param deps {@link CloudExperimentsPluginSetupDeps}
    */
   public setup(core: CoreSetup, deps: CloudExperimentsPluginSetupDeps) {
-    if (deps.cloud.isCloudEnabled && deps.cloud.cloudId && this.launchDarklyClient) {
+    if (deps.cloud.isCloudEnabled && deps.cloud.deploymentId && this.launchDarklyClient) {
       this.metadataService.setup({
-        userId: sha256(deps.cloud.cloudId),
+        userId: deps.cloud.deploymentId,
         kibanaVersion: this.kibanaVersion,
-        trial_end_date: deps.cloud.trialEndDate?.toISOString(),
-        is_elastic_staff_owned: deps.cloud.isElasticStaffOwned,
+        trialEndDate: deps.cloud.trialEndDate?.toISOString(),
+        isElasticStaff: deps.cloud.isElasticStaffOwned,
       });
     }
   }
@@ -98,7 +97,7 @@ export class CloudExperimentsPlugin
   ): CloudExperimentsPluginStart {
     if (cloud.isCloudEnabled) {
       this.metadataService.start({
-        hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasUserDataView() }),
+        hasDataFetcher: async () => ({ hasData: await dataViews.hasData.hasUserDataView() }),
       });
 
       // We only subscribe to the user metadata updates if Cloud is enabled.
@@ -155,8 +154,4 @@ export class CloudExperimentsPlugin
       });
     }
   };
-}
-
-function sha256(str: string) {
-  return new Sha256().update(str, 'utf8').digest('hex');
 }

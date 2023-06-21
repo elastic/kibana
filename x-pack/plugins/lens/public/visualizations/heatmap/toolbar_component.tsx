@@ -11,13 +11,14 @@ import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/chart-icons';
+import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
 import type { VisualizationToolbarProps } from '../../types';
 import {
   LegendSettingsPopover,
   ToolbarPopover,
   ValueLabelsSettings,
   AxisTitleSettings,
-  TooltipWrapper,
+  AxisTicksSettings,
 } from '../../shared_components';
 import type { HeatmapVisualizationState } from './types';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
@@ -165,6 +166,19 @@ export const HeatmapToolbar = memo(
                   }}
                   isAxisTitleVisible={state?.gridConfig.isYAxisTitleVisible}
                 />
+                <AxisTicksSettings
+                  axis="yLeft"
+                  updateTicksVisibilityState={(visible) => {
+                    setState({
+                      ...state,
+                      gridConfig: {
+                        ...state.gridConfig,
+                        isYAxisLabelVisible: visible,
+                      },
+                    });
+                  }}
+                  isAxisLabelVisible={state?.gridConfig.isYAxisLabelVisible}
+                />
               </ToolbarPopover>
             </TooltipWrapper>
 
@@ -197,6 +211,19 @@ export const HeatmapToolbar = memo(
                     })
                   }
                   isAxisTitleVisible={state?.gridConfig.isXAxisTitleVisible}
+                />
+                <AxisTicksSettings
+                  axis="x"
+                  updateTicksVisibilityState={(visible) => {
+                    setState({
+                      ...state,
+                      gridConfig: {
+                        ...state.gridConfig,
+                        isXAxisLabelVisible: visible,
+                      },
+                    });
+                  }}
+                  isAxisLabelVisible={state?.gridConfig.isXAxisLabelVisible}
                 />
               </ToolbarPopover>
             </TooltipWrapper>

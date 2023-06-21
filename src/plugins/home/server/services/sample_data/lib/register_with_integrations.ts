@@ -27,7 +27,7 @@ export function registerSampleDatasetWithIntegration(
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial_directory/sampleData`,
     isBeta: false,
     icons: [{ type: 'svg', src: core.http.basePath.prepend(GLOBE_ICON_PATH) }],
-    categories: ['sample_data'],
+    categories: ['custom'],
     shipper: 'sample_data',
   });
 }

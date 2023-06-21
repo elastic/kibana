@@ -8,6 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+// eslint-disable-next-line no-restricted-imports
 import { Router, Switch, Route, Prompt } from 'react-router-dom';
 import type { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';

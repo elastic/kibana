@@ -67,8 +67,8 @@ export const COPY_FINGERPRINT = i18n.translate('xpack.synthetics.certs.list.copy
   defaultMessage: 'Click to copy fingerprint value',
 });
 
-export const NO_CERTS_AVAILABLE = i18n.translate('xpack.synthetics.certs.list.empty', {
-  defaultMessage: 'No Certificates found. Note: Certificates are only visible for Heartbeat 7.8+',
+export const NO_CERTS_AVAILABLE = i18n.translate('xpack.synthetics.certs.list.noCerts', {
+  defaultMessage: 'No Certificates found.',
 });
 
 export const LOADING_CERTIFICATES = i18n.translate('xpack.synthetics.certificates.loading', {

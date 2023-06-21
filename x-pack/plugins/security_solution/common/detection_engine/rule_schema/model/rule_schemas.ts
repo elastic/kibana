@@ -36,6 +36,7 @@ import {
   updated_by,
   created_at,
   created_by,
+  revision,
 } from '../../schemas/common';
 
 import {
@@ -85,13 +86,14 @@ import {
 } from './specific_attributes/eql_attributes';
 import { Threshold } from './specific_attributes/threshold_attributes';
 import { HistoryWindowStart, NewTermsFields } from './specific_attributes/new_terms_attributes';
+import { AlertSuppression } from './specific_attributes/query_attributes';
 
 import { buildRuleSchemas } from './build_rule_schemas';
 
 // -------------------------------------------------------------------------------------------------
 // Base schema
 
-const baseSchema = buildRuleSchemas({
+export const baseSchema = buildRuleSchemas({
   required: {
     name: RuleName,
     description: RuleDescription,
@@ -117,6 +119,8 @@ const baseSchema = buildRuleSchemas({
     output_index: AlertsIndex,
     namespace: AlertsIndexNamespace,
     meta: RuleMetadata,
+    // Throttle
+    throttle: RuleActionThrottle,
   },
   defaultable: {
     // Main attributes
@@ -132,7 +136,6 @@ const baseSchema = buildRuleSchemas({
     to: RuleIntervalTo,
     // Rule actions
     actions: RuleActionArray,
-    throttle: RuleActionThrottle,
     // Rule exceptions
     exceptions_list: ExceptionListArray,
     // Misc attributes
@@ -153,6 +156,7 @@ const responseRequiredFields = {
   updated_by,
   created_at,
   created_by,
+  revision,
 
   // NOTE: For now, Related Integrations, Required Fields and Setup Guide are supported for prebuilt
   // rules only. We don't want to allow users to edit these 3 fields via the API. If we added them
@@ -206,10 +210,22 @@ export const SharedResponseProps = t.intersection([
 // -------------------------------------------------------------------------------------------------
 // EQL rule schema
 
+export enum QueryLanguage {
+  'kuery' = 'kuery',
+  'lucene' = 'lucene',
+  'eql' = 'eql',
+}
+
+export type KqlQueryLanguage = t.TypeOf<typeof KqlQueryLanguage>;
+export const KqlQueryLanguage = t.keyof({ kuery: null, lucene: null });
+
+export type EqlQueryLanguage = t.TypeOf<typeof EqlQueryLanguage>;
+export const EqlQueryLanguage = t.literal('eql');
+
 const eqlSchema = buildRuleSchemas({
   required: {
     type: t.literal('eql'),
-    language: t.literal('eql'),
+    language: EqlQueryLanguage,
     query: RuleQuery,
   },
   optional: {
@@ -256,12 +272,12 @@ const threatMatchSchema = buildRuleSchemas({
     saved_id,
     threat_filters,
     threat_indicator_path,
-    threat_language: t.keyof({ kuery: null, lucene: null }),
+    threat_language: KqlQueryLanguage,
     concurrent_searches,
     items_per_search,
   },
   defaultable: {
-    language: t.keyof({ kuery: null, lucene: null }),
+    language: KqlQueryLanguage,
   },
 });
 
@@ -302,10 +318,11 @@ const querySchema = buildRuleSchemas({
     filters: RuleFilterArray,
     saved_id,
     response_actions: ResponseActionArray,
+    alert_suppression: AlertSuppression,
   },
   defaultable: {
     query: RuleQuery,
-    language: t.keyof({ kuery: null, lucene: null }),
+    language: KqlQueryLanguage,
   },
 });
 
@@ -340,9 +357,10 @@ const savedQuerySchema = buildRuleSchemas({
     query: RuleQuery,
     filters: RuleFilterArray,
     response_actions: ResponseActionArray,
+    alert_suppression: AlertSuppression,
   },
   defaultable: {
-    language: t.keyof({ kuery: null, lucene: null }),
+    language: KqlQueryLanguage,
   },
 });
 
@@ -383,7 +401,7 @@ const thresholdSchema = buildRuleSchemas({
     saved_id,
   },
   defaultable: {
-    language: t.keyof({ kuery: null, lucene: null }),
+    language: KqlQueryLanguage,
   },
 });
 
@@ -458,7 +476,7 @@ const newTermsSchema = buildRuleSchemas({
     filters: RuleFilterArray,
   },
   defaultable: {
-    language: t.keyof({ kuery: null, lucene: null }),
+    language: KqlQueryLanguage,
   },
 });
 

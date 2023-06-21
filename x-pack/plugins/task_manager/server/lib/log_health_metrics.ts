@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
-
 import { isEmpty } from 'lodash';
-import { Logger } from '@kbn/core/server';
+import { Observable } from 'rxjs';
+import { Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import { HealthStatus } from '../monitoring';
 import { TaskManagerConfig } from '../config';
 import { MonitoredHealth } from '../routes/health';
 import { calculateHealthStatus } from './calculate_health_status';
 
 enum LogLevel {
+  Info = 'info',
   Warn = 'warn',
   Error = 'error',
   Debug = 'debug',
@@ -24,13 +24,38 @@ let lastLogLevel: LogLevel | null = null;
 export function resetLastLogLevel() {
   lastLogLevel = null;
 }
+
+export function setupIntervalLogging(
+  monitoredHealth$: Observable<MonitoredHealth>,
+  logger: Logger,
+  minutes: number
+) {
+  let monitoredHealth: MonitoredHealth | undefined;
+  monitoredHealth$.subscribe((m) => {
+    monitoredHealth = m;
+  });
+
+  setInterval(onInterval, 1000 * 60 * minutes);
+
+  function onInterval() {
+    const meta = { tags: ['task-manager-background-node-health'] };
+    if (!monitoredHealth) {
+      return logger.warn('unable to log health metrics, not initialized yet', meta);
+    }
+
+    logger.info(`background node health: ${JSON.stringify(monitoredHealth)}`, meta);
+  }
+}
+
 export function logHealthMetrics(
   monitoredHealth: MonitoredHealth,
   logger: Logger,
   config: TaskManagerConfig,
-  shouldRunTasks: boolean
+  shouldRunTasks: boolean,
+  docLinks: DocLinksServiceSetup
 ) {
-  let logLevel: LogLevel = LogLevel.Debug;
+  let logLevel: LogLevel =
+    config.monitored_stats_health_verbose_log.level === 'info' ? LogLevel.Info : LogLevel.Debug;
   const enabled = config.monitored_stats_health_verbose_log.enabled;
   const healthWithoutCapacity: MonitoredHealth = {
     ...monitoredHealth,
@@ -39,12 +64,9 @@ export function logHealthMetrics(
       capacity_estimation: undefined,
     },
   };
-  const statusWithoutCapacity = calculateHealthStatus(
-    healthWithoutCapacity,
-    config,
-    shouldRunTasks,
-    logger
-  );
+  const healthStatus = calculateHealthStatus(healthWithoutCapacity, config, shouldRunTasks, logger);
+
+  const statusWithoutCapacity = healthStatus?.status;
   if (statusWithoutCapacity === HealthStatus.Warning) {
     logLevel = LogLevel.Warn;
   } else if (statusWithoutCapacity === HealthStatus.Error && !isEmpty(monitoredHealth.stats)) {
@@ -52,10 +74,7 @@ export function logHealthMetrics(
   }
 
   const message = `Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`;
-  // TODO: remove when docs support "main"
-  const docsBranch = kibanaPackageJson.branch === 'main' ? 'master' : 'main';
-
-  const docLink = `https://www.elastic.co/guide/en/kibana/${docsBranch}/task-manager-health-monitoring.html`;
+  const docLink = docLinks.links.taskManager.healthMonitoring;
   const detectedProblemMessage = `Task Manager detected a degradation in performance. This is usually temporary, and Kibana can recover automatically. If the problem persists, check the docs for troubleshooting information: ${docLink} .`;
 
   // Drift looks at runtime stats which are not available when task manager is not running tasks
@@ -82,6 +101,9 @@ export function logHealthMetrics(
       logLevel = LogLevel.Warn;
     }
     switch (logLevel) {
+      case LogLevel.Info:
+        logger.info(message);
+        break;
       case LogLevel.Warn:
         logger.warn(message);
         break;

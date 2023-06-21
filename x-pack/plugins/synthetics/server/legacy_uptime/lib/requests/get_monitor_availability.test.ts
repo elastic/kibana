@@ -246,7 +246,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*",
         }
       `);
     });
@@ -397,7 +397,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*",
         }
       `);
 
@@ -411,6 +411,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -432,6 +433,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -453,6 +455,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -542,6 +545,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -563,6 +567,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -584,6 +589,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -605,6 +611,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -716,7 +723,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*",
         }
       `);
 
@@ -819,7 +826,7 @@ describe('monitor availability', () => {
               },
               "size": 0,
             },
-            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*",
           },
           Object {
             "meta": true,
@@ -957,7 +964,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*",
         }
       `);
     });

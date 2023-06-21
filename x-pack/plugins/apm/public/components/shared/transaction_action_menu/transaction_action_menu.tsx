@@ -7,8 +7,6 @@
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -17,11 +15,18 @@ import {
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
-} from '@kbn/observability-plugin/public';
+} from '@kbn/observability-shared-plugin/public';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import useAsync from 'react-use/lib/useAsync';
+import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
 
@@ -39,6 +44,7 @@ function ActionMenuButton({
 }) {
   return (
     <EuiButton
+      data-test-subj="apmActionMenuButtonInvestigateButton"
       isLoading={isLoading}
       iconType="arrowDown"
       iconSide="right"
@@ -83,16 +89,53 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 }
 
 function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
-  const { core } = useApmPluginContext();
+  const {
+    core,
+    uiActions,
+    infra: { locators },
+  } = useApmPluginContext();
   const location = useLocation();
-  const { urlParams } = useLegacyUrlParams();
+  const apmRouter = useApmRouter();
+
+  const infraLinksAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.InfraUiAvailable
+  );
 
   const sections = getSections({
     transaction,
     basePath: core.http.basePath,
     location,
-    urlParams,
+    apmRouter,
+    infraLocators: locators,
+    infraLinksAvailable,
   });
+
+  const externalMenuItems = useAsync(() => {
+    return transaction
+      ? getContextMenuItemsFromActions({
+          uiActions,
+          triggerId: ObservabilityTriggerId.ApmTransactionContextMenu,
+          context: transaction,
+        })
+      : Promise.resolve([]);
+  }, [transaction, uiActions]);
+
+  if (externalMenuItems.value?.length) {
+    sections.push([
+      {
+        key: 'external',
+        actions: externalMenuItems.value.map((item, i) => {
+          return {
+            condition: true,
+            key: `external-${i}`,
+            label: item.children,
+            onClick: item.onClick,
+            href: item.href,
+          };
+        }),
+      },
+    ]);
+  }
 
   return (
     <div>
@@ -112,6 +155,7 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
                       key={action.key}
                       label={action.label}
                       href={action.href}
+                      onClick={action.onClick}
                     />
                   ))}
                 </SectionLinks>

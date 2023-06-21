@@ -13,6 +13,12 @@
 export const REPORT_INTERVAL_MS = 86400000;
 
 /**
+ * The buffer time, in milliseconds, to consider the {@link REPORT_INTERVAL_MS} as expired.
+ * Currently, 2 minutes.
+ */
+export const REPORT_INTERVAL_BUFFER_MS = 120000;
+
+/**
  * How often we poll for the opt-in status.
  * Currently, 10 seconds.
  */
@@ -36,7 +42,7 @@ export const PAYLOAD_CONTENT_ENCODING = 'aes256gcm';
 /**
  * The endpoint version when hitting the remote telemetry service
  */
-export const ENDPOINT_VERSION = 'v2';
+export const ENDPOINT_VERSION = 'v3';
 
 /**
  * The staging telemetry endpoint for the remote telemetry service.
@@ -54,6 +60,6 @@ export const ENDPOINT_PROD = 'https://telemetry.elastic.co/';
  * The telemetry channels for the remote telemetry service.
  */
 export const TELEMETRY_CHANNELS = {
-  SNAPSHOT_CHANNEL: 'xpack',
-  OPT_IN_STATUS_CHANNEL: 'opt_in_status',
+  SNAPSHOT_CHANNEL: 'kibana-snapshot',
+  OPT_IN_STATUS_CHANNEL: 'kibana-opt-in-reports',
 };

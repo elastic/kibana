@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiAccordion,
@@ -28,10 +28,23 @@ export const DefaultPipelineItem: React.FC<{
   index: ElasticsearchIndexWithIngestion;
   indexName: string;
   ingestionMethod: string;
-  openModal: () => void;
+  openPipelineSettings: () => void;
   pipelineName: string;
   pipelineState: IngestPipelineParams;
-}> = ({ index, indexName, ingestionMethod, openModal, pipelineName, pipelineState }) => {
+}> = ({ index, indexName, ingestionMethod, openPipelineSettings, pipelineName, pipelineState }) => {
+  /**
+   * If we don't open the accordion on load, the curl code never shows the copy button
+   * Because if the accordion is closed, the code block is not present in the DOM
+   * And EuiCodeBlock doesn't show the copy button if it's virtualized (ie not present in DOM)
+   * It doesn't re-evaluate whether it's present in DOM if the inner text doesn't change
+   * Opening and closing makes sure it's present in DOM on initial load, so the copy button shows
+   * We use setImmediate to then close it on the next javascript loop
+   */
+  const [accordionOpen, setAccordionOpen] = useState<boolean>(true);
+  useEffect(() => {
+    setImmediate(() => setAccordionOpen(false));
+  }, []);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
@@ -44,7 +57,7 @@ export const DefaultPipelineItem: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-settings`}
-              onClick={openModal}
+              onClick={openPipelineSettings}
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.settings.label',
@@ -65,6 +78,8 @@ export const DefaultPipelineItem: React.FC<{
                   { defaultMessage: 'Ingest a document using cURL' }
                 )}
                 id="ingestPipelinesCurlAccordion"
+                forceState={accordionOpen ? 'open' : 'closed'}
+                onClick={() => setAccordionOpen(!accordionOpen)}
               >
                 <CurlRequest
                   document={{ body: 'body', title: 'Title' }}
@@ -76,7 +91,7 @@ export const DefaultPipelineItem: React.FC<{
           )}
           <EuiFlexItem grow={false}>
             <span>
-              <EuiBadge color="hollow">
+              <EuiBadge color="hollow" iconType="lock">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.managedBadge.label',
                   { defaultMessage: 'Managed' }

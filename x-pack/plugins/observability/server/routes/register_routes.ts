@@ -4,37 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { CoreSetup, KibanaRequest, Logger, RouteRegistrar } from '@kbn/core/server';
+import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import {
   decodeRequestParams,
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { CoreSetup, CoreStart, Logger, RouteRegistrar } from '@kbn/core/server';
-import Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
-import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import axios from 'axios';
+import * as t from 'io-ts';
+import { getHTTPResponseCode, ObservabilityError } from '../errors';
+import { IOpenAIClient } from '../services/openai/types';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
-import { getHTTPResponseCode, ObservabilityError } from '../errors';
 
-export function registerRoutes({
-  repository,
-  core,
-  logger,
-  ruleDataService,
-}: {
-  core: {
-    setup: CoreSetup;
-    start: () => Promise<CoreStart>;
-  };
+interface RegisterRoutes {
+  core: CoreSetup;
   repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
+  dependencies: RegisterRoutesDependencies;
+}
+
+export interface RegisterRoutesDependencies {
   ruleDataService: RuleDataPluginService;
-}) {
+  getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
+  getOpenAIClient: () => IOpenAIClient | undefined;
+}
+
+export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {
   const routes = Object.values(repository);
 
-  const router = core.setup.http.createRouter();
+  const router = core.http.createRouter();
 
   routes.forEach((route) => {
     const { endpoint, options, handler, params } = route;
@@ -60,10 +63,9 @@ export function registerRoutes({
           const data = (await handler({
             context,
             request,
-            core,
             logger,
             params: decodedParams,
-            ruleDataService,
+            dependencies,
           })) as any;
 
           if (data === undefined) {
@@ -76,6 +78,16 @@ export function registerRoutes({
             logger.error(error.message);
             return response.customError({
               statusCode: getHTTPResponseCode(error),
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
+          if (axios.isAxiosError(error)) {
+            logger.error(error);
+            return response.customError({
+              statusCode: error.response?.status || 500,
               body: {
                 message: error.message,
               },

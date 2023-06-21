@@ -15,7 +15,6 @@ import {
   MetricsAPIRow,
 } from '../../../../common/http_api';
 import { META_KEY } from './constants';
-import { InfraSource } from '../../../lib/sources';
 
 export const isIPv4 = (subject: string) => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(subject);
 
@@ -26,8 +25,7 @@ type RowWithMetadata = MetricsAPIRow & {
 export const applyMetadataToLastPath = (
   series: MetricsAPISeries,
   node: SnapshotNode,
-  snapshotRequest: SnapshotRequest,
-  source: InfraSource
+  snapshotRequest: SnapshotRequest
 ): SnapshotNodePath[] => {
   // First we need to find a row with metadata
   const rowWithMeta = series.rows.find(
@@ -46,7 +44,7 @@ export const applyMetadataToLastPath = (
       // Set the label as the name and fallback to the id OR path.value
       lastPath.label = (firstMetaDoc[inventoryFields.name] ?? lastPath.value) as string;
       // If the inventory fields contain an ip address, we need to try and set that
-      // on the path object. IP addersses are typically stored as multiple fields. We will
+      // on the path object. IP addresses are typically stored as multiple fields. We will
       // use the first IPV4 address we find.
       if (inventoryFields.ip) {
         const ipAddresses = get(firstMetaDoc, inventoryFields.ip) as string[];
@@ -55,6 +53,12 @@ export const applyMetadataToLastPath = (
         } else if (typeof ipAddresses === 'string') {
           lastPath.ip = ipAddresses;
         }
+      }
+      if (inventoryFields.os) {
+        lastPath.os = get(firstMetaDoc, inventoryFields.os) as string;
+      }
+      if (inventoryFields.cloudProvider) {
+        lastPath.cloudProvider = get(firstMetaDoc, inventoryFields.cloudProvider) as string;
       }
       return [...node.path.slice(0, node.path.length - 1), lastPath];
     }

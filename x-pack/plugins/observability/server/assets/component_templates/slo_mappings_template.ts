@@ -20,11 +20,17 @@ export const getSLOMappingsTemplate = (name: string) => ({
               type: 'keyword',
               ignore_above: 256,
             },
+            revision: {
+              type: 'long',
+            },
             numerator: {
               type: 'long',
             },
             denominator: {
               type: 'long',
+            },
+            isGoodSlice: {
+              type: 'byte',
             },
             context: {
               type: 'flattened',
@@ -37,5 +43,7 @@ export const getSLOMappingsTemplate = (name: string) => ({
   _meta: {
     description: 'Mappings for SLO rollup data',
     version: 1,
+    managed: true,
+    managed_by: 'observability',
   },
 });

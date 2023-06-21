@@ -6,64 +6,89 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { Ref } from 'react';
-import { EuiButtonIcon, EuiDualRange, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+
+import { getIsAnchored } from '../time_slider_selectors';
+import { TimeSliderStrings } from './time_slider_strings';
+import { useTimeSlider } from '../embeddable/time_slider_embeddable';
+import { TimeSliderAnchoredRange } from './time_slider_anchored_range';
+import { EuiDualRangeRef, TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
 
 interface Props {
   value: [number, number];
   onChange: (value?: [number, number]) => void;
-  onClear: () => void;
+  stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
-  rangeRef?: Ref<EuiDualRange>;
+  rangeRef?: Ref<EuiDualRangeRef>;
 }
 
 export function TimeSliderPopoverContent(props: Props) {
-  function onChange(value?: [number | string, number | string]) {
-    props.onChange(value as [number, number]);
-  }
+  const ticks =
+    props.ticks.length <= 12
+      ? props.ticks
+      : props.ticks.map((tick, index) => {
+          return {
+            value: tick.value,
+            // to avoid label overlap, only display even tick labels
+            // Passing empty string as tick label results in tick not rendering, so must wrap empty label in react element
+            // Can not store react node in redux state because its not serializable so have to transform into react node here
+            label: index % 2 === 0 ? tick.label : <span>&nbsp;</span>,
+          };
+        });
+
+  const timeSlider = useTimeSlider();
+  const isAnchored = timeSlider.select(getIsAnchored);
+  const rangeInput = isAnchored ? (
+    <TimeSliderAnchoredRange
+      value={props.value}
+      onChange={props.onChange}
+      stepSize={props.stepSize}
+      ticks={ticks}
+      timeRangeMin={props.timeRangeMin}
+      timeRangeMax={props.timeRangeMax}
+    />
+  ) : (
+    <TimeSliderSlidingWindowRange
+      value={props.value}
+      onChange={props.onChange}
+      stepSize={props.stepSize}
+      rangeRef={props.rangeRef}
+      ticks={ticks}
+      timeRangeMin={props.timeRangeMin}
+      timeRangeMax={props.timeRangeMax}
+    />
+  );
+  const anchorStartToggleButtonLabel = isAnchored
+    ? TimeSliderStrings.control.getUnpinStart()
+    : TimeSliderStrings.control.getPinStart();
 
   return (
     <EuiFlexGroup
       className="rangeSlider__actions"
       gutterSize="none"
-      data-test-subj="timeSlider-control-actions"
+      data-test-subj="timeSlider-popoverContents"
       responsive={false}
     >
-      <EuiFlexItem>
-        <EuiDualRange
-          ref={props.rangeRef}
-          fullWidth={true}
-          value={props.value}
-          onChange={onChange}
-          showTicks={true}
-          min={props.timeRangeMin}
-          max={props.timeRangeMax}
-          step={1}
-          ticks={props.ticks}
-          isDraggable
-        />
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
-            defaultMessage: 'Clear time selection',
-          })}
-        >
+        <EuiToolTip content={anchorStartToggleButtonLabel}>
           <EuiButtonIcon
-            iconType="eraser"
-            color="danger"
-            onClick={props.onClear}
-            aria-label={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
-              defaultMessage: 'Clear time selection',
-            })}
-            data-test-subj="timeSlider__clearTimeButton"
+            iconType={isAnchored ? 'pinFilled' : 'pin'}
+            onClick={() => {
+              const nextIsAnchored = !isAnchored;
+              if (nextIsAnchored) {
+                props.onChange([props.timeRangeMin, props.value[1]]);
+              }
+              timeSlider.dispatch.setIsAnchored({ isAnchored: nextIsAnchored });
+            }}
+            aria-label={anchorStartToggleButtonLabel}
+            data-test-subj="timeSlider__anchorStartToggleButton"
           />
         </EuiToolTip>
       </EuiFlexItem>
+      <EuiFlexItem>{rangeInput}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }

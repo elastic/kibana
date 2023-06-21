@@ -6,8 +6,9 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Installation } from '@kbn/fleet-plugin/common';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -44,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `Test policy ${uuid()}`,
+          name: `Test policy ${uuidv4()}`,
           namespace: 'default',
         })
         .expect(200);
@@ -245,7 +246,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
-    it('should return a 400 if there is another package policy with the same name', async function () {
+    it('should return a 409 if there is another package policy with the same name', async function () {
       await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -279,15 +280,15 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         })
-        .expect(400);
+        .expect(409);
     });
 
-    it('should return a 400 if there is a package policy with the same name on a different policy', async function () {
+    it('should return a 409 if there is a package policy with the same name on a different policy', async function () {
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `Test policy ${uuid()}`,
+          name: `Test policy ${uuidv4()}`,
           namespace: 'default',
         });
       const otherAgentPolicyId = agentPolicyResponse.item.id;
@@ -325,7 +326,7 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         })
-        .expect(400);
+        .expect(409);
     });
 
     it('should return a 400 with required variables not provided', async function () {
@@ -446,8 +447,33 @@ export default function (providerContext: FtrProviderContext) {
       expect(policy.name).to.equal(nameWithWhitespace.trim());
     });
 
+    it('should return a 200 when a package has no variables or data streams', async function () {
+      await supertest
+        .post('/api/fleet/package_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'no-variables-or-data-streams',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              streams: [],
+              type: 'single_input',
+            },
+          ],
+          package: {
+            name: 'single_input_no_streams',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+    });
+
     describe('input only packages', () => {
-      it('should return 400 if dataset not provided for input only pkg', async function () {
+      it('should default dataset if not provided for input only pkg', async function () {
         await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
@@ -455,7 +481,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             package: {
               name: 'integration_to_input',
-              version: '0.9.1',
+              version: '2.0.0',
             },
             name: 'integration_to_input-1',
             description: '',
@@ -476,7 +502,7 @@ export default function (providerContext: FtrProviderContext) {
               },
             },
           })
-          .expect(400);
+          .expect(200);
       });
       it('should successfully create an input only package policy with all required vars', async function () {
         await supertest
@@ -486,7 +512,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             package: {
               name: 'integration_to_input',
-              version: '0.9.1',
+              version: '2.0.0',
             },
             name: 'integration_to_input-2',
             description: '',
@@ -624,7 +650,7 @@ export default function (providerContext: FtrProviderContext) {
       const getInstallationSavedObject = async (pkg: string): Promise<Installation | undefined> => {
         const res: { _source?: { 'epm-packages': Installation } } = await es.transport.request({
           method: 'GET',
-          path: `/.kibana/_doc/epm-packages:${pkg}`,
+          path: `/${INGEST_SAVED_OBJECT_INDEX}/_doc/epm-packages:${pkg}`,
         });
 
         return res?._source?.['epm-packages'] as Installation;
@@ -677,7 +703,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'unverified_content-1',
+            name: 'unverified_content_' + Date.now(),
             description: '',
             namespace: 'default',
             policy_id: agentPolicyId,
@@ -713,7 +739,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'unverified_content-1',
+            name: 'unverified_content-' + Date.now(),
             description: '',
             namespace: 'default',
             policy_id: agentPolicyId,

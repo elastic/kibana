@@ -40,12 +40,21 @@ export const AnalyticsCollectionSettings: React.FC<AnalyticsCollectionSettingsPr
           listItems={[
             {
               title: i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.collectionsView.settingsTab.credentials.collectionName',
+                'xpack.enterpriseSearch.analytics.collections.collectionsView.settingsTab.details.collectionName',
                 {
                   defaultMessage: 'Collection name',
                 }
               ),
               description: collection.name,
+            },
+            {
+              title: i18n.translate(
+                'xpack.enterpriseSearch.analytics.collections.collectionsView.settingsTab.details.eventsDataStreamName',
+                {
+                  defaultMessage: 'Events Datastream Index',
+                }
+              ),
+              description: collection.events_datastream,
             },
           ]}
           type="column"

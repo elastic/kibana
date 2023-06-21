@@ -7,6 +7,7 @@
 
 export const ADD_AGENT_BUTTON = 'addAgentButton';
 export const ADD_AGENT_BUTTON_TOP = 'addAgentBtnTop';
+export const LANDING_PAGE_ADD_FLEET_SERVER_BUTTON = 'fleetServerLanding.addFleetServerButton';
 
 export const AGENTS_TAB = 'fleet-agents-tab';
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
@@ -14,10 +15,18 @@ export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';
 export const DATA_STREAMS_TAB = 'fleet-datastreams-tab';
 export const SETTINGS_TAB = 'fleet-settings-tab';
 
-export const MISSING_PRIVILEGES_TITLE = 'missingPrivilegesPromptTitle';
-export const MISSING_PRIVILEGES_MESSAGE = 'missingPrivilegesPromptMessage';
-export const FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE = 'fleetServerMissingPrivilegesMessage';
-export const FLEET_SERVER_MISSING_PRIVILEGES_TITLE = 'fleetServerMissingPrivilegesTitle';
+export const MISSING_PRIVILEGES = {
+  PROMPT: 'missingPrivilegesPrompt',
+  TITLE: 'missingPrivilegesPromptTitle',
+  MESSAGE: 'missingPrivilegesPromptMessage',
+};
+
+export const FLEET_SERVER_MISSING_PRIVILEGES = {
+  PROMPT: 'fleetServerMissingPrivilegesPrompt',
+  MESSAGE: 'fleetServerMissingPrivilegesMessage',
+  TITLE: 'fleetServerMissingPrivilegesTitle',
+};
+
 export const AGENT_POLICY_SAVE_INTEGRATION = 'saveIntegration';
 export const PACKAGE_POLICY_TABLE_LINK = 'PackagePoliciesTableLink';
 export const ADD_PACKAGE_POLICY_BTN = 'addPackagePolicyButton';
@@ -48,7 +57,7 @@ export const SETTINGS_SAVE_BTN = 'saveApplySettingsBtn';
 export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMonitoringCheckbox';
 export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'AgentPolicyAdvancedOptions.AccordionBtn';
 export const AGENT_POLICY_CREATE_STATUS_CALLOUT = 'agentPolicyCreateStatusCallOut';
-export const FLEET_SERVER_HOST_INPUT = 'fleetServerHostInput';
+
 export const EXISTING_HOSTS_TAB = 'existingHostsTab';
 export const NEW_HOSTS_TAB = 'newHostsTab';
 
@@ -64,6 +73,7 @@ export const AGENT_FLYOUT = {
   ADVANCED_TAB_BUTTON: 'fleetServerFlyoutTab-advanced',
   AGENT_POLICY_CODE_BLOCK: 'agentPolicyCodeBlock',
   STANDALONE_TAB: 'standaloneTab',
+  MANAGED_TAB: 'managedTab',
   CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
   INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
 };
@@ -96,9 +106,13 @@ export const AGENT_BINARY_SOURCES_FLYOUT = {
 export const SETTINGS_OUTPUTS = {
   EDIT_BTN: 'editOutputBtn',
   ADD_BTN: 'addOutputBtn',
-  EDIT_HOSTS_BTN: 'editHostsBtn',
   NAME_INPUT: 'settingsOutputsFlyout.nameInput',
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
+};
+
+export const SETTINGS_FLEET_SERVER_HOSTS = {
+  ADD_BUTTON: 'settings.fleetServerHosts.addFleetServerHostBtn',
+  EDIT_BUTTON: 'fleetServerHostsTable.edit.btn',
 };
 
 export const AGENT_POLICY_FORM = {
@@ -108,9 +122,35 @@ export const AGENT_POLICY_FORM = {
 export const FLEET_AGENT_LIST_PAGE = {
   TABLE: 'fleetAgentListTable',
   STATUS_FILTER: 'agentList.statusFilter',
+  TAGS_FILTER: 'agentList.tagsFilter',
   POLICY_FILTER: 'agentList.policyFilter',
   QUERY_INPUT: 'agentList.queryInput',
   SHOW_UPGRADEABLE: 'agentList.showUpgradeable',
   CHECKBOX_SELECT_ALL: 'checkboxSelectAll',
   BULK_ACTIONS_BUTTON: 'agentBulkActionsButton',
+  ACTIVITY_BUTTON: 'agentActivityButton',
+  ACTIVITY_FLYOUT: {
+    FLYOUT_ID: 'agentActivityFlyout',
+    CLOSE_BUTTON: 'euiFlyoutCloseButton',
+  },
+  BULK_ACTIONS: {
+    ADD_REMOVE_TAG_INPUT: 'addRemoveTags',
+  },
+};
+
+export const FLEET_SERVER_HOST_FLYOUT = {
+  NAME_INPUT: 'fleetServerHostsFlyout.nameInput',
+  DEFAULT_SWITCH: 'fleetServerHostsFlyout.isDefaultSwitch',
+};
+
+export const FLEET_SERVER_SETUP = {
+  NAME_INPUT: 'fleetServerSetup.nameInput',
+  HOST_INPUT: 'fleetServerSetup.multiRowInput',
+  DEFAULT_SWITCH: 'fleetServerHostsFlyout.isDefaultSwitch',
+  ADD_HOST_BTN: 'fleetServerSetup.addNewHostBtn',
+  SELECT_HOSTS: 'fleetServerSetup.fleetServerHostsSelect',
+};
+
+export const API_KEYS = {
+  REVOKE_KEY_BUTTON: 'enrollmentTokenTable.revokeBtn',
 };

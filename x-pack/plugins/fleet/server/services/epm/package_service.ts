@@ -14,7 +14,12 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+
+import type { PackageList } from '../../../common';
+
 import type {
+  CategoryId,
   EsAssetReference,
   InstallablePackage,
   Installation,
@@ -22,12 +27,14 @@ import type {
   ArchivePackage,
   BundledPackage,
 } from '../../types';
-import { checkSuperuser } from '../../routes/security';
+import { checkSuperuser } from '../security';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
+import type { FetchFindLatestPackageOptions } from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
-import { ensureInstalledPackage, getInstallation } from './packages';
+import { ensureInstalledPackage, getInstallation, getPackages } from './packages';
+import { generatePackageInfoFromArchiveBuffer } from './archive';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -45,12 +52,25 @@ export interface PackageClient {
     spaceId?: string;
   }): Promise<Installation | undefined>;
 
-  fetchFindLatestPackage(packageName: string): Promise<RegistryPackage | BundledPackage>;
+  fetchFindLatestPackage(
+    packageName: string,
+    options?: FetchFindLatestPackageOptions
+  ): Promise<RegistryPackage | BundledPackage>;
+
+  readBundledPackage(
+    bundledPackage: BundledPackage
+  ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
 
   getPackage(
     packageName: string,
     packageVersion: string
   ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
+
+  getPackages(params?: {
+    excludeInstallStatus?: false;
+    category?: CategoryId;
+    prerelease?: false;
+  }): Promise<PackageList>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -78,7 +98,8 @@ export class PackageServiceImpl implements PackageService {
       this.internalEsClient,
       this.internalSoClient,
       this.logger,
-      preflightCheck
+      preflightCheck,
+      request
     );
   }
 
@@ -88,12 +109,22 @@ export class PackageServiceImpl implements PackageService {
 }
 
 class PackageClientImpl implements PackageClient {
+  private authorizationHeader?: HTTPAuthorizationHeader | null = undefined;
+
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
     private readonly logger: Logger,
-    private readonly preflightCheck?: () => void | Promise<void>
+    private readonly preflightCheck?: () => void | Promise<void>,
+    private readonly request?: KibanaRequest
   ) {}
+
+  private getAuthorizationHeader() {
+    if (this.request) {
+      this.authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(this.request);
+      return this.authorizationHeader;
+    }
+  }
 
   public async getInstallation(pkgName: string) {
     await this.#runPreflight();
@@ -109,6 +140,7 @@ class PackageClientImpl implements PackageClient {
     spaceId?: string;
   }): Promise<Installation | undefined> {
     await this.#runPreflight();
+
     return ensureInstalledPackage({
       ...options,
       esClient: this.internalEsClient,
@@ -116,9 +148,17 @@ class PackageClientImpl implements PackageClient {
     });
   }
 
-  public async fetchFindLatestPackage(packageName: string) {
+  public async fetchFindLatestPackage(
+    packageName: string,
+    options?: FetchFindLatestPackageOptions
+  ): Promise<RegistryPackage | BundledPackage> {
     await this.#runPreflight();
-    return fetchFindLatestPackageOrThrow(packageName);
+    return fetchFindLatestPackageOrThrow(packageName, options);
+  }
+
+  public async readBundledPackage(bundledPackage: BundledPackage) {
+    await this.#runPreflight();
+    return generatePackageInfoFromArchiveBuffer(bundledPackage.buffer, 'application/zip');
   }
 
   public async getPackage(
@@ -128,6 +168,21 @@ class PackageClientImpl implements PackageClient {
   ) {
     await this.#runPreflight();
     return getPackage(packageName, packageVersion, options);
+  }
+
+  public async getPackages(params?: {
+    excludeInstallStatus?: false;
+    category?: CategoryId;
+    prerelease?: false;
+  }) {
+    const { excludeInstallStatus, category, prerelease } = params || {};
+    await this.#runPreflight();
+    return getPackages({
+      savedObjectsClient: this.internalSoClient,
+      excludeInstallStatus,
+      category,
+      prerelease,
+    });
   }
 
   public async reinstallEsAssets(
@@ -152,13 +207,18 @@ class PackageClientImpl implements PackageClient {
   }
 
   async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
-    const { installedTransforms } = await installTransforms(
-      packageInfo,
+    const authorizationHeader = await this.getAuthorizationHeader();
+
+    const { installedTransforms } = await installTransforms({
+      installablePackage: packageInfo,
       paths,
-      this.internalEsClient,
-      this.internalSoClient,
-      this.logger
-    );
+      esClient: this.internalEsClient,
+      savedObjectsClient: this.internalSoClient,
+      logger: this.logger,
+      force: true,
+      esReferences: undefined,
+      authorizationHeader,
+    });
     return installedTransforms;
   }
 

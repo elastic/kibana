@@ -12,6 +12,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import {
   invalidLicenseMessage,
@@ -29,16 +30,17 @@ import { EmptyPrompt } from './empty_prompt';
 import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
-import { SearchBar } from '../../shared/search_bar';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useServiceName } from '../../../hooks/use_service_name';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { DisabledPrompt } from './disabled_prompt';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
     <>
-      <SearchBar showKueryBar={false} />
+      <SearchBar showUnifiedSearchBar={false} />
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceAround"
@@ -84,7 +86,10 @@ export function ServiceMapHome() {
 export function ServiceMapServiceDetail() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/service-map');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   return (
     <ServiceMap
@@ -111,8 +116,8 @@ export function ServiceMap({
 }) {
   const theme = useTheme();
   const license = useLicenseContext();
-
   const serviceName = useServiceName();
+  const { config } = useApmPluginContext();
 
   const {
     data = { elements: [] },
@@ -121,7 +126,11 @@ export function ServiceMap({
   } = useFetcher(
     (callApmApi) => {
       // When we don't have a license or a valid license, don't make the request.
-      if (!license || !isActivePlatinumLicense(license)) {
+      if (
+        !license ||
+        !isActivePlatinumLicense(license) ||
+        !config.serviceMapEnabled
+      ) {
         return;
       }
 
@@ -134,11 +143,21 @@ export function ServiceMap({
             environment,
             serviceName,
             serviceGroup: serviceGroupId,
+            kuery,
           },
         },
       });
     },
-    [license, serviceName, environment, start, end, serviceGroupId]
+    [
+      license,
+      serviceName,
+      environment,
+      start,
+      end,
+      serviceGroupId,
+      kuery,
+      config.serviceMapEnabled,
+    ]
   );
 
   const { ref, height } = useRefDimensions();
@@ -155,6 +174,14 @@ export function ServiceMap({
     return (
       <PromptContainer>
         <LicensePrompt text={invalidLicenseMessage} />
+      </PromptContainer>
+    );
+  }
+
+  if (!config.serviceMapEnabled) {
+    return (
+      <PromptContainer>
+        <DisabledPrompt />
       </PromptContainer>
     );
   }
@@ -183,7 +210,7 @@ export function ServiceMap({
 
   return (
     <>
-      <SearchBar showKueryBar={false} showTimeComparison />
+      <SearchBar showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div
           data-test-subj="ServiceMap"

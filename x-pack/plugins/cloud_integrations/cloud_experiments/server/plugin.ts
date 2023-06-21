@@ -13,7 +13,6 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { get, has } from 'lodash';
-import { createSHA256Hash } from '@kbn/crypto';
 import type { LogMeta } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -84,13 +83,13 @@ export class CloudExperimentsPlugin
       }));
     }
 
-    if (deps.cloud.isCloudEnabled && deps.cloud.cloudId) {
+    if (deps.cloud.isCloudEnabled && deps.cloud.deploymentId) {
       this.metadataService.setup({
-        // We use the Cloud ID as the userId in the Cloud Experiments
-        userId: createSHA256Hash(deps.cloud.cloudId),
+        // We use the Cloud Deployment ID as the userId in the Cloud Experiments
+        userId: deps.cloud.deploymentId,
         kibanaVersion: this.initializerContext.env.packageInfo.version,
-        trial_end_date: deps.cloud.trialEndDate?.toISOString(),
-        is_elastic_staff_owned: deps.cloud.isElasticStaffOwned,
+        trialEndDate: deps.cloud.trialEndDate?.toISOString(),
+        isElasticStaff: deps.cloud.isElasticStaffOwned,
       });
 
       // We only subscribe to the user metadata updates if Cloud is enabled.
@@ -146,7 +145,7 @@ export class CloudExperimentsPlugin
   private async addHasDataMetadata(
     core: CoreStart,
     dataViews: DataViewsServerPluginStart
-  ): Promise<{ has_data: boolean }> {
+  ): Promise<{ hasData: boolean }> {
     const dataViewsService = await dataViews.dataViewsServiceFactory(
       core.savedObjects.createInternalRepository(),
       core.elasticsearch.client.asInternalUser,
@@ -154,7 +153,7 @@ export class CloudExperimentsPlugin
       true // Ignore capabilities checks
     );
     return {
-      has_data: await dataViewsService.hasUserDataView(),
+      hasData: await dataViewsService.hasUserDataView(),
     };
   }
 }

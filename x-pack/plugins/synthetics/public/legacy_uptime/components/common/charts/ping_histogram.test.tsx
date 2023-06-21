@@ -28,6 +28,7 @@ describe('PingHistogram component', () => {
   const props: PingHistogramComponentProps = {
     absoluteStartDate: 1548697920000,
     absoluteEndDate: 1548700920000,
+    timeZone: 'UTC',
     data: {
       histogram: [
         { x: 1581068329000, downCount: 6, upCount: 33, y: 1 },

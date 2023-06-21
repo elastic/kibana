@@ -27,9 +27,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 import type { Query } from '@kbn/es-query';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import {
   OVERALL_LABEL,
@@ -46,13 +48,11 @@ import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from '
 import { NoOverallData } from './components/no_overall_data';
 import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
-import { isDefined } from '../../../common/types/guards';
 import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimlaneAnnotationContainer, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
-import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
@@ -78,7 +78,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const globalTimeRange = useTimeRangeUpdates(true);
 
-    const selectCaseModal = cases?.hooks.getUseCasesAddToExistingCaseModal();
+    const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
 
     const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
       useAnomalyExplorerContext();

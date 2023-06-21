@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/discover-enhanced-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "plugin": {
+    "id": "discoverEnhanced",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "discoverEnhanced"
+    ],
+    "requiredPlugins": [
+      "uiActions",
+      "embeddable",
+      "discover"
+    ],
+    "optionalPlugins": [
+      "share",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "data",
+      "lens"
+    ]
+  }
+}

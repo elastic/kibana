@@ -179,7 +179,7 @@
     "id": "a4cf452c1e0375c3d4412cb550bd1783358468b3123314829d72c7df6fb74",
     "index": "ml_user_risk_score_latest_default",
     "source": {
-      "@timestamp": "2021-03-10T14:51:05.766Z",
+      "@timestamp": "2021-03-10T14:52:05.766Z",
       "user": {
         "name": "test",
         "risk": {

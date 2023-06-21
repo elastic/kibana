@@ -11,17 +11,13 @@ import type { Field, Fields } from '../../fields/field';
 const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text', 'match_only_text', 'wildcard'];
 const QUERY_DEFAULT_FIELD_LIMIT = 1024;
 
-const flattenAndExtractFields = (
-  fields: Fields,
-  path: string = ''
-): Array<Pick<Field, 'name' | 'type' | 'default_field'>> => {
+const flattenAndExtractFields = (fields: Fields, path: string = ''): Field[] => {
   let newFields: Array<Pick<Field, 'name' | 'type' | 'default_field'>> = [];
   fields.forEach((field) => {
     const fieldName = path ? `${path}.${field.name}` : field.name;
     newFields.push({
+      ...field,
       name: fieldName,
-      type: field.type,
-      default_field: field.default_field,
     });
     if (field.fields && field.fields.length) {
       newFields = newFields.concat(flattenAndExtractFields(field.fields, fieldName));
@@ -48,7 +44,11 @@ export function buildDefaultSettings({
   // the first 1024 keyword or text fields
   const defaultFields = flattenAndExtractFields(fields).filter(
     (field) =>
-      field.type && QUERY_DEFAULT_FIELD_TYPES.includes(field.type) && field.default_field !== false
+      field.type &&
+      QUERY_DEFAULT_FIELD_TYPES.includes(field.type) &&
+      field.default_field !== false &&
+      field.index !== false &&
+      field.doc_values !== false
   );
   if (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT) {
     logger.warn(
@@ -61,14 +61,28 @@ export function buildDefaultSettings({
       : defaultFields
   ).map((field) => field.name);
 
+  const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+
   return {
     index: {
-      // ILM Policy must be added here, for now point to the default global ILM policy name
-      lifecycle: {
-        name: ilmPolicy ? ilmPolicy : type,
-      },
+      ...(isILMPolicyDisabled
+        ? {}
+        : {
+            // ILM Policy must be added here, for now point to the default global ILM policy name
+            lifecycle: {
+              name: ilmPolicy ? ilmPolicy : type,
+            },
+          }),
       // What should be our default for the compression?
       codec: 'best_compression',
+      // setting `ignore_malformed` only for data_stream for logs
+      ...(type === 'logs'
+        ? {
+            mapping: {
+              ignore_malformed: true,
+            },
+          }
+        : {}),
       // All the default fields which should be queried have to be added here.
       // So far we add all keyword and text fields here if there are any, otherwise
       // this setting is skipped.

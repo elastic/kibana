@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 import React, { useState, useMemo, useCallback } from 'react';
-import VirtualList from 'react-tiny-virtual-list';
+import { FixedSizeList as VirtualList, areEqual } from 'react-window';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
 
 import { useFieldEditorContext } from '../../field_editor_context';
-import { useFieldPreviewContext, defaultValueFormatter } from '../field_preview_context';
-import type { FieldPreview } from '../types';
+import { useFieldPreviewContext } from '../field_preview_context';
+import type { FieldPreview, PreviewState } from '../types';
 import { PreviewListItem } from './field_list_item';
+import type { PreviewListItemProps } from './field_list_item';
+import { useStateSelector } from '../../../state_utils';
 
 import './field_list.scss';
 
@@ -46,29 +48,44 @@ function fuzzyMatch(searchValue: string, text: string) {
   return regex.test(text);
 }
 
+const pinnedFieldsSelector = (s: PreviewState) => s.pinnedFields;
+const currentDocumentSelector = (s: PreviewState) => s.documents[s.currentIdx];
+
+interface RowProps {
+  index: number;
+  style: React.CSSProperties;
+  data: { filteredFields: DocumentField[]; toggleIsPinned: PreviewListItemProps['toggleIsPinned'] };
+}
+
+const Row = React.memo<RowProps>(({ data, index, style }) => {
+  // Data passed to List as "itemData" is available as props.data
+  const { filteredFields, toggleIsPinned } = data;
+  const field = filteredFields[index];
+
+  return (
+    <div key={field.key} style={style} data-test-subj="indexPatternFieldList">
+      <PreviewListItem key={field.key} field={field} toggleIsPinned={toggleIsPinned} />
+    </div>
+  );
+}, areEqual);
+
 export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchValue = '' }) => {
   const { dataView } = useFieldEditorContext();
-  const {
-    currentDocument: { value: currentDocument },
-    pinnedFields: { value: pinnedFields, set: setPinnedFields },
-  } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
+  const pinnedFields = useStateSelector(controller.state$, pinnedFieldsSelector, isEqual);
+  const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
 
   const [showAllFields, setShowAllFields] = useState(false);
 
-  const {
-    fields: { getAll: getAllFields },
-  } = dataView;
-
-  const indexPatternFields = useMemo(() => {
-    return getAllFields();
-  }, [getAllFields]);
-
   const fieldList: DocumentField[] = useMemo(
     () =>
-      indexPatternFields
-        .map(({ name, displayName }) => {
+      dataView.fields
+        .getAll()
+        .map((field) => {
+          const { name, displayName } = field;
+          const formatter = dataView.getFormatterForField(field);
           const value = get(currentDocument?._source, name);
-          const formattedValue = defaultValueFormatter(value);
+          const formattedValue = formatter.convert(value, 'html');
 
           return {
             key: displayName,
@@ -78,7 +95,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           };
         })
         .filter(({ value }) => value !== undefined),
-    [indexPatternFields, currentDocument?._source]
+    [dataView, currentDocument?._source]
   );
 
   const fieldListWithPinnedFields: DocumentField[] = useMemo(() => {
@@ -131,19 +148,6 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
     setShowAllFields((prev) => !prev);
   }, []);
 
-  const toggleIsPinnedField = useCallback(
-    (name) => {
-      setPinnedFields((prev) => {
-        const isPinned = !prev[name];
-        return {
-          ...prev,
-          [name]: isPinned,
-        };
-      });
-    },
-    [setPinnedFields]
-  );
-
   const renderEmptyResult = () => {
     return (
       <>
@@ -194,6 +198,11 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       </div>
     );
 
+  const itemData = useMemo(
+    () => ({ filteredFields, toggleIsPinned: controller.togglePinnedField }),
+    [filteredFields, controller.togglePinnedField]
+  );
+
   if (currentDocument === undefined || height === -1) {
     return null;
   }
@@ -204,26 +213,16 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
         renderEmptyResult()
       ) : (
         <VirtualList
+          className="eui-scrollBar"
           style={{ overflowX: 'hidden' }}
           width="100%"
           height={listHeight}
+          itemData={itemData}
           itemCount={filteredFields.length}
           itemSize={ITEM_HEIGHT}
-          overscanCount={4}
-          renderItem={({ index, style }) => {
-            const field = filteredFields[index];
-
-            return (
-              <div key={field.key} style={style} data-test-subj="indexPatternFieldList">
-                <PreviewListItem
-                  key={field.key}
-                  field={field}
-                  toggleIsPinned={toggleIsPinnedField}
-                />
-              </div>
-            );
-          }}
-        />
+        >
+          {Row}
+        </VirtualList>
       )}
 
       {renderToggleFieldsButton()}

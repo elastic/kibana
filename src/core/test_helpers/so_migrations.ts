@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as kbnTestServer from './kbn_server';
+import {
+  type TestElasticsearchUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+  getSupertest,
+} from '@kbn/core-test-helpers-kbn-server';
 import { SavedObject } from '../types';
 import { SavedObjectsType } from '../server';
 
@@ -43,9 +48,9 @@ type ExportOptions = { type: string } | { objects: Array<{ id: string; type: str
 export const createTestHarness = () => {
   let started = false;
   let stopped = false;
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  const { startES } = kbnTestServer.createTestServers({ adjustTimeout: jest.setTimeout });
-  const root = kbnTestServer.createRootWithCorePlugins(
+  let esServer: TestElasticsearchUtils;
+  const { startES } = createTestServers({ adjustTimeout: jest.setTimeout });
+  const root = createRootWithCorePlugins(
     // Disable reporting due to browser install issue on CI. See https://github.com/elastic/kibana/issues/102919
     { xpack: { reporting: { enabled: false } } },
     { oss: false }
@@ -61,21 +66,21 @@ export const createTestHarness = () => {
       throw new Error(`SavedObjectTestHarness must be started before objects can be imported`);
     if (stopped) throw new Error(`SavedObjectTestHarness cannot import objects after stopped`);
 
-    const response = await kbnTestServer
+    const response =
       // Always use overwrite=true flag so we can isolate this harness to migrations
-      .getSupertest(root, 'post', '/api/saved_objects/_import?overwrite=true')
-      .set('Content-Type', 'multipart/form-data; boundary=EXAMPLE')
-      .send(
-        [
-          '--EXAMPLE',
-          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
-          'Content-Type: application/ndjson',
-          '',
-          ...objects.map((o) => JSON.stringify(o)),
-          '--EXAMPLE--',
-        ].join('\r\n')
-      )
-      .expect(200);
+      await getSupertest(root, 'post', '/api/saved_objects/_import?overwrite=true')
+        .set('Content-Type', 'multipart/form-data; boundary=EXAMPLE')
+        .send(
+          [
+            '--EXAMPLE',
+            'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+            'Content-Type: application/ndjson',
+            '',
+            ...objects.map((o) => JSON.stringify(o)),
+            '--EXAMPLE--',
+          ].join('\r\n')
+        )
+        .expect(200);
 
     if (response.body.errors?.length > 0) {
       throw new Error(
@@ -93,8 +98,7 @@ export const createTestHarness = () => {
       throw new Error(`SavedObjectTestHarness must be started before objects can be imported`);
     if (stopped) throw new Error(`SavedObjectTestHarness cannot import objects after stopped`);
 
-    const response = await kbnTestServer
-      .getSupertest(root, 'post', '/api/saved_objects/_export')
+    const response = await getSupertest(root, 'post', '/api/saved_objects/_export')
       .send({
         ...options,
         excludeExportDetails: true,
@@ -128,7 +132,7 @@ export const createTestHarness = () => {
 
       await waitForTrue({
         predicate: async () => {
-          const statusApi = kbnTestServer.getSupertest(root, 'get', '/api/status');
+          const statusApi = getSupertest(root, 'get', '/api/status');
           const response = await statusApi.send();
           return response.status === 200;
         },

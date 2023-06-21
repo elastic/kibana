@@ -15,11 +15,15 @@ import { ComponentType, ReactWrapper } from 'enzyme';
 import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { getLegendAction } from './legend_action';
-import { LegendActionPopover } from './legend_action_popover';
+import { LegendActionPopover, LegendCellValueActions } from './legend_action_popover';
 import { mockPaletteOutput } from '../../common/__mocks__';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { LayerFieldFormats } from '../helpers';
 
+const legendCellValueActions: LegendCellValueActions = [
+  { id: 'action_1', displayName: 'Action 1', iconType: 'testIcon1', execute: () => {} },
+  { id: 'action_2', displayName: 'Action 2', iconType: 'testIcon2', execute: () => {} },
+];
 const table: Datatable = {
   type: 'datatable',
   rows: [
@@ -178,6 +182,7 @@ describe('getLegendAction', function () {
   const Component: ComponentType<LegendActionProps> = getLegendAction(
     [sampleLayer],
     jest.fn(),
+    [legendCellValueActions],
     {
       first: {
         splitSeriesAccessors: {
@@ -251,15 +256,8 @@ describe('getLegendAction', function () {
     expect(wrapper.find(EuiPopover).prop('title')).toEqual(
       "Women's Accessories - Label B, filter options"
     );
-    expect(wrapper.find(LegendActionPopover).prop('context')).toEqual({
-      data: [
-        {
-          column: 1,
-          row: 1,
-          table,
-          value: "Women's Accessories",
-        },
-      ],
-    });
+    expect(wrapper.find(LegendActionPopover).prop('legendCellValueActions')).toEqual(
+      legendCellValueActions.map((action) => ({ ...action, execute: expect.any(Function) }))
+    );
   });
 });

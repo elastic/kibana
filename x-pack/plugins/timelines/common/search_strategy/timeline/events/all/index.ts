@@ -7,11 +7,11 @@
 
 import { JsonObject } from '@kbn/utility-types';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { Ecs } from '../../../../ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
 import type { TimelineRequestOptionsPaginated } from '../..';
+import type { RunTimeMappings } from '../eql';
 
 export interface TimelineEdges {
   node: TimelineItem;
@@ -38,11 +38,13 @@ export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
+type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsPaginated {
   authFilter?: JsonObject;
   excludeEcsData?: boolean;
   fieldRequested: string[];
   fields: string[] | Array<{ field: string; include_unmapped: boolean }>;
   language: 'eql' | 'kuery' | 'lucene';
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
+  filterStatus?: AlertWorkflowStatus;
 }

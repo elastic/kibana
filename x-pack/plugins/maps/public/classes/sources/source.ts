@@ -14,6 +14,7 @@ import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/
 import {
   AbstractSourceDescriptor,
   Attribution,
+  DataFilters,
   DataRequestMeta,
   StyleDescriptor,
   Timeslice,
@@ -29,6 +30,7 @@ export type OnSourceChangeArgs = {
 
 export type SourceEditorArgs = {
   currentLayerType: string;
+  hasSpatialJoins: boolean;
   numberOfJoins: number;
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
   onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
@@ -46,10 +48,9 @@ export interface ISource {
   getType(): string;
   isFieldAware(): boolean;
   isFilterByMapBounds(): boolean;
-  isGeoGridPrecisionAware(): boolean;
   isQueryAware(): boolean;
   isTimeAware(): Promise<boolean>;
-  getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
+  getImmutableProperties(dataFilters: DataFilters): Promise<ImmutableSourceProperty[]>;
   getAttributionProvider(): (() => Promise<Attribution[]>) | null;
   isESSource(): boolean;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
@@ -61,7 +62,6 @@ export interface ISource {
   getApplyForceRefresh(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getGeoGridPrecision(zoom: number): number;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
@@ -109,10 +109,6 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  isGeoGridPrecisionAware(): boolean {
-    return false;
-  }
-
   isQueryAware(): boolean {
     return false;
   }
@@ -143,10 +139,6 @@ export class AbstractSource implements ISource {
 
   getQueryableIndexPatternIds(): string[] {
     return [];
-  }
-
-  getGeoGridPrecision(zoom: number): number {
-    return 0;
   }
 
   isESSource(): boolean {

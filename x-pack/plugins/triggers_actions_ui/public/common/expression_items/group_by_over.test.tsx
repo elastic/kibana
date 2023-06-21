@@ -7,6 +7,8 @@
 
 import * as React from 'react';
 import { shallow } from 'enzyme';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { GroupByExpression } from './group_by_over';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -18,7 +20,7 @@ describe('group by expression', () => {
     const wrapper = shallow(
       <GroupByExpression
         errors={{ termSize: [], termField: [] }}
-        fields={[{}]}
+        fields={[]}
         groupBy={'all'}
         onChangeSelectedGroupBy={onChangeSelectedGroupBy}
         onChangeSelectedTermField={onChangeSelectedTermField}
@@ -53,7 +55,15 @@ describe('group by expression', () => {
     const wrapper = shallow(
       <GroupByExpression
         errors={{ termSize: [], termField: [] }}
-        fields={[{ normalizedType: 'number', name: 'test', text: 'test text' }]}
+        fields={[
+          {
+            normalizedType: 'number',
+            name: 'test',
+            type: 'long',
+            searchable: true,
+            aggregatable: true,
+          },
+        ]}
         groupBy={'top'}
         onChangeSelectedGroupBy={onChangeSelectedGroupBy}
         onChangeSelectedTermField={onChangeSelectedTermField}
@@ -90,7 +100,7 @@ describe('group by expression', () => {
     const wrapper = shallow(
       <GroupByExpression
         errors={{ termSize: [], termField: [] }}
-        fields={[{}]}
+        fields={[]}
         groupBy={'all'}
         onChangeSelectedGroupBy={onChangeSelectedGroupBy}
         onChangeSelectedTermField={onChangeSelectedTermField}
@@ -107,5 +117,35 @@ describe('group by expression', () => {
         />
       )
     ).toBeTruthy();
+  });
+
+  it('clears selected agg field if fields does not contain current selection', async () => {
+    const onChangeSelectedTermField = jest.fn();
+    const wrapper = mountWithIntl(
+      <GroupByExpression
+        errors={{ termSize: [], termField: [] }}
+        fields={[
+          {
+            normalizedType: 'number',
+            name: 'test',
+            type: 'long',
+            searchable: true,
+            aggregatable: true,
+          },
+        ]}
+        termField="notavailable"
+        groupBy={'all'}
+        onChangeSelectedGroupBy={() => {}}
+        onChangeSelectedTermSize={() => {}}
+        onChangeSelectedTermField={onChangeSelectedTermField}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith('');
   });
 });

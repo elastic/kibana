@@ -43,6 +43,35 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  match_only_text: {
+    value: 'match_only_text',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.matchOnlyTextDescription', {
+      defaultMessage: 'Match only text',
+    }),
+    documentation: {
+      main: '/text.html#match-only-text-field-type',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.matchOnlyTextLongDescription"
+          defaultMessage="A variant of {text} that trades scoring and efficiency of positional queries for space efficiency. This field effectively stores data the same way as a text field that only indexes documents (index_options: docs) and disables norms (norms: false). Term queries perform as fast if not faster as on text fields, however queries that need positions such as the match_phrase query perform slower as they need to look at the _source document to verify whether a phrase matches. All queries return constant scores that are equal to 1.0."
+          values={{
+            text: (
+              <EuiLink href={documentationService.getTypeDocLink('text')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.matchOnlyTextLongDescription.textTypeLink',
+                  {
+                    defaultMessage: 'text',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
+  },
   keyword: {
     value: 'keyword',
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.keywordDescription', {
@@ -921,6 +950,7 @@ export const MAIN_TYPES: MainType[] = [
   'keyword',
   'nested',
   'numeric',
+  'match_only_text',
   'object',
   'percolator',
   'range',

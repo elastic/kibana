@@ -13,7 +13,7 @@ import {
   constructReportersFilter,
 } from './utils';
 
-import type { Case } from './types';
+import type { CaseUI } from './types';
 
 const caseBeforeUpdate = {
   comments: [
@@ -24,9 +24,9 @@ const caseBeforeUpdate = {
   settings: {
     syncAlerts: true,
   },
-} as Case;
+} as CaseUI;
 
-const caseAfterUpdate = { title: 'My case' } as Case;
+const caseAfterUpdate = { title: 'My case' } as CaseUI;
 
 describe('utils', () => {
   describe('valueToUpdateIsSettings', () => {
@@ -58,6 +58,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Alerts in "My case" have been synced',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -74,6 +75,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -85,6 +87,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -100,6 +103,7 @@ describe('utils', () => {
       expect(toast).toEqual({
         title: 'Updated "My case"',
         text: 'Updated the statuses of attached alerts.',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -114,6 +118,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -128,6 +133,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
+        className: 'eui-textBreakWord',
       });
     });
 
@@ -142,6 +148,7 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Updated "My case"',
+        className: 'eui-textBreakWord',
       });
     });
   });

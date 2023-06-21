@@ -58,6 +58,6 @@ export function apacheMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['web'],
+    integrationBrowserCategories: ['observabilty', 'web'],
   };
 }

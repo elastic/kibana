@@ -6,10 +6,14 @@
  */
 
 import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import { generateMockIndicator, generateMockUrlIndicator, Indicator } from '../../indicators';
-import { TestProvidersComponent } from '../../../common/mocks/test_providers';
-import { useFilterInOut, UseFilterInValue } from '.';
-import { FilterIn } from '../utils';
+import {
+  generateMockIndicator,
+  generateMockUrlIndicator,
+  Indicator,
+} from '../../../../common/types/indicator';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
+import { useFilterInOut, UseFilterInValue } from './use_filter_in_out';
+import { FilterIn } from '../utils/filter';
 
 describe('useFilterInOut()', () => {
   let hookResult: RenderHookResult<{}, UseFilterInValue, Renderer<unknown>>;

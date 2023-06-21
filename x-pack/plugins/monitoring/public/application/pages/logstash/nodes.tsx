@@ -10,7 +10,6 @@ import { find } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
 import { Listing } from '../../../components/logstash/listing';
 import { LogstashTemplate } from './logstash_template';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';

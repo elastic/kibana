@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/core/server';
-import { lastValueFrom } from 'rxjs';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
-import { ReportingCore } from '../..';
+import { i18n } from '@kbn/i18n';
+import { lastValueFrom } from 'rxjs';
+import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { generatePngObservable } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
-import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { DiagnosticResponse } from '.';
-import { incrementApiUsageCounter } from '..';
+import { authorizedUserPreRouting, getCounters } from '../lib';
 
 const path = `${API_DIAGNOSE_URL}/screenshot`;
 
@@ -26,16 +24,9 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
   router.post(
     { path, validate: {} },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
-      incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+      const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
-      const config = reporting.getConfig();
-      const [basePath, protocol, hostname, port] = [
-        config.kbnConfig.get('server', 'basePath'),
-        config.get('kibanaServer', 'protocol'),
-        config.get('kibanaServer', 'hostname'),
-        config.get('kibanaServer', 'port'),
-      ] as string[];
-
+      const { basePath, protocol, hostname, port } = reporting.getServerInfo();
       const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
       const hashUrl = getAbsoluteUrl({ path: '/', hash: '', search: '' });
 
@@ -52,9 +43,15 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
           timefilterDurationAttribute: 'data-test-subj="kibanaChrome"',
         },
       };
-
+      const screenshotFn = () =>
+        reporting.getScreenshots({
+          layout,
+          request: req,
+          browserTimezone: 'America/Los_Angeles',
+          urls: [hashUrl],
+        });
       return lastValueFrom(
-        generatePngObservable(reporting, logger, {
+        generatePngObservable(screenshotFn, logger, {
           layout,
           request: req,
           browserTimezone: 'America/Los_Angeles',
@@ -64,6 +61,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
           .pipe()
       )
         .then((screenshot) => {
+          counters.usageCounter();
+
           // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
           if (screenshot.warnings.length) {
             return res.ok({
@@ -79,11 +78,12 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
               success: true,
               help: [],
               logs: '',
-            } as DiagnosticResponse,
+            },
           });
         })
-        .catch((error) =>
-          res.ok({
+        .catch((error) => {
+          counters.errorCounter();
+          return res.ok({
             body: {
               success: false,
               help: [
@@ -92,9 +92,9 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
                 }),
               ],
               logs: error.message,
-            } as DiagnosticResponse,
-          })
-        );
+            },
+          });
+        });
     })
   );
 };

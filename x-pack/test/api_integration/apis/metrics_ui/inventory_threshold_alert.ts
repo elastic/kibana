@@ -630,7 +630,7 @@ export default function ({ getService }: FtrProviderContext) {
             context: {
               cloud: undefined,
               host: undefined,
-              container: undefined,
+              container: [],
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
@@ -651,7 +651,7 @@ export default function ({ getService }: FtrProviderContext) {
             context: {
               cloud: undefined,
               host: undefined,
-              container: undefined,
+              container: [],
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
@@ -689,7 +689,14 @@ export default function ({ getService }: FtrProviderContext) {
             context: {
               cloud: undefined,
               host: undefined,
-              container: undefined,
+              container: [
+                {
+                  id: 'container-03',
+                },
+                {
+                  id: 'container-04',
+                },
+              ],
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,
@@ -710,7 +717,14 @@ export default function ({ getService }: FtrProviderContext) {
             context: {
               cloud: undefined,
               host: undefined,
-              container: undefined,
+              container: [
+                {
+                  id: 'container-01',
+                },
+                {
+                  id: 'container-02',
+                },
+              ],
               orchestrator: undefined,
               labels: undefined,
               tags: undefined,

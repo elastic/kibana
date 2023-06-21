@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { StackAlertsPublicPlugin } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => new StackAlertsPublicPlugin(ctx);
+export { DataViewSelectPopover } from './rule_types/components/data_view_select_popover';
+
+export const plugin = () => new StackAlertsPublicPlugin();

@@ -11,15 +11,14 @@ import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/sea
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
-  deleteSignalsIndex,
-  createSignalsIndex,
   deleteAllAlerts,
+  createSignalsIndex,
+  deleteAllRules,
   getRuleForSignalTesting,
   createRule,
   waitForSignalsToBePresent,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
 } from '../../../../detection_engine_api_integration/utils';
-import { ID } from '../../../../detection_engine_api_integration/security_and_spaces/group1/generating_signals';
 import {
   obsOnlySpacesAllEsRead,
   obsOnlySpacesAll,
@@ -31,6 +30,8 @@ type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
   message: string;
 };
 
+const ID = 'BhbXBmkBR346wHgn4PeZ';
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -39,12 +40,11 @@ export default ({ getService }: FtrProviderContext) => {
   const secureBsearch = getService('secureBsearch');
   const log = getService('log');
   const kbnClient = getService('kibanaServer');
+  const es = getService('es');
 
   const SPACE1 = 'space1';
 
-  // Failing: See https://github.com/elastic/kibana/issues/129219
-  // Failing: See https://github.com/elastic/kibana/issues/129219
-  describe.skip('ruleRegistryAlertsSearchStrategy', () => {
+  describe('ruleRegistryAlertsSearchStrategy', () => {
     let kibanaVersion: string;
     before(async () => {
       kibanaVersion = await kbnClient.version.get();
@@ -67,6 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.LOGS],
           },
@@ -88,6 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.LOGS],
             pagination: {
@@ -123,13 +125,13 @@ export default ({ getService }: FtrProviderContext) => {
           query: `_id:${ID}`,
         };
         const { id: createdId } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, createdId);
+        await waitForRuleSuccess({ supertest, log, id: createdId });
         await waitForSignalsToBePresent(supertest, log, 1, [createdId]);
       });
 
       after(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       });
@@ -143,6 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM],
           },
@@ -164,6 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
           },
@@ -173,6 +177,38 @@ export default ({ getService }: FtrProviderContext) => {
         expect(result.message).to.be(
           `The privateRuleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
         );
+      });
+
+      it('should be able to handle runtime fields on alerts from siem rules', async () => {
+        const runtimeFieldValue = 'hello world';
+        const runtimeFieldKey = 'hello_world';
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAllEsRead.username,
+            password: obsOnlySpacesAllEsRead.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            featureIds: [AlertConsumers.SIEM],
+            runtimeMappings: {
+              [runtimeFieldKey]: {
+                type: 'keyword',
+                script: {
+                  source: `emit('${runtimeFieldValue}')`,
+                },
+              },
+            },
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+        });
+        expect(result.rawResponse.hits.total).to.eql(1);
+        const runtimeFields = result.rawResponse.hits.hits.map(
+          (hit) => hit.fields?.[runtimeFieldKey]
+        );
+        expect(runtimeFields.every((field) => field === runtimeFieldValue));
       });
     });
 
@@ -193,6 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.APM],
           },
@@ -217,6 +254,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [],
           },

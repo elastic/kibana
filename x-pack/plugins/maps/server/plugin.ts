@@ -17,11 +17,10 @@ import {
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
-// @ts-expect-error
+
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
-// @ts-expect-error
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
-// @ts-expect-error
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
@@ -33,6 +32,7 @@ import { setupEmbeddable } from './embeddable';
 import { setupSavedObjects } from './saved_objects';
 import { registerIntegrations } from './register_integrations';
 import { StartDeps, SetupDeps } from './types';
+import { MapsStorage } from './content_management';
 
 export class MapsPlugin implements Plugin {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
@@ -153,7 +153,7 @@ export class MapsPlugin implements Plugin {
       DataViewPersistableStateService
     );
 
-    const { usageCollection, home, features, customIntegrations } = plugins;
+    const { usageCollection, home, features, customIntegrations, contentManagement } = plugins;
     const config$ = this._initializerContext.config.create();
 
     const emsSettings = plugins.mapsEms.createEMSSettings();
@@ -202,6 +202,14 @@ export class MapsPlugin implements Plugin {
     setupSavedObjects(core, getFilterMigrations, getDataViewMigrations);
     registerMapsUsageCollector(usageCollection);
 
+    contentManagement.register({
+      id: CONTENT_ID,
+      storage: new MapsStorage(),
+      version: {
+        latest: LATEST_VERSION,
+      },
+    });
+
     setupEmbeddable(plugins.embeddable, getFilterMigrations, getDataViewMigrations);
 
     return {
@@ -210,6 +218,6 @@ export class MapsPlugin implements Plugin {
   }
 
   start(core: CoreStart, plugins: StartDeps) {
-    setStartServices(core, plugins);
+    setStartServices(core);
   }
 }

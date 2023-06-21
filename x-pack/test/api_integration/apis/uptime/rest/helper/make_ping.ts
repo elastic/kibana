@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import { makeTls, TlsProps } from './make_tls';
@@ -89,7 +89,7 @@ export const makePing = async (
       },
       ip: '127.0.0.1',
       id: monitorId,
-      check_group: uuid.v4(),
+      check_group: uuidv4(),
       type: 'http',
       status: 'up',
       timespan: {

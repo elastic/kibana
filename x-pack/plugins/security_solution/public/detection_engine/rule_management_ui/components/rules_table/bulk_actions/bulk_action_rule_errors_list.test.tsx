@@ -13,7 +13,7 @@ import { render, screen } from '@testing-library/react';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type { DryRunResult } from './types';
-import { BulkAction } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 const Wrapper: FC = ({ children }) => {
   return (
@@ -26,7 +26,7 @@ const Wrapper: FC = ({ children }) => {
 describe('Component BulkEditRuleErrorsList', () => {
   test('should not render component if no errors present', () => {
     const { container } = render(
-      <BulkActionRuleErrorsList bulkAction={BulkAction.edit} ruleErrors={[]} />,
+      <BulkActionRuleErrorsList bulkAction={BulkActionType.edit} ruleErrors={[]} />,
       {
         wrapper: Wrapper,
       }
@@ -46,7 +46,7 @@ describe('Component BulkEditRuleErrorsList', () => {
         ruleIds: ['rule:1'],
       },
     ];
-    render(<BulkActionRuleErrorsList bulkAction={BulkAction.edit} ruleErrors={ruleErrors} />, {
+    render(<BulkActionRuleErrorsList bulkAction={BulkActionType.edit} ruleErrors={ruleErrors} />, {
       wrapper: Wrapper,
     });
 
@@ -76,7 +76,7 @@ describe('Component BulkEditRuleErrorsList', () => {
         ruleIds: ['rule:1', 'rule:2'],
       },
     ];
-    render(<BulkActionRuleErrorsList bulkAction={BulkAction.edit} ruleErrors={ruleErrors} />, {
+    render(<BulkActionRuleErrorsList bulkAction={BulkActionType.edit} ruleErrors={ruleErrors} />, {
       wrapper: Wrapper,
     });
 

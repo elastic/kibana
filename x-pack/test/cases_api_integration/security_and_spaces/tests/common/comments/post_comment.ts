@@ -7,14 +7,15 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CommentType,
   AttributesTypeUser,
   AttributesTypeAlerts,
   CaseStatuses,
+  CommentRequestExternalReferenceSOType,
+  CommentRequestAlertType,
 } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -23,6 +24,10 @@ import {
   postCommentUserReq,
   postCommentAlertReq,
   getPostCaseRequest,
+  getFilesAttachmentReq,
+  fileAttachmentMetadata,
+  fileMetadata,
+  postCommentAlertMultipleIdsReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -31,22 +36,17 @@ import {
   deleteComments,
   createCase,
   createComment,
-  getCaseUserActions,
-  removeServerGeneratedPropertiesFromUserAction,
   removeServerGeneratedPropertiesFromSavedObject,
   superUserSpace1Auth,
   updateCase,
-} from '../../../../common/lib/utils';
+  getCaseUserActions,
+  removeServerGeneratedPropertiesFromUserAction,
+  getAllComments,
+} from '../../../../common/lib/api';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
   deleteAllAlerts,
-  getRuleForSignalTesting,
-  waitForRuleSuccessOrStatus,
-  waitForSignalsToBePresent,
-  getSignalsByIds,
-  createRule,
-  getQuerySignalIds,
+  deleteAllRules,
 } from '../../../../../detection_engine_api_integration/utils';
 import {
   globalRead,
@@ -57,11 +57,22 @@ import {
   secOnly,
   secOnlyRead,
   superUser,
+  obsOnlyReadAlerts,
+  obsSec,
+  secOnlyReadAlerts,
+  secSolutionOnlyReadNoIndexAlerts,
 } from '../../../../common/lib/authentication/users';
+import {
+  getSecuritySolutionAlerts,
+  createSecuritySolutionAlerts,
+  getAlertById,
+} from '../../../../common/lib/alerts';
+import { User } from '../../../../common/lib/authentication/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
@@ -113,8 +124,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(comment).to.eql({
           type: postCommentAlertReq.type,
-          alertId: postCommentAlertReq.alertId,
-          index: postCommentAlertReq.index,
+          alertId: [postCommentAlertReq.alertId],
+          index: [postCommentAlertReq.index],
           rule: postCommentAlertReq.rule,
           created_by: defaultUser,
           pushed_at: null,
@@ -154,9 +165,75 @@ export default ({ getService }: FtrProviderContext): void => {
           owner: 'securitySolutionFixture',
         });
       });
+
+      describe('files', () => {
+        it('should create a file attachment', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const caseWithAttachments = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq(),
+          });
+
+          const fileAttachment =
+            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
+
+          expect(caseWithAttachments.totalComment).to.be(1);
+          expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
+        });
+      });
     });
 
     describe('unhappy path', () => {
+      describe('files', () => {
+        it('400s when attempting to create a single file attachment with multiple file objects within it', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const files = [fileMetadata(), fileMetadata()];
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {
+                files,
+              },
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should return a 400 when attaching a file with metadata that is missing the file field', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {
+                // intentionally structuring the data in a way that is invalid (using foo instead of files)
+                foo: fileAttachmentMetadata.files,
+              },
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should return a 400 when attaching a file with an empty metadata', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {},
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
       it('400s when attempting to create a comment with a different owner than the case', async () => {
         const postedCase = await createCase(
           supertest,
@@ -351,80 +428,476 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alerts', () => {
-      beforeEach(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-        await createSignalsIndex(supertest, log);
-      });
-
-      afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      });
-
-      const bulkCreateAlertsAndVerifyAlertStatus = async (
-        syncAlerts: boolean,
-        expectedAlertStatus: string
-      ) => {
-        const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const postedCase = await createCase(supertest, {
-          ...postCaseReq,
-          settings: { syncAlerts },
+      describe('security_solution', () => {
+        beforeEach(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await createSignalsIndex(supertest, log);
         });
 
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                status: CaseStatuses['in-progress'],
+        afterEach(async () => {
+          await deleteAllAlerts(supertest, log, es);
+          await deleteAllRules(supertest, log);
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        });
+
+        const createCommentAndRefreshIndex = async ({
+          caseId,
+          alertId,
+          alertIndex,
+          expectedHttpCode = 200,
+          auth = { user: superUser, space: null },
+        }: {
+          caseId: string;
+          alertId: string;
+          alertIndex: string;
+          expectedHttpCode?: number;
+          auth?: { user: User; space: string | null };
+        }) => {
+          await createComment({
+            supertest: supertestWithoutAuth,
+            caseId,
+            params: {
+              alertId,
+              index: alertIndex,
+              rule: {
+                id: 'id',
+                name: 'name',
               },
-            ],
-          },
-        });
-
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signals = await getSignalsByIds(supertest, log, [id]);
-
-        const alert = signals.hits.hits[0];
-        expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: {
-            alertId: alert._id,
-            index: alert._index,
-            rule: {
-              id: 'id',
-              name: 'name',
+              owner: 'securitySolutionFixture',
+              type: CommentType.alert,
             },
-            owner: 'securitySolutionFixture',
-            type: CommentType.alert,
-          },
+            expectedHttpCode,
+            auth,
+          });
+
+          await es.indices.refresh({ index: alertIndex });
+        };
+
+        const bulkCreateAlertsAndVerifyAlertStatus = async ({
+          syncAlerts,
+          expectedAlertStatus,
+          caseAuth,
+          attachmentExpectedHttpCode,
+          attachmentAuth,
+        }: {
+          syncAlerts: boolean;
+          expectedAlertStatus: string;
+          caseAuth?: { user: User; space: string | null };
+          attachmentExpectedHttpCode?: number;
+          attachmentAuth?: { user: User; space: string | null };
+        }) => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts },
+            },
+            200,
+            caseAuth
+          );
+
+          await updateCase({
+            supertest: supertestWithoutAuth,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
+            auth: caseAuth,
+          });
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+
+          const alert = signals.hits.hits[0];
+          expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
+
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+            expectedHttpCode: attachmentExpectedHttpCode,
+            auth: attachmentAuth,
+          });
+
+          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
+
+          expect(updatedAlert.hits.hits[0]._source?.[ALERT_WORKFLOW_STATUS]).eql(
+            expectedAlertStatus
+          );
+        };
+
+        const bulkCreateAlertsAndVerifyCaseIdsInAlertSchema = async (totalCases: number) => {
+          const cases = await Promise.all(
+            [...Array(totalCases).keys()].map((index) =>
+              createCase(supertest, {
+                ...postCaseReq,
+                settings: { syncAlerts: false },
+              })
+            )
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          for (const theCase of cases) {
+            await createCommentAndRefreshIndex({
+              caseId: theCase.id,
+              alertId: alert._id,
+              alertIndex: alert._index,
+            });
+          }
+
+          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          const caseIds = cases.map((theCase) => theCase.id);
+
+          expect(updatedAlert.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql(caseIds);
+
+          return { updatedAlert, cases };
+        };
+
+        it('should change the status of the alert if sync alert is on', async () => {
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'acknowledged',
+          });
         });
 
-        await es.indices.refresh({ index: alert._index });
+        it('should NOT change the status of the alert if sync alert is off', async () => {
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: false,
+            expectedAlertStatus: 'open',
+          });
+        });
 
-        const { body: updatedAlert } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds([alert._id]))
-          .expect(200);
+        it('should change the status of the alert when the user has write access to the indices and only read access to the siem solution', async () => {
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'acknowledged',
+            caseAuth: {
+              user: superUser,
+              space: 'space1',
+            },
+            attachmentAuth: { user: secOnlyReadAlerts, space: 'space1' },
+          });
+        });
 
-        expect(updatedAlert.hits.hits[0]._source[ALERT_WORKFLOW_STATUS]).eql(expectedAlertStatus);
-      };
+        it('should NOT change the status of the alert when the user does NOT have access to the alert', async () => {
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'open',
+            caseAuth: {
+              user: superUser,
+              space: 'space1',
+            },
+            attachmentExpectedHttpCode: 403,
+            attachmentAuth: { user: obsSec, space: 'space1' },
+          });
+        });
 
-      it('should change the status of the alert if sync alert is on', async () => {
-        await bulkCreateAlertsAndVerifyAlertStatus(true, 'acknowledged');
+        it('should NOT change the status of the alert when the user has read access to the kibana feature but no read access to the ES index', async () => {
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'open',
+            caseAuth: {
+              user: superUser,
+              space: 'space1',
+            },
+            attachmentExpectedHttpCode: 500,
+            attachmentAuth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
+          });
+        });
+
+        it('should add the case ID to the alert schema', async () => {
+          await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(1);
+        });
+
+        it('should add multiple case ids to the alert schema', async () => {
+          await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(2);
+        });
+
+        it('should remove cases with the same ID from the case_ids alerts field', async () => {
+          const { updatedAlert, cases } = await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(1);
+          const postedCase = cases[0];
+          const alert = updatedAlert.hits.hits[0];
+
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+          });
+
+          const updatedAlertSecondTime = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          expect(updatedAlertSecondTime.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql([
+            postedCase.id,
+          ]);
+        });
+
+        it('should not add more than 10 cases to an alert', async () => {
+          const { updatedAlert } = await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(10);
+          const alert = updatedAlert.hits.hits[0];
+
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            settings: { syncAlerts: false },
+          });
+
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should add the case ID to the alert schema when the user has write access to the indices and only read access to the siem solution', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+            expectedHttpCode: 200,
+            auth: { user: secOnlyReadAlerts, space: 'space1' },
+          });
+        });
+
+        it('should NOT add the case ID to the alert schema when the user does NOT have access to the alert', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+            expectedHttpCode: 403,
+            auth: { user: obsSec, space: 'space1' },
+          });
+        });
+
+        it('should add the case ID to the alert schema when the user has read access to the kibana feature but no read access to the ES index', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+            expectedHttpCode: 200,
+            auth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
+          });
+        });
       });
 
-      it('should NOT change the status of the alert if sync alert is off', async () => {
-        await bulkCreateAlertsAndVerifyAlertStatus(false, 'open');
+      describe('observability', () => {
+        const alertId = 'NoxgpHkBqbdrfX07MqXV';
+        const apmIndex = '.alerts-observability.apm.alerts';
+
+        beforeEach(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+        });
+
+        afterEach(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+        });
+
+        const bulkCreateAlertsAndVerifyCaseIdsInAlertSchema = async (totalCases: number) => {
+          const cases = await Promise.all(
+            [...Array(totalCases).keys()].map((index) =>
+              createCase(supertest, {
+                ...postCaseReq,
+                owner: 'observabilityFixture',
+                settings: { syncAlerts: false },
+              })
+            )
+          );
+
+          for (const theCase of cases) {
+            await createComment({
+              supertest,
+              caseId: theCase.id,
+              params: {
+                alertId,
+                index: apmIndex,
+                rule: {
+                  id: 'id',
+                  name: 'name',
+                },
+                owner: 'observabilityFixture',
+                type: CommentType.alert,
+              },
+            });
+          }
+
+          const alert = await getAlertById({
+            supertest,
+            id: alertId,
+            index: apmIndex,
+            auth: { user: superUser, space: 'space1' },
+          });
+
+          const caseIds = cases.map((theCase) => theCase.id);
+
+          expect(alert[ALERT_CASE_IDS]).eql(caseIds);
+
+          return { alert, cases };
+        };
+
+        it('should add the case ID to the alert schema', async () => {
+          await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(1);
+        });
+
+        it('should add multiple case ids to the alert schema', async () => {
+          await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(2);
+        });
+
+        it('should remove cases with the same ID from the case_ids alerts field', async () => {
+          const { cases } = await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(1);
+          const postedCase = cases[0];
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: {
+              alertId,
+              index: apmIndex,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner: 'observabilityFixture',
+              type: CommentType.alert,
+            },
+          });
+
+          const alert = await getAlertById({
+            supertest,
+            id: alertId,
+            index: apmIndex,
+            auth: { user: superUser, space: 'space1' },
+          });
+
+          expect(alert[ALERT_CASE_IDS]).eql([postedCase.id]);
+        });
+
+        it('should not add more than 10 cases to an alert', async () => {
+          await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(10);
+
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            settings: { syncAlerts: false },
+          });
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: {
+              alertId,
+              index: apmIndex,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner: 'observabilityFixture',
+              type: CommentType.alert,
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should add the case ID to the alert schema when the user has read access only', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              owner: 'observabilityFixture',
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: {
+              alertId,
+              index: apmIndex,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner: 'observabilityFixture',
+              type: CommentType.alert,
+            },
+            auth: { user: obsOnlyReadAlerts, space: 'space1' },
+            expectedHttpCode: 200,
+          });
+        });
+
+        it('should NOT add the case ID to the alert schema when the user does NOT have access to the alert', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              owner: 'observabilityFixture',
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: {
+              alertId,
+              index: apmIndex,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner: 'observabilityFixture',
+              type: CommentType.alert,
+            },
+            auth: { user: obsSec, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        });
       });
     });
 
@@ -467,9 +940,75 @@ export default ({ getService }: FtrProviderContext): void => {
       }
     });
 
-    describe('rbac', () => {
-      const supertestWithoutAuth = getService('supertestWithoutAuth');
+    describe('alert filtering', () => {
+      it('not create a new attachment if the alert is already attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
 
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should not create a new attachment if the alerts are already attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should create a new attachment without alerts attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertMultipleIdsReq,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            ...postCommentAlertMultipleIdsReq,
+            alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+            index: ['test-index-1', 'test-index-2', 'test-index-3'],
+          },
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(2);
+
+        const secondAttachment = attachments[1] as CommentRequestAlertType;
+
+        expect(secondAttachment.alertId).to.eql(['test-id-3']);
+        expect(secondAttachment.index).to.eql(['test-index-3']);
+      });
+    });
+
+    describe('rbac', () => {
       afterEach(async () => {
         await deleteAllCaseItems(es);
       });

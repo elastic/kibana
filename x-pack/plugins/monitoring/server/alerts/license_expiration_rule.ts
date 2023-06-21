@@ -155,7 +155,7 @@ export class LicenseExpirationRule extends BaseRule {
     // Logic in the base alert assumes that all alerts will operate against multiple nodes/instances (such as a CPU alert against ES nodes)
     // However, some alerts operate on the state of the cluster itself and are only concerned with a single state
     const state: AlertLicenseState = alertStates[0] as AlertLicenseState;
-    const $duration = moment.duration(+new Date() - state.expiryDateMS);
+    const $duration = moment.duration(+new Date() - state.meta.expiryDateMS);
     const actionText = i18n.translate('xpack.monitoring.alerts.licenseExpiration.action', {
       defaultMessage: 'Please update your license.',
     });

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import React, { useState, memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DataTableRecord } from '../types';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
-import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import './saved_search_grid.scss';
+import { DiscoverGridFlyout } from '../components/discover_grid/discover_grid_flyout';
+import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;
@@ -22,25 +22,17 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
   return (
-    <EuiFlexGroup
-      style={{ width: '100%' }}
-      direction="column"
-      gutterSize="xs"
-      responsive={false}
-      data-test-subj="embeddedSavedSearchDocTable"
+    <SavedSearchEmbeddableBase
+      totalHitCount={props.totalHitCount}
+      isLoading={props.isLoading}
+      dataTestSubj="embeddedSavedSearchDocTable"
     >
-      {props.totalHitCount !== 0 && (
-        <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
-          <TotalDocuments totalHitCount={props.totalHitCount} />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem style={{ minHeight: 0 }}>
-        <DataGridMemoized
-          {...props}
-          setExpandedDoc={!props.isPlainRecord ? setExpandedDoc : undefined}
-          expandedDoc={expandedDoc}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <DataGridMemoized
+        {...props}
+        setExpandedDoc={setExpandedDoc}
+        expandedDoc={expandedDoc}
+        DocumentView={DiscoverGridFlyout}
+      />
+    </SavedSearchEmbeddableBase>
   );
 }

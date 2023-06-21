@@ -438,7 +438,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+              "string[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -452,7 +452,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+              "\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -488,7 +488,7 @@
           "\nA category applicable to an Integration."
         ],
         "signature": [
-          "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+          "string"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -728,7 +728,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+              "string[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -742,7 +742,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+              "\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -797,7 +797,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"eui\" | \"svg\""
+              "\"svg\" | \"eui\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -833,13 +833,10 @@
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.IntegrationCategoryCount.id",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
-            ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -860,7 +857,7 @@
           "\nThe list of all available categories."
         ],
         "signature": [
-          "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+          "string[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -877,7 +874,7 @@
           "\nA category applicable to an Integration."
         ],
         "signature": [
-          "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+          "string"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -948,7 +945,7 @@
           "\nThe list of all known shippers."
         ],
         "signature": [
-          "(\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
+          "(\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -965,7 +962,7 @@
           "\nA shipper-- an internal or external system capable of storing data in ES/Kibana-- applicable to an Integration."
         ],
         "signature": [
-          "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+          "\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -1031,379 +1028,2419 @@
         "children": [
           {
             "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.advanced_analytics_ueba",
+            "type": "Object",
+            "tags": [],
+            "label": "advanced_analytics_ueba",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.advanced_analytics_ueba.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.advanced_analytics_ueba.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.analytics_engine",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics_engine",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.analytics_engine.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.analytics_engine.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.application_observability",
+            "type": "Object",
+            "tags": [],
+            "label": "application_observability",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.application_observability.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.application_observability.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.app_search",
+            "type": "Object",
+            "tags": [],
+            "label": "app_search",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.app_search.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.app_search.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.auditd",
+            "type": "Object",
+            "tags": [],
+            "label": "auditd",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.auditd.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.auditd.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.authentication",
+            "type": "Object",
+            "tags": [],
+            "label": "authentication",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.authentication.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.authentication.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.aws",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "aws",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.aws.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.aws.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.azure",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "azure",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.azure.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.azure.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.big_data",
+            "type": "Object",
+            "tags": [],
+            "label": "big_data",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.big_data.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.big_data.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.cdn_security",
+            "type": "Object",
+            "tags": [],
+            "label": "cdn_security",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.cdn_security.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.cdn_security.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.cloud",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "cloud",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.cloud.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.cloud.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.config_management",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "config_management",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.config_management.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.config_management.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector_client",
+            "type": "Object",
+            "tags": [],
+            "label": "connector_client",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector_client.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector_client.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector_package",
+            "type": "Object",
+            "tags": [],
+            "label": "connector_package",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector_package.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.connector_package.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.containers",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "containers",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.containers.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.containers.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.content_source",
+            "type": "Object",
+            "tags": [],
+            "label": "content_source",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.content_source.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.content_source.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.crawler",
+            "type": "Object",
+            "tags": [],
+            "label": "crawler",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.crawler.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.crawler.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.credential_management",
+            "type": "Object",
+            "tags": [],
+            "label": "credential_management",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.credential_management.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.credential_management.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.crm",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "crm",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.crm.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.crm.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.custom",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "custom",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.custom.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.custom.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.custom_logs",
+            "type": "Object",
+            "tags": [],
+            "label": "custom_logs",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.custom_logs.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.custom_logs.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.database_security",
+            "type": "Object",
+            "tags": [],
+            "label": "database_security",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.database_security.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.database_security.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.datastore",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "datastore",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.datastore.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.datastore.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.dns_security",
+            "type": "Object",
+            "tags": [],
+            "label": "dns_security",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.dns_security.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.dns_security.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.edr_xdr",
+            "type": "Object",
+            "tags": [],
+            "label": "edr_xdr",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.edr_xdr.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.edr_xdr.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.elasticsearch_sdk",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch_sdk",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.elasticsearch_sdk.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.elasticsearch_sdk.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.elastic_stack",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "elastic_stack",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.elastic_stack.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.elastic_stack.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.google_cloud",
-            "type": "string",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.email_security",
+            "type": "Object",
             "tags": [],
-            "label": "google_cloud",
+            "label": "email_security",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.infrastructure",
-            "type": "string",
-            "tags": [],
-            "label": "infrastructure",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.kubernetes",
-            "type": "string",
-            "tags": [],
-            "label": "kubernetes",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.languages",
-            "type": "string",
-            "tags": [],
-            "label": "languages",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.message_queue",
-            "type": "string",
-            "tags": [],
-            "label": "message_queue",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.microsoft_365",
-            "type": "string",
-            "tags": [],
-            "label": "microsoft_365",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.monitoring",
-            "type": "string",
-            "tags": [],
-            "label": "monitoring",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.network",
-            "type": "string",
-            "tags": [],
-            "label": "network",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.notification",
-            "type": "string",
-            "tags": [],
-            "label": "notification",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.os_system",
-            "type": "string",
-            "tags": [],
-            "label": "os_system",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.productivity",
-            "type": "string",
-            "tags": [],
-            "label": "productivity",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.security",
-            "type": "string",
-            "tags": [],
-            "label": "security",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.sample_data",
-            "type": "string",
-            "tags": [],
-            "label": "sample_data",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.support",
-            "type": "string",
-            "tags": [],
-            "label": "support",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.threat_intel",
-            "type": "string",
-            "tags": [],
-            "label": "threat_intel",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.ticketing",
-            "type": "string",
-            "tags": [],
-            "label": "ticketing",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.version_control",
-            "type": "string",
-            "tags": [],
-            "label": "version_control",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.web",
-            "type": "string",
-            "tags": [],
-            "label": "web",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.communications",
-            "type": "string",
-            "tags": [],
-            "label": "communications",
-            "description": [
-              "// Kibana added"
-            ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.email_security.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.email_security.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "enterprise_search",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.file_storage",
-            "type": "string",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.firewall_security",
+            "type": "Object",
             "tags": [],
-            "label": "file_storage",
+            "label": "firewall_security",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.firewall_security.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.firewall_security.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.google_cloud",
+            "type": "Object",
+            "tags": [],
+            "label": "google_cloud",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.google_cloud.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.google_cloud.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.iam",
+            "type": "Object",
+            "tags": [],
+            "label": "iam",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.iam.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.iam.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.ids_ips",
+            "type": "Object",
+            "tags": [],
+            "label": "ids_ips",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.ids_ips.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.ids_ips.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.infrastructure",
+            "type": "Object",
+            "tags": [],
+            "label": "infrastructure",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.infrastructure.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.infrastructure.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.java_observability",
+            "type": "Object",
+            "tags": [],
+            "label": "java_observability",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.java_observability.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.java_observability.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.kubernetes",
+            "type": "Object",
+            "tags": [],
+            "label": "kubernetes",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.kubernetes.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.kubernetes.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.language_client",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "language_client",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.language_client.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.language_client.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.upload_file",
-            "type": "string",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.languages",
+            "type": "Object",
             "tags": [],
-            "label": "upload_file",
+            "label": "languages",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.languages.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.languages.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.website_search",
-            "type": "string",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.load_balancer",
+            "type": "Object",
             "tags": [],
-            "label": "website_search",
+            "label": "load_balancer",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.load_balancer.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.load_balancer.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.geo",
-            "type": "string",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.message_queue",
+            "type": "Object",
             "tags": [],
-            "label": "geo",
+            "label": "message_queue",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.message_queue.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.message_queue.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.monitoring",
+            "type": "Object",
+            "tags": [],
+            "label": "monitoring",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.monitoring.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.monitoring.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.native_search",
+            "type": "Object",
+            "tags": [],
+            "label": "native_search",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.native_search.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.native_search.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.network",
+            "type": "Object",
+            "tags": [],
+            "label": "network",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.network.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.network.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.network_security",
+            "type": "Object",
+            "tags": [],
+            "label": "network_security",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.network_security.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.network_security.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.notification",
+            "type": "Object",
+            "tags": [],
+            "label": "notification",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.notification.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.notification.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.observability",
+            "type": "Object",
+            "tags": [],
+            "label": "observability",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.observability.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.observability.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.os_system",
+            "type": "Object",
+            "tags": [],
+            "label": "os_system",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.os_system.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.os_system.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.process_manager",
+            "type": "Object",
+            "tags": [],
+            "label": "process_manager",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.process_manager.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.process_manager.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.productivity",
+            "type": "Object",
+            "tags": [],
+            "label": "productivity",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.productivity.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.productivity.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.productivity_security",
+            "type": "Object",
+            "tags": [],
+            "label": "productivity_security",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.productivity_security.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.productivity_security.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.proxy_security",
+            "type": "Object",
+            "tags": [],
+            "label": "proxy_security",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.proxy_security.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.proxy_security.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.sdk_search",
+            "type": "Object",
+            "tags": [],
+            "label": "sdk_search",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.sdk_search.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.sdk_search.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.security.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.security.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.stream_processing",
+            "type": "Object",
+            "tags": [],
+            "label": "stream_processing",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.stream_processing.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.stream_processing.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.support",
+            "type": "Object",
+            "tags": [],
+            "label": "support",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.support.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.support.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.threat_intel",
+            "type": "Object",
+            "tags": [],
+            "label": "threat_intel",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.threat_intel.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.threat_intel.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.ticketing",
+            "type": "Object",
+            "tags": [],
+            "label": "ticketing",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.ticketing.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.ticketing.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.version_control",
+            "type": "Object",
+            "tags": [],
+            "label": "version_control",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.version_control.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.version_control.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.virtualization",
+            "type": "Object",
+            "tags": [],
+            "label": "virtualization",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.virtualization.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.virtualization.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.vpn_security",
+            "type": "Object",
+            "tags": [],
+            "label": "vpn_security",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.vpn_security.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.vpn_security.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.vulnerability_management",
+            "type": "Object",
+            "tags": [],
+            "label": "vulnerability_management",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.vulnerability_management.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.vulnerability_management.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.web",
+            "type": "Object",
+            "tags": [],
+            "label": "web",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.web.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.web.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.web_application_firewall",
+            "type": "Object",
+            "tags": [],
+            "label": "web_application_firewall",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.web_application_firewall.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.web_application_firewall.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.websphere",
+            "type": "Object",
+            "tags": [],
+            "label": "websphere",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.websphere.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.websphere.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.workplace_search",
+            "type": "Object",
+            "tags": [],
+            "label": "workplace_search",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.workplace_search.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.workplace_search.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.apm",
+            "type": "Object",
+            "tags": [],
+            "label": "apm",
+            "description": [
+              "// Kibana added"
+            ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.apm.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.apm.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

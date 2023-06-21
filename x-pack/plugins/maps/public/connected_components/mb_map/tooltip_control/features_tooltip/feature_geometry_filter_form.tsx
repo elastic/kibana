@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { MultiPolygon, Polygon } from 'geojson';
-import rison, { RisonObject } from 'rison-node';
+import rison from '@kbn/rison';
 import { URL_MAX_LENGTH } from '@kbn/core/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { buildGeoShapeFilter, PreIndexedShape } from '../../../../../common/elasticsearch_util';
@@ -99,9 +99,7 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
     // Ensure filter will not overflow URL. Filters that contain geometry can be extremely large.
     // No elasticsearch support for pre-indexed shapes and geo_point spatial queries.
     if (
-      window.location.href.length +
-        rison.encode(filter as unknown as RisonObject).length +
-        META_OVERHEAD >
+      window.location.href.length + rison.encode(filter).length + META_OVERHEAD >
       URL_MAX_LENGTH
     ) {
       this.setState({

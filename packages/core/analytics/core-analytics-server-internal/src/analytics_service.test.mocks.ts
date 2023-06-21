@@ -18,6 +18,7 @@ export const analyticsClientMock: jest.Mocked<AnalyticsClient> = {
   registerShipper: jest.fn(),
   telemetryCounter$: new Subject(),
   shutdown: jest.fn(),
+  flush: jest.fn(),
 };
 
 jest.doMock('@kbn/analytics-client', () => ({

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core/public';
 import type { VisSavedObject } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { findObjectByTitle } from './find_object_by_title';
@@ -22,19 +22,15 @@ import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_con
  * @param services
  */
 export async function checkForDuplicateTitle(
-  savedObject: Pick<
-    VisSavedObject,
-    'id' | 'title' | 'lastSavedTitle' | 'getDisplayName' | 'getEsType'
-  >,
+  savedObject: Pick<VisSavedObject, 'id' | 'title' | 'lastSavedTitle' | 'getEsType'>,
   copyOnSave: boolean,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
   services: {
-    savedObjectsClient: SavedObjectsClientContract;
     overlays: OverlayStart;
   }
 ): Promise<boolean> {
-  const { savedObjectsClient, overlays } = services;
+  const { overlays } = services;
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
     return true;
@@ -46,11 +42,7 @@ export async function checkForDuplicateTitle(
     return true;
   }
 
-  const duplicate = await findObjectByTitle(
-    savedObjectsClient,
-    savedObject.getEsType(),
-    savedObject.title
-  );
+  const duplicate = await findObjectByTitle(savedObject.title);
 
   if (!duplicate || duplicate.id === savedObject.id) {
     return true;

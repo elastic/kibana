@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { AllSeries } from '@kbn/observability-plugin/public';
+import { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { StartDependencies } from './plugin';
 
 export const App = (props: {
@@ -28,7 +28,7 @@ export const App = (props: {
   plugins: StartDependencies;
   defaultIndexPattern: DataView | null;
 }) => {
-  const ExploratoryViewComponent = props.plugins.observability.ExploratoryViewEmbeddable;
+  const ExploratoryViewComponent = props.plugins.exploratoryView.ExploratoryViewEmbeddable;
 
   const seriesList: AllSeries = [
     {
@@ -48,7 +48,7 @@ export const App = (props: {
     },
   ];
 
-  const hrefLink = props.plugins.observability.createExploratoryViewUrl(
+  const hrefLink = props.plugins.exploratoryView.createExploratoryViewUrl(
     { reportType: 'kpi-over-time', allSeries: seriesList },
     props.core.http.basePath.get()
   );

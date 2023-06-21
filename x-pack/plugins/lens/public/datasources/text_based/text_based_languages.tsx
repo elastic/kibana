@@ -13,11 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
-import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -26,6 +28,8 @@ import {
   DataType,
   TableChangeType,
   DatasourceDimensionTriggerProps,
+  DataSourceInfo,
+  UserMessage,
 } from '../../types';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
@@ -39,6 +43,7 @@ import type {
 import { FieldSelect } from './field_select';
 import type { Datasource, IndexPatternMap } from '../../types';
 import { LayerPanel } from './layerpanel';
+import { getUniqueLabelGenerator } from '../../utils';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -90,7 +95,9 @@ export function getTextBasedDatasource({
     indexPatterns: IndexPatternMap
   ) => {
     const context = state.initialContext;
-    if (context && 'dataViewSpec' in context && context.dataViewSpec.title) {
+    // on text based mode we offer suggestions for the query and not for a specific field
+    if (fieldName) return [];
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
       const indexPattern = indexPatterns[indexPatternId];
 
@@ -111,7 +118,7 @@ export function getTextBasedDatasource({
         };
       });
 
-      const index = context.dataViewSpec.title;
+      const index = context.dataViewSpec.id ?? context.dataViewSpec.title;
       const query = context.query;
       const updatedState = {
         ...state,
@@ -122,6 +129,7 @@ export function getTextBasedDatasource({
             query,
             columns: newColumns ?? [],
             allColumns: newColumns ?? [],
+            timeField: context.dataViewSpec.timeFieldName,
           },
         },
       };
@@ -160,7 +168,7 @@ export function getTextBasedDatasource({
     checkIntegrity: () => {
       return [];
     },
-    getErrorMessages: (state) => {
+    getUserMessages: (state) => {
       const errors: Error[] = [];
 
       Object.values(state.layers).forEach((layer) => {
@@ -169,21 +177,15 @@ export function getTextBasedDatasource({
         }
       });
       return errors.map((err) => {
-        return {
+        const message: UserMessage = {
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }, { id: 'textBasedLanguagesQueryInput' }],
           shortMessage: err.message,
           longMessage: err.message,
         };
+        return message;
       });
-    },
-    getUnifiedSearchErrors: (state) => {
-      const errors: Error[] = [];
-
-      Object.values(state.layers).forEach((layer) => {
-        if (layer.errors && layer.errors.length > 0) {
-          errors.push(...layer.errors);
-        }
-      });
-      return errors;
     },
     initialize(
       state?: TextBasedPersistedState,
@@ -234,13 +236,6 @@ export function getTextBasedDatasource({
       });
       return { state: { layers }, savedObjectReferences };
     },
-    isValidColumn(state, indexPatterns, layerId, columnId) {
-      const layer = state.layers[layerId];
-      const column = layer.columns.find((c) => c.columnId === columnId);
-      const indexPattern = indexPatterns[layer.index];
-      if (!column || !indexPattern) return false;
-      return true;
-    },
     insertLayer(state: TextBasedPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];
       const query = layer?.query;
@@ -281,18 +276,24 @@ export function getTextBasedDatasource({
       };
 
       return {
-        ...state,
-        layers: newLayers,
-        fieldList: state.fieldList,
+        removedLayerIds: [layerId],
+        newState: {
+          ...state,
+          layers: newLayers,
+          fieldList: state.fieldList,
+        },
       };
     },
 
     clearLayer(state: TextBasedPrivateState, layerId: string) {
       return {
-        ...state,
-        layers: {
-          ...state.layers,
-          [layerId]: { ...state.layers[layerId], columns: [] },
+        removedLayerIds: [],
+        newState: {
+          ...state,
+          layers: {
+            ...state.layers,
+            [layerId]: { ...state.layers[layerId], columns: [] },
+          },
         },
       };
     },
@@ -331,7 +332,7 @@ export function getTextBasedDatasource({
       };
     },
 
-    toExpression: (state, layerId, indexPatterns) => {
+    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) => {
       return toExpression(state, layerId);
     },
     getSelectedFields(state) {
@@ -377,19 +378,22 @@ export function getTextBasedDatasource({
         customLabel = selectedField?.fieldName;
       }
 
-      const columnExists = props.state.fieldList.some((f) => f.name === customLabel);
-
       render(
-        <EuiButtonEmpty
-          color={columnExists ? 'primary' : 'danger'}
-          onClick={() => {}}
-          data-test-subj="lns-dimensionTrigger-textBased"
-        >
-          {customLabel ??
-            i18n.translate('xpack.lens.textBasedLanguages.missingField', {
-              defaultMessage: 'Missing field',
-            })}
-        </EuiButtonEmpty>,
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <DimensionTrigger
+              id={props.columnId}
+              color={customLabel && selectedField ? 'primary' : 'danger'}
+              dataTestSubj="lns-dimensionTrigger-textBased"
+              label={
+                customLabel ??
+                i18n.translate('xpack.lens.textBasedLanguages.missingField', {
+                  defaultMessage: 'Missing field',
+                })
+              }
+            />{' '}
+          </I18nProvider>
+        </KibanaThemeProvider>,
         domElement
       );
     },
@@ -406,65 +410,90 @@ export function getTextBasedDatasource({
       const selectedField = props.state.layers[props.layerId]?.allColumns?.find(
         (column) => column.columnId === props.columnId
       );
+
+      const updatedFields = fields.map((f) => {
+        return {
+          ...f,
+          compatible: props.isMetricDimension
+            ? props.filterOperations({
+                dataType: f.meta.type as DataType,
+                isBucketed: Boolean(f?.meta?.type !== 'number'),
+                scale: 'ordinal',
+              })
+            : true,
+        };
+      });
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <EuiFormRow
-            data-test-subj="text-based-languages-field-selection-row"
-            label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
-              defaultMessage: 'Field',
-            })}
-            fullWidth
-            className="lnsIndexPatternDimensionEditor--padded"
-          >
-            <FieldSelect
-              existingFields={fields}
-              selectedField={selectedField}
-              onChoose={(choice) => {
-                const meta = fields.find((f) => f.name === choice.field)?.meta;
-                const newColumn = {
-                  columnId: props.columnId,
-                  fieldName: choice.field,
-                  meta,
-                };
-                return props.setState(
-                  !selectedField
-                    ? {
-                        ...props.state,
-                        layers: {
-                          ...props.state.layers,
-                          [props.layerId]: {
-                            ...props.state.layers[props.layerId],
-                            columns: [...props.state.layers[props.layerId].columns, newColumn],
-                            allColumns: [
-                              ...props.state.layers[props.layerId].allColumns,
-                              newColumn,
-                            ],
+          <I18nProvider>
+            <EuiFormRow
+              data-test-subj="text-based-languages-field-selection-row"
+              label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
+                defaultMessage: 'Field',
+              })}
+              fullWidth
+              className="lnsIndexPatternDimensionEditor--padded"
+            >
+              <FieldSelect
+                existingFields={updatedFields}
+                selectedField={selectedField}
+                onChoose={(choice) => {
+                  const meta = fields.find((f) => f.name === choice.field)?.meta;
+                  const newColumn = {
+                    columnId: props.columnId,
+                    fieldName: choice.field,
+                    meta,
+                  };
+                  return props.setState(
+                    !selectedField
+                      ? {
+                          ...props.state,
+                          layers: {
+                            ...props.state.layers,
+                            [props.layerId]: {
+                              ...props.state.layers[props.layerId],
+                              columns: [...props.state.layers[props.layerId].columns, newColumn],
+                              allColumns: [
+                                ...props.state.layers[props.layerId].allColumns,
+                                newColumn,
+                              ],
+                            },
                           },
-                        },
-                      }
-                    : {
-                        ...props.state,
-                        layers: {
-                          ...props.state.layers,
-                          [props.layerId]: {
-                            ...props.state.layers[props.layerId],
-                            columns: props.state.layers[props.layerId].columns.map((col) =>
-                              col.columnId !== props.columnId
-                                ? col
-                                : { ...col, fieldName: choice.field }
-                            ),
-                            allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
-                              col.columnId !== props.columnId
-                                ? col
-                                : { ...col, fieldName: choice.field }
-                            ),
+                        }
+                      : {
+                          ...props.state,
+                          layers: {
+                            ...props.state.layers,
+                            [props.layerId]: {
+                              ...props.state.layers[props.layerId],
+                              columns: props.state.layers[props.layerId].columns.map((col) =>
+                                col.columnId !== props.columnId
+                                  ? col
+                                  : { ...col, fieldName: choice.field, meta }
+                              ),
+                              allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
+                                col.columnId !== props.columnId
+                                  ? col
+                                  : { ...col, fieldName: choice.field, meta }
+                              ),
+                            },
                           },
-                        },
-                      }
-                );
-              }}
-            />
-          </EuiFormRow>
+                        }
+                  );
+                }}
+              />
+            </EuiFormRow>
+            {props.dataSectionExtra && (
+              <div
+                style={{
+                  paddingLeft: euiThemeVars.euiSize,
+                  paddingRight: euiThemeVars.euiSize,
+                }}
+              >
+                {props.dataSectionExtra}
+              </div>
+            )}
+          </I18nProvider>
         </KibanaThemeProvider>,
         domElement
       );
@@ -487,28 +516,14 @@ export function getTextBasedDatasource({
     uniqueLabels(state: TextBasedPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
-      const counts = {} as Record<string, number>;
+      const uniqueLabelGenerator = getUniqueLabelGenerator();
 
-      const makeUnique = (label: string) => {
-        let uniqueLabel = label;
-
-        while (counts[uniqueLabel] >= 0) {
-          const num = ++counts[uniqueLabel];
-          uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
-            defaultMessage: '{label} [{num}]',
-            values: { label, num },
-          });
-        }
-
-        counts[uniqueLabel] = 0;
-        return uniqueLabel;
-      };
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          columnLabelMap[column.columnId] = makeUnique(column.fieldName);
+          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
         });
       });
 
@@ -516,9 +531,15 @@ export function getTextBasedDatasource({
     },
 
     getDropProps: (props) => {
-      const { source } = props;
+      const { source, target, state } = props;
       if (!source) {
         return;
+      }
+      if (target && target.isMetricDimension) {
+        const layerId = target.layerId;
+        const currentLayer = state.layers[layerId];
+        const field = currentLayer.allColumns.find((f) => f.columnId === source.id);
+        if (field?.meta?.type !== 'number') return;
       }
       const label = source.field as string;
       return { dropTypes: ['field_add'], nextLabel: label };
@@ -672,6 +693,41 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: () => true,
+    getDatasourceInfo: async (state, references, dataViewsService) => {
+      const indexPatterns: DataView[] = [];
+      for (const { index } of Object.values(state.layers)) {
+        const dataView = await dataViewsService?.get(index);
+        if (dataView) {
+          indexPatterns.push(dataView);
+        }
+      }
+      return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
+        const columns = Object.entries(layer.columns).map(([colId, col]) => {
+          return {
+            id: colId,
+            role: col.meta?.type !== 'number' ? ('split' as const) : ('metric' as const),
+            operation: {
+              dataType: col?.meta?.type as DataType,
+              label: col.fieldName,
+              isBucketed: Boolean(col?.meta?.type !== 'number'),
+              hasTimeShift: false,
+              hasReducedTimeRange: false,
+              fields: [col.fieldName],
+              type: col.meta?.type || 'unknown',
+              filter: undefined,
+            },
+          };
+        });
+
+        acc.push({
+          layerId: key,
+          columns,
+          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
+        });
+
+        return acc;
+      }, []);
+    },
   };
 
   return TextBasedDatasource;

@@ -7,7 +7,7 @@
 
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
-export const cspRuleSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
+export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
     metadata: {
@@ -21,36 +21,37 @@ export const cspRuleSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
             },
           },
         },
-      },
-    },
-    package_policy_id: {
-      type: 'keyword',
-    },
-    policy_id: {
-      type: 'keyword',
-    },
-    enabled: {
-      type: 'boolean',
-      fields: {
-        keyword: {
+        id: {
           type: 'keyword',
         },
-      },
-    },
-  },
-};
-
-export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
-  dynamic: false,
-  properties: {
-    metadata: {
-      type: 'object',
-      properties: {
+        section: {
+          type: 'keyword',
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
+        },
+        version: {
+          type: 'keyword',
+        },
         benchmark: {
           type: 'object',
           properties: {
             id: {
               // Needed for filtering rule templates by benchmark.id
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+            posture_type: {
+              type: 'keyword',
+            },
+            version: {
+              type: 'keyword',
+            },
+            rule_number: {
               type: 'keyword',
             },
           },

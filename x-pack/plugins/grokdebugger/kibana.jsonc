@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/grokdebugger-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "grokdebugger",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "grokdebugger"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "home",
+      "devTools"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

@@ -89,7 +89,7 @@ export const EditWarning: FunctionComponent = () => {
                 />
               }
               color="danger"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="editManagedPolicyCallOut"
             >
               <p>

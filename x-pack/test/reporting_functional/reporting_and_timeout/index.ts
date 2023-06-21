@@ -6,12 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import fs from 'fs';
 import path from 'path';
+import { PNG } from 'pngjs';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'reporting', 'dashboard']);
+  const log = getService('log');
   const reportingAPI = getService('reportingAPI');
   const reportingFunctional = getService('reportingFunctional');
   const browser = getService('browser');
@@ -22,8 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/135309
   describe.skip('Reporting Functional Tests with forced timeout', function () {
     const dashboardTitle = 'Ecom Dashboard Hidden Panel Titles';
-    const baselineAPng = path.resolve(__dirname, 'fixtures/baseline/warnings_capture_a.png');
-    const sessionPng = 'warnings_capture_session_a';
+    const sessionPngFullPage = 'warnings_capture_session_a';
+    const sessionPngCropped = 'warnings_capture_session_b';
+    const baselinePng = path.resolve(__dirname, 'fixtures/baseline/warnings_capture_b.png');
 
     let url: string;
     before(async () => {
@@ -33,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
       await PageObjects.reporting.setTimepickerInEcommerceDataRange();
-      await browser.setWindowSize(1600, 850);
+      await browser.setWindowSize(800, 850);
 
       await PageObjects.reporting.openPngReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
@@ -51,17 +55,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('adds a visual warning in the report output', async () => {
       const captureData = await PageObjects.reporting.getRawPdfReportData(url);
-      const pngSessionFilePath = await PageObjects.reporting.writeSessionReport(
-        sessionPng,
+      const sessionReport = await PageObjects.reporting.writeSessionReport(
+        sessionPngFullPage,
         'png',
         captureData,
         screenshotDir
       );
 
-      // allow minor visual differences: https://github.com/elastic/kibana/issues/135309#issuecomment-1169095186
+      const region = { height: 320, width: 1540, srcX: 20, srcY: 10 };
+      const dstPath = path.resolve(screenshotDir, sessionPngCropped + '.png');
+      const dst = new PNG({ width: region.width, height: region.height });
+
+      const pngSessionFilePath = await new Promise<string>((resolve) => {
+        fs.createReadStream(sessionReport)
+          .pipe(new PNG())
+          .on('parsed', function () {
+            log.info(`cropping report to the visual warning area`);
+            this.bitblt(dst, region.srcX, region.srcY, region.width, region.height, 0, 0);
+            dst.pack().pipe(fs.createWriteStream(dstPath));
+            resolve(dstPath);
+          });
+      });
+
+      log.info(`saved cropped file to ${dstPath}`);
+
       expect(
-        await png.checkIfPngsMatch(pngSessionFilePath, baselineAPng, screenshotDir)
-      ).to.be.lessThan(0.015); // this factor of difference allows passing whether or not the page has loaded things like the loading graphics and titlebars
+        await png.checkIfPngsMatch(pngSessionFilePath, baselinePng, screenshotDir)
+      ).to.be.lessThan(0.09);
+
+      /**
+       * This test may fail when styling differences affect the result. To update the snapshot:
+       *
+       * 1. Run the functional test, to generate new temporary files for screenshot comparison.
+       * 2. Save the screenshot as the new baseline file:
+       *      cp \
+       *       x-pack/test/functional/screenshots/session/warnings_capture_session_b_actual.png \
+       *       x-pack/test/reporting_functional/reporting_and_timeout/fixtures/baseline/warnings_capture_b.png
+       * 3. Commit the changes to the .png file
+       */
     });
   });
 }

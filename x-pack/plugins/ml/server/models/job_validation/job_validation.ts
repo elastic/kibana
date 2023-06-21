@@ -13,7 +13,6 @@ import { getMessages, MessageId, JobValidationMessage } from '../../../common/co
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
 
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
-// @ts-expect-error importing js file
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
 import { validateInfluencers } from './validate_influencers';
@@ -86,9 +85,7 @@ export async function validateJob(
         return messages[m.id as MessageId].status === VALIDATION_STATUS.ERROR;
       });
 
-      validationMessages.push(
-        ...(await validateBucketSpan(client, job, duration, isSecurityDisabled))
-      );
+      validationMessages.push(...(await validateBucketSpan(client, job, duration)));
       validationMessages.push(...(await validateTimeRange(client, job, duration)));
 
       // only run the influencer and model memory limit checks

@@ -6,12 +6,13 @@
  */
 
 import sinon from 'sinon';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from '.';
-import { RawRule } from '../../types';
+import { RawRule, RawRuleAction } from '../../types';
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isAnyActionSupportIncidents } from './7.11';
 
@@ -28,7 +29,9 @@ describe('successful migrations', () => {
 
   describe('7.10.0', () => {
     test('marks alerts as legacy', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0']
+      );
       const alert = getMockData({});
       expect(migration710(alert, migrationContext)).toMatchObject({
         ...alert,
@@ -42,7 +45,9 @@ describe('successful migrations', () => {
     });
 
     test('migrates the consumer for metrics', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0']
+      );
       const alert = getMockData({
         consumer: 'metrics',
       });
@@ -59,7 +64,9 @@ describe('successful migrations', () => {
     });
 
     test('migrates the consumer for siem', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0']
+      );
       const alert = getMockData({
         consumer: 'securitySolution',
       });
@@ -76,7 +83,9 @@ describe('successful migrations', () => {
     });
 
     test('migrates the consumer for alerting', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0']
+      );
       const alert = getMockData({
         consumer: 'alerting',
       });
@@ -93,7 +102,9 @@ describe('successful migrations', () => {
     });
 
     test('migrates PagerDuty actions to set a default dedupkey of the AlertId', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0']
+      );
       const alert = getMockData({
         actions: [
           {
@@ -130,7 +141,9 @@ describe('successful migrations', () => {
     });
 
     test('skips PagerDuty actions with a specified dedupkey', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0']
+      );
       const alert = getMockData({
         actions: [
           {
@@ -168,7 +181,9 @@ describe('successful migrations', () => {
     });
 
     test('skips PagerDuty actions with an eventAction of "trigger"', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0']
+      );
       const alert = getMockData({
         actions: [
           {
@@ -207,7 +222,9 @@ describe('successful migrations', () => {
     });
 
     test('creates execution status', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0']
+      );
       const alert = getMockData();
       const dateStart = Date.now();
       const migratedAlert = migration710(alert, migrationContext);
@@ -235,7 +252,9 @@ describe('successful migrations', () => {
 
   describe('7.11.0', () => {
     test('add updatedAt field to alert - set to SavedObject updated_at attribute', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0'];
+      const migration711 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0']
+      );
       const alert = getMockData({}, true);
       expect(migration711(alert, migrationContext)).toEqual({
         ...alert,
@@ -248,7 +267,9 @@ describe('successful migrations', () => {
     });
 
     test('add updatedAt field to alert - set to createdAt when SavedObject updated_at is not defined', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0'];
+      const migration711 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0']
+      );
       const alert = getMockData({});
       expect(migration711(alert, migrationContext)).toEqual({
         ...alert,
@@ -261,7 +282,9 @@ describe('successful migrations', () => {
     });
 
     test('add notifyWhen=onActiveAlert when throttle is null', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0'];
+      const migration711 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0']
+      );
       const alert = getMockData({});
       expect(migration711(alert, migrationContext)).toEqual({
         ...alert,
@@ -274,7 +297,9 @@ describe('successful migrations', () => {
     });
 
     test('add notifyWhen=onActiveAlert when throttle is set', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0'];
+      const migration711 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0']
+      );
       const alert = getMockData({ throttle: '5m' });
       expect(migration711(alert, migrationContext)).toEqual({
         ...alert,
@@ -289,9 +314,9 @@ describe('successful migrations', () => {
 
   describe('7.11.2', () => {
     test('transforms connectors that support incident correctly', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.11.2'
-      ];
+      const migration7112 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.2']
+      );
       const alert = getMockData({
         actions: [
           {
@@ -433,9 +458,9 @@ describe('successful migrations', () => {
     });
 
     test('it transforms only subAction=pushToService', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.11.2'
-      ];
+      const migration7112 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.2']
+      );
       const alert = getMockData({
         actions: [
           {
@@ -454,9 +479,9 @@ describe('successful migrations', () => {
     });
 
     test('it does not transforms other connectors', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.11.2'
-      ];
+      const migration7112 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.2']
+      );
       const alert = getMockData({
         actions: [
           {
@@ -535,9 +560,9 @@ describe('successful migrations', () => {
     });
 
     test('it does not transforms alerts when the right structure connectors is already applied', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.11.2'
-      ];
+      const migration7112 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.2']
+      );
       const alert = getMockData({
         actions: [
           {
@@ -574,9 +599,9 @@ describe('successful migrations', () => {
     });
 
     test('if incident attribute is an empty object, copy back the related attributes from subActionParams back to incident', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.11.2'
-      ];
+      const migration7112 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.2']
+      );
       const alert = getMockData({
         actions: [
           {
@@ -638,9 +663,9 @@ describe('successful migrations', () => {
     });
 
     test('custom action does not get migrated/loss', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.11.2'
-      ];
+      const migration7112 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.2']
+      );
       const alert = getMockData({
         actions: [
           {
@@ -669,7 +694,9 @@ describe('successful migrations', () => {
 
   describe('7.13.0', () => {
     test('security solution alerts get migrated and remove null values', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0'];
+      const migration713 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -763,7 +790,9 @@ describe('successful migrations', () => {
     });
 
     test('non-null values in security solution alerts are not modified', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0'];
+      const migration713 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -830,7 +859,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution threshold alert with string in threshold.field is migrated to array', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0'];
+      const migration713 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -861,7 +892,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution threshold alert with empty string in threshold.field is migrated to empty array', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0'];
+      const migration713 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -892,7 +925,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution threshold alert with array in threshold.field and cardinality is left alone', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0'];
+      const migration713 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -934,7 +969,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution ML alert with string in machineLearningJobId is converted to an array', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0'];
+      const migration713 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -960,7 +997,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution ML alert with an array in machineLearningJobId is preserved', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0'];
+      const migration713 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -988,9 +1027,9 @@ describe('successful migrations', () => {
 
   describe('7.14.1', () => {
     test('security solution author field is migrated to array if it is undefined', () => {
-      const migration7141 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.14.1'
-      ];
+      const migration7141 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.14.1']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {},
@@ -1008,9 +1047,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution author field does not override existing values if they exist', () => {
-      const migration7141 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.14.1'
-      ];
+      const migration7141 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.14.1']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1034,9 +1073,9 @@ describe('successful migrations', () => {
 
   describe('7.15.0', () => {
     test('security solution is migrated to saved object references if it has 1 exceptionsList', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1065,9 +1104,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution is migrated to saved object references if it has 2 exceptionsLists', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1107,9 +1146,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution is migrated to saved object references if it has 3 exceptionsLists', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1160,9 +1199,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution does not change anything if exceptionsList is missing', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1174,9 +1213,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution will keep existing references if we do not have an exceptionsList but we do already have references', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1206,9 +1245,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution keep any foreign references if they exist but still migrate other references', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1273,9 +1312,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution is idempotent and if re-run on the same migrated data will keep the same items', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1315,9 +1354,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution will migrate with only missing data if we have partially migrated data', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1366,9 +1405,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution will not migrate if exception list if it is invalid data', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1382,9 +1421,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution will migrate valid data if it is mixed with invalid data', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1426,9 +1465,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution will not migrate if exception list is invalid data but will keep existing references', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.15.0'
-      ];
+      const migration7150 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.15.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1460,7 +1499,9 @@ describe('successful migrations', () => {
 
   describe('7.16.0', () => {
     test('add legacyId field to alert - set to SavedObject id attribute', () => {
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = getMockData({}, true);
       expect(migration716(alert, migrationContext)).toEqual({
         ...alert,
@@ -1475,7 +1516,9 @@ describe('successful migrations', () => {
       isPreconfigured.mockReset();
       isPreconfigured.mockReturnValueOnce(true);
       isPreconfigured.mockReturnValueOnce(false);
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const rule = {
         ...getMockData({
           actions: [
@@ -1551,7 +1594,9 @@ describe('successful migrations', () => {
       isPreconfigured.mockReturnValueOnce(true);
       isPreconfigured.mockReturnValueOnce(false);
       isPreconfigured.mockReturnValueOnce(false);
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const rule = {
         ...getMockData({
           actions: [
@@ -1634,7 +1679,9 @@ describe('successful migrations', () => {
 
     test('does nothing to rules with no references', () => {
       isPreconfigured.mockReset();
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const rule = {
         ...getMockData({
           actions: [
@@ -1670,7 +1717,9 @@ describe('successful migrations', () => {
 
     test('does nothing to rules with no action references', () => {
       isPreconfigured.mockReset();
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const rule = {
         ...getMockData({
           actions: [
@@ -1712,7 +1761,9 @@ describe('successful migrations', () => {
 
     test('does nothing to rules with references but no actions', () => {
       isPreconfigured.mockReset();
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const rule = {
         ...getMockData({
           actions: [],
@@ -1740,9 +1791,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution is migrated to saved object references if it has a "ruleAlertId"', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.notifications',
         params: {
@@ -1767,9 +1818,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution does not migrate anything if its type is not siem.notifications', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = getMockData({
         alertTypeId: 'other-type',
         params: {
@@ -1786,9 +1837,9 @@ describe('successful migrations', () => {
       });
     });
     test('security solution does not change anything if "ruleAlertId" is missing', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = getMockData({
         alertTypeId: 'siem.notifications',
         params: {},
@@ -1804,9 +1855,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution will keep existing references if we do not have a "ruleAlertId" but we do already have references', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.notifications',
@@ -1838,9 +1889,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution will keep any foreign references if they exist but still migrate other "ruleAlertId" references', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.notifications',
@@ -1879,9 +1930,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution is idempotent and if re-run on the same migrated data will keep the same items "ruleAlertId" references', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.notifications',
@@ -1915,9 +1966,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution will not migrate "ruleAlertId" if it is invalid data', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.notifications',
@@ -1937,9 +1988,9 @@ describe('successful migrations', () => {
     });
 
     test('security solution will not migrate "ruleAlertId" if it is invalid data but will keep existing references', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.notifications',
@@ -1973,9 +2024,9 @@ describe('successful migrations', () => {
     });
 
     test('geo-containment alert migration extracts boundary and index references', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: '.geo-containment',
@@ -2003,9 +2054,9 @@ describe('successful migrations', () => {
     });
 
     test('geo-containment alert migration should preserve foreign references', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: '.geo-containment',
@@ -2045,9 +2096,9 @@ describe('successful migrations', () => {
     });
 
     test('geo-containment alert migration ignores other alert-types', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const alert = {
         ...getMockData({
           alertTypeId: '.foo',
@@ -2071,13 +2122,17 @@ describe('successful migrations', () => {
 
   describe('8.0.0', () => {
     test('no op migration for rules SO', () => {
-      const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0']
+      );
       const alert = getMockData({}, true);
       expect(migration800(alert, migrationContext)).toEqual(alert);
     });
 
     test('add threatIndicatorPath default value to threat match rules if missing', () => {
-      const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0']
+      );
       const alert = getMockData(
         { params: { type: 'threat_match' }, alertTypeId: 'siem.signals' },
         true
@@ -2088,7 +2143,9 @@ describe('successful migrations', () => {
     });
 
     test('doesnt change threatIndicatorPath value in threat match rules if value is present', () => {
-      const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0']
+      );
       const alert = getMockData(
         {
           params: { type: 'threat_match', threatIndicatorPath: 'custom.indicator.path' },
@@ -2102,7 +2159,9 @@ describe('successful migrations', () => {
     });
 
     test('doesnt change threatIndicatorPath value in other rules', () => {
-      const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0']
+      );
       const alert = getMockData({ params: { type: 'eql' }, alertTypeId: 'siem.signals' }, true);
       expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
         undefined
@@ -2110,7 +2169,9 @@ describe('successful migrations', () => {
     });
 
     test('doesnt change threatIndicatorPath value if not a siem.signals rule', () => {
-      const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0']
+      );
       const alert = getMockData(
         { params: { type: 'threat_match' }, alertTypeId: 'not.siem.signals' },
         true
@@ -2121,7 +2182,9 @@ describe('successful migrations', () => {
     });
 
     test('doesnt change AAD rule params if not a siem.signals rule', () => {
-      const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0']
+      );
       const alert = getMockData(
         { params: { outputIndex: 'output-index', type: 'query' }, alertTypeId: 'not.siem.signals' },
         true
@@ -2136,9 +2199,9 @@ describe('successful migrations', () => {
     test.each(Object.keys(ruleTypeMappings) as RuleType[])(
       'changes AAD rule params accordingly if rule is a siem.signals %p rule',
       (ruleType) => {
-        const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.0.0'
-        ];
+        const migration800 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0']
+        );
         const alert = getMockData(
           { params: { outputIndex: 'output-index', type: ruleType }, alertTypeId: 'siem.signals' },
           true
@@ -2150,339 +2213,690 @@ describe('successful migrations', () => {
         expect(migratedAlert.attributes.params.outputIndex).toEqual('');
       }
     );
+  });
 
-    describe('8.0.1', () => {
-      describe.each(Object.keys(ruleTypeMappings) as RuleType[])(
-        'auto_disabled %p rule tags',
-        (ruleType) => {
-          const alert717Enabled = getMockData(
-            {
-              params: { outputIndex: 'output-index', type: ruleType },
-              alertTypeId: 'siem.signals',
-              enabled: true,
-              scheduledTaskId: 'abcd',
-            },
-            true
-          );
-          const alert717Disabled = getMockData(
-            {
-              params: { outputIndex: 'output-index', type: ruleType },
-              alertTypeId: 'siem.signals',
-              enabled: false,
-            },
-            true
-          );
-          const alert800 = getMockData(
-            {
-              params: { outputIndex: '', type: ruleType },
-              alertTypeId: ruleTypeMappings[ruleType],
-              enabled: false,
-              scheduledTaskId: 'abcd',
-            },
-            true
-          );
-
-          test('Does not update rule tags if rule has already been enabled', () => {
-            const migrations = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured);
-            const migration800 = migrations['8.0.0'];
-            const migration801 = migrations['8.0.1'];
-
-            // migrate to 8.0.0
-            const migratedAlert800 = migration800(alert717Enabled, migrationContext);
-            expect(migratedAlert800.attributes.enabled).toEqual(false);
-
-            // reenable rule
-            migratedAlert800.attributes.enabled = true;
-
-            // migrate to 8.0.1
-            const migratedAlert801 = migration801(migratedAlert800, migrationContext);
-
-            expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
-            expect(migratedAlert801.attributes.enabled).toEqual(true);
-            expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
-
-            // tags not updated
-            expect(migratedAlert801.attributes.tags).toEqual(['foo']);
-          });
-
-          test('Does not update rule tags if rule was already disabled before upgrading to 8.0', () => {
-            const migrations = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured);
-            const migration800 = migrations['8.0.0'];
-            const migration801 = migrations['8.0.1'];
-
-            // migrate to 8.0.0
-            const migratedAlert800 = migration800(alert717Disabled, migrationContext);
-            expect(migratedAlert800.attributes.enabled).toEqual(false);
-
-            // migrate to 8.0.1
-            const migratedAlert801 = migration801(migratedAlert800, migrationContext);
-
-            expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
-            expect(migratedAlert801.attributes.enabled).toEqual(false);
-            expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
-
-            // tags not updated
-            expect(migratedAlert801.attributes.tags).toEqual(['foo']);
-          });
-
-          test('Updates rule tags if rule was auto-disabled in 8.0 upgrade and not reenabled', () => {
-            const migrations = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured);
-            const migration800 = migrations['8.0.0'];
-            const migration801 = migrations['8.0.1'];
-
-            // migrate to 8.0.0
-            const migratedAlert800 = migration800(alert717Enabled, migrationContext);
-            expect(migratedAlert800.attributes.enabled).toEqual(false);
-
-            // migrate to 8.0.1
-            const migratedAlert801 = migration801(migratedAlert800, migrationContext);
-
-            expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
-            expect(migratedAlert801.attributes.enabled).toEqual(false);
-            expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
-
-            // tags updated
-            expect(migratedAlert801.attributes.tags).toEqual(['foo', 'auto_disabled_8.0']);
-          });
-
-          test('Updates rule tags correctly if tags are undefined', () => {
-            const migrations = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured);
-            const migration801 = migrations['8.0.1'];
-
-            const alert = {
-              ...alert800,
-              attributes: {
-                ...alert800.attributes,
-                tags: undefined,
-              },
-            };
-
-            // migrate to 8.0.1
-            const migratedAlert801 = migration801(alert, migrationContext);
-
-            expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
-            expect(migratedAlert801.attributes.enabled).toEqual(false);
-            expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
-
-            // tags updated
-            expect(migratedAlert801.attributes.tags).toEqual(['auto_disabled_8.0']);
-          });
-
-          test('Updates rule tags correctly if tags are null', () => {
-            const migrations = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured);
-            const migration801 = migrations['8.0.1'];
-
-            const alert = {
-              ...alert800,
-              attributes: {
-                ...alert800.attributes,
-                tags: null,
-              },
-            };
-
-            // migrate to 8.0.1
-            const migratedAlert801 = migration801(alert, migrationContext);
-
-            expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
-            expect(migratedAlert801.attributes.enabled).toEqual(false);
-            expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
-
-            // tags updated
-            expect(migratedAlert801.attributes.tags).toEqual(['auto_disabled_8.0']);
-          });
-        }
-      );
-    });
-
-    describe('8.2.0', () => {
-      test('migrates params to mapped_params', () => {
-        const migration820 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.2.0'
-        ];
-        const alert = getMockData(
+  describe('8.0.1', () => {
+    describe.each(Object.keys(ruleTypeMappings) as RuleType[])(
+      'auto_disabled %p rule tags',
+      (ruleType) => {
+        const alert717Enabled = getMockData(
           {
-            params: {
-              risk_score: 60,
-              severity: 'high',
-              foo: 'bar',
-            },
+            params: { outputIndex: 'output-index', type: ruleType },
             alertTypeId: 'siem.signals',
+            enabled: true,
+            scheduledTaskId: 'abcd',
+          },
+          true
+        );
+        const alert717Disabled = getMockData(
+          {
+            params: { outputIndex: 'output-index', type: ruleType },
+            alertTypeId: 'siem.signals',
+            enabled: false,
+          },
+          true
+        );
+        const alert800 = getMockData(
+          {
+            params: { outputIndex: '', type: ruleType },
+            alertTypeId: ruleTypeMappings[ruleType],
+            enabled: false,
+            scheduledTaskId: 'abcd',
           },
           true
         );
 
-        const migratedAlert820 = migration820(alert, migrationContext);
+        test('Does not update rule tags if rule has already been enabled', () => {
+          const migrations = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured);
+          const migration800 = SavedObjectsUtils.getMigrationFunction(migrations['8.0.0']);
+          const migration801 = SavedObjectsUtils.getMigrationFunction(migrations['8.0.1']);
 
-        expect(migratedAlert820.attributes.mapped_params).toEqual({
-          risk_score: 60,
-          severity: '60-high',
+          // migrate to 8.0.0
+          const migratedAlert800 = migration800(alert717Enabled, migrationContext);
+          expect(migratedAlert800.attributes.enabled).toEqual(false);
+
+          // reenable rule
+          migratedAlert800.attributes.enabled = true;
+
+          // migrate to 8.0.1
+          const migratedAlert801 = migration801(migratedAlert800, migrationContext);
+
+          expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+          expect(migratedAlert801.attributes.enabled).toEqual(true);
+          expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
+
+          // tags not updated
+          expect(migratedAlert801.attributes.tags).toEqual(['foo']);
         });
+
+        test('Does not update rule tags if rule was already disabled before upgrading to 8.0', () => {
+          const migrations = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured);
+          const migration800 = SavedObjectsUtils.getMigrationFunction(migrations['8.0.0']);
+          const migration801 = SavedObjectsUtils.getMigrationFunction(migrations['8.0.1']);
+
+          // migrate to 8.0.0
+          const migratedAlert800 = migration800(alert717Disabled, migrationContext);
+          expect(migratedAlert800.attributes.enabled).toEqual(false);
+
+          // migrate to 8.0.1
+          const migratedAlert801 = migration801(migratedAlert800, migrationContext);
+
+          expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+          expect(migratedAlert801.attributes.enabled).toEqual(false);
+          expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
+
+          // tags not updated
+          expect(migratedAlert801.attributes.tags).toEqual(['foo']);
+        });
+
+        test('Updates rule tags if rule was auto-disabled in 8.0 upgrade and not reenabled', () => {
+          const migrations = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured);
+          const migration800 = SavedObjectsUtils.getMigrationFunction(migrations['8.0.0']);
+          const migration801 = SavedObjectsUtils.getMigrationFunction(migrations['8.0.1']);
+
+          // migrate to 8.0.0
+          const migratedAlert800 = migration800(alert717Enabled, migrationContext);
+          expect(migratedAlert800.attributes.enabled).toEqual(false);
+
+          // migrate to 8.0.1
+          const migratedAlert801 = migration801(migratedAlert800, migrationContext);
+
+          expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+          expect(migratedAlert801.attributes.enabled).toEqual(false);
+          expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
+
+          // tags updated
+          expect(migratedAlert801.attributes.tags).toEqual(['foo', 'auto_disabled_8.0']);
+        });
+
+        test('Updates rule tags correctly if tags are undefined', () => {
+          const migrations = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured);
+          const migration801 = SavedObjectsUtils.getMigrationFunction(migrations['8.0.1']);
+
+          const alert = {
+            ...alert800,
+            attributes: {
+              ...alert800.attributes,
+              tags: undefined,
+            },
+          };
+
+          // migrate to 8.0.1
+          const migratedAlert801 = migration801(alert, migrationContext);
+
+          expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+          expect(migratedAlert801.attributes.enabled).toEqual(false);
+          expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
+
+          // tags updated
+          expect(migratedAlert801.attributes.tags).toEqual(['auto_disabled_8.0']);
+        });
+
+        test('Updates rule tags correctly if tags are null', () => {
+          const migrations = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured);
+          const migration801 = SavedObjectsUtils.getMigrationFunction(migrations['8.0.1']);
+
+          const alert = {
+            ...alert800,
+            attributes: {
+              ...alert800.attributes,
+              tags: null,
+            },
+          };
+
+          // migrate to 8.0.1
+          const migratedAlert801 = migration801(alert, migrationContext);
+
+          expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+          expect(migratedAlert801.attributes.enabled).toEqual(false);
+          expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
+
+          // tags updated
+          expect(migratedAlert801.attributes.tags).toEqual(['auto_disabled_8.0']);
+        });
+      }
+    );
+  });
+
+  describe('8.2.0', () => {
+    test('migrates params to mapped_params', () => {
+      const migration820 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.2.0']
+      );
+      const alert = getMockData(
+        {
+          params: {
+            risk_score: 60,
+            severity: 'high',
+            foo: 'bar',
+          },
+          alertTypeId: 'siem.signals',
+        },
+        true
+      );
+
+      const migratedAlert820 = migration820(alert, migrationContext);
+
+      expect(migratedAlert820.attributes.mapped_params).toEqual({
+        risk_score: 60,
+        severity: '60-high',
+      });
+    });
+  });
+
+  describe('8.3.0', () => {
+    test('migrates snoozed rules to the new data model', () => {
+      const fakeTimer = sinon.useFakeTimers();
+      const migration830 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.3.0']
+      );
+      const mutedAlert = getMockData(
+        {
+          snoozeEndTime: '1970-01-02T00:00:00.000Z',
+        },
+        true
+      );
+      const migratedMutedAlert830 = migration830(mutedAlert, migrationContext);
+
+      expect(migratedMutedAlert830.attributes.snoozeSchedule.length).toEqual(1);
+      expect(migratedMutedAlert830.attributes.snoozeSchedule[0].rRule.dtstart).toEqual(
+        '1970-01-01T00:00:00.000Z'
+      );
+      expect(migratedMutedAlert830.attributes.snoozeSchedule[0].duration).toEqual(86400000);
+      fakeTimer.restore();
+    });
+
+    test('migrates es_query alert params', () => {
+      const migration830 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.3.0']
+      );
+      const alert = getMockData(
+        {
+          params: { esQuery: '{ "query": "test-query" }' },
+          alertTypeId: '.es-query',
+        },
+        true
+      );
+      const migratedAlert820 = migration830(alert, migrationContext);
+
+      expect(migratedAlert820.attributes.params).toEqual({
+        esQuery: '{ "query": "test-query" }',
+        searchType: 'esQuery',
       });
     });
 
-    describe('8.3.0', () => {
-      test('migrates snoozed rules to the new data model', () => {
-        const fakeTimer = sinon.useFakeTimers();
-        const migration830 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.3.0'
-        ];
-        const mutedAlert = getMockData(
-          {
-            snoozeEndTime: '1970-01-02T00:00:00.000Z',
-          },
-          true
-        );
-        const migratedMutedAlert830 = migration830(mutedAlert, migrationContext);
+    test('removes internal tags', () => {
+      const migration830 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.3.0']
+      );
+      const alert = getMockData(
+        {
+          tags: [
+            '__internal_immutable:false',
+            '__internal_rule_id:064e3fed-6328-416b-bb85-c08265088f41',
+            'test-tag',
+          ],
+          alertTypeId: 'siem.queryRule',
+        },
+        true
+      );
 
-        expect(migratedMutedAlert830.attributes.snoozeSchedule.length).toEqual(1);
-        expect(migratedMutedAlert830.attributes.snoozeSchedule[0].rRule.dtstart).toEqual(
-          '1970-01-01T00:00:00.000Z'
-        );
-        expect(migratedMutedAlert830.attributes.snoozeSchedule[0].duration).toEqual(86400000);
-        fakeTimer.restore();
+      const migratedAlert830 = migration830(alert, migrationContext);
+
+      expect(migratedAlert830.attributes.tags).toEqual(['test-tag']);
+    });
+
+    test('do not remove internal tags if rule is not Security solution rule', () => {
+      const migration830 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.3.0']
+      );
+      const alert = getMockData(
+        {
+          tags: ['__internal_immutable:false', 'tag-1'],
+        },
+        true
+      );
+
+      const migratedAlert830 = migration830(alert, migrationContext);
+
+      expect(migratedAlert830.attributes.tags).toEqual(['__internal_immutable:false', 'tag-1']);
+    });
+  });
+
+  describe('8.4.1', () => {
+    test('removes isSnoozedUntil', () => {
+      const migration841 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.4.1']
+      );
+      const mutedAlert = getMockData(
+        {
+          isSnoozedUntil: '1970-01-02T00:00:00.000Z',
+        },
+        true
+      );
+      expect(mutedAlert.attributes.isSnoozedUntil).toBeTruthy();
+      const migratedAlert841 = migration841(mutedAlert, migrationContext);
+
+      expect(migratedAlert841.attributes.isSnoozedUntil).toBeFalsy();
+    });
+
+    test('works as expected if isSnoozedUntil is not populated', () => {
+      const migration841 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.4.1']
+      );
+      const mutedAlert = getMockData({}, true);
+      expect(mutedAlert.attributes.isSnoozedUntil).toBeFalsy();
+      expect(() => migration841(mutedAlert, migrationContext)).not.toThrowError();
+    });
+  });
+
+  describe('8.6.0', () => {
+    test('migrates executionStatus success', () => {
+      const migration860 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.6.0']
+      );
+
+      let ruleWithExecutionStatus = getMockData({
+        executionStatus: {
+          status: 'ok',
+          lastExecutionDate: '2022-01-02T00:00:00.000Z',
+          lastDuration: 60000,
+        },
       });
 
-      test('migrates es_query alert params', () => {
-        const migration830 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.3.0'
-        ];
-        const alert = getMockData(
+      let migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
+      expect(migratedRule.attributes.lastRun.outcome).toEqual('succeeded');
+      expect(migratedRule.attributes.lastRun.warning).toEqual(null);
+      ruleWithExecutionStatus = getMockData({
+        executionStatus: {
+          status: 'active',
+          lastExecutionDate: '2022-01-02T00:00:00.000Z',
+          lastDuration: 60000,
+        },
+      });
+
+      migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
+      expect(migratedRule.attributes.lastRun.outcome).toEqual('succeeded');
+      expect(migratedRule.attributes.lastRun.warning).toEqual(null);
+    });
+
+    test('migrates executionStatus warning and error', () => {
+      const migration860 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.6.0']
+      );
+
+      let ruleWithExecutionStatus = getMockData({
+        executionStatus: {
+          status: 'warning',
+          lastExecutionDate: '2022-01-02T00:00:00.000Z',
+          lastDuration: 60000,
+          warning: {
+            reason: 'warning reason',
+            message: 'warning message',
+          },
+        },
+      });
+
+      let migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
+      expect(migratedRule.attributes.lastRun.outcome).toEqual('warning');
+      expect(migratedRule.attributes.lastRun.outcomeMsg).toEqual('warning message');
+      expect(migratedRule.attributes.lastRun.warning).toEqual('warning reason');
+
+      ruleWithExecutionStatus = getMockData({
+        executionStatus: {
+          status: 'error',
+          lastExecutionDate: '2022-01-02T00:00:00.000Z',
+          lastDuration: 60000,
+          error: {
+            reason: 'failed reason',
+            message: 'failed message',
+          },
+        },
+      });
+
+      migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
+      expect(migratedRule.attributes.lastRun.outcome).toEqual('failed');
+      expect(migratedRule.attributes.lastRun.outcomeMsg).toEqual('failed message');
+      expect(migratedRule.attributes.lastRun.warning).toEqual('failed reason');
+    });
+
+    test('migrates empty monitoring', () => {
+      const migration860 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.6.0']
+      );
+
+      const ruleWithoutMonitoring = getMockData();
+      const migratedRule = migration860(ruleWithoutMonitoring, migrationContext);
+
+      expect(migratedRule.attributes.monitoring).toBeUndefined();
+    });
+
+    test('migrates empty monitoring when executionStatus exists', () => {
+      const migration860 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.6.0']
+      );
+
+      const ruleWithMonitoring = getMockData({
+        executionStatus: {
+          status: 'ok',
+          lastExecutionDate: '2022-01-02T00:00:00.000Z',
+          lastDuration: 60000,
+        },
+      });
+      const migratedRule = migration860(ruleWithMonitoring, migrationContext);
+
+      expect(migratedRule.attributes.monitoring.run.history).toEqual([]);
+      expect(migratedRule.attributes.monitoring.run.last_run.timestamp).toEqual(
+        '2022-01-02T00:00:00.000Z'
+      );
+      expect(migratedRule.attributes.monitoring.run.last_run.metrics.duration).toEqual(60000);
+    });
+  });
+
+  describe('8.7.0', () => {
+    describe('es_query rule', () => {
+      test('migrates es_query rule params and adds group by fields', () => {
+        const migration870 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0']
+        );
+        const rule = getMockData(
           {
-            params: { esQuery: '{ "query": "test-query" }' },
+            params: { esQuery: '{ "query": "test-query" }', searchType: 'esQuery' },
             alertTypeId: '.es-query',
           },
           true
         );
-        const migratedAlert820 = migration830(alert, migrationContext);
+        const migratedAlert870 = migration870(rule, migrationContext);
 
-        expect(migratedAlert820.attributes.params).toEqual({
+        expect(migratedAlert870.attributes.params).toEqual({
           esQuery: '{ "query": "test-query" }',
           searchType: 'esQuery',
+          aggType: 'count',
+          groupBy: 'all',
         });
       });
 
-      test('removes internal tags', () => {
-        const migration830 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.3.0'
-        ];
-        const alert = getMockData(
+      test('does not migrate rule params if rule is not es query', () => {
+        const migration870 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0']
+        );
+        const rule = getMockData(
           {
-            tags: [
-              '__internal_immutable:false',
-              '__internal_rule_id:064e3fed-6328-416b-bb85-c08265088f41',
-              'test-tag',
-            ],
-            alertTypeId: 'siem.queryRule',
+            params: { foo: true },
+            alertTypeId: '.not-es-query',
           },
           true
         );
+        const migratedAlert870 = migration870(rule, migrationContext);
 
-        const migratedAlert830 = migration830(alert, migrationContext);
-
-        expect(migratedAlert830.attributes.tags).toEqual(['test-tag']);
-      });
-
-      test('do not remove internal tags if rule is not Security solution rule', () => {
-        const migration830 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.3.0'
-        ];
-        const alert = getMockData(
-          {
-            tags: ['__internal_immutable:false', 'tag-1'],
-          },
-          true
-        );
-
-        const migratedAlert830 = migration830(alert, migrationContext);
-
-        expect(migratedAlert830.attributes.tags).toEqual(['__internal_immutable:false', 'tag-1']);
+        expect(migratedAlert870.attributes.params).toEqual({ foo: true });
       });
     });
 
-    describe('8.4.1', () => {
-      test('removes isSnoozedUntil', () => {
-        const migration841 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.4.1'
-        ];
-        const mutedAlert = getMockData(
-          {
-            isSnoozedUntil: '1970-01-02T00:00:00.000Z',
-          },
-          true
-        );
-        expect(mutedAlert.attributes.isSnoozedUntil).toBeTruthy();
-        const migratedAlert841 = migration841(mutedAlert, migrationContext);
+    describe('log threshold rule', () => {
+      const logThresholdAlertTypeId = 'logs.alert.document.count';
+      const logViewId = 'log-view-reference-0';
 
-        expect(migratedAlert841.attributes.isSnoozedUntil).toBeFalsy();
+      const params = {
+        timeSize: 5,
+        timeUnit: 'm',
+        count: {
+          value: 75,
+          comparator: 'more than',
+        },
+        criteria: [
+          {
+            field: 'log.level',
+            comparator: 'equals',
+            value: 'error',
+          },
+        ],
+      };
+
+      const logView = {
+        logViewId,
+        type: 'log-view-reference',
+      };
+
+      const references = [
+        {
+          name: `param:${logViewId}`,
+          type: 'infrastructure-monitoring-log-view',
+          id: 'default',
+        },
+      ];
+
+      test('should migrate and add the logView param and its reference', () => {
+        const migration870 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0']
+        );
+        const rule = getMockData({ params, alertTypeId: logThresholdAlertTypeId }, true);
+        const migratedAlert870 = migration870(rule, migrationContext);
+
+        expect(migratedAlert870.attributes.params).toEqual({
+          ...params,
+          logView,
+        });
+        expect(migratedAlert870.references).toEqual(references);
       });
 
-      test('works as expected if isSnoozedUntil is not populated', () => {
-        const migration841 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.4.1'
-        ];
-        const mutedAlert = getMockData({}, true);
-        expect(mutedAlert.attributes.isSnoozedUntil).toBeFalsy();
-        expect(() => migration841(mutedAlert, migrationContext)).not.toThrowError();
+      test('should not migrate the rule if is not of type logs.alert.document.count', () => {
+        const migration870 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0']
+        );
+        const rule = getMockData({ params, alertTypeId: `not-${logThresholdAlertTypeId}` }, true);
+        const migratedAlert870 = migration870(rule, migrationContext);
+
+        expect(migratedAlert870.attributes.params).toEqual(params);
+        expect(migratedAlert870.references).toEqual([]);
       });
     });
 
-    describe('Metrics Inventory Threshold rule', () => {
-      test('Migrates incorrect action group spelling', () => {
-        const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.0.0'
-        ];
+    test('migrates last run outcome order', () => {
+      const migration870 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0']
+      );
 
-        const actions = [
-          {
-            group: 'metrics.invenotry_threshold.fired',
-            params: {
-              level: 'info',
-              message:
-                '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
-            },
-            actionRef: 'action_0',
-            actionTypeId: '.server-log',
-          },
-        ];
+      // Failed rule
+      const failedRule = getMockData({ lastRun: { outcome: 'failed' } });
+      const failedRule870 = migration870(failedRule, migrationContext);
+      expect(failedRule870.attributes.lastRun).toEqual({ outcome: 'failed', outcomeOrder: 20 });
 
-        const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
+      // Rule with warnings
+      const warningRule = getMockData({ lastRun: { outcome: 'warning' } });
+      const warningRule870 = migration870(warningRule, migrationContext);
+      expect(warningRule870.attributes.lastRun).toEqual({ outcome: 'warning', outcomeOrder: 10 });
 
-        expect(migration800(alert, migrationContext)).toMatchObject({
-          ...alert,
-          attributes: {
-            ...alert.attributes,
-            actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
-          },
-        });
+      // Succeeded rule
+      const succeededRule = getMockData({ lastRun: { outcome: 'succeeded' } });
+      const succeededRule870 = migration870(succeededRule, migrationContext);
+      expect(succeededRule870.attributes.lastRun).toEqual({
+        outcome: 'succeeded',
+        outcomeOrder: 0,
+      });
+    });
+  });
+
+  describe('8.8.0', () => {
+    test('adds uuid to rule actions', () => {
+      const migration880 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0']
+      );
+      const rule = getMockData(
+        {
+          params: { foo: true },
+          alertTypeId: '.not-es-query',
+        },
+        true
+      );
+      const migratedAlert880 = migration880(rule, migrationContext);
+
+      expect(migratedAlert880.attributes.actions).toEqual([
+        {
+          group: 'default',
+          actionRef: '1',
+          actionTypeId: '1',
+          params: { foo: true },
+          uuid: expect.stringMatching(/.*\S.*/), // non-empty string
+        },
+      ]);
+    });
+
+    describe('security rule version to revision', () => {
+      test('migrates rule to include revision and defaults revision to 0', () => {
+        const migration880 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0']
+        );
+
+        const rule = getMockData();
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.revision).toEqual(0);
       });
 
-      test('Works with the correct action group spelling', () => {
-        const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.0.0'
-        ];
+      test('migrates security rule version to revision', () => {
+        const migration880 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0']
+        );
 
-        const actions = [
-          {
-            group: 'metrics.inventory_threshold.fired',
-            params: {
-              level: 'info',
-              message:
-                '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
-            },
-            actionRef: 'action_0',
-            actionTypeId: '.server-log',
-          },
-        ];
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, params: { version: 2 } });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.revision).toEqual(2);
+      });
+    });
 
-        const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
+    describe('migrate actions frequency for Security Solution ', () => {
+      test('Add frequency when throttle is null', () => {
+        const migration880 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0']
+        );
 
-        expect(migration800(alert, migrationContext)).toMatchObject({
-          ...alert,
-          attributes: {
-            ...alert.attributes,
-            actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
-          },
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.actions[0].frequency.summary).toEqual(true);
+        expect(migratedAlert880.attributes.actions[0].frequency.notifyWhen).toEqual(
+          'onActiveAlert'
+        );
+        expect(migratedAlert880.attributes.actions[0].frequency.throttle).toEqual(null);
+      });
+
+      test('Add frequency when throttle is 1h', () => {
+        const migration880 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0']
+        );
+
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, throttle: '1h' });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.actions[0].frequency.summary).toEqual(true);
+        expect(migratedAlert880.attributes.actions[0].frequency.notifyWhen).toEqual(
+          'onThrottleInterval'
+        );
+        expect(migratedAlert880.attributes.actions[0].frequency.throttle).toEqual('1h');
+      });
+
+      test('Do not migrate action when alert does NOT belong to security solution', () => {
+        const migration880 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0']
+        );
+
+        const rule = getMockData();
+        const migratedAlert880 = migration880(rule, migrationContext);
+        const updatedActions = migratedAlert880.attributes.actions.map(
+          (action: { [x: string]: unknown; uuid: unknown }) => {
+            const { uuid, ...updatedAction } = action;
+            return updatedAction;
+          }
+        );
+        expect(updatedActions).toEqual(rule.attributes.actions);
+      });
+    });
+
+    describe('unmute security rules', () => {
+      test.each(Object.values(ruleTypeMappings))(
+        'unmutes custom rules of type "%s" successfully',
+        (ruleType) => {
+          const migration880 = SavedObjectsUtils.getMigrationFunction(
+            getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0']
+          );
+
+          const rule = getMockData({ alertTypeId: ruleType, muteAll: true });
+          const migratedAlert880 = migration880(rule, migrationContext);
+
+          expect(migratedAlert880.attributes.muteAll).toBeFalsy();
+        }
+      );
+
+      test('ignores non security rules', () => {
+        const migration880 = SavedObjectsUtils.getMigrationFunction(
+          getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0']
+        );
+
+        const rule = getMockData({
+          alertTypeId: 'unknown',
+          muteAll: true,
         });
+        const migratedAlert880 = migration880(rule, migrationContext);
+
+        expect(migratedAlert880.attributes.muteAll).toBeTruthy();
+      });
+    });
+  });
+
+  describe('Metrics Inventory Threshold rule', () => {
+    test('Migrates incorrect action group spelling', () => {
+      const migration800 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0']
+      );
+
+      const actions = [
+        {
+          group: 'metrics.invenotry_threshold.fired',
+          params: {
+            level: 'info',
+            message:
+              '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
+          },
+          actionRef: 'action_0',
+          actionTypeId: '.server-log',
+        },
+      ];
+
+      const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
+
+      expect(migration800(alert, migrationContext)).toMatchObject({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
+        },
+      });
+    });
+
+    test('Works with the correct action group spelling', () => {
+      const migration800 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0']
+      );
+
+      const actions = [
+        {
+          group: 'metrics.inventory_threshold.fired',
+          params: {
+            level: 'info',
+            message:
+              '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
+          },
+          actionRef: 'action_0',
+          actionTypeId: '.server-log',
+        },
+      ];
+
+      const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
+
+      expect(migration800(alert, migrationContext)).toMatchObject({
+        ...alert,
+        attributes: {
+          ...alert.attributes,
+          actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
+        },
       });
     });
   });
@@ -2511,7 +2925,10 @@ describe('search source migration', () => {
     );
 
     expect(
-      migrations[versionToTest](esQueryRuleSavedObject, {} as SavedObjectMigrationContext)
+      SavedObjectsUtils.getMigrationFunction(migrations[versionToTest])(
+        esQueryRuleSavedObject,
+        {} as SavedObjectMigrationContext
+      )
     ).toEqual({
       attributes: {
         params: {
@@ -2543,7 +2960,10 @@ describe('search source migration', () => {
     );
 
     expect(
-      migrations[versionToTest](esQueryRuleSavedObject, {} as SavedObjectMigrationContext)
+      SavedObjectsUtils.getMigrationFunction(migrations[versionToTest])(
+        esQueryRuleSavedObject,
+        {} as SavedObjectMigrationContext
+      )
     ).toEqual({
       attributes: {
         params: {
@@ -2563,7 +2983,9 @@ describe('handles errors during migrations', () => {
   });
   describe('7.10.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0'];
+      const migration710 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.10.0']
+      );
       const alert = getMockData({
         consumer: 'alerting',
       });
@@ -2588,7 +3010,9 @@ describe('handles errors during migrations', () => {
 
   describe('7.11.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0'];
+      const migration711 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.0']
+      );
       const alert = getMockData({
         consumer: 'alerting',
       });
@@ -2613,9 +3037,9 @@ describe('handles errors during migrations', () => {
 
   describe('7.11.2 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.11.2'
-      ];
+      const migration7112 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.11.2']
+      );
       const alert = getMockData({
         consumer: 'alerting',
       });
@@ -2640,9 +3064,9 @@ describe('handles errors during migrations', () => {
 
   describe('7.13.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration7130 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.13.0'
-      ];
+      const migration7130 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.13.0']
+      );
       const alert = getMockData({
         consumer: 'alerting',
       });
@@ -2667,9 +3091,9 @@ describe('handles errors during migrations', () => {
 
   describe('7.16.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-        '7.16.0'
-      ];
+      const migration7160 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['7.16.0']
+      );
       const rule = getMockData();
       expect(() => {
         migration7160(rule, migrationContext);
@@ -2708,15 +3132,17 @@ describe('handles errors during migrations', () => {
       };
 
       const versionToTest = '8.3.0';
-      const migration830 = getMigrations(
-        encryptedSavedObjectsSetup,
-        {
-          [versionToTest]: () => {
-            throw new Error(`Can't migrate search source!`);
+      const migration830 = SavedObjectsUtils.getMigrationFunction(
+        getMigrations(
+          encryptedSavedObjectsSetup,
+          {
+            [versionToTest]: () => {
+              throw new Error(`Can't migrate search source!`);
+            },
           },
-        },
-        isPreconfigured
-      )[versionToTest];
+          isPreconfigured
+        )[versionToTest]
+      );
 
       expect(() => {
         migration830(rule, migrationContext);
@@ -2775,12 +3201,13 @@ function getMockData(
           params: {
             foo: true,
           },
-        },
+        } as unknown as RawRuleAction,
       ],
       ...overwrites,
     },
+    references: [],
     updated_at: withSavedObjectUpdatedAt ? getUpdatedAt() : undefined,
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'alert',
   };
 }

@@ -24,7 +24,7 @@ export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error, onB
 
   return (
     <EuiCallOut
-      iconType="alert"
+      iconType="warning"
       color="danger"
       title={i18n.translate('console.loadingError.title', {
         defaultMessage: 'Cannot load Console',

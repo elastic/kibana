@@ -21,9 +21,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { SpanLinkDetails } from '../../../../common/span_links';
 import { asDuration } from '../../../../common/utils/formatters';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { ServiceLink } from '../service_link';
+import { ServiceLink } from '../links/apm/service_link';
 import { getSpanIcon } from '../span_icon/get_span_icon';
 
 interface Props {
@@ -34,7 +34,10 @@ export function SpanLinksTable({ items }: Props) {
   const router = useApmRouter();
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
   const [idActionMenuOpen, setIdActionMenuOpen] = useState<
     string | undefined
   >();
@@ -99,6 +102,7 @@ export function SpanLinksTable({ items }: Props) {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink
+                  data-test-subj="apmColumnsLink"
                   href={router.link('/link-to/transaction/{transactionId}', {
                     path: { transactionId: details.transactionId },
                     query: { waterfallItemId: spanId },
@@ -154,6 +158,7 @@ export function SpanLinksTable({ items }: Props) {
               {details?.transactionId && (
                 <EuiFlexItem>
                   <EuiLink
+                    data-test-subj="apmColumnsGoToTraceLink"
                     href={router.link('/link-to/transaction/{transactionId}', {
                       path: { transactionId: details.transactionId },
                     })}
@@ -169,6 +174,7 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiCopy textToCopy={traceId}>
                   {(copy) => (
                     <EuiButtonEmpty
+                      data-test-subj="apmColumnsCopyParentTraceIdButton"
                       onClick={() => {
                         copy();
                         setIdActionMenuOpen(undefined);
@@ -186,6 +192,7 @@ export function SpanLinksTable({ items }: Props) {
               {details?.transactionId && (
                 <EuiFlexItem>
                   <EuiLink
+                    data-test-subj="apmColumnsGoToSpanDetailsLink"
                     href={router.link('/link-to/transaction/{transactionId}', {
                       path: { transactionId: details.transactionId },
                       query: { waterfallItemId: spanId },
@@ -202,6 +209,7 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiCopy textToCopy={spanId}>
                   {(copy) => (
                     <EuiButtonEmpty
+                      data-test-subj="apmColumnsCopySpanIdButton"
                       onClick={() => {
                         copy();
                         setIdActionMenuOpen(undefined);

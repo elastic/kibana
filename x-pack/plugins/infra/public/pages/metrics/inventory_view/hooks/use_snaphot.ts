@@ -12,28 +12,39 @@ import { useEffect } from 'react';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
-  SnapshotNodeResponseRT,
-  SnapshotNodeResponse,
-  SnapshotGroupBy,
-  SnapshotRequest,
   InfraTimerangeInput,
+  SnapshotNodeResponseRT,
+  SnapshotRequest,
 } from '../../../../../common/http_api/snapshot_api';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-} from '../../../../../common/inventory_models/types';
+
+export interface UseSnapshotRequest
+  extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
+  filterQuery: string | null | symbol | undefined;
+  currentTime: number;
+  sendRequestImmediately?: boolean;
+  includeTimeseries?: boolean;
+  timerange?: InfraTimerangeInput;
+  requestTs?: number;
+}
+
+export interface UseSnapshotRequestOptions {
+  abortable?: boolean;
+}
 
 export function useSnapshot(
-  filterQuery: string | null | symbol | undefined,
-  metrics: Array<{ type: SnapshotMetricType }>,
-  groupBy: SnapshotGroupBy,
-  nodeType: InventoryItemType,
-  sourceId: string,
-  currentTime: number,
-  accountId: string,
-  region: string,
-  sendRequestImmediatly = true,
-  timerange?: InfraTimerangeInput
+  {
+    timerange,
+    currentTime,
+    accountId = '',
+    region = '',
+    groupBy = null,
+    sendRequestImmediately = true,
+    includeTimeseries = true,
+    dropPartialBuckets = true,
+    requestTs,
+    ...args
+  }: UseSnapshotRequest,
+  options?: UseSnapshotRequestOptions
 ) {
   const decodeResponse = (response: any) => {
     return pipe(
@@ -42,37 +53,39 @@ export function useSnapshot(
     );
   };
 
-  timerange = timerange || {
-    interval: '1m',
-    to: currentTime,
-    from: currentTime - 1200 * 1000,
-    lookbackSize: 5,
+  const payload: Omit<SnapshotRequest, 'filterQuery'> = {
+    ...args,
+    accountId,
+    region,
+    groupBy,
+    timerange: timerange ?? {
+      interval: '1m',
+      to: currentTime,
+      from: currentTime - 1200 * 1000,
+      lookbackSize: 5,
+    },
+    includeTimeseries,
+    dropPartialBuckets,
   };
 
-  const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
+  const { error, loading, response, makeRequest, resetRequestState } = useHTTPRequest(
     '/api/metrics/snapshot',
     'POST',
-    JSON.stringify({
-      metrics,
-      groupBy,
-      nodeType,
-      timerange,
-      filterQuery,
-      sourceId,
-      accountId,
-      region,
-      includeTimeseries: true,
-    } as SnapshotRequest),
-    decodeResponse
+    JSON.stringify(payload),
+    decodeResponse,
+    undefined,
+    undefined,
+    options?.abortable
   );
 
   useEffect(() => {
-    (async () => {
-      if (sendRequestImmediatly) {
-        await makeRequest();
-      }
-    })();
-  }, [makeRequest, sendRequestImmediatly]);
+    if (sendRequestImmediately) {
+      makeRequest();
+    }
+    return () => {
+      resetRequestState();
+    };
+  }, [makeRequest, sendRequestImmediately, resetRequestState, requestTs]);
 
   return {
     error: (error && error.message) || null,

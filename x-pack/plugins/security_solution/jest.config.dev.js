@@ -9,8 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../',
   projects: [
-    '<rootDir>/x-pack/plugins/security_solution/*/jest.config.js',
-
+    '<rootDir>/x-pack/plugins/security_solution/common/*/jest.config.js',
     '<rootDir>/x-pack/plugins/security_solution/server/*/jest.config.js',
     '<rootDir>/x-pack/plugins/security_solution/public/*/jest.config.js',
   ],

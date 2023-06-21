@@ -8,6 +8,7 @@
 
 import './collapsible_nav.scss';
 import {
+  EuiThemeProvider,
   EuiCollapsibleNav,
   EuiCollapsibleNavGroup,
   EuiFlexItem,
@@ -19,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
-import React, { Fragment, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -160,37 +161,38 @@ export function CollapsibleNav({
       button={button}
       ownFocus={false}
       size={248}
+      className="kbnCollapsibleNav"
     >
       {customNavLink && (
-        <Fragment>
+        <>
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <EuiCollapsibleNavGroup
               background="dark"
               className="eui-yScroll"
               style={{ maxHeight: '40vh' }}
             >
-              <EuiListGroup
-                listItems={[
-                  createEuiListItem({
-                    link: customNavLink,
-                    basePath,
-                    navigateToUrl,
-                    dataTestSubj: 'collapsibleNavCustomNavLink',
-                    onClick: closeNav,
-                    externalLink: true,
-                    iconProps: { color: 'ghost' },
-                  }),
-                ]}
-                maxWidth="none"
-                gutterSize="none"
-                size="s"
-                color="ghost"
-              />
+              <EuiThemeProvider colorMode="dark">
+                <EuiListGroup
+                  listItems={[
+                    createEuiListItem({
+                      link: customNavLink,
+                      basePath,
+                      navigateToUrl,
+                      dataTestSubj: 'collapsibleNavCustomNavLink',
+                      onClick: closeNav,
+                      externalLink: true,
+                    }),
+                  ]}
+                  maxWidth="none"
+                  gutterSize="none"
+                  size="s"
+                />
+              </EuiThemeProvider>
             </EuiCollapsibleNavGroup>
           </EuiFlexItem>
 
           <EuiHorizontalRule margin="none" />
-        </Fragment>
+        </>
       )}
 
       {/* Pinned items */}
@@ -279,7 +281,7 @@ export function CollapsibleNav({
 
       <EuiHorizontalRule margin="none" />
 
-      <EuiFlexItem className="eui-yScroll">
+      <EuiFlexItem className="kbnCollapsibleNav__solutions">
         {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;

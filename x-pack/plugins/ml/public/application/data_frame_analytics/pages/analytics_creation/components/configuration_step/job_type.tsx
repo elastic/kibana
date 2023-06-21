@@ -9,8 +9,10 @@ import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiCard, EuiIcon, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import {
+  type DataFrameAnalysisConfigType,
+  ANALYSIS_CONFIG_TYPE,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
@@ -30,7 +32,7 @@ type JobDetails = Record<DataFrameAnalysisConfigType, Details>;
 const jobDetails: JobDetails = {
   [ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION]: {
     helpText: i18n.translate('xpack.ml.dataframe.analytics.create.outlierDetectionHelpText', {
-      defaultMessage: 'Outlier detection identifies unusual data points in the data set.',
+      defaultMessage: 'Identify unusual data points in the data set.',
     }),
     icon: 'outlierDetectionJob',
     title: i18n.translate('xpack.ml.dataframe.analytics.create.outlierDetectionTitle', {
@@ -39,7 +41,7 @@ const jobDetails: JobDetails = {
   },
   [ANALYSIS_CONFIG_TYPE.REGRESSION]: {
     helpText: i18n.translate('xpack.ml.dataframe.analytics.create.regressionHelpText', {
-      defaultMessage: 'Regression predicts numerical values in the data set.',
+      defaultMessage: 'Predict numerical values in the data set.',
     }),
     icon: 'regressionJob',
     title: i18n.translate('xpack.ml.dataframe.analytics.create.regressionTitle', {
@@ -48,7 +50,7 @@ const jobDetails: JobDetails = {
   },
   [ANALYSIS_CONFIG_TYPE.CLASSIFICATION]: {
     helpText: i18n.translate('xpack.ml.dataframe.analytics.create.classificationHelpText', {
-      defaultMessage: 'Classification predicts classes of data points in the data set.',
+      defaultMessage: 'Predict classes of data points in the data set.',
     }),
     icon: 'classificationJob',
     title: i18n.translate('xpack.ml.dataframe.analytics.create.classificationTitle', {

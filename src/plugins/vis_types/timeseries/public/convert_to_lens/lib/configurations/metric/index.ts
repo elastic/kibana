@@ -10,7 +10,7 @@ import color from 'color';
 import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { Panel } from '../../../../../common/types';
 import { Column, Layer } from '../../convert';
-import { getPalette } from './palette';
+import { getPalette } from '../palette';
 import { findMetricColumn, getMetricWithCollapseFn } from '../../../utils';
 
 export const getConfigurationForMetric = (
@@ -52,7 +52,7 @@ export const getConfigurationForGauge = (
   model: Panel,
   layer: Layer,
   bucket: Column | undefined,
-  gaugeMaxColumn: Column
+  gaugeMaxColumn?: Column
 ): MetricVisConfiguration | null => {
   const primarySeries = model.series[0];
   const primaryMetricWithCollapseFn = getMetricWithCollapseFn(primarySeries);
@@ -73,7 +73,8 @@ export const getConfigurationForGauge = (
     layerType: 'data',
     metricAccessor: primaryColumn?.columnId,
     breakdownByAccessor: bucket?.columnId,
-    maxAccessor: gaugeMaxColumn.columnId,
+    maxAccessor: gaugeMaxColumn?.columnId,
+    showBar: Boolean(gaugeMaxColumn),
     palette: gaugePalette,
     collapseFn: primaryMetricWithCollapseFn.collapseFn,
     ...(gaugePalette ? {} : { color: primaryColor }),

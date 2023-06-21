@@ -257,6 +257,20 @@ describe('Put payload schema', () => {
               query: `{ "match": { "title": "foo" } }`,
             },
           ],
+
+          remote_indices: [
+            {
+              field_security: {
+                grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                except: ['test-field-security-except-1', 'test-field-security-except-2'],
+              },
+              clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
+              names: ['test-index-name-1', 'test-index-name-2'],
+              privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+              query: `{ "match": { "title": "foo" } }`,
+            },
+          ],
+
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
         kibana: [
@@ -284,6 +298,33 @@ describe('Put payload schema', () => {
           ],
           "indices": Array [
             Object {
+              "field_security": Object {
+                "except": Array [
+                  "test-field-security-except-1",
+                  "test-field-security-except-2",
+                ],
+                "grant": Array [
+                  "test-field-security-grant-1",
+                  "test-field-security-grant-2",
+                ],
+              },
+              "names": Array [
+                "test-index-name-1",
+                "test-index-name-2",
+              ],
+              "privileges": Array [
+                "test-index-privilege-1",
+                "test-index-privilege-2",
+              ],
+              "query": "{ \\"match\\": { \\"title\\": \\"foo\\" } }",
+            },
+          ],
+          "remote_indices": Array [
+            Object {
+              "clusters": Array [
+                "test-cluster-name-1",
+                "test-cluster-name-2",
+              ],
               "field_security": Object {
                 "except": Array [
                   "test-field-security-except-1",
@@ -345,6 +386,49 @@ describe('Put payload schema', () => {
         "metadata": Object {
           "foo": "test-metadata",
         },
+      }
+    `);
+  });
+
+  test('passes through remote_indices when specified', () => {
+    expect(
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          remote_indices: [
+            {
+              clusters: ['remote_cluster'],
+              names: ['remote_index'],
+              privileges: ['all'],
+            },
+          ],
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {
+          "remote_indices": Array [
+            Object {
+              "clusters": Array [
+                "remote_cluster",
+              ],
+              "names": Array [
+                "remote_index",
+              ],
+              "privileges": Array [
+                "all",
+              ],
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  // This is important for backwards compatibility
+  test('does not set default value for remote_indices when not specified', () => {
+    expect(getPutPayloadSchema(() => basePrivilegeNamesMap).validate({})).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {},
       }
     `);
   });
@@ -464,6 +548,88 @@ describe('validateKibanaPrivileges', () => {
     ).toEqual([
       `Feature privilege [foo.all] requires all spaces to be selected but received [foo-space]`,
       `Feature [foo] does not support privilege [read].`,
+    ]);
+  });
+
+  const fooSubFeature = new KibanaFeature({
+    id: 'foo',
+    name: 'Foo',
+    privileges: {
+      all: {
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+      read: {
+        disabled: true,
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+    subFeatures: [
+      {
+        name: 'Require All Spaces Enabled',
+        requireAllSpaces: true,
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'test',
+                name: 'foo',
+                includeIn: 'none',
+                ui: ['test-ui'],
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    app: [],
+    category: { id: 'foo', label: 'foo' },
+  });
+
+  test('returns no error when subfeature requireAllSpaces enabled and all spaces selected', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooSubFeature],
+        [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: {
+              foo: ['all', 'test'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([]);
+  });
+  test('returns error when subfeature requireAllSpaces enabled but not all spaces selected', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooSubFeature],
+        [
+          {
+            spaces: ['foo-space'],
+            base: [],
+            feature: {
+              foo: ['all', 'test'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([
+      'Sub-feature privilege [Foo - Require All Spaces Enabled] requires all spaces to be selected but received [foo-space]',
     ]);
   });
 });

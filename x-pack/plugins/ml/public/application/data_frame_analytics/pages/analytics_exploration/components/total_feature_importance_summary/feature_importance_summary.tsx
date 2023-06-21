@@ -6,8 +6,8 @@
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+
+import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
 import {
   Chart,
   Settings,
@@ -20,23 +20,26 @@ import {
   PartialTheme,
   BarSeriesProps,
 } from '@elastic/charts';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
-  TotalFeatureImportance,
+  getAnalysisType,
+  isClassificationAnalysis,
   isClassificationTotalFeatureImportance,
+  isRegressionAnalysis,
   isRegressionTotalFeatureImportance,
-  RegressionTotalFeatureImportance,
-  ClassificationTotalFeatureImportance,
-  FeatureImportanceClassName,
-} from '../../../../../../../common/types/feature_importance';
+  type DataFrameAnalyticsConfig,
+  type TotalFeatureImportance,
+  type RegressionTotalFeatureImportance,
+  type ClassificationTotalFeatureImportance,
+  type FeatureImportanceClassName,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { ExpandableSection } from '../expandable_section';
-import { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
-import { getAnalysisType } from '../../../../common';
-import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
 
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -261,13 +264,16 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
             target="_blank"
             iconType="help"
             iconSide="left"
+            size="xs"
             color="primary"
             href={docLink}
           >
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.exploration.featureImportanceDocsLink"
-              defaultMessage="Feature importance docs"
-            />
+            <EuiText size="xs" color="primary">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.exploration.featureImportanceDocsLink"
+                defaultMessage="Feature importance docs"
+              />
+            </EuiText>
           </EuiButtonEmpty>
         }
         headerItems={[

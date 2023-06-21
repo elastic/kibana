@@ -163,24 +163,110 @@ exports[`<CodeEditor /> is rendered 1`] = `
       display="block"
       position="top"
     >
-      <span
-        className="euiToolTipAnchor euiToolTipAnchor--displayBlock"
+      <EuiToolTipAnchor
+        display="block"
+        id="generated-id"
+        isVisible={false}
+        onBlur={[Function]}
+        onFocus={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
-        <div
-          aria-label="Code Editor"
-          className="kibanaCodeEditor__keyboardHint"
-          data-test-subj="codeEditorHint"
-          id="1234"
-          onBlur={[Function]}
-          onClick={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          role="button"
-          tabIndex={0}
-        />
-      </span>
+        <span
+          css="unknown styles"
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          <Insertion
+            cache={
+              Object {
+                "insert": [Function],
+                "inserted": Object {
+                  "uuw4g3-euiToolTipAnchor-block": true,
+                },
+                "key": "css",
+                "nonce": undefined,
+                "registered": Object {},
+                "sheet": StyleSheet {
+                  "_alreadyInsertedOrderInsensitiveRule": true,
+                  "_insertTag": [Function],
+                  "before": null,
+                  "container": <head>
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block{display:block;}
+                    </style>
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block *[disabled]{pointer-events:none;}
+                    </style>
+                    <style
+                      data-styled="active"
+                      data-styled-version="5.1.0"
+                    />
+                  </head>,
+                  "ctr": 2,
+                  "insertionPoint": undefined,
+                  "isSpeedy": false,
+                  "key": "css",
+                  "nonce": undefined,
+                  "prepend": undefined,
+                  "tags": Array [
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block{display:block;}
+                    </style>,
+                    <style
+                      data-emotion="css"
+                      data-s=""
+                    >
+                      
+                      .emotion-euiToolTipAnchor-block *[disabled]{pointer-events:none;}
+                    </style>,
+                  ],
+                },
+              }
+            }
+            isStringTag={true}
+            serialized={
+              Object {
+                "map": undefined,
+                "name": "uuw4g3-euiToolTipAnchor-block",
+                "next": undefined,
+                "styles": "*[disabled]{pointer-events:none;};label:euiToolTipAnchor;;;display:block;label:block;;;",
+                "toString": [Function],
+              }
+            }
+          />
+          <span
+            className="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <div
+              aria-label="Code Editor"
+              className="kibanaCodeEditor__keyboardHint"
+              data-test-subj="codeEditorHint"
+              id="1234"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
+          </span>
+        </span>
+      </EuiToolTipAnchor>
     </EuiToolTip>
     <Component>
       <mockMonacoEditor

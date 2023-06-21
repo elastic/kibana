@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React from 'react';
 import type { CaseSeverity } from '../../../common/api';
 import { SeveritySelector } from './selector';
@@ -36,7 +36,6 @@ export const SeveritySidebarSelector: React.FC<Props> = ({
         onSeverityChange={onSeverityChange}
         isDisabled={isDisabled}
       />
-      <EuiSpacer size="m" />
     </EuiFlexItem>
   );
 };

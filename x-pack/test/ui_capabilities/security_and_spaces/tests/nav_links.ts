@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { NavLinksBuilder } from '../../common/nav_links_builder';
 import { FeaturesService } from '../../common/services';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import { UnreachableError } from '../../common/lib';
 import { UserAtSpaceScenarios } from '../scenarios';
 
 export default function navLinksTests({ getService }: FtrProviderContext) {
@@ -44,6 +45,21 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('monitoring'));
             break;
           case 'everything_space_all at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except(
+                'monitoring',
+                'enterpriseSearch',
+                'enterpriseSearchContent',
+                'enterpriseSearchAnalytics',
+                'enterpriseSearchApplications',
+                'enterpriseSearchEsre',
+                'appSearch',
+                'workplaceSearch'
+              )
+            );
+            break;
           case 'global_read at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'everything_space_read at everything_space':
@@ -55,8 +71,11 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 'enterpriseSearch',
                 'enterpriseSearchContent',
                 'enterpriseSearchAnalytics',
+                'enterpriseSearchApplications',
+                'enterpriseSearchEsre',
                 'appSearch',
-                'workplaceSearch'
+                'workplaceSearch',
+                'guidedOnboardingFeature'
               )
             );
             break;

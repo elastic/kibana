@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
+import ace, { type Annotation } from 'brace';
 import { Editor as IAceEditor, IEditSession as IAceEditSession } from 'brace';
 import $ from 'jquery';
 import {
@@ -21,8 +21,6 @@ import {
 import { AceTokensProvider } from '../../../lib/ace_token_provider';
 import * as curl from '../sense_editor/curl';
 import smartResize from './smart_resize';
-
-// @ts-ignore
 import * as InputMode from './mode/input';
 
 const _AceRange = ace.acequire('ace/range').Range;
@@ -40,6 +38,9 @@ export class LegacyCoreEditor implements CoreEditor {
     this.editor.setShowPrintMargin(false);
 
     const session = this.editor.getSession();
+    // @ts-expect-error
+    // ignore ts error here due to type definition mistake in brace for setMode(mode: string): void;
+    // this method accepts string or SyntaxMode which is an object. See https://github.com/ajaxorg/ace/blob/13dc911dbc0ea31ca343d5744b3f472767458fc3/ace.d.ts#L467
     session.setMode(new InputMode.Mode());
     (session as unknown as { setFoldStyle: (style: string) => void }).setFoldStyle('markbeginend');
     session.setTabSize(2);
@@ -402,8 +403,7 @@ export class LegacyCoreEditor implements CoreEditor {
         getCompletions: (
           // eslint-disable-next-line @typescript-eslint/naming-convention
           DO_NOT_USE_1: IAceEditor,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          DO_NOT_USE_2: IAceEditSession,
+          aceEditSession: IAceEditSession,
           pos: { row: number; column: number },
           prefix: string,
           callback: (...args: unknown[]) => void
@@ -412,7 +412,30 @@ export class LegacyCoreEditor implements CoreEditor {
             lineNumber: pos.row + 1,
             column: pos.column + 1,
           };
-          autocompleter(position, prefix, callback);
+
+          const getAnnotationControls = () => {
+            let customAnnotation: Annotation;
+            return {
+              setAnnotation(text: string) {
+                const annotations = aceEditSession.getAnnotations();
+                customAnnotation = {
+                  text,
+                  row: pos.row,
+                  column: pos.column,
+                  type: 'warning',
+                };
+
+                aceEditSession.setAnnotations([...annotations, customAnnotation]);
+              },
+              removeAnnotation() {
+                aceEditSession.setAnnotations(
+                  aceEditSession.getAnnotations().filter((a: Annotation) => a !== customAnnotation)
+                );
+              },
+            };
+          };
+
+          autocompleter(position, prefix, callback, getAnnotationControls());
         },
       },
     ]);
@@ -477,7 +500,11 @@ export class LegacyCoreEditor implements CoreEditor {
   addFoldsAtRanges(foldRanges: Range[]) {
     const session = this.editor.getSession();
     foldRanges.forEach((range) => {
-      session.addFold('...', _AceRange.fromPoints(range.start, range.end));
+      try {
+        session.addFold('...', _AceRange.fromPoints(range.start, range.end));
+      } catch (e) {
+        // ignore the error if a fold fails
+      }
     });
   }
 }

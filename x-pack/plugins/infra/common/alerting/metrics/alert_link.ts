@@ -6,7 +6,7 @@
  */
 
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 
@@ -15,22 +15,14 @@ export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unkno
     const objectKey = pKey.length ? `${pKey}.${key}` : key;
     if (typeof field === 'object' && field != null) {
       if (Array.isArray(field) && field.length > 0) {
-        return {
-          ...acc,
-          ...flatAlertRuleParams(field[0] as {}, objectKey),
-        };
+        return Object.assign(acc, flatAlertRuleParams(field[0] as {}, objectKey));
       } else {
-        return {
-          ...acc,
-          ...flatAlertRuleParams(field as {}, objectKey),
-        };
+        return Object.assign(acc, flatAlertRuleParams(field as {}, objectKey));
       }
     }
-    return {
-      ...acc,
-      [objectKey]: Array.isArray(field) ? field : [field],
-    };
-  }, {});
+    acc[objectKey] = Array.isArray(field) ? field : [field];
+    return acc;
+  }, {} as Record<string, unknown[]>);
 };
 
 export const getInventoryViewInAppUrl = (

@@ -7,7 +7,7 @@
  */
 
 import { getFormatService } from '../services';
-import { buildHierarchicalData, buildPointSeriesData } from './helpers';
+import { buildPointSeriesData } from './helpers';
 
 function tableResponseHandler(table, dimensions) {
   const converted = { tables: [] };
@@ -112,5 +112,3 @@ function handlerFunction(convertTable) {
 }
 
 export const vislibSeriesResponseHandler = handlerFunction(buildPointSeriesData);
-
-export const vislibSlicesResponseHandler = handlerFunction(buildHierarchicalData);

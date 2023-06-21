@@ -68,7 +68,7 @@ export const createDeleteActionDescriptor = (
   uiSession: UISession,
   core: CoreStart
 ): IClickActionDescriptor => ({
-  iconType: 'crossInACircleFilled',
+  iconType: 'trash',
   label: <FormattedMessage id="data.mgmt.searchSessions.actionDelete" defaultMessage="Delete" />,
   onClick: async () => {
     const ref = core.overlays.openModal(

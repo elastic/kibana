@@ -14,6 +14,13 @@ export const MESSAGE = i18n.translate(
   }
 );
 
+export const OPEN_ALERT_DETAILS_PAGE = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.openAlertDetails',
+  {
+    defaultMessage: 'Open alert details page',
+  }
+);
+
 export const CLOSE = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.closeEventDetailsLabel',
   {
@@ -39,5 +46,12 @@ export const ALERT_DETAILS = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.alertTitleLabel',
   {
     defaultMessage: 'Alert details',
+  }
+);
+
+export const SHARE_ALERT = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.shareAlert',
+  {
+    defaultMessage: 'Share alert',
   }
 );

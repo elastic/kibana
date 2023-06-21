@@ -121,6 +121,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
+        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
       });
@@ -133,6 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
+        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
       });
@@ -145,6 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
+        await PageObjects.header.awaitKibanaChrome();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(true);
@@ -152,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('preloads search filter bar when there is no match', async function () {
         const searchFilter = await listingTable.getSearchFilterValue();
-        expect(searchFilter).to.equal('"nodashboardsnamedme"');
+        expect(searchFilter).to.equal('nodashboardsnamedme');
       });
 
       it('stays on listing page if title matches two dashboards', async function () {
@@ -165,6 +170,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
+        await PageObjects.header.awaitKibanaChrome();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(true);
@@ -172,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('preloads search filter bar when there is more than one match', async function () {
         const searchFilter = await listingTable.getSearchFilterValue();
-        expect(searchFilter).to.equal('"two words"');
+        expect(searchFilter).to.equal('two words');
       });
 
       it('matches a title with many special characters', async function () {
@@ -188,6 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
+        await PageObjects.header.awaitKibanaChrome();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);

@@ -16,33 +16,47 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import styled from 'styled-components';
+
+import { useCheckEndpointPermissions } from './endpoint/check_permissions';
+import { EndpointResponseAction } from './endpoint/endpoint_response_action';
+import type { RuleResponseAction } from '../../../common/detection_engine/rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from '../../../common/detection_engine/rule_response_actions/schemas';
-import type { ResponseActionValidatorRef } from './response_actions_form';
 import { OsqueryResponseAction } from './osquery/osquery_response_action';
 import { getActionDetails } from './constants';
 import { useFormData } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';
 
-interface IProps {
+interface ResponseActionTypeFormProps {
   item: ArrayItem;
   onDeleteAction: (id: number) => void;
-  formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 
-export const ResponseActionTypeForm = React.memo((props: IProps) => {
-  const { item, onDeleteAction, formRef } = props;
+const StyledEuiAccordion = styled(EuiAccordion)`
+  background: ${({ theme }) => theme.eui.euiColorLightestShade};
+
+  .euiAccordion__buttonContent {
+    padding: ${({ theme }) => theme.eui.euiSizeM};
+  }
+`;
+
+const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActionTypeFormProps) => {
   const [_isOpen, setIsOpen] = useState(true);
 
   const [data] = useFormData();
-  const action = get(data, item.path);
+  const action: RuleResponseAction = get(data, item.path);
+  const editDisabled = useCheckEndpointPermissions(action) ?? false;
 
-  const getResponseActionTypeForm = useCallback(() => {
+  const getResponseActionTypeForm = useMemo(() => {
     if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
-      return <OsqueryResponseAction item={item} formRef={formRef} />;
+      return <OsqueryResponseAction item={item} />;
+    }
+    if (action?.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT) {
+      return <EndpointResponseAction item={item} editDisabled={editDisabled} />;
     }
     // Place for other ResponseActionTypes
     return null;
-  }, [action?.actionTypeId, formRef, item]);
+  }, [action?.actionTypeId, editDisabled, item]);
 
   const handleDelete = useCallback(() => {
     onDeleteAction(item.id);
@@ -51,16 +65,12 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
   const renderButtonContent = useMemo(() => {
     const { logo, name } = getActionDetails(action?.actionTypeId);
     return (
-      <EuiFlexGroup gutterSize="l" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon type={logo} size="m" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>{name}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiText>
+          <EuiText>{name}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -69,6 +79,7 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
   const renderExtraContent = useMemo(() => {
     return (
       <EuiButtonIcon
+        data-test-subj="remove-response-action"
         iconType="minusInCircle"
         color="danger"
         className="actAccordionActionForm__extraAction"
@@ -78,26 +89,28 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
             defaultMessage: 'Delete',
           }
         )}
+        disabled={editDisabled}
         onClick={handleDelete}
       />
     );
-  }, [handleDelete]);
+  }, [editDisabled, handleDelete]);
+
   return (
-    <EuiAccordion
+    <StyledEuiAccordion
       initialIsOpen={true}
       key={item.id}
       id={item.id.toString()}
       onToggle={setIsOpen}
       paddingSize="l"
-      className="actAccordionActionForm"
-      buttonContentClassName="actAccordionActionForm__button"
       data-test-subj={`alertActionAccordion`}
       buttonContent={renderButtonContent}
       extraAction={renderExtraContent}
     >
-      {getResponseActionTypeForm()}
-    </EuiAccordion>
+      {getResponseActionTypeForm}
+    </StyledEuiAccordion>
   );
-});
+};
 
-ResponseActionTypeForm.displayName = 'ResponseActionTypeForm';
+ResponseActionTypeFormComponent.displayName = 'ResponseActionTypeForm';
+
+export const ResponseActionTypeForm = React.memo(ResponseActionTypeFormComponent);

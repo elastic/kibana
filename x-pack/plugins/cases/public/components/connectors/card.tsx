@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
-import styled from 'styled-components';
+import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSkeletonText, EuiText } from '@elastic/eui';
 
 import type { ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
@@ -20,12 +19,6 @@ interface ConnectorCardProps {
   isLoading: boolean;
 }
 
-const StyledText = styled.span`
-  span {
-    display: block;
-  }
-`;
-
 const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   connectorType,
   title,
@@ -34,47 +27,35 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
 }) => {
   const { triggersActionsUi } = useKibana().services;
 
-  const description = useMemo(
-    () => (
-      <StyledText>
-        {listItems.length > 0 &&
-          listItems.map((item, i) => (
-            <span data-test-subj="card-list-item" key={`${item.title}-${i}`}>
-              <strong>{`${item.title}: `}</strong>
-              {item.description}
-            </span>
-          ))}
-      </StyledText>
-    ),
-    [listItems]
-  );
-
-  const icon = useMemo(
-    () => <EuiIcon size="xl" type={getConnectorIcon(triggersActionsUi, connectorType)} />,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connectorType]
-  );
-
   return (
-    <>
-      {isLoading && <EuiLoadingSpinner data-test-subj="connector-card-loading" />}
-      {!isLoading && (
-        <EuiFlexGroup direction="row">
+    <EuiSkeletonText
+      lines={3}
+      size={'m'}
+      isLoading={isLoading}
+      data-test-subj="connector-card-loading"
+    >
+      <EuiFlexGroup direction="column" alignItems="stretch" data-test-subj="connector-card">
+        <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
-            <EuiCard
-              data-test-subj={`connector-card`}
-              description={description}
-              display="plain"
-              layout="horizontal"
-              paddingSize="none"
-              title={title}
-              titleSize="xs"
-            />
+            <EuiText size="s" data-test-subj="connector-card-title">
+              <strong>{title}</strong>
+            </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon size="xl" type={getConnectorIcon(triggersActionsUi, connectorType)} />
+          </EuiFlexItem>
         </EuiFlexGroup>
-      )}
-    </>
+        <EuiFlexItem data-test-subj="connector-card-details">
+          {listItems.length > 0 &&
+            listItems.map((item, i) => (
+              <EuiText size="xs" data-test-subj="card-list-item" key={`${item.title}-${i}`}>
+                <strong>{`${item.title}: `}</strong>
+                {`${item.description}`}
+              </EuiText>
+            ))}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiSkeletonText>
   );
 };
 ConnectorCardDisplay.displayName = 'ConnectorCardDisplay';

@@ -6,7 +6,7 @@
  */
 
 import { getPings } from './get_pings';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { getUptimeESMockClient } from './test_helpers';
 
@@ -173,7 +173,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*",
         },
         Object {
           "meta": true,
@@ -245,7 +245,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*",
         },
         Object {
           "meta": true,
@@ -317,7 +317,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*",
         },
         Object {
           "meta": true,
@@ -394,7 +394,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*",
         },
         Object {
           "meta": true,
@@ -516,7 +516,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          "index": "heartbeat-8*,heartbeat-7*",
         },
         Object {
           "meta": true,

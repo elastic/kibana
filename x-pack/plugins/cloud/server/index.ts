@@ -8,7 +8,7 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 import { CloudPlugin } from './plugin';
 
-export type { CloudSetup } from './plugin';
+export type { CloudSetup, CloudStart } from './plugin';
 export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new CloudPlugin(initializerContext);

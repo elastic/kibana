@@ -9,14 +9,22 @@ import React, { useMemo } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { FieldPicker, FieldOptionValue, FieldOption } from '../../shared_components/field_picker';
+import {
+  FieldPicker,
+  FieldOptionValue,
+  FieldOption,
+} from '@kbn/visualization-ui-components/public';
 import type { TextBasedLayerColumn } from './types';
 import type { DataType } from '../../types';
+
+export interface FieldOptionCompatible extends DatatableColumn {
+  compatible: boolean;
+}
 
 export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOption['value']> {
   selectedField?: TextBasedLayerColumn;
   onChoose: (choice: FieldOptionValue) => void;
-  existingFields: DatatableColumn[];
+  existingFields: FieldOptionCompatible[];
 }
 
 export function FieldSelect({
@@ -26,19 +34,21 @@ export function FieldSelect({
   ['data-test-subj']: dataTestSub,
 }: FieldSelectProps) {
   const memoizedFieldOptions = useMemo(() => {
-    const availableFields = existingFields.map((field) => {
-      const dataType = field?.meta?.type as DataType;
-      return {
-        compatible: true,
-        exists: true,
-        label: field.name,
-        value: {
-          type: 'field' as FieldOptionValue['type'],
-          field: field.name,
-          dataType,
-        },
-      };
-    });
+    const availableFields = existingFields
+      .map((field) => {
+        const dataType = field?.meta?.type as DataType;
+        return {
+          compatible: field.compatible ? 1 : 0,
+          exists: true,
+          label: field.name,
+          value: {
+            type: 'field' as FieldOptionValue['type'],
+            field: field.name,
+            dataType,
+          },
+        };
+      })
+      .sort((a, b) => b.compatible - a.compatible);
     return [
       {
         label: i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {

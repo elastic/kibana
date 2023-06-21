@@ -84,6 +84,7 @@ export interface IInterpreterRenderHandlers {
   update(params: IInterpreterRenderUpdateParams): void;
   event(event: IInterpreterRenderEvent): void;
   hasCompatibleActions?(event: IInterpreterRenderEvent): Promise<boolean>;
+  getCompatibleCellValueActions?(data: object[]): Promise<unknown[]>;
   getRenderMode(): RenderMode;
 
   /**

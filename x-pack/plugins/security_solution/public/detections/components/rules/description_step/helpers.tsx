@@ -26,8 +26,7 @@ import styled from 'styled-components';
 import { FieldIcon } from '@kbn/react-field';
 
 import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import { FilterLabel } from '@kbn/unified-search-plugin/public';
+import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -44,10 +43,14 @@ import { SeverityBadge } from '../severity_badge';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,
+  Duration,
 } from '../../../pages/detection_engine/rules/types';
+import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
-
+import { TechnicalPreviewBadge } from './technical_preview_badge';
+import type { LicenseService } from '../../../../../common/license';
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -96,14 +99,10 @@ export const buildQueryBarDescription = ({
         description: (
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             {filterManager.getFilters().map((filter, index) => (
-              <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
+              <EuiFlexItem grow={false} key={`${field}-filter-${index}`} css={{ width: '100%' }}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
-                    <FilterLabel
-                      filter={filter}
-                      // @ts-ignore-next-line
-                      valueLabel={getDisplayValueFromFilter(filter, [indexPatterns])}
-                    />
+                    <FilterBadgeGroup filters={[filter]} dataViews={[indexPatterns]} />
                   ) : (
                     <EuiLoadingSpinner size="m" />
                   )}
@@ -509,6 +508,80 @@ export const buildRequiredFieldsDescription = (
           ))}
         </EuiFlexGrid>
       ),
+    },
+  ];
+};
+
+export const buildAlertSuppressionDescription = (
+  label: string,
+  values: string[],
+  license: LicenseService
+): ListItems[] => {
+  if (isEmpty(values)) {
+    return [];
+  }
+  const description = (
+    <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+      {values.map((val: string) =>
+        isEmpty(val) ? null : (
+          <EuiFlexItem grow={false} key={`${label}-${val}`}>
+            <EuiBadgeWrap data-test-subj="stringArrayDescriptionBadgeItem" color="hollow">
+              {val}
+            </EuiBadgeWrap>
+          </EuiFlexItem>
+        )
+      )}
+    </EuiFlexGroup>
+  );
+
+  const title = <TechnicalPreviewBadge label={label} license={license} />;
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};
+
+export const buildAlertSuppressionWindowDescription = (
+  label: string,
+  value: Duration,
+  license: LicenseService,
+  groupByRadioSelection: GroupByOptions
+): ListItems[] => {
+  const description =
+    groupByRadioSelection === GroupByOptions.PerTimePeriod
+      ? `${value.value}${value.unit}`
+      : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
+
+  const title = <TechnicalPreviewBadge label={label} license={license} />;
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};
+
+export const buildAlertSuppressionMissingFieldsDescription = (
+  label: string,
+  value: AlertSuppressionMissingFieldsStrategy,
+  license: LicenseService
+): ListItems[] => {
+  if (isEmpty(value)) {
+    return [];
+  }
+
+  const description =
+    value === AlertSuppressionMissingFieldsStrategy.Suppress
+      ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
+      : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
+
+  const title = <TechnicalPreviewBadge label={label} license={license} />;
+  return [
+    {
+      title,
+      description,
     },
   ];
 };

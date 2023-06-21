@@ -6,7 +6,19 @@
  */
 
 import { Truthy } from 'lodash';
-import { CSP_RULE_SAVED_OBJECT_TYPE } from '../constants';
+import {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PackagePolicy,
+  PackagePolicyInput,
+} from '@kbn/fleet-plugin/common';
+import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  CLOUDBEAT_VANILLA,
+  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+} from '../constants';
+import type { BenchmarkId, Score } from '../types';
 
 /**
  * @example
@@ -25,13 +37,50 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
   return defaultMessage; // TODO: i18n
 };
 
-export const createCspRuleSearchFilterByPackagePolicy = ({
-  packagePolicyId,
-  policyId,
-}: {
-  packagePolicyId: string;
-  policyId?: string;
-}): string =>
-  `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: "${packagePolicyId}"${
-    policyId ? ` AND ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"` : ''
-  }`;
+export const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
+  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
+
+export const isEnabledBenchmarkInputType = (input: PackagePolicyInput | NewPackagePolicyInput) =>
+  input.enabled;
+
+export const isCspPackage = (packageName?: string) =>
+  packageName === CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+
+export const getBenchmarkFromPackagePolicy = (
+  inputs: PackagePolicy['inputs'] | NewPackagePolicy['inputs']
+): BenchmarkId => {
+  const enabledInputs = inputs.filter(isEnabledBenchmarkInputType);
+
+  // Use the only enabled input
+  if (enabledInputs.length === 1) {
+    return getInputType(enabledInputs[0].type);
+  }
+
+  // Use the default benchmark id for multiple/none selected
+  return getInputType(CLOUDBEAT_VANILLA);
+};
+
+const getInputType = (inputType: string): string => {
+  // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
+  return inputType.split('/')[1];
+};
+
+export const CSP_FLEET_PACKAGE_KUERY = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`;
+
+export function assert(condition: any, msg?: string): asserts condition {
+  if (!condition) {
+    throw new Error(msg);
+  }
+}
+
+/**
+ * @param value value is [0, 1] range
+ */
+export const roundScore = (value: number): Score => Number((value * 100).toFixed(1));
+
+export const calculatePostureScore = (passed: number, failed: number): Score => {
+  const total = passed + failed;
+  if (total === 0) return total;
+
+  return roundScore(passed / (passed + failed));
+};

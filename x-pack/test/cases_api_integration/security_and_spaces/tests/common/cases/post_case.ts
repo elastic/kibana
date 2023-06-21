@@ -19,9 +19,9 @@ import {
   deleteCasesByESQuery,
   createCase,
   removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromUserAction,
   getCaseUserActions,
-} from '../../../../common/lib/utils';
+  removeServerGeneratedPropertiesFromUserAction,
+} from '../../../../common/lib/api';
 import {
   secOnly,
   secOnlyRead,
@@ -129,6 +129,13 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it('should post a case with default category', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest()); // category is undefined
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data.category).to.eql(null);
+      });
+
       it('should create a user action when creating a case', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
@@ -151,6 +158,7 @@ export default ({ getService }: FtrProviderContext): void => {
             status: CaseStatuses.open,
             severity: CaseSeverity.LOW,
             assignees: [],
+            category: null,
           },
         });
       });
@@ -252,8 +260,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('400s if the title is too long', async () => {
-        const longTitle =
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nulla enim, rutrum sit amet euismod venenatis, blandit et massa. Nulla id consectetur enim.';
+        const longTitle = 'a'.repeat(161);
 
         await createCase(supertest, getPostCaseRequest({ title: longTitle }), 400);
       });
@@ -269,6 +276,38 @@ export default ({ getService }: FtrProviderContext): void => {
           const tags = ['test', ''];
 
           await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
+      });
+
+      describe('categories', async () => {
+        it('400s when the category is too long', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              category: 'A very long category with more than fifty characters!',
+            }),
+            400
+          );
+        });
+
+        it('400s when the category is an empty string', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              category: '',
+            }),
+            400
+          );
+        });
+
+        it('400s when the category is a string just with spaces', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              category: '   ',
+            }),
+            400
+          );
         });
       });
     });

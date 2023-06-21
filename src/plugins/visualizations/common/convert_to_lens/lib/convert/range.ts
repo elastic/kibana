@@ -8,7 +8,7 @@
 
 import { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RANGE_MODES } from '../../constants';
 import { DataType, RangeParams } from '../../types';
 import { getFieldNameFromField } from '../utils';
@@ -27,18 +27,17 @@ export const convertToRangeParams = (
     return {
       type: RANGE_MODES.Histogram,
       maxBars: aggParams.maxBars ?? 'auto',
-      ranges: [],
+      includeEmptyRows: aggParams.min_doc_count,
     };
   } else {
     return {
       type: RANGE_MODES.Range,
       maxBars: 'auto',
-      ranges:
-        aggParams.ranges?.map((range) => ({
-          label: range.label,
-          from: range.from ?? null,
-          to: range.to ?? null,
-        })) ?? [],
+      ranges: aggParams.ranges?.map((range) => ({
+        label: range.label,
+        from: range.from ?? null,
+        to: range.to ?? null,
+      })),
     };
   }
 };
@@ -64,7 +63,7 @@ export const convertToRangeColumn = (
   const params = convertToRangeParams(aggParams);
 
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     label,
     operationType: 'range',
     dataType: field.type as DataType,

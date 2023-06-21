@@ -9,7 +9,12 @@ import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { handleEsError } from '../shared_imports';
-import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
+import {
+  createMockRouter,
+  MockRouter,
+  routeHandlerContextMock,
+  savedObjectsClient,
+} from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 
@@ -25,13 +30,20 @@ describe('ML snapshots APIs', () => {
   let mockRouter: MockRouter;
   let routeDependencies: any;
 
-  beforeEach(() => {
+  function registerMockRouter({ mlSnapshots } = { mlSnapshots: true }) {
     mockRouter = createMockRouter();
     routeDependencies = {
+      config: {
+        featureSet: { mlSnapshots, migrateSystemIndices: true, reindexCorrectiveActions: true },
+      },
       router: mockRouter,
       lib: { handleEsError },
     };
     registerMlSnapshotRoutes(routeDependencies);
+  }
+
+  beforeEach(() => {
+    registerMockRouter();
   });
 
   afterEach(() => {
@@ -188,6 +200,26 @@ describe('ML snapshots APIs', () => {
         mlUpgradeModeEnabled: true,
       });
     });
+
+    it('returns false if featureSet.mlSnapshots is set to false even if upgrade_mode is true', async () => {
+      registerMockRouter({ mlSnapshots: false });
+
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.info as jest.Mock
+      ).mockResolvedValue({
+        upgrade_mode: true,
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/ml_upgrade_mode',
+      })(routeHandlerContextMock, createRequestMock({}), kibanaResponseFactory);
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        mlUpgradeModeEnabled: false,
+      });
+    });
   });
 
   describe('GET /api/upgrade_assistant/ml_snapshots/:jobId/:snapshotId', () => {
@@ -258,7 +290,7 @@ describe('ML snapshots APIs', () => {
         ],
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      (savedObjectsClient.find as jest.Mock).mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -329,7 +361,7 @@ describe('ML snapshots APIs', () => {
         ],
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      (savedObjectsClient.find as jest.Mock).mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -394,7 +426,7 @@ describe('ML snapshots APIs', () => {
         ],
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      (savedObjectsClient.find as jest.Mock).mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -422,7 +454,7 @@ describe('ML snapshots APIs', () => {
         index_settings: {},
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.delete as jest.Mock).mockResolvedValue({});
+      (savedObjectsClient.delete as jest.Mock).mockResolvedValue({});
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',

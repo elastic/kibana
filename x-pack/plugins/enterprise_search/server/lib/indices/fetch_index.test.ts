@@ -9,6 +9,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
+import { SyncStatus } from '../../../common/types/connectors';
 
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
@@ -32,7 +33,14 @@ describe('fetchIndex lib function', () => {
         get: jest.fn(),
         stats: jest.fn(),
       },
-      search: jest.fn(),
+      search: jest.fn().mockReturnValue({
+        hits: {
+          hits: [
+            { _source: { status: SyncStatus.IN_PROGRESS } },
+            { _source: { status: SyncStatus.PENDING } },
+          ],
+        },
+      }),
     },
     asInternalUser: {},
   };
@@ -65,6 +73,8 @@ describe('fetchIndex lib function', () => {
   const result = {
     aliases: [],
     count: 100,
+    has_in_progress_syncs: false,
+    has_pending_syncs: false,
     health: 'green',
     hidden: false,
     name: 'index_name',
@@ -99,6 +109,14 @@ describe('fetchIndex lib function', () => {
   });
 
   it('should return data and stats for index and connector if connector is present', async () => {
+    mockClient.asCurrentUser.search.mockReturnValue({
+      hits: {
+        hits: [
+          { _source: { status: SyncStatus.CANCELED } },
+          { _source: { status: SyncStatus.PENDING } },
+        ],
+      },
+    });
     mockClient.asCurrentUser.indices.get.mockImplementation(() =>
       Promise.resolve({
         index_name: { aliases: [], data: 'full index' },
@@ -114,7 +132,11 @@ describe('fetchIndex lib function', () => {
 
     await expect(
       fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
-    ).resolves.toEqual({ ...result, connector: { doc: 'doc', service_type: 'some-service-type' } });
+    ).resolves.toEqual({
+      ...result,
+      connector: { doc: 'doc', service_type: 'some-service-type' },
+      has_pending_syncs: true,
+    });
   });
 
   it('should return data and stats for index and crawler if crawler is present', async () => {
@@ -144,6 +166,15 @@ describe('fetchIndex lib function', () => {
   });
 
   it('should return data and stats for index and crawler if a crawler registered as a connector is present', async () => {
+    mockClient.asCurrentUser.count.mockReturnValue({ count: 0 });
+    mockClient.asCurrentUser.search.mockReturnValue({
+      hits: {
+        hits: [
+          { _source: { status: SyncStatus.IN_PROGRESS } },
+          { _source: { status: SyncStatus.COMPLETED } },
+        ],
+      },
+    });
     mockClient.asCurrentUser.indices.get.mockImplementation(() =>
       Promise.resolve({
         index_name: { aliases: [], data: 'full index' },
@@ -167,7 +198,10 @@ describe('fetchIndex lib function', () => {
     ).resolves.toEqual({
       ...result,
       connector: { doc: 'doc', service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE },
+      count: 0,
       crawler: { id: '1234' },
+      has_in_progress_syncs: true,
+      has_pending_syncs: false,
     });
   });
 

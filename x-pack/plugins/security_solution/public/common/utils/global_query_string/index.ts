@@ -9,12 +9,8 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { difference, isEmpty, pickBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
-import {
-  encodeQueryString,
-  encodeRisonUrlState,
-  useGetInitialUrlParamValue,
-  useReplaceUrlParams,
-} from './helpers';
+import { encode } from '@kbn/rison';
+import { encodeQueryString, useGetInitialUrlParamValue, useReplaceUrlParams } from './helpers';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
 import { useRouteSpy } from '../route/use_route_spy';
@@ -29,7 +25,7 @@ import { getLinkInfo } from '../../links';
  * @param urlParamKey Must not change.
  * @param onInitialize Called once when initializing. It must not change.
  */
-export const useInitializeUrlParam = <State>(
+export const useInitializeUrlParam = <State extends {}>(
   urlParamKey: string,
   /**
    * @param state Decoded URL param value.
@@ -38,20 +34,20 @@ export const useInitializeUrlParam = <State>(
 ) => {
   const dispatch = useDispatch();
 
-  const getInitialUrlParamValue = useGetInitialUrlParamValue<State>(urlParamKey);
+  const getInitialUrlParamValue = useGetInitialUrlParamValue(urlParamKey);
 
   useEffect(() => {
-    const { param: initialValue, decodedParam: decodedInitialValue } = getInitialUrlParamValue();
+    const value = getInitialUrlParamValue();
 
     dispatch(
       globalUrlParamActions.registerUrlParam({
         key: urlParamKey,
-        initialValue: initialValue ?? null,
+        initialValue: value,
       })
     );
 
     // execute consumer initialization
-    onInitialize(decodedInitialValue);
+    onInitialize(value as State);
 
     return () => {
       dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
@@ -65,13 +61,12 @@ export const useInitializeUrlParam = <State>(
  *
  * Make sure to call `useInitializeUrlParam` before calling this function.
  */
-export const useUpdateUrlParam = <State>(urlParamKey: string) => {
+export const useUpdateUrlParam = <State extends {}>(urlParamKey: string) => {
   const dispatch = useDispatch();
 
   const updateUrlParam = useCallback(
     (value: State | null) => {
-      const encodedValue = value !== null ? encodeRisonUrlState(value) : null;
-      dispatch(globalUrlParamActions.updateUrlParam({ key: urlParamKey, value: encodedValue }));
+      dispatch(globalUrlParamActions.updateUrlParam({ key: urlParamKey, value }));
     },
     [dispatch, urlParamKey]
   );
@@ -81,11 +76,29 @@ export const useUpdateUrlParam = <State>(urlParamKey: string) => {
 
 export const useGlobalQueryString = (): string => {
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
+  const globalQueryString = useMemo(() => {
+    const encodedGlobalUrlParam: Record<string, string> = {};
 
-  const globalQueryString = useMemo(
-    () => encodeQueryString(pickBy((value) => !isEmpty(value), globalUrlParam)),
-    [globalUrlParam]
-  );
+    if (!globalUrlParam) {
+      return '';
+    }
+
+    Object.keys(globalUrlParam).forEach((paramName) => {
+      const value = globalUrlParam[paramName];
+
+      if (!value || (typeof value === 'object' && isEmpty(value))) {
+        return;
+      }
+
+      try {
+        encodedGlobalUrlParam[paramName] = encode(value);
+      } catch {
+        // Just ignore parameters which unable to encode
+      }
+    });
+
+    return encodeQueryString(pickBy((value) => !isEmpty(value), encodedGlobalUrlParam));
+  }, [globalUrlParam]);
 
   return globalQueryString;
 };
@@ -100,29 +113,29 @@ export const useSyncGlobalQueryString = () => {
   const previousGlobalUrlParams = usePrevious(globalUrlParam);
   const replaceUrlParams = useReplaceUrlParams();
 
-  // Url params that got deleted from GlobalUrlParams
-  const unregisteredKeys = useMemo(
-    () => difference(Object.keys(previousGlobalUrlParams ?? {}), Object.keys(globalUrlParam)),
-    [previousGlobalUrlParams, globalUrlParam]
-  );
-
   useEffect(() => {
     const linkInfo = getLinkInfo(pageName) ?? { skipUrlState: true };
-    const params = Object.entries(globalUrlParam).map(([key, value]) => ({
-      key,
-      value: linkInfo.skipUrlState ? null : value,
-    }));
+    const paramsToUpdate = { ...globalUrlParam };
+
+    if (linkInfo.skipUrlState) {
+      Object.keys(paramsToUpdate).forEach((key) => {
+        paramsToUpdate[key] = null;
+      });
+    }
+
+    // Url params that got deleted from GlobalUrlParams
+    const unregisteredKeys = difference(
+      Object.keys(previousGlobalUrlParams ?? {}),
+      Object.keys(globalUrlParam)
+    );
 
     // Delete unregistered Url params
     unregisteredKeys.forEach((key) => {
-      params.push({
-        key,
-        value: null,
-      });
+      paramsToUpdate[key] = null;
     });
 
-    if (params.length > 0) {
-      replaceUrlParams(params);
+    if (Object.keys(paramsToUpdate).length > 0) {
+      replaceUrlParams(paramsToUpdate);
     }
-  }, [globalUrlParam, pageName, unregisteredKeys, replaceUrlParams]);
+  }, [previousGlobalUrlParams, globalUrlParam, pageName, replaceUrlParams]);
 };

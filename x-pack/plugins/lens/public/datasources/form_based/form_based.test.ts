@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { SavedObjectReference } from '@kbn/core/public';
 import { isFragment } from 'react-is';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,7 +21,14 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { TinymathAST } from '@kbn/tinymath';
 import { getFormBasedDatasource, GenericIndexPatternColumn } from './form_based';
-import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } from '../../types';
+import {
+  DatasourcePublicAPI,
+  Datasource,
+  FramePublicAPI,
+  OperationDescriptor,
+  FrameDatasourceAPI,
+  UserMessage,
+} from '../../types';
 import { getFieldByNameFactory } from './pure_helpers';
 import {
   operationDefinitionMap,
@@ -41,8 +48,9 @@ import {
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createMockFramePublicAPI } from '../../mocks';
+import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -50,6 +58,8 @@ jest.mock('./operations');
 jest.mock('./dimension_panel/reference_editor', () => ({
   ReferenceEditor: () => null,
 }));
+
+const nowInstant = new Date();
 
 const fieldsOne = [
   {
@@ -176,17 +186,27 @@ const expectedIndexPatterns = {
 };
 
 const indexPatterns = expectedIndexPatterns;
+const dateRange = {
+  fromDate: '2022-03-17T08:25:00.000Z',
+  toDate: '2022-04-17T08:25:00.000Z',
+};
 
 describe('IndexPattern Data Source', () => {
   let baseState: FormBasedPrivateState;
   let FormBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState>;
 
   beforeEach(() => {
+    const data = dataPluginMock.createStartContract();
+    data.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => ({
+      from: '',
+      to: '',
+    }));
+
     FormBasedDatasource = getFormBasedDatasource({
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
-      data: dataPluginMock.createStartContract(),
+      data,
       dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
@@ -310,12 +330,52 @@ describe('IndexPattern Data Source', () => {
       };
       expect(FormBasedDatasource?.getSelectedFields?.(state)).toEqual([]);
     });
+
+    it('should support columns with multiple fields', async () => {
+      const state = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My Op',
+                dataType: 'string',
+                isBucketed: true,
+
+                // Private
+                operationType: 'terms',
+                sourceField: 'op',
+                params: {
+                  size: 5,
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  secondaryFields: ['source', 'geo.src'],
+                },
+              } as TermsIndexPatternColumn,
+            },
+          },
+        },
+      };
+
+      expect(FormBasedDatasource?.getSelectedFields?.(state)).toEqual(['op', 'source', 'geo.src']);
+    });
   });
 
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = FormBasedDatasource.initialize();
-      expect(FormBasedDatasource.toExpression(state, 'first', indexPatterns)).toEqual(null);
+      expect(
+        FormBasedDatasource.toExpression(
+          state,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        )
+      ).toEqual(null);
     });
 
     it('should create a table when there is a formula without aggs', async () => {
@@ -338,7 +398,16 @@ describe('IndexPattern Data Source', () => {
           },
         },
       };
-      expect(FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns)).toEqual({
+      expect(
+        FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        )
+      ).toEqual({
         chain: [
           {
             function: 'createTable',
@@ -385,8 +454,16 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      expect(FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns))
-        .toMatchInlineSnapshot(`
+      expect(
+        FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        )
+      ).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {
@@ -465,6 +542,9 @@ describe('IndexPattern Data Source', () => {
                     "type": "expression",
                   },
                 ],
+                "ignoreGlobalFilters": Array [
+                  false,
+                ],
                 "index": Array [
                   Object {
                     "chain": Array [
@@ -486,6 +566,12 @@ describe('IndexPattern Data Source', () => {
                 ],
                 "partialRows": Array [
                   false,
+                ],
+                "probability": Array [
+                  1,
+                ],
+                "samplerSeed": Array [
+                  1889181588,
                 ],
                 "timeFields": Array [
                   "timestamp",
@@ -560,7 +646,14 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        dateRange,
+        nowInstant,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
@@ -595,7 +688,14 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        dateRange,
+        nowInstant,
+        'testing-seed'
+      ) as Ast;
       expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
     });
 
@@ -802,7 +902,14 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        dateRange,
+        nowInstant,
+        'testing-seed'
+      ) as Ast;
       const count = (ast.chain[1].arguments.aggs[1] as Ast).chain[0];
       const sum = (ast.chain[1].arguments.aggs[2] as Ast).chain[0];
       const average = (ast.chain[1].arguments.aggs[3] as Ast).chain[0];
@@ -866,7 +973,14 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        dateRange,
+        nowInstant,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
@@ -990,7 +1104,14 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        dateRange,
+        nowInstant,
+        'testing-seed'
+      ) as Ast;
       const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
       const formatCalls = ast.chain.filter((fn) => fn.function === 'lens_format_column');
       expect(timeScaleCalls).toHaveLength(1);
@@ -1055,7 +1176,14 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        dateRange,
+        nowInstant,
+        'testing-seed'
+      ) as Ast;
       const filteredMetricAgg = (ast.chain[1].arguments.aggs[0] as Ast).chain[0].arguments;
       const metricAgg = (filteredMetricAgg.customMetric[0] as Ast).chain[0].arguments;
       const bucketAgg = (filteredMetricAgg.customBucket[0] as Ast).chain[0].arguments;
@@ -1106,7 +1234,14 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        dateRange,
+        nowInstant,
+        'testing-seed'
+      ) as Ast;
       const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
       const calculationIndex = ast.chain.findIndex((fn) => fn.function === 'moving_average');
       expect(calculationIndex).toBeLessThan(formatIndex);
@@ -1154,7 +1289,14 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        dateRange,
+        nowInstant,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
       expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
         'col-0-0': [expect.objectContaining({ id: 'bucket1' })],
@@ -1193,7 +1335,14 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        dateRange,
+        nowInstant,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
       expect(ast.chain[1].arguments.timeFields).not.toContain('timefield');
     });
@@ -1250,7 +1399,14 @@ describe('IndexPattern Data Source', () => {
 
         const optimizeMock = jest.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
 
-        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns);
+        FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        );
 
         expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
 
@@ -1318,7 +1474,14 @@ describe('IndexPattern Data Source', () => {
             return { aggs: aggs.reverse(), esAggsIdMap };
           });
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        ) as Ast;
 
         expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
 
@@ -1382,7 +1545,14 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        ) as Ast;
 
         const idMap = JSON.parse(ast.chain[2].arguments.idMap as unknown as string);
 
@@ -1487,7 +1657,14 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        ) as Ast;
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
         expect(ast.chain[3]).toEqual('mock');
@@ -1520,7 +1697,14 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        ) as Ast;
 
         expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
           'col-0-0': [
@@ -1607,7 +1791,14 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        ) as Ast;
         const chainLength = ast.chain.length;
         expect(ast.chain[chainLength - 2].arguments.name).toEqual(['math']);
         expect(ast.chain[chainLength - 1].arguments.id).toEqual(['formula']);
@@ -1631,6 +1822,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
         currentIndexPatternId: '1',
+        sampling: 1,
       };
       expect(FormBasedDatasource.insertLayer(state, 'newLayer', ['link-to-id'])).toEqual({
         ...state,
@@ -1640,7 +1832,9 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: '1',
             columnOrder: [],
             columns: {},
+            sampling: 1,
             linkToLayers: ['link-to-id'],
+            ignoreGlobalFilters: false,
           },
         },
       });
@@ -1665,12 +1859,15 @@ describe('IndexPattern Data Source', () => {
         currentIndexPatternId: '1',
       };
       expect(FormBasedDatasource.removeLayer(state, 'first')).toEqual({
-        ...state,
-        layers: {
-          second: {
-            indexPatternId: '2',
-            columnOrder: [],
-            columns: {},
+        removedLayerIds: ['first'],
+        newState: {
+          ...state,
+          layers: {
+            second: {
+              indexPatternId: '2',
+              columnOrder: [],
+              columns: {},
+            },
           },
         },
       });
@@ -1694,8 +1891,79 @@ describe('IndexPattern Data Source', () => {
         currentIndexPatternId: '1',
       };
       expect(FormBasedDatasource.removeLayer(state, 'first')).toEqual({
-        ...state,
-        layers: {},
+        removedLayerIds: ['first', 'second'],
+        newState: {
+          ...state,
+          layers: {},
+        },
+      });
+    });
+  });
+
+  describe('#clearLayer', () => {
+    it('should clear a layer', () => {
+      const state = {
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['some', 'order'],
+            columns: {
+              some: {} as GenericIndexPatternColumn,
+              columns: {} as GenericIndexPatternColumn,
+            },
+            linkToLayers: ['some-layer'],
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(FormBasedDatasource.clearLayer(state, 'first')).toEqual({
+        removedLayerIds: [],
+        newState: {
+          ...state,
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
+              ignoreGlobalFilters: false,
+              linkToLayers: ['some-layer'],
+              sampling: 1,
+            },
+          },
+        },
+      });
+    });
+
+    it('should remove linked layers', () => {
+      const state = {
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+            linkToLayers: ['first'],
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(FormBasedDatasource.clearLayer(state, 'first')).toEqual({
+        removedLayerIds: ['second'],
+        newState: {
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              linkToLayers: undefined,
+              sampling: 1,
+              ignoreGlobalFilters: false,
+            },
+          },
+        },
       });
     });
   });
@@ -2786,237 +3054,538 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
-  describe('#getErrorMessages', () => {
-    it('should use the results of getErrorMessages directly when single layer', () => {
-      (getErrorMessages as jest.Mock).mockClear();
-      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
-      const state: FormBasedPrivateState = {
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
-          },
-        },
-        currentIndexPatternId: '1',
+  describe('#getUserMessages', () => {
+    function createMockFrameDatasourceAPI({
+      activeData,
+      dataViews,
+    }: Partial<Omit<FramePublicAPI, 'dataViews'>> & {
+      dataViews?: Partial<FramePublicAPI['dataViews']>;
+    }): FrameDatasourceAPI {
+      return {
+        ...createMockFramePublicAPI({
+          activeData,
+          dataViews,
+        }),
+        query: { query: '', language: 'kuery' },
+        filters: [],
       };
-      expect(FormBasedDatasource.getErrorMessages(state, indexPatterns)).toEqual([
-        { longMessage: 'error 1', shortMessage: '' },
-        { longMessage: 'error 2', shortMessage: '' },
-      ]);
-      expect(getErrorMessages).toHaveBeenCalledTimes(1);
-    });
+    }
 
-    it('should prepend each error with its layer number on multi-layer chart', () => {
-      (getErrorMessages as jest.Mock).mockClear();
-      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
-      const state: FormBasedPrivateState = {
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
-          },
-          second: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
-          },
-        },
-        currentIndexPatternId: '1',
-      };
-      expect(FormBasedDatasource.getErrorMessages(state, indexPatterns)).toEqual([
-        { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
-        { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
-      ]);
-      expect(getErrorMessages).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('#getWarningMessages', () => {
-    let state: FormBasedPrivateState;
-    let framePublicAPI: FramePublicAPI;
-
-    beforeEach(() => {
-      const termsColumn: TermsIndexPatternColumn = {
-        operationType: 'terms',
-        dataType: 'number',
-        isBucketed: true,
-        label: '123211',
-        sourceField: 'foo',
-        params: {
-          size: 10,
-          orderBy: {
-            type: 'alphabetical',
-          },
-          orderDirection: 'asc',
-        },
-      };
-
-      state = {
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
-            columns: {
-              col1: {
-                operationType: 'date_histogram',
-                params: {
-                  interval: '12h',
-                },
-                label: '',
-                dataType: 'date',
-                isBucketed: true,
-                sourceField: 'timestamp',
-              } as DateHistogramIndexPatternColumn,
-              col2: {
-                operationType: 'count',
-                label: '',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'records',
-              },
-              col3: {
-                operationType: 'count',
-                timeShift: '1h',
-                label: '',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'records',
-              },
-              col4: {
-                operationType: 'count',
-                timeShift: '13h',
-                label: '',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'records',
-              },
-              col5: {
-                operationType: 'count',
-                timeShift: '1w',
-                label: '',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'records',
-              },
-              col6: {
-                operationType: 'count',
-                timeShift: 'previous',
-                label: '',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'records',
-              },
-              termsCol: termsColumn,
+    describe('error messages', () => {
+      it('should generate error messages for a single layer', () => {
+        (getErrorMessages as jest.Mock).mockClear();
+        (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+        const state: FormBasedPrivateState = {
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
             },
           },
-        },
-        currentIndexPatternId: '1',
-      };
+          currentIndexPatternId: '1',
+        };
+        expect(
+          FormBasedDatasource.getUserMessages(state, {
+            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            setState: () => {},
+          })
+        ).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "displayLocations": Array [
+                Object {
+                  "id": "visualization",
+                },
+              ],
+              "fixableInEditor": true,
+              "longMessage": "error 1",
+              "severity": "error",
+              "shortMessage": "",
+            },
+            Object {
+              "displayLocations": Array [
+                Object {
+                  "id": "visualization",
+                },
+              ],
+              "fixableInEditor": true,
+              "longMessage": "error 2",
+              "severity": "error",
+              "shortMessage": "",
+            },
+          ]
+        `);
+        expect(getErrorMessages).toHaveBeenCalledTimes(1);
+      });
 
-      framePublicAPI = {
-        activeData: {
-          first: {
-            type: 'datatable',
-            rows: [],
-            columns: [
-              {
-                id: 'col1',
-                name: 'col1',
-                meta: {
-                  type: 'date',
-                  source: 'esaggs',
-                  sourceParams: {
-                    type: 'date_histogram',
-                    params: {
-                      used_interval: '12h',
+      it('should prepend each error with its layer number on multi-layer chart', () => {
+        (getErrorMessages as jest.Mock).mockClear();
+        (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+        const state: FormBasedPrivateState = {
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
+            },
+            second: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
+            },
+          },
+          currentIndexPatternId: '1',
+        };
+        expect(
+          FormBasedDatasource.getUserMessages(state, {
+            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            setState: () => {},
+          })
+        ).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "displayLocations": Array [
+                Object {
+                  "id": "visualization",
+                },
+              ],
+              "fixableInEditor": true,
+              "longMessage": <FormattedMessage
+                defaultMessage="Layer {position} error: {wrappedMessage}"
+                id="xpack.lens.indexPattern.layerErrorWrapper"
+                values={
+                  Object {
+                    "position": 1,
+                    "wrappedMessage": <React.Fragment>
+                      error 1
+                    </React.Fragment>,
+                  }
+                }
+              />,
+              "severity": "error",
+              "shortMessage": "Layer 1 error: ",
+            },
+            Object {
+              "displayLocations": Array [
+                Object {
+                  "id": "visualization",
+                },
+              ],
+              "fixableInEditor": true,
+              "longMessage": <FormattedMessage
+                defaultMessage="Layer {position} error: {wrappedMessage}"
+                id="xpack.lens.indexPattern.layerErrorWrapper"
+                values={
+                  Object {
+                    "position": 1,
+                    "wrappedMessage": <React.Fragment>
+                      error 2
+                    </React.Fragment>,
+                  }
+                }
+              />,
+              "severity": "error",
+              "shortMessage": "Layer 1 error: ",
+            },
+          ]
+        `);
+        expect(getErrorMessages).toHaveBeenCalledTimes(2);
+      });
+
+      describe('dimension button error behavior', () => {
+        const state: FormBasedPrivateState = {
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {
+                col1: {
+                  operationType: 'terms',
+                  filter: {
+                    query: '::: bad query that will mark column invalid',
+                    language: 'kuery',
+                  },
+
+                  sourceField: 'op',
+                  params: {
+                    size: 5,
+                    orderBy: { type: 'alphabetical' },
+                    orderDirection: 'asc',
+                  },
+                  label: 'My Op',
+                  dataType: 'string',
+                  isBucketed: true,
+                } as TermsIndexPatternColumn,
+              },
+            },
+          },
+          currentIndexPatternId: '1',
+        };
+
+        it('should generate generic error if column invalid', () => {
+          (getErrorMessages as jest.Mock).mockClear();
+          (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
+
+          const messages = FormBasedDatasource.getUserMessages(state, {
+            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            setState: () => {},
+          });
+
+          expect(messages.length).toBe(1);
+
+          expect(messages).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "displayLocations": Array [
+                  Object {
+                    "dimensionId": "col1",
+                    "id": "dimensionButton",
+                  },
+                ],
+                "fixableInEditor": true,
+                "longMessage": <p>
+                  Invalid configuration.
+                  <br />
+                  Click for more details.
+                </p>,
+                "severity": "error",
+                "shortMessage": "",
+              },
+            ]
+          `);
+        });
+
+        it('should override generic error if operation generates something specific', () => {
+          (getErrorMessages as jest.Mock).mockClear();
+          (getErrorMessages as jest.Mock).mockReturnValueOnce([
+            {
+              displayLocations: [{ id: 'dimensionButton', dimensionId: 'col1' }],
+              message: 'specific error',
+            },
+          ] as ReturnType<typeof getErrorMessages>);
+
+          const messages = FormBasedDatasource.getUserMessages(state, {
+            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            setState: () => {},
+          });
+
+          expect(messages.length).toBe(1);
+
+          expect(messages).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "displayLocations": Array [
+                  Object {
+                    "dimensionId": "col1",
+                    "id": "dimensionButton",
+                  },
+                ],
+                "fixableInEditor": true,
+                "longMessage": <React.Fragment>
+                  specific error
+                </React.Fragment>,
+                "severity": "error",
+                "shortMessage": "",
+              },
+            ]
+          `);
+        });
+      });
+    });
+
+    describe('warning messages', () => {
+      let state: FormBasedPrivateState;
+      let framePublicAPI: FrameDatasourceAPI;
+
+      beforeEach(() => {
+        (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
+
+        const termsColumn: TermsIndexPatternColumn = {
+          operationType: 'terms',
+          dataType: 'number',
+          isBucketed: true,
+          label: '123211',
+          sourceField: 'foo',
+          params: {
+            size: 10,
+            orderBy: {
+              type: 'alphabetical',
+            },
+            orderDirection: 'asc',
+          },
+        };
+
+        state = {
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
+              columns: {
+                col1: {
+                  operationType: 'date_histogram',
+                  params: {
+                    interval: '12h',
+                  },
+                  label: '',
+                  dataType: 'date',
+                  isBucketed: true,
+                  sourceField: 'timestamp',
+                } as DateHistogramIndexPatternColumn,
+                col2: {
+                  operationType: 'count',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'records',
+                },
+                col3: {
+                  operationType: 'count',
+                  timeShift: '1h',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'records',
+                },
+                col4: {
+                  operationType: 'count',
+                  timeShift: '13h',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'records',
+                },
+                col5: {
+                  operationType: 'count',
+                  timeShift: '1w',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'records',
+                },
+                col6: {
+                  operationType: 'count',
+                  timeShift: 'previous',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'records',
+                },
+                termsCol: termsColumn,
+              },
+            },
+          },
+          currentIndexPatternId: '1',
+        };
+
+        framePublicAPI = createMockFrameDatasourceAPI({
+          activeData: {
+            first: {
+              type: 'datatable',
+              rows: [],
+              columns: [
+                {
+                  id: 'col1',
+                  name: 'col1',
+                  meta: {
+                    type: 'date',
+                    source: 'esaggs',
+                    sourceParams: {
+                      type: 'date_histogram',
+                      params: {
+                        used_interval: '12h',
+                      },
                     },
                   },
                 },
-              },
-              {
-                id: 'termsCol',
-                name: 'termsCol',
-                meta: {
-                  type: 'string',
-                  source: 'esaggs',
-                  sourceParams: {
-                    type: 'terms',
+                {
+                  id: 'termsCol',
+                  name: 'termsCol',
+                  meta: {
+                    type: 'string',
+                    source: 'esaggs',
+                    sourceParams: {
+                      type: 'terms',
+                    },
                   },
-                },
-              } as DatatableColumn,
-            ],
+                } as DatatableColumn,
+              ],
+            },
           },
-        },
-        dataViews: {
-          ...createMockFramePublicAPI().dataViews,
-          indexPatterns: expectedIndexPatterns,
-          indexPatternRefs: Object.values(expectedIndexPatterns).map(({ id, title }) => ({
-            id,
-            title,
-          })),
-        },
-      } as unknown as FramePublicAPI;
-    });
-
-    const extractTranslationIdsFromWarnings = (warnings: React.ReactNode[] | undefined) =>
-      warnings?.map((item) =>
-        isFragment(item)
-          ? (item as ReactElement).props.children[0].props.id
-          : (item as ReactElement).props.id
-      );
-
-    it('should return mismatched time shifts', () => {
-      const warnings = FormBasedDatasource.getWarningMessages!(state, framePublicAPI, {}, () => {});
-
-      expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
-        Array [
-          "xpack.lens.indexPattern.timeShiftSmallWarning",
-          "xpack.lens.indexPattern.timeShiftMultipleWarning",
-        ]
-      `);
-    });
-
-    it('should show different types of warning messages', () => {
-      framePublicAPI.activeData!.first.columns[1].meta.sourceParams!.hasPrecisionError = true;
-
-      const warnings = FormBasedDatasource.getWarningMessages!(state, framePublicAPI, {}, () => {});
-
-      expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
-        Array [
-          "xpack.lens.indexPattern.timeShiftSmallWarning",
-          "xpack.lens.indexPattern.timeShiftMultipleWarning",
-          "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled",
-        ]
-      `);
-    });
-
-    it('should prepend each error with its layer number on multi-layer chart', () => {
-      (getErrorMessages as jest.Mock).mockClear();
-      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
-
-      state = {
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
+          dataViews: {
+            indexPatterns: expectedIndexPatterns,
           },
-          second: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
-          },
-        },
-        currentIndexPatternId: '1',
+        });
+      });
+
+      const extractTranslationIdsFromWarnings = (warnings: UserMessage[]) => {
+        const onlyWarnings = filterAndSortUserMessages(warnings, undefined, {
+          severity: 'warning',
+        });
+        return onlyWarnings.map(({ longMessage }) =>
+          isFragment(longMessage)
+            ? (longMessage as ReactElement).props.children[0].props.id
+            : (longMessage as ReactElement).props.id
+        );
       };
 
-      expect(FormBasedDatasource.getErrorMessages(state, indexPatterns)).toEqual([
-        { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
-        { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
-      ]);
-      expect(getErrorMessages).toHaveBeenCalledTimes(2);
+      it('should return mismatched time shifts', () => {
+        const warnings = FormBasedDatasource.getUserMessages!(state, {
+          frame: framePublicAPI,
+          setState: () => {},
+        });
+
+        expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
+                  Array [
+                    "xpack.lens.indexPattern.timeShiftSmallWarning",
+                    "xpack.lens.indexPattern.timeShiftMultipleWarning",
+                  ]
+              `);
+      });
+
+      it('should show different types of warning messages', () => {
+        framePublicAPI.activeData!.first.columns[1].meta.sourceParams!.hasPrecisionError = true;
+
+        const warnings = FormBasedDatasource.getUserMessages!(state, {
+          frame: framePublicAPI,
+          setState: () => {},
+        });
+
+        expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
+                  Array [
+                    "xpack.lens.indexPattern.timeShiftSmallWarning",
+                    "xpack.lens.indexPattern.timeShiftMultipleWarning",
+                    "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled",
+                  ]
+              `);
+      });
+    });
+
+    describe('info messages', () => {
+      function createLayer(
+        index: number = 0,
+        sampling?: number
+      ): FormBasedPrivateState['layers'][number] {
+        return {
+          sampling,
+          indexPatternId: '1',
+          columnOrder: [`col-${index}-1`, `col-${index}-2`],
+          columns: {
+            [`col-${index}-1`]: {
+              operationType: 'date_histogram',
+              params: {
+                interval: '12h',
+              },
+              label: '',
+              dataType: 'date',
+              isBucketed: true,
+              sourceField: 'timestamp',
+            } as DateHistogramIndexPatternColumn,
+            [`col-${index}-2`]: {
+              operationType: 'count',
+              label: '',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'records',
+            },
+          },
+        };
+      }
+
+      function createDatatableForLayer(index: number): Datatable {
+        return {
+          type: 'datatable' as const,
+          rows: [],
+          columns: [
+            {
+              id: `col-${index}-1`,
+              name: `col-${index}-1`,
+              meta: {
+                type: 'date',
+                source: 'esaggs',
+                sourceParams: {
+                  type: 'date_histogram',
+                  params: {
+                    used_interval: '12h',
+                  },
+                },
+              },
+            },
+            {
+              id: `col-${index}-2`,
+              name: `col-${index}-2`,
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+        };
+      }
+
+      beforeEach(() => {
+        (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
+      });
+
+      it.each`
+        sampling     | infoMessages
+        ${undefined} | ${0}
+        ${1}         | ${0}
+        ${0.1}       | ${1}
+      `(
+        'should return $infoMessages info messages when sampling is set to $sampling',
+        ({ sampling, infoMessages }) => {
+          const messages = FormBasedDatasource.getUserMessages!(
+            {
+              layers: {
+                first: createLayer(0, sampling),
+              },
+              currentIndexPatternId: '1',
+            },
+            {
+              frame: createMockFrameDatasourceAPI({
+                activeData: {
+                  first: createDatatableForLayer(0),
+                },
+                dataViews: {
+                  indexPatterns: expectedIndexPatterns,
+                },
+              }),
+              setState: () => {},
+              visualizationInfo: { layers: [] },
+            }
+          );
+          expect(messages.filter(({ severity }) => severity === 'info')).toHaveLength(infoMessages);
+        }
+      );
+
+      it('should return a single info message for multiple layers with sampling < 100%', () => {
+        const state: FormBasedPrivateState = {
+          layers: {
+            first: createLayer(0, 0.1),
+            second: createLayer(1, 0.001),
+          },
+          currentIndexPatternId: '1',
+        };
+        const messages = FormBasedDatasource.getUserMessages!(state, {
+          frame: createMockFrameDatasourceAPI({
+            activeData: {
+              first: createDatatableForLayer(0),
+              second: createDatatableForLayer(1),
+            },
+            dataViews: {
+              indexPatterns: expectedIndexPatterns,
+            },
+          }),
+          setState: () => {},
+          visualizationInfo: { layers: [] },
+        });
+        const infoMessages = messages.filter(({ severity }) => severity === 'info');
+        expect(infoMessages).toHaveLength(1);
+        const [info] = infoMessages;
+        if (isFragment(info.longMessage)) {
+          expect(info.longMessage.props.layers).toHaveLength(2);
+        }
+      });
     });
   });
 

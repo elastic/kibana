@@ -57,6 +57,6 @@ export function barracudaLogsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['network', 'security'],
+    integrationBrowserCategories: ['network', 'security', 'firewall_security'],
   };
 }

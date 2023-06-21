@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -41,9 +41,9 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER
   ) {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/results/anomaly_search`)
+      .post(`/s/${space}/internal/ml/results/anomaly_search`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.createAndRunAnomalyDetectionLookbackJob(
         ml.commonConfig.getADFqSingleMetricJobConfig(adJobId),
         ml.commonConfig.getADFqDatafeedConfig(adJobId),
-        idSpace1
+        { space: idSpace1 }
       );
       await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [idSpace1]);
     });

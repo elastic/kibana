@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Description,
@@ -66,7 +66,7 @@ export const createList = async ({
     meta,
     name,
     serializer,
-    tie_breaker_id: tieBreaker ?? uuid.v4(),
+    tie_breaker_id: tieBreaker ?? uuidv4(),
     type,
     updated_at: createdAt,
     updated_by: user,

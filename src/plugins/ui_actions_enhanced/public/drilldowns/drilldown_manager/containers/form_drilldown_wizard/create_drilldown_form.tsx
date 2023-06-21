@@ -36,11 +36,7 @@ export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ state 
 
   return (
     <DrilldownForm name={name} onNameChange={state.setName} triggers={triggerPickerProps}>
-      <state.factory.ReactCollectConfig
-        config={config}
-        onConfig={state.setConfig}
-        context={context}
-      />
+      <state.factory.CollectConfig config={config} onConfig={state.setConfig} context={context} />
     </DrilldownForm>
   );
 };

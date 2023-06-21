@@ -1,7 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/core-saved-objects-migration-server-mocks",
-  "owner": "@elastic/kibana-core",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "devOnly": true,
+  "owner": "@elastic/kibana-core"
 }

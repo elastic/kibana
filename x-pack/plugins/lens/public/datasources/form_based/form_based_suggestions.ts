@@ -312,6 +312,7 @@ function createNewLayerWithMetricAggregationFromVizEditor(
 ) {
   const columns = convertToColumnChange(layer.columns, indexPattern);
   let newLayer: FormBasedLayer = {
+    ignoreGlobalFilters: layer.ignoreGlobalFilters,
     indexPatternId: indexPattern.id,
     columns: {},
     columnOrder: [],
@@ -527,6 +528,12 @@ function getEmptyLayerSuggestionsForField(
     newLayer = createNewLayerWithBucketAggregation(indexPattern, field, bucketOperation);
   } else if (indexPattern.timeFieldName && getOperationTypesForField(field).length > 0) {
     newLayer = createNewLayerWithMetricAggregation(indexPattern, field);
+  }
+
+  // copy the sampling rate to the new layer
+  // or just default to 1
+  if (newLayer) {
+    newLayer.sampling = state.layers[layerId]?.sampling ?? 1;
   }
 
   const newLayerSuggestions = newLayer

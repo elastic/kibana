@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
+import { transformToActionFrequency } from '../../normalization/rule_actions';
 
 const DUPLICATE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.cloneRule.duplicateTitle',
@@ -20,9 +20,13 @@ const DUPLICATE_TITLE = i18n.translate(
   }
 );
 
-export const duplicateRule = (rule: SanitizedRule<RuleParams>): InternalRuleCreate => {
+interface DuplicateRuleParams {
+  rule: SanitizedRule<RuleParams>;
+}
+
+export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<InternalRuleCreate> => {
   // Generate a new static ruleId
-  const ruleId = uuid.v4();
+  const ruleId = uuidv4();
 
   // If it's a prebuilt rule, reset Related Integrations, Required Fields and Setup Guide.
   // We do this because for now we don't allow the users to edit these fields for custom rules.
@@ -30,6 +34,7 @@ export const duplicateRule = (rule: SanitizedRule<RuleParams>): InternalRuleCrea
   const relatedIntegrations = isPrebuilt ? [] : rule.params.relatedIntegrations;
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
   const setup = isPrebuilt ? '' : rule.params.setup;
+  const actions = transformToActionFrequency(rule.actions, rule.throttle);
 
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,
@@ -43,11 +48,10 @@ export const duplicateRule = (rule: SanitizedRule<RuleParams>): InternalRuleCrea
       relatedIntegrations,
       requiredFields,
       setup,
+      exceptionsList: [],
     },
     schedule: rule.schedule,
     enabled: false,
-    actions: rule.actions,
-    throttle: null,
-    notifyWhen: null,
+    actions,
   };
 };

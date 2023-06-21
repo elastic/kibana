@@ -92,7 +92,7 @@ export class RemoteClusterList extends Component {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h2>
               <FormattedMessage
@@ -122,7 +122,7 @@ export class RemoteClusterList extends Component {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h2>
               <FormattedMessage

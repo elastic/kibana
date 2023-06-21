@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { OperationDefinition } from '.';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField, IndexPattern } from '../../../../types';
 import { DataType } from '../../../../types';
@@ -27,10 +28,10 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
+  getExistsFilter,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
-import { isScriptedField } from './terms/helpers';
+import { isRuntimeField, isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -63,16 +64,32 @@ const supportedTypes = new Set([
   'date_range',
 ]);
 
-export function getInvalidSortFieldMessage(sortField: string, indexPattern?: IndexPattern) {
+function getInvalidSortFieldMessage(
+  sortField: string,
+  columnId: string,
+  indexPattern?: IndexPattern
+): FieldBasedOperationErrorMessage | undefined {
   if (!indexPattern) {
     return;
   }
   const field = indexPattern.getFieldByName(sortField);
   if (!field) {
-    return i18n.translate('xpack.lens.indexPattern.lastValue.sortFieldNotFound', {
-      defaultMessage: 'Field {invalidField} was not found',
-      values: { invalidField: sortField },
-    });
+    return {
+      message: (
+        <FormattedMessage
+          id="xpack.lens.indexPattern.lastValue.sortFieldNotFound"
+          defaultMessage="Sort field {sortField} was not found."
+          values={{
+            sortField: <strong>{sortField}</strong>,
+          }}
+        />
+      ),
+      displayLocations: [
+        { id: 'toolbar' },
+        { id: 'dimensionButton', dimensionId: columnId },
+        { id: 'embeddableBadge' },
+      ],
+    };
   }
   if (field.type !== 'date') {
     return i18n.translate('xpack.lens.indexPattern.lastValue.invalidTypeSortField', {
@@ -107,6 +124,17 @@ function getDateFields(indexPattern: IndexPattern): IndexPatternField[] {
   return dateFields;
 }
 
+function setDefaultShowArrayValues(
+  field: IndexPatternField,
+  oldParams: LastValueIndexPatternColumn['params']
+) {
+  return (
+    isScriptedField(field) ||
+    (isRuntimeField(field) && field.type !== 'number') ||
+    oldParams?.showArrayValues
+  );
+}
+
 export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'last_value';
   params: {
@@ -117,11 +145,14 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   };
 }
 
-function getExistsFilter(field: string) {
-  return {
-    query: `${field}: *`,
-    language: 'kuery',
-  };
+function getScale(type: string) {
+  return type === 'string' ||
+    type === 'ip' ||
+    type === 'ip_range' ||
+    type === 'date_range' ||
+    type === 'number_range'
+    ? 'ordinal'
+    : 'ratio';
 }
 
 export const lastValueOperation: OperationDefinition<
@@ -144,7 +175,7 @@ export const lastValueOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
 
-    newParams.showArrayValues = isScriptedField(field) || oldColumn.params.showArrayValues;
+    newParams.showArrayValues = setDefaultShowArrayValues(field, oldColumn.params);
 
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
@@ -155,7 +186,7 @@ export const lastValueOperation: OperationDefinition<
       label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
       params: newParams,
-      scale: field.type === 'string' ? 'ordinal' : 'ratio',
+      scale: getScale(field.type),
       filter:
         oldColumn.filter && isEqual(oldColumn.filter, getExistsFilter(oldColumn.sourceField))
           ? getExistsFilter(field.name)
@@ -167,7 +198,7 @@ export const lastValueOperation: OperationDefinition<
       return {
         dataType: type as DataType,
         isBucketed: false,
-        scale: type === 'string' ? 'ordinal' : 'ratio',
+        scale: getScale(type),
       };
     }
   },
@@ -181,19 +212,22 @@ export const lastValueOperation: OperationDefinition<
   },
   getErrorMessage(layer, columnId, indexPattern) {
     const column = layer.columns[columnId] as LastValueIndexPatternColumn;
-    let errorMessages: string[] = [];
-    const invalidSourceFieldMessage = getInvalidFieldMessage(column, indexPattern);
+    const errorMessages: FieldBasedOperationErrorMessage[] = [];
+
+    const invalidSourceFieldMessage = getInvalidFieldMessage(layer, columnId, indexPattern);
+    if (invalidSourceFieldMessage) {
+      errorMessages.push(...invalidSourceFieldMessage);
+    }
+
     const invalidSortFieldMessage = getInvalidSortFieldMessage(
       column.params.sortField,
+      columnId,
       indexPattern
     );
-    if (invalidSourceFieldMessage) {
-      errorMessages = [...invalidSourceFieldMessage];
-    }
     if (invalidSortFieldMessage) {
-      errorMessages = [invalidSortFieldMessage];
+      errorMessages.push(invalidSortFieldMessage);
     }
-    errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
+
     errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
     return errorMessages.length ? errorMessages : undefined;
   },
@@ -211,14 +245,14 @@ export const lastValueOperation: OperationDefinition<
       );
     }
 
-    const showArrayValues = isScriptedField(field) || lastValueParams?.showArrayValues;
+    const showArrayValues = setDefaultShowArrayValues(field, lastValueParams);
 
     return {
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,
-      scale: field.type === 'string' ? 'ordinal' : 'ratio',
+      scale: getScale(field.type),
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
@@ -245,9 +279,12 @@ export const lastValueOperation: OperationDefinition<
       // time shift is added to wrapping aggFilteredMetric if filter is set
       timeShift: column.filter ? undefined : column.timeShift,
     } as const;
+    // do not use unsupported top hits when using a counter field type
+    const isCounterMetricFieldUsed =
+      indexPattern.getFieldByName(column.sourceField)?.timeSeriesMetric === 'counter';
 
     return (
-      column.params.showArrayValues
+      column.params.showArrayValues && !isCounterMetricFieldUsed
         ? buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
             ...initialArgs,
             aggregate: 'concat',
@@ -297,6 +334,7 @@ export const lastValueOperation: OperationDefinition<
     const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid = !!getInvalidSortFieldMessage(
       currentColumn.params.sortField,
+      '',
       indexPattern
     );
 

@@ -40,6 +40,7 @@ export const loginApp = Object.freeze({
           coreStart.i18n,
           { element, theme$ },
           {
+            customBranding: coreStart.customBranding,
             http: coreStart.http,
             notifications: coreStart.notifications,
             fatalErrors: coreStart.fatalErrors,

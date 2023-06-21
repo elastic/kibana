@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
-import { Prompt } from '@kbn/observability-plugin/public';
+import React, { useCallback } from 'react';
+import { Prompt } from '@kbn/observability-shared-plugin/public';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
@@ -75,18 +75,14 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
   ]);
 
-  const isWriteable = useMemo(
-    () => shouldAllowEdit && source && source.origin !== 'internal',
-    [shouldAllowEdit, source]
-  );
+  const isWriteable = shouldAllowEdit && (!Boolean(source) || source?.origin !== 'internal');
+
+  const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
 
   const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 
   if ((isLoading || isUninitialized) && !source) {
     return <SourceLoadingPage />;
-  }
-  if (!source?.configuration) {
-    return null;
   }
 
   return (
@@ -119,6 +115,8 @@ export const SourceConfigurationSettings = ({
           isLoading={isLoading}
           metricAliasFieldProps={indicesConfigurationProps.metricAlias}
           readOnly={!isWriteable}
+          metricIndicesExist={metricIndicesExist}
+          remoteClustersExist={remoteClustersExist}
         />
       </EuiPanel>
       <EuiSpacer />
@@ -153,7 +151,12 @@ export const SourceConfigurationSettings = ({
             {isLoading ? (
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButton color="primary" isLoading fill>
+                  <EuiButton
+                    data-test-subj="infraSourceConfigurationSettingsLoadingButton"
+                    color="primary"
+                    isLoading
+                    fill
+                  >
                     Loading
                   </EuiButton>
                 </EuiFlexItem>

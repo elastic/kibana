@@ -12,6 +12,7 @@ export interface UsageStats {
    */
   'securitySolution:defaultIndex': string;
   'securitySolution:defaultThreatIndex': string;
+  'securitySolution:alertTags': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
@@ -27,7 +28,6 @@ export interface UsageStats {
   'autocomplete:useTimeRange': boolean;
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
-  'visualization:visualize:legacyPieChartsLibrary': boolean;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
@@ -38,13 +38,15 @@ export interface UsageStats {
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
-  'observability:enableNewSyntheticsView': boolean;
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableServiceGroups': boolean;
   'observability:apmEnableServiceMetrics': boolean;
+  'observability:apmEnableContinuousRollups': boolean;
+  'observability:apmAWSLambdaPriceFactor': string;
+  'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
-  'visualize:enableLabs': boolean;
+  'observability:apmAgentExplorerView': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
   'visualization:useLegacyTimeAxis': boolean;
@@ -77,7 +79,6 @@ export interface UsageStats {
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
-  'discover:showLegacyFieldTopValues': boolean;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];
@@ -138,17 +139,17 @@ export interface UsageStats {
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
-  'lens:useFieldExistenceSampling': boolean;
   'metrics:allowCheckingForFailedShards': boolean;
-  'observability:apmOperationsTab': boolean;
+  'observability:syntheticsThrottlingEnabled': boolean;
+  'observability:enableLegacyUptimeApp': boolean;
   'observability:apmLabsButton': boolean;
   'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:apmServiceInventoryOptimizedSorting': boolean;
   'observability:apmTraceExplorerTab': boolean;
+  'observability:apmEnableCriticalPath': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
-  'enterpriseSearch:enableBehavioralAnalyticsSection': boolean;
 }

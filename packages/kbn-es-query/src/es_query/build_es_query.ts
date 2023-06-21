@@ -67,6 +67,7 @@ export function buildEsQuery(
       dateFormatTZ: config.dateFormatTZ,
       filtersInMustClause: config.filtersInMustClause,
       nestedIgnoreUnmapped: config.nestedIgnoreUnmapped,
+      caseInsensitive: config.caseInsensitive,
     }
   );
   const luceneQuery = buildQueryFromLucene(

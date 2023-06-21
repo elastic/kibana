@@ -110,6 +110,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       visEditorRef={visEditorRef}
       embeddableId={embeddableId}
       onAppLeave={onAppLeave}
+      eventEmitter={eventEmitter}
     />
   );
 };

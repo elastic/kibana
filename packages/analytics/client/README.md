@@ -133,6 +133,15 @@ analytics.optIn({
 })
 ```
 
+### Explicit flush of the events
+
+If, at any given point (usually testing or during shutdowns) we need to make sure that all the pending events 
+in the queue are sent. The `flush` API returns a promise that will resolve as soon as all events in the queue are sent. 
+
+```typescript
+await analytics.flush()
+```
+
 ### Shipping events
 
 In order to report the event to an analytics tool, we need to register the shippers our application wants to use. To register a shipper use the API `registerShipper`:

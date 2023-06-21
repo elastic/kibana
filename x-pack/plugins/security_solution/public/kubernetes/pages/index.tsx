@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
@@ -23,17 +24,13 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { SessionsView } from '../../common/components/sessions_viewer';
-import { TableId } from '../../../common/types/timeline';
 import { kubernetesSessionsHeaders } from './constants';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
+
   const { globalFullScreen } = useGlobalFullScreen();
-  const {
-    indexPattern,
-    // runtimeMappings,
-    // loading: isLoadingIndexPattern,
-  } = useSourcererDataView();
+  const { indexPattern } = useSourcererDataView();
   const { from, to } = useGlobalTime();
 
   const getGlobalFiltersQuerySelector = useMemo(

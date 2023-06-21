@@ -25,8 +25,9 @@ describe('createDescriptionUserActionBuilder ', () => {
     jest.clearAllMocks();
   });
 
-  it('renders correctly when editing a description', async () => {
+  it('renders correctly', async () => {
     const userAction = getUserAction('description', Actions.update);
+    // @ts-ignore no need to pass all the arguments
     const builder = createDescriptionUserActionBuilder({
       ...builderArgs,
       userAction,

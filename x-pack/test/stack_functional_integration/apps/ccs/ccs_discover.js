@@ -113,20 +113,22 @@ export default ({ getService, getPageObjects }) => {
       expect(patternName).to.be('local:makelogs工程*');
     });
 
-    it('create remote data makelogs index pattern', async () => {
-      log.debug('create remote data makelogs工程 index pattern');
-      await PageObjects.settings.createIndexPattern('data:makelogs工程*');
+    it('create ftr-remote makelogs index pattern', async () => {
+      log.debug('create ftr-remote makelogs工程 index pattern');
+      await PageObjects.settings.createIndexPattern('ftr-remote:makelogs工程*');
       const patternName = await PageObjects.settings.getIndexPageHeading();
-      expect(patternName).to.be('data:makelogs工程*');
+      expect(patternName).to.be('ftr-remote:makelogs工程*');
     });
 
-    it('create comma separated index patterns for data and local makelogs index pattern', async () => {
+    it('create comma separated index patterns for ftr-remote and local makelogs index pattern', async () => {
       log.debug(
-        'create comma separated index patterns for data and local makelogs工程 index pattern'
+        'create comma separated index patterns for ftr-remote and local makelogs工程 index pattern'
       );
-      await PageObjects.settings.createIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
+      await PageObjects.settings.createIndexPattern(
+        'ftr-remote:makelogs工程-*,local:makelogs工程-*'
+      );
       const patternName = await PageObjects.settings.getIndexPageHeading();
-      expect(patternName).to.be('data:makelogs工程-*,local:makelogs工程-*');
+      expect(patternName).to.be('ftr-remote:makelogs工程-*,local:makelogs工程-*');
     });
 
     it('create index pattern for data from both clusters', async () => {
@@ -147,8 +149,8 @@ export default ({ getService, getPageObjects }) => {
       });
     });
 
-    it('data:makelogs(star) should discover data from remote', async function () {
-      await PageObjects.discover.selectIndexPattern('data:makelogs工程*');
+    it('ftr-remote:makelogs(star) should discover data from remote', async function () {
+      await PageObjects.discover.selectIndexPattern('ftr-remote:makelogs工程*');
       await retry.tryForTime(40000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         log.debug('### hit count = ' + hitCount);
@@ -166,8 +168,10 @@ export default ({ getService, getPageObjects }) => {
       });
     });
 
-    it('data:makelogs-star,local:makelogs-star should discover data from both clusters', async function () {
-      await PageObjects.discover.selectIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
+    it('ftr-remote:makelogs-star,local:makelogs-star should discover data from both clusters', async function () {
+      await PageObjects.discover.selectIndexPattern(
+        'ftr-remote:makelogs工程-*,local:makelogs工程-*'
+      );
       await retry.tryForTime(40000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         log.debug('### hit count = ' + hitCount);
@@ -176,7 +180,9 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('should reload the saved search with persisted query to show the initial hit count', async function () {
-      await PageObjects.discover.selectIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
+      await PageObjects.discover.selectIndexPattern(
+        'ftr-remote:makelogs工程-*,local:makelogs工程-*'
+      );
       // apply query some changes
       await queryBar.setQuery('success');
       await queryBar.submitQuery();
@@ -190,10 +196,12 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('should add a phrases filter', async function () {
-      await PageObjects.discover.selectIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
+      await PageObjects.discover.selectIndexPattern(
+        'ftr-remote:makelogs工程-*,local:makelogs工程-*'
+      );
       const hitCountNumber = await PageObjects.discover.getHitCount();
       const originalHitCount = parseInt(hitCountNumber.replace(/\,/g, ''));
-      await filterBar.addFilter('extension.keyword', 'is', 'jpg');
+      await filterBar.addFilter({ field: 'extension.keyword', operation: 'is', value: 'jpg' });
       expect(await filterBar.hasFilter('extension.keyword', 'jpg')).to.be(true);
       await retry.try(async () => {
         const hitCountNumber = await PageObjects.discover.getHitCount();

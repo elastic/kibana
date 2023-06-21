@@ -1,24 +1,28 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/management/tsconfig.json" },
-    { "path": "../../../src/plugins/saved_objects_tagging_oss/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../security/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/management-plugin",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/features-plugin",
+    "@kbn/security-plugin",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

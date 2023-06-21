@@ -42,7 +42,7 @@ export const DrilldownStateForm: React.FC<DrilldownStateFormProps> = ({ state, d
       triggers={triggerPickerProps}
       disabled={disabled}
     >
-      <state.factory.ReactCollectConfig
+      <state.factory.CollectConfig
         config={config}
         onConfig={disabled ? () => {} : state.setConfig}
         context={context}

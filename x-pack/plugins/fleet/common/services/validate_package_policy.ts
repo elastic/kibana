@@ -22,10 +22,10 @@ import type {
 import {
   isValidNamespace,
   doesPackageHaveIntegrations,
-  isInputOnlyPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
 } from '.';
+import { packageHasNoPolicyTemplates } from './policy_template';
 
 type Errors = string[] | null;
 
@@ -92,16 +92,8 @@ export const validatePackagePolicy = (
     }, {} as ValidationEntry);
   }
 
-  if (
-    !packageInfo.policy_templates ||
-    packageInfo.policy_templates.length === 0 ||
-    !packageInfo.policy_templates.find(
-      (policyTemplate) =>
-        isInputOnlyPolicyTemplate(policyTemplate) ||
-        (policyTemplate.inputs && policyTemplate.inputs.length > 0)
-    )
-  ) {
-    validationResults.inputs = null;
+  if (!packageInfo?.policy_templates?.length || packageHasNoPolicyTemplates(packageInfo)) {
+    validationResults.inputs = {};
     return validationResults;
   }
 
@@ -199,7 +191,7 @@ export const validatePackagePolicy = (
   });
 
   if (Object.entries(validationResults.inputs!).length === 0) {
-    validationResults.inputs = null;
+    validationResults.inputs = {};
   }
 
   return validationResults;
@@ -242,6 +234,23 @@ export const validatePackagePolicyConfig = (
     }
   }
 
+  if (varDef.secret === true && parsedValue && parsedValue.isSecretRef === true) {
+    if (
+      parsedValue.id === undefined ||
+      parsedValue.id === '' ||
+      typeof parsedValue.id !== 'string'
+    ) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, id must be a string',
+        })
+      );
+
+      return errors;
+    }
+    return null;
+  }
+
   if (varDef.type === 'yaml') {
     try {
       parsedValue = safeLoadYaml(value);
@@ -258,7 +267,10 @@ export const validatePackagePolicyConfig = (
     if (parsedValue && !Array.isArray(parsedValue)) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage', {
-          defaultMessage: 'Invalid format',
+          defaultMessage: 'Invalid format for {fieldName}: expected array',
+          values: {
+            fieldName: varDef.title || varDef.name,
+          },
         })
       );
       return errors;
@@ -329,6 +341,16 @@ export const validatePackagePolicyConfig = (
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidIntegerErrorMessage', {
           defaultMessage: 'Invalid integer',
+        })
+      );
+    }
+  }
+
+  if (varDef.type === 'select' && parsedValue !== undefined) {
+    if (!varDef.options?.map((o) => o.value).includes(parsedValue)) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSelectValueErrorMessage', {
+          defaultMessage: 'Invalid value for select type',
         })
       );
     }

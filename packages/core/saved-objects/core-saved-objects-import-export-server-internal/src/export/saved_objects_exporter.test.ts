@@ -7,17 +7,26 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
+import { EXPORT_ALL_TYPES_TOKEN } from './constants';
 
 async function readStreamToCompletion(stream: Readable): Promise<Array<SavedObject<any>>> {
   return createPromiseFromStreams([stream, createConcatStream([])]);
 }
+
+const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
+  name: 'type',
+  namespaceType: 'single',
+  hidden: false,
+  mappings: { properties: {} },
+  ...parts,
+});
 
 const exportSizeLimit = 10000;
 const request = httpServerMock.createKibanaRequest();
@@ -32,13 +41,17 @@ describe('getSortedObjectsForExport()', () => {
     logger = loggerMock.create();
     typeRegistry = new SavedObjectTypeRegistry();
     savedObjectsClient = savedObjectsClientMock.create();
-    exporter = new SavedObjectsExporter({
+    exporter = createExporter();
+  });
+
+  const createExporter = () => {
+    return new SavedObjectsExporter({
       exportSizeLimit,
       logger,
       savedObjectsClient,
       typeRegistry,
     });
-  });
+  };
 
   describe('#exportByTypes', () => {
     test('exports selected types and sorts them', async () => {
@@ -127,6 +140,7 @@ describe('getSortedObjectsForExport()', () => {
                   "search",
                 ],
               },
+              undefined,
             ],
           ],
           "results": Array [
@@ -242,7 +256,8 @@ describe('getSortedObjectsForExport()', () => {
               sortField: 'updated_at',
               sortOrder: 'desc',
               type: ['index-pattern'],
-            })
+            }),
+            undefined // PointInTimeFinder adds `internalOptions`, which is undefined in this case
           );
         });
       });
@@ -480,6 +495,7 @@ describe('getSortedObjectsForExport()', () => {
                   "search",
                 ],
               },
+              undefined,
             ],
           ],
           "results": Array [
@@ -639,6 +655,7 @@ describe('getSortedObjectsForExport()', () => {
                   "search",
                 ],
               },
+              undefined,
             ],
           ],
           "results": Array [
@@ -735,6 +752,7 @@ describe('getSortedObjectsForExport()', () => {
                   "search",
                 ],
               },
+              undefined,
             ],
           ],
           "results": Array [
@@ -836,6 +854,7 @@ describe('getSortedObjectsForExport()', () => {
                   "search",
                 ],
               },
+              undefined,
             ],
           ],
           "results": Array [
@@ -979,6 +998,45 @@ describe('getSortedObjectsForExport()', () => {
           },
         ]
       `);
+    });
+
+    test(`supports the "all types" wildcard`, async () => {
+      typeRegistry.registerType(
+        createType({
+          name: 'exportable_1',
+          management: { importableAndExportable: true },
+        })
+      );
+      typeRegistry.registerType(
+        createType({
+          name: 'exportable_2',
+          management: { importableAndExportable: true },
+        })
+      );
+      typeRegistry.registerType(
+        createType({
+          name: 'not_exportable',
+          management: { importableAndExportable: false },
+        })
+      );
+
+      exporter = createExporter();
+
+      savedObjectsClient.find.mockResolvedValueOnce({
+        total: 0,
+        per_page: 1000,
+        page: 1,
+        saved_objects: [],
+      });
+
+      await exporter.exportByTypes({ request, types: [EXPORT_ALL_TYPES_TOKEN] });
+
+      expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ['exportable_1', 'exportable_2'],
+        })
+      );
     });
   });
 

@@ -1,0 +1,25 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "server/**/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "server/**/*.json",
+    "public/**/*",
+    "common/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/actions-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

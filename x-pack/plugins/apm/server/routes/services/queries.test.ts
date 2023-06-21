@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { ApmDocumentType } from '../../../common/document_type';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { RollupInterval } from '../../../common/rollup';
+import {
+  inspectSearchParams,
+  SearchParamsMock,
+} from '../../utils/test_helpers';
+import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
+import { getServicesItems } from './get_services/get_services_items';
 import { getServiceAgent } from './get_service_agent';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
-import { getServicesItems } from './get_services/get_services_items';
-import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('services queries', () => {
   let mock: SearchParamsMock;
@@ -23,10 +25,10 @@ describe('services queries', () => {
   });
 
   it('fetches the service agent name', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getServiceAgent({
         serviceName: 'foo',
-        setup,
+        apmEventClient: mockApmEventClient,
         start: 0,
         end: 50000,
       })
@@ -36,10 +38,10 @@ describe('services queries', () => {
   });
 
   it('fetches the service transaction types', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getServiceTransactionTypes({
         serviceName: 'foo',
-        setup,
+        apmEventClient: mockApmEventClient,
         searchAggregatedTransactions: false,
         start: 0,
         end: 50000,
@@ -50,22 +52,25 @@ describe('services queries', () => {
   });
 
   it('fetches the service items', async () => {
-    mock = await inspectSearchParams((setup) =>
-      getServicesItems({
-        setup,
-        searchAggregatedTransactions: false,
-        searchAggregatedServiceMetrics: false,
-        logger: {} as any,
-        environment: ENVIRONMENT_ALL.value,
-        kuery: '',
-        start: 0,
-        end: 50000,
-        serviceGroup: null,
-        randomSampler: {
-          probability: 1,
-          seed: 0,
-        },
-      })
+    mock = await inspectSearchParams(
+      ({ mockApmEventClient, mockApmAlertsClient }) =>
+        getServicesItems({
+          mlClient: undefined,
+          apmEventClient: mockApmEventClient,
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+          logger: {} as any,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
+          start: 0,
+          end: 50000,
+          serviceGroup: null,
+          randomSampler: {
+            probability: 1,
+            seed: 0,
+          },
+          apmAlertsClient: mockApmAlertsClient,
+        })
     );
 
     const allParams = mock.spy.mock.calls.map((call) => call[1]);
@@ -74,7 +79,9 @@ describe('services queries', () => {
   });
 
   it('fetches the agent status', async () => {
-    mock = await inspectSearchParams((setup) => hasHistoricalAgentData(setup));
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
+      hasHistoricalAgentData(mockApmEventClient)
+    );
 
     expect(mock.params).toMatchSnapshot();
   });

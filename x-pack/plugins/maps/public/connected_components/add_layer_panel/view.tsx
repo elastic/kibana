@@ -20,20 +20,36 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutBody } from './flyout_body';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers';
-import { getWizardById } from '../../classes/layers/wizards/layer_wizard_registry';
+import {
+  type LayerWizardStep,
+  type RenderSecondaryActionButtonProps,
+  getWizardById,
+} from '../../classes/layers/wizards/layer_wizard_registry';
 
 export const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
 const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
   defaultMessage: 'Add layer',
 });
-const SELECT_WIZARD_LABEL = ADD_LAYER_STEP_LABEL;
+const ADD_LAYER_STEP_NEXT_BUTTON_LABEL = i18n.translate(
+  'xpack.maps.addLayerPanel.addLayerNextButtonLabel',
+  {
+    defaultMessage: 'Add and continue',
+  }
+);
+const ADD_LAYER_STEP_SECONDARY_ACTION_BUTTON_LABEL = i18n.translate(
+  'xpack.maps.addLayerPanel.addLayerSecondaryActionButtonLabel',
+  {
+    defaultMessage: 'Add and close',
+  }
+);
 
 export interface Props {
   addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => void;
   closeFlyout: () => void;
   hasPreviewLayers: boolean;
   isLoadingPreviewLayers: boolean;
-  promotePreviewLayers: () => void;
+  addLayersAndClose: () => void;
+  addLayersAndContinue: () => void;
   enableEditMode: () => void;
   autoOpenLayerWizardId: string;
   clearAutoOpenLayerWizardId: () => void;
@@ -41,8 +57,8 @@ export interface Props {
 
 interface State {
   currentStepIndex: number;
-  currentStep: { id: string; label: string } | null;
-  layerSteps: Array<{ id: string; label: string }> | null;
+  currentStep: LayerWizardStep | null;
+  layerSteps: LayerWizardStep[] | null;
   layerWizard: LayerWizard | null;
   isNextStepBtnEnabled: boolean;
   isStepLoading: boolean;
@@ -91,6 +107,22 @@ export class AddLayerPanel extends Component<Props, State> {
       {
         id: ADD_LAYER_STEP_ID,
         label: ADD_LAYER_STEP_LABEL,
+        nextButtonLabel: ADD_LAYER_STEP_NEXT_BUTTON_LABEL,
+        renderSecondaryActionButton: ({
+          isDisabled,
+          isLoading,
+          addLayersAndClose,
+        }: RenderSecondaryActionButtonProps) => {
+          return (
+            <EuiButton
+              disabled={isDisabled || isLoading}
+              isLoading={isLoading}
+              onClick={addLayersAndClose}
+            >
+              {ADD_LAYER_STEP_SECONDARY_ACTION_BUTTON_LABEL}
+            </EuiButton>
+          );
+        },
       },
     ];
     this.setState({
@@ -108,7 +140,7 @@ export class AddLayerPanel extends Component<Props, State> {
 
     if (this.state.layerSteps.length - 1 === this.state.currentStepIndex) {
       // last step
-      this.props.promotePreviewLayers();
+      this.props.addLayersAndContinue();
       if (this.state.layerWizard?.showFeatureEditTools) {
         this.props.enableEditMode();
       }
@@ -156,20 +188,39 @@ export class AddLayerPanel extends Component<Props, State> {
       isLoading = this.state.isStepLoading;
     }
 
-    return (
+    const nextButton = (
       <EuiFlexItem grow={false}>
         <EuiButton
           data-test-subj="importFileButton"
           disabled={isDisabled || isLoading}
           isLoading={isLoading}
           iconSide="right"
-          iconType={'sortRight'}
+          iconType={'arrowRight'}
           onClick={this._onNext}
           fill
         >
-          {this.state.currentStep.label}
+          {this.state.currentStep.nextButtonLabel
+            ? this.state.currentStep.nextButtonLabel
+            : this.state.currentStep.label}
         </EuiButton>
       </EuiFlexItem>
+    );
+
+    return this.state.currentStep.renderSecondaryActionButton ? (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>
+            {this.state.currentStep.renderSecondaryActionButton({
+              isDisabled,
+              isLoading,
+              addLayersAndClose: this.props.addLayersAndClose,
+            })}
+          </EuiFlexItem>
+          {nextButton}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    ) : (
+      nextButton
     );
   }
 
@@ -178,7 +229,7 @@ export class AddLayerPanel extends Component<Props, State> {
       <>
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2>{this.state.currentStep ? this.state.currentStep.label : SELECT_WIZARD_LABEL}</h2>
+            <h2>{this.state.currentStep ? this.state.currentStep.label : ADD_LAYER_STEP_LABEL}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
@@ -200,7 +251,7 @@ export class AddLayerPanel extends Component<Props, State> {
         />
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
-          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false} gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={this.props.closeFlyout}

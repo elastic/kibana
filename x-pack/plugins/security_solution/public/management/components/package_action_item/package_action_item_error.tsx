@@ -31,7 +31,7 @@ export const PackageActionItemError = memo(({ actionFormatter }: PackageActionIt
     <StyledEuiCallout
       title={actionFormatter.title}
       color="danger"
-      iconType="alert"
+      iconType="warning"
       data-test-subj="packageItemErrorCallOut"
     >
       <StyledEuiText size="s" data-test-subj="packageItemErrorCallOutMessage">

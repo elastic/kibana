@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "__packages_do_not_import__/**/*",
@@ -15,8 +12,19 @@
     "../../../typings/**/*",
     ".storybook/**/*"
   ],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../data_views/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/i18n",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/share-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/safer-lodash-set",
+    "@kbn/storybook",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

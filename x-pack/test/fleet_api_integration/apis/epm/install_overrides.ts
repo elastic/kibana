@@ -26,6 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs packages that include settings and mappings overrides', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
@@ -122,6 +123,7 @@ export default function (providerContext: FtrProviderContext) {
         },
         { meta: true }
       ));
+
       // omit routings
       delete body.template.settings.index.routing;
 
@@ -130,10 +132,12 @@ export default function (providerContext: FtrProviderContext) {
           settings: {
             index: {
               codec: 'best_compression',
+              default_pipeline: 'logs-overrides.test-0.1.0',
               lifecycle: {
                 name: 'overridden by user',
               },
               mapping: {
+                ignore_malformed: `true`,
                 total_fields: {
                   limit: '10000',
                 },
@@ -145,6 +149,7 @@ export default function (providerContext: FtrProviderContext) {
             dynamic: 'false',
             properties: {
               '@timestamp': {
+                ignore_malformed: false,
                 type: 'date',
               },
               data_stream: {

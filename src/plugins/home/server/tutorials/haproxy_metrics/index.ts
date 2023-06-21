@@ -56,6 +56,6 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['network', 'web'],
+    integrationBrowserCategories: ['observability', 'load_balancer'],
   };
 }

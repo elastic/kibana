@@ -21,7 +21,6 @@ exports[`CalendarForm Renders calendar form 1`] = `
         "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
       ]
     }
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={true}
@@ -45,7 +44,6 @@ exports[`CalendarForm Renders calendar form 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
@@ -87,7 +85,6 @@ exports[`CalendarForm Renders calendar form 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
@@ -116,7 +113,6 @@ exports[`CalendarForm Renders calendar form 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
@@ -182,7 +178,9 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
+        color="primary"
         isDisabled={false}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Cancel"
@@ -195,10 +193,12 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="mlSaveCalendarButton"
         fill={true}
         isDisabled={true}
         onClick={[MockFunction]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Save"

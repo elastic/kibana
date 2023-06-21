@@ -6,6 +6,7 @@
  */
 
 import { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import Fs from 'fs/promises';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -70,6 +71,10 @@ const OBJECTS_TO_SHARE: Array<{
   {
     spacesToAdd: [SPACE_2.id],
     objects: [{ type: 'sharedtype', id: 'default_and_space_2' }],
+  },
+  {
+    spacesToAdd: [SPACE_1.id, SPACE_2.id],
+    objects: [{ type: 'resolvetype', id: 'conflict-newid' }],
   },
 ];
 
@@ -172,7 +177,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
 
     deleteAllSavedObjectsFromKibanaIndex: async () => {
       await es.deleteByQuery({
-        index: '.kibana',
+        index: ALL_SAVED_OBJECT_INDICES,
         wait_for_completion: true,
         body: {
           // @ts-expect-error

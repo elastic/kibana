@@ -17,29 +17,16 @@
 export { DELETED_SECURITY_SOLUTION_DATA_VIEW } from './constants';
 
 export type {
-  ActionProps,
-  AlertWorkflowStatus,
-  CellValueElementProps,
-  ColumnId,
-  ColumnRenderer,
-  ColumnHeaderType,
-  ColumnHeaderOptions,
-  ControlColumnProps,
+  DeprecatedCellValueElementProps,
   DataProvidersAnd,
   DataProvider,
-  GenericActionRowCellRenderProps,
-  HeaderActionProps,
-  HeaderCellRender,
   QueryOperator,
   QueryMatch,
-  RowCellRender,
-  RowRenderer,
-  SetEventsDeleted,
-  SetEventsLoading,
-  TimelineType,
+  DeprecatedRowRenderer,
+  ColumnHeaderOptions,
 } from './types';
 
-export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType } from './types';
+export { IS_OPERATOR, EXISTS_OPERATOR } from './types';
 
 export type {
   BeatFields,

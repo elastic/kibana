@@ -13,6 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { stringHash } from '@kbn/ml-string-hash';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
@@ -29,8 +30,19 @@ export const fetchAggIntervals = async (
   query: estypes.QueryDslQueryContainer,
   fields: HistogramField[],
   samplerShardSize: number,
-  runtimeMappings?: estypes.MappingRuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields,
+  abortSignal?: AbortSignal,
+  randomSamplerProbability?: number,
+  randomSamplerSeed?: number
 ): Promise<NumericColumnStatsMap> => {
+  if (
+    samplerShardSize >= 1 &&
+    randomSamplerProbability !== undefined &&
+    randomSamplerProbability < 1
+  ) {
+    throw new Error('Sampler and Random Sampler cannot be used at the same time.');
+  }
+
   const numericColumns = fields.filter((field) => {
     return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
   });
@@ -49,21 +61,44 @@ export const fetchAggIntervals = async (
     return aggs;
   }, {} as Record<string, object>);
 
-  const body = await client.search({
-    index: indexPattern,
-    size: 0,
-    body: {
-      query,
-      aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
-      size: 0,
-      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
-    },
+  const { wrap, unwrap } = createRandomSamplerWrapper({
+    probability: randomSamplerProbability ?? 1,
+    seed: randomSamplerSeed,
   });
 
-  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-  const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
+  const body = await client.search(
+    {
+      index: indexPattern,
+      size: 0,
+      body: {
+        query,
+        aggs:
+          randomSamplerProbability === undefined
+            ? buildSamplerAggregation(minMaxAggs, samplerShardSize)
+            : wrap(minMaxAggs),
+        size: 0,
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      },
+    },
+    { signal: abortSignal, maxRetries: 0 }
+  );
+
+  const aggsPath =
+    randomSamplerProbability === undefined
+      ? getSamplerAggregationsResponsePath(samplerShardSize)
+      : [];
+  const aggregations =
+    aggsPath.length > 0
+      ? get(body.aggregations, aggsPath)
+      : randomSamplerProbability !== undefined && body.aggregations !== undefined
+      ? unwrap(body.aggregations)
+      : body.aggregations;
 
   return Object.keys(aggregations).reduce((p, aggName) => {
+    if (aggregations === undefined) {
+      return p;
+    }
+
     const stats = [aggregations[aggName].min, aggregations[aggName].max];
     if (!stats.includes(null)) {
       const delta = aggregations[aggName].max - aggregations[aggName].min;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
@@ -60,6 +61,7 @@ export const timelineDefaults: SubsetTimelineModel &
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: null,
+  selectAll: false,
   sessionViewConfig: null,
   show: false,
   sort: [

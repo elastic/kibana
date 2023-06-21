@@ -33,8 +33,9 @@ export interface TelemetryResponse {
 
 type ESResponse = SearchResponse<SearchHit>;
 
-export function fetchProvider(index: string) {
+export function fetchProvider(getIndexForType: (type: string) => Promise<string>) {
   return async ({ esClient }: CollectorFetchContext) => {
+    const index = await getIndexForType('sample-data-telemetry');
     const response = await esClient.search<ESResponse>(
       {
         index,

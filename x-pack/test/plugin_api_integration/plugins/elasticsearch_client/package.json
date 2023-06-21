@@ -1,6 +1,7 @@
 {
-  "name": "elasticsearch_client_xpack",
+  "name": "@kbn/elasticsearch-client-xpack-plugin",
   "version": "1.0.0",
+  "license": "Elastic License 2.0",
   "kibana": {
     "version": "kibana"
   },

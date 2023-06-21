@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Criteria,
   EuiBasicTable,
@@ -16,17 +16,17 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ListFilters } from '../list_filters/list_filters';
+import { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
+import { DeleteMonitor } from './delete_monitor';
 import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import { MonitorListPageState } from '../../../../state';
-import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import {
   ConfigKey,
-  Ping,
   EncryptedSyntheticsSavedMonitor,
+  OverviewStatusState,
+  SourceType,
 } from '../../../../../../../common/runtime_types';
-import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
-import { getMonitorListColumns } from './columns';
+import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
 
 interface Props {
@@ -37,7 +37,7 @@ interface Props {
   loading: boolean;
   loadPage: (state: MonitorListPageState) => void;
   reloadPage: () => void;
-  errorSummaries?: Ping[];
+  overviewStatus: OverviewStatusState | null;
 }
 
 export const MonitorList = ({
@@ -46,25 +46,15 @@ export const MonitorList = ({
   total,
   error,
   loading,
+  overviewStatus,
   loadPage,
   reloadPage,
-  errorSummaries,
 }: Props) => {
-  const { basePath } = useContext(SyntheticsSettingsContext);
-  const isXl = useIsWithinMinBreakpoint('xxl');
-  const canEditSynthetics = useCanEditSynthetics();
   const { euiTheme } = useEuiTheme();
+  const isXl = useIsWithinMinBreakpoint('xxl');
 
-  const errorSummariesById = useMemo(
-    () =>
-      (errorSummaries ?? []).reduce((acc, cur) => {
-        if (cur.config_id) {
-          acc.set(cur.config_id, cur);
-        }
-        return acc;
-      }, new Map<string, Ping>()),
-    [errorSummaries]
-  );
+  const [monitorPendingDeletion, setMonitorPendingDeletion] =
+    useState<EncryptedSyntheticsSavedMonitor | null>(null);
 
   const handleOnChange = useCallback(
     ({
@@ -77,7 +67,7 @@ export const MonitorList = ({
       loadPage({
         pageIndex: index,
         pageSize: size,
-        sortField: `${field}.keyword`,
+        sortField: (field === 'enabled' ? field : `${field}.keyword`) as MonitorListSortField,
         sortOrder: direction,
       });
     },
@@ -93,52 +83,58 @@ export const MonitorList = ({
 
   const sorting: EuiTableSortingType<EncryptedSyntheticsSavedMonitor> = {
     sort: {
-      field: sortField.replace('.keyword', '') as keyof EncryptedSyntheticsSavedMonitor,
+      field: sortField?.replace('.keyword', '') as keyof EncryptedSyntheticsSavedMonitor,
       direction: sortOrder,
     },
   };
 
   const recordRangeLabel = labels.getRecordRangeLabel({
-    rangeStart: pageSize * pageIndex + 1,
+    rangeStart: total === 0 ? 0 : pageSize * pageIndex + 1,
     rangeEnd: pageSize * pageIndex + pageSize,
     total,
   });
 
-  const columns = getMonitorListColumns({
-    basePath,
-    euiTheme,
-    errorSummaries,
-    errorSummariesById,
-    canEditSynthetics,
-    syntheticsMonitors,
+  const columns = useMonitorListColumns({
     loading,
-    reloadPage,
+    overviewStatus,
+    setMonitorPendingDeletion,
   });
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-      <ListFilters />
-      <EuiSpacer />
-      {recordRangeLabel}
-      <EuiSpacer size="s" />
-      <hr style={{ border: `1px solid ${euiTheme.colors.lightShade}` }} />
-      <EuiBasicTable
-        aria-label={i18n.translate('xpack.synthetics.management.monitorList.title', {
-          defaultMessage: 'Synthetics monitors list',
-        })}
-        error={error?.body?.message}
-        loading={loading}
-        isExpandable={true}
-        hasActions={true}
-        itemId="monitor_id"
-        items={syntheticsMonitors}
-        columns={columns}
-        tableLayout={isXl ? 'auto' : 'fixed'}
-        pagination={pagination}
-        sorting={sorting}
-        onChange={handleOnChange}
-        noItemsMessage={loading ? labels.LOADING : labels.NO_DATA_MESSAGE}
-      />
-    </EuiPanel>
+    <>
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+        {recordRangeLabel}
+        <EuiSpacer size="s" />
+        <hr style={{ border: `1px solid ${euiTheme.colors.lightShade}` }} />
+        <EuiBasicTable
+          aria-label={i18n.translate('xpack.synthetics.management.monitorList.title', {
+            defaultMessage: 'Synthetics monitors list',
+          })}
+          error={error?.body?.message}
+          loading={loading}
+          isExpandable={true}
+          hasActions={true}
+          itemId="monitor_id"
+          items={syntheticsMonitors}
+          columns={columns}
+          tableLayout={isXl ? 'auto' : 'fixed'}
+          pagination={pagination}
+          sorting={sorting}
+          onChange={handleOnChange}
+          noItemsMessage={loading ? labels.LOADING : labels.NO_DATA_MESSAGE}
+        />
+      </EuiPanel>
+      {monitorPendingDeletion && (
+        <DeleteMonitor
+          configId={monitorPendingDeletion[ConfigKey.CONFIG_ID]}
+          name={monitorPendingDeletion[ConfigKey.NAME] ?? ''}
+          setMonitorPendingDeletion={setMonitorPendingDeletion}
+          isProjectMonitor={
+            monitorPendingDeletion[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
+          }
+          reloadPage={reloadPage}
+        />
+      )}
+    </>
   );
 };

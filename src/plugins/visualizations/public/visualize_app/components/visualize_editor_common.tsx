@@ -7,6 +7,7 @@
  */
 
 import './visualize_editor.scss';
+import { EventEmitter } from 'events';
 import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -48,6 +49,7 @@ interface VisualizeEditorCommonProps {
   originatingPath?: string;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
+  eventEmitter?: EventEmitter;
 }
 
 export const VisualizeEditorCommon = ({
@@ -66,6 +68,7 @@ export const VisualizeEditorCommon = ({
   visualizationIdFromUrl,
   embeddableId,
   visEditorRef,
+  eventEmitter,
 }: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
 
@@ -148,6 +151,7 @@ export const VisualizeEditorCommon = ({
           visualizationIdFromUrl={visualizationIdFromUrl}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
+          eventEmitter={eventEmitter}
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' &&

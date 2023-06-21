@@ -25,7 +25,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiSwitch"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
           aria-checked="false"
@@ -77,19 +77,15 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     </div>
   </div>
   <button
-    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton--fullWidth"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
     <span
-      class="euiButtonContent euiButton__content"
+      class="emotion-euiButtonDisplayContent"
     >
-      <span
-        class="euiButton__text"
-      >
-        <span>
-          Generate Analytical App
-        </span>
+      <span>
+        Generate Analytical App
       </span>
     </span>
   </button>
@@ -99,6 +95,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
   />
   <div
     class="euiAccordion"
+    data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
       class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
@@ -107,7 +104,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiAccordion__iconButton"
+        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
         tabindex="-1"
         type="button"
       >
@@ -160,6 +157,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           />
           <div
             class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+            data-test-subj="shareReportingUnsavedState"
           >
             <p
               class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
@@ -168,7 +166,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
                 aria-hidden="true"
                 class="emotion-euiCallOut__icon"
                 color="inherit"
-                data-euiicon-type="alert"
+                data-euiicon-type="warning"
               />
               Unsaved work
             </p>
@@ -221,7 +219,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiSwitch"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
           aria-checked="false"
@@ -273,19 +271,15 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     </div>
   </div>
   <button
-    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton--fullWidth"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
     <span
-      class="euiButtonContent euiButton__content"
+      class="emotion-euiButtonDisplayContent"
     >
-      <span
-        class="euiButton__text"
-      >
-        <span>
-          Generate Analytical App
-        </span>
+      <span>
+        Generate Analytical App
       </span>
     </span>
   </button>
@@ -295,6 +289,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
   />
   <div
     class="euiAccordion"
+    data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
       class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
@@ -303,7 +298,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiAccordion__iconButton"
+        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
         tabindex="-1"
         type="button"
       >
@@ -356,6 +351,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           />
           <div
             class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+            data-test-subj="shareReportingUnsavedState"
           >
             <p
               class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
@@ -364,7 +360,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
                 aria-hidden="true"
                 class="emotion-euiCallOut__icon"
                 color="inherit"
-                data-euiicon-type="alert"
+                data-euiicon-type="warning"
               />
               Unsaved work
             </p>
@@ -410,19 +406,15 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <button
-    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton--fullWidth"
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
     data-test-subj="generateReportButton"
     type="button"
   >
     <span
-      class="euiButtonContent euiButton__content"
+      class="emotion-euiButtonDisplayContent"
     >
-      <span
-        class="euiButton__text"
-      >
-        <span>
-          Generate Analytical App
-        </span>
+      <span>
+        Generate Analytical App
       </span>
     </span>
   </button>
@@ -432,6 +424,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
   />
   <div
     class="euiAccordion"
+    data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
       class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
@@ -440,7 +433,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
         aria-controls="advanced-options"
         aria-expanded="false"
         aria-labelledby="generated-id"
-        class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiAccordion__iconButton"
+        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
         tabindex="-1"
         type="button"
       >
@@ -493,6 +486,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
           />
           <div
             class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+            data-test-subj="shareReportingUnsavedState"
           >
             <p
               class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
@@ -501,7 +495,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
                 aria-hidden="true"
                 class="emotion-euiCallOut__icon"
                 color="inherit"
-                data-euiicon-type="alert"
+                data-euiicon-type="warning"
               />
               Unsaved work
             </p>

@@ -7,13 +7,8 @@
 
 import pMap from 'p-map';
 import semver from 'semver';
-import type LRU from 'lru-cache';
 import { isEqual, isEmpty } from 'lodash';
-import {
-  type Logger,
-  type SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -94,7 +89,6 @@ export interface ManifestManagerContext {
   exceptionListClient: ExceptionListClient;
   packagePolicyService: PackagePolicyClient;
   logger: Logger;
-  cache: LRU<string, Buffer>;
   experimentalFeatures: ExperimentalFeatures;
 }
 
@@ -112,7 +106,6 @@ export class ManifestManager {
   protected packagePolicyService: PackagePolicyClient;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
-  protected cache: LRU<string, Buffer>;
   protected schemaVersion: ManifestSchemaVersion;
   protected experimentalFeatures: ExperimentalFeatures;
 
@@ -122,7 +115,6 @@ export class ManifestManager {
     this.packagePolicyService = context.packagePolicyService;
     this.savedObjectsClient = context.savedObjectsClient;
     this.logger = context.logger;
-    this.cache = context.cache;
     this.schemaVersion = 'v1';
     this.experimentalFeatures = context.experimentalFeatures;
   }
@@ -335,34 +327,6 @@ export class ManifestManager {
   }
 
   /**
-   * Writes new artifact SO.
-   *
-   * @param artifact An InternalArtifactCompleteSchema representing the artifact.
-   * @returns {Promise<[Error | null, InternalArtifactCompleteSchema | undefined]>} An array with the error if encountered or null and the generated artifact or null.
-   */
-  protected async pushArtifact(
-    artifact: InternalArtifactCompleteSchema
-  ): Promise<[Error | null, InternalArtifactCompleteSchema | undefined]> {
-    const artifactId = getArtifactId(artifact);
-    let fleetArtifact;
-    try {
-      // Write the artifact SO
-      fleetArtifact = await this.artifactClient.createArtifact(artifact);
-
-      // Cache the compressed body of the artifact
-      this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isConflictError(err)) {
-        this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
-      } else {
-        return [err, undefined];
-      }
-    }
-
-    return [null, fleetArtifact];
-  }
-
-  /**
    * Writes new artifact SOs.
    *
    * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
@@ -374,25 +338,48 @@ export class ManifestManager {
     newManifest: Manifest
   ): Promise<Error[]> {
     const errors: Error[] = [];
+
+    const artifactsToCreate: InternalArtifactCompleteSchema[] = [];
+
     for (const artifact of artifacts) {
       if (internalArtifactCompleteSchema.is(artifact)) {
-        const [err, fleetArtifact] = await this.pushArtifact(artifact);
-        if (err) {
-          errors.push(err);
-        } else if (fleetArtifact) {
-          newManifest.replaceArtifact(fleetArtifact);
-        }
+        artifactsToCreate.push(artifact);
       } else {
         errors.push(new EndpointError(`Incomplete artifact: ${getArtifactId(artifact)}`, artifact));
       }
     }
+
+    if (artifactsToCreate.length === 0) {
+      return errors;
+    }
+
+    const { artifacts: fleetArtifacts, errors: createErrors } =
+      await this.artifactClient.bulkCreateArtifacts(artifactsToCreate);
+
+    if (createErrors) {
+      errors.push(...createErrors);
+    }
+
+    if (fleetArtifacts) {
+      const fleetArtfactsByIdentifier: { [key: string]: InternalArtifactCompleteSchema } = {};
+      fleetArtifacts.forEach((fleetArtifact) => {
+        fleetArtfactsByIdentifier[getArtifactId(fleetArtifact)] = fleetArtifact;
+      });
+      artifactsToCreate.forEach((artifact) => {
+        const artifactId = getArtifactId(artifact);
+        const fleetArtifact = fleetArtfactsByIdentifier[artifactId];
+
+        if (!fleetArtifact) return;
+
+        newManifest.replaceArtifact(fleetArtifact);
+      });
+    }
+
     return errors;
   }
 
   /**
    * Deletes outdated artifact SOs.
-   *
-   * The artifact may still remain in the cache.
    *
    * @param artifactIds The IDs of the artifact to delete..
    * @returns {Promise<Error[]>} Any errors encountered.

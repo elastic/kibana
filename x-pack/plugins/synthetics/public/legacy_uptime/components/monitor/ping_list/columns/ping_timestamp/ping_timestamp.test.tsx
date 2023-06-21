@@ -10,20 +10,20 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import { PingTimestamp } from './ping_timestamp';
 import { mockReduxHooks } from '../../../../../lib/helper/test_helpers';
 import { render } from '../../../../../lib/helper/rtl_helpers';
-import * as observabilityPublic from '@kbn/observability-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
 import moment from 'moment';
 import '../../../../../lib/__mocks__/legacy_use_composite_image.mock';
 import { mockRef } from '../../../../../lib/__mocks__/legacy_screenshot_ref.mock';
 
-jest.mock('@kbn/observability-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public');
 
 mockReduxHooks();
 
 describe('Ping Timestamp component', () => {
   let checkGroup: string;
   let timestamp: string;
-  const { FETCH_STATUS } = observabilityPublic;
+  const { FETCH_STATUS } = observabilitySharedPublic;
 
   beforeAll(() => {
     checkGroup = 'f58a484f-2ffb-11eb-9b35-025000000001';
@@ -34,7 +34,7 @@ describe('Ping Timestamp component', () => {
     'displays spinner when loading step image',
     (fetchStatus) => {
       jest
-        .spyOn(observabilityPublic, 'useFetcher')
+        .spyOn(observabilitySharedPublic, 'useFetcher')
         .mockReturnValue({ status: fetchStatus, data: null, refetch: () => null, loading: true });
       const { getByTestId } = render(
         <PingTimestamp checkGroup={checkGroup} label={getShortTimeStamp(moment(timestamp))} />
@@ -45,7 +45,7 @@ describe('Ping Timestamp component', () => {
 
   it('displays no image available when img src is unavailable and fetch status is successful', () => {
     jest
-      .spyOn(observabilityPublic, 'useFetcher')
+      .spyOn(observabilitySharedPublic, 'useFetcher')
       .mockReturnValue({ status: FETCH_STATUS.SUCCESS, data: null, refetch: () => null });
     const { getByTestId } = render(
       <PingTimestamp
@@ -59,7 +59,7 @@ describe('Ping Timestamp component', () => {
 
   it('displays image when img src is available from useFetcher', () => {
     const src = 'http://sample.com/sampleImageSrc.png';
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: { maxSteps: 2, stepName: 'test', src },
       refetch: () => null,
@@ -72,7 +72,7 @@ describe('Ping Timestamp component', () => {
 
   it('displays popover image when mouse enters img caption, and hides onLeave', async () => {
     const src = 'http://sample.com/sampleImageSrc.png';
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: { maxSteps: 1, stepName: null, src },
       refetch: () => null,
@@ -94,7 +94,7 @@ describe('Ping Timestamp component', () => {
   });
 
   it('handles screenshot ref data', async () => {
-    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: mockRef,
       refetch: () => null,

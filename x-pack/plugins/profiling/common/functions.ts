@@ -35,6 +35,7 @@ type TopNFunction = Pick<
 export interface TopNFunctions {
   TotalCount: number;
   TopN: TopNFunction[];
+  SamplingRate: number;
 }
 
 export function createTopNFunctions(
@@ -43,7 +44,8 @@ export function createTopNFunctions(
   stackFrames: Map<StackFrameID, StackFrame>,
   executables: Map<FileID, Executable>,
   startIndex: number,
-  endIndex: number
+  endIndex: number,
+  samplingRate: number
 ): TopNFunctions {
   // The `count` associated with a frame provides the total number of
   // traces in which that node has appeared at least once. However, a
@@ -52,12 +54,14 @@ export function createTopNFunctions(
   // far in each trace.
   let totalCount = 0;
   const topNFunctions = new Map<FrameGroupID, TopNFunctionAndFrameGroup>();
+  // The factor to apply to sampled events to scale the estimated result correctly.
+  const scalingFactor = 1.0 / samplingRate;
 
   // Collect metadata and inclusive + exclusive counts for each distinct frame.
   for (const [stackTraceID, count] of events) {
     const uniqueFrameGroupsPerEvent = new Set<FrameGroupID>();
-
-    totalCount += count;
+    const scaledCount = count * scalingFactor;
+    totalCount += scaledCount;
 
     // It is possible that we do not have a stacktrace for an event,
     // e.g. when stopping the host agent or on network errors.
@@ -87,6 +91,7 @@ export function createTopNFunctions(
           FileID: fileID,
           AddressOrLine: addressOrLine,
           FrameType: stackTrace.Types[i],
+          Inline: frame.Inline,
           FunctionName: frame.FunctionName,
           FunctionOffset: frame.FunctionOffset,
           SourceLine: frame.LineNumber,
@@ -106,12 +111,12 @@ export function createTopNFunctions(
 
       if (!uniqueFrameGroupsPerEvent.has(frameGroupID)) {
         uniqueFrameGroupsPerEvent.add(frameGroupID);
-        topNFunction.CountInclusive += count;
+        topNFunction.CountInclusive += scaledCount;
       }
 
       if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
-        topNFunction.CountExclusive += count;
+        topNFunction.CountExclusive += scaledCount;
       }
     }
   }
@@ -145,10 +150,10 @@ export function createTopNFunctions(
     CountInclusive: frameAndCount.CountInclusive,
     Id: frameAndCount.FrameGroupID,
   }));
-
   return {
     TotalCount: totalCount,
     TopN: framesAndCountsAndIds,
+    SamplingRate: samplingRate,
   };
 }
 

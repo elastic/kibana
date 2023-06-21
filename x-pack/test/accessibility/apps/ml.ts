@@ -7,6 +7,17 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
+interface Detector {
+  identifier: string;
+  function: string;
+  field?: string;
+  byField?: string;
+  overField?: string;
+  partitionField?: string;
+  excludeFrequent?: string;
+  description?: string;
+}
+
 export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
@@ -94,6 +105,114 @@ export default function ({ getService }: FtrProviderContext) {
         const uploadFilePath = require.resolve(
           '../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
         );
+
+        const advancedJobTestData = {
+          suiteTitle: 'with multiple metric detectors and custom datafeed settings',
+          jobSource: ecIndexPattern,
+          jobId: `ec_advanced_1_${Date.now()}`,
+          get jobIdClone(): string {
+            return `${this.jobId}_clone`;
+          },
+          jobDescription: `Create advanced job from ${ecIndexPattern} dataset with multiple metric detectors and custom datafeed settings`,
+          jobGroups: ['automated', 'ecommerce', 'advanced'],
+          get jobGroupsClone(): string[] {
+            return [...this.jobGroups, 'clone'];
+          },
+          pickFieldsConfig: {
+            detectors: [
+              {
+                identifier: 'high_count',
+                function: 'high_count',
+                description: 'high_count detector without split',
+              } as Detector,
+              {
+                identifier: 'mean("products.base_price") by "category.keyword"',
+                function: 'mean',
+                field: 'products.base_price',
+                byField: 'category.keyword',
+              } as Detector,
+              {
+                identifier: 'sum("products.discount_amount") over customer_id',
+                function: 'sum',
+                field: 'products.discount_amount',
+                overField: 'customer_id',
+              } as Detector,
+              {
+                identifier: 'median(total_quantity) partition_field_name=customer_gender',
+                function: 'median',
+                field: 'total_quantity',
+                partitionField: 'customer_gender',
+              } as Detector,
+              {
+                identifier:
+                  'max(total_quantity) by "geoip.continent_name" over customer_id partition_field_name=customer_gender',
+                function: 'max',
+                field: 'total_quantity',
+                byField: 'geoip.continent_name',
+                overField: 'customer_id',
+                partitionField: 'customer_gender',
+              } as Detector,
+            ],
+            influencers: [
+              'customer_id',
+              'category.keyword',
+              'geoip.continent_name',
+              'customer_gender',
+            ],
+            bucketSpan: '1h',
+            memoryLimit: '10mb',
+          },
+          datafeedConfig: {
+            queryDelay: '55s',
+            frequency: '350s',
+            scrollSize: '999',
+          },
+        };
+        const populationJobTestData = {
+          suiteTitle: 'population job',
+          jobSource: ecIndexPattern,
+          jobId: `ec_population_1_${Date.now()}`,
+          get jobIdClone(): string {
+            return `${this.jobId}_clone`;
+          },
+          jobDescription:
+            'Create population job based on the ecommerce sample dataset with 2h bucketspan over customer_id' +
+            ' - detectors: (Mean(products.base_price) by customer_gender), (Mean(products.quantity) by category.leyword)',
+          jobGroups: ['automated', 'ecommerce', 'population'],
+          get jobGroupsClone(): string[] {
+            return [...this.jobGroups, 'clone'];
+          },
+          populationField: 'customer_id',
+          pickFieldsConfig: {
+            detectors: [
+              {
+                identifier: 'Mean(products.base_price)',
+                splitField: 'customer_gender',
+                frontCardTitle: 'FEMALE',
+                numberOfBackCards: 1,
+              },
+              {
+                identifier: 'Mean(products.quantity)',
+                splitField: 'category.keyword',
+                frontCardTitle: "Men's Clothing",
+                numberOfBackCards: 5,
+              },
+            ],
+            influencers: [
+              'customer_id',
+              'category.keyword',
+              'geoip.continent_name',
+              'customer_gender',
+            ],
+            bucketSpan: '2h',
+            memoryLimit: '8mb',
+          },
+          datafeedConfig: {
+            queryDelay: '55s',
+            frequency: '350s',
+            scrollSize: '999',
+          },
+        };
 
         before(async () => {
           await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -263,6 +382,159 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('anomaly detection create multi metric job summary step', async () => {
+          await ml.jobWizardCommon.advanceToSummarySection();
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create advanced job open wizard', async () => {
+          await ml.navigation.navigateToMl();
+          await ml.navigation.navigateToJobManagement();
+
+          await ml.jobManagement.navigateToNewJobSourceSelection();
+
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(
+            advancedJobTestData.jobSource
+          );
+
+          await ml.jobTypeSelection.selectAdvancedJob();
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create advanced job pick fields step', async () => {
+          await ml.jobWizardCommon.advanceToPickFieldsSection();
+          await a11y.testAppSnapshot();
+
+          for (const detector of advancedJobTestData.pickFieldsConfig.detectors) {
+            await ml.jobWizardAdvanced.openCreateDetectorModal();
+            await a11y.testAppSnapshot();
+
+            await ml.jobWizardAdvanced.selectDetectorFunction(detector.function);
+            if (detector.hasOwnProperty('field')) {
+              await ml.jobWizardAdvanced.selectDetectorField(detector.field!);
+            }
+            if (detector.hasOwnProperty('byField')) {
+              await ml.jobWizardAdvanced.selectDetectorByField(detector.byField!);
+            }
+            if (detector.hasOwnProperty('overField')) {
+              await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField!);
+            }
+            if (detector.hasOwnProperty('partitionField')) {
+              await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField!);
+            }
+            if (detector.hasOwnProperty('excludeFrequent')) {
+              await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent!);
+            }
+            if (detector.hasOwnProperty('description')) {
+              await ml.jobWizardAdvanced.setDetectorDescription(detector.description!);
+            }
+
+            await ml.jobWizardAdvanced.confirmAddDetectorModal();
+          }
+
+          await ml.testExecution.logTestStep('job creation inputs the bucket span');
+          await ml.jobWizardCommon.setBucketSpan(advancedJobTestData.pickFieldsConfig.bucketSpan);
+
+          await ml.testExecution.logTestStep('job creation inputs influencers');
+          for (const influencer of advancedJobTestData.pickFieldsConfig.influencers) {
+            await ml.jobWizardCommon.addInfluencer(influencer);
+          }
+
+          await ml.testExecution.logTestStep('job creation inputs the model memory limit');
+          await ml.jobWizardCommon.setModelMemoryLimit(
+            advancedJobTestData.pickFieldsConfig.memoryLimit,
+            {
+              withAdvancedSection: false,
+            }
+          );
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create advanced job job details step', async () => {
+          await ml.jobWizardCommon.advanceToJobDetailsSection();
+          await ml.jobWizardCommon.setJobId(advancedJobTestData.jobId);
+          await ml.jobWizardCommon.setJobDescription(advancedJobTestData.jobDescription);
+          for (const jobGroup of advancedJobTestData.jobGroups) {
+            await ml.jobWizardCommon.addJobGroup(jobGroup);
+          }
+          await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+          await ml.jobWizardCommon.addCustomUrl({ label: 'check-kibana-dashboard' });
+          await ml.jobWizardCommon.addCalendar(calendarId);
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create advanced job validation step', async () => {
+          await ml.jobWizardCommon.advanceToValidationSection();
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create advanced job job summary step', async () => {
+          await ml.jobWizardCommon.advanceToSummarySection();
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create population job open wizard', async () => {
+          await ml.navigation.navigateToJobManagement();
+          await ml.jobManagement.navigateToNewJobSourceSelection();
+
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(ecIndexPattern);
+
+          await ml.testExecution.logTestStep('job creation loads the population job wizard page');
+          await ml.jobTypeSelection.selectPopulationJob();
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create population job pick fields step', async () => {
+          await ml.jobWizardCommon.advanceToPickFieldsSection();
+          await ml.jobWizardPopulation.selectPopulationField(populationJobTestData.populationField);
+          for (const [
+            index,
+            detector,
+          ] of populationJobTestData.pickFieldsConfig.detectors.entries()) {
+            await ml.jobWizardCommon.selectAggAndField(detector.identifier, false);
+            await ml.jobWizardCommon.assertDetectorPreviewExists(
+              detector.identifier,
+              index,
+              'SCATTER'
+            );
+          }
+
+          for (const [
+            index,
+            detector,
+          ] of populationJobTestData.pickFieldsConfig.detectors.entries()) {
+            await ml.jobWizardPopulation.assertDetectorSplitFieldInputExists(index);
+            await ml.jobWizardPopulation.selectDetectorSplitField(index, detector.splitField);
+          }
+          await ml.jobWizardCommon.setBucketSpan(populationJobTestData.pickFieldsConfig.bucketSpan);
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create population job details step', async () => {
+          await ml.jobWizardCommon.advanceToJobDetailsSection();
+
+          await ml.jobWizardCommon.setJobId(populationJobTestData.jobId);
+          await ml.jobWizardCommon.setJobDescription(populationJobTestData.jobDescription);
+          for (const jobGroup of populationJobTestData.jobGroups) {
+            await ml.jobWizardCommon.addJobGroup(jobGroup);
+          }
+          await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+          await ml.jobWizardCommon.addCustomUrl({ label: 'check-kibana-dashboard' });
+          await ml.jobWizardCommon.addCalendar(calendarId);
+
+          await ml.testExecution.logTestStep('job creation inputs the model memory limit');
+          await ml.jobWizardCommon.setModelMemoryLimit(
+            populationJobTestData.pickFieldsConfig.memoryLimit
+          );
+
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create population job validation step', async () => {
+          await ml.jobWizardCommon.advanceToValidationSection();
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create population job summary step', async () => {
           await ml.jobWizardCommon.advanceToSummarySection();
           await a11y.testAppSnapshot();
         });

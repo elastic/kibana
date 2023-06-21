@@ -20,8 +20,8 @@ import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
-import { MonitorStatusTranslations } from '../../../../common/translations';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
+import { MonitorStatusTranslations } from '../../../../common/rules/legacy_uptime/translations';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 
 const { defaultActionMessage, defaultRecoveryMessage, description } = MonitorStatusTranslations;
 

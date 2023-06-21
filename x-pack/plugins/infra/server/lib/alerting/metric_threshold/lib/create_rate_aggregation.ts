@@ -21,8 +21,8 @@ export const createRateAggsBucketScript = (
     [id]: {
       bucket_script: {
         buckets_path: {
-          first: `currentPeriod>${id}_first_bucket.maxValue`,
-          second: `currentPeriod>${id}_second_bucket.maxValue`,
+          first: `currentPeriod['all']>${id}_first_bucket.maxValue`,
+          second: `currentPeriod['all']>${id}_second_bucket.maxValue`,
         },
         script: `params.second > 0.0 && params.first > 0.0 && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds}: null`,
       },

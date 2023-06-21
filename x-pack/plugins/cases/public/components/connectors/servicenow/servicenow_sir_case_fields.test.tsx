@@ -6,27 +6,21 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
-import { waitFor, act, render, screen } from '@testing-library/react';
-import { EuiSelect } from '@elastic/eui';
+import { waitFor, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { useKibana } from '../../../common/lib/kibana';
-import { connector, choices as mockChoices } from '../mock';
-import type { Choice } from './types';
+import { useGetChoices } from './use_get_choices';
+import { connector, choices } from '../mock';
 import Fields from './servicenow_sir_case_fields';
-
-let onChoicesSuccess = (_c: Choice[]) => {};
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
+import { MockFormWrapperComponent } from '../test_utils';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('./use_get_choices', () => ({
-  useGetChoices: (args: { onSuccess: () => void }) => {
-    onChoicesSuccess = args.onSuccess;
-    return { isLoading: false, mockChoices };
-  },
-}));
+jest.mock('./use_get_choices');
+const useGetChoicesMock = useGetChoices as jest.Mock;
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+let appMockRenderer: AppMockRenderer;
 
 describe('ServiceNowSIR Fields', () => {
   const fields = {
@@ -38,249 +32,215 @@ describe('ServiceNowSIR Fields', () => {
     category: 'Denial of Service',
     subcategory: '26',
   };
-  const onChange = jest.fn();
 
   beforeEach(() => {
+    appMockRenderer = createAppMockRenderer();
+    useGetChoicesMock.mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      data: { data: choices },
+    });
     jest.clearAllMocks();
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: '.servicenow-sir',
-      iconClass: 'logoSecurity',
-    });
   });
 
-  it('all params fields are rendered - isEdit: true', () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="destIpCheckbox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="sourceIpCheckbox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="malwareUrlCheckbox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="malwareHashCheckbox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
+  it('all params fields are rendered', () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    expect(screen.getByTestId('destIpCheckbox')).toBeInTheDocument();
+    expect(screen.getByTestId('sourceIpCheckbox')).toBeInTheDocument();
+    expect(screen.getByTestId('malwareUrlCheckbox')).toBeInTheDocument();
+    expect(screen.getByTestId('malwareHashCheckbox')).toBeInTheDocument();
+    expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('categorySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('subcategorySelect')).toBeInTheDocument();
   });
 
-  test('all params fields are rendered - isEdit: false', () => {
-    const wrapper = mount(
-      <Fields isEdit={false} fields={fields} onChange={onChange} connector={connector} />
+  it('transforms the categories to options correctly', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
-    wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(0).text()).toEqual(
-      'Destination IPs: Yes'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(1).text()).toEqual(
-      'Source IPs: Yes'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
-      'Malware URLs: Yes'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(3).text()).toEqual(
-      'Malware Hashes: Yes'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(4).text()).toEqual(
-      'Priority: 1 - Critical'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(5).text()).toEqual(
-      'Category: Denial of Service'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(6).text()).toEqual(
-      'Subcategory: Single or distributed (DoS or DDoS)'
-    );
+    expect(screen.getByRole('option', { name: 'Privilege Escalation' }));
+    expect(screen.getByRole('option', { name: 'Criminal activity/investigation' }));
+    expect(screen.getByRole('option', { name: 'Denial of Service' }));
+    expect(screen.getByRole('option', { name: 'Software' }));
+    expect(screen.getByRole('option', { name: 'Failed Login' }));
   });
 
-  test('it transforms the categories to options correctly', async () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
+  it('transforms the subcategories to options correctly', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="categorySelect"]').first().prop('options')).toEqual([
-      { value: 'Priviledge Escalation', text: 'Priviledge Escalation' },
-      {
-        value: 'Criminal activity/investigation',
-        text: 'Criminal activity/investigation',
-      },
-      { value: 'Denial of Service', text: 'Denial of Service' },
-      {
-        text: 'Software',
-        value: 'software',
-      },
-      {
-        text: 'Failed Login',
-        value: 'failed_login',
-      },
-    ]);
+    expect(screen.getByRole('option', { name: 'Inbound or outbound' }));
+    expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
+    expect(screen.getByRole('option', { name: 'Inbound DDos' }));
   });
 
-  test('it transforms the subcategories to options correctly', async () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
+  it('transforms the priorities to options correctly', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="subcategorySelect"]').first().prop('options')).toEqual([
-      {
-        text: 'Inbound or outbound',
-        value: '12',
-      },
-      {
-        text: 'Single or distributed (DoS or DDoS)',
-        value: '26',
-      },
-      {
-        text: 'Inbound DDos',
-        value: 'inbound_ddos',
-      },
-    ]);
+    expect(screen.getByRole('option', { name: '1 - Critical' }));
+    expect(screen.getByRole('option', { name: '2 - High' }));
+    expect(screen.getByRole('option', { name: '3 - Moderate' }));
+    expect(screen.getByRole('option', { name: '4 - Low' }));
   });
 
-  test('it transforms the priorities to options correctly', async () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
-
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('options')).toEqual([
-      {
-        text: '1 - Critical',
-        value: '1',
-      },
-      {
-        text: '2 - High',
-        value: '2',
-      },
-      {
-        text: '3 - Moderate',
-        value: '3',
-      },
-      {
-        text: '4 - Low',
-        value: '4',
-      },
-    ]);
-  });
-
-  test('shows the deprecated callout if the connector is deprecated', async () => {
+  it('shows the deprecated callout if the connector is deprecated', async () => {
     const tableApiConnector = { ...connector, isDeprecated: true };
-    render(<Fields fields={fields} onChange={onChange} connector={tableApiConnector} />);
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={tableApiConnector} />
+      </MockFormWrapperComponent>
+    );
+
     expect(screen.getByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
-  test('does not show the deprecated callout when the connector is not deprecated', async () => {
-    render(<Fields fields={fields} onChange={onChange} connector={connector} />);
+  it('does not show the deprecated callout when the connector is not deprecated', async () => {
+    render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
   it('does not show the deprecated callout when the connector is preconfigured and not deprecated', async () => {
-    render(
-      <Fields
-        fields={fields}
-        onChange={onChange}
-        connector={{ ...connector, isPreconfigured: true }}
-      />
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={{ ...connector, isPreconfigured: true }} />
+      </MockFormWrapperComponent>
     );
+
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
   it('shows the deprecated callout when the connector is preconfigured and deprecated', async () => {
-    render(
-      <Fields
-        fields={fields}
-        onChange={onChange}
-        connector={{ ...connector, isPreconfigured: true, isDeprecated: true }}
-      />
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={{ ...connector, isPreconfigured: true, isDeprecated: true }} />
+      </MockFormWrapperComponent>
     );
+
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
-  test('it should hide subcategory if selecting a category without subcategories', async () => {
+  it('shows the subcategory if the selected category does not have subcategories', async () => {
     // Failed Login doesn't have defined subcategories
     const customFields = {
       ...fields,
       category: 'Failed Login',
       subcategory: '',
     };
-    const wrapper = mount(
-      <Fields fields={customFields} onChange={onChange} connector={connector} />
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={customFields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeFalsy();
+    expect(screen.getByTestId('subcategorySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('subcategorySelect')).not.toHaveValue();
   });
 
-  describe('onChange calls', () => {
-    let wrapper: ReactWrapper;
+  describe('changing checkbox', () => {
+    const checkboxes = ['destIp', 'sourceIp', 'malwareHash', 'malwareUrl'];
 
-    beforeEach(() => {
-      wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-      act(() => {
-        onChoicesSuccess(mockChoices);
-      });
-      wrapper.update();
-      expect(onChange).toHaveBeenCalledWith(fields);
+    checkboxes.forEach((subj) =>
+      it(`${subj.toUpperCase()}`, () => {
+        appMockRenderer.render(
+          <MockFormWrapperComponent fields={fields}>
+            <Fields connector={connector} />
+          </MockFormWrapperComponent>
+        );
+
+        const checkbox = screen.getByTestId(`${subj}Checkbox`);
+        userEvent.click(checkbox);
+
+        expect(checkbox).not.toBeChecked();
+      })
+    );
+
+    const testers = ['priority'];
+
+    testers.forEach((subj) =>
+      it(`${subj.toUpperCase()}`, async () => {
+        appMockRenderer.render(
+          <MockFormWrapperComponent fields={fields}>
+            <Fields connector={connector} />
+          </MockFormWrapperComponent>
+        );
+
+        const select = screen.getByTestId(`${subj}Select`);
+        userEvent.selectOptions(select, '4 - Low');
+
+        expect(select).toHaveValue('4');
+      })
+    );
+  });
+
+  it('should submit servicenow sir connector', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
+
+    userEvent.click(screen.getByTestId('destIpCheckbox'));
+    userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
+    userEvent.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
     });
 
-    const checkbox = ['destIp', 'sourceIp', 'malwareHash', 'malwareUrl'];
-    checkbox.forEach((subj) =>
-      test(`${subj.toUpperCase()}`, async () => {
-        await waitFor(() => {
-          wrapper
-            .find(`[data-test-subj="${subj}Checkbox"] input`)
-            .first()
-            .simulate('change', { target: { checked: false } });
-          expect(onChange).toHaveBeenCalledWith({
-            ...fields,
-            [subj]: false,
-          });
-        });
-      })
+    userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['26']);
+
+    expect(screen.getByTestId('destIpCheckbox')).not.toBeChecked();
+    expect(screen.getByTestId('sourceIpCheckbox')).toBeChecked();
+    expect(screen.getByTestId('malwareHashCheckbox')).toBeChecked();
+    expect(screen.getByTestId('malwareUrlCheckbox')).toBeChecked();
+    expect(screen.getByTestId('prioritySelect')).toHaveValue('1');
+    expect(screen.getByTestId('categorySelect')).toHaveValue('Denial of Service');
+    expect(screen.getByTestId('subcategorySelect')).toHaveValue('26');
+  });
+
+  it('resets subcategory when changing category', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
 
-    const testers = ['priority', 'subcategory'];
-    testers.forEach((subj) =>
-      test(`${subj.toUpperCase()}`, async () => {
-        await waitFor(() => {
-          const select = wrapper.find(EuiSelect).filter(`[data-test-subj="${subj}Select"]`)!;
-          select.prop('onChange')!({
-            target: {
-              value: '9',
-            },
-          } as React.ChangeEvent<HTMLSelectElement>);
-        });
-        wrapper.update();
-        expect(onChange).toHaveBeenCalledWith({
-          ...fields,
-          [subj]: '9',
-        });
-      })
-    );
+    const categorySelect = screen.getByTestId('categorySelect');
+    const subcategorySelect = screen.getByTestId('subcategorySelect');
 
-    test('it should set subcategory to null when changing category', async () => {
-      const select = wrapper.find(EuiSelect).filter(`[data-test-subj="categorySelect"]`)!;
-      select.prop('onChange')!({
-        target: {
-          value: 'network',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+    userEvent.selectOptions(categorySelect, ['Denial of Service']);
 
-      wrapper.update();
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
+    });
 
-      await waitFor(() => {
-        expect(onChange).toHaveBeenCalledWith({
-          ...fields,
-          subcategory: null,
-          category: 'network',
-        });
-      });
+    userEvent.selectOptions(subcategorySelect, ['26']);
+    userEvent.selectOptions(categorySelect, ['Privilege Escalation']);
+
+    await waitFor(() => {
+      expect(subcategorySelect).not.toHaveValue();
     });
   });
 });

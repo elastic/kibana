@@ -20,3 +20,9 @@ export const PLUGIN_NAME = 'AIOps';
  * "Explain log rate spikes UI" during development until the first release.
  */
 export const AIOPS_ENABLED = true;
+
+/**
+ * This is an internal hard coded feature flag so we can easily turn on/off the
+ * "Change Point Detection UI" during development until the first release.
+ */
+export const CHANGE_POINT_DETECTION_ENABLED = true;

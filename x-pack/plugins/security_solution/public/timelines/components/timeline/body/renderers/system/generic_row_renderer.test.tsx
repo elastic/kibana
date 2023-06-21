@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import type { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   mockDnsEvent,
   mockEndpointProcessExecutionMalwarePreventionAlert,
@@ -80,7 +80,7 @@ import {
 } from './generic_row_renderer';
 import * as i18n from './translations';
 import type { RowRenderer } from '../../../../../../../common/types';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 
 // EuiIcons coming from .testenv render the icon's aria-label as a span
 // extractEuiIcon removes the aria-label before checking for equality

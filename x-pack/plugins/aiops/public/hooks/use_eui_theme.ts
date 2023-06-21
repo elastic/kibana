@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-
-import { euiLightVars as euiThemeLight, euiDarkVars as euiThemeDark } from '@kbn/ui-theme';
-
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
-export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
-
 export function useEuiTheme() {
-  const { uiSettings } = useAiopsAppContext();
-
-  return useMemo(
-    () => (uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight),
-    [uiSettings]
-  );
+  const { theme } = useAiopsAppContext();
+  return useCurrentEuiThemeVars(theme).euiTheme;
 }

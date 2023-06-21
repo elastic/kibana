@@ -2,7 +2,6 @@
   "ml.close_job": {
     "url_params": {
       "allow_no_match": "__flag__",
-      "allow_no_jobs": "__flag__",
       "force": "__flag__",
       "timeout": ""
     },

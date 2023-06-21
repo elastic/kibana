@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/features-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "features",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "features"
+    ],
+    "requiredPlugins": [
+      "licensing"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

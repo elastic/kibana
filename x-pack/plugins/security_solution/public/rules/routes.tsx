@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
-import { Route } from '@kbn/kibana-react-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
 import { RULES_PATH, SecurityPageName } from '../../common/constants';
@@ -22,6 +22,8 @@ import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_ed
 import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
+import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
+import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
 
 const RulesSubRoutes = [
   {
@@ -40,8 +42,13 @@ const RulesSubRoutes = [
     exact: true,
   },
   {
-    path: '/rules',
+    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
     main: RulesPage,
+    exact: true,
+  },
+  {
+    path: '/rules/add_rules',
+    main: AddRulesPage,
     exact: true,
   },
 ];
@@ -71,6 +78,9 @@ const RulesContainerComponent: React.FC = () => {
               />
             )}
           />
+          <Route path="/rules" exact>
+            <Redirect to={`/rules/${AllRulesTabs.management}`} />
+          </Route>
           {RulesSubRoutes.map((route) => (
             <Route
               key={`rules-route-${route.path}`}

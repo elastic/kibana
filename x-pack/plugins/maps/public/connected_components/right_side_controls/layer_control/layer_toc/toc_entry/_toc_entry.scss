@@ -62,6 +62,11 @@
   pointer-events: none !important;
 }
 
+.mapTocEntry-isCombineLayer {
+  transition: background-color $euiAnimSpeedExtraSlow ease;
+  background-color: transparentize($euiColorSuccess, .75);
+}
+
 .mapTocEntry-isSelected {
   background-color: tintOrShade($euiColorLightShade, 60%, 20%);
 }

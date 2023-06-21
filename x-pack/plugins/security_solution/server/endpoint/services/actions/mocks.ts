@@ -8,17 +8,21 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { Readable } from 'stream';
+import type { HapiReadableStream } from '../../../types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import type {
   EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  FileUploadMetadata,
 } from '../../../../common/endpoint/types';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
+import type { actionCreateService } from '..';
 
 export const createActionRequestsEsSearchResultsMock = (
   agentIds?: string[],
@@ -159,4 +163,81 @@ export const applyActionListEsSearchMock = (
 
     return new EndpointActionGenerator().toEsSearchResponse([]);
   });
+};
+
+export const generateFileMetadataDocumentMock = (
+  overrides: Partial<FileUploadMetadata> = {}
+): FileUploadMetadata => {
+  return {
+    action_id: '83484393-ddba-4f3c-9c7e-f492ee198a85',
+    agent_id: 'eef9254d-f3ed-4518-889f-18714bd6cec1',
+    src: 'endpoint',
+    upload_id: 'da2da88f-4e0a-486d-9261-e89927a297d3',
+    upload_start: 1674492651278,
+    contents: [
+      {
+        accessed: '2023-01-23 11:44:43.764000018Z',
+        created: '1969-12-31 19:00:00.000000000Z',
+        directory: '/home/ubuntu/elastic-agent-8.7.0-SNAPSHOT-linux-arm64/',
+        file_extension: '.txt',
+        file_name: 'NOTICE.txt',
+        gid: 1000,
+        inode: 259388,
+        mode: '0644',
+        mountpoint: '/',
+        mtime: '2023-01-22 08:38:58.000000000Z',
+        path: '/home/ubuntu/elastic-agent-8.7.0-SNAPSHOT-linux-arm64/NOTICE.txt',
+        sha256: '065bf83eb2060d30277faa481b2b165c69484d1be1046192eb03f088e9402056',
+        size: 946667,
+        target_path: '',
+        type: 'file',
+        uid: 1000,
+      },
+    ],
+    file: {
+      ChunkSize: 4194304,
+      Status: 'READY',
+      attributes: ['archive', 'compressed'],
+      compression: 'deflate',
+      extension: 'zip',
+      hash: {
+        sha256: 'e5441eb2bb8a774783d4ff4690153832688bd546c878e953acc3da089ac05d06',
+      },
+      mime_type: 'application/zip',
+      name: 'upload.zip',
+      size: 64395,
+      type: 'file',
+    },
+    host: {
+      hostname: 'endpoint10',
+    },
+    transithash: {
+      sha256: 'a0d6d6a2bb73340d4a0ed32b2a46272a19dd111427770c072918aed7a8565010',
+    },
+
+    ...overrides,
+  };
+};
+
+export const createHapiReadableStreamMock = (): HapiReadableStream => {
+  const readable = Readable.from(['test']) as HapiReadableStream;
+  readable.hapi = {
+    filename: 'foo.txt',
+    headers: {
+      'content-type': 'application/text',
+    },
+  };
+
+  return readable;
+};
+
+export const createActionCreateServiceMock = (): jest.Mocked<
+  ReturnType<typeof actionCreateService>
+> => {
+  const createdActionMock = new EndpointActionGenerator('seed').generateActionDetails();
+
+  return {
+    createAction: jest.fn().mockResolvedValue(createdActionMock),
+    createActionFromAlert: jest.fn().mockResolvedValue(createdActionMock),
+  };
 };

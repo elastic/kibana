@@ -9,6 +9,7 @@
 import _, { merge } from 'lodash';
 import globby from 'globby';
 import { basename, join, resolve } from 'path';
+import normalizePath from 'normalize-path';
 import { readFileSync } from 'fs';
 
 import { jsSpecLoaders } from '../lib';
@@ -115,8 +116,9 @@ export class SpecDefinitionsService {
   }
 
   private loadJSONSpecInDir(dirname: string) {
-    const generatedFiles = globby.sync(join(dirname, 'generated', '*.json'));
-    const overrideFiles = globby.sync(join(dirname, 'overrides', '*.json'));
+    // we need to normalize paths otherwise they don't work on windows, see https://github.com/elastic/kibana/issues/151032
+    const generatedFiles = globby.sync(normalizePath(join(dirname, 'generated', '*.json')));
+    const overrideFiles = globby.sync(normalizePath(join(dirname, 'overrides', '*.json')));
 
     return generatedFiles.reduce((acc, file) => {
       const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
@@ -126,17 +128,15 @@ export class SpecDefinitionsService {
       if (overrideFile) {
         merge(loadedSpec, JSON.parse(readFileSync(overrideFile, 'utf8')));
       }
-      const spec: Record<string, EndpointDescription> = {};
       Object.entries(loadedSpec).forEach(([key, value]) => {
         if (acc[key]) {
           // add time to remove key collision
-          spec[`${key}${Date.now()}`] = value;
+          acc[`${key}${Date.now()}`] = value;
         } else {
-          spec[key] = value;
+          acc[key] = value;
         }
       });
-
-      return { ...acc, ...spec };
+      return acc;
     }, {} as Record<string, EndpointDescription>);
   }
 

@@ -146,7 +146,7 @@ describe('SecurityCheckupService', () => {
       expect(coreStart.notifications.toasts.addWarning.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "iconType": "alert",
+            "iconType": "warning",
             "text": "mock insecure cluster text",
             "title": "mock insecure cluster title",
           },

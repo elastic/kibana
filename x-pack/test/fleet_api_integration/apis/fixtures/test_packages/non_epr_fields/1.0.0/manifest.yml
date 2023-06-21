@@ -1,0 +1,42 @@
+format_version: 1.0.0
+name: non_epr_fields
+title: Non EPR Fields
+description: This package contain fields in its manifest and datastreams such as source_mode which are not returned by the EPR API.
+version: 1.0.0
+categories: []
+release: beta
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+policy_templates:
+  - name: p1
+    title: Synthetic source undefined
+    description: description
+    inputs:
+      - type: test_input1
+        title: source_mode undefined - defaults to unchecked, editable
+        description: source_mode undefined
+        enabled: true
+  - name: p2
+    title: Synthetic source synthetic
+    description: description
+    inputs:
+      - type: test_input2
+        title: source_mode 'synthetic' - default to checked, editable
+        description: source_mode synthetic should default to true and be editable
+        enabled: true
+  - name: p1
+    title: Synthetic source default
+    description: description
+    inputs:
+      - type: test_input3
+        title: source_mode 'default' - default to unchecked, not editable
+        description: source_mode default defaults to disabled and is not editable
+        enabled: true

@@ -7,6 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { PluginsService, PluginsServiceSetup } from '@kbn/core-plugins-browser-internal';
 
@@ -41,8 +42,10 @@ const createPluginInitializerContextMock = (config: unknown = {}) => {
         buildNum: 100,
         buildSha: 'buildSha',
         dist: false,
+        buildDate: new Date('2023-05-15T23:12:09.000Z'),
       },
     },
+    logger: loggerMock.create(),
     config: {
       get: <T>() => config as T,
     },

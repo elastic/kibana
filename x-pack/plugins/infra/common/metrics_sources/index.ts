@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { indexPatternRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import {
   SourceConfigurationRT,
@@ -28,6 +29,11 @@ export type MetricsSourceConfigurationProperties = rt.TypeOf<
   typeof metricsSourceConfigurationPropertiesRT
 >;
 
+export const partialMetricsSourceConfigurationReqPayloadRT = rt.partial({
+  ...metricsSourceConfigurationPropertiesRT.type.props,
+  metricAlias: indexPatternRt,
+});
+
 export const partialMetricsSourceConfigurationPropertiesRT = rt.partial({
   ...metricsSourceConfigurationPropertiesRT.type.props,
 });
@@ -44,6 +50,7 @@ const metricsSourceConfigurationOriginRT = rt.keyof({
 
 export const metricsSourceStatusRT = rt.strict({
   metricIndicesExist: SourceStatusRuntimeType.props.metricIndicesExist,
+  remoteClustersExist: SourceStatusRuntimeType.props.metricIndicesExist,
   indexFields: SourceStatusRuntimeType.props.indexFields,
 });
 

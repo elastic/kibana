@@ -75,17 +75,15 @@ export function GroupDetails({
     <>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>
-            {isEdit
-              ? i18n.translate(
-                  'xpack.apm.serviceGroups.groupDetailsForm.edit.title',
-                  { defaultMessage: 'Edit group' }
-                )
-              : i18n.translate(
-                  'xpack.apm.serviceGroups.groupDetailsForm.create.title',
-                  { defaultMessage: 'Create group' }
-                )}
-          </h1>
+          {isEdit
+            ? i18n.translate(
+                'xpack.apm.serviceGroups.groupDetailsForm.edit.title',
+                { defaultMessage: 'Edit group' }
+              )
+            : i18n.translate(
+                'xpack.apm.serviceGroups.groupDetailsForm.create.title',
+                { defaultMessage: 'Create group' }
+              )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -101,6 +99,7 @@ export function GroupDetails({
                   isInvalid={isInvalidName}
                 >
                   <EuiFieldText
+                    data-test-subj="apmGroupNameInput"
                     value={name}
                     onChange={(e) => {
                       setName(e.target.value);
@@ -150,6 +149,7 @@ export function GroupDetails({
               }
             >
               <EuiFieldText
+                data-test-subj="apmGroupDetailsFieldText"
                 fullWidth
                 value={description}
                 onChange={(e) => {
@@ -172,6 +172,7 @@ export function GroupDetails({
                 }}
                 color="danger"
                 isDisabled={isLoading}
+                data-test-subj="apmDeleteGroupButton"
               >
                 {i18n.translate(
                   'xpack.apm.serviceGroups.groupDetailsForm.deleteGroup',
@@ -181,7 +182,11 @@ export function GroupDetails({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-            <EuiButtonEmpty onClick={onCloseModal} isDisabled={isLoading}>
+            <EuiButtonEmpty
+              data-test-subj="apmGroupDetailsCancelButton"
+              onClick={onCloseModal}
+              isDisabled={isLoading}
+            >
               {i18n.translate(
                 'xpack.apm.serviceGroups.groupDetailsForm.cancel',
                 { defaultMessage: 'Cancel' }
@@ -190,6 +195,7 @@ export function GroupDetails({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="apmGroupDetailsSelectServicesButton"
               fill
               iconType="sortRight"
               iconSide="right"

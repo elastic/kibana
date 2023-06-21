@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+
 import moment from 'moment';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
   ALERT_EVALUATION_VALUE,
@@ -13,30 +14,42 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
-import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
+import { getSeverityType, type MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
+import {
+  alertsLocatorID,
+  AlertsLocatorParams,
+  getAlertUrl,
+} from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { asyncForEach } from '@kbn/std';
+import { UptimeEsClient } from '../lib';
 import {
   updateState,
   generateAlertMessage,
   getViewInAppUrl,
   setRecoveredAlertsContext,
+  UptimeRuleTypeAlertDefinition,
 } from './common';
-import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../../common/lib';
 
-import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/translations';
+import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/rules/legacy_uptime/translations';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 
-import { createUptimeESClient } from '../lib';
-import { ALERT_REASON_MSG, ACTION_VARIABLES, VIEW_IN_APP_URL } from './action_variables';
+import {
+  ALERT_REASON_MSG,
+  ACTION_VARIABLES,
+  VIEW_IN_APP_URL,
+  ALERT_DETAILS_URL,
+} from './action_variables';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
-export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Ping) => {
+export const getAnomalySummary = (anomaly: MlAnomaliesTableRecord, monitorInfo: Ping) => {
   return {
     severity: getSeverityType(anomaly.severity),
     severityScore: Math.round(anomaly.severity),
@@ -102,6 +115,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   ],
   actionVariables: {
     context: [
+      ACTION_VARIABLES[ALERT_DETAILS_URL],
       ACTION_VARIABLES[ALERT_REASON_MSG],
       ACTION_VARIABLES[VIEW_IN_APP_URL],
       ...durationAnomalyTranslations.actionVariables,
@@ -115,20 +129,24 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   async executor({
     params,
     services: {
-      alertWithLifecycle,
-      scopedClusterClient,
-      savedObjectsClient,
-      getAlertStartedDate,
       alertFactory,
+      alertWithLifecycle,
+      getAlertStartedDate,
+      getAlertUuid,
+      savedObjectsClient,
+      scopedClusterClient,
     },
+    spaceId,
     state,
     startedAt,
   }) {
-    const uptimeEsClient = createUptimeESClient({
-      esClient: scopedClusterClient.asCurrentUser,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-    });
-    const { basePath } = server;
+      scopedClusterClient.asCurrentUser
+    );
+    const { share, basePath } = server;
+    const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
+      share.url.locators.get(alertsLocatorID);
 
     const { anomalies } =
       (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt as string)) ??
@@ -144,7 +162,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
         monitorId: params.monitorId,
       });
 
-      anomalies.forEach((anomaly, index) => {
+      await asyncForEach(anomalies, async (anomaly, index) => {
         const summary = getAnomalySummary(anomaly, monitorInfo);
         const alertReasonMessage = generateAlertMessage(
           CommonDurationAnomalyTranslations.defaultActionMessage,
@@ -153,13 +171,14 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
 
         const alertId = DURATION_ANOMALY.id + index;
         const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+        const alertUuid = getAlertUuid(alertId);
         const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
-          monitorId: DURATION_ANOMALY.id + index,
+          monitorId: alertId,
           dateRangeEnd: 'now',
           dateRangeStart: indexedStartedAt,
         });
 
-        const alertInstance = alertWithLifecycle({
+        const alert = alertWithLifecycle({
           id: alertId,
           fields: {
             'monitor.id': params.monitorId,
@@ -172,20 +191,36 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
             [ALERT_REASON]: alertReasonMessage,
           },
         });
-        alertInstance.replaceState({
+        alert.replaceState({
           ...updateState(state, false),
           ...summary,
         });
-        alertInstance.scheduleActions(DURATION_ANOMALY.id, {
+        alert.scheduleActions(DURATION_ANOMALY.id, {
+          [ALERT_DETAILS_URL]: await getAlertUrl(
+            alertUuid,
+            spaceId,
+            indexedStartedAt,
+            alertsLocator,
+            basePath.publicBaseUrl
+          ),
           [ALERT_REASON_MSG]: alertReasonMessage,
-          [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
           ...summary,
         });
       });
     }
 
-    setRecoveredAlertsContext(alertFactory);
+    await setRecoveredAlertsContext({
+      alertFactory,
+      alertsLocator,
+      basePath,
+      defaultStartedAt: startedAt.toISOString(),
+      getAlertStartedDate,
+      getAlertUuid,
+      spaceId,
+    });
 
-    return updateState(state, foundAnomalies);
+    return { state: updateState(state, foundAnomalies) };
   },
+  alerts: UptimeRuleTypeAlertDefinition,
 });

@@ -7,6 +7,16 @@
 
 /* eslint-disable max-classes-per-file */
 
+jest.mock('../../../../../../kibana_services', () => ({
+  getEMSSettings() {
+    return {
+      isEMSUrlSet() {
+        return false;
+      },
+    };
+  },
+}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
@@ -50,6 +60,7 @@ const defaultProps = {
   openLayerSettings: () => {},
   numLayers: 2,
   showThisLayerOnly: () => {},
+  ungroupLayer: () => {},
 };
 
 describe('TOCEntryActionsPopover', () => {

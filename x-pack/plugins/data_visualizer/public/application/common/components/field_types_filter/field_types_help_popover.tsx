@@ -22,7 +22,7 @@ import React, { FC, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getFieldTypeDescription } from '../../../../../common/constants';
+import { getFieldTypeDescription } from '@kbn/unified-field-list-plugin/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface FieldTypeTableItem {
@@ -49,9 +49,9 @@ export const FieldTypesHelpPopover: FC<{
         fieldTypes.map((type, index) => ({
           id: index,
           dataType: type,
-          description: getFieldTypeDescription(type, docLinks),
+          description: getFieldTypeDescription(type),
         })),
-      [fieldTypes, docLinks]
+      [fieldTypes]
     );
 
     const columnsSidebar = [

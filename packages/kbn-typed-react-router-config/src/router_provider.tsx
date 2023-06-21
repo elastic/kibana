@@ -8,6 +8,7 @@
 import { History } from 'history';
 import React from 'react';
 import { Router as ReactRouter } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { RouteMap, Router } from './types';
 import { RouterContextProvider } from './use_router';
 
@@ -18,11 +19,13 @@ export function RouterProvider({
 }: {
   router: Router<RouteMap>;
   history: History;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
     <ReactRouter history={history}>
-      <RouterContextProvider router={router}>{children}</RouterContextProvider>
+      <CompatRouter>
+        <RouterContextProvider router={router}>{children}</RouterContextProvider>
+      </CompatRouter>
     </ReactRouter>
   );
 }

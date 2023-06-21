@@ -20,13 +20,19 @@ import { LegendType, LEGEND_TYPES } from '../vega_chart/common';
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
 
 const SCATTERPLOT_SIZE = 125;
+export const USER_SELECTION = 'user_selection';
+export const SINGLE_POINT_CLICK = 'single_point_click';
 
-export const DEFAULT_COLOR = euiPaletteColorBlind()[0];
+export const COLOR_BLUR = '#bbb';
 export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
+export const COLOR_SELECTION = euiPaletteColorBlind()[2];
+export const COLOR_RANGE_OUTLIER = [euiPaletteColorBlind()[1], euiPaletteColorBlind()[2]];
 export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
 export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
+const CUSTOM_VIS_FIELDS_PATH = 'fields';
 
 export const getColorSpec = (
+  forCustomVisLink: boolean,
   euiTheme: typeof euiThemeLight,
   escapedOutlierScoreField?: string,
   color?: string,
@@ -37,10 +43,14 @@ export const getColorSpec = (
   if (typeof escapedOutlierScoreField === 'string') {
     return {
       condition: {
-        value: COLOR_OUTLIER,
-        test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+        selection: USER_SELECTION,
+        field: getEscapedVegaFieldName('is_outlier' ?? '00FF00'),
+        type: LEGEND_TYPES.NOMINAL,
+        scale: {
+          range: COLOR_RANGE_OUTLIER,
+        },
       },
-      value: euiTheme.euiColorMediumShade,
+      value: COLOR_BLUR,
     };
   }
 
@@ -48,28 +58,209 @@ export const getColorSpec = (
   // this returns either a continuous or categorical color spec.
   if (color !== undefined && legendType !== undefined) {
     return {
-      field: getEscapedVegaFieldName(color),
-      type: legendType,
-      scale: {
-        range: legendType === LEGEND_TYPES.NOMINAL ? COLOR_RANGE_NOMINAL : COLOR_RANGE_QUANTITATIVE,
+      condition: {
+        selection: USER_SELECTION,
+        field: `${forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''}${getEscapedVegaFieldName(
+          color ?? '00FF00'
+          // When creating the custom link - this field is returned in an array so we need to access it
+        )}${forCustomVisLink ? '[0]' : ''}`,
+        type: legendType,
+        scale: {
+          range:
+            legendType === LEGEND_TYPES.NOMINAL ? COLOR_RANGE_NOMINAL : COLOR_RANGE_QUANTITATIVE,
+        },
       },
+      value: COLOR_BLUR,
     };
   }
 
-  return { value: DEFAULT_COLOR };
+  return {
+    condition: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
+    value: COLOR_BLUR,
+  };
+};
+
+const getVegaSpecLayer = (
+  forCustomVisLink: boolean,
+  isBackground: boolean,
+  values: VegaValue[],
+  colorSpec: any,
+  escapedOutlierScoreField: string,
+  outliers: boolean,
+  dynamicSize: boolean,
+  vegaColumns: string[],
+  color?: string
+) => {
+  const selection = outliers
+    ? {
+        selection: {
+          [USER_SELECTION]: { type: 'interval' },
+          [SINGLE_POINT_CLICK]: { type: 'single' },
+          mlOutlierScoreThreshold: {
+            type: 'single',
+            fields: ['cutoff'],
+            bind: {
+              input: 'range',
+              max: 1,
+              min: 0,
+              name: i18n.translate('xpack.ml.splomSpec.outlierScoreThresholdName', {
+                defaultMessage: 'Outlier score threshold: ',
+              }),
+              step: 0.01,
+            },
+            init: { cutoff: 0.99 },
+          },
+        },
+      }
+    : {
+        selection: {
+          // Always allow user selection
+          [USER_SELECTION]: {
+            type: 'interval',
+          },
+          [SINGLE_POINT_CLICK]: { type: 'single', empty: 'none' },
+        },
+      };
+
+  return {
+    // Don't need to add static data for custom vis links
+    ...(forCustomVisLink ? {} : { data: { values: [...values] } }),
+    mark: {
+      ...(outliers && dynamicSize
+        ? {
+            type: 'circle',
+            strokeWidth: 1.2,
+            strokeOpacity: 0.75,
+            fillOpacity: 0.1,
+          }
+        : { type: 'circle', opacity: 0.75, size: 8 }),
+    },
+    // transformation to apply outlier threshold as category
+    ...(outliers
+      ? {
+          transform: [
+            {
+              calculate: `datum${
+                forCustomVisLink ? `.${CUSTOM_VIS_FIELDS_PATH}` : ''
+              }['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff`,
+              as: 'is_outlier',
+            },
+          ],
+        }
+      : {}),
+    encoding: {
+      color: isBackground ? { value: COLOR_BLUR } : colorSpec,
+      opacity: {
+        condition: {
+          selection: USER_SELECTION,
+          value: 0.8,
+        },
+        value: 0.5,
+      },
+      ...(dynamicSize
+        ? {
+            stroke: colorSpec,
+            opacity: {
+              condition: {
+                value: 1,
+                test: `(datum${
+                  forCustomVisLink ? `.${CUSTOM_VIS_FIELDS_PATH}` : ''
+                }['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+              },
+              value: 0.5,
+            },
+          }
+        : {}),
+      ...(outliers
+        ? {
+            order: {
+              field: `${
+                forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''
+              }${escapedOutlierScoreField}`,
+            },
+            size: {
+              ...(!dynamicSize
+                ? {
+                    condition: {
+                      value: 40,
+                      test: `(datum${
+                        forCustomVisLink ? `.${CUSTOM_VIS_FIELDS_PATH}` : ''
+                      }['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+                    },
+                    value: 8,
+                  }
+                : {
+                    type: LEGEND_TYPES.QUANTITATIVE,
+                    field: `${
+                      forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''
+                    }${escapedOutlierScoreField}`,
+                    scale: {
+                      type: 'linear',
+                      range: [8, 200],
+                      domain: [0, 1],
+                    },
+                  }),
+            },
+          }
+        : {}),
+      x: {
+        type: LEGEND_TYPES.QUANTITATIVE,
+        field: { repeat: 'column' },
+        scale: { zero: false },
+      },
+      y: {
+        type: LEGEND_TYPES.QUANTITATIVE,
+        field: { repeat: 'row' },
+        scale: { zero: false },
+      },
+      tooltip: [
+        ...(color !== undefined
+          ? // @ts-ignore
+            [
+              {
+                type: colorSpec.condition.type,
+                field: `${
+                  forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''
+                }${getEscapedVegaFieldName(color)}`,
+              },
+            ]
+          : []),
+        ...vegaColumns.map((d) => ({
+          type: LEGEND_TYPES.QUANTITATIVE,
+          field: d,
+        })),
+        ...(outliers
+          ? [
+              {
+                type: LEGEND_TYPES.QUANTITATIVE,
+                field: `${
+                  forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''
+                }${escapedOutlierScoreField}`,
+                format: '.3f',
+              },
+            ]
+          : []),
+      ],
+    },
+    ...(isBackground ? {} : selection),
+    ...(forCustomVisLink ? {} : { width: SCATTERPLOT_SIZE }),
+    ...(forCustomVisLink ? {} : { height: SCATTERPLOT_SIZE }),
+  };
 };
 
 // Escapes the characters .[] in field names with double backslashes
 // since VEGA treats dots/brackets in field names as nested values.
 // See https://vega.github.io/vega-lite/docs/field.html for details.
-function getEscapedVegaFieldName(fieldName: string) {
-  return fieldName.replace(/([\.|\[|\]])/g, '\\$1');
+function getEscapedVegaFieldName(fieldName: string, prependString: string = '') {
+  return `${prependString}${fieldName.replace(/([\.|\[|\]])/g, '\\$1')}`;
 }
 
 type VegaValue = Record<string, string | number>;
 
 export const getScatterplotMatrixVegaLiteSpec = (
+  forCustomVisLink: boolean,
   values: VegaValue[],
+  backgroundValues: VegaValue[],
   columns: string[],
   euiTheme: typeof euiThemeLight,
   resultsField?: string,
@@ -78,19 +269,22 @@ export const getScatterplotMatrixVegaLiteSpec = (
   dynamicSize?: boolean
 ): TopLevelSpec => {
   const vegaValues = values;
-  const vegaColumns = columns.map(getEscapedVegaFieldName);
+  const vegaColumns = columns.map((column) =>
+    getEscapedVegaFieldName(column, forCustomVisLink ? 'fields.' : '')
+  );
   const outliers = resultsField !== undefined;
 
   const escapedOutlierScoreField = `${resultsField}\\.${OUTLIER_SCORE_FIELD}`;
 
   const colorSpec = getColorSpec(
+    forCustomVisLink,
     euiTheme,
     resultsField && escapedOutlierScoreField,
     color,
     legendType
   );
 
-  return {
+  const schema: TopLevelSpec = {
     $schema: 'https://vega.github.io/schema/vega-lite/v4.17.0.json',
     background: 'transparent',
     // There seems to be a bug in Vega which doesn't propagate these settings
@@ -118,100 +312,37 @@ export const getScatterplotMatrixVegaLiteSpec = (
       row: vegaColumns.slice().reverse(),
     },
     spec: {
-      data: { values: [...vegaValues] },
-      mark: {
-        ...(outliers && dynamicSize
-          ? {
-              type: 'circle',
-              strokeWidth: 1.2,
-              strokeOpacity: 0.75,
-              fillOpacity: 0.1,
-            }
-          : { type: 'circle', opacity: 0.75, size: 8 }),
-      },
-      encoding: {
-        color: colorSpec,
-        ...(dynamicSize
-          ? {
-              stroke: colorSpec,
-              opacity: {
-                condition: {
-                  value: 1,
-                  test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
-                },
-                value: 0.5,
-              },
-            }
-          : {}),
-        ...(outliers
-          ? {
-              order: { field: escapedOutlierScoreField },
-              size: {
-                ...(!dynamicSize
-                  ? {
-                      condition: {
-                        value: 40,
-                        test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
-                      },
-                      value: 8,
-                    }
-                  : {
-                      type: LEGEND_TYPES.QUANTITATIVE,
-                      field: escapedOutlierScoreField,
-                      scale: {
-                        type: 'linear',
-                        range: [8, 200],
-                        domain: [0, 1],
-                      },
-                    }),
-              },
-            }
-          : {}),
-        x: {
-          type: LEGEND_TYPES.QUANTITATIVE,
-          field: { repeat: 'column' },
-          scale: { zero: false },
-        },
-        y: {
-          type: LEGEND_TYPES.QUANTITATIVE,
-          field: { repeat: 'row' },
-          scale: { zero: false },
-        },
-        tooltip: [
-          ...(color !== undefined
-            ? [{ type: colorSpec.type, field: getEscapedVegaFieldName(color) }]
-            : []),
-          ...vegaColumns.map((d) => ({
-            type: LEGEND_TYPES.QUANTITATIVE,
-            field: d,
-          })),
-          ...(outliers
-            ? [{ type: LEGEND_TYPES.QUANTITATIVE, field: escapedOutlierScoreField, format: '.3f' }]
-            : []),
-        ],
-      },
-      ...(outliers
-        ? {
-            selection: {
-              mlOutlierScoreThreshold: {
-                type: 'single',
-                fields: ['cutoff'],
-                bind: {
-                  input: 'range',
-                  max: 1,
-                  min: 0,
-                  name: i18n.translate('xpack.ml.splomSpec.outlierScoreThresholdName', {
-                    defaultMessage: 'Outlier score threshold: ',
-                  }),
-                  step: 0.01,
-                },
-                init: { cutoff: 0.99 },
-              },
-            },
-          }
-        : {}),
-      width: SCATTERPLOT_SIZE,
-      height: SCATTERPLOT_SIZE,
+      layer: [
+        getVegaSpecLayer(
+          forCustomVisLink,
+          false,
+          vegaValues,
+          colorSpec,
+          escapedOutlierScoreField,
+          outliers,
+          !!dynamicSize,
+          vegaColumns,
+          color
+        ),
+      ],
     },
   };
+
+  if (backgroundValues.length) {
+    schema.spec.layer.unshift(
+      getVegaSpecLayer(
+        forCustomVisLink,
+        true,
+        backgroundValues,
+        colorSpec,
+        escapedOutlierScoreField,
+        outliers,
+        !!dynamicSize,
+        vegaColumns,
+        color
+      )
+    );
+  }
+
+  return schema;
 };

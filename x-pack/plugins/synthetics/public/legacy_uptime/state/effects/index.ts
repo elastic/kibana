@@ -6,15 +6,9 @@
  */
 
 import { fork } from 'redux-saga/effects';
-import { fetchAgentPoliciesEffect } from '../private_locations';
 import { fetchMonitorDetailsEffect } from './monitor';
-import { fetchMonitorListEffect, fetchUpdatedMonitorEffect } from './monitor_list';
-import {
-  fetchMonitorManagementEffect,
-  fetchSyntheticsServiceAllowedEffect,
-} from './monitor_management';
+import { fetchMonitorListEffect } from './monitor_list';
 import { fetchMonitorStatusEffect } from './monitor_status';
-import { fetchTestNowMonitorEffect } from './test_now_runs';
 import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
 import { fetchPingsEffect, fetchPingHistogramEffect } from './ping';
 import { fetchMonitorDurationEffect } from './monitor_duration';
@@ -32,10 +26,7 @@ import {
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
   yield fork(fetchMonitorListEffect);
-  yield fork(fetchUpdatedMonitorEffect);
-  yield fork(fetchMonitorManagementEffect);
   yield fork(fetchMonitorStatusEffect);
-  yield fork(fetchTestNowMonitorEffect);
   yield fork(fetchDynamicSettingsEffect);
   yield fork(setDynamicSettingsEffect);
   yield fork(fetchPingsEffect);
@@ -49,6 +40,4 @@ export function* rootEffect() {
   yield fork(fetchScreenshotBlocks);
   yield fork(generateBlockStatsOnPut);
   yield fork(pruneBlockCache);
-  yield fork(fetchSyntheticsServiceAllowedEffect);
-  yield fork(fetchAgentPoliciesEffect);
 }

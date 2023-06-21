@@ -11,25 +11,17 @@ import { Privileges } from '../../../../../common/types/privileges';
 
 import { useRequest } from '../../../hooks';
 
-import { hasPrivilegeFactory, Capabilities } from './common';
+import {
+  TransformCapabilities,
+  INITIAL_CAPABILITIES,
+} from '../../../../../common/privilege/has_privilege_factory';
 
 interface Authorization {
   isLoading: boolean;
   apiError: Error | null;
   privileges: Privileges;
-  capabilities: Capabilities;
+  capabilities: TransformCapabilities;
 }
-
-const initialCapabilities: Capabilities = {
-  canGetTransform: false,
-  canDeleteTransform: false,
-  canPreviewTransform: false,
-  canCreateTransform: false,
-  canStartStopTransform: false,
-  canCreateTransformAlerts: false,
-  canUseTransformAlerts: false,
-  canResetTransform: false,
-};
 
 const initialValue: Authorization = {
   isLoading: true,
@@ -38,61 +30,34 @@ const initialValue: Authorization = {
     hasAllPrivileges: false,
     missingPrivileges: {},
   },
-  capabilities: initialCapabilities,
+  capabilities: INITIAL_CAPABILITIES,
 };
 
 export const AuthorizationContext = createContext<Authorization>({ ...initialValue });
 
 interface Props {
-  privilegesEndpoint: string;
+  privilegesEndpoint: { path: string; version: string };
   children: React.ReactNode;
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) => {
+  const { path, version } = privilegesEndpoint;
   const {
     isLoading,
     error,
     data: privilegesData,
   } = useRequest({
-    path: privilegesEndpoint,
+    path,
+    version,
     method: 'get',
   });
 
   const value = {
     isLoading,
-    privileges: isLoading ? { ...initialValue.privileges } : privilegesData,
-    capabilities: { ...initialCapabilities },
+    privileges: isLoading ? { ...initialValue.privileges } : privilegesData.privileges,
+    capabilities: isLoading ? { ...INITIAL_CAPABILITIES } : privilegesData.capabilities,
     apiError: error ? (error as Error) : null,
   };
-
-  const hasPrivilege = hasPrivilegeFactory(value.privileges);
-
-  value.capabilities.canGetTransform =
-    hasPrivilege(['cluster', 'cluster:monitor/transform/get']) &&
-    hasPrivilege(['cluster', 'cluster:monitor/transform/stats/get']);
-
-  value.capabilities.canCreateTransform = hasPrivilege(['cluster', 'cluster:admin/transform/put']);
-
-  value.capabilities.canDeleteTransform = hasPrivilege([
-    'cluster',
-    'cluster:admin/transform/delete',
-  ]);
-
-  value.capabilities.canResetTransform = hasPrivilege(['cluster', 'cluster:admin/transform/reset']);
-
-  value.capabilities.canPreviewTransform = hasPrivilege([
-    'cluster',
-    'cluster:admin/transform/preview',
-  ]);
-
-  value.capabilities.canStartStopTransform =
-    hasPrivilege(['cluster', 'cluster:admin/transform/start']) &&
-    hasPrivilege(['cluster', 'cluster:admin/transform/start_task']) &&
-    hasPrivilege(['cluster', 'cluster:admin/transform/stop']);
-
-  value.capabilities.canCreateTransformAlerts = value.capabilities.canCreateTransform;
-
-  value.capabilities.canUseTransformAlerts = value.capabilities.canGetTransform;
 
   return (
     <AuthorizationContext.Provider value={{ ...value }}>{children}</AuthorizationContext.Provider>

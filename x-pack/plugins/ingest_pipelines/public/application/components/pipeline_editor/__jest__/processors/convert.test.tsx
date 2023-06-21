@@ -26,7 +26,7 @@ describe('Processor: Convert', () => {
   const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

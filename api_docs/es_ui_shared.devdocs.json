@@ -363,7 +363,7 @@
         "label": "JsonEditor",
         "description": [],
         "signature": [
-          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, euiCodeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
+          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, codeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
         "deprecated": false,
@@ -561,8 +561,14 @@
         "description": [],
         "signature": [
           "<D = any, E = any>(httpClient: ",
-          "HttpSetup",
-          ", { path, method, body, query, asSystemRequest }: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          ", { path, method, body, query, version, asSystemRequest }: ",
           {
             "pluginId": "esUiShared",
             "scope": "public",
@@ -592,7 +598,13 @@
             "label": "httpClient",
             "description": [],
             "signature": [
-              "HttpSetup"
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              }
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
@@ -604,7 +616,7 @@
             "id": "def-public.sendRequest.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ path, method, body, query, asSystemRequest }",
+            "label": "{ path, method, body, query, version, asSystemRequest }",
             "description": [],
             "signature": [
               {
@@ -651,8 +663,14 @@
         "description": [],
         "signature": [
           "<D = any, E = Error>(httpClient: ",
-          "HttpSetup",
-          ", { path, method, query, body, pollIntervalMs, initialData, deserializer }: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          ", { path, method, query, body, pollIntervalMs, initialData, deserializer, version, }: ",
           {
             "pluginId": "esUiShared",
             "scope": "public",
@@ -682,7 +700,13 @@
             "label": "httpClient",
             "description": [],
             "signature": [
-              "HttpSetup"
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              }
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
@@ -694,7 +718,7 @@
             "id": "def-public.useRequest.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ path, method, query, body, pollIntervalMs, initialData, deserializer }",
+            "label": "{\n    path,\n    method,\n    query,\n    body,\n    pollIntervalMs,\n    initialData,\n    deserializer,\n    version,\n  }",
             "description": [],
             "signature": [
               {
@@ -1290,7 +1314,7 @@
             "label": "method",
             "description": [],
             "signature": [
-              "\"get\" | \"post\" | \"put\" | \"delete\" | \"patch\" | \"head\""
+              "\"get\" | \"delete\" | \"head\" | \"post\" | \"put\" | \"patch\""
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
@@ -1304,7 +1328,13 @@
             "label": "query",
             "description": [],
             "signature": [
-              "HttpFetchQuery",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpFetchQuery",
+                "text": "HttpFetchQuery"
+              },
               " | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
@@ -1336,6 +1366,20 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.SendRequestConfig.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
@@ -1794,7 +1838,13 @@
         ],
         "signature": [
           "({ error, response, handleCustomError, }: EsErrorHandlerParams) => ",
-          "IKibanaResponse",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
           "<any>"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",

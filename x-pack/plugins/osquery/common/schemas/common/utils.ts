@@ -8,6 +8,7 @@
 import { isEmpty, reduce } from 'lodash';
 import type { DefaultValues } from 'react-hook-form';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 
 export type ECSMappingArray = Array<{
   key: string;
@@ -51,4 +52,49 @@ export const convertECSMappingToArray = (
       return acc;
     },
     [] as ECSMappingArray
+  );
+
+export type ShardsArray = Array<{
+  policy: {
+    key: string;
+    label: string;
+  };
+  percentage: number;
+}>;
+
+export type Shard = Record<string, number>;
+
+export const convertShardsToObject = (shards: ShardsArray): Shard =>
+  reduce(
+    shards,
+    (acc, value) => {
+      if (!isEmpty(value?.policy)) {
+        acc[value.policy.key] = value.percentage;
+      }
+
+      return acc;
+    },
+    {} as Shard
+  );
+
+export const convertShardsToArray = (
+  shards: DefaultValues<Shard>,
+  policiesById?: Record<string, GetAgentPoliciesResponseItem>
+): ShardsArray =>
+  reduce(
+    shards,
+    (acc, value, key) => {
+      if (value != null) {
+        acc.push({
+          policy: {
+            key,
+            label: policiesById?.[key]?.name ?? '',
+          },
+          percentage: value,
+        });
+      }
+
+      return acc;
+    },
+    [] as ShardsArray
   );

@@ -13,13 +13,16 @@ import type {
   OnPreResponseToolkit,
   OnPostAuthToolkit,
   OnPreRoutingToolkit,
+  OnPostAuthHandler,
 } from '@kbn/core-http-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
   createCustomHeadersPreResponseHandler,
+  createRestrictInternalRoutesPostAuthHandler,
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
+
 import { HttpConfig } from './http_config';
 
 type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
@@ -52,6 +55,10 @@ const forgeRequest = ({
     kibanaRouteOptions,
   });
 };
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('xsrf post-auth handler', () => {
   let toolkit: ToolkitMock;
@@ -167,6 +174,7 @@ describe('xsrf post-auth handler', () => {
         path: '/some-path',
         kibanaRouteOptions: {
           xsrfRequired: false,
+          access: 'public',
         },
       });
 
@@ -241,6 +249,108 @@ describe('versionCheck post-auth handler', () => {
   });
 });
 
+describe('restrictInternal post-auth handler', () => {
+  let toolkit: ToolkitMock;
+  let responseFactory: ReturnType<typeof mockRouter.createResponseFactory>;
+
+  beforeEach(() => {
+    toolkit = createToolkit();
+    responseFactory = mockRouter.createResponseFactory();
+  });
+  const createForgeRequest = (
+    access: 'internal' | 'public',
+    headers: Record<string, string> | undefined = {}
+  ) => {
+    return forgeRequest({
+      method: 'get',
+      headers,
+      path: `/${access}/some-path`,
+      kibanaRouteOptions: {
+        xsrfRequired: false,
+        access,
+      },
+    });
+  };
+
+  const createForwardSuccess = (handler: OnPostAuthHandler, request: KibanaRequest) => {
+    toolkit.next.mockReturnValue('next' as any);
+    const result = handler(request, responseFactory, toolkit);
+
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(responseFactory.badRequest).not.toHaveBeenCalled();
+    expect(result).toBe('next');
+  };
+
+  describe('when restriction is enabled', () => {
+    const config = createConfig({
+      name: 'my-server-name',
+      restrictInternalApis: true,
+    });
+    it('returns a bad request if called without internal origin header for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal');
+
+      responseFactory.badRequest.mockReturnValue('badRequest' as any);
+
+      const result = handler(request, responseFactory, toolkit);
+
+      expect(toolkit.next).not.toHaveBeenCalled();
+      expect(responseFactory.badRequest.mock.calls[0][0]?.body).toMatch(
+        /uri \[.*\/internal\/some-path\] with method \[get\] exists but is not available with the current configuration/
+      );
+      expect(result).toBe('badRequest');
+    });
+
+    it('forward the request to the next interceptor if called with internal origin header for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin header for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('public', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called without internal origin header for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('public');
+      createForwardSuccess(handler, request);
+    });
+  });
+
+  describe('when restriction is not enabled', () => {
+    const config = createConfig({
+      name: 'my-server-name',
+      restrictInternalApis: false,
+    });
+    it('forward the request to the next interceptor if called without internal origin header for internal APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal');
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin header for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called without internal origin header for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('public');
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin header for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('public', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+    });
+  });
+});
+
 describe('customHeaders pre-response handler', () => {
   let toolkit: ToolkitMock;
 
@@ -248,19 +358,28 @@ describe('customHeaders pre-response handler', () => {
     toolkit = createToolkit();
   });
 
-  it('adds the kbn-name header to the response', () => {
-    const config = createConfig({ name: 'my-server-name' });
+  it('adds the kbn-name and Content-Security-Policy headers to the response', () => {
+    const config = createConfig({
+      name: 'my-server-name',
+      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
+    });
     const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
 
     handler({} as any, {} as any, toolkit);
 
     expect(toolkit.next).toHaveBeenCalledTimes(1);
-    expect(toolkit.next).toHaveBeenCalledWith({ headers: { 'kbn-name': 'my-server-name' } });
+    expect(toolkit.next).toHaveBeenCalledWith({
+      headers: {
+        'Content-Security-Policy': 'foo',
+        'kbn-name': 'my-server-name',
+      },
+    });
   });
 
   it('adds the security headers and custom headers defined in the configuration', () => {
     const config = createConfig({
       name: 'my-server-name',
+      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
       securityResponseHeaders: {
         headerA: 'value-A',
         headerB: 'value-B', // will be overridden by the custom response header below
@@ -276,6 +395,7 @@ describe('customHeaders pre-response handler', () => {
     expect(toolkit.next).toHaveBeenCalledTimes(1);
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
+        'Content-Security-Policy': 'foo',
         'kbn-name': 'my-server-name',
         headerA: 'value-A',
         headerB: 'x',
@@ -283,11 +403,13 @@ describe('customHeaders pre-response handler', () => {
     });
   });
 
-  it('preserve the kbn-name value from server.name if defined in custom headders ', () => {
+  it('do not allow overwrite of the kbn-name and Content-Security-Policy headers if defined in custom headders ', () => {
     const config = createConfig({
       name: 'my-server-name',
+      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
       customResponseHeaders: {
         'kbn-name': 'custom-name',
+        'Content-Security-Policy': 'custom-csp',
         headerA: 'value-A',
         headerB: 'value-B',
       },
@@ -300,6 +422,7 @@ describe('customHeaders pre-response handler', () => {
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
         'kbn-name': 'my-server-name',
+        'Content-Security-Policy': 'foo',
         headerA: 'value-A',
         headerB: 'value-B',
       },

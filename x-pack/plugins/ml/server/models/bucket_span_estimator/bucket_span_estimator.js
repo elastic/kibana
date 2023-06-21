@@ -10,13 +10,11 @@ import { cloneDeep, each, remove, sortBy, get } from 'lodash';
 import { mlLog } from '../../lib/log';
 
 import { INTERVALS } from './intervals';
-import { singleSeriesCheckerFactory } from './single_series_checker';
-import { polledDataCheckerFactory } from './polled_data_checker';
+import { SingleSeriesChecker } from './single_series_checker';
+import { PolledDataChecker } from './polled_data_checker';
 
 export function estimateBucketSpanFactory(client) {
   const { asCurrentUser, asInternalUser } = client;
-  const PolledDataChecker = polledDataCheckerFactory(client);
-  const SingleSeriesChecker = singleSeriesCheckerFactory(client);
 
   class BucketSpanEstimator {
     constructor(
@@ -79,6 +77,7 @@ export function estimateBucketSpanFactory(client) {
       });
 
       this.polledDataChecker = new PolledDataChecker(
+        asCurrentUser,
         this.index,
         this.timeField,
         this.duration,
@@ -93,6 +92,7 @@ export function estimateBucketSpanFactory(client) {
             // either a single metric job or no data split
             this.checkers.push({
               check: new SingleSeriesChecker(
+                asCurrentUser,
                 this.index,
                 this.timeField,
                 this.aggTypes[i],
@@ -117,6 +117,7 @@ export function estimateBucketSpanFactory(client) {
               });
               this.checkers.push({
                 check: new SingleSeriesChecker(
+                  asCurrentUser,
                   this.index,
                   this.timeField,
                   this.aggTypes[i],

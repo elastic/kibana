@@ -152,7 +152,7 @@ test('errors observable if request returns with error', () => {
   expect(error).toHaveBeenCalledTimes(1);
   expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
   expect(error.mock.calls[0][0].message).toMatchInlineSnapshot(
-    `"Batch request failed with status 400"`
+    `"Check your network connection and try again. Code 400"`
   );
 });
 
@@ -182,7 +182,7 @@ test('does not emit when gets error response', () => {
   expect(error).toHaveBeenCalledTimes(1);
   expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
   expect(error.mock.calls[0][0].message).toMatchInlineSnapshot(
-    `"Batch request failed with status 400"`
+    `"Check your network connection and try again. Code 400"`
   );
 });
 

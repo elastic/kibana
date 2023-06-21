@@ -10,25 +10,26 @@ import { join } from 'path';
 import { SavedObject } from '@kbn/core/server';
 import supertest from 'supertest';
 import {
-  CASES_URL,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import {
   AttributesTypeUser,
-  CommentsResponse,
   CaseAttributes,
-  CaseUserActionAttributes,
   CasePostRequest,
-  CaseUserActionResponse,
   PushedUserAction,
   ConnectorUserAction,
   CommentUserAction,
   CreateCaseUserAction,
   CaseStatuses,
   CaseSeverity,
+  CaseUserActionWithoutReferenceIds,
 } from '@kbn/cases-plugin/common/api';
+import {
+  CasePersistedSeverity,
+  CasePersistedStatus,
+} from '@kbn/cases-plugin/server/common/types/case';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   deleteAllCaseItems,
@@ -36,7 +37,8 @@ import {
   createComment,
   findCases,
   getCaseUserActions,
-} from '../../../../common/lib/utils';
+  findAttachments,
+} from '../../../../common/lib/api';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -75,8 +77,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(objects).to.have.length(4);
 
-      expectExportToHaveCaseSavedObject(objects, caseRequest);
-      expectExportToHaveUserActions(objects, caseRequest);
+      const expectedCaseRequest = { ...caseRequest, category: null }; // added default value
+
+      expectExportToHaveCaseSavedObject(objects, expectedCaseRequest);
+      expectExportToHaveUserActions(objects, expectedCaseRequest);
       expectExportToHaveAComment(objects);
     });
 
@@ -99,10 +103,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(findResponse.cases[0].title).to.eql('A case to export');
       expect(findResponse.cases[0].description).to.eql('a description');
 
-      const { body: commentsResponse }: { body: CommentsResponse } = await supertestService
-        .get(`${CASES_URL}/${findResponse.cases[0].id}/comments/_find`)
-        .send()
-        .expect(200);
+      const commentsResponse = await findAttachments({
+        supertest: supertestService,
+        caseId: findResponse.cases[0].id,
+      });
 
       const comment = commentsResponse.comments[0] as unknown as AttributesTypeUser;
       expect(comment.comment).to.eql('A comment for my case');
@@ -162,11 +166,11 @@ const expectImportToHaveOneCase = async (supertestService: supertest.SuperTest<s
   expect(findResponse.cases[0].description).to.eql('super description');
 };
 
-const expectImportToHaveCreateCaseUserAction = (userAction: CaseUserActionResponse) => {
+const expectImportToHaveCreateCaseUserAction = (userAction: CaseUserActionWithoutReferenceIds) => {
   expect(userAction.action).to.eql('create');
 };
 
-const expectImportToHavePushUserAction = (userAction: CaseUserActionResponse) => {
+const expectImportToHavePushUserAction = (userAction: CaseUserActionWithoutReferenceIds) => {
   const pushedUserAction = userAction as PushedUserAction;
   expect(userAction.action).to.eql('push_to_service');
   expect(userAction.type).to.eql('pushed');
@@ -177,7 +181,7 @@ const expectImportToHavePushUserAction = (userAction: CaseUserActionResponse) =>
   );
 };
 
-const expectImportToHaveUpdateConnector = (userAction: CaseUserActionResponse) => {
+const expectImportToHaveUpdateConnector = (userAction: CaseUserActionWithoutReferenceIds) => {
   const connectorUserAction = userAction as ConnectorUserAction;
   expect(userAction.action).to.eql('update');
   expect(userAction.type).to.eql('connector');
@@ -205,14 +209,14 @@ const expectExportToHaveCaseSavedObject = (
   expect(createdCaseSO.attributes.connector.name).to.eql(caseRequest.connector.name);
   expect(createdCaseSO.attributes.connector.fields).to.eql([]);
   expect(createdCaseSO.attributes.settings).to.eql(caseRequest.settings);
-  expect(createdCaseSO.attributes.status).to.eql(CaseStatuses.open);
-  expect(createdCaseSO.attributes.severity).to.eql(CaseSeverity.LOW);
+  expect(createdCaseSO.attributes.status).to.eql(CasePersistedStatus.OPEN);
+  expect(createdCaseSO.attributes.severity).to.eql(CasePersistedSeverity.LOW);
   expect(createdCaseSO.attributes.duration).to.eql(null);
   expect(createdCaseSO.attributes.tags).to.eql(caseRequest.tags);
 };
 
 const expectExportToHaveUserActions = (objects: SavedObject[], caseRequest: CasePostRequest) => {
-  const userActionSOs = findSavedObjectsByType<CaseUserActionAttributes>(
+  const userActionSOs = findSavedObjectsByType<CaseUserActionWithoutReferenceIds>(
     objects,
     CASE_USER_ACTION_SAVED_OBJECT
   );
@@ -224,7 +228,7 @@ const expectExportToHaveUserActions = (objects: SavedObject[], caseRequest: Case
 };
 
 const expectCaseCreateUserAction = (
-  userActions: Array<SavedObject<CaseUserActionAttributes>>,
+  userActions: Array<SavedObject<CaseUserActionWithoutReferenceIds>>,
   caseRequest: CasePostRequest
 ) => {
   const userActionForCaseCreate = findUserActionSavedObject(userActions, 'create', 'create_case');
@@ -251,7 +255,7 @@ const expectCaseCreateUserAction = (
 };
 
 const expectCreateCommentUserAction = (
-  userActions: Array<SavedObject<CaseUserActionAttributes>>
+  userActions: Array<SavedObject<CaseUserActionWithoutReferenceIds>>
 ) => {
   const userActionForComment = findUserActionSavedObject(userActions, 'create', 'comment');
   const createCommentUserAction = userActionForComment!.attributes as CommentUserAction;
@@ -279,9 +283,9 @@ const findSavedObjectsByType = <ReturnType>(
 };
 
 const findUserActionSavedObject = (
-  savedObjects: Array<SavedObject<CaseUserActionAttributes>>,
+  savedObjects: Array<SavedObject<CaseUserActionWithoutReferenceIds>>,
   action: string,
   type: string
-): SavedObject<CaseUserActionAttributes> | undefined => {
+): SavedObject<CaseUserActionWithoutReferenceIds> | undefined => {
   return savedObjects.find((so) => so.attributes.action === action && so.attributes.type === type);
 };

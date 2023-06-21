@@ -8,6 +8,7 @@
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
   properties: {
     enabled: {
       type: 'boolean',
@@ -41,6 +42,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       type: 'keyword',
     },
     actions: {
+      dynamic: false,
       type: 'nested',
       properties: {
         group: {
@@ -52,10 +54,27 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         actionTypeId: {
           type: 'keyword',
         },
-        params: {
-          enabled: false,
-          type: 'object',
-        },
+        // NO NEED TO BE INDEXED
+        // params: {
+        //   dynamic: false,
+        //   properties: {},
+        // },
+        // frequency: {
+        //   properties: {
+        //     summary: {
+        //       index: false,
+        //       type: 'boolean',
+        //     },
+        //     notifyWhen: {
+        //       index: false,
+        //       type: 'keyword',
+        //     },
+        //     throttle: {
+        //       index: false,
+        //       type: 'keyword',
+        //     },
+        //   },
+        // },
       },
     },
     params: {
@@ -87,12 +106,14 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     updatedAt: {
       type: 'date',
     },
-    apiKey: {
-      type: 'binary',
-    },
-    apiKeyOwner: {
-      type: 'keyword',
-    },
+    // NEED TO CHECK WITH KIBANA SECURITY
+    // apiKey: {
+    //   type: 'binary',
+    // },
+    // NO NEED TO BE INDEXED
+    // apiKeyOwner: {
+    //   type: 'keyword',
+    // },
     throttle: {
       type: 'keyword',
     },
@@ -105,30 +126,34 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     mutedInstanceIds: {
       type: 'keyword',
     },
-    meta: {
-      properties: {
-        versionApiKeyLastmodified: {
-          type: 'keyword',
-        },
-      },
-    },
+    // NO NEED TO BE INDEXED
+    // meta: {
+    //   properties: {
+    //     versionApiKeyLastmodified: {
+    //       type: 'keyword',
+    //     },
+    //   },
+    // },
     monitoring: {
       properties: {
-        execution: {
+        run: {
           properties: {
-            history: {
-              properties: {
-                duration: {
-                  type: 'long',
-                },
-                success: {
-                  type: 'boolean',
-                },
-                timestamp: {
-                  type: 'date',
-                },
-              },
-            },
+            // history: {
+            //   properties: {
+            //     duration: {
+            //       type: 'long',
+            //     },
+            //     success: {
+            //       type: 'boolean',
+            //     },
+            //     timestamp: {
+            //       type: 'date',
+            //     },
+            //     outcome: {
+            //       type: 'keyword',
+            //     },
+            //   },
+            // },
             calculated_metrics: {
               properties: {
                 p50: {
@@ -145,10 +170,65 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
                 },
               },
             },
+            last_run: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                metrics: {
+                  properties: {
+                    duration: {
+                      type: 'long',
+                    },
+                    total_search_duration_ms: {
+                      type: 'long',
+                    },
+                    total_indexing_duration_ms: {
+                      type: 'long',
+                    },
+                    total_alerts_detected: {
+                      type: 'float',
+                    },
+                    total_alerts_created: {
+                      type: 'float',
+                    },
+                    gap_duration_s: {
+                      type: 'float',
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
     },
+    // There is need to query for a rule by a specific revision
+    revision: {
+      type: 'long',
+    },
+    snoozeSchedule: {
+      type: 'nested',
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+        duration: {
+          type: 'long',
+        },
+        skipRecurrences: {
+          type: 'date',
+          format: 'strict_date_time',
+        },
+        // NO NEED TO BE INDEXED
+        // rRule: rRuleMappingsField,
+      },
+    },
+    // NO NEED TO BE INDEXED
+    // nextRun: {
+    //   type: 'date',
+    // },
+    // Deprecated, if you need to add new property please do it in `last_run`
     executionStatus: {
       properties: {
         numberOfTriggeredActions: {
@@ -185,75 +265,41 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
-    snoozeSchedule: {
-      type: 'nested',
+    lastRun: {
       properties: {
-        id: {
+        outcome: {
           type: 'keyword',
         },
-        duration: {
-          type: 'long',
+        outcomeOrder: {
+          type: 'float',
         },
-        skipRecurrences: {
-          type: 'date',
-          format: 'strict_date_time',
-        },
-        rRule: {
-          type: 'nested',
+        // NO NEED TO BE INDEXED
+        // warning: {
+        //   type: 'text',
+        // },
+        // outcomeMsg: {
+        //   type: 'text',
+        // },
+        alertsCount: {
           properties: {
-            freq: {
-              type: 'keyword',
+            active: {
+              type: 'float',
             },
-            dtstart: {
-              type: 'date',
-              format: 'strict_date_time',
+            new: {
+              type: 'float',
             },
-            tzid: {
-              type: 'keyword',
+            recovered: {
+              type: 'float',
             },
-            until: {
-              type: 'date',
-              format: 'strict_date_time',
-            },
-            count: {
-              type: 'long',
-            },
-            interval: {
-              type: 'long',
-            },
-            wkst: {
-              type: 'keyword',
-            },
-            byweekday: {
-              type: 'keyword',
-            },
-            bymonth: {
-              type: 'short',
-            },
-            bysetpos: {
-              type: 'long',
-            },
-            bymonthday: {
-              type: 'short',
-            },
-            byyearday: {
-              type: 'short',
-            },
-            byweekno: {
-              type: 'short',
-            },
-            byhour: {
-              type: 'long',
-            },
-            byminute: {
-              type: 'long',
-            },
-            bysecond: {
-              type: 'long',
+            ignored: {
+              type: 'float',
             },
           },
         },
       },
+    },
+    running: {
+      type: 'boolean',
     },
   },
 };

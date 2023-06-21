@@ -29,6 +29,35 @@ import {
   RULE_MISSING_MONITORING_DATA,
 } from '../../../../common/constants';
 
+type ElasticsearchNodeRole =
+  | 'master'
+  | 'voting_only'
+  | 'data'
+  | 'data_content'
+  | 'data_hot'
+  | 'data_warm'
+  | 'data_cold'
+  | 'data_frozen'
+  | 'ingest'
+  | 'transform'
+  | 'ml'
+  | 'remote_cluster_client';
+
+const rolesByImportance: ElasticsearchNodeRole[] = [
+  'master',
+  'voting_only',
+  'data',
+  'data_content',
+  'data_hot',
+  'data_warm',
+  'data_cold',
+  'data_frozen',
+  'ingest',
+  'transform',
+  'ml',
+  'remote_cluster_client',
+];
+
 export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
@@ -66,7 +95,10 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
     if (services.http?.fetch && clusterUuid) {
       setIsLoading(true);
-      const response = await services.http?.fetch<{ totalNodeCount: number }>(url, {
+      const response = await services.http?.fetch<{
+        totalNodeCount: number;
+        nodes: Array<{ roles: string[] }>;
+      }>(url, {
         method: 'POST',
         body: JSON.stringify({
           ccs,
@@ -79,7 +111,20 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
       });
 
       setIsLoading(false);
-      setData(response);
+
+      const { nodes } = response;
+      const nodesWithSortedRoles = nodes.map((node) => {
+        const sortedRoles = sortNodeRoles(node.roles);
+        return {
+          ...node,
+          roles: sortedRoles,
+        };
+      });
+
+      setData({
+        ...response,
+        nodes: nodesWithSortedRoles,
+      });
       updateTotalItemCount(response.totalNodeCount);
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
@@ -140,3 +185,16 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     </ElasticsearchTemplate>
   );
 };
+
+function sortNodeRoles(roles: string[] | undefined): string[] | undefined {
+  if (!roles) {
+    return undefined;
+  }
+
+  if (roles.length === 0) {
+    return [];
+  }
+
+  const rolesAsSet = new Set(roles);
+  return rolesByImportance.filter((role) => rolesAsSet.has(role));
+}

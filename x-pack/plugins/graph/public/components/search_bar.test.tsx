@@ -29,6 +29,7 @@ import { GraphStore, setDatasource, submitSearchSaga } from '../state_management
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
@@ -42,6 +43,7 @@ function getServiceMocks() {
       },
     } as IUiSettingsClient,
     savedObjects: {} as SavedObjectsStart,
+    savedObjectsManagement: {} as SavedObjectsManagementPluginStart,
     notifications: {} as NotificationsStart,
     docLinks: {
       links: {
@@ -199,7 +201,7 @@ describe('search_bar', () => {
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    instance.find('[data-test-subj="graphDatasourceButton"]').first().simulate('click');
+    instance.find('button[data-test-subj="graphDatasourceButton"]').first().simulate('click');
 
     expect(openSourceModal).toHaveBeenCalled();
   });

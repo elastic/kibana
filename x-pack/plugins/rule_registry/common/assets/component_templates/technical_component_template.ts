@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mappingFromFieldMap } from '../../mapping_from_field_map';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { ClusterPutComponentTemplateBody } from '../../types';
 import { technicalRuleFieldMap } from '../field_maps/technical_rule_field_map';
 

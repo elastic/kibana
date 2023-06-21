@@ -26,6 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('setup checks packages completed install', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     describe('package install', async () => {
       before(async () => {
         if (!server.enabled) return;

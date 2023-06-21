@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'header', 'home']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
   const logsUi = getService('logsUi');
 
   describe('upgrade logs smoke tests', function describeIndexTests() {
@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.home.launchSampleLogs('logs');
           await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
         });
 
         it('should show log streams', async () => {

@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
+    "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
@@ -13,9 +10,15 @@
     "server/**/*",
     "__fixtures__/**/*",
   ],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../presentation_util/tsconfig.json" },
-    { "path": "../expressions/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/presentation-util-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

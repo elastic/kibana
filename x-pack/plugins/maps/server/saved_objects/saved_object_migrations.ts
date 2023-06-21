@@ -7,15 +7,10 @@
 
 import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { extractReferences } from '../../common/migrations/references';
-// @ts-expect-error
 import { emsRasterTileToEmsVectorTile } from '../../common/migrations/ems_raster_tile_to_ems_vector_tile';
-// @ts-expect-error
 import { topHitsTimeToSort } from '../../common/migrations/top_hits_time_to_sort';
-// @ts-expect-error
 import { moveApplyGlobalQueryToSources } from '../../common/migrations/move_apply_global_query';
-// @ts-expect-error
 import { addFieldMetaOptions } from '../../common/migrations/add_field_meta_options';
-// @ts-expect-error
 import { migrateSymbolStyleDescriptor } from '../../common/migrations/migrate_symbol_style_descriptor';
 import { migrateUseTopHitsToScalingType } from '../../common/migrations/scaling_type';
 import { migrateJoinAggKey } from '../../common/migrations/join_agg_key';
@@ -26,14 +21,14 @@ import { addTypeToTermJoin } from '../../common/migrations/add_type_to_termjoin'
 import { moveAttribution } from '../../common/migrations/move_attribution';
 import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
 import { renameLayerTypes } from '../../common/migrations/rename_layer_types';
-import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapAttributes } from '../../common/content_management';
 
 function logMigrationWarning(
   context: SavedObjectMigrationContext,
   errorMsg: string,
-  doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>
+  doc: SavedObjectUnsanitizedDoc<MapAttributes>
 ) {
-  context.log.warning(
+  context.log.warn(
     `map migration failed (${context.migrationVersion}). ${errorMsg}. attributes: ${JSON.stringify(
       doc
     )}`
@@ -49,7 +44,7 @@ function logMigrationWarning(
  */
 export const savedObjectMigrations = {
   '7.2.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -66,7 +61,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.4.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -82,7 +77,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.5.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -98,7 +93,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.6.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -115,7 +110,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.7.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -132,7 +127,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.8.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -148,7 +143,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.9.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -164,7 +159,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.10.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -180,7 +175,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.12.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -196,7 +191,7 @@ export const savedObjectMigrations = {
     }
   },
   '7.14.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -212,7 +207,7 @@ export const savedObjectMigrations = {
     }
   },
   '8.0.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -228,7 +223,7 @@ export const savedObjectMigrations = {
     }
   },
   '8.1.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -244,7 +239,7 @@ export const savedObjectMigrations = {
     }
   },
   '8.4.0': (
-    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    doc: SavedObjectUnsanitizedDoc<MapAttributes>,
     context: SavedObjectMigrationContext
   ) => {
     try {

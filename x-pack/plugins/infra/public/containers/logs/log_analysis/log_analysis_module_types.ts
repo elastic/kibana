@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
-} from '../../../../common/http_api/log_analysis';
+} from '../../../../common/http_api';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { DeleteJobsResponsePayload } from './api/ml_cleanup';
 import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
@@ -25,10 +25,10 @@ export interface ModuleDescriptor<JobType extends string> {
   moduleDescription: string;
   jobTypes: JobType[];
   bucketSpan: number;
-  getJobIds: (spaceId: string, sourceId: string) => Record<JobType, string>;
+  getJobIds: (spaceId: string, logViewId: string) => Record<JobType, string>;
   getJobSummary: (
     spaceId: string,
-    sourceId: string,
+    logViewId: string,
     fetch: HttpHandler
   ) => Promise<FetchJobStatusResponsePayload>;
   getModuleDefinition: (fetch: HttpHandler) => Promise<GetMlModuleResponsePayload>;
@@ -41,7 +41,7 @@ export interface ModuleDescriptor<JobType extends string> {
   ) => Promise<SetupMlModuleResponsePayload>;
   cleanUpModule: (
     spaceId: string,
-    sourceId: string,
+    logViewId: string,
     fetch: HttpHandler
   ) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices: (

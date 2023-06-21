@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
-import { CoreSetup } from '@kbn/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
@@ -27,12 +27,12 @@ import { httpService } from './services/http';
 
 function initSetup({
   usageCollection,
-  coreSetup,
+  core,
 }: {
-  coreSetup: CoreSetup<StartDependencies>;
+  core: CoreStart;
   usageCollection: UsageCollectionSetup;
 }) {
-  const { http, notifications } = coreSetup;
+  const { http, notifications } = core;
 
   httpService.setup(http);
   notificationService.setup(notifications);
@@ -63,6 +63,7 @@ export async function mountManagementSection(
     chrome: { docTitle },
     uiSettings,
     executionContext,
+    settings,
   } = core;
 
   const { url } = startDependencies.share;
@@ -73,7 +74,7 @@ export async function mountManagementSection(
 
   const { uiMetricService } = initSetup({
     usageCollection,
-    coreSetup,
+    core,
   });
 
   const appDependencies: AppDependencies = {
@@ -96,6 +97,7 @@ export async function mountManagementSection(
     history,
     setBreadcrumbs,
     uiSettings,
+    settings,
     url,
     docLinks,
     kibanaVersion,

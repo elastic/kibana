@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 
 const createActionTypeRegistryMock = () => {
@@ -26,7 +26,7 @@ const mockedActionParamsFields = lazy(async () => ({
 }));
 
 const createMockActionTypeModel = (actionType: Partial<ActionTypeModel> = {}): ActionTypeModel => {
-  const id = uuid.v4();
+  const id = uuidv4();
   return {
     id,
     iconClass: `iconClass-${id}`,

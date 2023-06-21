@@ -8,16 +8,18 @@ import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
-import { getPageRowIndex } from '@kbn/timelines-plugin/public';
+import { getPageRowIndex } from '@kbn/securitysolution-data-table';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { EmptyComponent, onFilterAdded, useKibanaServices } from './helpers';
 
 export const getFilterOutCellAction = ({
   data,
   pageSize,
+  closeCellPopover,
 }: {
   data?: TimelineNonEcsData[][];
   pageSize: number;
+  closeCellPopover?: () => void;
 }) =>
   data && data.length > 0
     ? function FilterOut({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) {
@@ -47,6 +49,7 @@ export const getFilterOutCellAction = ({
             ownFocus: false,
             showTooltip: false,
             value,
+            onClick: closeCellPopover,
           };
         }, [Component, columnId, filterManager, value]);
 

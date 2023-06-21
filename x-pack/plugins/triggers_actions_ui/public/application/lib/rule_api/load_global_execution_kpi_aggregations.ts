@@ -16,6 +16,7 @@ export interface LoadGlobalExecutionKPIAggregationsProps {
   message?: string;
   dateStart: string;
   dateEnd?: string;
+  namespaces?: Array<string | undefined>;
 }
 
 export const loadGlobalExecutionKPIAggregations = ({
@@ -25,6 +26,7 @@ export const loadGlobalExecutionKPIAggregations = ({
   message,
   dateStart,
   dateEnd,
+  namespaces,
 }: LoadGlobalExecutionKPIAggregationsProps & { http: HttpSetup }) => {
   const filter = getFilter({ outcomeFilter, message });
 
@@ -33,6 +35,7 @@ export const loadGlobalExecutionKPIAggregations = ({
       filter: filter.length ? filter.join(' and ') : undefined,
       date_start: dateStart,
       date_end: dateEnd,
+      namespaces: namespaces ? JSON.stringify(namespaces) : namespaces,
     },
   });
 };

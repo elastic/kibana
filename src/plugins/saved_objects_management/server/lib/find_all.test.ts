@@ -62,7 +62,8 @@ describe('findAll', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
         ...query,
-      })
+      }),
+      undefined // internalOptions
     );
 
     expect(results).toEqual([createObj(1), createObj(2)]);

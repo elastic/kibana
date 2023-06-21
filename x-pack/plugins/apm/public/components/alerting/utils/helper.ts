@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import moment from 'moment';
 
 export interface AlertMetadata {
@@ -14,21 +16,20 @@ export interface AlertMetadata {
   end?: string;
 }
 
-export type TimeUnit = 's' | 'm' | 'h' | 'd';
-
-const BUCKET_SIZE = 20;
+export const ALERT_PREVIEW_BUCKET_SIZE = 5;
 
 export function getIntervalAndTimeRange({
   windowSize,
   windowUnit,
 }: {
   windowSize: number;
-  windowUnit: TimeUnit;
+  windowUnit: TIME_UNITS;
 }) {
   const end = Date.now();
   const start =
     end -
-    moment.duration(windowSize, windowUnit).asMilliseconds() * BUCKET_SIZE;
+    moment.duration(windowSize, windowUnit).asMilliseconds() *
+      ALERT_PREVIEW_BUCKET_SIZE;
 
   return {
     interval: `${windowSize}${windowUnit}`,

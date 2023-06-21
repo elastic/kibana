@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/uptime_alerts';
 import { ClientPluginsStart } from '../../../../plugin';
 
 import { ToggleFlyoutTranslations } from './translations';
@@ -75,7 +75,11 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     'aria-label': ToggleFlyoutTranslations.navigateToAlertingUIAriaLabel,
     'data-test-subj': 'xpack.synthetics.navigateToAlertingUi',
     name: (
-      <EuiLink color="text" href={manageRulesUrl.href}>
+      <EuiLink
+        data-test-subj="syntheticsToggleAlertFlyoutButtonComponentManageRulesLink"
+        color="text"
+        href={manageRulesUrl.href}
+      >
         <FormattedMessage
           id="xpack.synthetics.navigateToAlertingButton.content"
           defaultMessage="Manage rules"

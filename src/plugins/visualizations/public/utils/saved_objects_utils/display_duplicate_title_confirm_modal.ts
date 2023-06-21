@@ -13,23 +13,30 @@ import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
-  savedObject: Pick<VisSavedObject, 'title' | 'getDisplayName'>,
+  savedObject: Pick<VisSavedObject, 'title'>,
   overlays: OverlayStart
 ): Promise<boolean> {
+  const confirmTitle = i18n.translate(
+    'visualizations.confirmModal.saveDuplicateConfirmationTitle',
+    {
+      defaultMessage: `This visualization already exists`,
+    }
+  );
+
   const confirmMessage = i18n.translate(
     'visualizations.confirmModal.saveDuplicateConfirmationMessage',
     {
-      defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
-      values: { title: savedObject.title, name: savedObject.getDisplayName() },
+      defaultMessage: `Saving "{name}" creates a duplicate title. Would you like to save anyway?`,
+      values: { name: savedObject.title },
     }
   );
 
   const confirmButtonText = i18n.translate('visualizations.confirmModal.saveDuplicateButtonLabel', {
-    defaultMessage: 'Save {name}',
-    values: { name: savedObject.getDisplayName() },
+    defaultMessage: 'Save',
   });
+
   try {
-    return confirmModalPromise(confirmMessage, '', confirmButtonText, overlays);
+    return confirmModalPromise(confirmMessage, confirmTitle, confirmButtonText, overlays);
   } catch {
     return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
   }

@@ -10,8 +10,8 @@ import { isString } from 'lodash';
 export class SavedObjectActions {
   private readonly prefix: string;
 
-  constructor(versionNumber: string) {
-    this.prefix = `saved_object:${versionNumber}:`;
+  constructor() {
+    this.prefix = `saved_object:`;
   }
 
   public get(type: string, operation: string): string {

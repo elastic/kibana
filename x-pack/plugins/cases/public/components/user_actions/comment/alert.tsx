@@ -8,7 +8,7 @@
 import React from 'react';
 import { get, isEmpty } from 'lodash';
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import type { CommentResponseAlertsType } from '../../../../common/api';
@@ -16,10 +16,12 @@ import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
-import { UserActionCopyLink } from '../copy_link';
 import { UserActionShowAlert } from './show_alert';
 import { ShowAlertTableLink } from './show_alert_table_link';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
+import { UserActionContentToolbar } from '../content_toolbar';
+import { AlertPropertyActions } from '../property_actions/alert_property_actions';
+import { DELETE_ALERTS_SUCCESS_TITLE } from './translations';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -30,6 +32,8 @@ type BuilderArgs = Pick<
   | 'loadingAlertData'
   | 'onShowAlertDetails'
   | 'userProfiles'
+  | 'handleDeleteComment'
+  | 'loadingCommentIds'
 > & { comment: SnakeToCamelCase<CommentResponseAlertsType> };
 
 const getSingleAlertUserAction = ({
@@ -37,10 +41,12 @@ const getSingleAlertUserAction = ({
   userProfiles,
   comment,
   alertData,
-  getRuleDetailsHref,
   loadingAlertData,
+  loadingCommentIds,
+  getRuleDetailsHref,
   onRuleDetailsClick,
   onShowAlertDetails,
+  handleDeleteComment,
 }: BuilderArgs): EuiCommentProps[] => {
   const alertId = getNonEmptyField(comment.alertId);
   const alertIndex = getNonEmptyField(comment.index);
@@ -58,10 +64,10 @@ const getSingleAlertUserAction = ({
       username: (
         <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
-      className: 'comment-alert',
+      eventColor: 'subdued',
       event: (
         <SingleAlertCommentEvent
-          actionId={userAction.actionId}
+          actionId={userAction.id}
           getRuleDetailsHref={getRuleDetailsHref}
           loadingAlertData={loadingAlertData}
           onRuleDetailsClick={onRuleDetailsClick}
@@ -69,23 +75,25 @@ const getSingleAlertUserAction = ({
           ruleName={ruleName}
         />
       ),
-      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.id}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false}>
-            <UserActionCopyLink id={userAction.actionId} />
-          </EuiFlexItem>
+        <UserActionContentToolbar id={comment.id}>
           <EuiFlexItem grow={false}>
             <UserActionShowAlert
-              id={userAction.actionId}
+              id={userAction.id}
               alertId={alertId}
               index={alertIndex}
               onShowAlertDetails={onShowAlertDetails}
             />
           </EuiFlexItem>
-        </EuiFlexGroup>
+          <AlertPropertyActions
+            onDelete={() => handleDeleteComment(comment.id, DELETE_ALERTS_SUCCESS_TITLE(1))}
+            isLoading={loadingCommentIds.includes(comment.id)}
+            totalAlerts={1}
+          />
+        </UserActionContentToolbar>
       ),
     },
   ];
@@ -96,9 +104,11 @@ const getMultipleAlertsUserAction = ({
   userProfiles,
   comment,
   alertData,
-  getRuleDetailsHref,
   loadingAlertData,
+  loadingCommentIds,
+  getRuleDetailsHref,
   onRuleDetailsClick,
+  handleDeleteComment,
 }: BuilderArgs): EuiCommentProps[] => {
   if (!Array.isArray(comment.alertId)) {
     return [];
@@ -112,10 +122,10 @@ const getMultipleAlertsUserAction = ({
       username: (
         <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
-      className: 'comment-alert',
+      eventColor: 'subdued',
       event: (
         <MultipleAlertsCommentEvent
-          actionId={userAction.actionId}
+          actionId={userAction.id}
           loadingAlertData={loadingAlertData}
           totalAlerts={totalAlerts}
           ruleId={ruleId}
@@ -124,18 +134,22 @@ const getMultipleAlertsUserAction = ({
           onRuleDetailsClick={onRuleDetailsClick}
         />
       ),
-      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.id}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false}>
-            <UserActionCopyLink id={userAction.actionId} />
-          </EuiFlexItem>
+        <UserActionContentToolbar id={comment.id}>
           <EuiFlexItem grow={false}>
             <ShowAlertTableLink />
           </EuiFlexItem>
-        </EuiFlexGroup>
+          <AlertPropertyActions
+            onDelete={() =>
+              handleDeleteComment(comment.id, DELETE_ALERTS_SUCCESS_TITLE(totalAlerts))
+            }
+            isLoading={loadingCommentIds.includes(comment.id)}
+            totalAlerts={totalAlerts}
+          />
+        </UserActionContentToolbar>
       ),
     },
   ];

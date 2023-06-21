@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
+import { persistedLogViewReferenceRT } from '../../../log_views';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
@@ -180,6 +181,7 @@ const RequiredRuleParamsRT = rt.type({
   count: ThresholdRT,
   timeUnit: timeUnitRT,
   timeSize: timeSizeRT,
+  logView: persistedLogViewReferenceRT, // Alerts are only compatible with persisted Log Views
 });
 
 const partialRequiredRuleParamsRT = rt.partial(RequiredRuleParamsRT.props);
@@ -268,10 +270,24 @@ const chartPreviewHistogramBucket = rt.type({
   doc_count: rt.number,
 });
 
+const AdditionalContext = rt.type({
+  hits: rt.type({
+    hits: rt.array(
+      rt.type({
+        fields: rt.record(rt.string, rt.array(rt.unknown)),
+      })
+    ),
+  }),
+});
+
 const ChartPreviewBucketsRT = rt.partial({
   histogramBuckets: rt.type({
     buckets: rt.array(chartPreviewHistogramBucket),
   }),
+});
+
+const additionalContextRT = rt.partial({
+  additionalContext: AdditionalContext,
 });
 
 // ES query responses //
@@ -297,7 +313,7 @@ export const UngroupedSearchQueryResponseRT = rt.intersection([
       hits: hitsRT,
     }),
     rt.partial({
-      aggregations: ChartPreviewBucketsRT,
+      aggregations: rt.intersection([ChartPreviewBucketsRT, additionalContextRT]),
     }),
   ]),
 ]);
@@ -318,6 +334,7 @@ export const UnoptimizedGroupedSearchQueryResponseRT = rt.intersection([
                   doc_count: rt.number,
                 }),
                 ChartPreviewBucketsRT,
+                additionalContextRT,
               ]),
             })
           ),
@@ -339,7 +356,9 @@ export const OptimizedGroupedSearchQueryResponseRT = rt.intersection([
     aggregations: rt.type({
       groups: rt.intersection([
         rt.type({
-          buckets: rt.array(rt.intersection([bucketFieldsRT, ChartPreviewBucketsRT])),
+          buckets: rt.array(
+            rt.intersection([bucketFieldsRT, ChartPreviewBucketsRT, additionalContextRT])
+          ),
         }),
         afterKeyRT,
       ]),
@@ -382,3 +401,8 @@ export const isOptimizableGroupedThreshold = (
     return false;
   }
 };
+
+export interface ExecutionTimeRange {
+  gte?: number;
+  lte: number;
+}

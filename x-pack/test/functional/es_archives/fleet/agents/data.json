@@ -8,7 +8,11 @@
       "active": true,
       "policy_id": "policy1",
       "type": "PERMANENT",
-      "local_metadata": { "host": {"hostname": "host1"}},
+      "local_metadata": { "host": {"hostname": "host1"}, "elastic": {
+        "agent": {
+          "version": "8.7.0"
+        }
+      }},
       "user_provided_metadata": {},
       "enrolled_at": "2022-06-21T12:14:25Z",
       "last_checkin": "2022-06-27T12:26:29Z",
@@ -85,6 +89,20 @@
       "api_key_id" : "key",
       "policy_id" : "policy1",
       "active" : true
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-server-host-1",
+    "index": ".fleet-fleet-server-host",
+    "source": {
+      "id": "test-default-123",
+      "name": "Default",
+      "is_default": true,
+      "host_urls": ["https://test.fr:8080", "https://test.fr:8081"]
     }
   }
 }

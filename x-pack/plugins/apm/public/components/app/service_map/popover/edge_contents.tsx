@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { EdgeDataDefinition } from 'cytoscape';
 import { ContentsProps } from '.';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -19,14 +19,15 @@ import { TransactionTab } from '../../transaction_details/waterfall_with_summary
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 
 export function EdgeContents({ elementData }: ContentsProps) {
   const edgeData = elementData as EdgeDataDefinition;
 
   const { query } = useAnyOfApmParams(
     '/service-map',
-    '/services/{serviceName}/service-map'
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
   );
 
   const apmRouter = useApmRouter();
@@ -49,7 +50,7 @@ export function EdgeContents({ elementData }: ContentsProps) {
       ` [ span where service.name == "${sourceService}" and span.destination.service.resource == "${edgeData.targetData[SPAN_DESTINATION_SERVICE_RESOURCE]}" ]`;
   }
 
-  const url = apmRouter.link('/traces/explorer', {
+  const url = apmRouter.link('/traces/explorer/waterfall', {
     query: {
       ...query,
       type: TraceSearchType.eql,
@@ -58,6 +59,7 @@ export function EdgeContents({ elementData }: ContentsProps) {
       traceId: '',
       transactionId: '',
       detailTab: TransactionTab.timeline,
+      showCriticalPath: false,
     },
   });
 
@@ -65,6 +67,7 @@ export function EdgeContents({ elementData }: ContentsProps) {
     <EuiFlexItem>
       {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
       <EuiButton
+        data-test-subj="apmEdgeContentsExploreTracesButton"
         href={url}
         fill={true}
         onClick={() => {

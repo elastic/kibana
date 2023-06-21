@@ -24,6 +24,11 @@ import {
   fetchExceptionListsItemsByListIds,
 } from '@kbn/securitysolution-list-api';
 
+import {
+  buildShowActiveExceptionsFilter,
+  buildShowExpiredExceptionsFilter,
+  getSavedObjectTypes,
+} from '@kbn/securitysolution-list-utils';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
@@ -44,7 +49,7 @@ const StyledText = styled(EuiText)`
   font-style: italic;
 `;
 
-const STATES_SEARCH_HIDDEN: ViewerState[] = ['error', 'empty'];
+const STATES_FILTERS_HIDDEN: ViewerState[] = ['error'];
 const STATES_PAGINATION_UTILITY_HIDDEN: ViewerState[] = [
   'loading',
   'empty_search',
@@ -66,6 +71,7 @@ const initialState: State = {
   viewerState: 'loading',
   isReadOnly: true,
   lastUpdated: Date.now(),
+  exceptionsToShow: { active: true },
 };
 
 export interface GetExceptionItemProps {
@@ -116,7 +122,16 @@ const ExceptionsViewerComponent = ({
 
   // Reducer state
   const [
-    { exceptions, pagination, currenFlyout, exceptionToEdit, viewerState, isReadOnly, lastUpdated },
+    {
+      exceptions,
+      pagination,
+      currenFlyout,
+      exceptionToEdit,
+      viewerState,
+      isReadOnly,
+      lastUpdated,
+      exceptionsToShow,
+    },
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), {
     ...initialState,
@@ -179,6 +194,16 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
+  const setExceptionsToShow = useCallback(
+    (optionId: string): void => {
+      dispatch({
+        type: 'setExceptionsToShow',
+        optionId,
+      });
+    },
+    [dispatch]
+  );
+
   const [isLoadingReferences, isFetchReferencesError, allReferences, fetchReferences] =
     useFindExceptionListReferences();
 
@@ -197,6 +222,26 @@ const ExceptionsViewerComponent = ({
       setViewerState(null);
     }
   }, [isLoadingReferences, isFetchReferencesError, setViewerState, viewerState]);
+
+  const namespaceTypes = useMemo(
+    () => exceptionListsToQuery.map((list) => list.namespace_type),
+    [exceptionListsToQuery]
+  );
+
+  const exceptionListFilter = useMemo(() => {
+    if (isEndpointSpecified || (exceptionsToShow.active && exceptionsToShow.expired)) {
+      return undefined;
+    }
+    const savedObjectPrefixes = getSavedObjectTypes({
+      namespaceType: namespaceTypes,
+    });
+    if (exceptionsToShow.active) {
+      return buildShowActiveExceptionsFilter(savedObjectPrefixes);
+    }
+    if (exceptionsToShow.expired) {
+      return buildShowExpiredExceptionsFilter(savedObjectPrefixes);
+    }
+  }, [exceptionsToShow, namespaceTypes, isEndpointSpecified]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -228,10 +273,10 @@ const ExceptionsViewerComponent = ({
         total,
         data,
       } = await fetchExceptionListsItemsByListIds({
-        filter: undefined,
+        filter: exceptionListFilter,
         http: services.http,
         listIds: exceptionListsToQuery.map((list) => list.list_id),
-        namespaceTypes: exceptionListsToQuery.map((list) => list.namespace_type),
+        namespaceTypes,
         search: options?.search,
         pagination: newPagination,
         signal: abortCtrl.signal,
@@ -248,8 +293,33 @@ const ExceptionsViewerComponent = ({
         total,
       };
     },
-    [pagination.pageIndex, pagination.pageSize, exceptionListsToQuery, services.http]
+    [
+      pagination.pageIndex,
+      pagination.pageSize,
+      exceptionListsToQuery,
+      services.http,
+      exceptionListFilter,
+      namespaceTypes,
+    ]
   );
+
+  const getTotalExceptionCount = useCallback(async () => {
+    const abortCtrl = new AbortController();
+
+    if (exceptionListsToQuery.length === 0) {
+      return 0;
+    }
+
+    const { total } = await fetchExceptionListsItemsByListIds({
+      filter: undefined,
+      http: services.http,
+      listIds: exceptionListsToQuery.map((list) => list.list_id),
+      namespaceTypes,
+      pagination: {},
+      signal: abortCtrl.signal,
+    });
+    return total;
+  }, [exceptionListsToQuery, namespaceTypes, services.http]);
 
   const handleGetExceptionListItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -266,7 +336,9 @@ const ExceptionsViewerComponent = ({
           },
         });
 
-        setViewerState(total > 0 ? null : 'empty');
+        setViewerState(
+          total > 0 ? null : (await getTotalExceptionCount()) > 0 ? 'empty_search' : 'empty'
+        );
       } catch (e) {
         setViewerState('error');
 
@@ -276,7 +348,7 @@ const ExceptionsViewerComponent = ({
         });
       }
     },
-    [handleFetchItems, setExceptions, setViewerState, toasts]
+    [handleFetchItems, setExceptions, setViewerState, toasts, getTotalExceptionCount]
   );
 
   const handleSearch = useCallback(
@@ -304,6 +376,13 @@ const ExceptionsViewerComponent = ({
       }
     },
     [handleFetchItems, setExceptions, setViewerState, toasts]
+  );
+
+  const handleExceptionsToShow = useCallback(
+    (optionId: string): void => {
+      setExceptionsToShow(optionId);
+    },
+    [setExceptionsToShow]
   );
 
   const handleAddException = useCallback((): void => {
@@ -429,22 +508,26 @@ const ExceptionsViewerComponent = ({
             {isEndpointSpecified ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT : i18n.EXCEPTIONS_TAB_ABOUT}
           </StyledText>
           <EuiSpacer size="l" />
-          {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
-            <ExceptionsViewerSearchBar
-              canAddException={isReadOnly}
-              isEndpoint={isEndpointSpecified}
-              isSearching={viewerState === 'searching'}
-              onSearch={handleSearch}
-              onAddExceptionClick={handleAddException}
-            />
-          )}
-          {!STATES_PAGINATION_UTILITY_HIDDEN.includes(viewerState) && (
+          {!STATES_FILTERS_HIDDEN.includes(viewerState) && (
             <>
-              <EuiSpacer size="l" />
-
-              <ExceptionsViewerUtility pagination={pagination} lastUpdated={lastUpdated} />
+              <ExceptionsViewerUtility
+                pagination={pagination}
+                exceptionsToShow={exceptionsToShow}
+                onChangeExceptionsToShow={handleExceptionsToShow}
+                lastUpdated={lastUpdated}
+                isEndpoint={isEndpointSpecified}
+              />
+              <EuiSpacer size="m" />
+              <ExceptionsViewerSearchBar
+                canAddException={isReadOnly}
+                isEndpoint={isEndpointSpecified}
+                isSearching={viewerState === 'searching'}
+                onSearch={handleSearch}
+                onAddExceptionClick={handleAddException}
+              />
             </>
           )}
+          <EuiSpacer size="l" />
 
           <ExceptionsViewerItems
             isReadOnly={isReadOnly}

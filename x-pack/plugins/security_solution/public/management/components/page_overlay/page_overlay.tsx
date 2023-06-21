@@ -15,14 +15,7 @@ import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
-import {
-  FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET,
-  TIMELINE_OVERRIDES_CSS_STYLESHEET,
-} from '../../../common/components/page';
-import {
-  SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
-  TIMELINE_EUI_THEME_ZINDEX_LEVEL,
-} from '../../../timelines/components/timeline/styles';
+import { FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
 
 const OverlayRootContainer = styled.div`
   border: none;
@@ -77,9 +70,10 @@ const OverlayRootContainer = styled.div`
 `;
 
 const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
-const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
-const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
-const PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-fullScreen`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-fullScreen`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-overSecuritySolutionPageWrapper`;
 
 const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME} {
@@ -97,25 +91,16 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   }
 
   //-------------------------------------------------------------------------------------------
-  // TIMELINE SPECIFIC STYLES
+  // Style overrides for when Page Overlay is displayed in serverless project
   //-------------------------------------------------------------------------------------------
-  // The timeline overlay uses a custom z-index, which causes issues with any other content that
-  // is normally appended to the 'document.body' directly (like popups, masks, flyouts, etc).
-  // The styles below will be applied anytime the timeline is opened/visible and attempts to
-  // mitigate the issues around z-index so that content that is shown after the PageOverlay is
-  // opened is displayed properly.
+  // With serverless, there is 1 less header displayed, thus the display of the page overlay
+  // need to be adjusted slightly so that it still display below the header
   //-------------------------------------------------------------------------------------------
-  body.${SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME}.${PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME} {
-    .${PAGE_OVERLAY_CSS_CLASSNAME},
-    .euiOverlayMask,
-    .euiFlyout {
-      z-index: ${({ theme: { eui } }) => eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL]};
-    }
-
-    // Other Timeline overrides from AppGlobalStyle:
-    // x-pack/plugins/security_solution/public/common/components/page/index.tsx
-    ${TIMELINE_OVERRIDES_CSS_STYLESHEET}
+  body.kbnBody.kbnBody--projectLayout:not(.${PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME}) .${PAGE_OVERLAY_CSS_CLASSNAME} {
+    top: ${({ theme: { eui } }) => eui.euiHeaderHeightCompensation};
+    height: calc(100% - (${({ theme: { eui } }) => eui.euiHeaderHeightCompensation}));
   }
+
 `;
 
 const setDocumentBodyOverlayIsVisible = () => {
@@ -142,6 +127,14 @@ const unSetDocumentBodyFullScreen = () => {
   document.body.classList.remove(PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME);
 };
 
+const setDocumentBodyOverPageWrapper = () => {
+  document.body.classList.add(PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME);
+};
+
+const unSetDocumentBodyOverPageWrapper = () => {
+  document.body.classList.remove(PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME);
+};
+
 export interface PageOverlayProps {
   children: ReactNode;
 
@@ -154,7 +147,7 @@ export interface PageOverlayProps {
   isHidden?: boolean;
 
   /**
-   * Setting this to `true` (defualt) will enable scrolling inside of the overlay
+   * Setting this to `true` (default) will enable scrolling inside of the overlay
    */
   enableScrolling?: boolean;
 
@@ -194,7 +187,8 @@ export interface PageOverlayProps {
 
 /**
  * A generic component for taking over the entire Kibana UI main content area (everything below the
- * top header that includes the breadcrumbs).
+ * top header that includes the breadcrumbs). This component adds nothing more than a blank page - its up
+ * to the `children` pass to actually display any type of intractable UI for the user.
  */
 export const PageOverlay = memo<PageOverlayProps>(
   ({
@@ -284,10 +278,15 @@ export const PageOverlay = memo<PageOverlayProps>(
     // Handle adding class names to the `document.body` DOM element
     useEffect(() => {
       if (isMounted()) {
+        const isOverSecuritySolutionPageWrapper = Boolean(
+          document.querySelector('.securitySolutionWrapper')
+        );
+
         if (isHidden) {
           unSetDocumentBodyOverlayIsVisible();
           unSetDocumentBodyLock();
           unSetDocumentBodyFullScreen();
+          unSetDocumentBodyOverPageWrapper();
         } else {
           setDocumentBodyOverlayIsVisible();
 
@@ -298,6 +297,10 @@ export const PageOverlay = memo<PageOverlayProps>(
           if (showInFullScreen) {
             setDocumentBodyFullScreen();
           }
+
+          if (isOverSecuritySolutionPageWrapper) {
+            setDocumentBodyOverPageWrapper();
+          }
         }
       }
 
@@ -305,6 +308,7 @@ export const PageOverlay = memo<PageOverlayProps>(
         unSetDocumentBodyLock();
         unSetDocumentBodyOverlayIsVisible();
         unSetDocumentBodyFullScreen();
+        unSetDocumentBodyOverPageWrapper();
       };
     }, [isHidden, isMounted, lockDocumentBody, showInFullScreen]);
 

@@ -7,17 +7,17 @@
 
 import { getNewRule } from '../../objects/rule';
 import {
-  NUMBER_OF_ALERTS,
   HOST_RISK_HEADER_COLIMN,
   USER_RISK_HEADER_COLIMN,
   HOST_RISK_COLUMN,
   USER_RISK_COLUMN,
   ACTION_COLUMN,
+  ALERTS_COUNT,
 } from '../../screens/alerts';
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
@@ -34,7 +34,6 @@ describe('Enrichment', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risk_users');
-    login();
   });
 
   after(() => {
@@ -45,7 +44,8 @@ describe('Enrichment', () => {
     beforeEach(() => {
       esArchiverLoad('risk_hosts');
       deleteAlertsAndRules();
-      createCustomRuleEnabled(getNewRule(), 'rule1');
+      createRule(getNewRule({ rule_id: 'rule1' }));
+      login();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
@@ -56,7 +56,7 @@ describe('Enrichment', () => {
     });
 
     it('Should has enrichment fields', function () {
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .should('match', /^[1-9].+$/); // Any number of alerts
       cy.get(HOST_RISK_HEADER_COLIMN).contains('host.risk.calculated_level');

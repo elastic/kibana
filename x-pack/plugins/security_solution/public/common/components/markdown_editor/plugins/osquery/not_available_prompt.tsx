@@ -26,7 +26,7 @@ export const OsqueryNotAvailablePrompt = () => (
     body={
       <p>
         <FormattedMessage
-          id="xpack.securitySolution.markdown.osquery.missingPrivilleges"
+          id="xpack.securitySolution.markdown.osquery.missingPrivileges"
           defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
           values={{
             osquery: <EuiCode>{'osquery'}</EuiCode>,

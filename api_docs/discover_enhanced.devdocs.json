@@ -18,7 +18,13 @@
             "text": "DiscoverEnhancedPlugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
           "<void, void, ",
           {
             "pluginId": "discoverEnhanced",
@@ -83,7 +89,13 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "PluginInitializerContext",
+                  {
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
                   "<object>"
                 ],
                 "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
@@ -103,7 +115,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<",
               {
                 "pluginId": "discoverEnhanced",
@@ -134,7 +152,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<",
                   {
                     "pluginId": "discoverEnhanced",
@@ -183,7 +207,13 @@
             "description": [],
             "signature": [
               "(core: ",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
               ", plugins: ",
               {
                 "pluginId": "discoverEnhanced",
@@ -206,7 +236,13 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  "CoreStart"
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
                 ],
                 "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
                 "deprecated": false,
@@ -611,7 +647,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -619,7 +655,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>>(definition: A) => ",
+              "<Context>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -627,9 +663,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<A>>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly registerTrigger: (trigger: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -726,7 +760,7 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly clear: () => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "{ readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -734,7 +768,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -742,7 +776,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>>(definition: A) => ",
+              "<Context>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -750,9 +784,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<A>>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly registerTrigger: (trigger: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -762,15 +794,7 @@
               },
               ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
-              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: <T extends ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>>(id: string) => ",
+              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -778,9 +802,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<T>>; readonly getTriggerActions: (triggerId: string) => ",
+              "<object>; readonly getTriggerActions: (triggerId: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -796,7 +818,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",

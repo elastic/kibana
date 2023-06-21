@@ -7,9 +7,10 @@
 
 import { FC } from 'react';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
@@ -17,8 +18,8 @@ import type { PivotSupportedAggs } from '../../../common/types/pivot_aggs';
 import { PIVOT_SUPPORTED_AGGS, PivotAgg } from '../../../common/types/pivot_aggs';
 
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
-import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
-import { PivotAggsConfigTopMetrics } from '../sections/create_transform/components/step_define/common/top_metrics_agg/types';
+import type { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
+import type { PivotAggsConfigTopMetrics } from '../sections/create_transform/components/step_define/common/top_metrics_agg/types';
 
 export function isPivotSupportedAggs(arg: unknown): arg is PivotSupportedAggs {
   return (
@@ -32,7 +33,11 @@ export const TERMS_AGG_DEFAULT_SIZE = 10;
 
 export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES.ATTACHMENT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
-  [KBN_FIELD_TYPES.BOOLEAN]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
+  [KBN_FIELD_TYPES.BOOLEAN]: [
+    PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
+    PIVOT_SUPPORTED_AGGS.FILTER,
+    PIVOT_SUPPORTED_AGGS.TERMS,
+  ],
   [KBN_FIELD_TYPES.DATE]: [
     PIVOT_SUPPORTED_AGGS.MAX,
     PIVOT_SUPPORTED_AGGS.MIN,
@@ -58,6 +63,7 @@ export const pivotAggsFieldSupport = {
     PIVOT_SUPPORTED_AGGS.SUM,
     PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
     PIVOT_SUPPORTED_AGGS.FILTER,
+    PIVOT_SUPPORTED_AGGS.TERMS,
     PIVOT_SUPPORTED_AGGS.TOP_METRICS,
   ],
   [KBN_FIELD_TYPES.STRING]: [
@@ -70,12 +76,18 @@ export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES._SOURCE]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.UNKNOWN]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
   [KBN_FIELD_TYPES.CONFLICT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT, PIVOT_SUPPORTED_AGGS.FILTER],
+  [TIME_SERIES_METRIC_TYPES.COUNTER]: [
+    PIVOT_SUPPORTED_AGGS.MAX,
+    PIVOT_SUPPORTED_AGGS.MIN,
+    PIVOT_SUPPORTED_AGGS.TOP_METRICS,
+  ],
 };
 
 export const TOP_METRICS_SORT_FIELD_TYPES = [
   KBN_FIELD_TYPES.NUMBER,
   KBN_FIELD_TYPES.DATE,
   KBN_FIELD_TYPES.GEO_POINT,
+  TIME_SERIES_METRIC_TYPES.COUNTER,
 ];
 
 export const SORT_DIRECTION = {

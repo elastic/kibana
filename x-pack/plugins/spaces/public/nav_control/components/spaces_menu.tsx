@@ -20,7 +20,7 @@ import type {
   EuiSelectableOnChangeEvent,
   EuiSelectableSearchableSearchProps,
 } from '@elastic/eui/src/components/selectable/selectable';
-import React, { Component, lazy, Suspense } from 'react';
+import React, { Component, Fragment, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -85,8 +85,11 @@ class SpacesMenuUI extends Component<Props> {
           };
 
     return (
-      <>
+      <Fragment>
         <EuiSelectable
+          aria-label={i18n.translate('xpack.spaces.navControl.spacesMenu.spacesAriaLabel', {
+            defaultMessage: 'Spaces',
+          })}
           id={this.props.id}
           className={'spcMenu'}
           title={i18n.translate('xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle', {
@@ -105,7 +108,7 @@ class SpacesMenuUI extends Component<Props> {
           }}
         >
           {(list, search) => (
-            <>
+            <Fragment>
               <EuiPopoverTitle paddingSize="s">
                 {search ||
                   i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
@@ -113,11 +116,11 @@ class SpacesMenuUI extends Component<Props> {
                   })}
               </EuiPopoverTitle>
               {list}
-            </>
+            </Fragment>
           )}
         </EuiSelectable>
         <EuiPopoverFooter paddingSize="s">{this.renderManageButton()}</EuiPopoverFooter>
-      </>
+      </Fragment>
     );
   }
 

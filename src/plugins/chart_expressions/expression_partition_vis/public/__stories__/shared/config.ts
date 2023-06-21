@@ -9,14 +9,15 @@ import { Position } from '@elastic/charts';
 import {
   LabelPositions,
   LegendDisplay,
-  RenderValue,
+  PartitionChartProps,
   PartitionVisParams,
   ValueFormats,
 } from '../../../common/types';
 
-export const config: RenderValue['visConfig'] = {
+export const config: PartitionChartProps['visConfig'] = {
   addTooltip: true,
   legendDisplay: LegendDisplay.HIDE,
+  metricsToLabels: { percent_uptime: 'percent_uptime' },
   truncateLegend: true,
   respectSourceOrder: true,
   legendPosition: Position.Bottom,
@@ -33,22 +34,25 @@ export const config: RenderValue['visConfig'] = {
     truncate: 0,
     valuesFormat: ValueFormats.PERCENT,
     last_level: false,
+    colorOverrides: {},
   },
   dimensions: {
-    metric: {
-      type: 'vis_dimension',
-      accessor: {
-        id: 'percent_uptime',
-        name: 'percent_uptime',
-        meta: {
-          type: 'number',
+    metrics: [
+      {
+        type: 'vis_dimension',
+        accessor: {
+          id: 'percent_uptime',
+          name: 'percent_uptime',
+          meta: {
+            type: 'number',
+          },
+        },
+        format: {
+          id: 'string',
+          params: {},
         },
       },
-      format: {
-        id: 'string',
-        params: {},
-      },
-    },
+    ],
   },
 };
 

@@ -27,16 +27,15 @@ function DurationSummaryItem({ duration, totalDuration, parentType }: Props) {
   return (
     <>
       <EuiToolTip content={label}>
-        <EuiText>{asDuration(duration)}</EuiText>
+        <EuiText size="s">
+          {asDuration(duration)} &nbsp;
+          <PercentOfParent
+            duration={duration}
+            totalDuration={calculatedTotalDuration}
+            parentType={parentType}
+          />
+        </EuiText>
       </EuiToolTip>
-      &nbsp;
-      <EuiText size="s">
-        <PercentOfParent
-          duration={duration}
-          totalDuration={calculatedTotalDuration}
-          parentType={parentType}
-        />
-      </EuiText>
     </>
   );
 }

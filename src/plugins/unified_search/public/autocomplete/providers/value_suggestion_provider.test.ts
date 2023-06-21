@@ -21,24 +21,19 @@ describe('FieldSuggestions', () => {
   const uiSettings = {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
+  let getTimeMock: jest.Mock;
+  let createFilterMock: jest.Mock;
 
   beforeEach(() => {
+    getTimeMock = jest.fn().mockReturnValue({ to: 'now', from: 'now-15m' });
+    createFilterMock = jest.fn().mockReturnValue({ time: 'fake' });
     http = { fetch: jest.fn().mockResolvedValue([]) };
 
     getValueSuggestions = setupValueSuggestionProvider({ http, uiSettings } as CoreSetup, {
       timefilter: {
         timefilter: {
-          createFilter: () => {
-            return {
-              time: 'fake',
-            };
-          },
-          getTime: () => {
-            return {
-              to: 'now',
-              from: 'now-15m',
-            };
-          },
+          createFilter: createFilterMock,
+          getTime: getTimeMock,
         },
       } as unknown as TimefilterSetup,
     });
@@ -74,15 +69,20 @@ describe('FieldSuggestions', () => {
       expect(http.fetch).not.toHaveBeenCalled();
     });
 
-    it('should return an empty array if the field type is not a string or boolean', async () => {
-      const [field] = stubFields.filter(({ type }) => type !== 'string' && type !== 'boolean');
-      const suggestions = await getValueSuggestions({
-        indexPattern: stubIndexPattern,
-        field,
-        query: '',
-      });
-
-      expect(suggestions).toEqual([]);
+    it('should return an empty array if the field type is not a string, boolean, or IP', async () => {
+      const fields = stubFields.filter(
+        ({ type }) => type !== 'string' && type !== 'boolean' && type !== 'ip'
+      );
+      await Promise.all(
+        fields.map(async (field) => {
+          const suggestions = await getValueSuggestions({
+            indexPattern: stubIndexPattern,
+            field,
+            query: '',
+          });
+          expect(suggestions).toEqual([]);
+        })
+      );
       expect(http.fetch).not.toHaveBeenCalled();
     });
 
@@ -98,10 +98,23 @@ describe('FieldSuggestions', () => {
       expect(http.fetch).not.toHaveBeenCalled();
     });
 
-    it('should otherwise request suggestions', async () => {
+    it('should request suggestions for strings', async () => {
       const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
+
+      await getValueSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+        useTimeRange: false,
+      });
+
+      expect(http.fetch).toHaveBeenCalled();
+    });
+
+    it('should request suggestions for ips', async () => {
+      const [field] = stubFields.filter(({ type, aggregatable }) => type === 'ip' && aggregatable);
 
       await getValueSuggestions({
         indexPattern: stubIndexPattern,
@@ -232,6 +245,28 @@ describe('FieldSuggestions', () => {
 
       expect(JSON.parse(callParams.body).filters).toHaveLength(1);
       expect(http.fetch).toHaveBeenCalled();
+    });
+
+    it('should round timefilter `to` value', async () => {
+      getTimeMock.mockReturnValue({ from: '2022-10-27||/d', to: '2022-10-27||/d' });
+
+      const [field] = stubFields.filter(
+        ({ type, aggregatable }) => type === 'string' && aggregatable
+      );
+
+      await getValueSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+        useTimeRange: true,
+      });
+
+      expect(createFilterMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+        Object {
+          "from": "2022-10-27T04:00:00.000Z",
+          "to": "2022-10-28T03:59:59.999Z",
+        }
+      `);
     });
 
     it('should use terms_enum', async () => {

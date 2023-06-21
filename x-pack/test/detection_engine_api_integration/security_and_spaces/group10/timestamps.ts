@@ -17,15 +17,16 @@ import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   createRule,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
   getOpenSignals,
   getRuleForSignalTesting,
   getSignalsByIds,
   getEqlRuleForSignalTesting,
+  waitForRulePartialFailure,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -53,8 +54,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
         );
@@ -67,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should convert the @timestamp which is epoch_seconds into the correct ISO format', async () => {
           const rule = getRuleForSignalTesting(['timestamp_in_seconds']);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const hits = signalsOpen.hits.hits
@@ -82,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
             timestamp_override: 'event.ingested',
           };
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const hits = signalsOpen.hits.hits
@@ -96,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should convert the @timestamp which is epoch_seconds into the correct ISO format for EQL', async () => {
           const rule = getEqlRuleForSignalTesting(['timestamp_in_seconds']);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const hits = signalsOpen.hits.hits
@@ -111,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
             timestamp_override: 'event.ingested',
           };
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const hits = signalsOpen.hits.hits
@@ -130,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from events with timestamp override field', async () => {
       beforeEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await createSignalsIndex(supertest, log);
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
@@ -147,8 +148,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
         );
@@ -172,12 +173,11 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id], 3);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -196,12 +196,11 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id], 2);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -215,12 +214,11 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -236,12 +234,11 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -282,7 +279,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
           const hits = signalsResponse.hits.hits
@@ -298,12 +295,11 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -319,12 +315,11 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -366,8 +361,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       describe('KQL', () => {
@@ -390,12 +385,11 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           await waitForSignalsToBePresent(supertest, log, 200, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id], 200);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);

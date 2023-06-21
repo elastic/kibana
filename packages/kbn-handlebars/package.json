@@ -2,8 +2,5 @@
   "name": "@kbn/handlebars",
   "version": "1.0.0",
   "private": true,
-  "main": "./target_node/index.js",
-  "browser": "./target_web/index.js",
-  "types": "./target_types/index.d.ts",
   "license": "MIT"
 }

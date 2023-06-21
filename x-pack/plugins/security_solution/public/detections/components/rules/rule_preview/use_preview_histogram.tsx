@@ -22,6 +22,7 @@ interface PreviewHistogramParams {
   spaceId: string;
   ruleType: Type;
   indexPattern: DataViewBase | undefined;
+  skip?: boolean;
 }
 
 export const usePreviewHistogram = ({
@@ -31,6 +32,7 @@ export const usePreviewHistogram = ({
   spaceId,
   ruleType,
   indexPattern,
+  skip,
 }: PreviewHistogramParams) => {
   const { uiSettings } = useKibana().services;
 
@@ -55,9 +57,9 @@ export const usePreviewHistogram = ({
       stackByField,
       startDate,
       includeMissingData: false,
-      skip: error != null,
+      skip: skip || error != null,
     };
-  }, [startDate, endDate, filterQuery, spaceId, error, stackByField]);
+  }, [endDate, filterQuery, spaceId, stackByField, startDate, skip, error]);
 
   return useMatrixHistogramCombined(matrixHistogramRequest);
 };

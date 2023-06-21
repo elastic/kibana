@@ -1,11 +1,7 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -13,5 +9,16 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/sort-package-json",
+    "@kbn/dev-cli-runner",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-errors",
+    "@kbn/tooling-log",
+    "@kbn/repo-packages",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

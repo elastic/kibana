@@ -6,16 +6,27 @@
  * Side Public License, v 1.
  */
 import { createBrowserHistory } from 'history';
-import { getState } from '../application/main/services/discover_state';
+import { getDiscoverStateContainer } from '../application/main/services/discover_state';
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
 import { discoverServiceMock } from './services';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
-export function getDiscoverStateMock({ isTimeBased = true }) {
+export function getDiscoverStateMock({
+  isTimeBased = true,
+  savedSearch,
+}: {
+  isTimeBased?: boolean;
+  savedSearch?: SavedSearch;
+}) {
   const history = createBrowserHistory();
   history.push('/');
-  return getState({
-    savedSearch: isTimeBased ? savedSearchMockWithTimeField : savedSearchMock,
+  const container = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
   });
+  container.savedSearchState.set(
+    savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock
+  );
+
+  return container;
 }

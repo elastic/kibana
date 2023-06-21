@@ -5,22 +5,26 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
 import type { Meta, Story } from '@storybook/react';
 import React, { ComponentType } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '@kbn/core/public';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { Schema } from '.';
-import { ConfirmSwitchModal } from './confirm_switch_modal';
+import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface Args {
   hasCloudAgentPolicy: boolean;
   hasCloudApmPackagePolicy: boolean;
   cloudApmMigrationEnabled: boolean;
+  hasApmIntegrations: boolean;
   hasRequiredRole: boolean;
   isMigrating: boolean;
+  latestApmPackageVersion: string;
 }
+
+type MigrationCheckAPIReturnType =
+  APIReturnType<'GET /internal/apm/fleet/migration_check'>;
 
 export default {
   title: 'app/settings/Schema',
@@ -31,6 +35,19 @@ export default {
         type: 'boolean',
         options: [true, false],
         defaultValue: true,
+      },
+    },
+    hasApmIntegrations: {
+      control: {
+        type: 'boolean',
+        options: [true, false],
+        defaultValue: true,
+      },
+    },
+    latestApmPackageVersion: {
+      control: {
+        type: 'string',
+        defaultValue: '8.7',
       },
     },
     hasCloudApmPackagePolicy: {
@@ -79,27 +96,29 @@ export default {
       }
       const coreMock = {
         http: {
-          basePath: { prepend: () => {} },
-          get: () => {
+          get: async (): Promise<MigrationCheckAPIReturnType> => {
             return {
-              has_cloud_agent_policy: args?.hasCloudAgentPolicy,
-              has_cloud_apm_package_policy: args?.hasCloudApmPackagePolicy,
-              cloud_apm_migration_enabled: args?.cloudApmMigrationEnabled,
+              has_cloud_agent_policy: args?.hasCloudAgentPolicy || true,
+              has_cloud_apm_package_policy:
+                args?.hasCloudApmPackagePolicy || true,
+              cloud_apm_migration_enabled:
+                args?.cloudApmMigrationEnabled || true,
               has_required_role: args?.hasRequiredRole,
+              has_apm_integrations: args?.hasApmIntegrations || true,
+              latest_apm_package_version:
+                args?.latestApmPackageVersion || '8.6',
+              cloud_apm_package_policy: undefined,
             };
           },
         },
-        uiSettings: { get: () => '' },
       } as unknown as CoreStart;
 
-      createCallApmApi(coreMock);
-
       return (
-        <MockApmPluginContextWrapper>
-          <MemoryRouter>
-            <StoryComponent />
-          </MemoryRouter>
-        </MockApmPluginContextWrapper>
+        <MockApmPluginStorybook
+          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
+        >
+          <StoryComponent />
+        </MockApmPluginStorybook>
       );
     },
   ],
@@ -108,18 +127,3 @@ export default {
 export const Example: Story = () => {
   return <Schema />;
 };
-
-interface ModalArgs {
-  unsupportedConfigs: Array<{ key: string; value: string }>;
-}
-
-export const Modal: Story<ModalArgs> = ({ unsupportedConfigs }) => {
-  return (
-    <ConfirmSwitchModal
-      onCancel={() => {}}
-      onConfirm={() => {}}
-      unsupportedConfigs={unsupportedConfigs}
-    />
-  );
-};
-Modal.args = { unsupportedConfigs: [{ key: 'test', value: '123' }] };

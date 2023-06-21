@@ -7,16 +7,17 @@
  */
 
 import _ from 'lodash';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 import Command from '../cli/command';
+import { getKeystore } from '../cli/keystore/get_keystore';
 import { Keystore } from '../cli/keystore';
 
 import { createCli } from './create';
 import { listCli } from './list';
 import { addCli } from './add';
 import { removeCli } from './remove';
-import { getKeystore } from './get_keystore';
+import { showCli } from './show';
 
 const argv = process.argv.slice();
 const program = new Command('bin/kibana-keystore');
@@ -31,6 +32,7 @@ createCli(program, keystore);
 listCli(program, keystore);
 addCli(program, keystore);
 removeCli(program, keystore);
+showCli(program, keystore);
 
 program
   .command('help <command>')

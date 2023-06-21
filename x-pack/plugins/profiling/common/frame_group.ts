@@ -4,10 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { takeRight } from 'lodash';
 import { StackFrameMetadata } from './profiling';
 
 export type FrameGroupID = string;
+
+function stripLeadingSubdirs(sourceFileName: string) {
+  return takeRight(sourceFileName.split('/'), 2).join('/');
+}
 
 // createFrameGroupID is the "standard" way of grouping frames, by commonly
 // shared group identifiers.
@@ -30,5 +34,5 @@ export function createFrameGroupID(
     return `elf;${exeFilename};${functionName}`;
   }
 
-  return `full;${exeFilename};${functionName};${sourceFilename}`;
+  return `full;${exeFilename};${functionName};${stripLeadingSubdirs(sourceFilename || '')}`;
 }

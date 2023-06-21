@@ -12,10 +12,19 @@ import { useDerivedIndexPattern } from '../components/param_details_form/use_der
 import { convertKueryToElasticSearchQuery } from '../../lib/kuery';
 import { KueryBar } from '../../components/kuery_bar';
 import { Props } from '../components/param_details_form/expression';
+import { AlertParamDuration } from '../flyout_expressions/alert_param_duration';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
-export const Expression = ({ ruleParams, config, setRuleParams, dataViews }: Props) => {
+export const Expression = ({
+  ruleParams,
+  config,
+  setRuleParams,
+  dataViews,
+  errors,
+  defaults,
+  expressionConfig,
+}: Props) => {
   const { derivedIndexPattern } = useDerivedIndexPattern(dataViews, config);
   const onFilterChange = useCallback(
     (filter: string) => {
@@ -45,8 +54,26 @@ export const Expression = ({ ruleParams, config, setRuleParams, dataViews }: Pro
     <></>
   );
 
+  const duration = expressionConfig?.showDuration ? (
+    <EuiFormRow>
+      <AlertParamDuration
+        key="duration"
+        name={'duration'}
+        duration={ruleParams.duration ?? defaults?.duration}
+        label={i18n.translate('xpack.monitoring.alerts.legacy.paramDetails.duration.label', {
+          defaultMessage: 'In the last',
+        })}
+        errors={errors.duration}
+        setRuleParams={setRuleParams}
+      />
+    </EuiFormRow>
+  ) : (
+    <></>
+  );
+
   return (
     <EuiForm component="form">
+      {duration}
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.monitoring.alerts.filterLable', {

@@ -30,6 +30,7 @@ export interface TermsParams extends FormatParams {
   orderBy:
     | { type: 'alphabetical'; fallback?: boolean }
     | { type: 'rare'; maxDocCount: number }
+    | { type: 'significant' }
     | { type: 'column'; columnId: string }
     | { type: 'custom' };
   orderAgg?: Column;
@@ -55,7 +56,7 @@ interface Range {
 export interface RangeParams extends FormatParams {
   type: RangeMode;
   maxBars: 'auto' | number;
-  ranges: Range[];
+  ranges?: Range[];
   includeEmptyRows?: boolean;
   parentFormat?: {
     id: string;

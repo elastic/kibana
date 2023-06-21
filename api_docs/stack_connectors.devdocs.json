@@ -40,7 +40,7 @@
         "tags": [],
         "label": "OpsgenieSubActions",
         "description": [],
-        "path": "x-pack/plugins/stack_connectors/common/opsgenie.ts",
+        "path": "x-pack/plugins/stack_connectors/common/opsgenie/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -72,7 +72,7 @@
         "signature": [
           "\".opsgenie\""
         ],
-        "path": "x-pack/plugins/stack_connectors/common/opsgenie.ts",
+        "path": "x-pack/plugins/stack_connectors/common/opsgenie/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

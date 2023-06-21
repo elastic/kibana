@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect, FC } from 'react';
-import { useHistory, useLocation, Router, RouteProps } from 'react-router-dom';
-import { Location } from 'history';
+import React, { FC } from 'react';
+import { Router, type RouteProps } from 'react-router-dom';
+import { type Location } from 'history';
 
-import type {
-  AppMountParameters,
-  IUiSettingsClient,
-  ChromeStart,
-  ChromeBreadcrumb,
-} from '@kbn/core/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { AppMountParameters, ChromeStart, ChromeBreadcrumb } from '@kbn/core/public';
 
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
+import { UrlStateProvider } from '@kbn/ml-url-state';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
-import { MlContext, MlContextValue } from '../contexts/ml';
-import { UrlStateProvider } from '../util/url_state';
 
 import { MlPage } from '../components/ml_page';
+import { MlPages } from '../../locator';
+import { type RouteResolverContext } from './use_resolver';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -58,42 +53,25 @@ export interface PageProps {
 }
 
 export interface PageDependencies {
-  config: IUiSettingsClient;
   history: AppMountParameters['history'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
-  redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
-export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
-  return context === null ? (
-    <EuiLoadingContent lines={10} />
-  ) : (
-    <MlContext.Provider value={context}>{children}</MlContext.Provider>
+export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, children }) => {
+  const isLoading = !context.initialized;
+
+  if (context?.resolvedComponent) {
+    return context.resolvedComponent;
+  }
+
+  return (
+    <EuiSkeletonText lines={10} isLoading={isLoading}>
+      {!isLoading ? children : null}
+    </EuiSkeletonText>
   );
 };
 
-/**
- * This component provides compatibility with the previous hash based
- * URL format used by HashRouter. Even if we migrate all internal URLs
- * to one without hashes, we should keep this redirect in place to
- * support legacy bookmarks and as a fallback for unmigrated URLs
- * from other plugins.
- */
-const LegacyHashUrlRedirect: FC = ({ children }) => {
-  const history = useHistory();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location.hash.startsWith('#/')) {
-      history.push(location.hash.replace('#', ''));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.hash]);
-
-  return <>{children}</>;
-};
 /**
  * `MlRouter` is based on `BrowserRouter` and takes in `ScopedHistory` provided
  * by Kibana. `LegacyHashUrlRedirect` provides compatibility with legacy hash based URLs.
@@ -104,12 +82,14 @@ export const MlRouter: FC<{
   pageDeps: PageDependencies;
 }> = ({ pageDeps }) => (
   <Router history={pageDeps.history}>
-    <LegacyHashUrlRedirect>
-      <UrlStateProvider>
-        <MlNotificationsContextProvider>
-          <MlPage pageDeps={pageDeps} />
-        </MlNotificationsContextProvider>
-      </UrlStateProvider>
-    </LegacyHashUrlRedirect>
+    <UrlStateProvider>
+      <MlNotificationsContextProvider>
+        <MlPage pageDeps={pageDeps} />
+      </MlNotificationsContextProvider>
+    </UrlStateProvider>
   </Router>
 );
+
+export function createPath(page: MlPages, additionalPrefix?: string) {
+  return `/${page}${additionalPrefix ? `${additionalPrefix}` : ''}`;
+}

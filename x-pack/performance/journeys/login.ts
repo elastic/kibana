@@ -7,6 +7,7 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
+import { waitForChrome } from '../utils';
 
 export const journey = new Journey({
   skipAutoLogin: true,
@@ -33,12 +34,15 @@ export const journey = new Journey({
     ],
     maxDuration: '10m',
   },
-}).step('Login', async ({ page, kbnUrl, inputDelays }) => {
+}).step('Login', async ({ page, kbnUrl, inputDelays, auth }) => {
   await page.goto(kbnUrl.get());
+  if (auth.isCloud()) {
+    await page.click(subj('loginCard-basic/cloud-basic'), { delay: inputDelays.MOUSE_CLICK });
+  }
 
-  await page.type(subj('loginUsername'), 'elastic', { delay: inputDelays.TYPING });
-  await page.type(subj('loginPassword'), 'changeme', { delay: inputDelays.TYPING });
+  await page.type(subj('loginUsername'), auth.getUsername(), { delay: inputDelays.TYPING });
+  await page.type(subj('loginPassword'), auth.getPassword(), { delay: inputDelays.TYPING });
   await page.click(subj('loginSubmit'), { delay: inputDelays.MOUSE_CLICK });
 
-  await page.waitForSelector('#headerUserMenu');
+  await waitForChrome(page);
 });

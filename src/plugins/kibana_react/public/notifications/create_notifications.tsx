@@ -40,7 +40,7 @@ export const createNotifications = (services: KibanaServices): KibanaReactNotifi
     show({ color: 'warning', iconType: 'help', ...input });
 
   const danger: KibanaReactNotifications['toasts']['danger'] = (input) =>
-    show({ color: 'danger', iconType: 'alert', ...input });
+    show({ color: 'danger', iconType: 'error', ...input });
 
   const notifications: KibanaReactNotifications = {
     toasts: {

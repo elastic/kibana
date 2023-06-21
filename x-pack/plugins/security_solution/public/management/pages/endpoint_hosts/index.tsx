@@ -6,7 +6,7 @@
  */
 
 import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
 import { EndpointList } from './view';
 import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../common/constants';

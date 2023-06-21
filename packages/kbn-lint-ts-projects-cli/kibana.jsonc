@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/lint-ts-projects-cli",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

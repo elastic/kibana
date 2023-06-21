@@ -9,16 +9,17 @@ import React, { FC, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
+import type {
+  FeatureImportance,
+  FeatureImportanceBaseline,
+  TopClass,
+  TopClasses,
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   isDecisionPathData,
   useDecisionPathData,
   getStringBasedClassName,
 } from './use_classification_path_data';
-import type {
-  FeatureImportance,
-  FeatureImportanceBaseline,
-  TopClasses,
-} from '../../../../../../../common/types/feature_importance';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';
 
@@ -42,12 +43,20 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
   const [currentClass, setCurrentClass] = useState<string>(
     getStringBasedClassName(topClasses[0].class_name)
   );
+  const selectedClass = topClasses.find(
+    (t) => getStringBasedClassName(t.class_name) === getStringBasedClassName(currentClass)
+  ) as TopClass;
+  const predictedProbabilityForCurrentClass = selectedClass
+    ? selectedClass.class_probability
+    : undefined;
+
   const { decisionPathData } = useDecisionPathData({
     baseline,
     featureImportance,
     predictedValue: currentClass,
-    predictedProbability,
+    predictedProbability: predictedProbabilityForCurrentClass,
   });
+
   const options = useMemo(() => {
     const predictionValueStr = getStringBasedClassName(predictedValue);
 

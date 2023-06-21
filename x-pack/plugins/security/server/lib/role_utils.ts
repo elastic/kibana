@@ -101,6 +101,22 @@ export const validateKibanaPrivileges = (
         }
       }
 
+      kibanaFeature.subFeatures.forEach((subFeature) => {
+        if (
+          subFeature.requireAllSpaces &&
+          !forAllSpaces &&
+          subFeature.privilegeGroups.some((group) =>
+            group.privileges.some((privilege) => feature.includes(privilege.id))
+          )
+        ) {
+          errors.push(
+            `Sub-feature privilege [${kibanaFeature.name} - ${
+              subFeature.name
+            }] requires all spaces to be selected but received [${priv.spaces.join(',')}]`
+          );
+        }
+      });
+
       return errors;
     });
   });

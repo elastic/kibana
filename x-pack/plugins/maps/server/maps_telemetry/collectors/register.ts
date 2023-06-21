@@ -18,10 +18,6 @@ export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetu
     isReady: () => true,
     fetch: async () => await getMapsTelemetry(),
     schema: {
-      indexPatternsWithGeoFieldCount: { type: 'long' },
-      indexPatternsWithGeoPointFieldCount: { type: 'long' },
-      indexPatternsWithGeoShapeFieldCount: { type: 'long' },
-      geoShapeAggLayersCount: { type: 'long' },
       mapsTotalCount: { type: 'long' },
       timeCaptured: { type: 'date' },
       layerTypes: {
@@ -164,6 +160,18 @@ export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetu
           total: {
             type: 'long',
             _meta: { description: 'total number of kbn tms layers in cluster' },
+          },
+        },
+        layer_group: {
+          min: { type: 'long', _meta: { description: 'min number of layer groups per map' } },
+          max: { type: 'long', _meta: { description: 'max number of layer groups per map' } },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of layer groups per map' },
+          },
+          total: {
+            type: 'long',
+            _meta: { description: 'total number of layer groups in cluster' },
           },
         },
         ux_tms_mvt: {
@@ -366,6 +374,26 @@ export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetu
         },
       },
       joins: {
+        distance: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of distance joins per map' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of distance joins per map' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of distance joins per map' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of distance joins in cluster',
+            },
+          },
+        },
         term: {
           min: {
             type: 'long',

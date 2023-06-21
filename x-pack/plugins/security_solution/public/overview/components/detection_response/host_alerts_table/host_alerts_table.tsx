@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -19,6 +19,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { CellActionsMode } from '@kbn/cell-actions';
+import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
@@ -26,11 +29,16 @@ import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/componen
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
+
 import * as i18n from '../translations';
 import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
 import type { HostAlertsItem } from './use_host_alerts_items';
 import { useHostAlertsItems } from './use_host_alerts_items';
+import {
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 
 interface HostAlertsTableProps {
   signalIndexName: string | null;
@@ -43,7 +51,31 @@ type GetTableColumns = (
 const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
 
 export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableProps) => {
-  const { openHostInTimeline } = useNavigateToTimeline();
+  const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
+  const { filterQuery } = useGlobalFilterQuery();
+
+  const openHostInAlerts = useCallback(
+    ({ hostName, severity }: { hostName: string; severity?: string }) =>
+      openAlertsPageWithFilters([
+        {
+          title: i18n.OPEN_IN_ALERTS_TITLE_HOSTNAME,
+          selectedOptions: [hostName],
+          fieldName: 'host.name',
+        },
+
+        ...(severity
+          ? [
+              {
+                title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
+                selectedOptions: [severity],
+                fieldName: ALERT_SEVERITY,
+              },
+            ]
+          : []),
+      ]),
+    [openAlertsPageWithFilters]
+  );
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID
   );
@@ -51,9 +83,10 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
     skip: !toggleStatus,
     queryId: DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID,
     signalIndexName,
+    filterQuery,
   });
 
-  const columns = useMemo(() => getTableColumns(openHostInTimeline), [openHostInTimeline]);
+  const columns = useMemo(() => getTableColumns(openHostInAlerts), [openHostInAlerts]);
 
   return (
     <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
@@ -118,9 +151,27 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { hostName }) => (
-      <EuiLink disabled={totalAlerts === 0} onClick={() => handleClick({ hostName })}>
-        <FormattedCount count={totalAlerts} />
-      </EuiLink>
+      <SecurityCellActions
+        field={{
+          name: 'host.name',
+          value: hostName,
+          type: 'keyword',
+          aggregatable: true,
+        }}
+        mode={CellActionsMode.HOVER_RIGHT}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        metadata={{
+          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+        }}
+      >
+        <EuiLink
+          data-test-subj="hostSeverityAlertsTable-totalAlertsLink"
+          disabled={totalAlerts === 0}
+          onClick={() => handleClick({ hostName })}
+        >
+          <FormattedCount count={totalAlerts} />
+        </EuiLink>
+      </SecurityCellActions>
     ),
   },
   {
@@ -128,12 +179,33 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_CRITICAL_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
-        <EuiLink
-          disabled={count === 0}
-          onClick={() => handleClick({ hostName, severity: 'critical' })}
-        >
+        {count > 0 ? (
+          <SecurityCellActions
+            field={{
+              name: 'host.name',
+              value: hostName,
+              type: 'keyword',
+              aggregatable: true,
+            }}
+            mode={CellActionsMode.HOVER_RIGHT}
+            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            metadata={{
+              andFilters: [
+                { field: 'kibana.alert.severity', value: 'critical' },
+                { field: 'kibana.alert.workflow_status', value: 'open' },
+              ],
+            }}
+          >
+            <EuiLink
+              data-test-subj="hostSeverityAlertsTable-criticalLink"
+              onClick={() => handleClick({ hostName, severity: 'critical' })}
+            >
+              <FormattedCount count={count} />
+            </EuiLink>
+          </SecurityCellActions>
+        ) : (
           <FormattedCount count={count} />
-        </EuiLink>
+        )}
       </EuiHealth>
     ),
   },
@@ -142,9 +214,30 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_HIGH_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
-        <EuiLink disabled={count === 0} onClick={() => handleClick({ hostName, severity: 'high' })}>
+        {count > 0 ? (
+          <SecurityCellActions
+            field={{
+              name: 'host.name',
+              value: hostName,
+              type: 'keyword',
+              aggregatable: true,
+            }}
+            mode={CellActionsMode.HOVER_RIGHT}
+            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            metadata={{
+              andFilters: [
+                { field: 'kibana.alert.severity', value: 'high' },
+                { field: 'kibana.alert.workflow_status', value: 'open' },
+              ],
+            }}
+          >
+            <EuiLink onClick={() => handleClick({ hostName, severity: 'high' })}>
+              <FormattedCount count={count} />
+            </EuiLink>
+          </SecurityCellActions>
+        ) : (
           <FormattedCount count={count} />
-        </EuiLink>
+        )}
       </EuiHealth>
     ),
   },
@@ -153,12 +246,30 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_MEDIUM_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
-        <EuiLink
-          disabled={count === 0}
-          onClick={() => handleClick({ hostName, severity: 'medium' })}
-        >
+        {count > 0 ? (
+          <SecurityCellActions
+            field={{
+              name: 'host.name',
+              value: hostName,
+              type: 'keyword',
+              aggregatable: true,
+            }}
+            mode={CellActionsMode.HOVER_RIGHT}
+            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            metadata={{
+              andFilters: [
+                { field: 'kibana.alert.severity', value: 'medium' },
+                { field: 'kibana.alert.workflow_status', value: 'open' },
+              ],
+            }}
+          >
+            <EuiLink onClick={() => handleClick({ hostName, severity: 'medium' })}>
+              <FormattedCount count={count} />
+            </EuiLink>
+          </SecurityCellActions>
+        ) : (
           <FormattedCount count={count} />
-        </EuiLink>
+        )}
       </EuiHealth>
     ),
   },
@@ -167,9 +278,30 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_LOW_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
-        <EuiLink disabled={count === 0} onClick={() => handleClick({ hostName, severity: 'low' })}>
+        {count > 0 ? (
+          <SecurityCellActions
+            field={{
+              name: 'host.name',
+              value: hostName,
+              type: 'keyword',
+              aggregatable: true,
+            }}
+            mode={CellActionsMode.HOVER_RIGHT}
+            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            metadata={{
+              andFilters: [
+                { field: 'kibana.alert.severity', value: 'low' },
+                { field: 'kibana.alert.workflow_status', value: 'open' },
+              ],
+            }}
+          >
+            <EuiLink onClick={() => handleClick({ hostName, severity: 'low' })}>
+              <FormattedCount count={count} />
+            </EuiLink>
+          </SecurityCellActions>
+        ) : (
           <FormattedCount count={count} />
-        </EuiLink>
+        )}
       </EuiHealth>
     ),
   },

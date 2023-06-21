@@ -6,12 +6,19 @@
  */
 
 import { get, groupBy } from 'lodash';
-import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import {
+  getIndexPatterns,
+  getElasticsearchDataset,
+} from '../../../../lib/cluster/get_index_patterns';
 import {
   postElasticsearchCcrRequestParamsRT,
   postElasticsearchCcrRequestPayloadRT,
+  PostElasticsearchCcrResponsePayload,
   postElasticsearchCcrResponsePayloadRT,
+  CcrBucket,
+  CcrFullStats,
+  CcrShard,
+  CcrShardBucket,
 } from '../../../../../common/http_api/elasticsearch';
 import { TimeRange } from '../../../../../common/http_api/shared';
 import {
@@ -22,7 +29,7 @@ import {
 import { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { LegacyRequest, MonitoringCore } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
 
 function getBucketScript(max: string, min: string) {
   return {
@@ -36,12 +43,15 @@ function getBucketScript(max: string, min: string) {
   };
 }
 
-function buildRequest(
-  req: LegacyRequest<unknown, unknown, { timeRange: TimeRange }>,
-  config: MonitoringConfig,
-  esIndexPattern: string
-) {
-  const { min, max } = req.payload.timeRange;
+interface BuildRequestParams {
+  clusterUuid: string;
+  config: MonitoringConfig;
+  esIndexPattern: string;
+  timeRange: TimeRange;
+}
+
+function buildRequest({ clusterUuid, config, esIndexPattern, timeRange }: BuildRequestParams) {
+  const { min, max } = timeRange;
   const maxBucketSize = config.ui.max_bucket_size;
   const aggs = {
     ops_synced_max: {
@@ -124,6 +134,13 @@ function buildRequest(
         bool: {
           must: [
             {
+              term: {
+                cluster_uuid: {
+                  value: clusterUuid,
+                },
+              },
+            },
+            {
               bool: {
                 should: [
                   {
@@ -137,6 +154,13 @@ function buildRequest(
                     term: {
                       'metricset.name': {
                         value: 'ccr',
+                      },
+                    },
+                  },
+                  {
+                    term: {
+                      'data_stream.dataset': {
+                        value: getElasticsearchDataset('ccr'),
                       },
                     },
                   },
@@ -201,6 +225,41 @@ function buildRequest(
   };
 }
 
+function buildShardStats({
+  fullStats,
+  bucket,
+  shardBucket,
+}: {
+  bucket: CcrBucket;
+  fullStats: CcrFullStats;
+  shardBucket: CcrShardBucket;
+}) {
+  const fullStat: any = fullStats[`${bucket.key}:${shardBucket.key}`][0];
+  const fullLegacyStat: ElasticsearchLegacySource = fullStat._source?.ccr_stats
+    ? fullStat._source
+    : null;
+  const fullMbStat: ElasticsearchMetricbeatSource = fullStat._source?.elasticsearch?.ccr
+    ? fullStat._source
+    : null;
+  const readExceptions =
+    fullLegacyStat?.ccr_stats?.read_exceptions ??
+    fullMbStat?.elasticsearch?.ccr?.read_exceptions ??
+    [];
+  const shardStat = {
+    shardId: shardBucket.key,
+    error: readExceptions.length ? readExceptions[0].exception?.type : null,
+    opsSynced: get(shardBucket, 'ops_synced.value'),
+    syncLagTime:
+      fullLegacyStat?.ccr_stats?.time_since_last_read_millis ??
+      fullMbStat?.elasticsearch?.ccr?.follower?.time_since_last_read?.ms,
+    syncLagOps: get(shardBucket, 'lag_ops.value'),
+    syncLagOpsLeader: get(shardBucket, 'leader_lag_ops.value'),
+    syncLagOpsFollower: get(shardBucket, 'follower_lag_ops.value'),
+  };
+
+  return shardStat;
+}
+
 export function ccrRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postElasticsearchCcrRequestParamsRT);
   const validateBody = createValidationFunction(postElasticsearchCcrRequestPayloadRT);
@@ -215,23 +274,31 @@ export function ccrRoute(server: MonitoringCore) {
     async handler(req) {
       const config = server.config;
       const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+      const { clusterUuid } = req.params;
+      const dataset = 'ccr';
+      const moduleType = 'elasticsearch';
+      const esIndexPattern = getIndexPatterns({
+        config,
+        moduleType,
+        dataset,
+        ccs,
+      });
 
       try {
         const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-        const params = buildRequest(req, config, esIndexPattern);
+        const params = buildRequest({
+          clusterUuid,
+          config,
+          esIndexPattern,
+          timeRange: req.payload.timeRange,
+        });
         const response: ElasticsearchResponse = await callWithRequest(req, 'search', params);
 
         if (!response || Object.keys(response).length === 0) {
-          return { data: [] };
+          return [];
         }
 
-        const fullStats: {
-          [key: string]: Array<
-            | NonNullable<ElasticsearchLegacySource['ccr_stats']>
-            | NonNullable<ElasticsearchMetricbeatSource['elasticsearch']>['ccr']
-          >;
-        } =
+        const fullStats: CcrFullStats =
           response.hits?.hits.reduce((accum, hit) => {
             const innerHits = hit.inner_hits?.by_shard.hits?.hits ?? [];
             const grouped = groupBy(innerHits, (innerHit) => {
@@ -249,79 +316,39 @@ export function ccrRoute(server: MonitoringCore) {
           }, {}) ?? {};
 
         const buckets = response.aggregations?.by_follower_index.buckets ?? [];
-        const data = buckets.reduce((accum: any, bucket: any) => {
+
+        const data: PostElasticsearchCcrResponsePayload = buckets.map((bucket: CcrBucket) => {
           const leaderIndex = get(bucket, 'leader_index.buckets[0].key');
           const remoteCluster = get(
             bucket,
             'leader_index.buckets[0].remote_cluster.buckets[0].key'
           );
           const follows = remoteCluster ? `${leaderIndex} on ${remoteCluster}` : leaderIndex;
-          const stat: {
-            [key: string]: any;
-            shards: Array<{
-              error?: string;
-              opsSynced: number;
-              syncLagTime: number;
-              syncLagOps: number;
-            }>;
-          } = {
+
+          const shards: CcrShard[] = get(bucket, 'by_shard_id.buckets').map(
+            (shardBucket: CcrShardBucket) => buildShardStats({ bucket, fullStats, shardBucket })
+          );
+
+          const error = (shards.find((shard) => shard.error) || {}).error;
+          const opsSynced = shards.reduce((sum, curr) => sum + curr.opsSynced, 0);
+          const syncLagTime = shards.reduce((max, curr) => Math.max(max, curr.syncLagTime), 0);
+          const syncLagOps = shards.reduce((max, curr) => Math.max(max, curr.syncLagOps), 0);
+
+          const stat = {
             id: bucket.key,
             index: bucket.key,
             follows,
-            shards: [],
-            error: undefined,
-            opsSynced: undefined,
-            syncLagTime: undefined,
-            syncLagOps: undefined,
+            shards,
+            error,
+            opsSynced,
+            syncLagTime,
+            syncLagOps,
           };
 
-          stat.shards = get(bucket, 'by_shard_id.buckets').reduce(
-            (accum2: any, shardBucket: any) => {
-              const fullStat: any = fullStats[`${bucket.key}:${shardBucket.key}`][0];
-              const fullLegacyStat: ElasticsearchLegacySource = fullStat._source?.ccr_stats
-                ? fullStat._source
-                : null;
-              const fullMbStat: ElasticsearchMetricbeatSource = fullStat._source?.elasticsearch?.ccr
-                ? fullStat._source
-                : null;
-              const readExceptions =
-                fullLegacyStat?.ccr_stats?.read_exceptions ??
-                fullMbStat?.elasticsearch?.ccr?.read_exceptions ??
-                [];
-              const shardStat = {
-                shardId: shardBucket.key,
-                error: readExceptions.length ? readExceptions[0].exception?.type : null,
-                opsSynced: get(shardBucket, 'ops_synced.value'),
-                syncLagTime:
-                  // @ts-ignore
-                  fullLegacyStat?.ccr_stats?.time_since_last_read_millis ??
-                  fullMbStat?.elasticsearch?.ccr?.follower?.time_since_last_read?.ms,
-                syncLagOps: get(shardBucket, 'lag_ops.value'),
-                syncLagOpsLeader: get(shardBucket, 'leader_lag_ops.value'),
-                syncLagOpsFollower: get(shardBucket, 'follower_lag_ops.value'),
-              };
-              accum2.push(shardStat);
-              return accum2;
-            },
-            []
-          );
+          return stat;
+        });
 
-          stat.error = (stat.shards.find((shard) => shard.error) || {}).error;
-          stat.opsSynced = stat.shards.reduce((sum, { opsSynced }) => sum + opsSynced, 0);
-          stat.syncLagTime = stat.shards.reduce(
-            (max, { syncLagTime }) => Math.max(max, syncLagTime),
-            0
-          );
-          stat.syncLagOps = stat.shards.reduce(
-            (max, { syncLagOps }) => Math.max(max, syncLagOps),
-            0
-          );
-
-          accum.push(stat);
-          return accum;
-        }, []);
-
-        return postElasticsearchCcrResponsePayloadRT.encode({ data });
+        return postElasticsearchCcrResponsePayloadRT.encode(data);
       } catch (err) {
         return handleError(err, req);
       }

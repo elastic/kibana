@@ -1,7 +1,12 @@
 {
-  "extends": "../../tsconfig.bazel.json",
-  "compilerOptions": {},
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
   "include": [
     "**/*",
+  ],
+  "exclude": [
+    "target/**/*",
   ],
 }

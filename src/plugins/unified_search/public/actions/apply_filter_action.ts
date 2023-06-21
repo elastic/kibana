@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ThemeServiceSetup } from '@kbn/core/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { Action, createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter, RangeFilter } from '@kbn/es-query';
@@ -36,8 +36,8 @@ export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
   theme: ThemeServiceSetup
-): Action {
-  return createAction({
+): UiActionsActionDefinition<ApplyGlobalFilterActionContext> {
+  return {
     type: ACTION_GLOBAL_APPLY_FILTER,
     id: ACTION_GLOBAL_APPLY_FILTER,
     order: 100,
@@ -115,7 +115,7 @@ export function createFilterAction(
         filterManager.addFilters(selectedFilters);
       }
     },
-  });
+  };
 }
 
 async function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {

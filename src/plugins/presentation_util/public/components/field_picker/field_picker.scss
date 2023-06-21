@@ -1,17 +1,12 @@
-.presFieldPicker__fieldButton {
-  background: $euiColorEmptyShade;
-}
 
 .presFieldPickerFieldButtonActive {
-  box-shadow: 0 0 0 2px $euiColorPrimary;
+  background-color: transparentize($euiColorPrimary, .9);
 }
 
-.presFieldPicker__fieldPanel {
-  height: 300px;
-  overflow-y: scroll;
-}
+.fieldPickerSelectable {
+  height: $euiSizeXXL * 9; // 40 * 9 = 360px
 
-.presFieldPicker__container--disabled {
-  opacity: .7;
-  pointer-events: none;
+  .euiSelectableMessage {
+    height: 100%;
+  }
 }

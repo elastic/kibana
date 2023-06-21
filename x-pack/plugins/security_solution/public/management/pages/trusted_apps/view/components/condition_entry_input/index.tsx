@@ -116,11 +116,17 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           dropdownDisplay: getDropdownDisplay(ConditionEntryField.HASH),
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.HASH],
           value: ConditionEntryField.HASH,
+          'data-test-subj': getTestId(
+            `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.HASH]}`
+          ),
         },
         {
           dropdownDisplay: getDropdownDisplay(ConditionEntryField.PATH),
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.PATH],
           value: ConditionEntryField.PATH,
+          'data-test-subj': getTestId(
+            `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.PATH]}`
+          ),
         },
         ...(os === OperatingSystem.WINDOWS
           ? [
@@ -128,11 +134,14 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER),
                 inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER],
                 value: ConditionEntryField.SIGNER,
+                'data-test-subj': getTestId(
+                  `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER]}`
+                ),
               },
             ]
           : []),
       ];
-    }, [os]);
+    }, [getTestId, os]);
 
     const handleValueUpdate = useCallback<ChangeEventHandler<HTMLInputElement>>(
       (ev) => onChange({ ...entry, value: ev.target.value }, entry),

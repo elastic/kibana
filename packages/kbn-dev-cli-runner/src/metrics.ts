@@ -9,7 +9,7 @@
 import path from 'path';
 
 import normalizePath from 'normalize-path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { ToolingLog } from '@kbn/tooling-log';
 

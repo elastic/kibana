@@ -12,10 +12,15 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
+  HTTPAuthorizationHeader,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -91,7 +96,7 @@ export class RulesClientFactory {
       ruleTypeRegistry: this.ruleTypeRegistry,
       minimumScheduleInterval: this.minimumScheduleInterval,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
-        excludedWrappers: ['security'],
+        excludedExtensions: [SECURITY_EXTENSION_ID],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
       }),
       authorization: this.authorization.create(request),
@@ -132,6 +137,30 @@ export class RulesClientFactory {
         return eventLog.getClient(request);
       },
       eventLogger: this.eventLogger,
+      isAuthenticationTypeAPIKey() {
+        if (!securityPluginStart) {
+          return false;
+        }
+        const user = securityPluginStart.authc.getCurrentUser(request);
+        return user && user.authentication_type ? user.authentication_type === 'api_key' : false;
+      },
+      getAuthenticationAPIKey(name: string) {
+        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+        if (authorizationHeader && authorizationHeader.credentials) {
+          const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')
+            .toString()
+            .split(':');
+          return {
+            apiKeysEnabled: true,
+            result: {
+              name,
+              id: apiKey[0],
+              api_key: apiKey[1],
+            },
+          };
+        }
+        return { apiKeysEnabled: false };
+      },
     });
   }
 }

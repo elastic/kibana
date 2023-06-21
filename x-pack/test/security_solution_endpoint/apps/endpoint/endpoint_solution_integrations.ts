@@ -6,8 +6,10 @@
  */
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
-import { kibanaPackageJson } from '@kbn/utils';
+import { TimelineResponse } from '@kbn/security-solution-plugin/common/types/timeline/api';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { kibanaPackageJson } from '@kbn/repo-info';
+import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 /**
@@ -22,9 +24,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'timeline']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/140701
-  describe.skip('App level Endpoint functionality', () => {
+  describe('App level Endpoint functionality', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
+    let indexedAlerts: IndexedEndpointRuleAlerts;
     let endpointAgentId: string;
 
     before(async () => {
@@ -37,14 +39,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await endpointService.waitForUnitedEndpoints([endpointAgentId]);
 
-      // Ensure our Endpoint is for v8.0 (or whatever is running in kibana now)
+      // Ensure our Endpoint is for current version of kibana
       await endpointService.sendEndpointMetadataUpdate(endpointAgentId, {
         agent: { version: kibanaPackageJson.version },
       });
 
-      // start/stop the endpoint rule. This should cause the rule to run immediately
-      // and avoid us having to wait for the interval (of 5 minutes)
-      await detectionsTestService.stopStartEndpointRule();
+      // Load alerts for our endpoint (so that we don't have to wait for the rule to run)
+      indexedAlerts = await detectionsTestService.loadEndpointRuleAlerts(endpointAgentId);
     });
 
     after(async () => {
@@ -52,12 +53,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         log.info('Cleaning up loaded endpoint data');
         await endpointService.unloadEndpointData(indexedData);
       }
+
+      if (indexedAlerts) {
+        await indexedAlerts.cleanup();
+      }
     });
 
     describe('from Timeline', () => {
       let timeline: TimelineResponse;
 
       before(async () => {
+        log.info(
+          `Creating timeline for events from host: ${indexedData.hosts[0].host.hostname} (agent id: ${indexedData.hosts[0].agent.id})`
+        );
         timeline = await timelineTestService.createTimelineForEndpointAlerts(
           'endpoint in timeline',
           {
@@ -78,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.savedObjectId
         );
         await pageObjects.timeline.setDateRange('Last 1 year');
-        await pageObjects.timeline.waitForEvents(60_000);
+        await pageObjects.timeline.waitForEvents(60_000 * 2);
       });
 
       after(async () => {

@@ -25,6 +25,10 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
 `owner` of the case you're updating.
 
+=== {api-description-title}
+
+NOTE: Each case can have a maximum of 1,000 alerts.
+
 === {api-path-parms-title}
 
 `<case_id>`::
@@ -39,22 +43,28 @@ default space is used.
 === {api-request-body-title}
 
 `alertId`::
-(Required*, string or array of strings) The alert identifier. It is required
-only when `type` is `alert`. If it is an array, `index` must also be an array. preview:[]
+(Required*, string or array of strings) The alert identifiers. It is required
+only when `type` is `alert`. You can use an array of strings to add multiple
+alerts to a case, provided that they all relate to the same rule; `index` must
+also be an array with the same length or number of elements. Adding multiple
+alerts in this manner is recommended rather than calling the API multiple times.
+preview:[]
 
 `comment`::
 (Required*, string) The new comment. It is required only when `type` is `user`.
 
 `index`::
-(Required*, string or array of strings) The alert index. It is required only
-when `type` is `alert`. If it is an array, `alertId` must also be an array. preview:[]
+(Required*, string or array of strings) The alert indices. It is required only
+when `type` is `alert`. If you are adding multiple alerts to a case, use an array
+of strings; the position of each index name in the array must match the position
+of the corresponding alert identifier in the `alertId` array. preview:[]
 
 `owner`::
 (Required, string) The application that owns the case. Valid values are:
 `cases`, `observability`, or `securitySolution`.
 
 `rule`::
-(Required*, object) The rule that is associated with the alert. It is required
+(Required*, object) The rule that is associated with the alerts. It is required
 only when `type` is `alert`. preview:[]
 +
 .Properties of `rule`

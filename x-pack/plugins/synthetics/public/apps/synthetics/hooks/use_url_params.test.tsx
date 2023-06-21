@@ -11,13 +11,18 @@ import { render } from '../utils/testing';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, SyntheticsUrlParamsHook } from './use_url_params';
 import { SyntheticsRefreshContext } from '../contexts';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../common/constants/synthetics/client_defaults';
+const { AUTOREFRESH_INTERVAL_SECONDS } = CLIENT_DEFAULTS_SYNTHETICS;
 
 interface MockUrlParamsComponentProps {
   hook: SyntheticsUrlParamsHook;
-  updateParams?: { [key: string]: any };
+  updateParams?: { [key: string]: any } | null;
 }
 
-const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponentProps) => {
+const UseUrlParamsTestComponent = ({
+  hook,
+  updateParams = { dateRangeStart: 'now-12d', dateRangeEnd: 'now' },
+}: MockUrlParamsComponentProps) => {
   const [params, setParams] = useState({});
   const [getUrlParams, updateUrlParams] = hook();
   const queryParams = getUrlParams();
@@ -27,7 +32,7 @@ const UseUrlParamsTestComponent = ({ hook, updateParams }: MockUrlParamsComponen
       <button
         id="setUrlParams"
         onClick={() => {
-          updateUrlParams(updateParams || { dateRangeStart: 'now-12d', dateRangeEnd: 'now' });
+          updateUrlParams(updateParams as any);
         }}
       >
         Set url params
@@ -50,7 +55,15 @@ describe('useUrlParams', () => {
 
   it('accepts router props, updates URL params, and returns the current params', async () => {
     const { findByText, history } = render(
-      <SyntheticsRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
+      <SyntheticsRefreshContext.Provider
+        value={
+          {
+            lastRefresh: 123,
+            refreshApp: jest.fn(),
+            refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
+          } as any
+        }
+      >
         <UseUrlParamsTestComponent hook={useUrlParams} />
       </SyntheticsRefreshContext.Provider>
     );
@@ -62,6 +75,32 @@ describe('useUrlParams', () => {
     expect(pushSpy).toHaveBeenCalledWith({
       pathname: '/',
       search: 'dateRangeEnd=now&dateRangeStart=now-12d',
+    });
+    pushSpy.mockClear();
+  });
+
+  it('clears search when null is passed to params', async () => {
+    const { findByText, history } = render(
+      <SyntheticsRefreshContext.Provider
+        value={
+          {
+            lastRefresh: 123,
+            refreshApp: jest.fn(),
+            refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
+          } as any
+        }
+      >
+        <UseUrlParamsTestComponent hook={useUrlParams} updateParams={null} />
+      </SyntheticsRefreshContext.Provider>
+    );
+
+    const pushSpy = jest.spyOn(history, 'push');
+
+    const setUrlParamsButton = await findByText('Set url params');
+    userEvent.click(setUrlParamsButton);
+    expect(pushSpy).toHaveBeenCalledWith({
+      pathname: '/',
+      search: undefined,
     });
     pushSpy.mockClear();
   });

@@ -49,8 +49,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dynamic_settings'));
       loadTestFile(require.resolve('./snapshot'));
       loadTestFile(require.resolve('./monitor_states_generated'));
-      loadTestFile(require.resolve('./telemetry_collectors'));
-      loadTestFile(require.resolve('./telemetry_collectors_fleet'));
     });
 
     describe('with real-world data', () => {
@@ -70,20 +68,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./monitor_duration'));
       loadTestFile(require.resolve('./index_status'));
       loadTestFile(require.resolve('./monitor_states_real_data'));
-      loadTestFile(require.resolve('./uptime_zip_url_deprecation.ts'));
-    });
-
-    describe('uptime CRUD routes', () => {
-      loadTestFile(require.resolve('./get_monitor'));
-      loadTestFile(require.resolve('./get_monitor_overview'));
-      loadTestFile(require.resolve('./add_monitor'));
-      loadTestFile(require.resolve('./add_monitor_project'));
-      loadTestFile(require.resolve('./get_monitor_project'));
-      loadTestFile(require.resolve('./add_monitor_private_location'));
-      loadTestFile(require.resolve('./edit_monitor'));
-      loadTestFile(require.resolve('./delete_monitor'));
-      loadTestFile(require.resolve('./delete_monitor_project'));
-      loadTestFile(require.resolve('./synthetics_enablement'));
+      loadTestFile(require.resolve('./uptime_integration_deprecation.ts'));
     });
   });
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { EntityAnalyticsAnomalies } from '.';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
@@ -14,7 +14,23 @@ import { AnomalyEntity } from '../../../../common/components/ml/anomaly/use_anom
 import { TestProviders } from '../../../../common/mock';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 
-const mockUseNotableAnomaliesSearch = jest.fn().mockReturnValue({
+jest.mock('../../../../common/components/ml_popover/hooks/use_enable_data_feed', () => ({
+  useEnableDataFeed: () => ({
+    loading: false,
+    enableDatafeed: jest.fn().mockResolvedValue({ enabled: true }),
+  }),
+}));
+
+// Query toggle only works if pageName.lenght > 0
+jest.mock('../../../../common/utils/route/use_route_spy', () => ({
+  useRouteSpy: jest.fn().mockReturnValue([
+    {
+      pageName: 'not_empty',
+    },
+  ]),
+}));
+
+const mockUseAggregatedAnomaliesByJob = jest.fn().mockReturnValue({
   isLoading: false,
   data: [],
   refetch: jest.fn(),
@@ -35,7 +51,7 @@ jest.mock('../../../../common/components/ml/anomaly/use_anomalies_search', () =>
   );
   return {
     ...original,
-    useNotableAnomaliesSearch: () => mockUseNotableAnomaliesSearch(),
+    useAggregatedAnomaliesByJob: () => mockUseAggregatedAnomaliesByJob(),
   };
 });
 
@@ -79,7 +95,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
@@ -110,7 +126,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
@@ -136,7 +152,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
@@ -153,6 +169,32 @@ describe('EntityAnalyticsAnomalies', () => {
     expect(getByTestId('enable-job')).toBeInTheDocument();
   });
 
+  it('renders recently installed jobs', async () => {
+    const jobCount: AnomaliesCount = {
+      job: { isInstalled: false, isCompatible: true } as SecurityJob,
+      name: 'v3_windows_anomalous_script',
+      count: 0,
+
+      entity: AnomalyEntity.User,
+    };
+
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
+      isLoading: false,
+      data: [jobCount],
+      refetch: jest.fn(),
+    });
+
+    const { getByTestId } = render(<EntityAnalyticsAnomalies />, { wrapper: TestProviders });
+
+    act(() => {
+      fireEvent.click(getByTestId('enable-job'));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('anomalies-table-column-count')).toHaveTextContent('0');
+    });
+  });
+
   it('renders failed jobs', () => {
     const jobCount: AnomaliesCount = {
       job: {
@@ -166,7 +208,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
@@ -190,7 +232,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: true,
       data: [jobCount],
       refetch: jest.fn(),
@@ -203,5 +245,63 @@ describe('EntityAnalyticsAnomalies', () => {
     );
 
     expect(getByTestId('anomalies-table-column-count').textContent).toEqual('Count'); // 'Count' is always rendered by only displayed on mobile
+  });
+
+  it('renders a warning message when jobs are incompatible', () => {
+    const jobCount: AnomaliesCount = {
+      job: {
+        isInstalled: true,
+        datafeedState: 'started',
+        jobState: 'opened',
+        isCompatible: false,
+      } as SecurityJob,
+      name: 'v3_windows_anomalous_script',
+      count: 0,
+      entity: AnomalyEntity.User,
+    };
+
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
+      isLoading: false,
+      data: [jobCount],
+      refetch: jest.fn(),
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <EntityAnalyticsAnomalies />
+      </TestProviders>
+    );
+
+    expect(getByTestId('incompatible_jobs_warnings')).toBeInTheDocument();
+  });
+
+  it("doesn't render the warning message when header is collapsed", () => {
+    const jobCount: AnomaliesCount = {
+      job: {
+        isInstalled: true,
+        datafeedState: 'started',
+        jobState: 'opened',
+        isCompatible: false,
+      } as SecurityJob,
+      name: 'v3_windows_anomalous_script',
+      count: 0,
+      entity: AnomalyEntity.User,
+    };
+
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
+      isLoading: false,
+      data: [jobCount],
+      refetch: jest.fn(),
+    });
+
+    const { queryByTestId, getByTestId } = render(
+      <TestProviders>
+        <EntityAnalyticsAnomalies />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('query-toggle-header'));
+
+    expect(queryByTestId('incompatible_jobs_warnings')).not.toBeInTheDocument();
   });
 });

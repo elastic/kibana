@@ -22,7 +22,10 @@ describe('ExceptionsViewerUtility', () => {
             totalItemCount: 105,
             pageSizeOptions: [5, 10, 20, 50, 100],
           }}
+          exceptionsToShow={{ active: true }}
+          onChangeExceptionsToShow={(optionId: string) => {}}
           lastUpdated={1660534202}
+          isEndpoint={false}
         />
       </TestProviders>
     );
@@ -42,7 +45,10 @@ describe('ExceptionsViewerUtility', () => {
             totalItemCount: 1,
             pageSizeOptions: [5, 10, 20, 50, 100],
           }}
+          exceptionsToShow={{ active: true }}
+          onChangeExceptionsToShow={(optionId: string) => {}}
           lastUpdated={Date.now()}
+          isEndpoint={false}
         />
       </TestProviders>
     );

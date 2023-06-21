@@ -5,8 +5,9 @@
 ++++
 <titleabbrev>Reporting</titleabbrev>
 ++++
-:keywords: administrator, analyst, concept, setup, reporting
-:description: Consider the production components that are used to generate reports.
+
+:frontmatter-description: Consider the production components that are used to generate reports.
+:frontmatter-tags-products: [kibana]
 
 To generate reports, {kib} uses the Chromium web browser, which runs on the server in headless mode. Chromium is an open-source project not related to Elastic, and is embedded into {kib}. Chromium may require additional OS dependencies to run properly.
 

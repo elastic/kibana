@@ -41,13 +41,6 @@ Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-elasticsearch[Encr
 See <<monitoring-kibana>>.
 
 
-[role="exclude",id="settings-xpack-kb"]
-== {xpack} Settings in {kib}
-
-include::{asciidoc-dir}/../../shared/settings.asciidoc[]
-
-For more {kib} configuration settings, see <<settings>>.
-
 [role="exclude",id="uptime-security"]
 == Uptime security
 
@@ -396,11 +389,6 @@ This content has moved. Refer to <<saved-object-migrations>>.
 
 This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
 
-[role="exclude",id="upgrade-assistant"]
-== Upgrade Assistant
-
-This content has moved. Refer to {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant].
-
 [role="exclude",id="brew"]
 == Install {kib} on macOS with Homebrew
 
@@ -420,3 +408,8 @@ This page has been deleted. Refer to <<osquery>>.
 == Sync machine learning objects API
 
 This page has been deleted. Refer to <<machine-learning-api-sync>>.
+
+[role="exclude",id="managing-alerts-and-actions"]
+== Alerts and Actions
+
+This page has been deleted. Refer to <<alerting-getting-started>>.

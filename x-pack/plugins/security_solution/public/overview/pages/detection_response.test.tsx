@@ -37,7 +37,11 @@ jest.mock('../components/detection_response/cases_by_status', () => ({
 }));
 
 jest.mock('../../common/components/search_bar', () => ({
-  SiemSearchBar: () => <div data-test-subj="mock_globalDatePicker" />,
+  SiemSearchBar: () => <div data-test-subj="mock_globalSearchBar" />,
+}));
+
+jest.mock('../../common/components/filters_global', () => ({
+  FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const defaultUseSourcererReturn = {
@@ -97,7 +101,7 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_globalDatePicker')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_globalSearchBar')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseSections')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseLoader')).not.toBeInTheDocument();
     expect(result.getByText('Detection & Response')).toBeInTheDocument();
@@ -119,7 +123,7 @@ describe('DetectionResponse', () => {
 
     expect(result.getByTestId('siem-landing-page')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponsePage')).not.toBeInTheDocument();
-    expect(result.queryByTestId('mock_globalDatePicker')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_globalSearchBar')).not.toBeInTheDocument();
   });
 
   it('should render loader if sourcerer is loading', () => {
@@ -137,7 +141,7 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_globalDatePicker')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_globalSearchBar')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseLoader')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseSections')).not.toBeInTheDocument();
   });
@@ -227,6 +231,6 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).not.toBeInTheDocument();
-    expect(result.queryByTestId('noPermissionPage')).toBeInTheDocument();
+    expect(result.queryByTestId('noPrivilegesPage')).toBeInTheDocument();
   });
 });

@@ -148,7 +148,7 @@
           ",",
           "ActionCardProps"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -161,7 +161,7 @@
             "description": [
               "\nSingle name for the current solution, used to auto-generate the title, logo, description, and button label"
             ],
-            "path": "node_modules/@kbn/shared-ux-page-no-data-types/index.d.ts",
+            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -174,7 +174,7 @@
             "description": [
               "\nRequired to set the docs link for the whole solution"
             ],
-            "path": "node_modules/@kbn/shared-ux-page-no-data-types/index.d.ts",
+            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -190,7 +190,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@kbn/shared-ux-page-no-data-types/index.d.ts",
+            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -206,7 +206,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@kbn/shared-ux-page-no-data-types/index.d.ts",
+            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -230,7 +230,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -249,7 +249,7 @@
           " & ",
           "RedirectAppLinksServices"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

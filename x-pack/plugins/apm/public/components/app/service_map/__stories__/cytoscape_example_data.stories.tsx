@@ -17,17 +17,14 @@ import {
 } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react';
 import React, { useEffect, useState } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import {
-  CodeEditor,
-  createKibanaReactContext,
-} from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { Cytoscape } from '../cytoscape';
 import { Centerer } from './centerer';
 import exampleResponseHipsterStore from './example_response_hipster_store.json';
 import exampleResponseOpbeansBeats from './example_response_opbeans_beats.json';
 import exampleResponseTodo from './example_response_todo.json';
 import { generateServiceMapElements } from './generate_service_map_elements';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 const STORYBOOK_PATH = 'app/ServiceMap/Example data';
 
@@ -48,16 +45,10 @@ const stories: Meta<{}> = {
   component: Cytoscape,
   decorators: [
     (StoryComponent, { globals }) => {
-      const KibanaReactContext = createKibanaReactContext({
-        uiSettings: {
-          get: () => globals.euiTheme && globals.euiTheme.includes('dark'),
-        },
-      } as unknown as Partial<CoreStart>);
-
       return (
-        <KibanaReactContext.Provider>
+        <MockApmPluginStorybook>
           <StoryComponent />
-        </KibanaReactContext.Provider>
+        </MockApmPluginStorybook>
       );
     },
   ],
@@ -76,6 +67,7 @@ export const GenerateMap: Story<{}> = () => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiButton
+            data-test-subj="apmGenerateMapGenerateServiceMapButton"
             onClick={() => {
               setElements(
                 generateServiceMapElements({ size, hasAnomalies: true })
@@ -89,6 +81,7 @@ export const GenerateMap: Story<{}> = () => {
         <EuiFlexItem>
           <EuiToolTip position="right" content="Number of services">
             <EuiFieldNumber
+              data-test-subj="apmGenerateMapFieldNumber"
               placeholder="Size"
               value={size}
               onChange={(e) => setSize(e.target.valueAsNumber)}
@@ -97,6 +90,7 @@ export const GenerateMap: Story<{}> = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
+            data-test-subj="apmGenerateMapGetJsonButton"
             onClick={() => {
               setJson(JSON.stringify({ elements }, null, 2));
             }}
@@ -192,6 +186,7 @@ export const MapFromJSON: Story<{}> = () => {
               />
               <EuiSpacer />
               <EuiButton
+                data-test-subj="apmMapFromJSONRenderJsonButton"
                 onClick={() => {
                   updateRenderedElements();
                 }}

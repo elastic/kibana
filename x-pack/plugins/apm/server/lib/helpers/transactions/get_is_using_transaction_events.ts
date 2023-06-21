@@ -8,17 +8,19 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getSearchTransactionsEvents } from '.';
-import { Setup } from '../setup_request';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
+import { APMConfig } from '../../..';
 
 export async function getIsUsingTransactionEvents({
-  setup: { config, apmEventClient },
+  config,
+  apmEventClient,
   kuery,
   start,
   end,
 }: {
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   kuery: string;
   start?: number;
   end?: number;

@@ -400,7 +400,7 @@ export const createJavaAgentInstructions = (
 Do **not** add the agent as a dependency to your application.',
       values: {
         mavenCentralLink:
-          'http://search.maven.org/#search%7Cga%7C1%7Ca%3Aelastic-apm-agent',
+          'https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=co.elastic.apm&a=elastic-apm-agent&v=LATEST',
       },
     }),
   },
@@ -519,10 +519,12 @@ export const createDotNetAgentInstructions = (
         defaultMessage:
           'In case you don’t pass an `IConfiguration` instance to the agent (e.g. in case of non ASP.NET Core applications) \
       you can also configure the agent through environment variables. \n \
-      See [the documentation]({documentationLink}) for advanced usage.',
+      See [the documentation]({documentationLink}) for advanced usage, including the [Profiler Auto instrumentation]({profilerLink}) quick start.',
         values: {
           documentationLink:
             '{config.docs.base_url}guide/en/apm/agent/dotnet/current/configuration.html',
+          profilerLink:
+            '{config.docs.base_url}guide/en/apm/agent/dotnet/current/setup-auto-instrumentation.html#setup-auto-instrumentation',
         },
       }
     ),

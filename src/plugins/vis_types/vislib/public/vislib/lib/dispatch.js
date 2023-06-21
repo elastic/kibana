@@ -123,23 +123,6 @@ export class Dispatch {
     return reduce(this._listeners, (count, handlers) => count + size(handlers), 0);
   }
 
-  _pieClickResponse(data) {
-    const points = [];
-
-    let dataPointer = data;
-    while (dataPointer && dataPointer.rawData) {
-      points.push(dataPointer.rawData);
-      dataPointer = dataPointer.parent;
-    }
-
-    if (get(data, 'rawData.table.$parent')) {
-      const { table, column, row, key } = get(data, 'rawData.table.$parent');
-      points.push({ table, column, row, value: key });
-    }
-
-    return points;
-  }
-
   _seriesClickResponse(data) {
     const points = [];
 
@@ -170,7 +153,7 @@ export class Dispatch {
     const data = d.input || d;
 
     return {
-      data: isSlices ? this._pieClickResponse(data) : this._seriesClickResponse(data),
+      data: this._seriesClickResponse(data),
     };
   }
 

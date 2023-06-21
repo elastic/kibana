@@ -8,13 +8,12 @@
 import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
-import type { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
-import type { RulesClient, BulkEditError } from '@kbn/alerting-plugin/server';
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
-
+import type { RuleAlertType } from '../../../../rule_schema';
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -22,10 +21,17 @@ import {
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../../../common/constants';
 import {
-  BulkAction,
+  BulkActionType,
   PerformBulkActionRequestBody,
   PerformBulkActionRequestQuery,
 } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type {
+  NormalizedRuleError,
+  RuleDetailsInError,
+  BulkEditActionResponse,
+  BulkEditActionResults,
+  BulkEditActionSummary,
+} from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
@@ -35,13 +41,12 @@ import { initPromisePool } from '../../../../../../utils/promise_pool';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { deleteRules } from '../../../logic/crud/delete_rules';
 import { duplicateRule } from '../../../logic/actions/duplicate_rule';
+import { duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 import { findRules } from '../../../logic/search/find_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { internalRuleToAPIResponse } from '../../../normalization/rule_converters';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { bulkEditRules } from '../../../logic/bulk_actions/bulk_edit_rules';
 import type { DryRunError } from '../../../logic/bulk_actions/dry_run';
 import {
@@ -55,18 +60,10 @@ const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
 const MAX_ROUTE_CONCURRENCY = 5;
 
-interface RuleDetailsInError {
-  id: string;
-  name?: string;
-}
-interface NormalizedRuleError {
-  message: string;
-  status_code: number;
-  err_code?: BulkActionsDryRunErrCode;
-  rules: RuleDetailsInError[];
-}
-
-type BulkActionError = PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError;
+export type BulkActionError =
+  | PromisePoolError<string>
+  | PromisePoolError<RuleAlertType>
+  | BulkOperationError;
 
 const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[] => {
   const errorsMap = new Map<string, NormalizedRuleError>();
@@ -76,7 +73,7 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
     let statusCode: number = 500;
     let errorCode: BulkActionsDryRunErrCode | undefined;
     let rule: RuleDetailsInError;
-    // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError)
+    // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkOperationError)
     // to one common used in NormalizedRuleError
     if ('rule' in errorObj) {
       rule = errorObj.rule;
@@ -120,61 +117,66 @@ const buildBulkResponse = (
     updated = [],
     created = [],
     deleted = [],
+    skipped = [],
   }: {
     isDryRun?: boolean;
     errors?: BulkActionError[];
     updated?: RuleAlertType[];
     created?: RuleAlertType[];
     deleted?: RuleAlertType[];
+    skipped?: BulkActionSkipResult[];
   }
-) => {
+): IKibanaResponse<BulkEditActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
+  const numSkipped = skipped.length;
   const numFailed = errors.length;
-  const summary = {
+
+  const summary: BulkEditActionSummary = {
     failed: numFailed,
     succeeded: numSucceeded,
-    total: numSucceeded + numFailed,
+    skipped: numSkipped,
+    total: numSucceeded + numFailed + numSkipped,
   };
 
   // if response is for dry_run, empty lists of rules returned, as rules are not actually updated and stored within ES
   // thus, it's impossible to return reliably updated/duplicated/deleted rules
-  const results = isDryRun
+  const results: BulkEditActionResults = isDryRun
     ? {
         updated: [],
         created: [],
         deleted: [],
+        skipped: [],
       }
     : {
         updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
         created: created.map((rule) => internalRuleToAPIResponse(rule)),
         deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
+        skipped,
       };
 
   if (numFailed > 0) {
-    return response.custom({
+    return response.custom<BulkEditActionResponse>({
       headers: { 'content-type': 'application/json' },
-      body: Buffer.from(
-        JSON.stringify({
-          message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
-          status_code: 500,
-          attributes: {
-            errors: normalizeErrorResponse(errors),
-            results,
-            summary,
-          },
-        })
-      ),
+      body: {
+        message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
+        status_code: 500,
+        attributes: {
+          errors: normalizeErrorResponse(errors),
+          results,
+          summary,
+        },
+      },
       statusCode: 500,
     });
   }
 
-  return response.ok({
-    body: {
-      success: true,
-      rules_count: summary.total,
-      attributes: { results, summary },
-    },
-  });
+  const responseBody: BulkEditActionResponse = {
+    success: true,
+    rules_count: summary.total,
+    attributes: { results, summary },
+  };
+
+  return response.ok({ body: responseBody });
 };
 
 const fetchRulesByQueryOrIds = async ({
@@ -225,39 +227,6 @@ const fetchRulesByQueryOrIds = async ({
   };
 };
 
-/**
- * Helper method to migrate any legacy actions a rule may have. If no actions or no legacy actions
- * no migration is performed.
- * @params rulesClient
- * @params savedObjectsClient
- * @params rule - rule to be migrated
- * @returns The migrated rule
- */
-export const migrateRuleActions = async ({
-  rulesClient,
-  savedObjectsClient,
-  rule,
-}: {
-  rulesClient: RulesClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  rule: RuleAlertType;
-}): Promise<SanitizedRule<RuleParams>> => {
-  const migratedRule = await legacyMigrate({
-    rulesClient,
-    savedObjectsClient,
-    rule,
-  });
-
-  // This should only be hit if `rule` passed into `legacyMigrate`
-  // is `null` or `rule.id` is null which right now, as typed, should not occur
-  // but catching if does, in which case something upstream would be breaking down
-  if (migratedRule == null) {
-    throw new Error(`An error occurred processing rule with id:${rule.id}`);
-  }
-
-  return migratedRule;
-};
-
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
@@ -298,7 +267,7 @@ export const performBulkActionRoute = (
       const isDryRun = request.query.dry_run === 'true';
 
       // dry run is not supported for export, as it doesn't change ES state and has different response format(exported JSON file)
-      if (isDryRun && body.action === BulkAction.export) {
+      if (isDryRun && body.action === BulkActionType.export) {
         return siemResponse.error({
           body: `Export action doesn't support dry_run mode`,
           statusCode: 400,
@@ -317,12 +286,18 @@ export const performBulkActionRoute = (
           'alerting',
           'licensing',
           'lists',
+          'actions',
         ]);
 
         const rulesClient = ctx.alerting.getRulesClient();
-        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
         const exceptionsClient = ctx.lists?.getExceptionListClient();
         const savedObjectsClient = ctx.core.savedObjects.client;
+        const actionsClient = (await ctx.actions)?.getActionsClient();
+
+        const { getExporter, getClient } = (await ctx.core).savedObjects;
+        const client = getClient({ includedHiddenTypes: ['action'] });
+
+        const exporter = getExporter(client);
 
         const mlAuthz = buildMlAuthz({
           license: ctx.licensing.license,
@@ -335,8 +310,8 @@ export const performBulkActionRoute = (
 
         // handling this action before switch statement as bulkEditRules fetch rules within
         // rulesClient method, hence there is no need to use fetchRulesByQueryOrIds utility
-        if (body.action === BulkAction.edit && !isDryRun) {
-          const { rules, errors } = await bulkEditRules({
+        if (body.action === BulkActionType.edit && !isDryRun) {
+          const { rules, errors, skipped } = await bulkEditRules({
             rulesClient,
             filter: query,
             ids: body.ids,
@@ -344,30 +319,10 @@ export const performBulkActionRoute = (
             mlAuthz,
           });
 
-          // migrate legacy rule actions
-          const migrationOutcome = await initPromisePool({
-            concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-            items: rules,
-            executor: async (rule) => {
-              // actions only get fired when rule running, so we should be fine to migrate only enabled
-              if (rule.enabled) {
-                return migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
-              } else {
-                return rule;
-              }
-            },
-            abortSignal: abortController.signal,
-          });
-
           return buildBulkResponse(response, {
-            updated: migrationOutcome.results
-              .filter(({ result }) => result)
-              .map(({ result }) => result),
-            errors: [...errors, ...migrationOutcome.errors],
+            updated: rules,
+            skipped,
+            errors,
           });
         }
 
@@ -385,7 +340,7 @@ export const performBulkActionRoute = (
         let deleted: RuleAlertType[] = [];
 
         switch (body.action) {
-          case BulkAction.enable:
+          case BulkActionType.enable:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -397,18 +352,12 @@ export const performBulkActionRoute = (
                   return rule;
                 }
 
-                const migratedRule = await migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
-
-                if (!migratedRule.enabled) {
-                  await rulesClient.enable({ id: migratedRule.id });
+                if (!rule.enabled) {
+                  await rulesClient.enable({ id: rule.id });
                 }
 
                 return {
-                  ...migratedRule,
+                  ...rule,
                   enabled: true,
                 };
               },
@@ -418,7 +367,7 @@ export const performBulkActionRoute = (
               .map(({ result }) => result)
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
-          case BulkAction.disable:
+          case BulkActionType.disable:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -430,18 +379,12 @@ export const performBulkActionRoute = (
                   return rule;
                 }
 
-                const migratedRule = await migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
-
-                if (migratedRule.enabled) {
-                  await rulesClient.disable({ id: migratedRule.id });
+                if (rule.enabled) {
+                  await rulesClient.disable({ id: rule.id });
                 }
 
                 return {
-                  ...migratedRule,
+                  ...rule,
                   enabled: false,
                 };
               },
@@ -452,7 +395,7 @@ export const performBulkActionRoute = (
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
 
-          case BulkAction.delete:
+          case BulkActionType.delete:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -462,16 +405,9 @@ export const performBulkActionRoute = (
                   return null;
                 }
 
-                const migratedRule = await migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
-
                 await deleteRules({
-                  ruleId: migratedRule.id,
+                  ruleId: rule.id,
                   rulesClient,
-                  ruleExecutionLog,
                 });
 
                 return null;
@@ -483,7 +419,7 @@ export const performBulkActionRoute = (
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
 
-          case BulkAction.duplicate:
+          case BulkActionType.duplicate:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -495,17 +431,45 @@ export const performBulkActionRoute = (
                   return rule;
                 }
 
-                const migratedRule = await migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
+                let shouldDuplicateExceptions = true;
+                let shouldDuplicateExpiredExceptions = true;
+                if (body.duplicate !== undefined) {
+                  shouldDuplicateExceptions = body.duplicate.include_exceptions;
+                  shouldDuplicateExpiredExceptions = body.duplicate.include_expired_exceptions;
+                }
+
+                const duplicateRuleToCreate = await duplicateRule({
                   rule,
                 });
 
                 const createdRule = await rulesClient.create({
-                  data: duplicateRule(migratedRule),
+                  data: duplicateRuleToCreate,
                 });
 
-                return createdRule;
+                // we try to create exceptions after rule created, and then update rule
+                const exceptions = shouldDuplicateExceptions
+                  ? await duplicateExceptions({
+                      ruleId: rule.params.ruleId,
+                      exceptionLists: rule.params.exceptionsList,
+                      includeExpiredExceptions: shouldDuplicateExpiredExceptions,
+                      exceptionsClient,
+                    })
+                  : [];
+
+                const updatedRule = await rulesClient.update({
+                  id: createdRule.id,
+                  data: {
+                    ...duplicateRuleToCreate,
+                    params: {
+                      ...duplicateRuleToCreate.params,
+                      exceptionsList: exceptions,
+                    },
+                  },
+                  shouldIncrementRevision: () => false,
+                });
+
+                // TODO: figureout why types can't return just updatedRule
+                return { ...createdRule, ...updatedRule };
               },
               abortSignal: abortController.signal,
             });
@@ -514,16 +478,19 @@ export const performBulkActionRoute = (
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
 
-          case BulkAction.export:
+          case BulkActionType.export:
             const exported = await getExportByObjectIds(
               rulesClient,
               exceptionsClient,
               savedObjectsClient,
               rules.map(({ params }) => ({ rule_id: params.ruleId })),
-              logger
+              logger,
+              exporter,
+              request,
+              actionsClient
             );
 
-            const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.exportDetails}`;
+            const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.actionConnectors}${exported.exportDetails}`;
 
             return response.ok({
               headers: {
@@ -535,7 +502,7 @@ export const performBulkActionRoute = (
 
           // will be processed only when isDryRun === true
           // during dry run only validation is getting performed and rule is not saved in ES
-          case BulkAction.edit:
+          case BulkActionType.edit:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,

@@ -90,6 +90,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       callAdminCluster,
       logger,
       [],
+      undefined,
       SavedObjectsRepository
     );
     expect(repository).toBeDefined();
@@ -109,6 +110,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       callAdminCluster,
       logger,
       ['hiddenType', 'hiddenType', 'hiddenType'],
+      undefined,
       SavedObjectsRepository
     );
     expect(repository).toBeDefined();

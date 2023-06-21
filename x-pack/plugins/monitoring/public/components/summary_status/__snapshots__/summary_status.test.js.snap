@@ -6,10 +6,10 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
   intl="[object Object]"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero eui-textTruncate"
+      class="euiFlexItem eui-textTruncate emotion-euiFlexItem-growZero"
       style="max-width:200px"
     >
       <div
@@ -41,7 +41,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="transportAddress"
       style="max-width:200px"
     >
@@ -69,7 +69,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="documentCount"
       style="max-width:200px"
     >
@@ -108,14 +108,14 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
   intl="[object Object]"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero eui-textTruncate"
+      class="euiFlexItem eui-textTruncate emotion-euiFlexItem-growZero"
       style="max-width:200px"
     />
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="freeDiskSpace"
       style="max-width:200px"
     >
@@ -145,7 +145,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="documentCount"
       style="max-width:200px"
     >
@@ -184,10 +184,10 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
   intl="[object Object]"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero eui-textTruncate"
+      class="euiFlexItem eui-textTruncate emotion-euiFlexItem-growZero"
       style="max-width:200px"
     >
       <div
@@ -219,7 +219,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="freeDiskSpace"
       style="max-width:200px"
     >
@@ -249,7 +249,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="documentCount"
       style="max-width:200px"
     >

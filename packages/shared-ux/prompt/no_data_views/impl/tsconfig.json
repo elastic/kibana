@@ -1,11 +1,7 @@
 {
-  "extends": "../../../../../tsconfig.bazel.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -17,5 +13,16 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/shared-ux-utility",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-prompt-no-data-views-types",
+    "@kbn/shared-ux-prompt-no-data-views-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

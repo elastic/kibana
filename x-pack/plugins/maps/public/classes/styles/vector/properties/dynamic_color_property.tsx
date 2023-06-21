@@ -22,7 +22,6 @@ import {
   FieldFormatter,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-// @ts-expect-error
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
 import { Break, BreakedLegend } from '../components/legend/breaked_legend';
@@ -52,7 +51,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     this._chartsPaletteServiceGetColor = chartsPaletteServiceGetColor;
   }
 
-  syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'circle-color', color);
     mbMap.setPaintProperty(mbLayerId, 'circle-opacity', alpha);
@@ -68,25 +67,25 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-color', color);
   }
 
-  syncCircleStrokeWithMb(pointLayerId: string, mbMap: MbMap, alpha: number) {
+  syncCircleStrokeWithMb(pointLayerId: string, mbMap: MbMap, alpha: unknown) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
   }
 
-  syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'fill-color', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
 
-  syncLineColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncLineColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'line-color', color);
     mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
   }
 
-  syncLabelColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncLabelColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'text-color', color);
     mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
@@ -142,6 +141,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getOrdinalColorMbExpression() {
+    const invert = this._options.invert === undefined ? false : this._options.invert;
     const targetName = this.getMbFieldName();
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
@@ -177,7 +177,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
       const colorStops = getPercentilesMbColorRampStops(
         this._options.color ? this._options.color : null,
-        percentilesFieldMeta
+        percentilesFieldMeta,
+        invert
       );
       if (!colorStops) {
         return null;
@@ -205,7 +206,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     const colorStops = getOrdinalMbColorRampStops(
       this._options.color ? this._options.color : null,
       rangeFieldMeta.min,
-      rangeFieldMeta.max
+      rangeFieldMeta.max,
+      invert
     );
     if (!colorStops) {
       return null;
@@ -350,6 +352,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getOrdinalBreaks(symbolId?: string, svg?: string): Break[] {
+    const invert = this._options.invert === undefined ? false : this._options.invert;
     let colorStops: Array<number | string> | null = null;
     let getValuePrefix: ((i: number, isNext: boolean) => string) | null = null;
     if (this._options.useCustomColorRamp) {
@@ -364,7 +367,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       }
       colorStops = getPercentilesMbColorRampStops(
         this._options.color ? this._options.color : null,
-        percentilesFieldMeta
+        percentilesFieldMeta,
+        invert
       );
       getValuePrefix = function (i: number, isNext: boolean) {
         const percentile = isNext
@@ -379,7 +383,9 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         return [];
       }
       if (rangeFieldMeta.delta === 0) {
-        const colors = getColorPalette(this._options.color);
+        const colors = invert
+          ? getColorPalette(this._options.color).reverse()
+          : getColorPalette(this._options.color);
         // map to last color.
         return [
           {
@@ -393,7 +399,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       colorStops = getOrdinalMbColorRampStops(
         this._options.color ? this._options.color : null,
         rangeFieldMeta.min,
-        rangeFieldMeta.max
+        rangeFieldMeta.max,
+        invert
       );
     }
 

@@ -37,19 +37,23 @@ export default function ({ getPageObjects, getService }) {
       );
       const searchParams = Object.fromEntries(tileUrl.searchParams);
 
-      expect(tileUrl.pathname).to.equal('/api/maps/mvt/getGridTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf');
+      expect(tileUrl.pathname).to.equal(
+        '/internal/maps/mvt/getGridTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf'
+      );
 
       // token is an unique id that changes between runs
       expect(typeof searchParams.token).to.equal('string');
       delete searchParams.token;
 
       expect(searchParams).to.eql({
+        buffer: '4',
+        executionContextId: '78116c8c-fd2a-11ea-adc1-0242ac120002',
         geometryFieldName: 'geo.coordinates',
         hasLabels: 'false',
         index: 'logstash-*',
-        gridPrecision: 8,
+        gridPrecision: '8',
         renderAs: 'grid',
-        requestBody: `(_source:(excludes:!()),aggs:(max_of_bytes:(max:(field:bytes))),fields:!((field:'@timestamp',format:date_time),(field:'relatedContent.article:modified_time',format:date_time),(field:'relatedContent.article:published_time',format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((range:('@timestamp':(format:strict_date_optional_time,gte:'2015-09-20T00:00:00.000Z',lte:'2015-09-20T01:00:00.000Z')))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:'doc[!'@timestamp!'].value.getHour()'))),size:0,stored_fields:!('*'))`,
+        requestBody: `(aggs:(max_of_bytes:(max:(field:bytes))),fields:!((field:'@timestamp',format:date_time),(field:'relatedContent.article:modified_time',format:date_time),(field:'relatedContent.article:published_time',format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((range:('@timestamp':(format:strict_date_optional_time,gte:'2015-09-20T00:00:00.000Z',lte:'2015-09-20T01:00:00.000Z')))),must:!(),must_not:!(),should:!())),runtime_mappings:())`,
       });
 
       //Should correctly load meta for style-rule (sigma is set to 1, opacity to 1)

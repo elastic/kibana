@@ -162,7 +162,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             />
           }
           color="warning"
-          iconType="alert"
+          iconType="warning"
           data-test-subj="repositoryErrorsWarning"
         >
           <FormattedMessage

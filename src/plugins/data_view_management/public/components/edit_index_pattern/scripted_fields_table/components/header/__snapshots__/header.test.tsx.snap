@@ -2,10 +2,10 @@
 
 exports[`Header should render normally 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-center-row"
 >
   <div
-    class="euiFlexItem"
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
       class="euiText emotion-euiText-s"
@@ -17,7 +17,7 @@ exports[`Header should render normally 1`] = `
         <br />
         <span
           color="warning"
-          data-euiicon-type="alert"
+          data-euiicon-type="warning"
           style="margin-right: 4px;"
         />
         <span>

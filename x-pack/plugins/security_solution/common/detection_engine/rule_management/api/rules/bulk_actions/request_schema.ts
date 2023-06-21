@@ -9,6 +9,8 @@ import * as t from 'io-ts';
 
 import { NonEmptyArray, TimeDuration } from '@kbn/securitysolution-io-ts-types';
 import {
+  RuleActionAlertsFilter,
+  RuleActionFrequency,
   RuleActionGroup,
   RuleActionId,
   RuleActionParams,
@@ -22,7 +24,7 @@ import {
   TimelineTemplateTitle,
 } from '../../../../rule_schema';
 
-export enum BulkAction {
+export enum BulkActionType {
   'enable' = 'enable',
   'disable' = 'disable',
   'export' = 'export',
@@ -66,7 +68,9 @@ const BulkActionEditPayloadTags = t.type({
   value: RuleTagArray,
 });
 
-type BulkActionEditPayloadIndexPatterns = t.TypeOf<typeof BulkActionEditPayloadIndexPatterns>;
+export type BulkActionEditPayloadIndexPatterns = t.TypeOf<
+  typeof BulkActionEditPayloadIndexPatterns
+>;
 const BulkActionEditPayloadIndexPatterns = t.intersection([
   t.type({
     type: t.union([
@@ -92,13 +96,17 @@ const BulkActionEditPayloadTimeline = t.type({
  * per rulesClient.bulkEdit rules actions operation contract (x-pack/plugins/alerting/server/rules_client/rules_client.ts)
  * normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
  */
-type NormalizedRuleAction = t.TypeOf<typeof NormalizedRuleAction>;
-const NormalizedRuleAction = t.exact(
-  t.type({
-    group: RuleActionGroup,
-    id: RuleActionId,
-    params: RuleActionParams,
-  })
+export type NormalizedRuleAction = t.TypeOf<typeof NormalizedRuleAction>;
+export const NormalizedRuleAction = t.exact(
+  t.intersection([
+    t.type({
+      group: RuleActionGroup,
+      id: RuleActionId,
+      params: RuleActionParams,
+    }),
+    t.partial({ frequency: RuleActionFrequency }),
+    t.partial({ alerts_filter: RuleActionAlertsFilter }),
+  ])
 );
 
 export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof BulkActionEditPayloadRuleActions>;
@@ -107,10 +115,12 @@ export const BulkActionEditPayloadRuleActions = t.type({
     t.literal(BulkActionEditType.add_rule_actions),
     t.literal(BulkActionEditType.set_rule_actions),
   ]),
-  value: t.type({
-    throttle: ThrottleForBulkActions,
-    actions: t.array(NormalizedRuleAction),
-  }),
+  value: t.intersection([
+    t.partial({ throttle: ThrottleForBulkActions }),
+    t.type({
+      actions: t.array(NormalizedRuleAction),
+    }),
+  ]),
 });
 
 type BulkActionEditPayloadSchedule = t.TypeOf<typeof BulkActionEditPayloadSchedule>;
@@ -130,6 +140,15 @@ export const BulkActionEditPayload = t.union([
   BulkActionEditPayloadRuleActions,
   BulkActionEditPayloadSchedule,
 ]);
+
+const bulkActionDuplicatePayload = t.exact(
+  t.type({
+    include_exceptions: t.boolean,
+    include_expired_exceptions: t.boolean,
+  })
+);
+
+export type BulkActionDuplicatePayload = t.TypeOf<typeof bulkActionDuplicatePayload>;
 
 /**
  * actions that modify rules attributes
@@ -162,18 +181,29 @@ export const PerformBulkActionRequestBody = t.intersection([
     t.exact(
       t.type({
         action: t.union([
-          t.literal(BulkAction.delete),
-          t.literal(BulkAction.disable),
-          t.literal(BulkAction.duplicate),
-          t.literal(BulkAction.enable),
-          t.literal(BulkAction.export),
+          t.literal(BulkActionType.delete),
+          t.literal(BulkActionType.disable),
+          t.literal(BulkActionType.enable),
+          t.literal(BulkActionType.export),
         ]),
       })
     ),
+    t.intersection([
+      t.exact(
+        t.type({
+          action: t.literal(BulkActionType.duplicate),
+        })
+      ),
+      t.exact(
+        t.partial({
+          [BulkActionType.duplicate]: bulkActionDuplicatePayload,
+        })
+      ),
+    ]),
     t.exact(
       t.type({
-        action: t.literal(BulkAction.edit),
-        [BulkAction.edit]: NonEmptyArray(BulkActionEditPayload),
+        action: t.literal(BulkActionType.edit),
+        [BulkActionType.edit]: NonEmptyArray(BulkActionEditPayload),
       })
     ),
   ]),

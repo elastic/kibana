@@ -9,28 +9,20 @@ import React, { FC, useState } from 'react';
 import {
   Direction,
   EuiBasicTableColumn,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
-  EuiSpacer,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { useGroupActions } from './actions';
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
-import { JobStatsBarStats, StatsBar } from '../../../components/stats_bar';
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
 import { toLocaleString } from '../../../util/string_utils';
 import { SwimlaneContainer } from '../../../explorer/swimlane_container';
 import { useTimeBuckets } from '../../../components/custom_hooks/use_time_buckets';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useMlLink } from '../../../contexts/kibana';
 
 export enum AnomalyDetectionListColumns {
   id = 'id',
@@ -44,11 +36,10 @@ export enum AnomalyDetectionListColumns {
 
 interface Props {
   items: GroupsDictionary;
-  statsBarData: JobStatsBarStats;
   chartsService: ChartsPluginStart;
 }
 
-export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData, chartsService }) => {
+export const AnomalyDetectionTable: FC<Props> = ({ items, chartsService }) => {
   const groupsList = Object.values(items);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -57,10 +48,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData, chartsSe
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const timeBuckets = useTimeBuckets();
-
-  const manageJobsLink = useMlLink({
-    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-  });
 
   const columns: Array<EuiBasicTableColumn<Group>> = [
     {
@@ -195,47 +182,19 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData, chartsSe
   };
 
   return (
-    <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize={'s'}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="m">
-            <h3>
-              {i18n.translate('xpack.ml.overview.anomalyDetection.panelTitle', {
-                defaultMessage: 'Anomaly Detection',
-              })}
-            </h3>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize={'s'} alignItems="center">
-            <EuiFlexItem grow={false}>
-              <StatsBar stats={statsBarData} dataTestSub={'mlOverviewJobStatsBar'} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton size="m" fill href={manageJobsLink}>
-                {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
-                  defaultMessage: 'Manage jobs',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiInMemoryTable<Group>
-        allowNeutralSort={false}
-        className="mlAnomalyDetectionTable"
-        columns={columns}
-        hasActions={true}
-        isExpandable={false}
-        isSelectable={false}
-        items={groupsList}
-        itemId={AnomalyDetectionListColumns.id}
-        onTableChange={onTableChange}
-        pagination={pagination}
-        sorting={sorting}
-        data-test-subj="mlOverviewTableAnomalyDetection"
-      />
-    </>
+    <EuiInMemoryTable<Group>
+      allowNeutralSort={false}
+      className="mlAnomalyDetectionTable"
+      columns={columns}
+      hasActions={true}
+      isExpandable={false}
+      isSelectable={false}
+      items={groupsList}
+      itemId={AnomalyDetectionListColumns.id}
+      onTableChange={onTableChange}
+      pagination={pagination}
+      sorting={sorting}
+      data-test-subj="mlOverviewTableAnomalyDetection"
+    />
   );
 };

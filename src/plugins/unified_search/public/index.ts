@@ -19,10 +19,10 @@ export type {
 } from './types';
 export { SearchBar } from './search_bar';
 export type { FilterItemsProps } from './filter_bar';
-export { FilterLabel, FilterItem, FilterItems } from './filter_bar';
-export { DataViewsList } from './dataview_picker/dataview_list';
-export { DataViewPicker } from './dataview_picker';
+export { FilterItem, FilterItems } from './filter_bar';
+export { FilterBadgeGroup } from './filter_badge';
 
+export { DataViewPicker, DataViewSelector, DataViewsList } from './dataview_picker';
 export type { DataViewPickerProps } from './dataview_picker';
 
 export type { ApplyGlobalFilterActionContext } from './actions';

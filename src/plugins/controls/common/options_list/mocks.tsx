@@ -6,55 +6,65 @@
  * Side Public License, v 1.
  */
 
-import { ReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public/redux_embeddables/types';
-import { ControlOutput } from '../../public/types';
-import { OptionsListComponentState, OptionsListReduxState } from '../../public/options_list/types';
-import { optionsListReducers } from '../../public/options_list/options_list_reducers';
+import { OptionsListEmbeddable, OptionsListEmbeddableFactory } from '../../public';
+import { OptionsListComponentState } from '../../public/options_list/types';
+import { ControlFactory, ControlOutput } from '../../public/types';
 import { OptionsListEmbeddableInput } from './types';
 
+import * as optionsListStateModule from '../../public/options_list/options_list_reducers';
+
 const mockOptionsListComponentState = {
+  searchString: { value: '', valid: true },
   field: undefined,
   totalCardinality: 0,
-  availableOptions: ['woof', 'bark', 'meow', 'quack', 'moo'],
+  availableOptions: [
+    { value: 'woof', docCount: 100 },
+    { value: 'bark', docCount: 75 },
+    { value: 'meow', docCount: 50 },
+    { value: 'quack', docCount: 25 },
+    { value: 'moo', docCount: 5 },
+  ],
   invalidSelections: [],
+  allowExpensiveQueries: true,
+  popoverOpen: false,
   validSelections: [],
-  searchString: { value: '', valid: true },
 } as OptionsListComponentState;
 
-const mockOptionsListEmbeddableInput = {
+export const mockOptionsListEmbeddableInput = {
   id: 'sample options list',
   fieldName: 'sample field',
   dataViewId: 'sample id',
   selectedOptions: [],
   runPastTimeout: false,
   singleSelect: false,
+  exclude: false,
 } as OptionsListEmbeddableInput;
 
 const mockOptionsListOutput = {
   loading: false,
 } as ControlOutput;
 
-export const mockOptionsListContext = (
-  partialState?: Partial<OptionsListReduxState>
-): ReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers> => {
-  const mockReduxState = {
-    componentState: {
-      ...mockOptionsListComponentState,
-      ...partialState?.componentState,
-    },
-    explicitInput: {
-      ...mockOptionsListEmbeddableInput,
-      ...partialState?.explicitInput,
-    },
-    output: {
-      ...mockOptionsListOutput,
-      ...partialState?.output,
-    },
-  } as OptionsListReduxState;
+export const mockOptionsListEmbeddable = async (partialState?: {
+  explicitInput?: Partial<OptionsListEmbeddableInput>;
+  componentState?: Partial<OptionsListComponentState>;
+}) => {
+  const optionsListFactoryStub = new OptionsListEmbeddableFactory();
+  const optionsListControlFactory = optionsListFactoryStub as unknown as ControlFactory;
+  optionsListControlFactory.getDefaultInput = () => ({});
 
-  return {
-    actions: {},
-    useEmbeddableDispatch: () => {},
-    useEmbeddableSelector: (selector: any) => selector(mockReduxState),
-  } as unknown as ReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>;
+  // initial component state can be provided by overriding the defaults.
+  const initialComponentState = {
+    ...mockOptionsListComponentState,
+    ...partialState?.componentState,
+  };
+  jest
+    .spyOn(optionsListStateModule, 'getDefaultComponentState')
+    .mockImplementation(() => initialComponentState);
+
+  const mockEmbeddable = (await optionsListControlFactory.create({
+    ...mockOptionsListEmbeddableInput,
+    ...partialState?.explicitInput,
+  })) as OptionsListEmbeddable;
+  mockEmbeddable.getOutput = jest.fn().mockReturnValue(mockOptionsListOutput);
+  return mockEmbeddable;
 };

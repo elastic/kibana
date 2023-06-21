@@ -34,12 +34,12 @@ describe('anomaly_scores', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <AnomalyScoreComponent
-        jobKey="job-key-1"
         startDate={startDate}
         endDate={endDate}
         score={anomalies.anomalies[0]}
         interval="day"
         narrowDateRange={narrowDateRange}
+        jobName={'job-1'}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -49,12 +49,12 @@ describe('anomaly_scores', () => {
     const wrapper = mount(
       <TestProviders>
         <AnomalyScoreComponent
-          jobKey="job-key-1"
           startDate={startDate}
           endDate={endDate}
           score={anomalies.anomalies[0]}
           interval="day"
           narrowDateRange={narrowDateRange}
+          jobName={'job-1'}
         />
       </TestProviders>
     );
@@ -65,12 +65,12 @@ describe('anomaly_scores', () => {
     const wrapper = mount(
       <TestProviders>
         <AnomalyScoreComponent
-          jobKey="job-key-1"
           startDate={startDate}
           endDate={endDate}
           score={anomalies.anomalies[0]}
           interval="day"
           narrowDateRange={narrowDateRange}
+          jobName={'job-1'}
         />
       </TestProviders>
     );

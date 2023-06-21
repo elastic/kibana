@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { SavedSearch, getSavedSearchUrl } from '@kbn/discover-plugin/public';
+import { SavedSearch, getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -167,11 +167,11 @@ function SidebarTitle({ savedSearch, vis, isLinkedSearch, eventEmitter }: Sideba
         title={i18n.translate('visDefaultEditor.sidebar.indexPatternAriaLabel', {
           defaultMessage: 'Index pattern: {title}',
           values: {
-            title: vis.data.indexPattern!.getName(),
+            title: vis.data?.indexPattern?.getName(),
           },
         })}
       >
-        {vis.data.indexPattern!.getName()}
+        {vis.data?.indexPattern?.getName()}
       </h2>
     </EuiTitle>
   ) : (

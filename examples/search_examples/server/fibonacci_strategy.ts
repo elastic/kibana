@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ISearchStrategy } from '@kbn/data-plugin/server';
+import { of } from 'rxjs';
 import { FibonacciRequest, FibonacciResponse } from '../common/types';
 
 export const fibonacciStrategyProvider = (): ISearchStrategy<
@@ -17,7 +18,7 @@ export const fibonacciStrategyProvider = (): ISearchStrategy<
   const responseMap = new Map<string, [number[], number, number]>();
   return {
     search: (request: FibonacciRequest) => {
-      const id = request.id ?? uuid();
+      const id = request.id ?? uuidv4();
       const [sequence, total, started] = responseMap.get(id) ?? [
         [],
         request.params?.n ?? 0,
@@ -40,10 +41,7 @@ export const fibonacciStrategyProvider = (): ISearchStrategy<
       const took = Date.now() - started;
       const values = sequence.slice(0, loaded);
 
-      // Usually we'd do something like "of()" but for some reason it breaks in tests with the error
-      // "You provided an invalid object where a stream was expected." which is why we have to cast
-      // down below as well
-      return [{ id, loaded, total, isRunning, isPartial, rawResponse: { took, values } }];
+      return of({ id, loaded, total, isRunning, isPartial, rawResponse: { took, values } });
     },
     cancel: async (id: string) => {
       responseMap.delete(id);

@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { validateDurationSchema, parseDuration } from './lib';
 
+export const DEFAULT_MAX_ALERTS = 1000;
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const ruleTypeSchema = schema.object({
   id: schema.string(),
@@ -44,7 +45,7 @@ const rulesSchema = schema.object({
       connectorTypeOverrides: schema.maybe(schema.arrayOf(connectorTypeSchema)),
     }),
     alerts: schema.object({
-      max: schema.number({ defaultValue: 1000 }),
+      max: schema.number({ defaultValue: DEFAULT_MAX_ALERTS }),
     }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
@@ -62,6 +63,7 @@ export const configSchema = schema.object({
   maxEphemeralActionsPerAlert: schema.number({
     defaultValue: DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT,
   }),
+  enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,
 });

@@ -10,11 +10,10 @@ import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createTopNFunctions } from '../../common/functions';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
 import { createCommonFilter } from './query';
+import { searchStackTraces } from './search_stacktraces';
 
 const querySchema = schema.object({
   timeFrom: schema.number(),
@@ -26,11 +25,16 @@ const querySchema = schema.object({
 
 type QuerySchemaType = TypeOf<typeof querySchema>;
 
-export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegisterParameters) {
+export function registerTopNFunctionsSearchRoute({
+  router,
+  logger,
+  services: { createProfilingEsClient },
+}: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
     {
       path: paths.TopNFunctions,
+      options: { tags: ['access:profiling'] },
       validate: {
         query: querySchema,
       },
@@ -41,21 +45,20 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
 
         const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
         const esClient = await getClient(context);
+        const profilingElasticsearchClient = createProfilingEsClient({ request, esClient });
         const filter = createCommonFilter({
           timeFrom,
           timeTo,
           kuery,
         });
 
-        const { stackFrames, stackTraceEvents, stackTraces, executables } =
-          await getExecutablesAndStackTraces({
-            client: createProfilingEsClient({ request, esClient }),
+        const { stackTraceEvents, stackTraces, executables, stackFrames, samplingRate } =
+          await searchStackTraces({
+            client: profilingElasticsearchClient,
             filter,
-            logger,
             sampleSize: targetSampleSize,
           });
 
-        const t0 = Date.now();
         const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
           return createTopNFunctions(
             stackTraceEvents,
@@ -63,18 +66,21 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
             stackFrames,
             executables,
             startIndex,
-            endIndex
+            endIndex,
+            samplingRate
           );
         });
-        logger.info(`creating topN functions took ${Date.now() - t0} ms`);
-
-        logger.info('returning payload response to client');
 
         return response.ok({
           body: topNFunctions,
         });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching TopN functions',
+        });
       }
     }
   );

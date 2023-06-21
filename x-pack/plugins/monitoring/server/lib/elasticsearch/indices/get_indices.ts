@@ -7,13 +7,9 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
-// @ts-ignore
 import { createQuery } from '../../create_query';
-// @ts-ignore
 import { calculateRate } from '../../calculate_rate';
-// @ts-ignore
 import { getUnassignedShards } from '../shards';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';

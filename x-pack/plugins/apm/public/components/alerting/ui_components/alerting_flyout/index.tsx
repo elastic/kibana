@@ -52,7 +52,7 @@ export function AlertingFlyout(props: Props) {
   const addAlertFlyout = useMemo(
     () =>
       ruleType &&
-      services.triggersActionsUi.getAddAlertFlyout({
+      services.triggersActionsUi.getAddRuleFlyout({
         consumer: APM_SERVER_FEATURE_ID,
         onClose: onCloseAddFlyout,
         ruleTypeId: ruleType,

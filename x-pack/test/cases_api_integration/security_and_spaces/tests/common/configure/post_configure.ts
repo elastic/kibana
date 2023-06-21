@@ -18,7 +18,7 @@ import {
   createConfiguration,
   getConfiguration,
   ensureSavedObjectIsAuthorized,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 
 import {
   secOnly,
@@ -93,6 +93,11 @@ export default ({ getService }: FtrProviderContext): void => {
           action_type: 'overwrite',
           source: 'description',
           target: 'description',
+        },
+        {
+          action_type: 'overwrite',
+          source: 'tags',
+          target: 'labels',
         },
         {
           action_type: 'append',

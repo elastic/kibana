@@ -9,8 +9,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { mlTimefilterRefresh$, Refresh } from '@kbn/ml-date-picker';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { dataVisualizerRefresh$, Refresh } from '../../services/timefilter_refresh_service';
 
 export interface DataVisualizerDataViewManagementProps {
   /**
@@ -56,7 +56,7 @@ export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewMa
         const refresh: Refresh = {
           lastRefresh: Date.now(),
         };
-        dataVisualizerRefresh$.next(refresh);
+        mlTimefilterRefresh$.next(refresh);
       },
     });
   };

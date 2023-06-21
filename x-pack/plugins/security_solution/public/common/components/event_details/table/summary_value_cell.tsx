@@ -7,7 +7,11 @@
 
 import React from 'react';
 
-import { ActionCell } from './action_cell';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../cell_actions';
 import { FieldValueCell } from './field_value_cell';
 import type { AlertSummaryRow } from '../helpers';
 import { hasHoverOrRowActions } from '../helpers';
@@ -40,16 +44,17 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
         values={values}
       />
       {scopeId !== TimelineId.active && !isReadOnly && hoverActionsEnabled && (
-        <ActionCell
-          contextId={scopeId}
-          data={data}
-          eventId={eventId}
-          fieldFromBrowserField={fieldFromBrowserField}
-          linkValue={linkValue}
-          scopeId={scopeId}
-          values={values}
-          applyWidthAndPadding={false}
-          hideAddToTimeline={false}
+        <SecurityCellActions
+          field={{
+            name: data.field,
+            value: values,
+            type: data.type,
+            aggregatable: fieldFromBrowserField?.aggregatable,
+          }}
+          triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+          mode={CellActionsMode.INLINE}
+          visibleCellActions={3}
+          metadata={{ scopeId }}
         />
       )}
     </>

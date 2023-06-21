@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RawIndicatorFieldId } from '../types';
+import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { unwrapValue } from './unwrap_value';
 
 describe('unwrapValue()', () => {
@@ -17,5 +17,9 @@ describe('unwrapValue()', () => {
     expect(
       unwrapValue({ fields: { [RawIndicatorFieldId.Type]: ['ip'] } }, RawIndicatorFieldId.Type)
     ).toEqual('ip');
+
+    expect(
+      unwrapValue({ fields: { [RawIndicatorFieldId.Type]: [{}] } }, RawIndicatorFieldId.Type)
+    ).toEqual(null);
   });
 });

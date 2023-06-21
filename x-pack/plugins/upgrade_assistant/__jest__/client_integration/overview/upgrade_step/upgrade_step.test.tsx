@@ -57,7 +57,7 @@ describe('Overview - Upgrade Step', () => {
       expect(exists('upgradeSetupDocsLink')).toBe(true);
       expect(exists('upgradeSetupCloudLink')).toBe(true);
 
-      expect(find('upgradeSetupCloudLink').props().disabled).toBe(false);
+      expect(find('upgradeSetupCloudLink').props().disabled).toBeFalsy();
       expect(find('upgradeSetupCloudLink').props().href).toBe(
         `${DEPLOYMENT_URL}?show_upgrade=true`
       );

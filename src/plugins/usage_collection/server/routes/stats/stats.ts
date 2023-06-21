@@ -8,25 +8,18 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import defaultsDeep from 'lodash/defaultsDeep';
 import { firstValueFrom, Observable } from 'rxjs';
 
 import {
   ElasticsearchClient,
   IRouter,
   type MetricsServiceSetup,
-  SavedObjectsClientContract,
   ServiceStatus,
   ServiceStatusLevels,
 } from '@kbn/core/server';
 import { CollectorSet } from '../../collector';
+import { Stats } from '../../../common/types';
 const SNAPSHOT_REGEX = /-snapshot/i;
-
-interface UsageObject {
-  kibana?: UsageObject;
-  xpack?: UsageObject;
-  [key: string]: unknown | UsageObject;
-}
 
 export function registerStatsRoute({
   router,
@@ -51,14 +44,6 @@ export function registerStatsRoute({
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
 }) {
-  const getUsage = async (
-    esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract
-  ): Promise<UsageObject> => {
-    const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient);
-    return collectorSet.toObject(usage);
-  };
-
   const getClusterUuid = async (asCurrentUser: ElasticsearchClient): Promise<string> => {
     const body = await asCurrentUser.info({ filter_path: 'cluster_uuid' });
     const { cluster_uuid: uuid } = body;
@@ -77,69 +62,28 @@ export function registerStatsRoute({
           extended: schema.oneOf([schema.literal(''), schema.boolean()], { defaultValue: false }),
           legacy: schema.oneOf([schema.literal(''), schema.boolean()], { defaultValue: false }),
           exclude_usage: schema.oneOf([schema.literal(''), schema.boolean()], {
-            defaultValue: false,
+            defaultValue: true,
           }),
         }),
       },
     },
     async (context, req, res) => {
-      const isExtended = req.query.extended === '' || req.query.extended;
-      const isLegacy = req.query.legacy === '' || req.query.legacy;
-      const shouldGetUsage = req.query.exclude_usage === false;
+      const requestQuery: Stats.v1.StatsHTTPQuery = req.query;
+      const isExtended = requestQuery.extended === '' || requestQuery.extended;
+      const isLegacy = requestQuery.legacy === '' || requestQuery.legacy;
 
       let extended;
       if (isExtended) {
         const core = await context.core;
         const { asCurrentUser } = core.elasticsearch.client;
-        const savedObjectsClient = core.savedObjects.client;
+        // as of https://github.com/elastic/kibana/pull/151082, usage will always be an empty object.
 
-        const [usage, clusterUuid] = await Promise.all([
-          shouldGetUsage
-            ? getUsage(asCurrentUser, savedObjectsClient)
-            : Promise.resolve<UsageObject>({}),
-          getClusterUuid(asCurrentUser),
-        ]);
-
-        let modifiedUsage = usage;
-        if (isLegacy) {
-          // In an effort to make telemetry more easily augmented, we need to ensure
-          // we can passthrough the data without every part of the process needing
-          // to know about the change; however, to support legacy use cases where this
-          // wasn't true, we need to be backwards compatible with how the legacy data
-          // looked and support those use cases here.
-          modifiedUsage = Object.keys(usage).reduce((accum, usageKey) => {
-            if (usageKey === 'kibana') {
-              accum = {
-                ...accum,
-                ...usage[usageKey],
-              };
-            } else if (usageKey === 'reporting') {
-              accum = {
-                ...accum,
-                xpack: {
-                  ...accum.xpack,
-                  reporting: usage[usageKey],
-                },
-              };
-            } else {
-              // I don't think we need to it this for the above conditions, but do it for most as it will
-              // match the behavior done in monitoring/bulk_uploader
-              defaultsDeep(accum, { [usageKey]: usage[usageKey] });
-            }
-
-            return accum;
-          }, {} as UsageObject);
-
-          extended = {
-            usage: modifiedUsage,
-            clusterUuid,
-          };
-        } else {
-          extended = collectorSet.toApiFieldNames({
-            usage: modifiedUsage,
-            clusterUuid,
-          });
-        }
+        const clusterUuid = await getClusterUuid(asCurrentUser);
+        const extendedClusterUuid = isLegacy ? { clusterUuid } : { cluster_uuid: clusterUuid };
+        extended = {
+          usage: {},
+          ...extendedClusterUuid,
+        };
       }
 
       // Guaranteed to resolve immediately due to replay effect on getOpsMetrics$
@@ -165,17 +109,19 @@ export function registerStatsRoute({
         collection_interval_in_millis: metrics.collectionInterval,
       });
 
+      const body: Stats.v1.StatsHTTPBodyTyped = {
+        ...kibanaStats,
+        ...extended,
+      };
+
       return res.ok({
-        body: {
-          ...kibanaStats,
-          ...extended,
-        },
+        body,
       });
     }
   );
 }
 
-const ServiceStatusToLegacyState: Record<string, string> = {
+const ServiceStatusToLegacyState: Stats.v1.KibanaServiceStatus = {
   [ServiceStatusLevels.critical.toString()]: 'red',
   [ServiceStatusLevels.unavailable.toString()]: 'red',
   [ServiceStatusLevels.degraded.toString()]: 'yellow',

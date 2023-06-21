@@ -10,6 +10,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
 import { Connector, ConnectorDocument } from '../../../common/types/connectors';
+import { OptimisticConcurrency } from '../../../common/types/util_types';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
 
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
@@ -18,14 +19,18 @@ import { fetchAll } from '../fetch_all';
 export const fetchConnectorById = async (
   client: IScopedClusterClient,
   connectorId: string
-): Promise<Connector | undefined> => {
+): Promise<OptimisticConcurrency<Connector> | undefined> => {
   try {
     const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
       id: connectorId,
       index: CONNECTORS_INDEX,
     });
     return connectorResult._source
-      ? { ...connectorResult._source, id: connectorResult._id }
+      ? {
+          primaryTerm: connectorResult._primary_term,
+          seqNo: connectorResult._seq_no,
+          value: { ...connectorResult._source, id: connectorResult._id },
+        }
       : undefined;
   } catch (error) {
     if (isIndexNotFoundException(error)) {
@@ -44,11 +49,10 @@ export const fetchConnectorByIndexName = async (
       index: CONNECTORS_INDEX,
       query: { term: { index_name: indexName } },
     });
+    // Because we cannot guarantee that the index has been refreshed and is giving us the most recent source
+    // we need to fetch the source with a direct get from the index, which will always be up to date
     const result = connectorResult.hits.hits[0]?._source
-      ? {
-          ...connectorResult.hits.hits[0]._source,
-          id: connectorResult.hits.hits[0]._id,
-        }
+      ? (await fetchConnectorById(client, connectorResult.hits.hits[0]._id))?.value
       : undefined;
     return result;
   } catch (error) {

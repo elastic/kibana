@@ -24,6 +24,22 @@ Each span has a type and is defined by a different color in the timeline/waterfa
 image::apm/images/apm-span-detail.png[Example view of a span detail in the APM app in Kibana]
 
 [float]
+[[trace-sample-investigate]]
+==== Investigate
+
+The trace sample timeline features an **Investigate** button which provides a quick way to jump
+to other areas of the Elastic Observability UI while maintaining the context of the currently selected trace sample.
+For example, quickly view:
+
+* logs and metrics for the selected pod
+* logs and metrics for the selected host
+* trace logs for the selected `trace.id`
+* uptime status of the selected domain
+* the <<service-maps,service map>> filtered by the selected trace
+* the selected transaction in <<discover,Discover>>
+* your <<custom-links,custom links>>
+
+[float]
 [[distributed-tracing]]
 ==== Distributed tracing
 

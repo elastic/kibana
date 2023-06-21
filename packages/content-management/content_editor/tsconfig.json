@@ -1,0 +1,30 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "jsx": "react",
+    "esModuleInterop": true,
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
+      "@emotion/react/types/css-prop"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/core-overlays-browser",
+    "@kbn/test-jest-helpers",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

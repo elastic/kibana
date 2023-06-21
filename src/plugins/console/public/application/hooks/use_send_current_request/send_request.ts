@@ -8,6 +8,7 @@
 
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { KIBANA_API_PREFIX } from '../../../../common/constants';
 import { extractWarningMessages } from '../../../lib/utils';
 import { send } from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types';
@@ -34,6 +35,25 @@ export interface RequestResult<V = unknown> {
 
 const getContentType = (response: Response | undefined) =>
   (response?.headers.get('Content-Type') as BaseResponseType) ?? '';
+
+const extractStatusCodeAndText = (response: Response | undefined, path: string) => {
+  const isKibanaApiRequest = path.startsWith(KIBANA_API_PREFIX);
+  // Kibana API requests don't go through the proxy, so we can use the response status code and text.
+  if (isKibanaApiRequest) {
+    return {
+      statusCode: response?.status ?? 500,
+      statusText: response?.statusText ?? 'error',
+    };
+  }
+
+  // For ES requests, we need to extract the status code and text from the response
+  // headers, due to the way the proxy set up to avoid mirroring the status code which could be 401
+  // and trigger a login prompt. See for more details: https://github.com/elastic/kibana/issues/140536
+  const statusCode = parseInt(response?.headers.get('x-console-proxy-status-code') ?? '500', 10);
+  const statusText = response?.headers.get('x-console-proxy-status-text') ?? 'error';
+
+  return { statusCode, statusText };
+};
 
 let CURRENT_REQ_ID = 0;
 export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
@@ -79,59 +99,55 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           asResponse: true,
         });
 
+        const { statusCode, statusText } = extractStatusCodeAndText(response, path);
+
         if (reqId !== CURRENT_REQ_ID) {
           // Skip if previous request is not resolved yet. This can happen when issuing multiple requests at the same time and with slow networks
           return;
         }
 
         if (response) {
-          const isSuccess =
-            // Things like DELETE index where the index is not there are OK.
-            (response.status >= 200 && response.status < 300) || response.status === 404;
-
-          if (isSuccess) {
-            let value;
-            // check if object is ArrayBuffer
-            if (body instanceof ArrayBuffer) {
-              value = body;
-            } else {
-              value = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
-            }
-
-            const warnings = response.headers.get('warning');
-            if (warnings) {
-              const warningMessages = extractWarningMessages(warnings);
-              value = warningMessages.join('\n') + '\n' + value;
-            }
-
-            if (isMultiRequest) {
-              value = `# ${req.method} ${req.url} ${response.status} ${response.statusText}\n${value}`;
-            }
-
-            results.push({
-              response: {
-                timeMs: Date.now() - startTime,
-                statusCode: response.status,
-                statusText: response.statusText,
-                contentType: getContentType(response),
-                value,
-              },
-              request: {
-                data,
-                method,
-                path,
-              },
-            });
-
-            // single request terminate via sendNextRequest as well
-            await sendNextRequest();
+          let value;
+          // check if object is ArrayBuffer
+          if (body instanceof ArrayBuffer) {
+            value = body;
+          } else {
+            value = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
           }
+
+          const warnings = response.headers.get('warning');
+          if (warnings) {
+            const warningMessages = extractWarningMessages(warnings);
+            value = warningMessages.join('\n') + '\n' + value;
+          }
+
+          if (isMultiRequest) {
+            value = `# ${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
+          }
+
+          results.push({
+            response: {
+              timeMs: Date.now() - startTime,
+              statusCode,
+              statusText,
+              contentType: getContentType(response),
+              value,
+            },
+            request: {
+              data,
+              method,
+              path,
+            },
+          });
+
+          // single request terminate via sendNextRequest as well
+          await sendNextRequest();
         }
       } catch (error) {
         let value;
         const { response, body } = error as IHttpFetchError;
-        const statusCode = response?.status ?? 500;
-        const statusText = response?.statusText ?? 'error';
+
+        const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
         if (body) {
           value = JSON.stringify(body, null, 2);

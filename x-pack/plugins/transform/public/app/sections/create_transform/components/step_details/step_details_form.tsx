@@ -24,11 +24,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { integerRangeMinus1To100Validator } from '../../../transform_management/components/edit_transform_flyout/use_edit_transform_flyout';
+import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
 import {
   isEsIndices,
   isEsIngestPipelines,
@@ -47,16 +47,17 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
 import { StepDetailsTimeField } from './step_details_time_field';
 import {
-  getPivotQuery,
+  getTransformConfigQuery,
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
 import { EsIndexName, DataViewTitle } from './common';
 import {
   continuousModeDelayValidator,
+  integerRangeMinus1To100Validator,
   retentionPolicyMaxAgeValidator,
   transformFrequencyValidator,
-  transformSettingsMaxPageSearchSizeValidator,
+  transformSettingsPageSearchSizeValidator,
 } from '../../../../common/validators';
 import { StepDefineExposedState } from '../step_define/common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
@@ -132,10 +133,10 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       // use an IIFE to avoid returning a Promise to useEffect.
       (async function () {
         const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
-        const pivotQuery = getPivotQuery(searchQuery);
+        const transformConfigQuery = getTransformConfigQuery(searchQuery);
         const previewRequest = getPreviewTransformRequestBody(
-          searchItems.dataView.title,
-          pivotQuery,
+          searchItems.dataView,
+          transformConfigQuery,
           partialPreviewRequest,
           stepDefineState.runtimeMappings
         );
@@ -278,7 +279,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     // Reset retention policy settings when the user disables the whole option
     useEffect(() => {
       if (!isRetentionPolicyEnabled) {
-        setRetentionPolicyDateField(isRetentionPolicyAvailable ? dateFieldNames[0] : '');
+        setRetentionPolicyDateField(
+          isRetentionPolicyAvailable ? dataViewAvailableTimeFields[0] : ''
+        );
         setRetentionPolicyMaxAge('');
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -296,14 +299,16 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [transformFrequency, setTransformFrequency] = useState(defaults.transformFrequency);
     const isTransformFrequencyValid = transformFrequencyValidator(transformFrequency);
 
-    const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState(
-      defaults.transformSettingsMaxPageSearchSize
-    );
+    const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState<
+      number | undefined
+    >(defaults.transformSettingsMaxPageSearchSize);
     const [transformSettingsDocsPerSecond] = useState(defaults.transformSettingsDocsPerSecond);
 
-    const isTransformSettingsMaxPageSearchSizeValid = transformSettingsMaxPageSearchSizeValidator(
+    const transformSettingsMaxPageSearchSizeErrors = transformSettingsPageSearchSizeValidator(
       transformSettingsMaxPageSearchSize
     );
+    const isTransformSettingsMaxPageSearchSizeValid =
+      transformSettingsMaxPageSearchSizeErrors.length === 0;
 
     const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState<
       string | number | undefined
@@ -524,7 +529,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           {stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
             <>
               <EuiSpacer size={'m'} />
-              <EuiCallOut color="warning" iconType="alert" size="m">
+              <EuiCallOut color="warning" iconType="warning" size="m">
                 <p>
                   <FormattedMessage
                     id="xpack.transform.stepDetailsForm.destinationIndexWarning"
@@ -625,7 +630,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map((text: string) => ({ text }))}
+                  options={dateFieldNames.map((text: string) => ({ text, value: text }))}
                   value={continuousModeDateField}
                   onChange={(e) => setContinuousModeDateField(e.target.value)}
                   data-test-subj="transformContinuousDateFieldSelect"
@@ -713,7 +718,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map((text: string) => ({ text }))}
+                  options={dataViewAvailableTimeFields.map((text: string) => ({ text }))}
                   value={retentionPolicyDateField}
                   onChange={(e) => setRetentionPolicyDateField(e.target.value)}
                   data-test-subj="transformRetentionPolicyDateFieldSelect"
@@ -729,11 +734,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 isInvalid={!retentionPolicyMaxAgeEmpty && !isRetentionPolicyMaxAgeValid}
                 error={
                   !retentionPolicyMaxAgeEmpty &&
-                  !isRetentionPolicyMaxAgeValid && [
-                    i18n.translate('xpack.transform.stepDetailsForm.retentionPolicyMaxAgeError', {
-                      defaultMessage: 'Invalid max age format. Minimum of 60s required.',
-                    }),
-                  ]
+                  !isRetentionPolicyMaxAgeValid && [retentionPolicyMaxAgeInvalidErrorMessage]
                 }
                 helpText={i18n.translate(
                   'xpack.transform.stepDetailsForm.retentionPolicyMaxAgeHelpText',
@@ -793,7 +794,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               }
               helpText={i18n.translate('xpack.transform.stepDetailsForm.frequencyHelpText', {
                 defaultMessage:
-                  'The interval to check for changes in source indices when the transformation runs continuously.',
+                  'The interval to check for changes in source indices when the transform runs continuously.',
               })}
             >
               <EuiFieldText
@@ -819,14 +820,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 defaultMessage: 'Maximum page search size',
               })}
               isInvalid={!isTransformSettingsMaxPageSearchSizeValid}
-              error={
-                !isTransformSettingsMaxPageSearchSizeValid && [
-                  i18n.translate('xpack.transform.stepDetailsForm.maxPageSearchSizeError', {
-                    defaultMessage:
-                      'max_page_search_size needs to be a number between 10 and 10000.',
-                  }),
-                ]
-              }
+              error={transformSettingsMaxPageSearchSizeErrors}
               helpText={i18n.translate(
                 'xpack.transform.stepDetailsForm.maxPageSearchSizeHelpText',
                 {
@@ -843,10 +837,19 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                     values: { defaultValue: 500 },
                   }
                 )}
-                value={transformSettingsMaxPageSearchSize.toString()}
-                onChange={(e) =>
-                  setTransformSettingsMaxPageSearchSize(parseInt(e.target.value, 10))
+                value={
+                  transformSettingsMaxPageSearchSize
+                    ? transformSettingsMaxPageSearchSize.toString()
+                    : transformSettingsMaxPageSearchSize
                 }
+                onChange={(e) => {
+                  if (e.target.value !== '') {
+                    const parsed = parseInt(e.target.value, 10);
+                    setTransformSettingsMaxPageSearchSize(isFinite(parsed) ? parsed : undefined);
+                  } else {
+                    setTransformSettingsMaxPageSearchSize(undefined);
+                  }
+                }}
                 aria-label={i18n.translate(
                   'xpack.transform.stepDetailsForm.maxPageSearchSizeAriaLabel',
                   {

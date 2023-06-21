@@ -4,15 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { createJourneyScreenshotRoute } from './journey_screenshots';
+import { IKibanaResponse } from '@kbn/core-http-server';
+import { createJourneyScreenshotRoute, ClientContract } from './journey_screenshots';
 import { UMServerLibs } from '../../uptime_server';
 
 describe('journey screenshot route', () => {
   let handlerContext: any;
   beforeEach(() => {
     handlerContext = {
-      uptimeEsClient: jest.fn(),
+      uptimeEsClient: {
+        search: jest.fn().mockResolvedValue({
+          body: {
+            hits: {
+              hits: [],
+            },
+          },
+        }),
+      },
       request: {
         params: {
           checkGroup: 'check_group',
@@ -63,13 +71,27 @@ describe('journey screenshot route', () => {
       totalSteps: 3,
     };
 
+    handlerContext.uptimeEsClient.search = jest.fn().mockResolvedValue({
+      body: {
+        hits: {
+          total: {
+            value: 3,
+          },
+          hits: [],
+        },
+        aggregations: { step: { image: { hits: { hits: [{ _source: mock }] } } } },
+      },
+    });
+
     const route = createJourneyScreenshotRoute({
       requests: {
         getJourneyScreenshot: jest.fn().mockReturnValue(mock),
       },
     } as unknown as UMServerLibs);
 
-    const response = await route.handler(handlerContext as any);
+    const response = (await route.handler(
+      handlerContext as any
+    )) as IKibanaResponse<ClientContract>;
     expect(response.status).toBe(200);
     // @ts-expect-error incomplete implementation for testing
     expect(response.headers).toMatchInlineSnapshot(`
@@ -93,8 +115,20 @@ describe('journey screenshot route', () => {
         },
         type: 'step/screenshot',
       },
-      totalSteps: 3,
     };
+
+    handlerContext.uptimeEsClient.search = jest.fn().mockResolvedValue({
+      body: {
+        hits: {
+          total: {
+            value: 3,
+          },
+          hits: [],
+        },
+        aggregations: { step: { image: { hits: { hits: [{ _source: mock }] } } } },
+      },
+    });
+
     const route = createJourneyScreenshotRoute({
       requests: {
         getJourneyScreenshot: jest.fn().mockReturnValue(mock),
@@ -133,13 +167,26 @@ describe('journey screenshot route', () => {
         type: 'step/screenshot',
       },
     };
+    handlerContext.uptimeEsClient.search = jest.fn().mockResolvedValue({
+      body: {
+        hits: {
+          total: {
+            value: 3,
+          },
+          hits: [],
+        },
+        aggregations: { step: { image: { hits: { hits: [{ _source: mock }] } } } },
+      },
+    });
     const route = createJourneyScreenshotRoute({
       requests: {
         getJourneyScreenshot: jest.fn().mockReturnValue(mock),
       },
     } as unknown as UMServerLibs);
 
-    const response = await route.handler(handlerContext as any);
+    const response = (await route.handler(
+      handlerContext as any
+    )) as IKibanaResponse<ClientContract>;
 
     expect(response.status).toBe(200);
     // @ts-expect-error incomplete implementation for testing

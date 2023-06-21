@@ -15,8 +15,9 @@ import type { FleetConfigType } from '../../config';
 import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
-
 import { appContextService } from '../app_context';
+
+import { isDifferent } from './utils';
 
 export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   const { outputs: outputsOrUndefined } = config;
@@ -44,7 +45,7 @@ export async function ensurePreconfiguredOutputs(
   outputs: PreconfiguredOutput[]
 ) {
   await createOrUpdatePreconfiguredOutputs(soClient, esClient, outputs);
-  await cleanPreconfiguredOutputs(soClient, outputs);
+  await cleanPreconfiguredOutputs(soClient, esClient, outputs);
 }
 
 export async function createOrUpdatePreconfiguredOutputs(
@@ -87,15 +88,24 @@ export async function createOrUpdatePreconfiguredOutputs(
       }
 
       const isCreate = !existingOutput;
+
+      // field in allow edit are not updated through preconfiguration
+      if (!isCreate && output.allow_edit) {
+        for (const key of output.allow_edit) {
+          // @ts-expect-error
+          data[key] = existingOutput[key];
+        }
+      }
+
       const isUpdateWithNewData =
         existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
 
       if (isCreate) {
         logger.debug(`Creating output ${output.id}`);
-        await outputService.create(soClient, data, { id, fromPreconfiguration: true });
+        await outputService.create(soClient, esClient, data, { id, fromPreconfiguration: true });
       } else if (isUpdateWithNewData) {
         logger.debug(`Updating output ${output.id}`);
-        await outputService.update(soClient, id, data, { fromPreconfiguration: true });
+        await outputService.update(soClient, esClient, id, data, { fromPreconfiguration: true });
         // Bump revision of all policies using that output
         if (outputData.is_default || outputData.is_default_monitoring) {
           await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
@@ -109,6 +119,7 @@ export async function createOrUpdatePreconfiguredOutputs(
 
 export async function cleanPreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
   const existingOutputs = await outputService.list(soClient);
@@ -128,6 +139,7 @@ export async function cleanPreconfiguredOutputs(
       logger.info(`Updating default preconfigured output ${output.id} is no longer preconfigured`);
       await outputService.update(
         soClient,
+        esClient,
         output.id,
         { is_preconfigured: false },
         {
@@ -138,6 +150,7 @@ export async function cleanPreconfiguredOutputs(
       logger.info(`Updating default preconfigured output ${output.id} is no longer preconfigured`);
       await outputService.update(
         soClient,
+        esClient,
         output.id,
         { is_preconfigured: false },
         {
@@ -149,17 +162,6 @@ export async function cleanPreconfiguredOutputs(
       await outputService.delete(soClient, output.id, { fromPreconfiguration: true });
     }
   }
-}
-
-function isDifferent(val1: any, val2: any) {
-  if (
-    (val1 === null || typeof val1 === 'undefined') &&
-    (val2 === null || typeof val2 === 'undefined')
-  ) {
-    return false;
-  }
-
-  return !isEqual(val1, val2);
 }
 
 function isPreconfiguredOutputDifferentFromCurrent(
@@ -187,6 +189,8 @@ function isPreconfiguredOutputDifferentFromCurrent(
       existingOutput.ca_trusted_fingerprint,
       preconfiguredOutput.ca_trusted_fingerprint
     ) ||
-    isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml)
+    isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
+    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
+    isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? [])
   );
 }

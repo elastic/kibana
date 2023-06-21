@@ -1,0 +1,108 @@
+{
+  "attributes": {
+    "fieldAttrs": "{\"products.manufacturer\":{\"count\":1},\"products.price\":{\"count\":1},\"products.product_name\":{\"count\":1},\"total_quantity\":{\"count\":1}}",
+    "fieldFormatMap": "{\"taxful_total_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.[00]\"}},\"products.price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"taxless_total_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.taxless_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.taxful_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.min_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.base_unit_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.base_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}}}",
+    "fields": "[]",
+    "name": "Kibana Sample Data eCommerce",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "order_date",
+    "title": "kibana_sample_data_ecommerce",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-31T12:48:03.382Z",
+  "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-10-31T12:48:03.382Z",
+  "version": "WzM1NCwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "title": "[eCommerce] Sold Products per Day",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"[eCommerce] Sold Products per Day\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"entire_time_range\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"gauge\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"},{\"id\":\"fd1e1b90-e4e3-11eb-8234-cb7bfd534fce\",\"type\":\"math\",\"variables\":[{\"id\":\"00374270-e4e4-11eb-8234-cb7bfd534fce\",\"name\":\"c\",\"field\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"script\":\"params.c / (params._interval / 1000 / 60 / 60 / 24)\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"0.0\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Trxns / day\",\"split_color_mode\":\"gradient\",\"value_template\":\"\"}],\"time_field\":\"order_date\",\"interval\":\"1d\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"gauge_color_rules\":[{\"value\":150,\"id\":\"6da070c0-b891-11e8-b645-195edeb9de84\",\"gauge\":\"rgba(104,188,0,1)\",\"operator\":\"gte\"},{\"value\":150,\"id\":\"9b0cdbc0-b891-11e8-b645-195edeb9de84\",\"gauge\":\"rgba(244,78,59,1)\",\"operator\":\"lt\"}],\"gauge_width\":\"15\",\"gauge_inner_width\":\"10\",\"gauge_style\":\"half\",\"filter\":\"\",\"gauge_max\":\"300\",\"use_kibana_indexes\":true,\"hide_last_value_indicator\":true,\"tooltip_mode\":\"show_all\",\"drop_last_bucket\":0,\"isModelInvalid\":false,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-31T12:48:03.382Z",
+  "id": "b80e6540-b891-11e8-a6d9-e546fe2bba5f",
+  "migrationVersion": {
+    "visualization": "8.5.0"
+  },
+  "references": [
+    {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2022-10-31T12:48:03.382Z",
+  "version": "WzM1NiwxXQ=="
+}
+
+{
+  "attributes": {
+    "controlGroupInput": {
+      "chainingSystem": "HIERARCHICAL",
+      "controlStyle": "oneLine",
+      "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}",
+      "panelsJSON": "{\"1ee1617f-fd8e-45e4-bc6a-d5736710ea20\":{\"order\":0,\"width\":\"small\",\"grow\":true,\"type\":\"optionsListControl\",\"explicitInput\":{\"title\":\"Manufacturer\",\"fieldName\":\"manufacturer.keyword\",\"parentFieldName\":\"manufacturer\",\"id\":\"1ee1617f-fd8e-45e4-bc6a-d5736710ea20\",\"enhancements\":{}}},\"afa9fa0f-a002-41a5-bab9-b738316d2590\":{\"order\":1,\"width\":\"small\",\"grow\":true,\"type\":\"optionsListControl\",\"explicitInput\":{\"title\":\"Category\",\"fieldName\":\"category.keyword\",\"parentFieldName\":\"category\",\"id\":\"afa9fa0f-a002-41a5-bab9-b738316d2590\",\"enhancements\":{}}},\"d3f766cb-5f96-4a12-8d3c-034e08be8855\":{\"order\":2,\"width\":\"small\",\"grow\":true,\"type\":\"rangeSliderControl\",\"explicitInput\":{\"title\":\"Quantity\",\"fieldName\":\"total_quantity\",\"id\":\"d3f766cb-5f96-4a12-8d3c-034e08be8855\",\"enhancements\":{}}}}"
+    },
+    "description": "Analyze mock eCommerce orders and revenue",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"version\":\"8.6.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":19,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_7\"}]",
+    "refreshInterval": {
+      "pause": true,
+      "value": 0
+    },
+    "timeTo": "2022-10-25T20:00:00.000Z",
+    "timeFrom": "2022-10-18T20:00:00.000Z",
+    "timeRestore": true,
+    "title": "[eCommerce] TSVB Gauge Only Dashboard",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-31T12:51:08.112Z",
+  "id": "b05a8ee0-591a-11ed-8d12-9d4a72794439",
+  "migrationVersion": {
+    "dashboard": "8.6.0"
+  },
+  "references": [
+    {
+      "id": "b80e6540-b891-11e8-a6d9-e546fe2bba5f",
+      "name": "7:panel_7",
+      "type": "visualization"
+    },
+    {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "controlGroup_1ee1617f-fd8e-45e4-bc6a-d5736710ea20:optionsListDataView",
+      "type": "index-pattern"
+    },
+    {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "controlGroup_afa9fa0f-a002-41a5-bab9-b738316d2590:optionsListDataView",
+      "type": "index-pattern"
+    },
+    {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "controlGroup_d3f766cb-5f96-4a12-8d3c-034e08be8855:rangeSliderDataView",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2022-10-31T12:51:08.112Z",
+  "version": "WzQ2MywxXQ=="
+}

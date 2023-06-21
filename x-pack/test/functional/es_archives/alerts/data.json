@@ -14,7 +14,7 @@
         "createdAt": "2020-06-17T15:35:38.497Z",
         "createdBy": "elastic",
         "enabled": true,
-        "muteAll": false,
+        "muteAll": true,
         "mutedInstanceIds": [
         ],
         "name": "always-firing-alert",
@@ -1009,16 +1009,21 @@
               "interval":"1m"
            },
            "enabled":true,
-           "actions":[
-              
-           ],
-           "throttle":null,
+           "actions": [{
+              "actionRef": "action_1",
+              "actionTypeId": ".slack",
+              "group": "default",
+              "params": {
+                "message": "something happened!"
+              }
+            }],
+           "throttle":"1h",
            "apiKeyOwner":null,
            "apiKey":null,
            "createdBy":"elastic",
            "updatedBy":"elastic",
            "createdAt":"2021-07-27T20:42:55.896Z",
-           "muteAll":false,
+           "muteAll":true,
            "mutedInstanceIds":[
               
            ],
@@ -1230,5 +1235,239 @@
       "type": "alert",
       "updated_at": "2022-08-24T19:05:50.159Z"
     }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:8370ffd2-f2db-49dc-9741-92c657189b9b",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+          "alertTypeId": "example.always-firing",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "alerts",
+          "createdAt": "2022-08-24T19:02:30.889Z",
+          "createdBy": "elastic",
+          "enabled": false,
+          "muteAll": false,
+          "mutedInstanceIds": [],
+          "name": "Test rule migration with successful execution status and monitoring",
+          "params": {},
+          "schedule": {
+              "interval": "1m"
+          },
+          "scheduledTaskId": null,
+          "tags": [],
+          "throttle": null,
+          "updatedBy": "elastic",
+          "isSnoozedUntil": "2022-08-24T19:05:49.817Z",
+          "executionStatus": {
+            "status": "ok",
+            "lastExecutionDate": "2022-08-24T19:05:49.817Z",
+            "lastDuration": 60000
+          },
+          "monitoring": {
+            "execution": {
+              "history": [{
+                "duration": 60000,
+                "success": true,
+                "timestamp": "2022-08-24T19:05:49.817Z"
+              }],
+              "calculated_metrics": {
+                "success_ratio": 1,
+                "p50": 0,
+                "p95": 60000,
+                "p99": 60000
+              }
+            }
+          }
+      },
+      "migrationVersion": {
+          "alert": "8.0.1"
+      },
+      "references": [
+      ],
+      "type": "alert",
+      "updated_at": "2022-11-01T19:05:50.159Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:c87707ac-7328-47f7-b212-2cb40a4fc9b9",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+          "alertTypeId": "example.always-firing",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "alerts",
+          "createdAt": "2022-08-24T19:02:30.889Z",
+          "createdBy": "elastic",
+          "enabled": false,
+          "muteAll": false,
+          "mutedInstanceIds": [],
+          "name": "Test rule migration with warning execution status",
+          "params": {},
+          "schedule": {
+              "interval": "1m"
+          },
+          "scheduledTaskId": null,
+          "tags": [],
+          "throttle": null,
+          "updatedBy": "elastic",
+          "isSnoozedUntil": "2022-08-24T19:05:49.817Z",
+          "executionStatus": {
+            "status": "warning",
+            "lastExecutionDate": "2022-08-24T19:05:49.817Z",
+            "lastDuration": 60000,
+            "warning": {
+              "reason": "warning reason",
+              "message": "warning message"
+            }
+          },
+          "monitoring": {
+            "execution": {
+              "history": [{
+                "duration": 60000,
+                "success": true,
+                "timestamp": "2022-08-24T19:05:49.817Z"
+              }],
+              "calculated_metrics": {
+                "success_ratio": 1,
+                "p50": 0,
+                "p95": 60000,
+                "p99": 60000
+              }
+            }
+          }
+      },
+      "migrationVersion": {
+          "alert": "8.0.1"
+      },
+      "references": [
+      ],
+      "type": "alert",
+      "updated_at": "2022-11-01T19:05:50.159Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:8bd01ff0-9d84-11ed-994d-f1971f849da5",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "Old Log threshold rule",
+        "alertTypeId": "logs.alert.document.count",
+        "consumer": "logs",
+        "params": {
+          "timeSize": 5,
+          "timeUnit": "m",
+          "count": {
+            "value": 75,
+            "comparator": "more than"
+          },
+          "criteria": [
+            {
+              "field": "log.level",
+              "comparator": "equals",
+              "value": "error"
+            }
+          ]
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2023-01-26T14:20:13.449Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "8bd01ff0-9d84-11ed-994d-f1971f849da5",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "references": [],
+      "migrationVersion": {
+        "alert": "8.0.1"
+      }
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+     "id":"alert:88bc8c21-07ba-42eb-ad9c-06820275ac10",
+     "index":".kibana_1",
+     "source":{
+        "alert":{
+           "name":"Test unmuting of a custom security rule",
+           "alertTypeId":"siem.queryRule",
+           "consumer":"siem",
+           "params":{
+              "immutable":false,
+              "ruleId":"bf9638eb-8d3c-4f40-83d7-8c40a7c80f2e",
+              "author":[],
+              "description":"Test unmuting of a custom security rule",
+              "falsePositives":[],
+              "from":"now-36000060s",
+              "license":"",
+              "outputIndex":".siem-signals-default",
+              "meta":{
+                 "from":"10000h"
+              },
+              "maxSignals":100,
+              "riskScore":21,
+              "riskScoreMapping":[],
+              "severity":"low",
+              "severityMapping":[],
+              "threat":[],
+              "to":"now",
+              "references":[],
+              "version":0,
+              "exceptionsList":[],
+              "type":"query",
+              "language":"kuery",
+              "index":["test-index"],
+              "query":"*:*",
+              "filters":[]
+           },
+           "schedule":{
+              "interval":"5m"
+           },
+           "enabled":false,
+           "actions": [],
+           "apiKeyOwner":null,
+           "apiKey":null,
+           "createdBy":"elastic",
+           "updatedBy":"elastic",
+           "createdAt":"2023-03-27T20:42:55.896Z",
+           "muteAll":true,
+           "mutedInstanceIds":[],
+           "scheduledTaskId":null,
+           "tags":[]
+        },
+        "type":"alert",
+        "migrationVersion":{
+           "alert":"8.7.0"
+        },
+        "updated_at":"2023-03-27T20:42:55.896Z",
+        "references":[]
+     }
   }
 }

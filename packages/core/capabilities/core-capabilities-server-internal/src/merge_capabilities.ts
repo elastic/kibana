@@ -10,7 +10,7 @@ import { mergeWith } from 'lodash';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 
 export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>
-  mergeWith({}, ...sources, (a: any, b: any) => {
+  mergeWith({}, ...sources, (a: unknown, b: unknown) => {
     if (
       (typeof a === 'boolean' && typeof b === 'object') ||
       (typeof a === 'object' && typeof b === 'boolean')

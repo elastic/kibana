@@ -22,6 +22,7 @@ import {
 import { ENHANCED_ES_SEARCH_STRATEGY, ISearchOptions } from '@kbn/data-plugin/common';
 import { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { AlertAuditAction, alertAuditEvent } from '@kbn/rule-registry-plugin/server';
+import { Logger } from '@kbn/logging';
 import {
   TimelineFactoryQueryTypes,
   TimelineStrategyResponseType,
@@ -35,6 +36,7 @@ import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,
   alerting: AlertingPluginStartContract,
+  logger: Logger,
   security?: SecurityPluginSetup
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const esAsInternal = data.search.searchAsInternalUser;
@@ -70,7 +72,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
           queryFactory,
         });
       } else {
-        return timelineSearchStrategy({ es, request, options, deps, queryFactory });
+        return timelineSearchStrategy({ es, request, options, deps, queryFactory, logger });
       }
     },
     cancel: async (id, options, deps) => {
@@ -93,6 +95,7 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   options: ISearchOptions;
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;
+  logger: Logger;
 }) => {
   const dsl = queryFactory.buildDsl(request);
   return es.search({ ...request, params: dsl }, options, deps).pipe(

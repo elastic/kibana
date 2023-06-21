@@ -9,10 +9,10 @@ Array [
       class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+        class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <h1
             class="euiTitle emotion-euiTitle-l"
@@ -20,7 +20,7 @@ Array [
             <span
               class="emotion-euiPageHeaderContent__titleIcon"
               color="danger"
-              data-euiicon-type="alert"
+              data-euiicon-type="warning"
             />
             <span
               data-test-subj="licenseText"
@@ -62,10 +62,10 @@ Array [
       class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+        class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <h1
             class="euiTitle emotion-euiTitle-l"
@@ -93,7 +93,7 @@ Array [
               >
                 Your license will expire on 
                 <strong>
-                  October 12, 2099 7:00 PM EST
+                  October 12, 2099 8:00 PM EDT
                 </strong>
               </span>
             </p>

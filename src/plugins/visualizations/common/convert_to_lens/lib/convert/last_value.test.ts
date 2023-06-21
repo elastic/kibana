@@ -22,6 +22,7 @@ jest.mock('../utils', () => ({
 }));
 
 describe('convertToLastValueColumn', () => {
+  const visType = 'heatmap';
   const dataView = stubLogstashDataView;
   const sortField = dataView.fields[0];
 
@@ -59,7 +60,13 @@ describe('convertToLastValueColumn', () => {
   test.each<[string, Parameters<typeof convertToLastValueColumn>, Partial<FiltersColumn> | null]>([
     [
       'null if top hits size is more than 1',
-      [{ agg: { ...topHitAgg, aggParams: { ...topHitAgg.aggParams!, size: 2 } }, dataView }],
+      [
+        {
+          agg: { ...topHitAgg, aggParams: { ...topHitAgg.aggParams!, size: 2 } },
+          dataView,
+          visType,
+        },
+      ],
       null,
     ],
     [
@@ -74,6 +81,7 @@ describe('convertToLastValueColumn', () => {
             },
           },
           dataView,
+          visType,
         },
       ],
       null,
@@ -88,7 +96,7 @@ describe('convertToLastValueColumn', () => {
 
   test('should skip if top hit field is not specified', () => {
     mockGetFieldNameFromField.mockReturnValue(null);
-    expect(convertToLastValueColumn({ agg: topHitAgg, dataView })).toBeNull();
+    expect(convertToLastValueColumn({ agg: topHitAgg, dataView, visType })).toBeNull();
     expect(mockGetFieldNameFromField).toBeCalledTimes(1);
     expect(dataView.getFieldByName).toBeCalledTimes(0);
   });
@@ -97,14 +105,14 @@ describe('convertToLastValueColumn', () => {
     mockGetFieldByName.mockReturnValue(null);
     dataView.getFieldByName = mockGetFieldByName;
 
-    expect(convertToLastValueColumn({ agg: topHitAgg, dataView })).toBeNull();
+    expect(convertToLastValueColumn({ agg: topHitAgg, dataView, visType })).toBeNull();
     expect(mockGetFieldNameFromField).toBeCalledTimes(1);
     expect(dataView.getFieldByName).toBeCalledTimes(1);
     expect(mockGetLabel).toBeCalledTimes(0);
   });
 
   test('should return top hit column if top hit field is not present in index pattern', () => {
-    expect(convertToLastValueColumn({ agg: topHitAgg, dataView })).toEqual(
+    expect(convertToLastValueColumn({ agg: topHitAgg, dataView, visType })).toEqual(
       expect.objectContaining({
         dataType: 'number',
         label: 'someLabel',

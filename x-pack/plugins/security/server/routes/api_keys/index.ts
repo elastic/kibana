@@ -11,11 +11,13 @@ import { defineEnabledApiKeysRoutes } from './enabled';
 import { defineGetApiKeysRoutes } from './get';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
 import { defineCheckPrivilegesRoutes } from './privileges';
+import { defineUpdateApiKeyRoutes } from './update';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);
   defineGetApiKeysRoutes(params);
   defineCreateApiKeyRoutes(params);
+  defineUpdateApiKeyRoutes(params);
   defineCheckPrivilegesRoutes(params);
   defineInvalidateApiKeysRoutes(params);
 }

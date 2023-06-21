@@ -11,5 +11,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Connectors', function () {
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./opsgenie'));
+    loadTestFile(require.resolve('./tines'));
+    loadTestFile(require.resolve('./slack'));
   });
 };

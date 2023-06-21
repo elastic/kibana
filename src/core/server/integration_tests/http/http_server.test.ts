@@ -31,7 +31,7 @@ describe('Http server', () => {
       maxPayload: new ByteSizeValue(1024),
       port: 10002,
       ssl: { enabled: false },
-      compression: { enabled: true },
+      compression: { enabled: true, brotli: { enabled: false } },
       requestId: {
         allowFromAnyIp: true,
         ipAllowlist: [],
@@ -54,7 +54,10 @@ describe('Http server', () => {
       const { registerRouter, server: innerServer } = await server.setup(config);
       innerServerListener = innerServer.listener;
 
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, {
+        isDev: false,
+        versionedRouteResolution: 'oldest',
+      });
       router.post(
         {
           path: '/',

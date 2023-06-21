@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import type { SecuritySolutionDataViewBase } from '../../types';
+
 /** Uniquely identifies a Sourcerer Scope */
 export enum SourcererScopeName {
   default = 'default',
@@ -50,25 +52,39 @@ export interface KibanaDataView {
   title: string;
 }
 
+export type RunTimeMappings =
+  | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>
+  | undefined;
+
 /**
  * DataView from Kibana + timelines/index_fields enhanced field data
  */
 export interface SourcererDataView extends KibanaDataView {
   id: string;
-  /** determines how we can use the field in the app
+  /**
+   * @deprecated
+   * determines how we can use the field in the app
    * aggregatable, searchable, type, example
    * category, description, format
    * indices the field is included in etc*/
   browserFields: BrowserFields;
-  /** comes from dataView.fields.toSpec() */
+  /**
+   * @deprecated use sourcererDataView.fields
+   * comes from dataView.fields.toSpec() */
   indexFields: SecuritySolutionDataViewBase['fields'];
+  fields: DataViewSpec['fields'] | undefined;
   /** set when data view fields are fetched */
   loading: boolean;
   /**
+   * @deprecated use sourcererDataView.runtimeMappings
    * Needed to pass to search strategy
    * Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
    */
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
+  /**
+   * @type DataView @kbn/data-views-plugin/common
+   */
+  dataView: DataViewSpec | undefined;
 }
 
 /**
@@ -76,9 +92,13 @@ export interface SourcererDataView extends KibanaDataView {
  * selected data view state
  */
 export interface SelectedDataView {
+  /**
+   * @deprecated use EcsFlat or fields / indexFields from data view
+   */
   browserFields: SourcererDataView['browserFields'];
   dataViewId: string | null; // null if legacy pre-8.0 timeline
   /**
+   * @deprecated use sourcererDataView
    * DataViewBase with enhanced index fields used in timelines
    */
   indexPattern: SecuritySolutionDataViewBase;
@@ -86,13 +106,30 @@ export interface SelectedDataView {
   indicesExist: boolean;
   /** is an update being made to the data view */
   loading: boolean;
-  /** all active & inactive patterns from SourcererDataView['title']  */
+  /**
+   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
+   * all active & inactive patterns from SourcererDataView['title']
+   */
   patternList: string[];
+  /**
+   * @deprecated use sourcererDataView.runtimeMappings
+   */
   runtimeMappings: SourcererDataView['runtimeMappings'];
-  /** all selected patterns from SourcererScope['selectedPatterns'] */
+  /**
+   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
+   * all selected patterns from SourcererScope['selectedPatterns'] */
   selectedPatterns: SourcererScope['selectedPatterns'];
-  // active patterns when dataViewId == null
+  /**
+   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
+   * active patterns when dataViewId == null
+   */
   activePatterns?: string[];
+
+  /**
+   * Easier to add this additional data rather than
+   * try to extend the SelectedDataView type from DataView.
+   */
+  sourcererDataView: DataViewSpec | undefined;
 }
 
 /**
@@ -122,14 +159,17 @@ export const initSourcererScope: Omit<SourcererScope, 'id'> = {
   selectedPatterns: [],
   missingPatterns: [],
 };
-export const initDataView = {
+
+export const initDataView: SourcererDataView & { id: string; error?: unknown } = {
   browserFields: EMPTY_BROWSER_FIELDS,
   id: '',
   indexFields: EMPTY_INDEX_FIELDS,
+  fields: undefined,
   loading: false,
   patternList: [],
   runtimeMappings: {},
   title: '',
+  dataView: undefined,
 };
 
 export const initialSourcererState: SourcererModel = {

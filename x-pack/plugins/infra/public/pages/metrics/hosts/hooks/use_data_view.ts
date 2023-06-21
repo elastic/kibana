@@ -5,70 +5,38 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { v5 as uuidv5 } from 'uuid';
 import createContainer from 'constate';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { InfraClientStartDeps } from '../../../../types';
-import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
+import useAsyncRetry from 'react-use/lib/useAsyncRetry';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { DATA_VIEW_PREFIX, TIMESTAMP_FIELD } from '../constants';
+
+export const generateDataViewId = (indexPattern: string) => {
+  // generates a unique but the same uuid as long as the index pattern doesn't change
+  return `${DATA_VIEW_PREFIX}_${uuidv5(indexPattern, uuidv5.DNS)}`;
+};
 
 export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
-  const [metricsDataView, setMetricsDataView] = useState<DataView>();
   const {
     services: { dataViews },
-  } = useKibana<InfraClientStartDeps>();
+  } = useKibanaContextForPlugin();
 
-  const [createDataViewRequest, createDataView] = useTrackedPromise(
-    {
-      createPromise: (config): Promise<DataView> => {
-        return dataViews.createAndSave(config);
-      },
-      onResolve: (response: DataView) => {
-        setMetricsDataView(response);
-      },
-      cancelPreviousOn: 'creation',
-    },
-    []
-  );
+  const state = useAsyncRetry(() => {
+    return dataViews.create({
+      id: generateDataViewId(metricAlias),
+      title: metricAlias,
+      timeFieldName: TIMESTAMP_FIELD,
+    });
+  }, [metricAlias]);
 
-  const [getDataViewRequest, getDataView] = useTrackedPromise(
-    {
-      createPromise: (indexPattern: string): Promise<DataView[]> => {
-        return dataViews.find(metricAlias, 1);
-      },
-      onResolve: (response: DataView[]) => {
-        setMetricsDataView(response[0]);
-      },
-      cancelPreviousOn: 'creation',
-    },
-    []
-  );
-
-  const loadDataView = useCallback(async () => {
-    try {
-      let view = (await getDataView(metricAlias))[0];
-      if (!view) {
-        view = await createDataView({
-          title: metricAlias,
-          timeFieldName: '@timestamp',
-        });
-      }
-    } catch (error) {
-      setMetricsDataView(undefined);
-    }
-  }, [metricAlias, createDataView, getDataView]);
-
-  const hasFailedFetchingDataView = getDataViewRequest.state === 'rejected';
-  const hasFailedCreatingDataView = createDataViewRequest.state === 'rejected';
-
-  useEffect(() => {
-    loadDataView();
-  }, [metricAlias, loadDataView]);
+  const { value, loading, error, retry } = state;
 
   return {
-    metricsDataView,
-    hasFailedCreatingDataView,
-    hasFailedFetchingDataView,
+    metricAlias,
+    dataView: value,
+    loading,
+    loadDataView: retry,
+    error,
   };
 };
 

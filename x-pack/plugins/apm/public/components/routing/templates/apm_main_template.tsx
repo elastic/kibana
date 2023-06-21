@@ -6,20 +6,22 @@
  */
 
 import { EuiPageHeaderProps } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
+import { ServiceGroupSaveButton } from '../../app/service_groups';
+import { ServiceGroupsButtonGroup } from '../../app/service_groups/service_groups_button_group';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
-import { ServiceGroupSaveButton } from '../../app/service_groups';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 // Paths that must skip the no data screen
-const bypassNoDataScreenPaths = ['/settings'];
+const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
 
 /*
  * This template contains:
@@ -37,6 +39,8 @@ export function ApmMainTemplate({
   children,
   environmentFilter = true,
   showServiceGroupSaveButton = false,
+  showServiceGroupsNav = false,
+  selectedNavButton,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
@@ -44,14 +48,18 @@ export function ApmMainTemplate({
   children: React.ReactNode;
   environmentFilter?: boolean;
   showServiceGroupSaveButton?: boolean;
-} & KibanaPageTemplateProps) {
+  showServiceGroupsNav?: boolean;
+  selectedNavButton?: 'serviceGroups' | 'allServices';
+} & KibanaPageTemplateProps &
+  Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks, observability, application } = services;
+  const { http, docLinks, observabilityShared, application } = services;
   const basePath = http?.basePath.get();
+  const { config } = useApmPluginContext();
 
-  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
+  const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
   const { data, status } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/has_data');
@@ -95,16 +103,11 @@ export function ApmMainTemplate({
     hasApmIntegrations: fleetApmPoliciesData?.hasApmPolicies,
     shouldBypassNoDataScreen,
     loading: isLoading,
+    isServerless: config?.serverlessOnboarding,
   });
 
-  const {
-    services: { uiSettings },
-  } = useKibana<ApmPluginStartDeps>();
-  const isServiceGroupsEnabled = uiSettings?.get<boolean>(enableServiceGroups);
-  const renderServiceGroupSaveButton =
-    showServiceGroupSaveButton && isServiceGroupsEnabled;
   const rightSideItems = [
-    ...(renderServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
+    ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
     ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
   ];
 
@@ -116,6 +119,10 @@ export function ApmMainTemplate({
         pageTitle,
         rightSideItems,
         ...pageHeader,
+        children:
+          showServiceGroupsNav && selectedNavButton ? (
+            <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+          ) : null,
       }}
       {...pageTemplateProps}
     >

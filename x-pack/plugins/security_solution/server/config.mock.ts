@@ -11,7 +11,7 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigType } from './config';
 
 export const createMockConfig = (): ConfigType => {
-  const enableExperimental: string[] = [];
+  const enableExperimental: Array<keyof ExperimentalFeatures> = ['responseActionUploadEnabled'];
 
   return {
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
@@ -21,12 +21,13 @@ export const createMockConfig = (): ConfigType => {
     maxTimelineImportPayloadBytes: 10485760,
     enableExperimental,
     packagerTaskInterval: '60s',
+    prebuiltRulesPackageVersion: '',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
-    prebuiltRulesFromFileSystem: true,
-    prebuiltRulesFromSavedObjects: false,
+    maxUploadResponseActionFileBytes: 26214400,
 
-    experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
+    enabled: true,
   };
 };
 
@@ -38,7 +39,7 @@ const withExperimentalFeature = (
   return {
     ...config,
     enableExperimental,
-    experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
   };
 };
 

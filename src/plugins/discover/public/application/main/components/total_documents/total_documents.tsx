@@ -7,17 +7,26 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 
 export const TotalDocuments = ({ totalHitCount }: { totalHitCount: number }) => {
   return (
-    <EuiText grow={false} size="s" style={{ paddingRight: 2 }}>
+    <EuiText
+      grow={false}
+      size="s"
+      style={{ paddingRight: 2 }}
+      data-test-subj="savedSearchTotalDocuments"
+    >
       <FormattedMessage
         id="discover.docTable.totalDocuments"
         defaultMessage="{totalDocuments} documents"
         values={{
-          totalDocuments: <strong>{totalHitCount}</strong>,
+          totalDocuments: (
+            <strong>
+              <FormattedNumber value={totalHitCount} />
+            </strong>
+          ),
         }}
       />
     </EuiText>

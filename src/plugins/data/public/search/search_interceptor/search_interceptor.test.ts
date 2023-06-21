@@ -23,11 +23,15 @@ import { BehaviorSubject } from 'rxjs';
 import { dataPluginMock } from '../../mocks';
 import { UI_SETTINGS } from '../../../common';
 
-jest.mock('./utils', () => ({
-  createRequestHash: jest.fn().mockImplementation((input) => {
-    return Promise.resolve(JSON.stringify(input));
-  }),
-}));
+jest.mock('./utils', () => {
+  const originalModule = jest.requireActual('./utils');
+  return {
+    ...originalModule,
+    createRequestHash: jest.fn().mockImplementation((input) => {
+      return Promise.resolve(JSON.stringify(input));
+    }),
+  };
+});
 
 jest.mock('../errors/search_session_incomplete_warning', () => ({
   SearchSessionIncompleteWarning: jest.fn(),
@@ -41,8 +45,10 @@ let mockCoreSetup: MockedKeys<CoreSetup>;
 let bfetchSetup: jest.Mocked<BfetchPublicSetup>;
 let fetchMock: jest.Mock<any>;
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
-jest.useFakeTimers();
+const flushPromises = () =>
+  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 const timeTravel = async (msToRun = 0) => {
   await flushPromises();
@@ -1531,7 +1537,7 @@ describe('SearchInterceptor', () => {
         await flushPromises();
       });
 
-      test('Immediately aborts if passed an aborted abort signal', async (done) => {
+      test('Immediately aborts if passed an aborted abort signal', async () => {
         const abort = new AbortController();
         const mockRequest: IEsSearchRequest = {
           params: {},
@@ -1542,7 +1548,6 @@ describe('SearchInterceptor', () => {
         error.mockImplementation((e) => {
           expect(e).toBeInstanceOf(AbortError);
           expect(fetchMock).not.toBeCalled();
-          done();
         });
 
         response.subscribe({ error });

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export const PLATINUM_MAX_RAM_FOR_ML_NODES = '1GB';
 export const TRIAL_MAX_RAM_FOR_ML_NODES = '2GB';

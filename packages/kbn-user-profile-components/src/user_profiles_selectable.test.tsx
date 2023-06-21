@@ -84,6 +84,37 @@ describe('UserProfilesSelectable', () => {
     ]);
   });
 
+  it('should render warning and disable remaining users when limit has been reached', () => {
+    const [firstOption, secondOption, thirdOption] = userProfiles;
+    const wrapper = mount(
+      <UserProfilesSelectable
+        selectedOptions={[firstOption]}
+        defaultOptions={[secondOption, thirdOption]}
+        limit={1}
+      />
+    );
+    expect(wrapper.find('EuiCallOut').prop('color')).toEqual('warning');
+    expect(wrapper.find('EuiSelectable').prop('options')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: firstOption.uid,
+          checked: 'on',
+          disabled: false,
+        }),
+        expect.objectContaining({
+          key: secondOption.uid,
+          checked: undefined,
+          disabled: true,
+        }),
+        expect.objectContaining({
+          key: thirdOption.uid,
+          checked: undefined,
+          disabled: true,
+        }),
+      ])
+    );
+  });
+
   it('should hide `selectedOptions` and `defaultOptions` when `options` has been provided', () => {
     const [firstOption, secondOption, thirdOption] = userProfiles;
     const wrapper = mount(

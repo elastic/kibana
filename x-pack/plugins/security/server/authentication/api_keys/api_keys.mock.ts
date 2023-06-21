@@ -13,7 +13,9 @@ export const apiKeysMock = {
   create: (): jest.Mocked<PublicMethodsOf<APIKeys>> => ({
     areAPIKeysEnabled: jest.fn(),
     create: jest.fn(),
+    update: jest.fn(),
     grantAsInternalUser: jest.fn(),
+    validate: jest.fn(),
     invalidate: jest.fn(),
     invalidateAsInternalUser: jest.fn(),
   }),

@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, Fragment } from 'react';
 import { chunk, find } from 'lodash/fp';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -198,7 +198,7 @@ export const Overview = React.memo<Props>(
 
     // 675px is the container width at which none of the cards, when hovered,
     // creates a visual overflow in a single row setup
-    const showAsSingleRow = width === 0 || width >= 675;
+    const showAsSingleRow = width === 0 || (width && width >= 675);
 
     // Only render cards with content
     const cards = [signalCard, severityCard, riskScoreCard, ruleNameCard].filter(isNotNull);
@@ -213,10 +213,10 @@ export const Overview = React.memo<Props>(
           // Add a spacer between rows but not after the last row
           const addSpacer = index < length - 1;
           return (
-            <>
+            <Fragment key={index}>
               <NotGrowingFlexGroup gutterSize="s">{elements}</NotGrowingFlexGroup>
               {addSpacer && <EuiSpacer size="s" />}
-            </>
+            </Fragment>
           );
         })}
       </>

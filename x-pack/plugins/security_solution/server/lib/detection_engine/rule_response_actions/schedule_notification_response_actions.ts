@@ -5,42 +5,41 @@
  * 2.0.
  */
 
-import { map, uniq } from 'lodash';
-import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import { each } from 'lodash';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SetupPlugins } from '../../../plugin_contract';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import { osqueryResponseAction } from './osquery_response_action';
+import { endpointResponseAction } from './endpoint_response_action';
+import type { ScheduleNotificationActions } from '../rule_types/types';
+import type { Alert, AlertWithAgent } from './types';
 
-interface ScheduleNotificationActions {
-  signals: unknown[];
-  responseActions: RuleResponseAction[];
+interface ScheduleNotificationResponseActionsService {
+  endpointAppContextService: EndpointAppContextService;
+  osqueryCreateActionService?: SetupPlugins['osquery']['createActionService'];
 }
 
-interface IAlert {
-  agent: {
-    id: string;
+export const getScheduleNotificationResponseActionsService =
+  ({
+    osqueryCreateActionService,
+    endpointAppContextService,
+  }: ScheduleNotificationResponseActionsService) =>
+  ({ signals, responseActions }: ScheduleNotificationActions) => {
+    const alerts = (signals as Alert[]).filter((alert) => alert.agent?.id) as AlertWithAgent[];
+
+    each(responseActions, (responseAction) => {
+      if (
+        responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY &&
+        osqueryCreateActionService
+      ) {
+        osqueryResponseAction(responseAction, osqueryCreateActionService, {
+          alerts,
+        });
+      }
+      if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT) {
+        endpointResponseAction(responseAction, endpointAppContextService, {
+          alerts,
+        });
+      }
+    });
   };
-}
-
-export const scheduleNotificationResponseActions = (
-  { signals, responseActions }: ScheduleNotificationActions,
-  osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction']
-) => {
-  const filteredAlerts = (signals as IAlert[]).filter((alert) => alert.agent?.id);
-  const agentIds = uniq(filteredAlerts.map((alert: IAlert) => alert.agent?.id));
-  const alertIds = map(filteredAlerts, '_id');
-
-  responseActions.forEach((responseAction) => {
-    if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
-      const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
-
-      return osqueryCreateAction({
-        ...rest,
-        queries,
-        ecs_mapping: ecsMapping,
-        saved_query_id: savedQueryId,
-        agent_ids: agentIds,
-        alert_ids: alertIds,
-      });
-    }
-  });
-};

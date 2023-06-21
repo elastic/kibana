@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { isValidOwner } from '../../common/utils/owner';
 import {
   CASE_VIEW_COMMENT_PATH,
@@ -23,21 +24,19 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AlertInfo } from './types';
+import type { AlertInfo, FileAttachmentRequest, SOWithErrors } from './types';
 
 import type {
-  CaseAttributes,
   CasePostRequest,
-  CaseResponse,
+  Case,
   CasesFindResponse,
   CommentAttributes,
   CommentRequest,
   CommentRequestActionsType,
   CommentRequestAlertType,
-  CommentRequestExternalReferenceSOType,
   CommentRequestUserType,
-  CommentResponse,
-  CommentsResponse,
+  Comment,
+  CommentsFindResponse,
   User,
 } from '../../common/api';
 import {
@@ -45,14 +44,16 @@ import {
   CaseStatuses,
   CommentType,
   ConnectorTypes,
-  ExternalReferenceStorageType,
+  ExternalReferenceSORt,
+  FileAttachmentMetadataRt,
 } from '../../common/api';
-import type { UpdateAlertRequest } from '../client/alerts/types';
+import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
   parseCommentString,
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
 import { dedupAssignees } from '../client/cases/utils';
+import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 
 /**
  * Default sort field for querying saved objects.
@@ -70,7 +71,7 @@ export const transformNewCase = ({
 }: {
   user: User;
   newCase: CasePostRequest;
-}): CaseAttributes => ({
+}): CaseTransformedAttributes => ({
   ...newCase,
   duration: null,
   severity: newCase.severity ?? CaseSeverity.LOW,
@@ -83,6 +84,7 @@ export const transformNewCase = ({
   updated_at: null,
   updated_by: null,
   assignees: dedupAssignees(newCase.assignees) ?? [],
+  category: newCase.category ?? null,
 });
 
 export const transformCases = ({
@@ -94,7 +96,7 @@ export const transformCases = ({
   perPage,
   total,
 }: {
-  casesMap: Map<string, CaseResponse>;
+  casesMap: Map<string, Case>;
   countOpenCases: number;
   countInProgressCases: number;
   countClosedCases: number;
@@ -117,11 +119,11 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
 }: {
-  savedObject: SavedObject<CaseAttributes>;
+  savedObject: CaseSavedObjectTransformed;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
-}): CaseResponse => ({
+}): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
@@ -132,7 +134,7 @@ export const flattenCaseSavedObject = ({
 
 export const transformComments = (
   comments: SavedObjectsFindResponse<CommentAttributes>
-): CommentsResponse => ({
+): CommentsFindResponse => ({
   page: comments.page,
   per_page: comments.per_page,
   total: comments.total,
@@ -141,14 +143,15 @@ export const transformComments = (
 
 export const flattenCommentSavedObjects = (
   savedObjects: Array<SavedObject<CommentAttributes>>
-): CommentResponse[] =>
-  savedObjects.reduce((acc: CommentResponse[], savedObject: SavedObject<CommentAttributes>) => {
-    return [...acc, flattenCommentSavedObject(savedObject)];
+): Comment[] =>
+  savedObjects.reduce((acc: Comment[], savedObject: SavedObject<CommentAttributes>) => {
+    acc.push(flattenCommentSavedObject(savedObject));
+    return acc;
   }, []);
 
 export const flattenCommentSavedObject = (
   savedObject: SavedObject<CommentAttributes>
-): CommentResponse => ({
+): Comment => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   ...savedObject.attributes,
@@ -252,27 +255,27 @@ export const isCommentRequestTypeAlert = (
 };
 
 /**
- * A type narrowing function for external reference so attachments.
+ * A type narrowing function for file attachments.
  */
-export const isCommentRequestTypeExternalReferenceSO = (
+export const isFileAttachmentRequest = (
   context: Partial<CommentRequest>
-): context is CommentRequestExternalReferenceSOType => {
+): context is FileAttachmentRequest => {
   return (
-    context.type === CommentType.externalReference &&
-    context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
+    ExternalReferenceSORt.is(context) &&
+    FileAttachmentMetadataRt.is(context.externalReferenceMetadata)
   );
 };
 
 /**
  * Adds the ids and indices to a map of statuses
  */
-export function createAlertUpdateRequest({
+export function createAlertUpdateStatusRequest({
   comment,
   status,
 }: {
   comment: CommentRequest;
   status: CaseStatuses;
-}): UpdateAlertRequest[] {
+}): UpdateAlertStatusRequest[] {
   return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
 }
 
@@ -420,6 +423,7 @@ export const getApplicationRoute = (
 
 export const getCaseViewPath = (params: {
   publicBaseUrl: NonNullable<IBasePath['publicBaseUrl']>;
+  spaceId: string;
   caseId: string;
   owner: string;
   commentId?: string;
@@ -429,11 +433,12 @@ export const getCaseViewPath = (params: {
   const removeEndingSlash = (path: string): string =>
     path.endsWith('/') ? path.slice(0, -1) : path;
 
-  const { publicBaseUrl, caseId, owner, commentId, tabId } = params;
+  const { publicBaseUrl, caseId, owner, commentId, tabId, spaceId } = params;
 
   const publicBaseUrlWithoutEndingSlash = removeEndingSlash(publicBaseUrl);
+  const publicBaseUrlWithSpace = addSpaceIdToPath(publicBaseUrlWithoutEndingSlash, spaceId);
   const appRoute = getApplicationRoute(OWNER_INFO, owner);
-  const basePath = `${publicBaseUrlWithoutEndingSlash}${appRoute}/cases`;
+  const basePath = `${publicBaseUrlWithSpace}${appRoute}/cases`;
 
   if (commentId) {
     const commentPath = normalizePath(
@@ -453,3 +458,5 @@ export const getCaseViewPath = (params: {
 
   return `${basePath}${normalizePath(CASE_VIEW_PATH.replace(':detailName', caseId))}`;
 };
+
+export const isSOError = <T>(so: { error?: unknown }): so is SOWithErrors<T> => so.error != null;

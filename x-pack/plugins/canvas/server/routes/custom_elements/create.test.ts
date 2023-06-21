@@ -30,7 +30,9 @@ const mockedUUID = '123abc';
 const now = new Date();
 const nowIso = now.toISOString();
 
-jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123abc'),
+}));
 
 describe('POST custom element', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -42,7 +44,8 @@ describe('POST custom element', () => {
     const routerDeps = getMockedRouterDeps();
     initializeCreateCustomElementRoute(routerDeps);
 
-    routeHandler = routerDeps.router.post.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.post.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   afterEach(() => {

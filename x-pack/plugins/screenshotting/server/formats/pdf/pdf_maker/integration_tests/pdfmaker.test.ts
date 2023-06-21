@@ -35,6 +35,7 @@ describe('PdfMaker', () => {
       buildSha: 'screenshot-dfdfed0a',
       dist: false,
       version: '1000.0.0',
+      buildDate: new Date('2023-05-15T23:12:09.000Z'),
     };
     pdf = new PdfMaker(layout, undefined, packageInfo, logger);
   });

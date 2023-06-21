@@ -8,24 +8,38 @@
 
 import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { HttpService } from '@kbn/core-http-server-internal';
+import {
+  type HttpConfigType,
+  type ExternalUrlConfigType,
+  type CspConfigType,
+  HttpService,
+} from '@kbn/core-http-server-internal';
 
 const coreId = Symbol('core');
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
 const logger = loggingSystemMock.create();
 
-const createConfigService = () => {
+export const createConfigService = ({
+  server,
+  externalUrl,
+  csp,
+}: Partial<{
+  server: Partial<HttpConfigType>;
+  externalUrl: Partial<ExternalUrlConfigType>;
+  csp: Partial<CspConfigType>;
+}> = {}) => {
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
     if (path === 'server') {
       return new BehaviorSubject({
+        name: 'kibana',
         hosts: ['localhost'],
         maxPayload: new ByteSizeValue(1024),
         autoListen: true,
@@ -35,7 +49,7 @@ const createConfigService = () => {
         cors: {
           enabled: false,
         },
-        compression: { enabled: true },
+        compression: { enabled: true, brotli: { enabled: false } },
         xsrf: {
           disableProtection: true,
           allowlist: [],
@@ -49,11 +63,18 @@ const createConfigService = () => {
         shutdownTimeout: moment.duration(30, 'seconds'),
         keepaliveTimeout: 120_000,
         socketTimeout: 120_000,
+        restrictInternalApis: false,
+        versioned: {
+          versionResolution: 'oldest',
+          strictClientVersionCheck: true,
+        },
+        ...server,
       } as any);
     }
     if (path === 'externalUrl') {
       return new BehaviorSubject({
         policy: [],
+        ...externalUrl,
       } as any);
     }
     if (path === 'csp') {
@@ -61,6 +82,7 @@ const createConfigService = () => {
         strict: false,
         disableEmbedding: false,
         warnLegacyBrowsers: true,
+        ...csp,
       });
     }
     throw new Error(`Unexpected config path: ${path}`);

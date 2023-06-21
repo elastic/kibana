@@ -8,7 +8,7 @@
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CoreUsageDataStart } from '@kbn/core/server';
-import { CoreUsageData } from './core_usage_data';
+import { CoreUsageData } from '@kbn/core-usage-data-server';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -275,6 +275,12 @@ export function getCoreUsageCollector(
               _meta: {
                 description:
                   'Indicates if security headers to disable embedding have been configured.',
+              },
+            },
+            crossOriginOpenerPolicy: {
+              type: 'keyword',
+              _meta: {
+                description: 'The crossOriginOpenerPolicy response header, "NULL" if disabled.',
               },
             },
           },

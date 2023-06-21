@@ -8,19 +8,17 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { QueryClientProvider } from '@tanstack/react-query';
-import type { UserProfile } from '@kbn/user-profile-components';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import * as i18n from './translations';
 import { LinkAnchor } from '../links';
 import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import type { FilterMode as RecentCasesFilterMode } from './types';
-import type { AuthenticatedElasticUser } from '../../common/lib/kibana';
+import type { FilterOptions } from '../../containers/types';
 import { useCurrentUser } from '../../common/lib/kibana';
 import { useAllCasesNavigation } from '../../common/navigation';
-import { casesQueryClient } from '../cases_context/query_client';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
-import type { User } from '../../../common/api';
+import { getReporterFilter, getAssigneeFilter } from './get_filter_options';
 
 export interface RecentCasesProps {
   maxCasesToShow: number;
@@ -28,9 +26,10 @@ export interface RecentCasesProps {
 
 const RecentCases = React.memo((props: RecentCasesProps) => {
   return (
-    <QueryClientProvider client={casesQueryClient}>
-      <RecentCasesWithoutQueryProvider {...props} />
-    </QueryClientProvider>
+    <>
+      <ReactQueryDevtools initialIsOpen={false} />
+      <RecentCasesComponent {...props} />
+    </>
   );
 });
 
@@ -39,7 +38,7 @@ RecentCases.displayName = 'RecentCases';
 // eslint-disable-next-line import/no-default-export
 export { RecentCases as default };
 
-const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
+const RecentCasesComponent = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
   const currentUser = useCurrentUser();
   const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
@@ -56,7 +55,13 @@ const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCa
     [navigateToAllCases]
   );
 
-  const recentCasesFilterOptions = useMemo(() => {
+  const recentCasesFilterOptions: Partial<FilterOptions> = useMemo(() => {
+    if (recentCasesFilterBy === 'myRecentlyAssigned') {
+      return getAssigneeFilter({
+        isLoadingCurrentUserProfile,
+        currentUserProfile,
+      });
+    }
     return getReporterFilter({
       currentUser,
       isLoadingCurrentUserProfile,
@@ -66,7 +71,7 @@ const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCa
   }, [currentUser, currentUserProfile, isLoadingCurrentUserProfile, recentCasesFilterBy]);
 
   // show the recently reported if we have the current user profile, or if we have the fallback user information
-  const showMyRecentlyReported = currentUserProfile != null || currentUser != null;
+  const hasCurrentUserInfo = currentUserProfile != null || currentUser != null;
 
   return (
     <>
@@ -81,13 +86,18 @@ const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCa
           <RecentCasesFilters
             filterBy={recentCasesFilterBy}
             setFilterBy={setRecentCasesFilterBy}
-            showMyRecentlyReported={showMyRecentlyReported}
+            hasCurrentUserInfo={hasCurrentUserInfo}
+            isLoading={isLoadingCurrentUserProfile}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
       <EuiText color="subdued" size="s">
-        <RecentCasesComp filterOptions={recentCasesFilterOptions} maxCasesToShow={maxCasesToShow} />
+        <RecentCasesComp
+          filterOptions={recentCasesFilterOptions}
+          maxCasesToShow={maxCasesToShow}
+          recentCasesFilterBy={recentCasesFilterBy}
+        />
         <EuiHorizontalRule margin="s" />
         <EuiText size="xs">
           <LinkAnchor onClick={navigateToAllCasesClick} href={getAllCasesUrl()}>
@@ -100,46 +110,4 @@ const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCa
   );
 });
 
-RecentCasesWithoutQueryProvider.displayName = 'RecentCases';
-
-const getReporterFilter = ({
-  recentCasesFilterBy,
-  currentUserProfile,
-  currentUser,
-  isLoadingCurrentUserProfile,
-}: {
-  recentCasesFilterBy: RecentCasesFilterMode;
-  currentUserProfile?: UserProfile;
-  currentUser: AuthenticatedElasticUser | null;
-  isLoadingCurrentUserProfile: boolean;
-}): { reporters: User[] } => {
-  const emptyFilter = { reporters: [] };
-  if (recentCasesFilterBy !== 'myRecentlyReported') {
-    return emptyFilter;
-  }
-
-  if (currentUserProfile != null && !isLoadingCurrentUserProfile) {
-    return {
-      reporters: [
-        {
-          email: currentUserProfile.user.email,
-          full_name: currentUserProfile.user.full_name,
-          username: currentUserProfile.user.username,
-          profile_uid: currentUserProfile.uid,
-        },
-      ],
-    };
-  } else if (currentUser != null) {
-    return {
-      reporters: [
-        {
-          email: currentUser.email,
-          full_name: currentUser.fullName,
-          username: currentUser.username,
-        },
-      ],
-    };
-  }
-
-  return emptyFilter;
-};
+RecentCasesComponent.displayName = 'RecentCasesComponent';

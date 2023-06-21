@@ -18,7 +18,6 @@ interface DurationChartProps {
   hasMLJob: boolean;
   anomalies: AnomalyRecords | null;
   locationDurationLines: LocationDurationLine[];
-  exploratoryViewLink: string;
 }
 
 /**

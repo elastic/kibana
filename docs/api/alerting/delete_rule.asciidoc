@@ -8,6 +8,12 @@ Permanently removes a rule.
 
 WARNING: After you delete a rule, you cannot recover it.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+====
+
 [[delete-rule-api-request]]
 === {api-request-title}
 
@@ -36,7 +42,7 @@ default space is used.
 [[delete-rule-api-response-codes]]
 === {api-response-codes-title}
 
-`200`::
+`204`::
 Indicates a successful call.
 
 === {api-examples-title}

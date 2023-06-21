@@ -29,7 +29,8 @@ export const createDescriptionList = (
   startDate: string,
   endDate: string,
   interval: string,
-  narrowDateRange: NarrowDateRange
+  narrowDateRange: NarrowDateRange,
+  jobName: string
 ): DescriptionList[] => {
   const descriptionList: DescriptionList[] = [
     {
@@ -50,7 +51,7 @@ export const createDescriptionList = (
       ),
       description: (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false}>{score.jobId}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{jobName}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ExplorerLink
               score={score}

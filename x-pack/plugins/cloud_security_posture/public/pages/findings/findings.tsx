@@ -5,70 +5,127 @@
  * 2.0.
  */
 import React from 'react';
-import type { UseQueryResult } from '@tanstack/react-query';
-import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { NoFindingsStates } from '../../components/no_findings_states';
-import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
-import { FindingsEsPitContext } from './es_pit/findings_es_pit_context';
-import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { Redirect, Switch, useHistory, useLocation, matchPath } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
-import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
-import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
+import { Vulnerabilities } from '../vulnerabilities';
 
 export const Findings = () => {
+  const history = useHistory();
   const location = useLocation();
-  const dataViewQuery = useLatestFindingsDataView();
-  // TODO: Consider splitting the PIT window so that each "group by" view has its own PIT
-  const { pitQuery, pitIdRef, setPitId } = useFindingsEsPit('findings');
-  const getSetupStatus = useCspSetupStatusApi();
 
-  const hasFindings = getSetupStatus.data?.status === 'indexed';
-  if (!hasFindings) return <NoFindingsStates />;
+  const navigateToVulnerabilitiesTab = () => {
+    history.push({ pathname: findingsNavigation.vulnerabilities.path });
+  };
+  const navigateToConfigurationsTab = () => {
+    history.push({ pathname: findingsNavigation.findings_default.path });
+  };
 
-  let queryForCloudPosturePage: UseQueryResult = dataViewQuery;
-  if (pitQuery.isError || pitQuery.isLoading) {
-    queryForCloudPosturePage = pitQuery;
-  }
+  const isResourcesVulnerabilitiesPage = matchPath(location.pathname, {
+    path: findingsNavigation.resource_vulnerabilities.path,
+  })?.isExact;
+
+  const isResourcesFindingsPage = matchPath(location.pathname, {
+    path: findingsNavigation.resource_findings.path,
+  })?.isExact;
+
+  const showHeader = !isResourcesVulnerabilitiesPage && !isResourcesFindingsPage;
+
+  const isVulnerabilitiesTabSelected = (pathname: string) => {
+    return (
+      pathname === findingsNavigation.vulnerabilities.path ||
+      pathname === findingsNavigation.vulnerabilities_by_resource.path
+    );
+  };
 
   return (
-    <CloudPosturePage query={queryForCloudPosturePage}>
-      <FindingsEsPitContext.Provider
-        value={{
-          pitQuery,
-          // Asserting the ref as a string value since at this point the query was necessarily successful
-          pitIdRef: pitIdRef as React.MutableRefObject<string>,
-          setPitId,
-        }}
-      >
-        <Switch>
-          <Route
-            exact
-            path={cloudPosturePages.findings.path}
-            component={() => (
-              <Redirect
-                to={{
-                  pathname: findingsNavigation.findings_default.path,
-                  search: location.search,
-                }}
+    <>
+      {showHeader && (
+        <>
+          <EuiTitle size="l">
+            <h1>
+              <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
+            </h1>
+          </EuiTitle>
+          <EuiSpacer />
+          <EuiTabs size="l">
+            <EuiTab
+              key="vuln_mgmt"
+              onClick={navigateToVulnerabilitiesTab}
+              isSelected={isVulnerabilitiesTabSelected(location.pathname)}
+            >
+              <EuiFlexGroup responsive={false} alignItems="center" direction="row" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <FormattedMessage
+                    id="xpack.csp.findings.tabs.vulnerabilities"
+                    defaultMessage="Vulnerabilities"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    css={css`
+                      display: block;
+                    `}
+                    label="Beta"
+                    tooltipContent={
+                      <FormattedMessage
+                        id="xpack.csp.findings.betaLabel"
+                        defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features."
+                      />
+                    }
+                    tooltipPosition="bottom"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiTab>
+            <EuiTab
+              key="configurations"
+              onClick={navigateToConfigurationsTab}
+              isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
+            >
+              <FormattedMessage
+                id="xpack.csp.findings.tabs.misconfigurations"
+                defaultMessage="Misconfigurations"
               />
-            )}
-          />
-          <Route
-            path={findingsNavigation.findings_default.path}
-            render={() => <LatestFindingsContainer dataView={dataViewQuery.data!} />}
-          />
-          <Route
-            path={findingsNavigation.findings_by_resource.path}
-            render={() => <FindingsByResourceContainer dataView={dataViewQuery.data!} />}
-          />
-          <Route
-            path={'*'}
-            component={() => <Redirect to={findingsNavigation.findings_default.path} />}
-          />
-        </Switch>
-      </FindingsEsPitContext.Provider>
-    </CloudPosturePage>
+            </EuiTab>
+          </EuiTabs>
+        </>
+      )}
+      <Switch>
+        <Route
+          exact
+          path={cloudPosturePages.findings.path}
+          render={() => (
+            <Redirect
+              to={{
+                pathname: findingsNavigation.findings_default.path,
+                search: location.search,
+              }}
+            />
+          )}
+        />
+        <Route path={findingsNavigation.findings_default.path} component={Configurations} />
+        <Route path={findingsNavigation.findings_by_resource.path} component={Configurations} />
+        <Route path={findingsNavigation.vulnerabilities.path} component={Vulnerabilities} />
+        <Route
+          path={findingsNavigation.vulnerabilities_by_resource.path}
+          component={Vulnerabilities}
+        />
+        {/* Redirect to default findings page if no match */}
+        <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
+      </Switch>
+    </>
   );
 };

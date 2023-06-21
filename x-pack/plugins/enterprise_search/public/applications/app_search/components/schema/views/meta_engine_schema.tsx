@@ -46,7 +46,7 @@ export const MetaEngineSchema: React.FC = () => {
       {hasConflicts && (
         <>
           <EuiCallOut
-            iconType="alert"
+            iconType="warning"
             color="warning"
             title={i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.schema.metaEngine.conflictsCalloutTitle',

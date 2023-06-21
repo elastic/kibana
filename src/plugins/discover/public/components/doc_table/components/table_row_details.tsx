@@ -7,29 +7,47 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonEmpty, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DiscoverNavigationProps } from '../../../hooks/use_navigation_props';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { useNavigationProps } from '../../../hooks/use_navigation_props';
+
 interface TableRowDetailsProps {
-  open: boolean;
-  colLength: number;
-  isTimeBased: boolean;
-  singleDocProps: DiscoverNavigationProps;
-  surrDocsProps: DiscoverNavigationProps;
   children: JSX.Element;
+  colLength: number;
+  rowIndex: string;
+  rowId: string;
+  columns: string[];
+  isTimeBased: boolean;
+  dataView: DataView;
+  filters?: Filter[];
+  savedSearchId?: string;
+  isPlainRecord?: boolean;
 }
 
 export const TableRowDetails = ({
-  open,
   colLength,
   isTimeBased,
-  singleDocProps,
-  surrDocsProps,
   children,
+  dataView,
+  rowIndex,
+  rowId,
+  columns,
+  filters,
+  savedSearchId,
+  isPlainRecord,
 }: TableRowDetailsProps) => {
-  if (!open) {
-    return null;
-  }
+  const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
+    {
+      dataView,
+      rowIndex,
+      rowId,
+      columns,
+      filters,
+      savedSearchId,
+    }
+  );
 
   return (
     <td colSpan={(colLength || 1) + 2}>
@@ -42,37 +60,65 @@ export const TableRowDetails = ({
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs" data-test-subj="docTableRowDetailsTitle">
                 <h4>
-                  <FormattedMessage
-                    id="discover.docTable.tableRow.detailHeading"
-                    defaultMessage="Expanded document"
-                  />
+                  {isPlainRecord && (
+                    <FormattedMessage
+                      id="discover.grid.tableRow.textBasedDetailHeading"
+                      defaultMessage="Expanded row"
+                    />
+                  )}
+                  {!isPlainRecord && (
+                    <FormattedMessage
+                      id="discover.docTable.tableRow.detailHeading"
+                      defaultMessage="Expanded document"
+                    />
+                  )}
                 </h4>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {isTimeBased && (
-                <EuiLink data-test-subj="docTableRowAction" {...surrDocsProps}>
+        {!isPlainRecord && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {isTimeBased && (
+                  /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+                  <EuiButtonEmpty
+                    size="s"
+                    iconSize="s"
+                    iconType="document"
+                    flush="left"
+                    data-test-subj="docTableRowAction"
+                    href={contextViewHref}
+                    onClick={onOpenContextView}
+                  >
+                    <FormattedMessage
+                      id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
+                      defaultMessage="View surrounding documents"
+                    />
+                  </EuiButtonEmpty>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButtonEmpty
+                  size="s"
+                  iconSize="s"
+                  iconType="document"
+                  flush="left"
+                  data-test-subj="docTableRowAction"
+                  href={singleDocHref}
+                  onClick={onOpenSingleDoc}
+                >
                   <FormattedMessage
-                    id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
-                    defaultMessage="View surrounding documents"
+                    id="discover.docTable.tableRow.viewSingleDocumentLinkText"
+                    defaultMessage="View single document"
                   />
-                </EuiLink>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiLink data-test-subj="docTableRowAction" {...singleDocProps}>
-                <FormattedMessage
-                  id="discover.docTable.tableRow.viewSingleDocumentLinkText"
-                  defaultMessage="View single document"
-                />
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <div data-test-subj="docViewer">{children}</div>
     </td>

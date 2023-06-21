@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import { IngestInferenceConfig, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+
+import { FieldMapping } from '../ml_inference_pipeline';
 
 export interface InferencePipeline {
   modelId: string | undefined;
@@ -43,9 +45,16 @@ export interface MlInferenceError {
   timestamp: string | undefined; // Date string
 }
 
-export interface CreateMlInferencePipelineResponse {
-  addedToParentPipeline?: boolean;
-  created?: boolean;
+export interface PreparePipelineAndIndexForMlInferenceResult {
+  added_to_parent_pipeline?: boolean;
+  created_pipeline?: boolean;
+  pipeline_id: string;
+
+  mapping_updated: boolean;
+}
+
+export interface CreatePipelineResult {
+  created: boolean;
   id: string;
 }
 
@@ -64,3 +73,23 @@ export interface DeleteMlInferencePipelineResponse {
   deleted?: string;
   updated?: string;
 }
+
+export interface CreateMlInferencePipelineParameters {
+  destination_field?: string;
+  inference_config?: InferencePipelineInferenceConfig;
+  model_id: string;
+  pipeline_name: string;
+  source_field: string;
+}
+
+export interface CreateMLInferencePipelineDefinition {
+  field_mappings: FieldMapping[];
+  pipeline_definition: MlInferencePipeline;
+  pipeline_name: string;
+}
+
+export type InferencePipelineInferenceConfig = IngestInferenceConfig & {
+  zero_shot_classification?: {
+    labels: string[];
+  };
+};

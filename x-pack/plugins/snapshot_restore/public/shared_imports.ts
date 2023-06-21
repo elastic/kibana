@@ -28,7 +28,6 @@ export {
   useAuthorizationContext,
   useRequest,
   WithPrivileges,
-  EuiCodeEditor,
   AuthorizationContext,
   GlobalFlyout,
 } from '@kbn/es-ui-shared-plugin/public';

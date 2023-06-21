@@ -12,7 +12,7 @@ visualizations and reports.
 To get started, open the main menu, then click *Stack Management > Rollup Jobs*.
 
 [role="screenshot"]
-image::images/management_rollup_list.png[][List of currently active rollup jobs]
+image::images/management_rollup_list.png[List of currently active rollup jobs]
 
 Before using this feature, you should be familiar with how rollups work.
 {ref}/xpack-rollup.html[Rolling up historical data] is a good source for more
@@ -40,21 +40,21 @@ the rollup index. For example, if your index pattern is `metricbeat-*`, you can
 name your rollup index `rollup-metricbeat`, but not `metricbeat-rollup`.
 
 [role="screenshot"]
-image::images/management_create_rollup_job.png[][Wizard that walks you through creation of a rollup job]
+image::images/management_create_rollup_job.png[Wizard that walks you through creation of a rollup job]
 
 [float]
 [[manage-rollup-job]]
 === Start, stop, and delete rollup jobs
 
-Once you’ve saved a rollup job, you’ll see it the *Rollup Jobs* overview page,
+Once you've saved a rollup job, you'll see it the *Rollup Jobs* overview page,
 where you can drill down for further investigation. The *Manage* menu enables
 you to start, stop, and delete the rollup job.
 You must first stop a rollup job before deleting it.
 
 [role="screenshot"]
-image::images/management_rollup_job_details.png[][Rollup job details]
+image::images/management_rollup_job_details.png[Rollup job details]
 
-You can’t change a rollup job after you’ve created it. To select additional
+You can't change a rollup job after you've created it. To select additional
 fields or redefine terms, you must delete the existing job, and then create a
 new one with the updated specifications. Be sure to use a different name for the
 new rollup job&mdash;reusing the same name can lead to problems with mismatched
@@ -66,11 +66,11 @@ configuration].
 === Try it: Create and visualize rolled up data
 
 This example creates a rollup job to capture log data from sample web logs.
-Before you start, <<add-sample-data, add the web logs sample data set>>.
+Before you start, <<add-sample-data,add the web logs sample data set>>.
 
 In this example, you want data that is older than 7 days in the
 `kibana_sample_data_logs` index to roll up into the `rollup_logstash` index.
-You’ll bucket the rolled up data on an hourly basis, using `60m` for the time
+You'll bucket the rolled up data on an hourly basis, using `60m` for the time
 bucket configuration.
 
 For this example, the job will perform the rollup every minute. However, you'd
@@ -163,7 +163,7 @@ matches the rollup index and `kibana_sample_data_logs` matches the raw data.
 as your source to see both the raw and rolled up data.
 +
 [role="screenshot"]
-image::images/management-create-rollup-bar-chart.png[][Create visualization of rolled up data]
+image::images/management-create-rollup-bar-chart.png[Create visualization of rolled up data]
 
 . Select *Bar vertical stacked* in the chart type dropdown.
 
@@ -176,4 +176,4 @@ bytes`.
 to zoom in.
 +
 [role="screenshot"]
-image::images/management_rollup_job_dashboard.png[][Dashboard with rolled up data]
+image::images/management_rollup_job_dashboard.png[Dashboard with rolled up data]

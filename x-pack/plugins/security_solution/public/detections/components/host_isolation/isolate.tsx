@@ -38,7 +38,11 @@ export const IsolateHost = React.memo(
       return caseInfo.id;
     });
 
-    const { loading, isolateHost } = useHostIsolation({ endpointId, comment, caseIds });
+    const { loading, isolateHost } = useHostIsolation({
+      endpointId,
+      comment,
+      caseIds,
+    });
 
     const confirmHostIsolation = useCallback(async () => {
       const hostIsolated = await isolateHost();

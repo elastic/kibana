@@ -14,7 +14,7 @@ import {
   createComment,
   deleteAllCaseItems,
   getAlertsAttachedToCase,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,

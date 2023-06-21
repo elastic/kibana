@@ -25,6 +25,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 describe('Use cases toast hook', () => {
   const successMock = jest.fn();
   const errorMock = jest.fn();
+  const dangerMock = jest.fn();
   const getUrlForApp = jest.fn().mockReturnValue(`/app/cases/${mockCase.id}`);
   const navigateToUrl = jest.fn();
 
@@ -54,6 +55,7 @@ describe('Use cases toast hook', () => {
     return {
       addSuccess: successMock,
       addError: errorMock,
+      addDanger: dangerMock,
     };
   });
 
@@ -346,7 +348,28 @@ describe('Use cases toast hook', () => {
 
       result.current.showSuccessToast('my title');
 
-      expect(successMock).toHaveBeenCalledWith('my title');
+      expect(successMock).toHaveBeenCalledWith({
+        className: 'eui-textBreakWord',
+        title: 'my title',
+      });
+    });
+  });
+
+  describe('showDangerToast', () => {
+    it('should show a danger toast', () => {
+      const { result } = renderHook(
+        () => {
+          return useCasesToast();
+        },
+        { wrapper: TestProviders }
+      );
+
+      result.current.showDangerToast('my danger toast');
+
+      expect(dangerMock).toHaveBeenCalledWith({
+        className: 'eui-textBreakWord',
+        title: 'my danger toast',
+      });
     });
   });
 });

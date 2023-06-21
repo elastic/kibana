@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import DateMath from '@kbn/datemath';
+import moment from 'moment';
 import { getCerts } from './get_certs';
 import { getUptimeESMockClient } from './test_helpers';
 
@@ -82,6 +84,9 @@ describe('getCerts', () => {
   });
 
   it('parses query result and returns expected values', async () => {
+    const dateMathSpy = jest.spyOn(DateMath, 'parse');
+
+    dateMathSpy.mockReturnValue(moment(10000));
     const { esClient, uptimeEsClient } = getUptimeESMockClient();
 
     esClient.search.mockResponseOnce({
@@ -107,8 +112,13 @@ describe('getCerts', () => {
           Object {
             "common_name": "r2.shared.global.fastly.net",
             "issuer": "GlobalSign CloudSSL CA - SHA256 - G3",
+            "locationName": undefined,
+            "monitorName": "Real World Test",
+            "monitorType": undefined,
+            "monitorUrl": "https://fullurl.com",
             "monitors": Array [
               Object {
+                "configId": undefined,
                 "id": "real-world-test",
                 "name": "Real World Test",
                 "url": undefined,
@@ -131,6 +141,9 @@ describe('getCerts', () => {
               "_source": Array [
                 "monitor.id",
                 "monitor.name",
+                "monitor.type",
+                "url.full",
+                "observer.geo.name",
                 "tls.server.x509.issuer.common_name",
                 "tls.server.x509.subject.common_name",
                 "tls.server.hash.sha1",
@@ -153,6 +166,7 @@ describe('getCerts', () => {
                       "monitor.id",
                       "monitor.name",
                       "url.full",
+                      "config_id",
                     ],
                   },
                   "collapse": Object {
@@ -178,8 +192,8 @@ describe('getCerts', () => {
                     Object {
                       "range": Object {
                         "monitor.timespan": Object {
-                          "gte": "now-2d",
-                          "lte": "now+1h",
+                          "gte": 10000,
+                          "lte": 10000,
                         },
                       },
                     },
@@ -190,7 +204,7 @@ describe('getCerts', () => {
                           Object {
                             "range": Object {
                               "tls.certificate_not_valid_after": Object {
-                                "lte": "now+100d",
+                                "lte": 10000,
                               },
                             },
                           },
@@ -225,7 +239,7 @@ describe('getCerts', () => {
                 },
               ],
             },
-            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*",
           },
           Object {
             "meta": true,

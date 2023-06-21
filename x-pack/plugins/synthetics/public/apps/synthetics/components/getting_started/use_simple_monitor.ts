@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useSelector } from 'react-redux';
-import { selectServiceLocationsState } from '../../state';
+import { useDispatch, useSelector } from 'react-redux';
+import { useSyntheticsRefreshContext } from '../../contexts';
+import { cleanMonitorListState, selectServiceLocationsState } from '../../state';
 import { showSyncErrors } from '../monitors_page/management/show_sync_errors';
 import { fetchCreateMonitor } from '../../state';
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
@@ -19,14 +20,22 @@ import {
   ServiceLocationErrors,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
-import { MONITOR_SUCCESS_LABEL, MY_FIRST_MONITOR, SimpleFormData } from './simple_monitor_form';
+import {
+  MONITOR_SUCCESS_LABEL,
+  MONITOR_FAILURE_LABEL,
+  SimpleFormData,
+} from './simple_monitor_form';
 import { kibanaService } from '../../../../utils/kibana_service';
 
 export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData }) => {
   const { application } = useKibana().services;
   const { locations: serviceLocations } = useSelector(selectServiceLocationsState);
 
-  const { data, loading } = useFetcher(() => {
+  const dispatch = useDispatch();
+
+  const { refreshApp } = useSyntheticsRefreshContext();
+
+  const { data, loading, status } = useFetcher(() => {
     if (!monitorData) {
       return new Promise<undefined>((resolve) => resolve(undefined));
     }
@@ -39,7 +48,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
   await page.goto('${urls}');
 });`,
         [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
-        [ConfigKey.NAME]: MY_FIRST_MONITOR,
+        [ConfigKey.NAME]: urls,
         [ConfigKey.LOCATIONS]: locations,
         [ConfigKey.URLS]: urls,
       },
@@ -57,14 +66,21 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
       );
     }
 
-    if (!loading && newMonitor?.id) {
+    if (!loading && status === FETCH_STATUS.FAILURE) {
+      kibanaService.toasts.addDanger({
+        title: MONITOR_FAILURE_LABEL,
+        toastLifeTimeMs: 3000,
+      });
+    } else if (!loading && newMonitor?.id) {
       kibanaService.toasts.addSuccess({
         title: MONITOR_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
       });
-      application?.navigateToApp('synthetics', { path: `` });
+      refreshApp();
+      dispatch(cleanMonitorListState());
+      application?.navigateToApp('synthetics', { path: 'monitors' });
     }
-  }, [application, data, loading, serviceLocations]);
+  }, [application, data, status, dispatch, loading, refreshApp, serviceLocations]);
 
-  return { data, loading };
+  return { data: data as SyntheticsMonitorWithId, loading };
 };

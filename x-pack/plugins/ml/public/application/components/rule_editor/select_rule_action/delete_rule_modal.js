@@ -11,6 +11,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiConfirmModal, EuiLink, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -44,27 +45,20 @@ export class DeleteRuleModal extends Component {
     if (this.state.isModalVisible) {
       modal = (
         <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleTitle"
-              defaultMessage="Delete rule?"
-            />
-          }
+          title={i18n.translate('xpack.ml.ruleEditor.deleteRuleModal.deleteRuleTitle', {
+            defaultMessage: 'Delete rule?',
+          })}
           onCancel={this.closeModal}
           onConfirm={this.deleteRule}
           buttonColor="danger"
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.ml.ruleEditor.deleteRuleModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.ml.ruleEditor.deleteRuleModal.deleteButtonLabel"
-              defaultMessage="Delete"
-            />
-          }
+          cancelButtonText={i18n.translate(
+            'xpack.ml.ruleEditor.deleteRuleModal.cancelButtonLabel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.ruleEditor.deleteRuleModal.deleteButtonLabel',
+            { defaultMessage: 'Delete' }
+          )}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />
       );

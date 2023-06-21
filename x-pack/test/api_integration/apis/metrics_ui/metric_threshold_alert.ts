@@ -11,6 +11,7 @@ import {
   Aggregators,
   Comparator,
   CountMetricExpressionParams,
+  CustomMetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
 import { InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
@@ -40,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         comparator: Comparator.GT_OR_EQ,
         aggType: Aggregators.SUM,
         metric: 'value',
-      },
+      } as NonCountMetricExpressionParams,
     ],
   };
 
@@ -125,6 +126,82 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+        it('should alert with custom metric that is a document ratio', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.CUSTOM,
+                customMetrics: [
+                  { name: 'A', aggType: 'count', filter: 'event.dataset: "apache2.error"' },
+                  { name: 'B', aggType: 'count' },
+                ],
+                equation: '(A / B) * 100',
+                label: 'apache2 error ratio',
+              } as CustomMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'custom',
+                metric: 'apache2 error ratio',
+                label: 'apache2 error ratio',
+                customMetrics: [
+                  { name: 'A', aggType: 'count', filter: 'event.dataset: "apache2.error"' },
+                  { name: 'B', aggType: 'count' },
+                ],
+                equation: '(A / B) * 100',
+                currentValue: 36.195262024407754,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -174,6 +251,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: 'web' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -206,7 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
             logger,
             void 0,
             timeFrame,
-            ['middleware']
+            [{ key: 'middleware', bucketKey: { groupBy0: 'middleware' } }]
           );
           expect(results).to.eql([
             {
@@ -222,6 +308,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: 'web' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
               middleware: {
                 timeSize: 5,
@@ -235,6 +330,159 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: 'middleware' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+        it('should trigger with contaier list in context on document count', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['kubernetes.pod.uid'],
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+
+          expect(results).to.eql([
+            {
+              'pod-01': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 2,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: {
+                  groupBy0: 'pod-01',
+                },
+                context: {
+                  cloud: undefined,
+                  container: [{ id: 'container-01' }, { id: 'container-02' }],
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+              'pod-02': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 2,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: {
+                  groupBy0: 'pod-02',
+                },
+                context: {
+                  cloud: undefined,
+                  container: [{ id: 'container-03' }, { id: 'container-04' }],
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+        it('should trigger with single container in context on document count', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['container.id'],
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [2],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+
+          expect(results).to.eql([
+            {
+              'container-05': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [2],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 2,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: {
+                  groupBy0: 'container-05',
+                },
+                context: {
+                  cloud: undefined,
+                  container: {
+                    id: 'container-05',
+                  },
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -281,6 +529,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -312,6 +569,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -358,6 +624,15 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  bucketKey: { groupBy0: '*' },
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined,
+                  },
                 },
               },
             ]);
@@ -388,7 +663,10 @@ export default function ({ getService }: FtrProviderContext) {
               logger,
               void 0,
               timeFrame,
-              ['web', 'prod']
+              [
+                { key: 'web', bucketKey: { groupBy0: 'web' } },
+                { key: 'prod', bucketKey: { groupBy0: 'prod' } },
+              ]
             );
             expect(results).to.eql([
               {
@@ -404,6 +682,15 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  bucketKey: { groupBy0: '*' },
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined,
+                  },
                 },
                 web: {
                   timeSize: 5,
@@ -417,6 +704,15 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  bucketKey: { groupBy0: 'web' },
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined,
+                  },
                 },
                 prod: {
                   timeSize: 5,
@@ -430,6 +726,15 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  bucketKey: { groupBy0: 'prod' },
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined,
+                  },
                 },
               },
             ]);
@@ -475,11 +780,20 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
-                currentValue: 4,
+                currentValue: 5,
                 timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -522,6 +836,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -548,11 +871,20 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'sum',
                 metric: 'value',
-                currentValue: 1,
+                currentValue: 151,
                 timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -593,11 +925,20 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
-                currentValue: 2,
+                currentValue: 3,
                 timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: 'dev' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
               prod: {
                 timeSize: 5,
@@ -611,6 +952,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: 'prod' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -633,6 +983,30 @@ export default function ({ getService }: FtrProviderContext) {
           );
           expect(results).to.eql([
             {
+              dev: {
+                aggType: 'sum',
+                bucketKey: {
+                  groupBy0: 'dev',
+                },
+                comparator: '>=',
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+                currentValue: 150,
+                isNoData: false,
+                metric: 'value',
+                shouldFire: true,
+                shouldWarn: false,
+                threshold: [1],
+                timeSize: 5,
+                timeUnit: 'm',
+                timestamp: '2021-01-01T01:00:00.000Z',
+              },
               prod: {
                 timeSize: 5,
                 timeUnit: 'm',
@@ -645,6 +1019,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: 'prod' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -665,7 +1048,7 @@ export default function ({ getService }: FtrProviderContext) {
             logger,
             void 0,
             timeFrame,
-            ['dev']
+            [{ key: 'dev', bucketKey: { groupBy0: 'dev' } }]
           );
           expect(results).to.eql([
             {
@@ -681,12 +1064,21 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: 'dev' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
         });
 
-        it('should NOT resport any alerts when missing group recovers', async () => {
+        it('should NOT report any alerts when missing group recovers', async () => {
           const params = {
             ...baseParams,
             criteria: [
@@ -711,7 +1103,7 @@ export default function ({ getService }: FtrProviderContext) {
             logger,
             moment(gauge.midpoint).subtract(1, 'm').valueOf(),
             timeFrame,
-            ['dev']
+            [{ key: 'dev', bucketKey: { groupBy0: 'dev' } }]
           );
           expect(results).to.eql([{}]);
         });
@@ -746,6 +1138,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: 'prod' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
               dev: {
                 timeSize: 5,
@@ -759,6 +1160,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                bucketKey: { groupBy0: 'dev' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -807,6 +1217,15 @@ export default function ({ getService }: FtrProviderContext) {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: '*' },
+              context: {
+                cloud: undefined,
+                container: undefined,
+                host: undefined,
+                labels: undefined,
+                orchestrator: undefined,
+                tags: undefined,
+              },
             },
           },
         ]);
@@ -851,6 +1270,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -901,6 +1329,15 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: true,
                 isNoData: false,
+                bucketKey: { groupBy0: 'dev' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
               },
             },
           ]);

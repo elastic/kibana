@@ -21,13 +21,13 @@ import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import type { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import {
-  useGetAgentCountForPolicy,
   useGetEndpointSecurityPackage,
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
@@ -40,6 +40,7 @@ import { PolicyEndpointCount } from './components/policy_endpoint_count';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 export const PolicyList = memo(() => {
+  const { canReadEndpointList, loading: authLoading } = useUserPrivileges().endpointPrivileges;
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
   const { search } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -55,31 +56,10 @@ export const PolicyList = memo(() => {
     perPage: pagination.pageSize,
   });
 
-  // endpoint count per policy
-  const policyIds = useMemo(() => data?.items.map((policies) => policies.id) ?? [], [data]);
-  const agentPolicyIds = useMemo(
-    () => data?.items.map((policies) => policies.policy_id) ?? [],
-    [data]
-  );
-  const { data: endpointCount = { items: [] } } = useGetAgentCountForPolicy({
-    agentPolicyIds,
-    customQueryOptions: {
-      enabled: agentPolicyIds.length > 0,
-      onError: (err) => {
-        toasts.addDanger(
-          i18n.translate('xpack.securitySolution.policyList.endpointCountError', {
-            defaultMessage: 'Error retrieving endpoint counts',
-          })
-        );
-      },
-    },
-  });
-
   // grab endpoint version for empty page
   const { data: endpointPackageInfo, isFetching: packageIsFetching } =
     useGetEndpointSecurityPackage({
       customQueryOptions: {
-        enabled: agentPolicyIds.length === 0,
         onError: (err) => {
           toasts.addDanger(
             i18n.translate('xpack.securitySolution.policyList.packageVersionError', {
@@ -89,28 +69,6 @@ export const PolicyList = memo(() => {
         },
       },
     });
-
-  const policyIdToEndpointCount = useMemo(() => {
-    const map = new Map<string, number>();
-
-    for (const agentPolicy of endpointCount?.items) {
-      if (agentPolicy.package_policies) {
-        for (const packagePolicy of agentPolicy.package_policies) {
-          if (policyIds.includes(packagePolicy.id)) {
-            map.set(packagePolicy.id, agentPolicy.agents ?? 0);
-          }
-        }
-      }
-    }
-
-    // error with the endpointCount api call, set default count to 0
-    if (policyIds.length > 0 && map.size === 0) {
-      for (const policy of policyIds) {
-        map.set(policy, 0);
-      }
-    }
-    return map;
-  }, [endpointCount, policyIds]);
 
   const totalItemCount = useMemo(() => data?.total ?? 0, [data]);
 
@@ -260,13 +218,14 @@ export const PolicyList = memo(() => {
         }),
         width: '8%',
         render: (policy: PolicyData) => {
-          const count = policyIdToEndpointCount.get(policy.id);
+          const count = policy.agents ?? 0;
+
           return (
             <PolicyEndpointCount
               className="eui-textTruncate"
               data-test-subj="policyEndpointCountLink"
               policyId={policy.id}
-              nonLinkCondition={count === 0}
+              nonLinkCondition={authLoading || !canReadEndpointList || count === 0}
             >
               {count}
             </PolicyEndpointCount>
@@ -274,7 +233,7 @@ export const PolicyList = memo(() => {
         },
       },
     ];
-  }, [policyIdToEndpointCount, backLink]);
+  }, [backLink, authLoading, canReadEndpointList]);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {

@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getRiskEntityTranslation } from '../../../../risk_score/components/translations';
+import { getRiskEntityTranslation } from '../../../../explore/components/risk_score/translations';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-export * from '../../../../risk_score/components/translations';
+export * from '../../../../explore/components/risk_score/translations';
 
 export const ENTITY_RISK_TOOLTIP = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskToolTip', {
@@ -17,14 +17,6 @@ export const ENTITY_RISK_TOOLTIP = (riskEntity: RiskScoreEntity) =>
     values: {
       riskEntity: getRiskEntityTranslation(riskEntity),
       riskEntityLowercase: getRiskEntityTranslation(riskEntity, true),
-    },
-  });
-
-export const ENTITY_RISK = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskClassificationTitle', {
-    defaultMessage: '{riskEntity} risk classification',
-    values: {
-      riskEntity: getRiskEntityTranslation(riskEntity),
     },
   });
 
@@ -47,5 +39,21 @@ export const LEARN_MORE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.riskDashboard.learnMore',
   {
     defaultMessage: 'Learn more',
+  }
+);
+
+export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.riskDashboard.hostsTableTooltip',
+  {
+    defaultMessage:
+      'The Host Risk Score panel displays the list of risky hosts and their latest risk score. You may filter this list using global filters in the KQL search bar. The time-range picker filter will display Alerts within the selected time range only and does not filter the list of risky hosts.',
+  }
+);
+
+export const USER_RISK_TABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.riskDashboard.usersTableTooltip',
+  {
+    defaultMessage:
+      'The User Risk Score panel displays the list of risky users and their latest risk score. You may filter this list using global filters in the KQL search bar. The time-range picker filter will display Alerts within the selected time range only and does not filter the list of risky users.',
   }
 );

@@ -21,10 +21,9 @@ import {
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import { ExpressionLegacyMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
 
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));

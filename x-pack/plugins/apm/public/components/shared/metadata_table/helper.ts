@@ -43,7 +43,7 @@ export const getSectionsFromFields = (fields: Record<string, any>) => {
 
   const [labelSections, otherSections] = partition(
     sections,
-    (section) => section.key === 'labels'
+    (section) => section.key === 'labels' || section.key === 'numeric_labels'
   );
 
   return [...labelSections, ...otherSections];

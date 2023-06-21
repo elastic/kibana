@@ -34,7 +34,7 @@ export class CasesClient {
     this._casesClientInternal = createCasesClientInternal(args);
     this._cases = createCasesSubClient(args, this, this._casesClientInternal);
     this._attachments = createAttachmentsSubClient(args, this, this._casesClientInternal);
-    this._userActions = createUserActionsSubClient(args);
+    this._userActions = createUserActionsSubClient(args, this);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
     this._metrics = createMetricsSubClient(args, this);
   }

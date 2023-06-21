@@ -6,9 +6,7 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
-// @ts-ignore
 import { createQuery } from '../create_query';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';

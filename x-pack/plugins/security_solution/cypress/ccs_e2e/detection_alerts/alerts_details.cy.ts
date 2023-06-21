@@ -7,9 +7,9 @@
 
 import { JSON_TEXT } from '../../screens/alerts_details';
 
-import { expandFirstAlert, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
+import { expandFirstAlert, waitForAlerts } from '../../tasks/alerts';
 import { openJsonView } from '../../tasks/alerts_details';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverCCSLoad } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -23,9 +23,9 @@ describe('Alert details with unmapped fields', () => {
     login();
     cleanKibana();
     esArchiverCCSLoad('unmapped_fields');
-    createCustomRuleEnabled(getUnmappedCCSRule());
+    createRule(getUnmappedCCSRule());
     visitWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
+    waitForAlerts();
     expandFirstAlert();
   });
 

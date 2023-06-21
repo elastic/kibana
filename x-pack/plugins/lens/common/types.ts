@@ -9,7 +9,6 @@ import type { Filter, FilterMeta } from '@kbn/es-query';
 import type { Position } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/common';
 import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
@@ -17,20 +16,18 @@ import { layerTypes } from './layer_types';
 import { CollapseFunction } from './expressions';
 
 export type { OriginalColumn } from './expressions/map_to_columns';
-
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
-
-export interface ExistingFields {
-  indexPatternTitle: string;
-  existingFieldNames: string[];
-}
+export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
+export type { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+export type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
+export type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
+export type { FormatFactory } from '@kbn/visualization-ui-components/public';
 
 export interface DateRange {
   fromDate: string;
   toDate: string;
 }
 
-export interface PersistableFilterMeta extends FilterMeta {
+interface PersistableFilterMeta extends FilterMeta {
   indexRefName?: string;
 }
 
@@ -45,10 +42,10 @@ export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 export type ValueLabelConfig = 'hide' | 'show';
 
 export type PieChartType = $Values<typeof PieChartTypes>;
-export type CategoryDisplayType = $Values<typeof CategoryDisplay>;
-export type NumberDisplayType = $Values<typeof NumberDisplay>;
+type CategoryDisplayType = $Values<typeof CategoryDisplay>;
+type NumberDisplayType = $Values<typeof NumberDisplay>;
 
-export type LegendDisplayType = $Values<typeof LegendDisplay>;
+type LegendDisplayType = $Values<typeof LegendDisplay>;
 
 export enum EmptySizeRatios {
   SMALL = 0.3,
@@ -57,9 +54,11 @@ export enum EmptySizeRatios {
 }
 
 export interface SharedPieLayerState {
+  metrics: string[];
   primaryGroups: string[];
   secondaryGroups?: string[];
-  metric?: string;
+  allowMultipleMetrics?: boolean;
+  colorsByDimension?: Record<string, string>;
   collapseFns?: Record<string, CollapseFunction>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
@@ -85,6 +84,7 @@ export interface PieVisualizationState {
   palette?: PaletteOutput;
 }
 export interface LegacyMetricState {
+  autoScaleMetricAlignment?: 'left' | 'right' | 'center';
   layerId: string;
   accessor?: string;
   layerType: LayerType;

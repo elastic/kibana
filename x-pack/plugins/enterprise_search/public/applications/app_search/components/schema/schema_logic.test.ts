@@ -37,6 +37,7 @@ describe('SchemaLogic', () => {
     },
     unconfirmedFields: ['some_field'],
     unsearchedUnconfirmedFields: true,
+    incompleteFields: ['some_other_field'],
   };
 
   const DEFAULT_VALUES = {
@@ -51,6 +52,8 @@ describe('SchemaLogic', () => {
     hasUnconfirmedFields: false,
     hasNewUnsearchedFields: false,
     isModalOpen: false,
+    incompleteFields: [],
+    hasIncompleteFields: false,
   };
 
   /*
@@ -93,6 +96,8 @@ describe('SchemaLogic', () => {
           unconfirmedFields: MOCK_RESPONSE.unconfirmedFields,
           hasUnconfirmedFields: true,
           hasNewUnsearchedFields: MOCK_RESPONSE.unsearchedUnconfirmedFields,
+          incompleteFields: MOCK_RESPONSE.incompleteFields,
+          hasIncompleteFields: true,
         });
       });
     });

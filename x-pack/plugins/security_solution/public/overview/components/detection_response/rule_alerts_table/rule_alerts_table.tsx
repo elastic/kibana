@@ -20,6 +20,10 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { CellActionsMode } from '@kbn/cell-actions';
+import { SecurityCellActionsTrigger } from '../../../../actions/constants';
+import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { HeaderSection } from '../../../../common/components/header_section';
 
 import { SEVERITY_COLOR } from '../utils';
@@ -34,7 +38,8 @@ import { HoverVisibilityContainer } from '../../../../common/components/hover_vi
 import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
+import { SecurityCellActions } from '../../../../common/components/cell_actions';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;
@@ -43,13 +48,17 @@ export interface RuleAlertsTableProps {
 export type GetTableColumns = (params: {
   getAppUrl: GetAppUrl;
   navigateTo: NavigateTo;
-  openRuleInTimeline: (ruleName: string) => void;
+  openRuleInAlertsPage: (ruleName: string) => void;
 }) => Array<EuiBasicTableColumn<RuleAlertsItem>>;
 
 const DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID =
   'detection-response-rule-alerts-severity-table' as const;
 
-export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRuleInTimeline }) => [
+export const getTableColumns: GetTableColumns = ({
+  getAppUrl,
+  navigateTo,
+  openRuleInAlertsPage,
+}) => [
   {
     field: 'name',
     name: i18n.RULE_ALERTS_COLUMN_RULE_NAME,
@@ -90,9 +99,27 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRu
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
     render: (alertCount: number, { name }) => (
-      <EuiLink disabled={alertCount === 0} onClick={() => openRuleInTimeline(name)}>
-        <FormattedCount count={alertCount} />
-      </EuiLink>
+      <SecurityCellActions
+        field={{
+          name: ALERT_RULE_NAME,
+          value: name,
+          type: 'keyword',
+          aggregatable: true,
+        }}
+        mode={CellActionsMode.HOVER_RIGHT}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        metadata={{
+          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+        }}
+      >
+        <EuiLink
+          data-test-subj="severityRuleAlertsTable-alertCountLink"
+          disabled={alertCount === 0}
+          onClick={() => openRuleInAlertsPage(name)}
+        >
+          <FormattedCount count={alertCount} />
+        </EuiLink>
+      </SecurityCellActions>
     ),
   },
   {
@@ -108,21 +135,38 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRu
 export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexName }) => {
   const { getAppUrl, navigateTo } = useNavigation();
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID);
+  const { filterQuery } = useGlobalFilterQuery();
+
   const { items, isLoading, updatedAt } = useRuleAlertsItems({
     signalIndexName,
     queryId: DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID,
     skip: !toggleStatus,
+    filterQuery,
   });
 
-  const { openRuleInTimeline } = useNavigateToTimeline();
+  const openAlertsPageWithFilter = useNavigateToAlertsPageWithFilters();
+
+  const openRuleInAlertsPage = useCallback(
+    (ruleName: string) =>
+      openAlertsPageWithFilter({
+        title: i18n.OPEN_IN_ALERTS_TITLE_RULENAME,
+        selectedOptions: [ruleName],
+        fieldName: ALERT_RULE_NAME,
+      }),
+    [openAlertsPageWithFilter]
+  );
 
   const navigateToAlerts = useCallback(() => {
-    navigateTo({ deepLinkId: SecurityPageName.alerts });
-  }, [navigateTo]);
+    openAlertsPageWithFilter({
+      title: i18n.OPEN_IN_ALERTS_TITLE_STATUS,
+      selectedOptions: ['open'],
+      fieldName: ALERT_WORKFLOW_STATUS,
+    });
+  }, [openAlertsPageWithFilter]);
 
   const columns = useMemo(
-    () => getTableColumns({ getAppUrl, navigateTo, openRuleInTimeline }),
-    [getAppUrl, navigateTo, openRuleInTimeline]
+    () => getTableColumns({ getAppUrl, navigateTo, openRuleInAlertsPage }),
+    [getAppUrl, navigateTo, openRuleInAlertsPage]
   );
 
   return (

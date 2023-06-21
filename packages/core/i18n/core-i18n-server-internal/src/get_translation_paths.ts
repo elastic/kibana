@@ -26,12 +26,12 @@ export async function getTranslationPaths({ cwd, nested }: { cwd: string; nested
     const pluginBasePath = dirname(entryFullPath);
     try {
       const content = await readFile(entryFullPath, 'utf8');
-      const { translations } = JSON.parse(content) as I18NRCFileStructure;
-      if (translations && translations.length) {
-        translations.forEach((translation) => {
-          const translationFullPath = resolve(pluginBasePath, translation);
-          translationPaths.push(translationFullPath);
-        });
+      const { translations = [] } = JSON.parse(content) as I18NRCFileStructure;
+
+      for (const path of translations) {
+        translationPaths.push(
+          path.startsWith('@kbn/') ? require.resolve(path) : resolve(pluginBasePath, path)
+        );
       }
     } catch (err) {
       throw new Error(`Failed to parse .i18nrc.json file at ${entryFullPath}`);

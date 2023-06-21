@@ -12,6 +12,12 @@ export const useRulesTableContextMock = {
   create: (): jest.Mocked<RulesTableContextType> => ({
     state: {
       rules: [],
+      rulesSnoozeSettings: {
+        data: {},
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+      },
       pagination: {
         page: 1,
         perPage: 20,
@@ -28,10 +34,10 @@ export const useRulesTableContextMock = {
         order: 'desc',
       },
       isActionInProgress: false,
+      isPreflightInProgress: false,
       isAllSelected: false,
       isFetched: true,
       isFetching: false,
-      isInMemorySorting: false,
       isLoading: false,
       isRefetching: false,
       isRefreshOn: true,
@@ -39,19 +45,21 @@ export const useRulesTableContextMock = {
       loadingRuleIds: [],
       loadingRulesAction: null,
       selectedRuleIds: [],
+      isDefault: true,
     },
     actions: {
       reFetchRules: jest.fn(),
       setFilterOptions: jest.fn(),
       setIsAllSelected: jest.fn(),
-      setIsInMemorySorting: jest.fn(),
       setIsRefreshOn: jest.fn(),
       setLoadingRules: jest.fn(),
       setPage: jest.fn(),
       setPerPage: jest.fn(),
+      setIsPreflightInProgress: jest.fn(),
       setSelectedRuleIds: jest.fn(),
       setSortingOptions: jest.fn(),
       clearRulesSelection: jest.fn(),
+      clearFilters: jest.fn(),
     },
   }),
 };

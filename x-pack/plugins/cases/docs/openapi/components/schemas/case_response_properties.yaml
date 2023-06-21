@@ -24,18 +24,7 @@ required:
   - version
 properties:
   assignees:
-    type: array
-    description: An array containing users that are assigned to the case.
-    nullable: true
-    items:
-      type: object
-      required:
-        - uid
-      properties:
-        uid:
-          type: string
-          description: A unique identifier for the user profile. You can use the get user profile API to retrieve more details.
-          example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
+    $ref: 'assignees.yaml'
   closed_at:
     type: string
     format: date-time

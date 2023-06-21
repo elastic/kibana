@@ -34,8 +34,7 @@ describe('When using the `FormattedError` component', () => {
     const httpError = new Error('api foo') as IHttpFetchError;
     Object.assign(httpError, {
       name: 'foo',
-      req: {} as Request,
-      res: {} as Response,
+      request: {} as Request,
       response: {
         status: '400',
         statusText: 'some 400 error',

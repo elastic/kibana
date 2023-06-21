@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { TransformAPIProvider } from './api';
 import { TransformEditFlyoutProvider } from './edit_flyout';
+import { TransformDatePickerProvider } from './date_picker';
 import { TransformDiscoverProvider } from './discover';
 import { TransformManagementProvider } from './management';
 import { TransformNavigationProvider } from './navigation';
@@ -18,6 +19,7 @@ import { TransformSourceSelectionProvider } from './source_selection';
 import { TransformTableProvider } from './transform_table';
 import { TransformTestExecutionProvider } from './test_execution';
 import { TransformWizardProvider } from './wizard';
+import { TransformAlertingProvider } from './alerting';
 
 import { MachineLearningAPIProvider } from '../ml/api';
 import { MachineLearningTestResourcesProvider } from '../ml/test_resources';
@@ -25,6 +27,7 @@ import { MachineLearningTestResourcesProvider } from '../ml/test_resources';
 export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);
   const mlApi = MachineLearningAPIProvider(context);
+  const datePicker = TransformDatePickerProvider(context);
   const discover = TransformDiscoverProvider(context);
   const editFlyout = TransformEditFlyoutProvider(context);
   const management = TransformManagementProvider(context);
@@ -36,9 +39,12 @@ export function TransformProvider(context: FtrProviderContext) {
   const testExecution = TransformTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context, mlApi);
   const wizard = TransformWizardProvider(context);
+  const alerting = TransformAlertingProvider(context);
 
   return {
+    alerting,
     api,
+    datePicker,
     discover,
     editFlyout,
     management,

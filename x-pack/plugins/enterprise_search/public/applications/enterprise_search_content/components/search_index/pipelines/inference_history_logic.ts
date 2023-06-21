@@ -10,7 +10,6 @@ import { kea, MakeLogicType } from 'kea';
 import { Status } from '../../../../../../common/types/api';
 import { MlInferenceHistoryItem } from '../../../../../../common/types/pipelines';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
 import {
   FetchMlInferencePipelineHistoryApiLogicArgs,
   FetchMlInferencePipelineHistoryApiLogicResponse,
@@ -18,14 +17,14 @@ import {
 } from '../../../api/pipelines/fetch_ml_inference_pipeline_history';
 import { IndexNameLogic } from '../index_name_logic';
 
-interface InferenceHistoryActions {
+export interface InferenceHistoryActions {
   fetchIndexInferenceHistory: Actions<
     FetchMlInferencePipelineHistoryApiLogicArgs,
     FetchMlInferencePipelineHistoryApiLogicResponse
   >['makeRequest'];
 }
 
-interface InferenceHistoryValues {
+export interface InferenceHistoryValues {
   fetchIndexInferenceHistoryStatus: Status;
   indexName: string;
   inferenceHistory: MlInferenceHistoryItem[] | undefined;
@@ -48,10 +47,6 @@ export const InferenceHistoryLogic = kea<
       ['data as inferenceHistoryData', 'status as fetchIndexInferenceHistoryStatus'],
     ],
   },
-  listeners: () => ({
-    fetchIndexInferenceHistory: () => clearFlashMessages(),
-    fetchIndexInferenceHistoryError: (error) => flashAPIErrors(error),
-  }),
   path: ['enterprise_search', 'content', 'pipelines_inference_history'],
   selectors: ({ selectors }) => ({
     inferenceHistory: [

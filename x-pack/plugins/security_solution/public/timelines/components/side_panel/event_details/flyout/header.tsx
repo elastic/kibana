@@ -12,20 +12,26 @@ import { ExpandableEventTitle } from '../expandable_event';
 import { BackToAlertDetailsLink } from './back_to_alert_details_link';
 
 interface FlyoutHeaderComponentProps {
+  eventId: string;
+  eventIndex: string;
   isAlert: boolean;
   isHostIsolationPanelOpen: boolean;
   isolateAction: 'isolateHost' | 'unisolateHost';
   loading: boolean;
+  promptContextId?: string;
   ruleName: string;
   showAlertDetails: () => void;
   timestamp: string;
 }
 
 const FlyoutHeaderContentComponent = ({
+  eventId,
+  eventIndex,
   isAlert,
   isHostIsolationPanelOpen,
   isolateAction,
   loading,
+  promptContextId,
   ruleName,
   showAlertDetails,
   timestamp,
@@ -36,8 +42,11 @@ const FlyoutHeaderContentComponent = ({
         <BackToAlertDetailsLink isolateAction={isolateAction} showAlertDetails={showAlertDetails} />
       ) : (
         <ExpandableEventTitle
+          eventId={eventId}
+          eventIndex={eventIndex}
           isAlert={isAlert}
           loading={loading}
+          promptContextId={promptContextId}
           ruleName={ruleName}
           timestamp={timestamp}
         />
@@ -48,10 +57,13 @@ const FlyoutHeaderContentComponent = ({
 const FlyoutHeaderContent = React.memo(FlyoutHeaderContentComponent);
 
 const FlyoutHeaderComponent = ({
+  eventId,
+  eventIndex,
   isAlert,
   isHostIsolationPanelOpen,
   isolateAction,
   loading,
+  promptContextId,
   ruleName,
   showAlertDetails,
   timestamp,
@@ -59,10 +71,13 @@ const FlyoutHeaderComponent = ({
   return (
     <EuiFlyoutHeader hasBorder={isHostIsolationPanelOpen}>
       <FlyoutHeaderContentComponent
+        eventId={eventId}
+        eventIndex={eventIndex}
         isAlert={isAlert}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         isolateAction={isolateAction}
         loading={loading}
+        promptContextId={promptContextId}
         ruleName={ruleName}
         showAlertDetails={showAlertDetails}
         timestamp={timestamp}

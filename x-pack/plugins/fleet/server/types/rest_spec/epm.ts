@@ -9,7 +9,8 @@ import { schema } from '@kbn/config-schema';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
-    experimental: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
+    experimental: schema.maybe(schema.boolean()), // deprecated
     include_policy_templates: schema.maybe(schema.boolean()),
   }),
 };
@@ -17,8 +18,54 @@ export const GetCategoriesRequestSchema = {
 export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
-    experimental: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
+    experimental: schema.maybe(schema.boolean()), // deprecated
     excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
+  }),
+};
+
+export const GetInstalledPackagesRequestSchema = {
+  query: schema.object({
+    dataStreamType: schema.maybe(
+      schema.oneOf([
+        schema.literal('logs'),
+        schema.literal('metrics'),
+        schema.literal('traces'),
+        schema.literal('synthetics'),
+        schema.literal('profiling'),
+      ])
+    ),
+    nameQuery: schema.maybe(schema.string()),
+    searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
+    perPage: schema.number({ defaultValue: 30 }),
+    sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      defaultValue: 'asc',
+    }),
+  }),
+};
+
+export const GetDataStreamsRequestSchema = {
+  query: schema.object({
+    type: schema.maybe(
+      schema.oneOf([
+        schema.literal('logs'),
+        schema.literal('metrics'),
+        schema.literal('traces'),
+        schema.literal('synthetics'),
+        schema.literal('profiling'),
+      ])
+    ),
+    datasetQuery: schema.maybe(schema.string()),
+    sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      defaultValue: 'asc',
+    }),
+    uncategorisedOnly: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const GetLimitedPackagesRequestSchema = {
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -37,12 +84,25 @@ export const GetInfoRequestSchema = {
   }),
   query: schema.object({
     ignoreUnverified: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
+    full: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const GetBulkAssetsRequestSchema = {
+  body: schema.object({
+    assetIds: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() })),
   }),
 };
 
 export const GetInfoRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
+  }),
+  query: schema.object({
+    ignoreUnverified: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
+    full: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -76,6 +136,9 @@ export const InstallPackageFromRegistryRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.maybe(schema.string()),
   }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
   body: schema.nullable(
     schema.object({
       force: schema.boolean({ defaultValue: false }),
@@ -84,9 +147,25 @@ export const InstallPackageFromRegistryRequestSchema = {
   ),
 };
 
+export const ReauthorizeTransformRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.maybe(schema.string()),
+  }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
+  body: schema.object({
+    transforms: schema.arrayOf(schema.object({ transformId: schema.string() })),
+  }),
+};
+
 export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
+  }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
   }),
   body: schema.nullable(
     schema.object({
@@ -95,9 +174,19 @@ export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   ),
 };
 
-export const BulkUpgradePackagesFromRegistryRequestSchema = {
+export const BulkInstallPackagesFromRegistryRequestSchema = {
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
   body: schema.object({
-    packages: schema.arrayOf(schema.string(), { minSize: 1 }),
+    packages: schema.arrayOf(
+      schema.oneOf([
+        schema.string(),
+        schema.object({ name: schema.string(), version: schema.string() }),
+      ]),
+      { minSize: 1 }
+    ),
+    force: schema.boolean({ defaultValue: false }),
   }),
 };
 

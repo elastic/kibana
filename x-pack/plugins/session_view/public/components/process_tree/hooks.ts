@@ -7,7 +7,7 @@
 import memoizeOne from 'memoize-one';
 import { sortedUniqBy } from 'lodash';
 import { useState, useEffect, useMemo } from 'react';
-import {
+import type {
   AlertStatusEventEntityIdMap,
   EventAction,
   EventKind,
@@ -15,7 +15,7 @@ import {
   ProcessEvent,
   ProcessMap,
   ProcessEventsPage,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import {
   inferProcessFromLeaderInfo,
   updateAlertEventStatus,
@@ -140,7 +140,7 @@ export class ProcessImpl implements Process {
   }
 
   hasOutput() {
-    return !!this.findEventByAction(this.events, EventAction.text_output);
+    return !!this.findEventByAction(this.events, 'text_output');
   }
 
   hasAlerts() {
@@ -164,11 +164,11 @@ export class ProcessImpl implements Process {
   }
 
   hasExec() {
-    return !!this.findEventByAction(this.events, EventAction.exec);
+    return !!this.findEventByAction(this.events, 'exec');
   }
 
   hasExited() {
-    return !!this.findEventByAction(this.events, EventAction.end);
+    return !!this.findEventByAction(this.events, 'end');
   }
 
   getDetails() {
@@ -181,7 +181,7 @@ export class ProcessImpl implements Process {
   }
 
   getEndTime() {
-    const endEvent = this.findEventByAction(this.events, EventAction.end);
+    const endEvent = this.findEventByAction(this.events, 'end');
     return endEvent?.['@timestamp'] || '';
   }
 
@@ -214,13 +214,10 @@ export class ProcessImpl implements Process {
     return !!(sessionIsInteractive && parentIsASessionLeader && processIsAGroupLeader);
   }
 
-  getMaxAlertLevel() {
-    // TODO: as part of alerts details work + tie in with the new alert flyout
-    return null;
-  }
-
   findEventByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
-    return events.find(({ event }) => event?.action === action);
+    return events.find(({ event }) => {
+      return event?.action?.includes(action);
+    });
   });
 
   findEventByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
@@ -228,7 +225,9 @@ export class ProcessImpl implements Process {
   });
 
   filterEventsByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
-    return events.filter(({ event }) => event?.action === action);
+    return events.filter(({ event }) => {
+      return event?.action?.includes(action);
+    });
   });
 
   filterEventsByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
@@ -239,14 +238,10 @@ export class ProcessImpl implements Process {
   // to be used as a source for the most up to date details
   // on the processes lifecycle.
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
-    // TODO: add these to generator
-    const actionsToFind: Array<EventAction | undefined> = [
-      EventAction.fork,
-      EventAction.exec,
-      EventAction.end,
-    ];
     const filtered = events.filter((processEvent) => {
-      return actionsToFind.includes(processEvent.event?.action);
+      const action = processEvent?.event?.action;
+
+      return action?.includes('fork') || action?.includes('exec') || action?.includes('end');
     });
 
     // there are some anomalous processes which are omitting event.action

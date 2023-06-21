@@ -24,7 +24,9 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.ResolvedSimpleSavedObject",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ResolvedSimpleSavedObject",
         "description": [
           "\nThis interface is a very simple wrapper for SavedObjects resolved from the server\nwith the {@link SavedObjectsClientContract}.\n"
@@ -40,8 +42,150 @@
           "<T>"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/resolve.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          },
+          {
+            "plugin": "spaces",
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts"
+          },
+          {
+            "plugin": "spaces",
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/common/ui/types.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/common/ui/types.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/common/ui/types.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/common/ui/types.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/public/services/workpad.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/public/services/workpad.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/public/services/workpad.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/public/services/workpad.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/use_workspace_loader.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/use_workspace_loader.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/use_workspace_loader.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/use_workspace_loader.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -121,9 +265,13 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsBatchResponse",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsBatchResponse",
-        "description": [],
+        "description": [
+          "\nBatch response for simple saved objects\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -135,8 +283,42 @@
           "<T>"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/base.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -144,7 +326,9 @@
             "type": "Array",
             "tags": [],
             "label": "savedObjects",
-            "description": [],
+            "description": [
+              "Array of simple saved objects"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -166,9 +350,13 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsBulkCreateObject",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsBulkCreateObject",
-        "description": [],
+        "description": [
+          "\nPer-object parameters for bulk create operation\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -187,8 +375,22 @@
           }
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_create.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -196,7 +398,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "Create a SavedObject of this type."
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_create.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -207,7 +411,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "attributes",
-            "description": [],
+            "description": [
+              "Attributes for the saved object to be created."
+            ],
             "signature": [
               "T"
             ],
@@ -222,12 +428,30 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsBulkCreateOptions",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsBulkCreateOptions",
-        "description": [],
+        "description": [
+          "\nOptions for bulk create operation\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_create.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -236,7 +460,7 @@
             "tags": [],
             "label": "overwrite",
             "description": [
-              "If a document with the given `id` already exists, overwrite it's contents (default=false)."
+              "If a document with the given `id` already exists, overwrite its contents (default=false)."
             ],
             "signature": [
               "boolean | undefined"
@@ -252,12 +476,17 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsBulkDeleteOptions",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsBulkDeleteOptions",
-        "description": [],
+        "description": [
+          "\nOptions for bulk delete operation\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -265,7 +494,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "force",
-            "description": [],
+            "description": [
+              "Force deletion of any objects that exist in multiple namespaces (default=false)"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -280,12 +511,26 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsBulkDeleteResponse",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsBulkDeleteResponse",
-        "description": [],
+        "description": [
+          "\nReturn type of the Saved Objects `bulkDelete()` method.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -293,7 +538,9 @@
             "type": "Array",
             "tags": [],
             "label": "statuses",
-            "description": [],
+            "description": [
+              "array of statuses per object"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -315,12 +562,17 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsBulkDeleteResponseItem",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsBulkDeleteResponseItem",
-        "description": [],
+        "description": [
+          "\nSingle item within the statuses array of the bulk delete response\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -328,7 +580,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "saved object id"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -339,7 +593,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "saved object type"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -350,7 +606,9 @@
             "type": "boolean",
             "tags": [],
             "label": "success",
-            "description": [],
+            "description": [
+              "true if the delete operation succeeded"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -361,9 +619,17 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "error from delete operation (undefined if no error)"
+            ],
             "signature": [
-              "SavedObjectError",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
               " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_delete.ts",
@@ -377,9 +643,13 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsBulkResolveResponse",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsBulkResolveResponse",
-        "description": [],
+        "description": [
+          "\nReturn type of the Saved Objects `bulkResolve()` method.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -391,8 +661,14 @@
           "<T>"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_resolve.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -400,7 +676,9 @@
             "type": "Array",
             "tags": [],
             "label": "resolved_objects",
-            "description": [],
+            "description": [
+              "Array of {@link ResolvedSimpleSavedObject} that were resolved"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -422,9 +700,13 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsBulkUpdateObject",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsBulkUpdateObject",
-        "description": [],
+        "description": [
+          "\nPer-object parameters for bulk update operation\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -436,8 +718,22 @@
           "<T>"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_update.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -445,7 +741,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "Type of the saved object to update"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -456,7 +754,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "ID of the saved object to update"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_update.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -467,7 +767,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "attributes",
-            "description": [],
+            "description": [
+              "The attributes to update"
+            ],
             "signature": [
               "T"
             ],
@@ -481,7 +783,9 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [],
+            "description": [
+              "The version string for the saved object"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -495,9 +799,17 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [],
+            "description": [
+              "Array of references to other saved objects"
+            ],
             "signature": [
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[] | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_update.ts",
@@ -511,12 +823,22 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsBulkUpdateOptions",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsBulkUpdateOptions",
-        "description": [],
+        "description": [
+          "\nOptions for bulk update operation\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/bulk_update.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -524,7 +846,9 @@
             "type": "string",
             "tags": [],
             "label": "namespace",
-            "description": [],
+            "description": [
+              "\nThe namespace from which to apply the bulk update operation\nNot permitted if spaces extension is enabled"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -539,23 +863,185 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsClientContract",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsClientContract",
         "description": [
           "\nThe client-side SavedObjectsClient is a thin convenience library around the SavedObjects\nHTTP API for interacting with Saved Objects.\n"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser",
+            "path": "packages/core/saved-objects/core-saved-objects-browser/src/contracts.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser",
+            "path": "packages/core/saved-objects/core-saved-objects-browser/src/contracts.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          },
+          {
+            "plugin": "dataViews",
+            "path": "src/plugins/data_views/common/lib/get_title.ts"
+          },
+          {
+            "plugin": "dataViews",
+            "path": "src/plugins/data_views/common/lib/get_title.ts"
+          },
+          {
+            "plugin": "dataViews",
+            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
+          },
+          {
+            "plugin": "dataViews",
+            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/kibana_services.ts"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/kibana_services.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/initialize_saved_object.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/initialize_saved_object.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/plugin.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/plugin.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/contexts/query_input_bar_context.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/contexts/query_input_bar_context.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SavedObjectsClientContract.create",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "create",
             "description": [
-              "\nPersists an object"
+              "\nCreates an object\n"
             ],
             "signature": [
               "<T = unknown>(type: string, attributes: T, options?: ",
@@ -577,8 +1063,126 @@
               "<T>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_saved_object.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -586,7 +1190,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [],
+                "description": [
+                  "- the type of object to create"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -601,7 +1207,9 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "attributes",
-                "description": [],
+                "description": [
+                  "- the attributes of the object"
+                ],
                 "signature": [
                   "T"
                 ],
@@ -616,7 +1224,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link SavedObjectsCreateOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -633,16 +1243,20 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "The result of the create operation - the created saved object"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SavedObjectsClientContract.bulkCreate",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "bulkCreate",
             "description": [
-              "\nCreates multiple documents at once"
+              "\nCreates multiple objects at once\n"
             ],
             "signature": [
               "(objects: ",
@@ -672,8 +1286,34 @@
               "<unknown>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/public/application/components/home_app.js"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -681,7 +1321,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": [],
+                "description": [
+                  "- an array of objects containing type, attributes"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -703,7 +1345,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link SavedObjectsBulkCreateOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -728,10 +1372,12 @@
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SavedObjectsClientContract.delete",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "delete",
             "description": [
-              "\nDeletes an object"
+              "\nDeletes an object\n"
             ],
             "signature": [
               "(type: string, id: string, options?: ",
@@ -745,8 +1391,42 @@
               " | undefined) => Promise<{}>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/build_saved_object.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -754,7 +1434,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [],
+                "description": [
+                  "- the type the of object to delete"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -769,7 +1451,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [],
+                "description": [
+                  "- the id of the object to delete"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -784,7 +1468,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link SavedObjectsDeleteOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -807,14 +1493,22 @@
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SavedObjectsClientContract.bulkDelete",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "bulkDelete",
             "description": [
               "\nDeletes multiple documents at once"
             ],
             "signature": [
               "(objects: ",
-              "SavedObjectTypeIdTuple",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectTypeIdTuple",
+                "text": "SavedObjectTypeIdTuple"
+              },
               "[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -834,8 +1528,26 @@
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -847,7 +1559,13 @@
                   "- an array of objects containing id, type"
                 ],
                 "signature": [
-                  "SavedObjectTypeIdTuple",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectTypeIdTuple",
+                    "text": "SavedObjectTypeIdTuple"
+                  },
                   "[]"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
@@ -895,7 +1613,8 @@
               "property",
               "property",
               "property",
-              "property"
+              "property",
+              "deprecated"
             ],
             "label": "find",
             "description": [
@@ -921,8 +1640,58 @@
               "<T, unknown>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+              },
+              {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/dashboards/dashboards_service.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
+              },
+              {
+                "plugin": "dashboardEnhanced",
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -930,7 +1699,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link SavedObjectsFindOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -954,7 +1725,9 @@
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SavedObjectsClientContract.get",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "get",
             "description": [
               "\nFetches a single object\n"
@@ -971,8 +1744,110 @@
               "<T>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/lib/get_title.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/helpers/initialize_saved_object.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
+              },
+              {
+                "plugin": "dashboardEnhanced",
+                "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -980,7 +1855,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [],
+                "description": [
+                  "- the type of the object to get"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -995,7 +1872,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [],
+                "description": [
+                  "- the ID of the object to get"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1013,14 +1892,22 @@
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SavedObjectsClientContract.bulkGet",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "bulkGet",
             "description": [
               "\nReturns an array of objects by id\n"
             ],
             "signature": [
               "(objects: ",
-              "SavedObjectTypeIdTuple",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectTypeIdTuple",
+                "text": "SavedObjectTypeIdTuple"
+              },
               "[]) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -1032,8 +1919,22 @@
               "<unknown>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1045,7 +1946,13 @@
                   "- an array ids, or an array of objects containing id and optionally type"
                 ],
                 "signature": [
-                  "SavedObjectTypeIdTuple",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectTypeIdTuple",
+                    "text": "SavedObjectTypeIdTuple"
+                  },
                   "[]"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
@@ -1063,11 +1970,12 @@
             "id": "def-common.SavedObjectsClientContract.resolve",
             "type": "Function",
             "tags": [
-              "note"
+              "note",
+              "deprecated"
             ],
             "label": "resolve",
             "description": [
-              "\nResolves a single object\n"
+              "\nResolves a single object.\n\nAfter 8.0.0, saved objects are provided a unique ID _across_ spaces.\nA subset of existing saved objects may have IDs regenerated while upgrading to 8+.\n`.resolve` provides a way for clients with legacy IDs to still retrieve the correct\nsaved object.\n\nAn example of a client with a \"legacy ID\" is a bookmarked dashboard in a\nnon-default space.\n"
             ],
             "signature": [
               "<T = unknown>(type: string, id: string) => Promise<",
@@ -1081,8 +1989,78 @@
               "<T>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/services/discover_state.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1090,7 +2068,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [],
+                "description": [
+                  "- the type of the object to resolve"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1105,7 +2085,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [],
+                "description": [
+                  "- the ID of the object to resolve"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1124,15 +2106,22 @@
             "id": "def-common.SavedObjectsClientContract.bulkResolve",
             "type": "Function",
             "tags": [
-              "note"
+              "note",
+              "deprecated"
             ],
             "label": "bulkResolve",
             "description": [
-              "\nResolves an array of objects by id, using any legacy URL aliases if they exist\n"
+              "\nResolves an array of objects by id.\n\nSee documentation for `.resolve`.\n"
             ],
             "signature": [
               "<T = unknown>(objects: ",
-              "SavedObjectTypeIdTuple",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectTypeIdTuple",
+                "text": "SavedObjectTypeIdTuple"
+              },
               "[]) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -1144,8 +2133,18 @@
               "<T>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1157,7 +2156,13 @@
                   "- an array of objects containing id, type"
                 ],
                 "signature": [
-                  "SavedObjectTypeIdTuple",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectTypeIdTuple",
+                    "text": "SavedObjectTypeIdTuple"
+                  },
                   "[]"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
@@ -1176,7 +2181,7 @@
             "type": "Function",
             "tags": [
               "prop",
-              "prop"
+              "deprecated"
             ],
             "label": "update",
             "description": [
@@ -1202,8 +2207,58 @@
               "<T>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "savedObjects",
+                "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1211,7 +2266,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": [],
+                "description": [
+                  "- the type of the object to update"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1226,7 +2283,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [],
+                "description": [
+                  "- the ID of the object to update"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1241,7 +2300,9 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "attributes",
-                "description": [],
+                "description": [
+                  "- the attributes to update"
+                ],
                 "signature": [
                   "T"
                 ],
@@ -1256,7 +2317,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "{@link SavedObjectsUpdateOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -1273,13 +2336,17 @@
                 "isRequired": false
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "the udpated simple saved object"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SavedObjectsClientContract.bulkUpdate",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "bulkUpdate",
             "description": [
               "\nUpdate multiple documents at once\n"
@@ -1304,8 +2371,26 @@
               "<T>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/saved_objects_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1314,7 +2399,7 @@
                 "tags": [],
                 "label": "objects",
                 "description": [
-                  "- [{ type, id, attributes, options: { version, references } }]"
+                  "- an array of objects containing type, id, attributes, and references"
                 ],
                 "signature": [
                   {
@@ -1333,7 +2418,7 @@
               }
             ],
             "returnComment": [
-              "The result of the update operation containing both failed and updated saved objects."
+              "the result of the bulk update operation containing both failed and updated saved objects."
             ]
           }
         ],
@@ -1343,12 +2428,78 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsCreateOptions",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsCreateOptions",
-        "description": [],
+        "description": [
+          "\nOptions for creating a saved object.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/create.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.test.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1386,18 +2537,36 @@
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SavedObjectsCreateOptions.migrationVersion",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrationVersion",
             "description": [
-              "{@inheritDoc SavedObjectsMigrationVersion}"
+              "\n{@inheritDoc SavedObjectsMigrationVersion}"
             ],
             "signature": [
-              "SavedObjectsMigrationVersion",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsMigrationVersion",
+                "text": "SavedObjectsMigrationVersion"
+              },
               " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/create.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1417,14 +2586,54 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SavedObjectsCreateOptions.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
+            "description": [
+              "A semver value that is used when migrating documents between Kibana versions."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SavedObjectsCreateOptions.references",
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [],
+            "description": [
+              "Array of referenced saved objects."
+            ],
             "signature": [
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SavedObjectsCreateOptions.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nFlag indicating if a saved object is managed by Kibana (default=false)\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/create.ts",
             "deprecated": false,
@@ -1437,12 +2646,30 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsDeleteOptions",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsDeleteOptions",
-        "description": [],
+        "description": [
+          "\nOptions for deleting a saved object.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/delete.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1451,7 +2678,7 @@
             "tags": [],
             "label": "force",
             "description": [
-              "Force deletion of an object that exists in multiple namespaces"
+              "Force deletion of an object that exists in multiple namespaces (default=false)"
             ],
             "signature": [
               "boolean | undefined"
@@ -1469,8 +2696,10 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsFindOptionsReference",
-        "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
+        "description": [
+          "\nAn object reference for use in find operation options\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1480,8 +2709,10 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
+            "description": [
+              "The type of the saved object"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1491,8 +2722,10 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
+            "description": [
+              "The ID of the saved object"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1503,7 +2736,9 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsFindResponse",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsFindResponse",
         "description": [
           "\nReturn type of the Saved Objects `find()` method.\n"
@@ -1527,8 +2762,30 @@
           "<T>"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1536,7 +2793,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "aggregations",
-            "description": [],
+            "description": [
+              "aggregations from the search query"
+            ],
             "signature": [
               "A | undefined"
             ],
@@ -1550,7 +2809,9 @@
             "type": "number",
             "tags": [],
             "label": "total",
-            "description": [],
+            "description": [
+              "total number of results"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1561,7 +2822,9 @@
             "type": "number",
             "tags": [],
             "label": "perPage",
-            "description": [],
+            "description": [
+              "number of results per page"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1572,7 +2835,9 @@
             "type": "number",
             "tags": [],
             "label": "page",
-            "description": [],
+            "description": [
+              "current page in results"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1584,9 +2849,13 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsUpdateOptions",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsUpdateOptions",
-        "description": [],
+        "description": [
+          "\nOptions for updating a saved object\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -1598,8 +2867,22 @@
           "<Attributes>"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/update.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1607,7 +2890,9 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [],
+            "description": [
+              "version of the saved object"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1621,7 +2906,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "upsert",
-            "description": [],
+            "description": [
+              "Alternative attributes for the saved object if upserting"
+            ],
             "signature": [
               "Attributes | undefined"
             ],
@@ -1635,9 +2922,17 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [],
+            "description": [
+              "Array of references to other saved objects"
+            ],
             "signature": [
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[] | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/update.ts",
@@ -1651,7 +2946,9 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SimpleSavedObject",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SimpleSavedObject",
         "description": [
           "\nVery simple wrapper for SavedObjects loaded from the server\nwith the {@link SavedObjectsClientContract}.\n\nIt provides basic functionality for creating/saving/deleting saved objects,\nbut doesn't include any type-specific implementations.\n"
@@ -1667,8 +2964,258 @@
           "<T>"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/services/dashboards/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts"
+          },
+          {
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
+          },
+          {
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/kibana.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/common/types/kibana.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
+          },
+          {
+            "plugin": "dashboardEnhanced",
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+          },
+          {
+            "plugin": "dashboardEnhanced",
+            "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/types/app_state.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/types/app_state.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/hooks/types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/hooks/types.ts"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.test.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1676,7 +3223,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "attributes",
-            "description": [],
+            "description": [
+              "attributes of the object, templated"
+            ],
             "signature": [
               "T"
             ],
@@ -1690,7 +3239,9 @@
             "type": "string",
             "tags": [],
             "label": "_version",
-            "description": [],
+            "description": [
+              " version of the saved object"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1704,7 +3255,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "ID of the saved object"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1715,7 +3268,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "Type of the saved object"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1724,16 +3279,44 @@
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SimpleSavedObject.migrationVersion",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrationVersion",
-            "description": [],
+            "description": [
+              "\nMigration version of the saved object"
+            ],
             "signature": [
-              "SavedObjectsMigrationVersion",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsMigrationVersion",
+                "text": "SavedObjectsMigrationVersion"
+              },
               " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1741,7 +3324,25 @@
             "type": "string",
             "tags": [],
             "label": "coreMigrationVersion",
-            "description": [],
+            "description": [
+              "Core migration version of the saved object"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SimpleSavedObject.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
+            "description": [
+              "Core migration version of the saved object"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1755,9 +3356,17 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "Error associated with this object, undefined if no error"
+            ],
             "signature": [
-              "SavedObjectError",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
               " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
@@ -1770,9 +3379,17 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": [],
+            "description": [
+              "References to other saved objects"
+            ],
             "signature": [
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
@@ -1785,7 +3402,9 @@
             "type": "string",
             "tags": [],
             "label": "updatedAt",
-            "description": [],
+            "description": [
+              "The date this object was last updated"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1799,7 +3418,9 @@
             "type": "string",
             "tags": [],
             "label": "createdAt",
-            "description": [],
+            "description": [
+              "The date this object was created"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -1825,11 +3446,29 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SimpleSavedObject.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nFlag indicating if a saved object is managed by Kibana (default=false)\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SimpleSavedObject.get",
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": [],
+            "description": [
+              "\nGets an attribute of this object\n"
+            ],
             "signature": [
               "(key: string) => any"
             ],
@@ -1843,7 +3482,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "key",
-                "description": [],
+                "description": [
+                  "- the name of the attribute"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1853,7 +3494,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "The value of the attribute."
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1861,7 +3504,9 @@
             "type": "Function",
             "tags": [],
             "label": "set",
-            "description": [],
+            "description": [
+              "\nSets an attribute of this object\n"
+            ],
             "signature": [
               "(key: string, value: any) => T"
             ],
@@ -1875,7 +3520,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "key",
-                "description": [],
+                "description": [
+                  "- the name of the attribute"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1890,7 +3537,9 @@
                 "type": "Any",
                 "tags": [],
                 "label": "value",
-                "description": [],
+                "description": [
+                  "- the value for the attribute"
+                ],
                 "signature": [
                   "any"
                 ],
@@ -1900,7 +3549,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "The updated attributes of this object."
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -1908,7 +3559,9 @@
             "type": "Function",
             "tags": [],
             "label": "has",
-            "description": [],
+            "description": [
+              "\nChecks if this object has an attribute\n"
+            ],
             "signature": [
               "(key: string) => boolean"
             ],
@@ -1922,7 +3575,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "key",
-                "description": [],
+                "description": [
+                  "- the name of the attribute"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -1932,15 +3587,21 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "true if the attribute exists."
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SimpleSavedObject.save",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "save",
-            "description": [],
+            "description": [
+              "\nSaves this object"
+            ],
             "signature": [
               "() => Promise<",
               {
@@ -1953,8 +3614,22 @@
               "<T>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
+              }
+            ],
             "children": [],
             "returnComment": []
           },
@@ -1962,15 +3637,25 @@
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SimpleSavedObject.delete",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "delete",
-            "description": [],
+            "description": [
+              "\nDeletes this object"
+            ],
             "signature": [
               "() => Promise<{}>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              }
+            ],
             "children": [],
             "returnComment": []
           }
@@ -1984,25 +3669,79 @@
         "parentPluginId": "@kbn/core-saved-objects-api-browser",
         "id": "def-common.SavedObjectsFindOptions",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsFindOptions",
-        "description": [],
+        "description": [
+          "\nBrowser options for finding saved objects\n"
+        ],
         "signature": [
-          "{ type: string | string[]; filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
+          "{ type: string | string[]; search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; searchFields?: string[] | undefined; hasReference?: ",
-          "SavedObjectsFindOptionsReference",
+          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
           " | ",
-          "SavedObjectsFindOptionsReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
           "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
-          "SavedObjectsFindOptionsReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
           " | ",
-          "SavedObjectsFindOptionsReference",
-          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+          }
+        ],
         "initialIsOpen": false
       }
     ],

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsClientContract, CoreStart } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { SyntheticsMonitorClient } from './synthetics_monitor_client';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../synthetics_service';
@@ -16,6 +17,26 @@ import {
   PrivateLocation,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
+import { mockEncryptedSO } from '../utils/mocks';
+
+const mockCoreStart = coreMock.createStart() as CoreStart;
+
+mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+  license: {
+    status: 'active',
+    uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
+    type: 'platinum',
+    issue_date: '2022-11-29T00:00:00.000Z',
+    issue_date_in_millis: 1669680000000,
+    expiry_date: '2024-12-31T23:59:59.999Z',
+    expiry_date_in_millis: 1735689599999,
+    max_nodes: 100,
+    max_resource_units: null,
+    issued_to: 'Elastic - INTERNAL (development environments)',
+    issuer: 'API',
+    start_date_in_millis: 1669680000000,
+  },
+});
 
 describe('SyntheticsMonitorClient', () => {
   const mockEsClient = {
@@ -43,11 +64,12 @@ describe('SyntheticsMonitorClient', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
 
-  syntheticsService.addConfig = jest.fn();
+  syntheticsService.addConfigs = jest.fn();
   syntheticsService.editConfig = jest.fn();
   syntheticsService.deleteConfigs = jest.fn();
 
@@ -95,14 +117,19 @@ describe('SyntheticsMonitorClient', () => {
     id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
     fields: { config_id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d' },
     fields_under_root: true,
+    secrets: '{}',
   } as unknown as MonitorFields;
+
+  const previousMonitor: any = {
+    attributes: { ...monitor },
+  };
 
   it('should add a monitor', async () => {
     locations[1].isServiceManaged = false;
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.createMonitors = jest.fn();
+    client.privateLocationAPI.createPackagePolicies = jest.fn();
 
     await client.addMonitors(
       [{ monitor, id }],
@@ -112,8 +139,8 @@ describe('SyntheticsMonitorClient', () => {
       'test-space'
     );
 
-    expect(syntheticsService.addConfig).toHaveBeenCalledTimes(1);
-    expect(client.privateLocationAPI.createMonitors).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.addConfigs).toHaveBeenCalledTimes(1);
+    expect(client.privateLocationAPI.createPackagePolicies).toHaveBeenCalledTimes(1);
   });
 
   it('should edit a monitor', async () => {
@@ -121,17 +148,21 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.editMonitors = jest.fn();
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
 
     await client.editMonitors(
       [
         {
-          monitor,
           id,
+          monitor,
+          previousMonitor,
+          decryptedPreviousMonitor: previousMonitor,
         },
       ],
-      mockRequest,
-      savedObjectsClientMock,
+      {
+        request: mockRequest,
+        savedObjectsClient: savedObjectsClientMock,
+      } as any,
       privateLocations,
       'test-space'
     );
@@ -140,11 +171,55 @@ describe('SyntheticsMonitorClient', () => {
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
   });
 
+  it('deletes a monitor from location, if location is removed from monitor', async () => {
+    locations[1].isServiceManaged = false;
+
+    const id = 'test-id-1';
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
+    syntheticsService.editConfig = jest.fn();
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
+
+    monitor.locations = previousMonitor.attributes.locations.filter(
+      (loc: any) => loc.id !== locations[0].id
+    );
+
+    await client.editMonitors(
+      [
+        {
+          monitor,
+          id,
+          previousMonitor,
+          decryptedPreviousMonitor: previousMonitor,
+        },
+      ],
+      {
+        request: mockRequest,
+        savedObjectsClient: savedObjectsClientMock,
+      } as any,
+      privateLocations,
+      'test-space'
+    );
+
+    expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.editConfig).toHaveBeenCalledWith([
+      {
+        monitor,
+        configId: id,
+        params: {
+          username: 'elastic',
+        },
+      },
+    ]);
+    expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
+    expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
+  });
+
   it('should delete a monitor', async () => {
     locations[1].isServiceManaged = false;
 
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.deleteMonitors = jest.fn();
+    syntheticsService.deleteConfigs = jest.fn();
 
     await client.deleteMonitors(
       [monitor as unknown as SyntheticsMonitorWithId],

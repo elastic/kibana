@@ -1,0 +1,13 @@
+- name: "--help"
+  become: true
+  command:
+    cmd: /usr/share/kibana/bin/kibana-health-gateway --help
+  register: health_gateway_help
+
+- debug:
+    msg: "{{ health_gateway_help }}"
+
+- name: assert health-gateway provides help
+  assert:
+    that:
+      - health_gateway_help.failed == false

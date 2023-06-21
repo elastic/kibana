@@ -9,9 +9,13 @@ import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import type { SetupPlugins } from '../../../types';
+import type { AlertWorkflowStatus } from '../../types';
 export { telemetryMiddleware } from './middleware';
 
 export { METRIC_TYPE };
+export * from './telemetry_client';
+export * from './telemetry_service';
+export * from './types';
 
 type TrackFn = (type: UiCounterMetricType, event: string | string[], count?: number) => void;
 
@@ -40,7 +44,6 @@ export enum TELEMETRY_EVENT {
   SIEM_RULE_DISABLED = 'siem_rule_disabled',
   CUSTOM_RULE_ENABLED = 'custom_rule_enabled',
   CUSTOM_RULE_DISABLED = 'custom_rule_disabled',
-
   // ML
   SIEM_JOB_ENABLED = 'siem_job_enabled',
   SIEM_JOB_DISABLED = 'siem_job_disabled',
@@ -56,4 +59,25 @@ export enum TELEMETRY_EVENT {
 
   // UI Interactions
   TAB_CLICKED = 'tab_',
+
+  // Landing pages
+  LANDING_CARD = 'landing_card_',
+  // Landing page - dashboard
+  DASHBOARD = 'navigate_to_dashboard',
+  CREATE_DASHBOARD = 'create_dashboard',
+
+  // Breadcrumbs
+  BREADCRUMB = 'breadcrumb_',
 }
+
+export const getTelemetryEvent = {
+  groupedAlertsTakeAction: ({
+    tableId,
+    groupNumber,
+    status,
+  }: {
+    tableId: string;
+    groupNumber: number;
+    status: AlertWorkflowStatus;
+  }) => `alerts_table_${tableId}_group-${groupNumber}_mark-${status}`,
+};

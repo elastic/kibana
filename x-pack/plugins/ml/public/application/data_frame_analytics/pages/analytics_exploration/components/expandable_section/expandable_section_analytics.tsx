@@ -9,13 +9,14 @@ import React, { useEffect, useState, FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiHorizontalRule, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 
-import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { ml } from '../../../../../services/ml_api_service';
-
-import { getAnalysisType } from '../../../../common';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 import {
@@ -116,7 +117,6 @@ export const ExpandableSectionAnalytics: FC<ExpandableSectionAnalyticsProps> = (
   const analyticsSectionHeaderItems = getAnalyticsSectionHeaderItems(expandedRowItem);
   const analyticsSectionContent = (
     <>
-      <EuiHorizontalRule size="full" margin="none" />
       {expandedRowItem === undefined && (
         <EuiText textAlign="center">
           <EuiSpacer size="l" />

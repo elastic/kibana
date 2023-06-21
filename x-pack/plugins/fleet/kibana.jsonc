@@ -1,0 +1,52 @@
+{
+  "type": "plugin",
+  "id": "@kbn/fleet-plugin",
+  "owner": "@elastic/fleet",
+  "plugin": {
+    "id": "fleet",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "fleet"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "data",
+      "encryptedSavedObjects",
+      "navigation",
+      "customIntegrations",
+      "share",
+      "security",
+      "unifiedSearch",
+      "savedObjectsTagging",
+      "taskManager",
+      "guidedOnboarding",
+      "files",
+      "uiActions"
+    ],
+    "optionalPlugins": [
+      "features",
+      "cloud",
+      "usageCollection",
+      "home",
+      "globalSearch",
+      "telemetry",
+      "discover",
+      "ingestPipelines",
+      "spaces",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "cloudChat",
+      "esUiShared",
+      "infra",
+      "kibanaUtils",
+      "usageCollection",
+      "unifiedSearch"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

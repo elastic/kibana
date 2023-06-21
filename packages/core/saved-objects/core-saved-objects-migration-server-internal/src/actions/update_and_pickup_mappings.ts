@@ -13,7 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
 import { DEFAULT_TIMEOUT } from './constants';
@@ -28,6 +28,7 @@ export interface UpdateAndPickupMappingsParams {
   client: ElasticsearchClient;
   index: string;
   mappings: IndexMapping;
+  batchSize: number;
 }
 /**
  * Updates an index's mappings and runs an pickupUpdatedMappings task so that the mapping
@@ -37,6 +38,7 @@ export const updateAndPickupMappings = ({
   client,
   index,
   mappings,
+  batchSize,
 }: UpdateAndPickupMappingsParams): TaskEither.TaskEither<
   RetryableEsClientError,
   UpdateAndPickupMappingsResponse
@@ -74,7 +76,7 @@ export const updateAndPickupMappings = ({
   return pipe(
     putMappingTask,
     TaskEither.chain((res) => {
-      return pickupUpdatedMappings(client, index);
+      return pickupUpdatedMappings(client, index, batchSize);
     })
   );
 };

@@ -8,8 +8,7 @@
 import React, { FC, memo, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-
-import { SplitField } from '../../../../../../../../../common/types/fields';
+import type { SplitField } from '@kbn/ml-anomaly-utils';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import './style.scss';
 
@@ -94,7 +93,7 @@ export const SplitCards: FC<Props> = memo(
           {(fieldValues.length === 0 || numberOfDetectors === 0) && <>{children}</>}
           {fieldValues.length > 0 && numberOfDetectors > 0 && splitField !== null && (
             <Fragment>
-              {jobType === JOB_TYPE.MULTI_METRIC && (
+              {(jobType === JOB_TYPE.MULTI_METRIC || jobType === JOB_TYPE.GEO) && (
                 <Fragment>
                   <div
                     style={{ fontSize: 'small' }}

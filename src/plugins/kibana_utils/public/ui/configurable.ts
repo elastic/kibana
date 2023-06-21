@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { UiComponent } from '../../common/ui/ui_component';
+import type { FC } from 'react';
 
 /**
  * Represents something that can be configured by user using UI.
@@ -27,9 +27,9 @@ export interface Configurable<
   readonly isConfigValid: (config: Config, context: Context) => boolean;
 
   /**
-   * `UiComponent` to be rendered when collecting configuration for this item.
+   * Component to be rendered when collecting configuration for this item.
    */
-  readonly CollectConfig: UiComponent<CollectConfigProps<Config, Context>>;
+  readonly CollectConfig: FC<CollectConfigProps<Config, Context>>;
 }
 
 /**

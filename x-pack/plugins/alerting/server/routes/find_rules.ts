@@ -20,7 +20,7 @@ import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
-  INTERNAL_BASE_ALERTING_API_PATH,
+  INTERNAL_ALERTING_API_FIND_RULES_PATH,
 } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
@@ -136,6 +136,51 @@ const buildFindRulesRoute = ({
       })
     )
   );
+  if (path === INTERNAL_ALERTING_API_FIND_RULES_PATH) {
+    router.post(
+      {
+        path,
+        validate: {
+          body: querySchema,
+        },
+      },
+      router.handleLegacyErrors(
+        verifyAccessAndContext(licenseState, async function (context, req, res) {
+          const rulesClient = (await context.alerting).getRulesClient();
+
+          trackLegacyTerminology(
+            [req.body.search, req.body.search_fields, req.body.sort_field].filter(
+              Boolean
+            ) as string[],
+            usageCounter
+          );
+
+          const options = rewriteQueryReq({
+            ...req.body,
+            has_reference: req.body.has_reference || undefined,
+            search_fields: searchFieldsAsArray(req.body.search_fields),
+          });
+
+          if (req.body.fields) {
+            usageCounter?.incrementCounter({
+              counterName: `alertingFieldsUsage`,
+              counterType: 'alertingFieldsUsage',
+              incrementBy: 1,
+            });
+          }
+
+          const findResult = await rulesClient.find({
+            options,
+            excludeFromPublicApi,
+            includeSnoozeData: true,
+          });
+          return res.ok({
+            body: rewriteBodyRes(findResult),
+          });
+        })
+      )
+    );
+  }
 };
 
 export const findRulesRoute = (
@@ -160,7 +205,7 @@ export const findInternalRulesRoute = (
   buildFindRulesRoute({
     excludeFromPublicApi: false,
     licenseState,
-    path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`,
+    path: INTERNAL_ALERTING_API_FIND_RULES_PATH,
     router,
     usageCounter,
   });

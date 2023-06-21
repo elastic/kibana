@@ -45,16 +45,16 @@ Array [
 
 exports[`index table should change pages when a pagination link is clicked on 2`] = `
 Array [
-  "testy6",
-  ".admin6",
-  "testy7",
-  ".admin7",
-  "testy8",
-  ".admin8",
-  "testy9",
-  ".admin9",
-  "testy10",
-  ".admin10",
+  "testy0",
+  ".admin0",
+  "testy1",
+  "testy2",
+  ".admin2",
+  "testy3",
+  "testy4",
+  ".admin4",
+  "testy5",
+  ".admin5",
 ]
 `;
 

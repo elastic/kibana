@@ -2689,7 +2689,7 @@
           "rollover_alias": "endgame-4.21.0"
         },
         "mapping": {
-          "ignore_malformed": "true",
+          "ignore_malformed": true,
           "total_fields": {
             "limit": "10000"
           }

@@ -109,7 +109,13 @@
         "description": [],
         "signature": [
           "T & ",
-          "JsonObject"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonObject",
+            "text": "JsonObject"
+          }
         ],
         "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
         "deprecated": false,
@@ -124,7 +130,7 @@
         "label": "MonitoringCollectionConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ headers?: Record<string, string> | undefined; url?: string | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
+          "{ readonly enabled: boolean; readonly opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
         ],
         "path": "x-pack/plugins/monitoring_collection/server/config.ts",
         "deprecated": false,

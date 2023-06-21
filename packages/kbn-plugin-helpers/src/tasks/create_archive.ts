@@ -14,11 +14,11 @@ import del from 'del';
 import vfs from 'vinyl-fs';
 import zip from 'gulp-zip';
 
-import { BuildContext } from '../build_context';
+import { TaskContext } from '../task_context';
 
 const asyncPipeline = promisify(pipeline);
 
-export async function createArchive({ kibanaVersion, plugin, log }: BuildContext) {
+export async function createArchive({ kibanaVersion, plugin, log }: TaskContext) {
   const {
     manifest: { id },
     directory,
@@ -42,4 +42,5 @@ export async function createArchive({ kibanaVersion, plugin, log }: BuildContext
 
   // delete the files that were zipped
   await del(Path.resolve(buildDir, 'kibana'));
+  log.success('plugin archive created');
 }

@@ -8,26 +8,45 @@
 
 import React from 'react';
 import { render } from 'enzyme';
+import { stubLogstashDataView as dataView } from '@kbn/data-plugin/common/stubs';
 import { FieldName } from './field_name';
 
-// Note that it currently provides just 2 basic tests, there should be more, but
-// the components involved will soon change
-test('FieldName renders a string field by providing fieldType and fieldName', () => {
-  const component = render(<FieldName fieldType="string" fieldName="test" />);
-  expect(component).toMatchSnapshot();
-});
+describe('FieldName', function () {
+  test('renders a string field by providing fieldType and fieldName', () => {
+    const component = render(<FieldName fieldType="string" fieldName="test" />);
+    expect(component).toMatchSnapshot();
+  });
 
-test('FieldName renders a number field by providing a field record', () => {
-  const component = render(<FieldName fieldName={'test.test.test'} fieldType={'number'} />);
-  expect(component).toMatchSnapshot();
-});
+  test('renders a number field by providing a field record', () => {
+    const component = render(<FieldName fieldName={'test.test.test'} fieldType={'number'} />);
+    expect(component).toMatchSnapshot();
+  });
 
-test('FieldName renders a geo field', () => {
-  const component = render(<FieldName fieldName={'test.test.test'} fieldType={'geo_point'} />);
-  expect(component).toMatchSnapshot();
-});
+  test('renders a geo field', () => {
+    const component = render(<FieldName fieldName={'test.test.test'} fieldType={'geo_point'} />);
+    expect(component).toMatchSnapshot();
+  });
 
-test('FieldName renders unknown field', () => {
-  const component = render(<FieldName fieldName={'test.test.test'} />);
-  expect(component).toMatchSnapshot();
+  test('renders unknown field', () => {
+    const component = render(<FieldName fieldName={'test.test.test'} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  test('renders with a search highlight', () => {
+    const component = render(
+      <FieldName fieldName={'test.test.test'} fieldType={'number'} highlight="te" />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('renders when mapping is provided', () => {
+    const component = render(
+      <FieldName
+        fieldName="test"
+        fieldType="number"
+        fieldMapping={dataView.getFieldByName('bytes')}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
 });

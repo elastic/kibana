@@ -11,6 +11,7 @@ import { isScreenshotBlockDoc } from '../../../../../common/runtime_types';
 
 import type { BrowserJourneyState } from './models';
 import {
+  fetchJourneyAction,
   pruneCacheAction,
   putBlocksAction,
   putCacheSize,
@@ -23,6 +24,8 @@ const initialState: BrowserJourneyState = {
   blocks: {},
   cacheSize: 0,
   hitCount: [],
+  journeys: {},
+  journeysLoading: {},
 };
 
 export const browserJourneyReducer = createReducer(initialState, (builder) => {
@@ -86,6 +89,18 @@ export const browserJourneyReducer = createReducer(initialState, (builder) => {
         ...state.blocks,
         ...action.payload.blocks.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
       };
+    })
+    .addCase(fetchJourneyAction.get, (state, action) => {
+      state.journeysLoading[action.payload.checkGroup] = true;
+    })
+    .addCase(fetchJourneyAction.success, (state, action) => {
+      state.journeysLoading[action.payload.checkGroup] = false;
+      state.journeys[action.payload.checkGroup] = action.payload;
+    })
+    .addCase(fetchJourneyAction.fail, (state, action) => {
+      if (action.payload.getPayload) {
+        state.journeysLoading[action.payload.getPayload.checkGroup] = false;
+      }
     });
 });
 

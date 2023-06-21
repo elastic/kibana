@@ -12,11 +12,14 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
+import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
+import { observabilityCoPilotConfig } from './services/openai/config';
+
 export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
@@ -28,29 +31,38 @@ const configSchema = schema.object({
     index: schema.string({ defaultValue: 'observability-annotations' }),
   }),
   unsafe: schema.object({
-    slo: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-    }),
     alertDetails: schema.object({
-      apm: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
       metrics: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
       logs: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
+        // Enable it by default: https://github.com/elastic/kibana/issues/159945
+        enabled: schema.boolean({ defaultValue: true }),
       }),
       uptime: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
     }),
+    thresholdRule: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
+  }),
+  thresholdRule: schema.object({
+    groupByPageSize: schema.number({ defaultValue: 10_000 }),
+  }),
+  enabled: schema.boolean({ defaultValue: true }),
+  coPilot: schema.maybe(observabilityCoPilotConfig),
+  compositeSlo: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
 });
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     unsafe: true,
+    coPilot: {
+      enabled: true,
+    },
   },
   schema: configSchema,
 };
@@ -61,6 +73,11 @@ export const plugin = (initContext: PluginInitializerContext) =>
   new ObservabilityPlugin(initContext);
 
 export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
-export { createOrUpdateIndex, unwrapEsResponse, WrappedElasticsearchClientError };
+export {
+  createOrUpdateIndex,
+  createOrUpdateIndexTemplate,
+  unwrapEsResponse,
+  WrappedElasticsearchClientError,
+};
 
 export { uiSettings } from './ui_settings';

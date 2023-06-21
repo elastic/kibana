@@ -19,7 +19,7 @@ import { Cancelable } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 import { useDateFormat } from '../../hooks';
 
-jest.useFakeTimers('modern');
+jest.useFakeTimers();
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;
@@ -64,7 +64,7 @@ describe('ProcessTreeNode component', () => {
       renderResult = mockedContext.render(<ProcessTreeNode {...props} isSessionLeader />);
 
       expect(renderResult.container.textContent?.replace(/\s+/g, ' ')).toEqual(
-        ' bash started by vagrant'
+        ' bash started by vagrant '
       );
     });
 

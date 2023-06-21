@@ -67,6 +67,11 @@ export const getArchivePackage = (args: SharedKey) => {
   };
 };
 
+/*
+ * This cache should only be used to store "full" package info generated from the package archive.
+ * NOT package info from the EPR API. This is because we parse extra fields from the archive
+ * which are not provided by the registry API.
+ */
 export const setPackageInfo = ({
   name,
   version,

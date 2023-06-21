@@ -10,7 +10,7 @@ import type { Serializable } from '@kbn/utility-types';
 import { omitBy } from 'lodash';
 import type { ParsedQuery } from 'query-string';
 import { stringify } from 'query-string';
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { isFilterPinned } from '@kbn/es-query';
 import { url } from '@kbn/kibana-utils-plugin/common';
 import { GLOBAL_STATE_STORAGE_KEY, STATE_STORAGE_KEY, VisualizeConstants } from './constants';

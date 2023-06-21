@@ -48,6 +48,8 @@ describe('getRuleExecutionLogRoute', () => {
         schedule_delay_ms: 3126,
         rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
         rule_name: 'rule_name',
+        space_ids: ['namespace'],
+        maintenance_window_ids: [],
       },
       {
         id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -70,6 +72,8 @@ describe('getRuleExecutionLogRoute', () => {
         schedule_delay_ms: 3008,
         rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
         rule_name: 'rule_name',
+        space_ids: ['namespace'],
+        maintenance_window_ids: ['test-id-1'],
       },
     ],
   };

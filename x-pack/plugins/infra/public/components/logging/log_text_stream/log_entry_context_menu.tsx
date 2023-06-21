@@ -13,6 +13,7 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuItemProps,
 } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -30,6 +31,7 @@ interface LogEntryContextMenuProps {
   onOpen: () => void;
   onClose: () => void;
   items: LogEntryContextMenuItem[];
+  externalItems?: EuiContextMenuItemProps[];
 }
 
 const DEFAULT_MENU_LABEL = i18n.translate(
@@ -45,12 +47,13 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   onOpen,
   onClose,
   items,
+  externalItems,
 }) => {
   const closeMenuAndCall = useMemo(() => {
-    return (callback: LogEntryContextMenuItem['onClick']) => {
+    return (callback: LogEntryContextMenuItem['onClick'] | EuiContextMenuItemProps['onClick']) => {
       return (e: React.MouseEvent) => {
         onClose();
-        callback(e);
+        callback?.(e);
       };
     };
   }, [onClose]);
@@ -58,6 +61,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   const button = (
     <ButtonWrapper>
       <EuiButton
+        data-test-subj="infraLogEntryContextMenuButton"
         size="s"
         fill
         aria-label={ariaLabel || DEFAULT_MENU_LABEL}
@@ -70,12 +74,22 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   );
 
   const wrappedItems = useMemo(() => {
-    return items.map((item, i) => (
-      <EuiContextMenuItem key={i} onClick={closeMenuAndCall(item.onClick)} href={item.href}>
-        {item.label}
-      </EuiContextMenuItem>
-    ));
-  }, [items, closeMenuAndCall]);
+    return items
+      .map((item, i) => (
+        <EuiContextMenuItem key={i} onClick={closeMenuAndCall(item.onClick)} href={item.href}>
+          {item.label}
+        </EuiContextMenuItem>
+      ))
+      .concat(
+        (externalItems ?? []).map((item, i) => (
+          <EuiContextMenuItem
+            key={`external_${i}`}
+            {...item}
+            onClick={closeMenuAndCall(item.onClick)}
+          />
+        ))
+      );
+  }, [items, closeMenuAndCall, externalItems]);
 
   return (
     <LogEntryContextMenuContent>

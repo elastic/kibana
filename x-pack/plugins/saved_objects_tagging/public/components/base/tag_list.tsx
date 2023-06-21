@@ -13,17 +13,22 @@ import { TagBadge } from './tag_badge';
 export interface TagListProps {
   tags: TagWithOptionalId[];
   onClick?: (tag: TagWithOptionalId) => void;
+  tagRender?: (tag: TagWithOptionalId) => JSX.Element;
 }
 
 /**
  * Displays a list of tag
  */
-export const TagList: FC<TagListProps> = ({ tags, onClick }) => {
+export const TagList: FC<TagListProps> = ({ tags, onClick, tagRender }) => {
   return (
     <EuiBadgeGroup>
-      {tags.map((tag) => (
-        <TagBadge key={tag.name} tag={tag} onClick={onClick} />
-      ))}
+      {tags.map((tag) =>
+        tagRender ? (
+          <span key={tag.name}>{tagRender(tag)}</span>
+        ) : (
+          <TagBadge key={tag.name} tag={tag} onClick={onClick} />
+        )
+      )}
     </EuiBadgeGroup>
   );
 };

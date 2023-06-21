@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/embeddable-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Adds embeddables service to Kibana",
+  "plugin": {
+    "id": "embeddable",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "inspector",
+      "uiActions",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
+    ],
+    "optionalPlugins": ["savedObjectsTaggingOss"],
+    "requiredBundles": [
+      "savedObjects",
+      "kibanaReact",
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

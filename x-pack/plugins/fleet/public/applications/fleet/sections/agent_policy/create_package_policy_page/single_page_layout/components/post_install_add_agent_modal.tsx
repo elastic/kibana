@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { WithGuidedOnboardingTour } from '../../../../../../../components';
 import { useIsGuidedOnboardingActive } from '../../../../../../../hooks';
-import type { AgentPolicy, PackageInfo } from '../../../../../types';
+import type { PackageInfo } from '../../../../../types';
 
 const toTitleCase = (str: string) => str.charAt(0).toUpperCase() + str.substr(1);
 
@@ -28,8 +28,7 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
   onConfirm: () => void;
   onCancel: () => void;
   packageInfo: PackageInfo;
-  agentPolicy: AgentPolicy;
-}> = ({ onConfirm, onCancel, packageInfo, agentPolicy }) => {
+}> = ({ onConfirm, onCancel, packageInfo }) => {
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo.name);
 
   return (
@@ -51,7 +50,7 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
           <p>
             <FormattedMessage
               id="xpack.fleet.agentPolicy.postInstallAddAgentModalDescription"
-              defaultMessage="To complete this integration, add {elasticAgent} to your hosts to collect data and send it to Elastic Stack"
+              defaultMessage="To complete this integration, add {elasticAgent} to your hosts to collect data and send it to Elastic Stack."
               values={{
                 elasticAgent: <strong>Elastic Agent</strong>,
               }}

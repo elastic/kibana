@@ -6,7 +6,7 @@
  */
 
 import type { DataViewBase } from '@kbn/es-query';
-import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import type {
   HostInfo,
   Immutable,
@@ -36,6 +36,9 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
+    // Adding `hostInfo` to store full API response in order to support the
+    // refactoring effort with AgentStatus component
+    hostInfo?: HostInfo;
     hostDetails: {
       /** details data for a specific host */
       details?: Immutable<HostMetadata>;
@@ -60,7 +63,7 @@ export interface EndpointState {
   /** the selected policy ID in the onboarding flow */
   selectedPolicyId?: string;
   /** Endpoint package info */
-  endpointPackageInfo: AsyncResourceState<GetPackagesResponse['items'][0]>;
+  endpointPackageInfo: AsyncResourceState<GetInfoResponse['item']>;
   /** Tracks the list of policies IDs used in Host metadata that may no longer exist */
   nonExistingPolicies: PolicyIds['packagePolicy'];
   /** List of Package Policy Ids mapped to an associated Fleet Parent Agent Policy Id*/

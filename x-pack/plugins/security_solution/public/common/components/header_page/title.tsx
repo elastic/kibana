@@ -9,8 +9,7 @@ import React from 'react';
 import { EuiBetaBadge, EuiBadge, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { DraggableArguments, BadgeOptions, TitleProp } from './types';
-import { DefaultDraggable } from '../draggables';
+import type { BadgeOptions, TitleProp } from './types';
 import { TruncatableText } from '../truncatable_text';
 
 const Header = styled.h1`
@@ -34,24 +33,14 @@ TitleWrapper.displayName = 'TitleWrapper';
 interface Props {
   badgeOptions?: BadgeOptions;
   title: TitleProp;
-  draggableArguments?: DraggableArguments;
 }
 
-const TitleComponent: React.FC<Props> = ({ draggableArguments, title, badgeOptions }) => (
+const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
   <EuiTitle size="l">
     <Header data-test-subj="header-page-title">
-      {!draggableArguments ? (
-        <TitleWrapper>
-          <TruncatableText tooltipContent={title}>{title}</TruncatableText>
-        </TitleWrapper>
-      ) : (
-        <DefaultDraggable
-          data-test-subj="header-page-draggable"
-          id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
-          field={draggableArguments.field}
-          value={`${draggableArguments.value}`}
-        />
-      )}
+      <TitleWrapper>
+        <TruncatableText tooltipContent={title}>{title}</TruncatableText>
+      </TitleWrapper>
       {badgeOptions && (
         <>
           {badgeOptions.beta ? (

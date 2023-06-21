@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { EuiIconTip, EuiText } from '@elastic/eui';
+import './feature_table_cell.scss';
+
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import type { SecuredFeature } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;
+  className?: string;
 }
 
-export const FeatureTableCell = ({ feature }: Props) => {
+export const FeatureTableCell = ({ feature, className }: Props) => {
   let tooltipElement = null;
   if (feature.getPrivilegesTooltip()) {
     const tooltipContent = (
@@ -35,8 +38,27 @@ export const FeatureTableCell = ({ feature }: Props) => {
   }
 
   return (
-    <span data-test-subj={`featureTableCell`}>
-      {feature.name} {tooltipElement}
-    </span>
+    <EuiFlexGroup className={className} direction="column" gutterSize="none" component="span">
+      <EuiFlexItem data-test-subj={`featureTableCell`} component="span">
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem className="featurePrivilegeName" grow={false}>
+            {feature.name}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{tooltipElement}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      {feature.description && (
+        <EuiFlexItem>
+          <EuiText
+            color="subdued"
+            size="xs"
+            data-test-subj="featurePrivilegeDescriptionText"
+            aria-describedby={`${feature.name} description text`}
+          >
+            {feature.description}
+          </EuiText>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };

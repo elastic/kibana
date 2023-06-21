@@ -14,6 +14,7 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
@@ -31,8 +32,10 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { APP_ID } from '../common/constants';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 
+import { APP_ID } from '../common/constants';
 import {
   createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
@@ -43,7 +46,7 @@ import {
 } from './saved_object_types';
 
 import type { CasesClient } from './client';
-import type { CasesRequestHandlerContext, PluginSetupContract, PluginStartContract } from './types';
+import type { CasesRequestHandlerContext, CasesSetup, CasesStart } from './types';
 import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeature } from './features';
 import { registerRoutes } from './routes/api/register_routes';
@@ -54,11 +57,15 @@ import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/p
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
+import { registerInternalAttachments } from './internal_attachments';
+import { registerCaseFileKinds } from './files';
+import type { ConfigType } from './config';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
+  files: FilesSetup;
   security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager?: TaskManagerSetupContract;
@@ -68,13 +75,17 @@ export interface PluginsSetup {
 export interface PluginsStart {
   actions: ActionsPluginStart;
   features: FeaturesPluginStart;
+  files: FilesStart;
   licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   security: SecurityPluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
+  notifications: NotificationsPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
 }
 
 export class CasePlugin {
+  private readonly caseConfig: ConfigType;
   private readonly logger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private clientFactory: CasesClientFactory;
@@ -85,6 +96,7 @@ export class CasePlugin {
   private userProfileService: UserProfileService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.caseConfig = initializerContext.config.get<ConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.logger = this.initializerContext.logger.get();
     this.clientFactory = new CasesClientFactory(this.logger);
@@ -93,12 +105,18 @@ export class CasePlugin {
     this.userProfileService = new UserProfileService(this.logger);
   }
 
-  public setup(core: CoreSetup, plugins: PluginsSetup): PluginSetupContract {
+  public setup(core: CoreSetup, plugins: PluginsSetup): CasesSetup {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
       )}] and plugins [${Object.keys(plugins)}]`
     );
+
+    registerInternalAttachments(
+      this.externalReferenceAttachmentTypeRegistry,
+      this.persistableStateAttachmentTypeRegistry
+    );
+    registerCaseFileKinds(this.caseConfig.files, plugins.files);
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -165,7 +183,7 @@ export class CasePlugin {
     };
   }
 
-  public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {
+  public start(core: CoreStart, plugins: PluginsStart): CasesStart {
     this.logger.debug(`Starting Case Workflow`);
 
     if (plugins.taskManager) {
@@ -199,6 +217,9 @@ export class CasePlugin {
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
+      notifications: plugins.notifications,
+      ruleRegistry: plugins.ruleRegistry,
+      filesPluginStart: plugins.files,
     });
 
     const client = core.elasticsearch.client;
@@ -213,6 +234,9 @@ export class CasePlugin {
 
     return {
       getCasesClientWithRequest,
+      getExternalReferenceAttachmentTypeRegistry: () =>
+        this.externalReferenceAttachmentTypeRegistry,
+      getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
     };
   }
 

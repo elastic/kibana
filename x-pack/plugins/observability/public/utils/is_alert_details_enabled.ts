@@ -6,25 +6,42 @@
  */
 
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { TopAlert } from '../pages/alerts';
-import { ConfigSchema } from '../plugin';
+import type { ConfigSchema } from '../plugin';
+import type { TopAlert } from '../typings/alerts';
 
-// We are mapping the ruleTypeId from the feature flag with the ruleTypeId form the alert
+const ALLOWED_RULE_TYPES = ['apm.transaction_duration'];
+
+const isUnsafeAlertDetailsFlag = (
+  subject: string
+): subject is keyof ConfigSchema['unsafe']['alertDetails'] =>
+  ['uptime', 'logs', 'metrics'].includes(subject);
+
+// We are mapping the ruleTypeId from the feature flag with the ruleTypeId from the alert
 // to know whether the feature flag is enabled or not.
 export const isAlertDetailsEnabledPerApp = (
-  alert?: TopAlert | null,
-  config?: ConfigSchema | null
+  alert: TopAlert | null,
+  config: ConfigSchema | null
 ): boolean => {
-  if (!alert || !config) return false;
-  const ruleTypeIdFromFeatureFlag = Object.keys(config.unsafe.alertDetails);
-  let ruleTypeId = alert.fields[ALERT_RULE_TYPE_ID].split('.')[0] as string;
+  if (!alert) return false;
+  const ruleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
 
-  // Uptime rule type id is not following the same name convention as all the other rules, so dedicated treatment needed.
-  if (alert.fields[ALERT_RULE_TYPE_ID] === 'xpack.uptime.alerts.monitorStatus')
-    ruleTypeId = 'uptime';
+  // The feature flags for alertDetails are not specific enough so we need to check
+  // the specific rule types to see if they should be blocked or not.
+  if (ALLOWED_RULE_TYPES.includes(ruleTypeId)) {
+    return true;
+  }
 
-  const appName = ruleTypeId as unknown as keyof ConfigSchema['unsafe']['alertDetails'];
-  return (
-    ruleTypeIdFromFeatureFlag.includes(ruleTypeId) && config?.unsafe?.alertDetails[appName].enabled
-  );
+  if (!config) return false;
+
+  // Since we are moving away from feature flags, this code will eventually be removed.
+  const appNameFromAlertRuleType =
+    ruleTypeId === 'xpack.uptime.alerts.monitorStatus' ||
+    ruleTypeId === 'xpack.uptime.alerts.tlsCertificate'
+      ? 'uptime'
+      : ruleTypeId.split('.')[0];
+  if (isUnsafeAlertDetailsFlag(appNameFromAlertRuleType)) {
+    return config.unsafe?.alertDetails[appNameFromAlertRuleType]?.enabled;
+  }
+
+  return false;
 };

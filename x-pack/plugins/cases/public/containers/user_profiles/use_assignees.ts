@@ -8,8 +8,7 @@
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useMemo } from 'react';
 import type { CaseAssignees } from '../../../common/api';
-import type { CurrentUserProfile } from '../../components/types';
-import { bringCurrentUserToFrontAndSort } from '../../components/user_profiles/sort';
+import { sortProfiles } from '../../components/user_profiles/sort';
 import type { Assignee, AssigneeWithProfile } from '../../components/user_profiles/types';
 
 interface PartitionedAssignees {
@@ -20,11 +19,9 @@ interface PartitionedAssignees {
 export const useAssignees = ({
   caseAssignees,
   userProfiles,
-  currentUserProfile,
 }: {
   caseAssignees: CaseAssignees;
   userProfiles: Map<string, UserProfileWithAvatar>;
-  currentUserProfile: CurrentUserProfile;
 }): {
   assigneesWithProfiles: AssigneeWithProfile[];
   assigneesWithoutProfiles: Assignee[];
@@ -46,14 +43,14 @@ export const useAssignees = ({
       { usersWithProfiles: [], usersWithoutProfiles: [] }
     );
 
-    const orderedProf = bringCurrentUserToFrontAndSort(currentUserProfile, usersWithProfiles);
+    const orderedProf = sortProfiles(usersWithProfiles);
 
-    const assigneesWithProfile2 = orderedProf?.map((profile) => ({ uid: profile.uid, profile }));
+    const withProfiles = orderedProf?.map((profile) => ({ uid: profile.uid, profile }));
     return {
-      assigneesWithProfiles: assigneesWithProfile2 ?? [],
+      assigneesWithProfiles: withProfiles ?? [],
       assigneesWithoutProfiles: usersWithoutProfiles,
     };
-  }, [caseAssignees, currentUserProfile, userProfiles]);
+  }, [caseAssignees, userProfiles]);
 
   const allAssignees = useMemo(
     () => [...assigneesWithProfiles, ...assigneesWithoutProfiles],

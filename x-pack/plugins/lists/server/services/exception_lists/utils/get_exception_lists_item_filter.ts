@@ -26,7 +26,7 @@ export const getExceptionListsItemFilter = ({
     const escapedListId = escapeQuotes(singleListId);
     const listItemAppend = `(${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: "${escapedListId}")`;
     const listItemAppendWithFilter =
-      filter[index] != null ? `(${listItemAppend} AND ${filter[index]})` : listItemAppend;
+      filter[index] != null ? `(${listItemAppend} AND (${filter[index]}))` : listItemAppend;
     if (accum === '') {
       return listItemAppendWithFilter;
     } else {

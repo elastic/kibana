@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { configure, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { configure, waitFor, fireEvent } from '@testing-library/react';
 import type { RecentCasesProps } from '.';
 import RecentCases from '.';
 import type { AppMockRenderer } from '../../common/mock';
@@ -89,6 +88,22 @@ describe('RecentCases', () => {
     });
   });
 
+  it('render formatted date correctly', async () => {
+    const result = appMockRender.render(
+      <TestProviders>
+        <RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />
+      </TestProviders>
+    );
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [], owner: ['securitySolution'] },
+      queryParams: { perPage: 2 },
+    });
+
+    await waitFor(() =>
+      expect(result.getAllByTestId('recent-cases-creation-relative-time')).toHaveLength(8)
+    );
+  });
+
   it('sets the reporter filters correctly', async () => {
     const { getByTestId } = appMockRender.render(
       <TestProviders>
@@ -102,37 +117,39 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    await waitFor(() => {
-      const myRecentCasesElement = getByTestId('myRecentlyReported');
-      userEvent.click(myRecentCasesElement);
-    });
+    const recentCasesFilter = getByTestId('recent-cases-filter');
 
-    expect(useGetCasesMock).toHaveBeenLastCalledWith({
-      filterOptions: {
-        reporters: [
-          {
-            email: 'damaged_raccoon@elastic.co',
-            full_name: 'Damaged Raccoon',
-            profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
-            username: 'damaged_raccoon',
-          },
-        ],
-        owner: ['securitySolution'],
-      },
-      queryParams: { perPage: 10 },
-    });
+    fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyReported' } });
+
+    await waitFor(() =>
+      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+        filterOptions: {
+          reporters: [
+            {
+              email: 'damaged_raccoon@elastic.co',
+              full_name: 'Damaged Raccoon',
+              profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+              username: 'damaged_raccoon',
+            },
+          ],
+          owner: ['securitySolution'],
+        },
+        queryParams: { perPage: 10 },
+      })
+    );
 
     // remove the filter
-    const recentCasesElement = getByTestId('recentlyCreated');
-    userEvent.click(recentCasesElement);
+    fireEvent.change(recentCasesFilter, { target: { value: 'recentlyCreated' } });
 
-    expect(useGetCasesMock).toHaveBeenLastCalledWith({
-      filterOptions: {
-        reporters: [],
-        owner: ['securitySolution'],
-      },
-      queryParams: { perPage: 10 },
-    });
+    await waitFor(() =>
+      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+        filterOptions: {
+          reporters: [],
+          owner: ['securitySolution'],
+        },
+        queryParams: { perPage: 10 },
+      })
+    );
   });
 
   it('sets the reporter filters to the user info without the profile uid when it cannot find the current user profile', async () => {
@@ -150,24 +167,96 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    await waitFor(() => {
-      const myRecentCasesElement = getByTestId('myRecentlyReported');
-      userEvent.click(myRecentCasesElement);
-    });
+    const recentCasesFilter = getByTestId('recent-cases-filter');
 
-    expect(useGetCasesMock).toHaveBeenLastCalledWith({
-      filterOptions: {
-        reporters: [
-          {
-            email: 'elastic@elastic.co',
-            full_name: 'Elastic',
-            username: 'elastic',
-          },
-        ],
-        owner: ['securitySolution'],
-      },
+    fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyReported' } });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+        filterOptions: {
+          reporters: [
+            {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic',
+              username: 'elastic',
+            },
+          ],
+          owner: ['securitySolution'],
+        },
+        queryParams: { perPage: 10 },
+      });
+    });
+  });
+
+  it('sets the assignees filters correctly', async () => {
+    const { getByTestId } = appMockRender.render(
+      <TestProviders>
+        <RecentCases {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [], owner: ['securitySolution'] },
       queryParams: { perPage: 10 },
     });
+
+    // apply the filter
+    const recentCasesFilter = getByTestId('recent-cases-filter');
+
+    fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyAssigned' } });
+
+    await waitFor(() =>
+      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+        filterOptions: {
+          assignees: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0'],
+          owner: ['securitySolution'],
+        },
+        queryParams: { perPage: 10 },
+      })
+    );
+
+    // remove the filter
+    fireEvent.change(recentCasesFilter, { target: { value: 'recentlyCreated' } });
+
+    await waitFor(() =>
+      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+        filterOptions: {
+          reporters: [],
+          owner: ['securitySolution'],
+        },
+        queryParams: { perPage: 10 },
+      })
+    );
+  });
+
+  it('sets empty assignees filter when no profile uid available', async () => {
+    useGetCurrentUserProfileMock.mockReturnValue({ data: undefined, isLoading: false });
+
+    const { getByTestId } = appMockRender.render(
+      <TestProviders>
+        <RecentCases {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [], owner: ['securitySolution'] },
+      queryParams: { perPage: 10 },
+    });
+
+    // apply the filter
+    const recentCasesFilter = getByTestId('recent-cases-filter');
+
+    fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyAssigned' } });
+
+    await waitFor(() =>
+      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+        filterOptions: {
+          assignees: [],
+          owner: ['securitySolution'],
+        },
+        queryParams: { perPage: 10 },
+      })
+    );
   });
 
   it('sets all available solutions correctly', () => {

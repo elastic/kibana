@@ -88,6 +88,7 @@ export const TypeSwitcher: React.FC<Props> = ({ criteria, updateType }) => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiSelect
+                data-test-subj="infraTypeSwitcherSelect"
                 compressed
                 value={thresholdType}
                 onChange={(e) => updateType(thresholdType === 'ratio' ? 'count' : 'ratio')}

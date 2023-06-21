@@ -8,7 +8,7 @@
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 import { ROLES } from '../../../../common/test';
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
@@ -35,12 +35,11 @@ describe('Exceptions viewer read only', () => {
     esArchiverResetKibana();
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
-      createCustomRule(
-        {
-          ...getNewRule(),
-          customQuery: 'agent.name:*',
-          dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
-          exceptionLists: [
+      createRule(
+        getNewRule({
+          query: 'agent.name:*',
+          index: ['exceptions*'],
+          exceptions_list: [
             {
               id: response.body.id,
               list_id: exceptionList.list_id,
@@ -48,11 +47,13 @@ describe('Exceptions viewer read only', () => {
               namespace_type: exceptionList.namespace_type,
             },
           ],
-        },
-        '2'
+          rule_id: '2',
+        })
       );
     });
+  });
 
+  beforeEach(() => {
     login(ROLES.reader);
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.reader);
     goToRuleDetails();

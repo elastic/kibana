@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -23,7 +23,7 @@ import { SubscriptionSplashPage } from '../../../components/subscription_splash_
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogViewContext } from '../../../hooks/use_log_view';
-import { LogsPageTemplate } from '../page_template';
+import { LogsPageTemplate } from '../shared/page_template';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
 

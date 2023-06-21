@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
-import { METRIC_TYPE, useUiTracker } from '@kbn/observability-plugin/public';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import {
   FILTER_REQUESTS_LABEL,
   FILTER_SCREENREADER_LABEL,
@@ -129,6 +129,7 @@ export const WaterfallFilter = ({
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem>
         <EuiFieldSearch
+          data-test-subj="syntheticsWaterfallFilterFieldSearch"
           fullWidth
           aria-label={FILTER_REQUESTS_LABEL}
           placeholder={FILTER_REQUESTS_LABEL}

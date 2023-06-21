@@ -26,7 +26,6 @@ import {
   CommonAlertFilter,
 } from '../../common/types/alerts';
 import { RULE_CPU_USAGE, RULE_DETAILS } from '../../common/constants';
-// @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';

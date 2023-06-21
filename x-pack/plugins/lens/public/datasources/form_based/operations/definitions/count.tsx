@@ -23,7 +23,6 @@ import {
   isColumnOfType,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -91,8 +90,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   input: 'field',
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
-      getDisallowedPreviousShiftMessage(layer, columnId),
+      getInvalidFieldMessage(layer, columnId, indexPattern),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   allowAsReference: true,
@@ -103,10 +101,16 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       sourceField: field.name,
     };
   },
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type,
+    timeSeriesMetric,
+  }) => {
     if (
       type === 'document' ||
       (aggregatable &&
+        timeSeriesMetric !== 'counter' &&
         (!aggregationRestrictions || aggregationRestrictions.value_count) &&
         supportedTypes.has(type))
     ) {
@@ -235,7 +239,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     }),
     description: i18n.translate('xpack.lens.indexPattern.count.documentation.markdown', {
       defaultMessage: `
-The total number of documents. When you provide a field as the first argument, the total number of field values is counted. Use the count function for fields that have multiple values in a single document.
+The total number of documents. When you provide a field, the total number of field values is counted. When you use the Count function for fields that have multiple values in a single document, all values are counted.
 
 #### Examples
 
@@ -249,7 +253,7 @@ To calculate the number of documents that match a specific filter, use \`count(k
   },
   quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.count.documentation.quick', {
     defaultMessage: `
-The total number of documents. When you provide a field, the total number of field values is counted. Use the count function for fields that have multiple values in a single document.
+The total number of documents. When you provide a field, the total number of field values is counted. When you use the Count function for fields that have multiple values in a single document, all values are counted.
       `,
   }),
   shiftable: true,

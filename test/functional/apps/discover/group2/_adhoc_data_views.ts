@@ -14,8 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const fieldEditor = getService('fieldEditor');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const queryBar = getService('queryBar');
@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'context',
     'dashboard',
+    'unifiedFieldList',
   ]);
   const find = getService('find');
   const security = getService('security');
@@ -51,12 +52,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
       await PageObjects.discover.createAdHocDataView('logstash', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const first = await PageObjects.discover.getCurrentDataViewId();
+
+      await PageObjects.discover.addRuntimeField(
+        '_bytes-runtimefield',
+        `emit(doc["bytes"].value.toString())`
+      );
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
+
+      const second = await PageObjects.discover.getCurrentDataViewId();
+      expect(first).not.to.equal(second);
 
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -82,7 +94,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should support query and filtering', async () => {
-      await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
+      await filterBar.addFilter({
+        field: 'nestedField.child',
+        operation: 'is',
+        value: 'nestedValue',
+      });
       expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be('1');
@@ -119,18 +135,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(prevDataViewId).not.to.equal(newDataViewId);
     });
 
-    it('should update data view id when saving data view from hoc one', async () => {
-      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
-
-      await testSubjects.click('discoverAlertsButton');
-      await testSubjects.click('confirmModalConfirmButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
-
-      expect(prevDataViewId).not.to.equal(newDataViewId);
-    });
-
     it('search results should be different after data view update', async () => {
       await PageObjects.discover.createAdHocDataView('logst', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -141,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '_bytes-runtimefield',
         `emit(doc["bytes"].value.toString())`
       );
-      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
 
@@ -150,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // remove field and create with the same name, but different value
-      await PageObjects.discover.clickFieldListItemRemove('_bytes-runtimefield');
+      await PageObjects.unifiedFieldList.clickFieldListItemRemove('_bytes-runtimefield');
       await PageObjects.discover.removeField('_bytes-runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -159,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '_bytes-runtimefield',
         `emit((doc["bytes"].value * 2).toString())`
       );
-      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
 
       // save second search
       await PageObjects.discover.saveSearch('logst*-ss-_bytes-runtimefield-updated', true);
@@ -182,9 +186,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(+second).to.equal(+first * 2);
     });
 
-    it('should update id after data view field edit', async () => {
-      await PageObjects.common.navigateToApp('discover');
+    it('should open saved search by navigation to context from embeddable', async () => {
+      // navigate to context view
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
+      await surrDocs.click();
+
+      // close popup
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      if (await testSubjects.exists('confirmModalConfirmButton')) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+      // open saved search
+      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const savedSearch = await find.byCssSelector(`[data-test-subj="breadcrumb last"]`);
+      const savedSearchName = await savedSearch.getVisibleText();
+      expect(savedSearchName).to.be.equal('logst*-ss-_bytes-runtimefield');
+
+      // test the header now
+      const header = await dataGrid.getHeaderFields();
+      expect(header.join(' ')).to.have.string('_bytes-runtimefield');
+    });
+
+    it('should update id after data view field edit', async () => {
       await PageObjects.discover.loadSavedSearch('logst*-ss-_bytes-runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -205,10 +234,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.createAdHocDataView('logstas', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
+      await filterBar.addFilter({
+        field: 'nestedField.child',
+        operation: 'is',
+        value: 'nestedValue',
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await filterBar.addFilter('extension', 'is', 'jpg');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const first = await PageObjects.discover.getCurrentDataViewId();
@@ -227,14 +260,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.goBack();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const firstToast = await toasts.getToastContent(1);
-      expect(firstToast).to.equal(
-        `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`
-      );
+      const [firstToast, secondToast] = await toasts.getAllToastElements();
 
-      const secondToast = await toasts.getToastContent(2);
-      expect(secondToast).to.equal(
-        `Different index references\nData view id references in some of the applied filters differ from the current data view.`
+      expect([await firstToast.getVisibleText(), await secondToast.getVisibleText()].sort()).to.eql(
+        [
+          `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`,
+          `Different index references\nData view id references in some of the applied filters differ from the current data view.`,
+        ].sort()
       );
     });
   });

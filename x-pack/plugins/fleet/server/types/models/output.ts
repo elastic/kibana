@@ -54,6 +54,21 @@ const OutputBaseSchema = {
       key: schema.maybe(schema.string()),
     })
   ),
+  proxy_id: schema.nullable(schema.string()),
+  shipper: schema.maybe(
+    schema.object({
+      disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
+      disk_queue_path: schema.nullable(schema.string()),
+      disk_queue_max_size: schema.nullable(schema.number()),
+      disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
+      disk_queue_compression_enabled: schema.nullable(schema.boolean()),
+      compression_level: schema.nullable(schema.number()),
+      loadbalance: schema.nullable(schema.boolean()),
+      mem_queue_events: schema.nullable(schema.number()),
+      queue_flush_timeout: schema.nullable(schema.number()),
+      max_batch_bytes: schema.nullable(schema.number()),
+    })
+  ),
 };
 
 export const NewOutputSchema = schema.object({ ...OutputBaseSchema });
@@ -79,6 +94,21 @@ export const UpdateOutputSchema = schema.object({
       certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
       certificate: schema.maybe(schema.string()),
       key: schema.maybe(schema.string()),
+    })
+  ),
+  proxy_id: schema.nullable(schema.string()),
+  shipper: schema.maybe(
+    schema.object({
+      disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
+      disk_queue_path: schema.nullable(schema.string()),
+      disk_queue_max_size: schema.nullable(schema.number()),
+      disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
+      disk_queue_compression_enabled: schema.nullable(schema.boolean()),
+      compression_level: schema.nullable(schema.number()),
+      loadbalance: schema.nullable(schema.boolean()),
+      mem_queue_events: schema.nullable(schema.number()),
+      queue_flush_timeout: schema.nullable(schema.number()),
+      max_batch_bytes: schema.nullable(schema.number()),
     })
   ),
 });

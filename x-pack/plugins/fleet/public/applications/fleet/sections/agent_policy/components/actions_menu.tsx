@@ -11,7 +11,14 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
 import { useAuthz } from '../../../hooks';
-import { AgentEnrollmentFlyout, ContextMenuActions } from '../../../components';
+import {
+  AgentEnrollmentFlyout,
+  ContextMenuActions,
+  UninstallCommandFlyout,
+} from '../../../components';
+import { FLEET_SERVER_PACKAGE } from '../../../constants';
+
+import { ExperimentalFeaturesService } from '../../../../../services/experimental_features';
 
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
@@ -34,6 +41,18 @@ export const AgentPolicyActionMenu = memo<{
     const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
     const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
       enrollmentFlyoutOpenByDefault
+    );
+    const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] =
+      useState<boolean>(false);
+
+    const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
+
+    const isFleetServerPolicy = useMemo(
+      () =>
+        agentPolicy.package_policies?.some(
+          (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
+        ),
+      [agentPolicy]
     );
 
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -83,10 +102,17 @@ export const AgentPolicyActionMenu = memo<{
                   }}
                   key="enrollAgents"
                 >
-                  <FormattedMessage
-                    id="xpack.fleet.agentPolicyActionMenu.enrollAgentActionText"
-                    defaultMessage="Add agent"
-                  />
+                  {isFleetServerPolicy ? (
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyActionMenu.addFleetServerActionText"
+                      defaultMessage="Add Fleet Server"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyActionMenu.enrollAgentActionText"
+                      defaultMessage="Add agent"
+                    />
+                  )}
                 </EuiContextMenuItem>,
                 viewPolicyItem,
                 <EuiContextMenuItem
@@ -104,20 +130,47 @@ export const AgentPolicyActionMenu = memo<{
                   />
                 </EuiContextMenuItem>,
               ];
+
+          if (agentTamperProtectionEnabled && !agentPolicy?.is_managed) {
+            menuItems.push(
+              <EuiContextMenuItem
+                icon="minusInCircle"
+                onClick={() => {
+                  setIsContextMenuOpen(false);
+                  setIsUninstallCommandFlyoutOpen(true);
+                }}
+                key="getUninstallCommand"
+                data-test-subj="uninstall-agents-command-menu-item"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyActionMenu.getUninstallCommand"
+                  defaultMessage="Uninstall agents on this policy"
+                />
+              </EuiContextMenuItem>
+            );
+          }
+
           return (
             <>
-              {isYamlFlyoutOpen ? (
+              {isYamlFlyoutOpen && (
                 <EuiPortal>
                   <AgentPolicyYamlFlyout
                     policyId={agentPolicy.id}
                     onClose={() => setIsYamlFlyoutOpen(false)}
                   />
                 </EuiPortal>
-              ) : null}
+              )}
               {isEnrollmentFlyoutOpen && (
                 <EuiPortal>
                   <AgentEnrollmentFlyout agentPolicy={agentPolicy} onClose={onClose} />
                 </EuiPortal>
+              )}
+              {isUninstallCommandFlyoutOpen && (
+                <UninstallCommandFlyout
+                  target="agent"
+                  policyId={agentPolicy.id}
+                  onClose={() => setIsUninstallCommandFlyoutOpen(false)}
+                />
               )}
               <ContextMenuActions
                 isOpen={isContextMenuOpen}

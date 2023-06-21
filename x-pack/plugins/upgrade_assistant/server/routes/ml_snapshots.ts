@@ -136,6 +136,7 @@ const getModelSnapshotUpgradeStatus = async (
 };
 
 export function registerMlSnapshotRoutes({
+  config: { featureSet },
   router,
   log,
   lib: { handleEsError },
@@ -154,7 +155,7 @@ export function registerMlSnapshotRoutes({
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
         const {
-          savedObjects: { client: savedObjectsClient },
+          savedObjects: { getClient },
           elasticsearch: { client: esClient },
         } = await core;
         const { snapshotId, jobId } = request.body;
@@ -172,7 +173,10 @@ export function registerMlSnapshotRoutes({
 
         // Store snapshot in saved object if upgrade not complete
         if (body.completed !== true) {
-          await createMlOperation(savedObjectsClient, snapshotInfo);
+          await createMlOperation(
+            getClient({ includedHiddenTypes: [ML_UPGRADE_OP_TYPE] }),
+            snapshotInfo
+          );
         }
 
         return response.ok({
@@ -201,9 +205,10 @@ export function registerMlSnapshotRoutes({
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
         const {
-          savedObjects: { client: savedObjectsClient },
+          savedObjects: { getClient },
           elasticsearch: { client: esClient },
         } = await core;
+        const savedObjectsClient = getClient({ includedHiddenTypes: [ML_UPGRADE_OP_TYPE] });
         const { snapshotId, jobId } = request.params;
 
         // Verify snapshot exists
@@ -332,6 +337,24 @@ export function registerMlSnapshotRoutes({
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
+        /**
+         * Always return false if featureSet.mlSnapshots is set to false
+         * This disables possibly showing a needless warning about ML
+         * upgrade mode when there's never a need to upgrade ML job
+         * snapshots in minor version upgrades.
+         *
+         * This config should be set to false only on the `x.last` versions, or when
+         * the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
+         * is incremented to something higher than 7.0.0 in the Elasticsearch code.
+         */
+        if (!featureSet.mlSnapshots) {
+          return response.ok({
+            body: {
+              mlUpgradeModeEnabled: false,
+            },
+          });
+        }
+
         const {
           elasticsearch: { client: esClient },
         } = await core;

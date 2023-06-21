@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../../../test/functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default ({ loadTestFile, getService }: FtrProviderContext) => {
+export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Triggers Actions UI Example', function () {
     loadTestFile(require.resolve('./rule_status_dropdown'));
     loadTestFile(require.resolve('./rule_tag_filter'));
@@ -16,5 +16,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
     loadTestFile(require.resolve('./rule_event_log_list'));
     loadTestFile(require.resolve('./rules_list'));
     loadTestFile(require.resolve('./alerts_table'));
+    loadTestFile(require.resolve('./rules_settings_link'));
   });
 };

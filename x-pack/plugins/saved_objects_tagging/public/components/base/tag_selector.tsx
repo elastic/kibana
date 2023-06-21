@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiComboBoxProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Tag } from '../../../common';
@@ -42,14 +43,14 @@ function isCreateOption(
   return value.type === '__create_option__';
 }
 
-export interface TagSelectorProps {
+export type TagSelectorProps = EuiComboBoxProps<Tag | CreateOption> & {
   tags: Tag[];
   selected: string[];
   onTagsSelected: (ids: string[]) => void;
   'data-test-subj'?: string;
   allowCreate: boolean;
   openCreateModal: CreateModalOpener;
-}
+};
 
 const renderCreateOption = () => {
   return (
@@ -105,6 +106,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
   onTagsSelected,
   allowCreate,
   openCreateModal,
+  fullWidth = true,
   ...otherProps
 }) => {
   const [currentSearch, setCurrentSearch] = useState('');
@@ -166,13 +168,14 @@ export const TagSelector: FC<TagSelectorProps> = ({
   );
 
   return (
-    <EuiComboBox
+    <EuiComboBox<Tag | CreateOption>
       placeholder={''}
       options={options}
       selectedOptions={selectedOptions}
       onSearchChange={setCurrentSearch}
       onChange={onChange}
       renderOption={renderOption}
+      fullWidth={fullWidth}
       {...otherProps}
     />
   );

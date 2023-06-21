@@ -26,6 +26,7 @@ import { disableEventDefaults, focusNextElement } from './helpers';
 import { useTreeViewContext } from '../contexts';
 import { TreeViewIcon } from '../tree_view_icon';
 import type { DynamicTreeViewProps, DynamicTreeViewItemProps } from './types';
+import { BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS } from '../translations';
 
 const BUTTON_TEST_ID = 'kubernetesSecurity:dynamicTreeViewButton';
 
@@ -37,11 +38,13 @@ const focusPreviousButton = (event: KeyboardEvent) => {
 };
 
 const DynamicTreeViewExpander = ({
+  defaultExpanded = false,
   children,
 }: {
+  defaultExpanded: boolean;
   children: (childrenProps: { isExpanded: boolean; onToggleExpand: () => void }) => JSX.Element;
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   const onToggleExpand = () => {
     setIsExpanded((e) => !e);
@@ -65,7 +68,7 @@ export const DynamicTreeView = ({
 }: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
 
-  const { indexPattern, setNoResults } = useTreeViewContext();
+  const { indexPattern, setNoResults, setTreeNavSelection } = useTreeViewContext();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
     useFetchDynamicTreeView(query, tree[depth].key, indexPattern, expanded);
@@ -90,10 +93,15 @@ export const DynamicTreeView = ({
   };
 
   useEffect(() => {
-    if (depth === 0 && data && data.pages?.[0].buckets.length === 0) {
-      setNoResults(true);
+    if (depth === 0 && data) {
+      const noData = data.pages?.[0].buckets.length === 0;
+      setNoResults(noData);
+
+      if (noData) {
+        setTreeNavSelection({});
+      }
     }
-  }, [data, depth, setNoResults]);
+  }, [data, depth, setNoResults, setTreeNavSelection]);
 
   useEffect(() => {
     if (expanded) {
@@ -164,8 +172,10 @@ export const DynamicTreeView = ({
             },
           };
 
+          const defaultExpanded = selected.indexOf('' + aggData.key) > 0;
+
           return (
-            <DynamicTreeViewExpander key={aggData.key}>
+            <DynamicTreeViewExpander key={aggData.key} defaultExpanded={defaultExpanded}>
               {({ isExpanded, onToggleExpand }) => (
                 <DynamicTreeViewItem
                   aggData={aggData}
@@ -309,6 +319,8 @@ const DynamicTreeViewItem = ({
     );
   }, [aggData.key, aggData.key_as_string, depth, selected, selectionDepth, tree]);
 
+  const clusterLevel = BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS[tree[depth].type];
+
   return (
     <li
       className={`euiTreeView__node
@@ -332,7 +344,7 @@ const DynamicTreeViewItem = ({
           />
         )}
         <TreeViewIcon {...tree[depth].iconProps} css={styles.labelIcon} />
-        <EuiToolTip content={aggData.key}>
+        <EuiToolTip content={`${clusterLevel}: ${aggData.key}`}>
           <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
         </EuiToolTip>
       </button>

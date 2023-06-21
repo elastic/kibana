@@ -38,6 +38,23 @@ import { bulkEditInternalRulesRoute } from './bulk_edit_rules';
 import { snoozeRuleRoute } from './snooze_rule';
 import { unsnoozeRuleRoute } from './unsnooze_rule';
 import { runSoonRoute } from './run_soon';
+import { bulkDeleteRulesRoute } from './bulk_delete_rules';
+import { bulkEnableRulesRoute } from './bulk_enable_rules';
+import { bulkDisableRulesRoute } from './bulk_disable_rules';
+import { cloneRuleRoute } from './clone_rule';
+import { getFlappingSettingsRoute } from './get_flapping_settings';
+import { updateFlappingSettingsRoute } from './update_flapping_settings';
+import { getRuleTagsRoute } from './get_rule_tags';
+
+import { createMaintenanceWindowRoute } from './maintenance_window/create_maintenance_window';
+import { getMaintenanceWindowRoute } from './maintenance_window/get_maintenance_window';
+import { updateMaintenanceWindowRoute } from './maintenance_window/update_maintenance_window';
+import { deleteMaintenanceWindowRoute } from './maintenance_window/delete_maintenance_window';
+import { findMaintenanceWindowsRoute } from './maintenance_window/find_maintenance_windows';
+import { archiveMaintenanceWindowRoute } from './maintenance_window/archive_maintenance_window';
+import { finishMaintenanceWindowRoute } from './maintenance_window/finish_maintenance_window';
+import { activeMaintenanceWindowsRoute } from './maintenance_window/active_maintenance_windows';
+import { bulkGetMaintenanceWindowRoute } from './maintenance_window/bulk_get_maintenance_windows';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -76,7 +93,23 @@ export function defineRoutes(opts: RouteOptions) {
   unmuteAlertRoute(router, licenseState);
   updateRuleApiKeyRoute(router, licenseState);
   bulkEditInternalRulesRoute(router, licenseState);
+  bulkDeleteRulesRoute({ router, licenseState });
+  bulkEnableRulesRoute({ router, licenseState });
+  bulkDisableRulesRoute({ router, licenseState });
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
   runSoonRoute(router, licenseState);
+  cloneRuleRoute(router, licenseState);
+  getFlappingSettingsRoute(router, licenseState);
+  updateFlappingSettingsRoute(router, licenseState);
+  getRuleTagsRoute(router, licenseState);
+  createMaintenanceWindowRoute(router, licenseState);
+  getMaintenanceWindowRoute(router, licenseState);
+  updateMaintenanceWindowRoute(router, licenseState);
+  deleteMaintenanceWindowRoute(router, licenseState);
+  findMaintenanceWindowsRoute(router, licenseState);
+  archiveMaintenanceWindowRoute(router, licenseState);
+  finishMaintenanceWindowRoute(router, licenseState);
+  activeMaintenanceWindowsRoute(router, licenseState);
+  bulkGetMaintenanceWindowRoute(router, licenseState);
 }

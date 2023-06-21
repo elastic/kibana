@@ -201,6 +201,113 @@ exports[`IndicesList should change per page 1`] = `
 </div>
 `;
 
+exports[`IndicesList should highlight fully when an exact match 1`] = `
+<div>
+  <EuiTable
+    responsive={false}
+    tableLayout="auto"
+  >
+    <EuiTableBody>
+      <EuiTableRow
+        key="0"
+      >
+        <EuiTableRowCell>
+          <span>
+            <strong>
+              logs
+            </strong>
+            tash
+          </span>
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="1"
+      >
+        <EuiTableRowCell>
+          <strong>
+            some_logs
+          </strong>
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+    </EuiTableBody>
+  </EuiTable>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiButtonEmpty
+            color="text"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="indexPatternEditor.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
+          </EuiButtonEmpty>
+        }
+        closePopover={[Function]}
+        display="inline-block"
+        hasArrow={true}
+        id="customizablePagination"
+        isOpen={false}
+        ownFocus={true}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel
+          items={
+            Array [
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                5
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                10
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                20
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                50
+              </EuiContextMenuItem>,
+            ]
+          }
+        />
+      </EuiPopover>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
 exports[`IndicesList should highlight the query in the matches 1`] = `
 <div>
   <EuiTable
@@ -225,7 +332,9 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         key="1"
       >
         <EuiTableRowCell>
-          es
+          <strong>
+            es
+          </strong>
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>

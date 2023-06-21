@@ -12,8 +12,8 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getComplexRule,
   getComplexRuleOutput,
   getSimpleRule,
@@ -26,6 +26,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('find_rules', () => {
     beforeEach(async () => {
@@ -33,8 +34,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
     });
 
     it('should return an empty find body correctly if no rules are loaded', async () => {
@@ -126,8 +127,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...getSimpleRuleOutput(),
-        actions: [action],
-        throttle: 'rule',
+        actions: [
+          {
+            ...action,
+            uuid: body.data[0].actions[0].uuid,
+            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+          },
+        ],
       };
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
@@ -171,8 +177,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...getSimpleRuleOutput(),
-        actions: [action],
-        throttle: '1h', // <-- throttle makes this a scheduled action
+        actions: [
+          {
+            ...action,
+            uuid: body.data[0].actions[0].uuid,
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+          },
+        ],
       };
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
@@ -239,9 +250,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
               action_type_id: hookAction.actionTypeId,
+              frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
             },
           ],
-          throttle: '1h',
         };
 
         body.data = [removeServerGeneratedProperties(body.data[0])];

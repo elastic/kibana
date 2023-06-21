@@ -135,6 +135,7 @@ type TestSubjects =
   | 'stepTwo.readOnlyToggle'
   | 'stepTwo.submitButton'
   | 'stepTwo.title'
+  | 'storageClassSelect'
   | 'submitButton'
   | 'title'
   | 'urlRepositoryType';

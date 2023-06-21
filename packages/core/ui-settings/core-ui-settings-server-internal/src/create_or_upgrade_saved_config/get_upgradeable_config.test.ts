@@ -17,8 +17,18 @@ describe('getUpgradeableConfig', () => {
       saved_objects: [{ id: '7.5.0', attributes: 'foo' }],
     } as SavedObjectsFindResponse);
 
-    await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0' });
+    await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0', type: 'config' });
     expect(savedObjectsClient.find.mock.calls[0][0].type).toBe('config');
+  });
+
+  it('finds saved objects with type "config-global"', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [{ id: '8.6.0', attributes: 'bar' }],
+    } as SavedObjectsFindResponse);
+
+    await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0', type: 'config-global' });
+    expect(savedObjectsClient.find.mock.calls[0][0].type).toBe('config-global');
   });
 
   it('finds saved config with version < than Kibana version', async () => {
@@ -28,8 +38,65 @@ describe('getUpgradeableConfig', () => {
       saved_objects: [savedConfig],
     } as SavedObjectsFindResponse);
 
-    const result = await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0' });
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
     expect(result).toEqual(savedConfig);
+  });
+
+  it('uses the latest config when multiple are found', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        { id: '7.2.0', attributes: 'foo' },
+        { id: '7.3.0', attributes: 'foo' },
+      ],
+    } as SavedObjectsFindResponse);
+
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
+    expect(result!.id).toBe('7.3.0');
+  });
+
+  it('uses the latest config when multiple are found with rc qualifier', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        { id: '7.2.0', attributes: 'foo' },
+        { id: '7.3.0', attributes: 'foo' },
+        { id: '7.5.0-rc1', attributes: 'foo' },
+      ],
+    } as SavedObjectsFindResponse);
+
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
+    expect(result!.id).toBe('7.5.0-rc1');
+  });
+
+  it('ignores documents with malformed ids', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        { id: 'not-a-semver', attributes: 'foo' },
+        { id: '7.2.0', attributes: 'foo' },
+        { id: '7.3.0', attributes: 'foo' },
+      ],
+    } as SavedObjectsFindResponse);
+
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
+    expect(result!.id).toBe('7.3.0');
   });
 
   it('finds saved config with RC version === Kibana version', async () => {
@@ -39,7 +106,11 @@ describe('getUpgradeableConfig', () => {
       saved_objects: [savedConfig],
     } as SavedObjectsFindResponse);
 
-    const result = await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0' });
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
     expect(result).toEqual(savedConfig);
   });
 
@@ -50,7 +121,11 @@ describe('getUpgradeableConfig', () => {
       saved_objects: [savedConfig],
     } as SavedObjectsFindResponse);
 
-    const result = await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0' });
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
     expect(result).toBe(null);
   });
 
@@ -61,7 +136,11 @@ describe('getUpgradeableConfig', () => {
       saved_objects: [savedConfig],
     } as SavedObjectsFindResponse);
 
-    const result = await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0' });
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
     expect(result).toBe(null);
   });
 
@@ -71,7 +150,11 @@ describe('getUpgradeableConfig', () => {
       saved_objects: [],
     } as unknown as SavedObjectsFindResponse);
 
-    const result = await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0' });
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
     expect(result).toBe(null);
   });
 });

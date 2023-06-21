@@ -10,6 +10,7 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {
   LANDING_PATH,
   OVERVIEW_PATH,
+  DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   SecurityPageName,
   ENTITY_ANALYTICS_PATH,
@@ -18,9 +19,11 @@ import type { SecuritySubPluginRoutes } from '../app/types';
 
 import { LandingPage } from './pages/landing';
 import { StatefulOverview } from './pages/overview';
+import { DataQuality } from './pages/data_quality';
 import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPage } from './pages/entity_analytics';
+import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const OverviewRoutes = () => (
   <PluginTemplateWrapper>
@@ -39,17 +42,23 @@ const DetectionResponseRoutes = () => (
 );
 
 const LandingRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.landing}>
-      <LandingPage />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.landing}>
+    <LandingPage />
+  </TrackApplicationView>
 );
 
 const EntityAnalyticsRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.entityAnalytics}>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.entityAnalytics}>
       <EntityAnalyticsPage />
+    </SecurityRoutePageWrapper>
+  </PluginTemplateWrapper>
+);
+
+const DataQualityRoutes = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.dataQuality}>
+      <DataQuality />
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
@@ -70,5 +79,9 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: ENTITY_ANALYTICS_PATH,
     render: EntityAnalyticsRoutes,
+  },
+  {
+    path: DATA_QUALITY_PATH,
+    component: DataQualityRoutes,
   },
 ];

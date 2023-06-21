@@ -26,6 +26,6 @@ describe('<IconButtonGroup />', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 });

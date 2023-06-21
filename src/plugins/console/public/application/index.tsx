@@ -69,6 +69,8 @@ export function renderApp({
   const api = createApi({ http });
   const esHostService = createEsHostService({ api });
 
+  autocompleteInfo.mapping.setup(http, settings);
+
   render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>

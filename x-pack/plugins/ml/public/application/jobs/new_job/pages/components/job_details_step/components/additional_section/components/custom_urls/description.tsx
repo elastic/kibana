@@ -9,6 +9,7 @@ import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 
 export const Description: FC = memo(({ children }) => {
@@ -22,10 +23,21 @@ export const Description: FC = memo(({ children }) => {
       defaultMessage: 'Custom URLs',
     }
   );
+
+  const cssOverride = css({
+    '> .euiFlexGroup': {
+      '> .euiFlexItem': {
+        '&:last-child': {
+          flexBasis: '50%',
+        },
+      },
+    },
+  });
+
   return (
     <EuiDescribedFormGroup
       fullWidth
-      className="ml-custom-urls-selection"
+      css={cssOverride}
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage

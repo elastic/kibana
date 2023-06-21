@@ -8,7 +8,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -34,10 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('_bulk_create', () => {
-    let KIBANA_VERSION: string;
-
     before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
@@ -77,7 +73,9 @@ export default function ({ getService }: FtrProviderContext) {
                 migrationVersion: {
                   dashboard: resp.body.saved_objects[1].migrationVersion.dashboard,
                 },
-                coreMigrationVersion: KIBANA_VERSION,
+                coreMigrationVersion: '8.8.0',
+                typeMigrationVersion: resp.body.saved_objects[1].typeMigrationVersion,
+                managed: false,
                 references: [],
                 namespaces: [SPACE_ID],
               },

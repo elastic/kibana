@@ -13,7 +13,8 @@ import type { ChromeDocTitle } from './doc_title';
 import type { ChromeNavControls } from './nav_controls';
 import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
-import type { ChromeBadge, ChromeUserBanner } from './types';
+import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
+import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -106,7 +107,19 @@ export interface ChromeStart {
   setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
 
   /**
-   * Get an observable of the current custom help conttent
+   * Get the list of the registered global help extension menu links
+   */
+  getGlobalHelpExtensionMenuLinks$(): Observable<ChromeGlobalHelpExtensionMenuLink[]>;
+
+  /**
+   * Append a global help extension menu link
+   */
+  registerGlobalHelpExtensionMenuLink(
+    globalHelpExtensionMenuLink: ChromeGlobalHelpExtensionMenuLink
+  ): void;
+
+  /**
+   * Get an observable of the current custom help content
    */
   getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
 
@@ -137,4 +150,15 @@ export interface ChromeStart {
    * Get an observable of the current header banner presence state.
    */
   hasHeaderBanner$(): Observable<boolean>;
+
+  /**
+   * Sets the style type of the chrome.
+   * @param style The style type to apply to the chrome.
+   */
+  setChromeStyle(style: ChromeStyle): void;
+
+  /**
+   * Get an observable of the current style type of the chrome.
+   */
+  getChromeStyle$(): Observable<ChromeStyle>;
 }

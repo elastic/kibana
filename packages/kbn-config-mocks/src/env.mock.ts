@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages } from '@kbn/repo-packages';
 import { Env, type RawPackageInfo, type EnvOptions } from '@kbn/config';
 
 type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends Array<infer R> ? Array<DeepPartial<R>> : DeepPartial<T[P]>;
+  [P in keyof T]?: P extends 'repoPackages'
+    ? T[P]
+    : T[P] extends Array<infer R>
+    ? Array<DeepPartial<R>>
+    : DeepPartial<T[P]>;
 };
 
 export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {
@@ -28,6 +33,7 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       runExamples: false,
       ...(options.cliArgs || {}),
     },
+    repoPackages: options.repoPackages ?? getPackages(REPO_ROOT),
   };
 }
 
@@ -39,6 +45,7 @@ export const createTestPackageInfo = ({ dist = true }: { dist?: boolean } = {}):
       distributable: dist,
       number: 123456789,
       sha: 'XXXXXX',
+      date: '2023-05-15T23:12:09+0000',
     },
   };
 };

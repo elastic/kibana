@@ -30,4 +30,5 @@ export interface NotificationsSetup {
 export interface NotificationsStart {
   /** {@link ToastsStart} */
   toasts: ToastsStart;
+  showErrorDialog: (options: { title: string; error: Error }) => void;
 }

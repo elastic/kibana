@@ -6,14 +6,14 @@
  */
 
 import _ from 'lodash';
-import { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { FieldFormatter, MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
 import type {
   AbstractSourceDescriptor,
   Attribution,
-  DataFilters,
   DataRequestMeta,
+  SourceRequestMeta,
   Timeslice,
 } from '@kbn/maps-plugin/common/descriptor_types';
 import type {
@@ -42,7 +42,13 @@ export class CustomRasterSource implements IRasterSource {
   constructor(sourceDescriptor: CustomRasterSourceDescriptor) {
     this._descriptor = sourceDescriptor;
   }
+  async hasLegendDetails(): Promise<boolean> {
+    return true;
+  }
 
+  renderLegendDetails(): ReactElement<any> | null {
+    return <img alt="Radar legend" src="https://nowcoast.noaa.gov/images/legends/radar.png" />;
+  }
   async canSkipSourceUpdate(
     dataRequest: DataRequest,
     nextRequestMeta: DataRequestMeta
@@ -96,10 +102,6 @@ export class CustomRasterSource implements IRasterSource {
     return false;
   }
 
-  isGeoGridPrecisionAware(): boolean {
-    return false;
-  }
-
   isQueryAware(): boolean {
     return false;
   }
@@ -130,10 +132,6 @@ export class CustomRasterSource implements IRasterSource {
 
   getQueryableIndexPatternIds(): string[] {
     return [];
-  }
-
-  getGeoGridPrecision(zoom: number): number {
-    return 0;
   }
 
   isESSource(): boolean {
@@ -173,11 +171,11 @@ export class CustomRasterSource implements IRasterSource {
     return true;
   }
 
-  async getUrlTemplate(dataFilters: DataFilters): Promise<string> {
+  async getUrlTemplate(requestMeta: SourceRequestMeta): Promise<string> {
     const defaultUrl =
       'https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer/export?dpi=96&transparent=true&format=png32&time={time}&layers=show%3A3&bbox=-{bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256%2C256&f=image';
 
-    const { timeslice, timeFilters } = dataFilters;
+    const { timeslice, timeFilters } = requestMeta;
     let timestamp;
 
     if (timeslice) {

@@ -19,5 +19,5 @@ export const useSyntheticsServiceAllowed = () => {
 
   // return useSelector(syntheticsServiceAllowedSelector);
   // TODO Implement for Synthetics App
-  return { isAllowed: true, signupUrl: 'https://example.com', loading: false };
+  return { isAllowed: true, signupUrl: undefined, loading: false };
 };

@@ -6,6 +6,7 @@
  */
 
 export { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from './plugin';
+export { INGEST_SAVED_OBJECT_INDEX } from './saved_objects';
 export * from './routes';
 export * from './agent';
 export * from './agent_policy';
@@ -18,12 +19,19 @@ export * from './preconfiguration';
 export * from './download_source';
 export * from './fleet_server_policy_config';
 export * from './authz';
+export * from './file_storage';
+export * from './message_signing_keys';
+export * from './locators';
+export * from './secrets';
+export * from './uninstall_token';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates
 // the maximum amount of results allowed to be returned from a search. It's possible
 // for the actual setting to differ from the default. Can we retrieve the real
 // setting in the future?
 export const SO_SEARCH_LIMIT = 10000;
+
+export const ES_SEARCH_LIMIT = 10000;
 
 export const FLEET_SERVER_INDICES_VERSION = 1;
 

@@ -15,6 +15,7 @@ import {
   JavaFrameHeadingRenderer,
   JavaScriptFrameHeadingRenderer,
   RubyFrameHeadingRenderer,
+  PhpFrameHeadingRenderer,
 } from './frame_heading_renderers';
 
 const FileDetails = euiStyled.div`
@@ -39,9 +40,15 @@ interface Props {
   codeLanguage?: string;
   stackframe: Stackframe;
   isLibraryFrame: boolean;
+  idx: string;
 }
 
-function FrameHeading({ codeLanguage, stackframe, isLibraryFrame }: Props) {
+function FrameHeading({
+  codeLanguage,
+  stackframe,
+  isLibraryFrame,
+  idx,
+}: Props) {
   const FileDetail: ComponentType = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
@@ -59,6 +66,9 @@ function FrameHeading({ codeLanguage, stackframe, isLibraryFrame }: Props) {
     case 'ruby':
       Renderer = RubyFrameHeadingRenderer;
       break;
+    case 'php':
+      Renderer = PhpFrameHeadingRenderer;
+      break;
     default:
       Renderer = DefaultFrameHeadingRenderer;
       break;
@@ -66,7 +76,11 @@ function FrameHeading({ codeLanguage, stackframe, isLibraryFrame }: Props) {
 
   return (
     <FileDetails data-test-subj="FrameHeading">
-      <Renderer fileDetailComponent={FileDetail} stackframe={stackframe} />
+      <Renderer
+        fileDetailComponent={FileDetail}
+        stackframe={stackframe}
+        idx={idx}
+      />
     </FileDetails>
   );
 }

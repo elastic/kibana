@@ -42,6 +42,7 @@ describe('alertSummaryFromEventLog', () => {
         "lastRun": undefined,
         "muteAll": false,
         "name": "rule-name",
+        "revision": 0,
         "ruleTypeId": "123",
         "status": "OK",
         "statusEndDate": "2020-06-18T01:00:00.000Z",
@@ -88,6 +89,7 @@ describe('alertSummaryFromEventLog', () => {
         "lastRun": undefined,
         "muteAll": true,
         "name": "rule-name-2",
+        "revision": 0,
         "ruleTypeId": "456",
         "status": "OK",
         "statusEndDate": "2020-06-18T03:00:00.000Z",
@@ -122,14 +124,18 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": true,
             "status": "OK",
+            "uuid": undefined,
           },
           "alert-2": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": true,
             "status": "OK",
+            "uuid": undefined,
           },
         },
         "lastRun": undefined,
@@ -209,11 +215,11 @@ describe('alertSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewAlert('alert-1')
-      .addActiveAlert('alert-1', 'action group A')
+      .addNewAlert('alert-1', 'uuid-1')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
       .advanceTime(10000)
       .addExecute()
-      .addRecoveredAlert('alert-1')
+      .addRecoveredAlert('alert-1', 'uuid-1')
       .getEvents();
     const executionEvents = eventsFactory.getEvents();
 
@@ -232,8 +238,10 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
+            "uuid": "uuid-1",
           },
         },
         "lastRun": "2020-06-18T00:00:10.000Z",
@@ -249,11 +257,11 @@ describe('alertSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewAlert('alert-1')
-      .addActiveAlert('alert-1', 'action group A')
+      .addNewAlert('alert-1', 'uuid-1')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
       .advanceTime(10000)
       .addExecute()
-      .addLegacyResolvedAlert('alert-1')
+      .addLegacyResolvedAlert('alert-1', 'uuid-1')
       .getEvents();
     const executionEvents = eventsFactory.getEvents();
 
@@ -272,8 +280,10 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
+            "uuid": "uuid-1",
           },
         },
         "lastRun": "2020-06-18T00:00:10.000Z",
@@ -289,10 +299,10 @@ describe('alertSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addActiveAlert('alert-1', 'action group A')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
       .advanceTime(10000)
       .addExecute()
-      .addRecoveredAlert('alert-1')
+      .addRecoveredAlert('alert-1', 'uuid-1')
       .getEvents();
     const executionEvents = eventsFactory.getEvents();
 
@@ -311,8 +321,10 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
+            "uuid": "uuid-1",
           },
         },
         "lastRun": "2020-06-18T00:00:10.000Z",
@@ -328,11 +340,11 @@ describe('alertSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewAlert('alert-1')
-      .addActiveAlert('alert-1', 'action group A')
+      .addNewAlert('alert-1', 'uuid-1')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
       .advanceTime(10000)
       .addExecute()
-      .addActiveAlert('alert-1', 'action group A')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
       .getEvents();
     const executionEvents = eventsFactory.getEvents();
 
@@ -351,8 +363,10 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": "action group A",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "flapping": false,
             "muted": false,
             "status": "Active",
+            "uuid": "uuid-1",
           },
         },
         "lastRun": "2020-06-18T00:00:10.000Z",
@@ -368,11 +382,11 @@ describe('alertSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewAlert('alert-1')
-      .addActiveAlert('alert-1', undefined)
+      .addNewAlert('alert-1', 'uuid-1')
+      .addActiveAlert('alert-1', undefined, 'uuid-1')
       .advanceTime(10000)
       .addExecute()
-      .addActiveAlert('alert-1', undefined)
+      .addActiveAlert('alert-1', undefined, 'uuid-1')
       .getEvents();
     const executionEvents = eventsFactory.getEvents();
 
@@ -391,8 +405,10 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": undefined,
             "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "flapping": false,
             "muted": false,
             "status": "Active",
+            "uuid": "uuid-1",
           },
         },
         "lastRun": "2020-06-18T00:00:10.000Z",
@@ -408,11 +424,11 @@ describe('alertSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewAlert('alert-1')
-      .addActiveAlert('alert-1', 'action group A')
+      .addNewAlert('alert-1', 'uuid-1')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
       .advanceTime(10000)
       .addExecute()
-      .addActiveAlert('alert-1', 'action group B')
+      .addActiveAlert('alert-1', 'action group B', 'uuid-1')
       .getEvents();
     const executionEvents = eventsFactory.getEvents();
 
@@ -431,8 +447,10 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": "action group B",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "flapping": false,
             "muted": false,
             "status": "Active",
+            "uuid": "uuid-1",
           },
         },
         "lastRun": "2020-06-18T00:00:10.000Z",
@@ -448,10 +466,10 @@ describe('alertSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addActiveAlert('alert-1', 'action group A')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
       .advanceTime(10000)
       .addExecute()
-      .addActiveAlert('alert-1', 'action group A')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
       .getEvents();
     const executionEvents = eventsFactory.getEvents();
 
@@ -469,8 +487,10 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": "action group A",
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "Active",
+            "uuid": "uuid-1",
           },
         },
         "lastRun": "2020-06-18T00:00:10.000Z",
@@ -486,14 +506,14 @@ describe('alertSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewAlert('alert-1')
-      .addActiveAlert('alert-1', 'action group A')
-      .addNewAlert('alert-2')
-      .addActiveAlert('alert-2', 'action group B')
+      .addNewAlert('alert-1', 'uuid-1')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
+      .addNewAlert('alert-2', 'uuid-2')
+      .addActiveAlert('alert-2', 'action group B', 'uuid-2')
       .advanceTime(10000)
       .addExecute()
-      .addActiveAlert('alert-1', 'action group A')
-      .addRecoveredAlert('alert-2')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
+      .addRecoveredAlert('alert-2', 'uuid-2')
       .getEvents();
     const executionEvents = eventsFactory.getEvents();
 
@@ -511,14 +531,18 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": "action group A",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "flapping": false,
             "muted": true,
             "status": "Active",
+            "uuid": "uuid-1",
           },
           "alert-2": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": true,
             "status": "OK",
+            "uuid": "uuid-2",
           },
         },
         "lastRun": "2020-06-18T00:00:10.000Z",
@@ -534,20 +558,20 @@ describe('alertSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addNewAlert('alert-1')
-      .addActiveAlert('alert-1', 'action group A')
-      .addNewAlert('alert-2')
-      .addActiveAlert('alert-2', 'action group B')
+      .addNewAlert('alert-1', 'uuid-1')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
+      .addNewAlert('alert-2', 'uuid-2')
+      .addActiveAlert('alert-2', 'action group B', 'uuid-2')
       .advanceTime(10000)
       .addExecute()
-      .addActiveAlert('alert-1', 'action group A')
-      .addRecoveredAlert('alert-2')
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1')
+      .addRecoveredAlert('alert-2', 'uuid-2')
       .advanceTime(10000)
       .addExecute()
-      .addActiveAlert('alert-1', 'action group B')
+      .addActiveAlert('alert-1', 'action group B', 'uuid-1')
       .advanceTime(10000)
       .addExecute()
-      .addActiveAlert('alert-1', 'action group B')
+      .addActiveAlert('alert-1', 'action group B', 'uuid-1')
       .getEvents();
     const executionEvents = eventsFactory.getEvents();
 
@@ -566,17 +590,59 @@ describe('alertSummaryFromEventLog', () => {
           "alert-1": Object {
             "actionGroupId": "action group B",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "flapping": false,
             "muted": false,
             "status": "Active",
+            "uuid": "uuid-1",
           },
           "alert-2": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
+            "uuid": "uuid-2",
           },
         },
         "lastRun": "2020-06-18T00:00:30.000Z",
+        "status": "Active",
+      }
+    `);
+
+    testExecutionDurations(eventsFactory.getExecutionDurations(), executionDuration);
+  });
+
+  test('rule with currently active alert, flapping', async () => {
+    const rule = createRule({});
+    const eventsFactory = new EventsFactory();
+    const events = eventsFactory
+      .addExecute()
+      .addActiveAlert('alert-1', 'action group A', 'uuid-1', true)
+      .getEvents();
+
+    const executionEvents = eventsFactory.getEvents();
+
+    const summary: AlertSummary = alertSummaryFromEventLog({
+      rule,
+      events,
+      executionEvents,
+      dateStart,
+      dateEnd,
+    });
+    const { lastRun, status, alerts, executionDuration } = summary;
+    expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
+      Object {
+        "alerts": Object {
+          "alert-1": Object {
+            "actionGroupId": "action group A",
+            "activeStartDate": undefined,
+            "flapping": true,
+            "muted": false,
+            "status": "Active",
+            "uuid": "uuid-1",
+          },
+        },
+        "lastRun": "2020-06-18T00:00:00.000Z",
         "status": "Active",
       }
     `);
@@ -642,7 +708,12 @@ export class EventsFactory {
     return this;
   }
 
-  addActiveAlert(alertId: string, actionGroupId: string | undefined): EventsFactory {
+  addActiveAlert(
+    alertId: string,
+    actionGroupId: string | undefined,
+    uuid: string,
+    flapping = false
+  ): EventsFactory {
     const kibanaAlerting = actionGroupId
       ? { instance_id: alertId, action_group_id: actionGroupId }
       : { instance_id: alertId };
@@ -652,43 +723,43 @@ export class EventsFactory {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.activeInstance,
       },
-      kibana: { alerting: kibanaAlerting },
+      kibana: { alerting: kibanaAlerting, alert: { flapping, uuid } },
     });
     return this;
   }
 
-  addNewAlert(alertId: string): EventsFactory {
+  addNewAlert(alertId: string, uuid: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.newInstance,
       },
-      kibana: { alerting: { instance_id: alertId } },
+      kibana: { alerting: { instance_id: alertId }, alert: { uuid } },
     });
     return this;
   }
 
-  addRecoveredAlert(alertId: string): EventsFactory {
+  addRecoveredAlert(alertId: string, uuid: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.recoveredInstance,
       },
-      kibana: { alerting: { instance_id: alertId } },
+      kibana: { alerting: { instance_id: alertId }, alert: { uuid } },
     });
     return this;
   }
 
-  addLegacyResolvedAlert(alertId: string): EventsFactory {
+  addLegacyResolvedAlert(alertId: string, uuid: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: LEGACY_EVENT_LOG_ACTIONS.resolvedInstance,
       },
-      kibana: { alerting: { instance_id: alertId } },
+      kibana: { alerting: { instance_id: alertId }, alert: { uuid } },
     });
     return this;
   }
@@ -730,4 +801,5 @@ const BaseRule: SanitizedRule<{ bar: boolean }> = {
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 };

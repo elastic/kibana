@@ -41,13 +41,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should convert to Lens', async () => {
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('mtrVis');
-      expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
-      expect(await lens.getMetricVisualizationData()).to.eql([
+      const data = await lens.getMetricVisualizationData();
+      expect(data.length).to.be.equal(1);
+      expect(data).to.eql([
         {
           title: 'Count',
           subtitle: undefined,
           extraText: '',
-          value: '14.01K',
+          value: '14,005',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
           showingTrendline: false,
@@ -70,13 +71,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(dimensions).to.have.length(1);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
 
-      expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
-      expect(await lens.getMetricVisualizationData()).to.eql([
+      const data = await lens.getMetricVisualizationData();
+      expect(data.length).to.be.equal(1);
+      expect(data).to.eql([
         {
           title: 'Average machine.ram',
           subtitle: undefined,
           extraText: '',
-          value: '13.1B',
+          value: '13,104,036,080.615',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
           showingTrendline: false,
@@ -99,13 +101,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[0].getVisibleText()).to.be('Overall Max of Count');
       expect(await dimensions[1].getVisibleText()).to.be('@timestamp');
 
-      expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
-      expect(await lens.getMetricVisualizationData()).to.eql([
+      const data = await lens.getMetricVisualizationData();
+      expect(data.length).to.be.equal(1);
+      expect(data).to.eql([
         {
           title: 'Overall Max of Count',
           subtitle: undefined,
           extraText: '',
-          value: '1.44K',
+          value: '1,437',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
           showingTrendline: false,
@@ -152,14 +155,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(dimensions).to.have.length(2);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('machine.os.raw: Descending');
-
-      expect((await lens.getMetricVisualizationData()).length).to.be.equal(6);
-      expect(await lens.getMetricVisualizationData()).to.eql([
+      const data = await lens.getMetricVisualizationData();
+      expect(data.length).to.be.equal(6);
+      expect(data).to.eql([
         {
           title: 'osx',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '13.23B',
+          value: '13,228,964,670.613',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
           showingTrendline: false,
@@ -168,7 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win 7',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '13.19B',
+          value: '13,186,695,551.251',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
           showingTrendline: false,
@@ -177,7 +180,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win xp',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '13.07B',
+          value: '13,073,190,186.423',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
           showingTrendline: false,
@@ -186,7 +189,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win 8',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '13.03B',
+          value: '13,031,579,645.108',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
           showingTrendline: false,
@@ -195,7 +198,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'ios',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '13.01B',
+          value: '13,009,497,206.823',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
           showingTrendline: false,
@@ -211,7 +214,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
       ]);
 
-      dimensions[0].click();
+      await dimensions[0].click();
 
       await lens.openPalettePanel('lnsMetric');
       const colorStops = await lens.getPaletteColorStops();

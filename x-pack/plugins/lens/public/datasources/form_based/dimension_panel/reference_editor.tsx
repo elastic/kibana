@@ -10,12 +10,12 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRowProps, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DateRange } from '../../../../common';
+import type { DateRange } from '../../../../common/types';
 import type { OperationSupportMatrix } from './operation_support';
 import type { GenericIndexPatternColumn, OperationType } from '../form_based';
 import {
@@ -29,12 +29,7 @@ import {
 import { FieldChoiceWithOperationType, FieldSelect } from './field_select';
 import { hasField } from '../pure_utils';
 import type { FormBasedLayer } from '../types';
-import type {
-  ExistingFieldsMap,
-  IndexPattern,
-  IndexPatternField,
-  ParamEditorCustomProps,
-} from '../../../types';
+import type { IndexPattern, IndexPatternField, ParamEditorCustomProps } from '../../../types';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import { FormRow } from '../operations/definitions/shared_components';
 
@@ -55,7 +50,7 @@ const getFunctionOptions = (
       (column &&
         hasField(column) &&
         def.input === 'field' &&
-        operationSupportMatrix.fieldByOperation[operationType]?.has(column.sourceField)) ||
+        operationSupportMatrix.fieldByOperation.get(operationType)?.has(column.sourceField)) ||
       (column && !hasField(column) && def.input !== 'field');
 
     return {
@@ -83,7 +78,6 @@ export interface ReferenceEditorProps {
   fieldLabel?: string;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   isInline?: boolean;
-  existingFields: ExistingFieldsMap;
   dateRange: DateRange;
   labelAppend?: EuiFormRowProps['labelAppend'];
   isFullscreen: boolean;
@@ -98,12 +92,12 @@ export interface ReferenceEditorProps {
   ) => void;
   onChooseField: (choice: FieldChoiceWithOperationType) => void;
   onDeleteColumn: () => void;
+  onResetIncomplete: () => void;
   onChooseFunction: (operationType: string, field?: IndexPatternField) => void;
 
   // Services
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
-  savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
@@ -114,7 +108,6 @@ export interface ReferenceEditorProps {
 export const ReferenceEditor = (props: ReferenceEditorProps) => {
   const {
     currentIndexPattern,
-    existingFields,
     validation,
     selectionStyle,
     labelAppend,
@@ -123,6 +116,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     functionLabel,
     onChooseField,
     onDeleteColumn,
+    onResetIncomplete,
     onChooseFunction,
     fieldLabel,
     operationDefinitionMap,
@@ -137,8 +131,8 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
   } = useMemo(() => {
     const operationTypes: Set<OperationType> = new Set();
     const operationWithoutField: Set<OperationType> = new Set();
-    const operationByField: Partial<Record<string, Set<OperationType>>> = {};
-    const fieldByOperation: Partial<Record<OperationType, Set<string>>> = {};
+    const operationByField: Map<string, Set<OperationType>> = new Map();
+    const fieldByOperation: Map<OperationType, Set<string>> = new Map();
     Object.values(operationDefinitionMap)
       .filter(({ hidden, allowAsReference }) => !hidden && allowAsReference)
       .sort((op1, op2) => {
@@ -156,12 +150,11 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
           );
           if (allFields.length) {
             operationTypes.add(op.type);
-            fieldByOperation[op.type] = new Set(allFields.map(({ name }) => name));
+            fieldByOperation.set(op.type, new Set(allFields.map(({ name }) => name)));
             allFields.forEach((field) => {
-              if (!operationByField[field.name]) {
-                operationByField[field.name] = new Set();
-              }
-              operationByField[field.name]?.add(op.type);
+              const fieldOps = operationByField.get(field.name) ?? new Set<OperationType>();
+              fieldOps.add(op.type);
+              operationByField.set(field.name, fieldOps);
             });
           }
         } else if (
@@ -269,10 +262,15 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 }
 
                 const operationType = choices[0].value!;
+                // When it has an incomplete state, make sure to clear it up before updating
+                if (incompleteColumn) {
+                  onResetIncomplete();
+                }
                 if (column?.operationType === operationType) {
                   return;
                 }
-                const possibleFieldNames = operationSupportMatrix.fieldByOperation[operationType];
+                const possibleFieldNames =
+                  operationSupportMatrix.fieldByOperation.get(operationType);
 
                 const field =
                   column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)
@@ -307,7 +305,6 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
           <FieldSelect
             fieldIsInvalid={showFieldInvalid || showFieldMissingInvalid}
             currentIndexPattern={currentIndexPattern}
-            existingFields={existingFields[currentIndexPattern.title]}
             operationByField={operationSupportMatrix.operationByField}
             selectedOperationType={
               // Allows operation to be selected before creating a valid column

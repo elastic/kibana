@@ -9,6 +9,7 @@
 export type { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
 export { isEmbeddable } from './is_embeddable';
 export { Embeddable } from './embeddable';
+export { EmbeddableErrorHandler } from './embeddable_error_handler';
 export * from './embeddable_factory';
 export * from './embeddable_factory_definition';
 export * from './default_embeddable_factory_provider';

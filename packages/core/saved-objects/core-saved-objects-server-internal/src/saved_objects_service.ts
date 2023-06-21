@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable, firstValueFrom } from 'rxjs';
+import { Subject, Observable, firstValueFrom, of } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
+import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
@@ -25,8 +26,11 @@ import type {
   SavedObjectsRepositoryFactory,
   SavedObjectStatusMeta,
   SavedObjectsClientFactoryProvider,
-  SavedObjectsClientWrapperFactory,
   ISavedObjectTypeRegistry,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectConfig,
@@ -35,6 +39,7 @@ import {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
+  DEFAULT_INDEX_TYPES_MAP,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsClient,
@@ -48,12 +53,13 @@ import {
 } from '@kbn/core-saved-objects-import-export-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
+import type { NodeInfo } from '@kbn/core-node-server';
+import { MAIN_SAVED_OBJECT_INDEX, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-
-const kibanaIndex = '.kibana';
+import { applyTypeDefaults } from './apply_type_defaults';
 
 /**
  * @internal
@@ -74,17 +80,12 @@ export interface SavedObjectsSetupDeps {
   deprecations: DeprecationRegistryProvider;
 }
 
-interface WrappedClientFactoryWrapper {
-  priority: number;
-  id: string;
-  factory: SavedObjectsClientWrapperFactory;
-}
-
 /** @internal */
 export interface SavedObjectsStartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
   pluginsInitialized?: boolean;
   docLinks: DocLinksServiceStart;
+  node: NodeInfo;
 }
 
 export class SavedObjectsService
@@ -96,7 +97,9 @@ export class SavedObjectsService
   private setupDeps?: SavedObjectsSetupDeps;
   private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
-  private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
+  private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
+  private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
+  private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
@@ -104,9 +107,7 @@ export class SavedObjectsService
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
-    this.kibanaVersion = SavedObjectsService.stripVersionQualifier(
-      this.coreContext.env.packageInfo.version
-    );
+    this.kibanaVersion = stripVersionQualifier(this.coreContext.env.packageInfo.version);
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -122,10 +123,9 @@ export class SavedObjectsService
       this.coreContext.configService.atPath<SavedObjectsMigrationConfigType>('migrations')
     );
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
-
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
-        kibanaIndex,
+        kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
         savedObjectsConfig: this.config,
         kibanaVersion: this.kibanaVersion,
         typeRegistry: this.typeRegistry,
@@ -140,15 +140,19 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: firstValueFrom(this.migrator$),
-      kibanaIndex,
+      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
     });
 
     registerCoreObjectTypes(this.typeRegistry);
 
+    const skipMigration = this.config.migration.skip;
+
     return {
       status$: calculateStatus$(
-        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
+        skipMigration
+          ? of({ status: 'completed' })
+          : this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
         elasticsearch.status$
       ),
       setClientFactoryProvider: (provider) => {
@@ -160,24 +164,42 @@ export class SavedObjectsService
         }
         this.clientFactoryProvider = provider;
       },
-      addClientWrapper: (priority, id, factory) => {
+      setEncryptionExtension: (factory) => {
         if (this.started) {
-          throw new Error('cannot call `addClientWrapper` after service startup.');
+          throw new Error('cannot call `setEncryptionExtension` after service startup.');
         }
-        this.clientFactoryWrappers.push({
-          priority,
-          id,
-          factory,
-        });
+        if (this.encryptionExtensionFactory) {
+          throw new Error('encryption extension is already set, and can only be set once');
+        }
+        this.encryptionExtensionFactory = factory;
+      },
+      setSecurityExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `setSecurityExtension` after service startup.');
+        }
+        if (this.securityExtensionFactory) {
+          throw new Error('security extension is already set, and can only be set once');
+        }
+        this.securityExtensionFactory = factory;
+      },
+      setSpacesExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `setSpacesExtension` after service startup.');
+        }
+        if (this.spacesExtensionFactory) {
+          throw new Error('spaces extension is already set, and can only be set once');
+        }
+        this.spacesExtensionFactory = factory;
       },
       registerType: (type) => {
         if (this.started) {
           throw new Error('cannot call `registerType` after service startup.');
         }
-        this.typeRegistry.registerType(type);
+        this.typeRegistry.registerType(applyTypeDefaults(type));
       },
       getTypeRegistry: () => this.typeRegistry,
-      getKibanaIndex: () => kibanaIndex,
+      getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
+      getAllIndices: () => [...ALL_SAVED_OBJECT_INDICES],
     };
   }
 
@@ -185,6 +207,7 @@ export class SavedObjectsService
     elasticsearch,
     pluginsInitialized = true,
     docLinks,
+    node,
   }: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
@@ -194,10 +217,13 @@ export class SavedObjectsService
 
     const client = elasticsearch.client;
 
+    const waitForMigrationCompletion = node.roles.backgroundTasks && !node.roles.ui;
     const migrator = this.createMigrator(
       this.config.migration,
       elasticsearch.client.asInternalUser,
-      docLinks
+      docLinks,
+      waitForMigrationCompletion,
+      node
     );
 
     this.migrator$.next(migrator);
@@ -250,39 +276,51 @@ export class SavedObjectsService
 
     const createRepository = (
       esClient: ElasticsearchClient,
-      includedHiddenTypes: string[] = []
+      includedHiddenTypes: string[] = [],
+      extensions?: SavedObjectsExtensions
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
-        kibanaIndex,
+        MAIN_SAVED_OBJECT_INDEX,
         esClient,
         this.logger.get('repository'),
-        includedHiddenTypes
+        includedHiddenTypes,
+        extensions
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
-      createInternalRepository: (includedHiddenTypes?: string[]) =>
-        createRepository(client.asInternalUser, includedHiddenTypes),
-      createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) =>
-        createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes),
+      createInternalRepository: (
+        includedHiddenTypes?: string[],
+        extensions?: SavedObjectsExtensions | undefined
+      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions),
+      createScopedRepository: (
+        req: KibanaRequest,
+        includedHiddenTypes?: string[],
+        extensions?: SavedObjectsExtensions
+      ) => createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
-      defaultClientFactory({ request, includedHiddenTypes }) {
-        const repository = repositoryFactory.createScopedRepository(request, includedHiddenTypes);
+      defaultClientFactory({ request, includedHiddenTypes, extensions }): SavedObjectsClient {
+        const repository = repositoryFactory.createScopedRepository(
+          request,
+          includedHiddenTypes,
+          extensions
+        );
         return new SavedObjectsClient(repository);
       },
       typeRegistry: this.typeRegistry,
+      encryptionExtensionFactory: this.encryptionExtensionFactory,
+      securityExtensionFactory: this.securityExtensionFactory,
+      spacesExtensionFactory: this.spacesExtensionFactory,
     });
+
     if (this.clientFactoryProvider) {
       const clientFactory = this.clientFactoryProvider(repositoryFactory);
       clientProvider.setClientFactory(clientFactory);
     }
-    this.clientFactoryWrappers.forEach(({ id, factory, priority }) => {
-      clientProvider.addClientWrapperFactory(priority, id, factory);
-    });
 
     this.started = true;
 
@@ -298,13 +336,28 @@ export class SavedObjectsService
           exportSizeLimit: this.config!.maxImportExportSize,
           logger: this.logger.get('exporter'),
         }),
-      createImporter: (savedObjectsClient) =>
+      createImporter: (savedObjectsClient, options) =>
         new SavedObjectsImporter({
           savedObjectsClient,
           typeRegistry: this.typeRegistry,
-          importSizeLimit: this.config!.maxImportExportSize,
+          importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
         }),
       getTypeRegistry: () => this.typeRegistry,
+      getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
+      getIndexForType: (type: string) => {
+        const definition = this.typeRegistry.getType(type);
+        return definition?.indexPattern ?? MAIN_SAVED_OBJECT_INDEX;
+      },
+      getIndicesForTypes: (types: string[]) => {
+        const indices = new Set<string>();
+        types.forEach((type) => {
+          const definition = this.typeRegistry.getType(type);
+          const index = definition?.indexPattern ?? MAIN_SAVED_OBJECT_INDEX;
+          indices.add(index);
+        });
+        return [...indices];
+      },
+      getAllIndices: () => [...ALL_SAVED_OBJECT_INDICES],
     };
   }
 
@@ -313,24 +366,21 @@ export class SavedObjectsService
   private createMigrator(
     soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
-    docLinks: DocLinksServiceStart
+    docLinks: DocLinksServiceStart,
+    waitForMigrationCompletion: boolean,
+    nodeInfo: NodeInfo
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       soMigrationsConfig,
-      kibanaIndex,
+      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
+      defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
       client,
       docLinks,
+      waitForMigrationCompletion,
+      nodeRoles: nodeInfo.roles,
     });
-  }
-
-  /**
-   * Coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha)
-   * to regular semver (x.y.z).
-   */
-  private static stripVersionQualifier(version: string) {
-    return version.split('-')[0];
   }
 }

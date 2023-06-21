@@ -30,7 +30,8 @@ function selectDataViewPickerOption(instance: ShallowWrapper, selectedLabel: str
       ? { ...option, checked: 'on' }
       : { ...option, checked: undefined }
   );
-  return getDataViewPickerList(instance).prop('onChange')!(options, event);
+  const selectedOption = { label: selectedLabel };
+  return getDataViewPickerList(instance).prop('onChange')!(options, event, selectedOption);
 }
 
 describe('DataView list component', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
 interface TestData {
@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           aggregatable: true,
           loading: false,
           exampleCount: 11,
-          docCountFormatted: '5000 (100%)',
+          docCountFormatted: '86,274 (100%)',
           viewableInLens: true,
           hasActionMenu: true,
         },
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
-          docCountFormatted: '5000 (100%)',
+          docCountFormatted: '86,274 (100%)',
           statsMaxDecimalPlaces: 3,
           topValuesCount: 11,
           viewableInLens: true,
@@ -153,7 +153,6 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     await ml.dataVisualizerTable.assertSearchPanelExist();
-    await ml.dataVisualizerTable.assertSampleSizeInputExists();
     await ml.dataVisualizerTable.assertFieldTypeInputExists();
     await ml.dataVisualizerTable.assertFieldNameInputExists();
 

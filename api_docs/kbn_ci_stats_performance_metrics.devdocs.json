@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/ci-stats-performance-metrics",
-        "id": "def-server.reporter",
+        "id": "def-common.reporter",
         "type": "Function",
         "tags": [],
         "label": "reporter",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-performance-metrics",
-            "id": "def-server.reporter.$1",
+            "id": "def-common.reporter.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -46,7 +54,7 @@
       },
       {
         "parentPluginId": "@kbn/ci-stats-performance-metrics",
-        "id": "def-server.runCli",
+        "id": "def-common.runCli",
         "type": "Function",
         "tags": [],
         "label": "runCli",
@@ -62,14 +70,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

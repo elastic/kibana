@@ -22,22 +22,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
-
-      await kibanaServer.uiSettings.update({
-        'visualization:visualize:legacyPieChartsLibrary': true,
-      });
-      await browser.refresh();
-    });
-
-    after(async () => {
-      await kibanaServer.uiSettings.update({
-        'visualization:visualize:legacyPieChartsLibrary': false,
-      });
       await browser.refresh();
     });
 
     loadTestFile(require.resolve('./_shared_item'));
-    loadTestFile(require.resolve('./_lab_mode'));
     loadTestFile(require.resolve('./_linked_saved_searches'));
     loadTestFile(require.resolve('./_visualize_listing'));
     loadTestFile(require.resolve('./_add_to_dashboard.ts'));

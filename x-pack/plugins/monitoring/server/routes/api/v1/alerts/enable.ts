@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// @ts-ignore
-import { ActionResult } from '@kbn/actions-plugin/common';
+import { ActionResult } from '@kbn/actions-plugin/server';
 import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { AlertsFactory } from '../../../../alerts';

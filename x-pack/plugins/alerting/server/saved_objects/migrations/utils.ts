@@ -57,3 +57,6 @@ export const isDetectionEngineAADRuleType = (doc: SavedObjectUnsanitizedDoc<RawR
 export const isSecuritySolutionLegacyNotification = (
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): boolean => doc.attributes.alertTypeId === 'siem.notifications';
+
+export const isLogThresholdRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>) =>
+  doc.attributes.alertTypeId === 'logs.alert.document.count';

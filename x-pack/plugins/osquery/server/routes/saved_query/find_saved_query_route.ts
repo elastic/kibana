@@ -21,10 +21,12 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
       path: '/api/osquery/saved_queries',
       validate: {
         query: schema.object({
-          page: schema.maybe(schema.number()),
+          page: schema.number({ defaultValue: 1 }),
           pageSize: schema.maybe(schema.number()),
-          sort: schema.maybe(schema.string()),
-          sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+          sort: schema.string({ defaultValue: 'id' }),
+          sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+            defaultValue: 'desc',
+          }),
         }),
       },
       options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
@@ -33,40 +35,50 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
       const coreContext = await context.core;
       const savedObjectsClient = coreContext.savedObjects.client;
 
-      const savedQueries = await savedObjectsClient.find<{
-        ecs_mapping: Array<{ field: string; value: string }>;
-        prebuilt: boolean;
-      }>({
-        type: savedQuerySavedObjectType,
-        page: request.query.page ?? 1,
-        perPage: request.query.pageSize,
-        sortField: request.query.sort,
-        sortOrder: request.query.sortOrder ?? 'desc',
-      });
+      try {
+        const savedQueries = await savedObjectsClient.find<{
+          ecs_mapping: Array<{ field: string; value: string }>;
+          prebuilt: boolean;
+        }>({
+          type: savedQuerySavedObjectType,
+          page: request.query.page,
+          perPage: request.query.pageSize,
+          sortField: request.query.sort,
+          sortOrder: request.query.sortOrder,
+        });
 
-      const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
-        osqueryContext.service.getPackageService()?.asInternalUser
-      );
-      const savedObjects = savedQueries.saved_objects.map((savedObject) => {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const ecs_mapping = savedObject.attributes.ecs_mapping;
+        const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
+          osqueryContext.service.getPackageService()?.asInternalUser
+        );
+        const savedObjects = savedQueries.saved_objects.map((savedObject) => {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          const ecs_mapping = savedObject.attributes.ecs_mapping;
 
-        savedObject.attributes.prebuilt = !!prebuiltSavedQueriesMap[savedObject.id];
+          savedObject.attributes.prebuilt = !!prebuiltSavedQueriesMap[savedObject.id];
 
-        if (ecs_mapping) {
-          // @ts-expect-error update types
-          savedObject.attributes.ecs_mapping = convertECSMappingToObject(ecs_mapping);
-        }
+          if (ecs_mapping) {
+            // @ts-expect-error update types
+            savedObject.attributes.ecs_mapping = convertECSMappingToObject(ecs_mapping);
+          }
 
-        return savedObject;
-      });
+          return {
+            ...savedObject.attributes,
+            saved_object_id: savedObject.id,
+          };
+        });
 
-      return response.ok({
-        body: {
-          ...omit(savedQueries, 'saved_objects'),
-          data: savedObjects,
-        },
-      });
+        return response.ok({
+          body: {
+            ...omit(savedQueries, 'saved_objects'),
+            data: savedObjects,
+          },
+        });
+      } catch (e) {
+        return response.customError({
+          statusCode: e.statusCode || e.output?.statusCode || 500,
+          body: e,
+        });
+      }
     }
   );
 };

@@ -9,13 +9,13 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { FleetPlugin } from './plugin';
 
-export type { FleetSetup, FleetStart } from './plugin';
+export type { FleetSetup, FleetStart, FleetStartServices } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);
 };
 
-export type { NewPackagePolicy } from './types';
+export type { NewPackagePolicy, KibanaSavedObjectType } from './types';
 export type {
   AgentDetailsReassignPolicyAction,
   AgentPolicyDetailsDeployAgentAction,

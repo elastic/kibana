@@ -8,12 +8,14 @@
 import { mapValues } from 'lodash';
 import type { CoreSetup, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { SavedObjectMigrationMap } from '@kbn/core/server';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { APP_ICON, getFullPath } from '../../common/constants';
+import { CONTENT_ID } from '../../common/content_management';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
 import { migrateDataViewsPersistedState } from '../../common/migrations/migrate_data_view_persisted_state';
-import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapAttributes } from '../../common/content_management';
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export function setupSavedObjects(
@@ -21,8 +23,9 @@ export function setupSavedObjects(
   getFilterMigrations: () => MigrateFunctionsObject,
   getDataViewMigrations: () => MigrateFunctionsObject
 ) {
-  core.savedObjects.registerType<MapSavedObjectAttributes>({
-    name: 'map',
+  core.savedObjects.registerType<MapAttributes>({
+    name: CONTENT_ID,
+    indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -61,23 +64,6 @@ export function setupSavedObjects(
       );
     },
   });
-
-  /*
-   * The maps-telemetry saved object type isn't used, but in order to remove these fields from
-   * the mappings we register this type with `type: 'object', enabled: true` to remove all
-   * previous fields from the mappings until https://github.com/elastic/kibana/issues/67086 is
-   * solved.
-   */
-  core.savedObjects.registerType({
-    name: 'maps-telemetry',
-    hidden: false,
-    namespaceType: 'agnostic',
-    mappings: {
-      // @ts-ignore Core types don't support this since it's only really valid when removing a previously registered type
-      type: 'object',
-      enabled: false,
-    },
-  });
 }
 
 /**
@@ -88,7 +74,7 @@ export const getMapsFilterMigrations = (
 ): MigrateFunctionsObject =>
   mapValues(
     filterMigrations,
-    (filterMigration) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
+    (filterMigration) => (doc: SavedObjectUnsanitizedDoc<MapAttributes>) => {
       try {
         const attributes = migrateDataPersistedState(doc, filterMigration);
 
@@ -110,20 +96,17 @@ export const getMapsFilterMigrations = (
 export const getMapsDataViewMigrations = (
   migrations: MigrateFunctionsObject
 ): MigrateFunctionsObject =>
-  mapValues(
-    migrations,
-    (migration) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
-      try {
-        const attributes = migrateDataViewsPersistedState(doc, migration);
+  mapValues(migrations, (migration) => (doc: SavedObjectUnsanitizedDoc<MapAttributes>) => {
+    try {
+      const attributes = migrateDataViewsPersistedState(doc, migration);
 
-        return {
-          ...doc,
-          attributes,
-        };
-      } catch (e) {
-        // Do not fail migration
-        // Maps application can display error when saved object is viewed
-        return doc;
-      }
+      return {
+        ...doc,
+        attributes,
+      };
+    } catch (e) {
+      // Do not fail migration
+      // Maps application can display error when saved object is viewed
+      return doc;
     }
-  );
+  });

@@ -16,25 +16,25 @@ import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
+import { AccessorConfig } from '@kbn/visualization-ui-components/public';
 import { CollapseFunction } from '../../../common/expressions';
-import type { LayerType } from '../../../common';
+import type { LayerType } from '../../../common/types';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
 import {
   Visualization,
   OperationMetadata,
-  AccessorConfig,
   VisualizationConfigProps,
   VisualizationDimensionGroupConfig,
   Suggestion,
 } from '../../types';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
-import { DimensionEditor } from './dimension_editor';
+import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
-import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
 import { toExpression } from './to_expression';
+import { nonNullable } from '../../utils';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -61,6 +61,7 @@ export interface MetricVisualizationState {
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   color?: string;
+  icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
 
@@ -98,25 +99,21 @@ const getMetricLayerConfiguration = (
     const hasDynamicColoring = !!props.state.palette;
     return hasDynamicColoring
       ? {
-          triggerIcon: 'colorBy',
+          triggerIconType: 'colorBy',
           palette: stops.map(({ color }) => color),
         }
       : hasStaticColoring
       ? {
-          triggerIcon: 'color',
+          triggerIconType: 'color',
           color: props.state.color,
         }
       : {
-          triggerIcon: 'color',
+          triggerIconType: 'color',
           color: getDefaultColor(props.state),
         };
   };
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
-
-  const formatterOptions: FormatSelectorOptions = {
-    disableExtraOptions: true,
-  };
 
   return {
     groups: [
@@ -141,9 +138,9 @@ const getMetricLayerConfiguration = (
           : [],
         supportsMoreColumns: !props.state.metricAccessor,
         filterOperations: isSupportedDynamicMetric,
+        isMetricDimension: true,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
         requiredMinDimensionCount: 1,
       },
       {
@@ -166,9 +163,9 @@ const getMetricLayerConfiguration = (
           : [],
         supportsMoreColumns: !props.state.secondaryMetricAccessor,
         filterOperations: isSupportedDynamicMetric,
+        isMetricDimension: true,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
       },
       {
         groupId: GROUP_ID.MAX,
@@ -190,7 +187,6 @@ const getMetricLayerConfiguration = (
         filterOperations: isSupportedMetric,
         enableDimensionEditor: true,
         enableFormatSelector: false,
-        formatSelectorOptions: formatterOptions,
         supportStaticValue: true,
         prioritizedOperation: 'max',
         groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
@@ -207,7 +203,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIcon: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
               },
             ]
           : [],
@@ -215,7 +211,6 @@ const getMetricLayerConfiguration = (
         filterOperations: isBucketed,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
       },
     ],
   };
@@ -416,7 +411,6 @@ export const getMetricVisualization = ({
             ]
           : undefined,
         disabled: true,
-        canAddViaMenu: true,
       },
       {
         type: layerTypes.METRIC_TRENDLINE,
@@ -427,7 +421,6 @@ export const getMetricVisualization = ({
           { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
         ],
         disabled: Boolean(state?.trendlineLayerId),
-        canAddViaMenu: true,
       },
     ];
   },
@@ -452,6 +445,10 @@ export const getMetricVisualization = ({
     };
 
     return newState;
+  },
+
+  getRemoveOperation(state, layerId) {
+    return layerId === state.trendlineLayerId ? 'remove' : 'clear';
   },
 
   getLayersToLinkTo(state, newLayerId: string): string[] {
@@ -617,14 +614,20 @@ export const getMetricVisualization = ({
     );
   },
 
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
+  renderDimensionEditorAdditionalSection(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <DimensionEditorAdditionalSection {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 
   getDisplayOptions() {
     return {
-      noPanelTitle: true,
+      noPanelTitle: false,
       noPadding: true,
     };
   },
@@ -651,5 +654,68 @@ export const getMetricVisualization = ({
       },
     };
     return suggestion;
+  },
+
+  getVisualizationInfo(state) {
+    const dimensions = [];
+    if (state.metricAccessor) {
+      dimensions.push({
+        id: state.metricAccessor,
+        name: i18n.translate('xpack.lens.primaryMetric.label', {
+          defaultMessage: 'Primary metric',
+        }),
+        dimensionType: 'primary_metric',
+      });
+    }
+
+    if (state.secondaryMetricAccessor) {
+      dimensions.push({
+        id: state.secondaryMetricAccessor,
+        name: i18n.translate('xpack.lens.metric.secondaryMetric', {
+          defaultMessage: 'Secondary metric',
+        }),
+        dimensionType: 'secondary_metric',
+      });
+    }
+
+    if (state.maxAccessor) {
+      dimensions.push({
+        id: state.maxAccessor,
+        name: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+        dimensionType: 'max',
+      });
+    }
+
+    if (state.breakdownByAccessor) {
+      dimensions.push({
+        id: state.breakdownByAccessor,
+        name: i18n.translate('xpack.lens.metric.breakdownBy', {
+          defaultMessage: 'Break down by',
+        }),
+        dimensionType: 'breakdown',
+      });
+    }
+
+    const stops = state.palette?.params?.stops || [];
+    const hasStaticColoring = !!state.color;
+    const hasDynamicColoring = !!state.palette;
+
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: 'metric',
+          ...this.getDescription(state),
+          dimensions,
+          palette: (hasDynamicColoring
+            ? stops.map(({ color }) => color)
+            : hasStaticColoring
+            ? [state.color]
+            : [getDefaultColor(state)]
+          ).filter(nonNullable),
+        },
+      ],
+    };
   },
 });

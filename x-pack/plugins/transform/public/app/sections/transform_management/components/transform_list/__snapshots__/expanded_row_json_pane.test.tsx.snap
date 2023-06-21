@@ -21,7 +21,6 @@ exports[`Transform: Transform List Expanded Row <ExpandedRowJsonPane /> Minimal 
           }
         }
       >
-        value=
         {
   "id": "fq_date_histogram_1m_1441",
   "source": {

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { ButtonColor } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import { useMemo } from 'react';
 import type { ResolverProcessType, NodeDataStatus } from '../types';
 import { useSymbolIDs } from './use_symbol_ids';
@@ -18,10 +18,11 @@ import { useColors } from './use_colors';
  * Provides colors and HTML IDs used to render the 'cube' graphic that accompanies nodes.
  */
 export function useCubeAssets(
+  id: string,
   cubeType: NodeDataStatus,
   isProcessTrigger: boolean
 ): NodeStyleConfig {
-  const SymbolIds = useSymbolIDs();
+  const SymbolIds = useSymbolIDs({ id });
   const colorMap = useColors();
 
   const nodeAssets: NodeStyleMap = useMemo(
@@ -145,6 +146,6 @@ interface NodeStyleConfig {
   descriptionFill: string;
   descriptionText: string;
   isLabelFilled: boolean;
-  labelButtonFill: ButtonColor;
+  labelButtonFill: EuiButtonColor;
   strokeColor: string;
 }

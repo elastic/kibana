@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
+import { nonNullable } from '../../../../../utils';
+import type { DateRange } from '../../../../../../common/types';
 import type { IndexPattern } from '../../../../../types';
 import {
   OperationDefinition,
@@ -25,7 +27,6 @@ import {
   getOperationParams,
   groupArgsByType,
   mergeWithGlobalFilters,
-  nonNullable,
 } from './util';
 import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
@@ -41,6 +42,7 @@ function parseAndExtract(
   columnId: string,
   indexPattern: IndexPattern,
   operations: Record<string, GenericOperationDefinition>,
+  dateRange: DateRange | undefined,
   label?: string
 ) {
   const { root, error } = tryToParse(text, operations);
@@ -48,7 +50,14 @@ function parseAndExtract(
     return { extracted: [], isValid: false };
   }
   // before extracting the data run the validation task and throw if invalid
-  const errors = runASTValidation(root, layer, indexPattern, operations, layer.columns[columnId]);
+  const errors = runASTValidation(
+    root,
+    layer,
+    indexPattern,
+    operations,
+    layer.columns[columnId],
+    dateRange
+  );
   if (errors.length) {
     return { extracted: [], isValid: false };
   }
@@ -64,7 +73,8 @@ function parseAndExtract(
     i18n.translate('xpack.lens.indexPattern.formulaPartLabel', {
       defaultMessage: 'Part of {label}',
       values: { label: label || text },
-    })
+    }),
+    dateRange
   );
   return { extracted, isValid: true };
 }
@@ -75,7 +85,8 @@ function extractColumns(
   ast: TinymathAST,
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
-  label: string
+  label: string,
+  dateRange: DateRange | undefined
 ): Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> {
   const columns: Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> = [];
   const { filter: globalFilter, reducedTimeRange: globalReducedTimeRange } =
@@ -185,6 +196,21 @@ function extractColumns(
       // replace by new column id
       return newColId;
     }
+
+    if (nodeOperation.input === 'managedReference' && nodeOperation.usedInMath) {
+      const newCol = (
+        nodeOperation as OperationDefinition<GenericIndexPatternColumn, 'managedReference'>
+      ).buildColumn({
+        layer,
+        indexPattern,
+      });
+      const newColId = getManagedId(idPrefix, columns.length);
+      newCol.customLabel = true;
+      newCol.label = label;
+      columns.push({ column: newCol, location: node.location });
+      // replace by new column id
+      return newColId;
+    }
   }
 
   const root = parseNode(ast);
@@ -210,6 +236,8 @@ function extractColumns(
 interface ExpandColumnProperties {
   indexPattern: IndexPattern;
   operations?: Record<string, GenericOperationDefinition>;
+  dateRange?: DateRange;
+  strictShiftValidation?: boolean;
 }
 
 const getEmptyColumnsWithFormulaMeta = (): {
@@ -228,7 +256,7 @@ function generateFormulaColumns(
   id: string,
   column: FormulaIndexPatternColumn,
   layer: FormBasedLayer,
-  { indexPattern, operations = operationDefinitionMap }: ExpandColumnProperties
+  { indexPattern, operations = operationDefinitionMap, dateRange }: ExpandColumnProperties
 ) {
   const { columns, meta } = getEmptyColumnsWithFormulaMeta();
   const formula = column.params.formula || '';
@@ -239,6 +267,7 @@ function generateFormulaColumns(
     id,
     indexPattern,
     filterByVisibleOperation(operations),
+    dateRange,
     column.customLabel ? column.label : undefined
   );
 

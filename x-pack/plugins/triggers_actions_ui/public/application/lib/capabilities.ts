@@ -23,8 +23,11 @@ export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
 export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.delete;
 
-export function hasAllPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
-  return ruleType?.authorizedConsumers[rule.consumer]?.all ?? false;
+export function hasAllPrivilege(
+  ruleConsumer: InitialRule['consumer'],
+  ruleType?: RuleType
+): boolean {
+  return ruleType?.authorizedConsumers[ruleConsumer]?.all ?? false;
 }
 export function hasReadPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
   return ruleType?.authorizedConsumers[rule.consumer]?.read ?? false;

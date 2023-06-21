@@ -8,9 +8,9 @@
 
 import {
   createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-} from '../../../test_helpers/kbn_server';
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { isInlineScriptingEnabled } from '@kbn/core-elasticsearch-server-internal';
 
 describe('isInlineScriptingEnabled', () => {

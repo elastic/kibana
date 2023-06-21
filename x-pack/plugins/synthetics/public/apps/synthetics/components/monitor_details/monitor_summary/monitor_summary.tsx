@@ -6,78 +6,108 @@
  */
 
 import React from 'react';
-import {
-  EuiTitle,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
+import { useTestFlyoutOpen } from '../../test_now_mode/hooks/use_test_flyout_open';
 
+import { useMonitorDetailsPage } from '../use_monitor_details_page';
+import { useMonitorRangeFrom } from '../hooks/use_monitor_range_from';
+import { MonitorAlerts } from './monitor_alerts';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
+import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { DurationSparklines } from './duration_sparklines';
 import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
 import { AvailabilityPanel } from './availability_panel';
 import { DurationPanel } from './duration_panel';
-import { MonitorDetailsPanel } from './monitor_details_panel';
+import { MonitorDetailsPanelContainer } from './monitor_details_panel_container';
 import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
-import { LastTenTestRuns } from './last_ten_test_runs';
+import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
+import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 
 export const MonitorSummary = () => {
-  const { euiTheme } = useEuiTheme();
+  const { from, to } = useMonitorRangeFrom();
 
-  // TODO this range needs to be adjusted dynamically https://github.com/elastic/kibana/issues/143472
-  const from = 'now-30d/d';
-  const to = 'now';
+  const monitorId = useMonitorQueryId();
+  const isFlyoutOpen = !!useTestFlyoutOpen();
+
+  const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
+
+  const redirect = useMonitorDetailsPage();
+  if (redirect) {
+    return redirect;
+  }
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={1}>
-          <EuiPanel hasShadow={false} hasBorder>
-            <EuiTitle size="xs">
-              <h3>{MONITOR_DETAILS_LABEL}</h3>
-            </EuiTitle>
-            <MonitorDetailsPanel />
-          </EuiPanel>
+    <MonitorPendingWrapper>
+      <EuiFlexGroup gutterSize="m" wrap={true} responsive={false}>
+        <EuiFlexItem grow={1} css={{ flexBasis: '36%', minWidth: 260 }}>
+          <MonitorDetailsPanelContainer />
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <EuiPanel hasShadow={false} hasBorder paddingSize="s" css={{ height: 158 }}>
-            <EuiTitle size="xs">
-              <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{LAST_30DAYS_LABEL}</h3>
-            </EuiTitle>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <AvailabilityPanel from={from} to={to} />
+        <EuiFlexItem grow={1} css={{ flexBasis: '60%' }}>
+          <EuiPanel hasShadow={false} grow={false} hasBorder paddingSize="m">
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h3>{SUMMARY_LABEL}</h3>
+                </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
-                <AvailabilitySparklines from={from} to={to} />
+                <EuiText color="subdued" size="s">
+                  {dateLabel}
+                </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <DurationPanel from={from} to={to} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <DurationSparklines from={from} to={to} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <MonitorErrorsCount from={from} to={to} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <MonitorErrorSparklines />
-              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup gutterSize="s" wrap={true}>
+              <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <AvailabilityPanel from={from} to={to} id="availabilityPercentageSummary" />
+                </EuiFlexItem>
+                <EuiFlexItem css={{ minWidth: 100 }}>
+                  <AvailabilitySparklines from={from} to={to} id="availabilitySparklineSummary" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
+                <EuiFlexItem grow={false} css={{ minWidth: 86 }}>
+                  <DurationPanel from={from} to={to} id="durationAvgValueSummary" />
+                </EuiFlexItem>
+                <EuiFlexItem css={{ minWidth: 100 }}>
+                  <DurationSparklines from={from} to={to} id="durationAvgSparklineSummary" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
+                <EuiFlexItem grow={false}>
+                  {monitorId && (
+                    <MonitorErrorsCount
+                      from={from}
+                      to={to}
+                      monitorId={[monitorId]}
+                      id="monitorErrorsCountSummary"
+                    />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem css={{ minWidth: 100 }}>
+                  {monitorId && (
+                    <MonitorErrorSparklines
+                      from={from}
+                      to={to}
+                      monitorId={[monitorId]}
+                      id="monitorErrorsSparklineSummary"
+                    />
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexGroup>
           </EuiPanel>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel hasShadow={false} hasBorder>
-                <EuiFlexGroup alignItems="center">
+              <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
+                <EuiFlexGroup alignItems="center" gutterSize="m">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
                       <h3>{DURATION_TREND_LABEL}</h3>
@@ -85,7 +115,7 @@ export const MonitorSummary = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText color="subdued" size="s">
-                      {LAST_30_DAYS_LABEL}
+                      {dateLabel}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -95,29 +125,38 @@ export const MonitorSummary = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {/* <EuiSpacer size="l" /> */}
-      {/* <EuiPanel style={{ height: 100 }}>/!* TODO: Add status panel*!/</EuiPanel> */}
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
+      <MonitorStatusPanel
+        from={'now-24h'}
+        to={'now'}
+        brushable={false}
+        showViewHistoryButton={true}
+      />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m" wrap={true}>
+        <EuiFlexItem css={isFlyoutOpen ? { minWidth: 260 } : undefined}>
           <LastTestRun />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 260 }}>
+          <MonitorAlerts dateLabel={dateLabel} from={from} to={to} />
+          <EuiSpacer size="m" />
           <StepDurationPanel />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <LastTenTestRuns />
-    </>
+      <LoadWhenInView placeholderTitle={LAST_10_TEST_RUNS}>
+        <TestRunsTable paginable={false} from={from} to={to} />
+      </LoadWhenInView>
+    </MonitorPendingWrapper>
   );
 };
 
-const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails', {
-  defaultMessage: 'Monitor details',
+const SUMMARY_LABEL = i18n.translate('xpack.synthetics.detailsPanel.summary', {
+  defaultMessage: 'Summary',
 });
 
-const LAST_30DAYS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.last30Days', {
-  defaultMessage: 'Last 30 days',
+const TO_DATE_LABEL = i18n.translate('xpack.synthetics.detailsPanel.toDate', {
+  defaultMessage: 'To date',
 });
 
 const DURATION_TREND_LABEL = i18n.translate('xpack.synthetics.detailsPanel.durationTrends', {

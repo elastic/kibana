@@ -8,30 +8,30 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Setup } from '../../lib/helpers/setup_request';
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { SavedServiceGroup } from '../../../common/service_groups';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServicesCounts({
-  setup,
+  apmEventClient,
   start,
   end,
   serviceGroups,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   serviceGroups: SavedServiceGroup[];
 }) {
-  const { apmEventClient } = setup;
-
-  const serviceGroupsKueryMap: Record<string, QueryDslQueryContainer> =
-    serviceGroups.reduce((acc, sg) => {
-      return {
-        ...acc,
-        [sg.id]: kqlQuery(sg.kuery)[0],
-      };
-    }, {});
+  if (!serviceGroups.length) {
+    return {};
+  }
+  const serviceGroupsKueryMap = serviceGroups.reduce<
+    Record<string, QueryDslQueryContainer>
+  >((acc, sg) => {
+    acc[sg.id] = kqlQuery(sg.kuery)[0];
+    return acc;
+  }, {});
 
   const params = {
     apm: {
@@ -69,7 +69,8 @@ export async function getServicesCounts({
 
   const buckets: Record<string, { services_count: { value: number } }> =
     response?.aggregations?.service_groups.buckets ?? {};
-  return Object.keys(buckets).reduce((acc, key) => {
+
+  return Object.keys(buckets).reduce<Record<string, number>>((acc, key) => {
     return {
       ...acc,
       [key]: buckets[key].services_count.value,

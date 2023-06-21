@@ -213,6 +213,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                         style={{
                           paddingLeft: '9px',
                           paddingRight: '9px',
+                          height: '36px',
                           // Replicate euiPanel--accent vs euiPanel--subdued
                           // Applying these classNames by themselves doesn't work due to a CSS-in-JS issue with EuiPanel
                           color: isActive ? '#a8376a' : euiTheme.colors.subduedText,

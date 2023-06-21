@@ -20,12 +20,14 @@ export const ActionsLogFilter = memo(
     filterName,
     isFlyout,
     onChangeFilterOptions,
+    'data-test-subj': dataTestSubj,
   }: {
     filterName: FilterName;
     isFlyout: boolean;
     onChangeFilterOptions: (selectedOptions: string[]) => void;
+    'data-test-subj'?: string;
   }) => {
-    const getTestId = useTestIdGenerator('response-actions-list');
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     // popover states and handlers
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -50,6 +52,7 @@ export const ActionsLogFilter = memo(
       setUrlActionsFilters,
       setUrlHostsFilters,
       setUrlStatusesFilters,
+      setUrlTypeFilters,
     } = useActionsLogFilter({
       filterName,
       isFlyout,
@@ -86,7 +89,10 @@ export const ActionsLogFilter = memo(
       return items;
     }, [areHostsSelectedOnMount, shouldPinSelectedHosts, items]);
 
-    const isSearchable = useMemo(() => filterName !== 'statuses', [filterName]);
+    const isSearchable = useMemo(
+      () => filterName !== 'statuses' && filterName !== 'type',
+      [filterName]
+    );
 
     const onOptionsChange = useCallback(
       (newOptions: FilterItems) => {
@@ -113,6 +119,8 @@ export const ActionsLogFilter = memo(
             setUrlHostsFilters(selectedItems.join());
           } else if (filterName === 'statuses') {
             setUrlStatusesFilters(selectedItems.join());
+          } else if (filterName === 'type') {
+            setUrlTypeFilters(selectedItems.join());
           }
           // reset shouldPinSelectedHosts, setAreHostsSelectedOnMount
           shouldPinSelectedHosts(false);
@@ -123,15 +131,16 @@ export const ActionsLogFilter = memo(
         onChangeFilterOptions(selectedItems);
       },
       [
-        shouldPinSelectedHosts,
-        filterName,
-        isFlyout,
         setItems,
+        isFlyout,
         onChangeFilterOptions,
+        filterName,
+        shouldPinSelectedHosts,
         setAreHostsSelectedOnMount,
         setUrlActionsFilters,
         setUrlHostsFilters,
         setUrlStatusesFilters,
+        setUrlTypeFilters,
       ]
     );
 
@@ -153,19 +162,22 @@ export const ActionsLogFilter = memo(
           setUrlHostsFilters('');
         } else if (filterName === 'statuses') {
           setUrlStatusesFilters('');
+        } else if (filterName === 'type') {
+          setUrlTypeFilters('');
         }
       }
       // update query state
       onChangeFilterOptions([]);
     }, [
-      filterName,
-      isFlyout,
-      items,
       setItems,
+      items,
+      isFlyout,
       onChangeFilterOptions,
+      filterName,
       setUrlActionsFilters,
       setUrlHostsFilters,
       setUrlStatusesFilters,
+      setUrlTypeFilters,
     ]);
 
     return (
@@ -177,6 +189,7 @@ export const ActionsLogFilter = memo(
         numActiveFilters={numActiveFilters}
         numFilters={numFilters}
         onButtonClick={onPopoverButtonClick}
+        data-test-subj={dataTestSubj}
       >
         <EuiSelectable
           aria-label={`${filterName}`}

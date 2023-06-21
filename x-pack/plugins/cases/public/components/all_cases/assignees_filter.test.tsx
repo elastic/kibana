@@ -132,12 +132,30 @@ describe('AssigneesFilterPopover', () => {
 
     await waitFor(async () => {
       userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByText('1 assignee filtered')).toBeInTheDocument();
+      expect(screen.getByText('1 filter selected')).toBeInTheDocument();
     });
 
     await waitForEuiPopoverOpen();
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+  });
+
+  it('shows the total when the multiple users are selected', async () => {
+    const props = {
+      ...defaultProps,
+      selectedAssignees: [userProfiles[0], userProfiles[1]],
+    };
+    appMockRender.render(<AssigneesFilterPopover {...props} />);
+
+    await waitFor(async () => {
+      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      expect(screen.getByText('2 filters selected')).toBeInTheDocument();
+    });
+
+    await waitForEuiPopoverOpen();
+
+    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
   });
 
   it('shows three users when initially rendered', async () => {
@@ -169,8 +187,10 @@ describe('AssigneesFilterPopover', () => {
 
     const assignees = screen.getAllByRole('option');
     expect(within(assignees[1]).getByText('Wet Dingo')).toBeInTheDocument();
-    expect(within(assignees[2]).getByText('Damaged Raccoon')).toBeInTheDocument();
-    expect(within(assignees[3]).getByText('Physical Dinosaur')).toBeInTheDocument();
+    expect(within(assignees[2]).getByText('Convenient Orca')).toBeInTheDocument();
+    expect(within(assignees[3]).getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(within(assignees[4]).getByText('Physical Dinosaur')).toBeInTheDocument();
+    expect(within(assignees[5]).getByText('Silly Hare')).toBeInTheDocument();
   });
 
   it('does not show the number of filters', async () => {

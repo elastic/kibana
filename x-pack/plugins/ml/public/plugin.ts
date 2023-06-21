@@ -31,6 +31,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
@@ -44,6 +45,7 @@ import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-pl
 import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
@@ -68,6 +70,8 @@ export interface MlStartDependencies {
   lens?: LensPublicStart;
   cases?: CasesUiStart;
   security: SecurityPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedSearch: SavedSearchPublicPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -135,6 +139,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             cases: pluginsStart.cases,
+            savedObjectsManagement: pluginsStart.savedObjectsManagement,
+            savedSearch: pluginsStart.savedSearch,
           },
           params
         );
@@ -153,10 +159,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
+      const mlEnabled = isMlEnabled(license);
+      const fullLicense = isFullLicense(license);
       const [coreStart, pluginStart] = await core.getStartServices();
       const { capabilities } = coreStart.application;
 
-      if (isMlEnabled(license)) {
+      if (mlEnabled) {
         // add ML to home page
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
@@ -178,9 +186,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerMapExtension,
         registerCasesAttachments,
       } = await import('./register_helper');
-
-      const mlEnabled = isMlEnabled(license);
-      const fullLicense = isFullLicense(license);
 
       if (pluginsSetup.maps) {
         // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
@@ -219,6 +224,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
+      lens: deps.lens,
     });
 
     return {

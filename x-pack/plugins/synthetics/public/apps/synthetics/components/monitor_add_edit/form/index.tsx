@@ -14,18 +14,18 @@ import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
 
-export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor; space?: string }> = ({
-  children,
-  defaultValues,
-  space,
-}) => {
+export const MonitorForm: React.FC<{
+  defaultValues?: SyntheticsMonitor;
+  space?: string;
+  readOnly?: boolean;
+}> = ({ children, defaultValues, space, readOnly = false }) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     defaultValues:
       formatDefaultFormValues(defaultValues as SyntheticsMonitor) ||
       getDefaultFormFields(space)[FormMonitorType.MULTISTEP],
-    shouldFocusError: true,
+    shouldFocusError: false,
   });
 
   /* React hook form doesn't seem to register a field
@@ -43,7 +43,7 @@ export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor; space?: 
       >
         {children}
         <EuiSpacer />
-        <ActionBar />
+        <ActionBar readOnly={readOnly} />
       </EuiForm>
       <Disclaimer />
     </FormProvider>

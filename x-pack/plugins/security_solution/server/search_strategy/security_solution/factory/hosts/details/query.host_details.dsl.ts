@@ -6,7 +6,7 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
-import { cloudFieldsMap, hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
+import { cloudFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
 import type { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
 import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';

@@ -70,45 +70,38 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     absolute,
   });
 
-  const codeEntries = entries.reduce((paths, entry) => {
-    const resolvedPath = path.resolve(inputPath, entry);
-    paths.push(resolvedPath);
-
-    return paths;
-  }, []);
-
-  return [[codeEntries, extractCodeMessages]];
+  return {
+    entries: entries.map((entry) => path.resolve(inputPath, entry)),
+    extractFunction: extractCodeMessages,
+  };
 }
 
 export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
-  const categorizedEntries = await matchEntriesWithExctractors(inputPath);
-  return Promise.all(
-    categorizedEntries.map(async ([entries, extractFunction]) => {
-      const files = await Promise.all(
-        filterEntries(entries, config.exclude).map(async (entry) => {
-          return {
-            name: entry,
-            content: await readFileAsync(entry),
-          };
-        })
-      );
+  const { entries, extractFunction } = await matchEntriesWithExctractors(inputPath);
 
-      for (const { name, content } of files) {
-        const reporterWithContext = reporter.withContext({ name });
-
-        try {
-          for (const [id, value] of extractFunction(content, reporterWithContext)) {
-            validateMessageNamespace(id, name, config.paths, reporterWithContext);
-            addMessageToMap(targetMap, id, value, reporterWithContext);
-          }
-        } catch (error) {
-          if (!isFailError(error)) {
-            throw error;
-          }
-
-          reporterWithContext.report(error);
-        }
-      }
+  const files = await Promise.all(
+    filterEntries(entries, config.exclude).map(async (entry) => {
+      return {
+        name: entry,
+        content: await readFileAsync(entry),
+      };
     })
   );
+
+  for (const { name, content } of files) {
+    const reporterWithContext = reporter.withContext({ name });
+
+    try {
+      for (const [id, value] of extractFunction(content, reporterWithContext)) {
+        validateMessageNamespace(id, name, config.paths, reporterWithContext);
+        addMessageToMap(targetMap, id, value, reporterWithContext);
+      }
+    } catch (error) {
+      if (!isFailError(error)) {
+        throw error;
+      }
+
+      reporterWithContext.report(error);
+    }
+  }
 }

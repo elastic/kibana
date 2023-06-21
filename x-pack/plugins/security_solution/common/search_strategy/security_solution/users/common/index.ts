@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import type { HostEcs, UserEcs } from '@kbn/securitysolution-ecs';
 import type { CommonFields, Maybe, RiskScoreFields, RiskSeverity, SortField } from '../../..';
-import type { HostEcs } from '../../../../ecs/host';
-import type { UserEcs } from '../../../../ecs/user';
 
 export interface UserRiskScoreItem {
   _id?: Maybe<string>;
@@ -19,8 +18,6 @@ export interface UserRiskScoreItem {
 export interface UserItem {
   user?: Maybe<UserEcs>;
   host?: Maybe<HostEcs>;
-  lastSeen?: Maybe<string>;
-  firstSeen?: Maybe<string>;
 }
 
 export type SortableUsersFields = Exclude<UsersFields, typeof UsersFields.domain>;
@@ -28,9 +25,9 @@ export type SortableUsersFields = Exclude<UsersFields, typeof UsersFields.domain
 export type SortUsersField = SortField<SortableUsersFields>;
 
 export enum UsersFields {
-  lastSeen = 'lastSeen',
   name = 'name',
   domain = 'domain',
+  lastSeen = 'lastSeen',
 }
 
 export interface UserAggEsItem {
@@ -40,8 +37,6 @@ export interface UserAggEsItem {
   host_os_name?: UserBuckets;
   host_ip?: UserBuckets;
   host_os_family?: UserBuckets;
-  first_seen?: { value_as_string: string };
-  last_seen?: { value_as_string: string };
 }
 
 export interface UserBuckets {
@@ -69,3 +64,11 @@ interface UsersDomainHitsItem {
     }>;
   };
 }
+
+export const EVENT_KIND_ASSET_FILTER = { term: { 'event.kind': 'asset' } };
+
+export const NOT_EVENT_KIND_ASSET_FILTER = {
+  bool: {
+    must_not: [EVENT_KIND_ASSET_FILTER],
+  },
+};

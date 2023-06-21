@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import chalk from 'chalk';
 import ora from 'ora';
 import { Command } from 'commander';
@@ -24,7 +24,7 @@ import {
   kibanaConfigWriter,
   elasticsearch,
 } from './utils';
-import { Logger } from '../cli_plugin/lib/logger';
+import { Logger } from '../cli/logger';
 
 const program = new Command('bin/kibana-setup');
 

@@ -64,7 +64,7 @@ describe('useExpressionRenderer', () => {
   });
 
   it('should debounce property changes', () => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
 
     hook.rerender({ debounce: 1000, expression: 'something else' });
     expect(expressionLoader.update).not.toHaveBeenCalled();
@@ -79,7 +79,7 @@ describe('useExpressionRenderer', () => {
   });
 
   it('should not debounce if loader optaions are not changed', () => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
 
     hook.rerender({ expression: 'something else', partial: true });
     hook.rerender({

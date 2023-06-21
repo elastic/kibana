@@ -13,7 +13,7 @@ import type {
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useStatusAction } from '../actions/status/use_status_action';
@@ -23,8 +23,13 @@ import { statuses } from '../status';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useSeverityAction } from '../actions/severity/use_severity_action';
 import { severities } from '../severity/config';
+import { useTagsAction } from '../actions/tags/use_tags_action';
+import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
+import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
+import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
+import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
 
-const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }> = ({
+const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean }> = ({
   theCase,
   disableActions,
 }) => {
@@ -39,6 +44,10 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
     onActionSuccess: refreshCases,
   });
 
+  const copyIDAction = useCopyIDAction({
+    onActionSuccess: closePopover,
+  });
+
   const statusAction = useStatusAction({
     isDisabled: false,
     onAction: closePopover,
@@ -51,6 +60,18 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
     onAction: closePopover,
     onActionSuccess: refreshCases,
     selectedSeverity: theCase.severity,
+  });
+
+  const tagsAction = useTagsAction({
+    isDisabled: false,
+    onAction: closePopover,
+    onActionSuccess: refreshCases,
+  });
+
+  const assigneesAction = useAssigneesAction({
+    isDisabled: false,
+    onAction: closePopover,
+    onActionSuccess: refreshCases,
   });
 
   const canDelete = deleteAction.canDelete;
@@ -105,6 +126,13 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
       });
     }
 
+    if (canUpdate) {
+      mainPanelItems.push(tagsAction.getAction([theCase]));
+      mainPanelItems.push(assigneesAction.getAction([theCase]));
+    }
+
+    mainPanelItems.push(copyIDAction.getAction(theCase));
+
     if (canDelete) {
       mainPanelItems.push(deleteAction.getAction([theCase]));
     }
@@ -124,7 +152,17 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
     }
 
     return panelsToBuild;
-  }, [canDelete, canUpdate, deleteAction, severityAction, statusAction, theCase]);
+  }, [
+    assigneesAction,
+    canDelete,
+    canUpdate,
+    copyIDAction,
+    deleteAction,
+    severityAction,
+    statusAction,
+    tagsAction,
+    theCase,
+  ]);
 
   return (
     <>
@@ -148,13 +186,32 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} key={`case-action-menu-${theCase.id}`} />
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={panels}
+          key={`case-action-menu-${theCase.id}`}
+          data-test-subj={`case-action-menu-${theCase.id}`}
+        />
       </EuiPopover>
       {deleteAction.isModalVisible ? (
         <ConfirmDeleteCaseModal
           totalCasesToBeDeleted={1}
           onCancel={deleteAction.onCloseModal}
           onConfirm={deleteAction.onConfirmDeletion}
+        />
+      ) : null}
+      {tagsAction.isFlyoutOpen ? (
+        <EditTagsFlyout
+          onClose={tagsAction.onFlyoutClosed}
+          selectedCases={[theCase]}
+          onSaveTags={tagsAction.onSaveTags}
+        />
+      ) : null}
+      {assigneesAction.isFlyoutOpen ? (
+        <EditAssigneesFlyout
+          onClose={assigneesAction.onFlyoutClosed}
+          selectedCases={[theCase]}
+          onSaveAssignees={assigneesAction.onSaveAssignees}
         />
       ) : null}
     </>
@@ -166,7 +223,7 @@ ActionColumnComponent.displayName = 'ActionColumnComponent';
 const ActionColumn = React.memo(ActionColumnComponent);
 
 interface UseBulkActionsReturnValue {
-  actions: EuiTableComputedColumnType<Case> | null;
+  actions: EuiTableComputedColumnType<CaseUI> | null;
 }
 
 interface UseBulkActionsProps {
@@ -182,7 +239,7 @@ export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActi
       ? {
           name: i18n.ACTIONS,
           align: 'right',
-          render: (theCase: Case) => {
+          render: (theCase: CaseUI) => {
             return (
               <ActionColumn theCase={theCase} key={theCase.id} disableActions={disableActions} />
             );

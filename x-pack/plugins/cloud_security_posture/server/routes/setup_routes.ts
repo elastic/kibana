@@ -14,10 +14,10 @@ import type {
 } from '../types';
 import { PLUGIN_ID } from '../../common';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compliance_dashboard';
+import { defineGetVulnerabilitiesDashboardRoute } from './vulnerabilities_dashboard/vulnerabilities_dashboard';
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
-import { defineUpdateRulesConfigRoute } from './configuration/update_rules_configuration';
 import { defineGetCspStatusRoute } from './status/status';
-import { defineEsPitRoute } from './es_pit/es_pit';
+import { defineFindCspRuleTemplateRoute } from './csp_rule_template/get_csp_rule_template';
 
 /**
  * 1. Registers routes
@@ -26,16 +26,18 @@ import { defineEsPitRoute } from './es_pit/es_pit';
 export function setupRoutes({
   core,
   logger,
+  isPluginInitialized,
 }: {
   core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>;
   logger: Logger;
+  isPluginInitialized(): boolean;
 }) {
   const router = core.http.createRouter<CspRequestHandlerContext>();
   defineGetComplianceDashboardRoute(router);
+  defineGetVulnerabilitiesDashboardRoute(router);
   defineGetBenchmarksRoute(router);
-  defineUpdateRulesConfigRoute(router);
   defineGetCspStatusRoute(router);
-  defineEsPitRoute(router);
+  defineFindCspRuleTemplateRoute(router);
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,
@@ -61,6 +63,7 @@ export function setupRoutes({
         agentService: fleet.agentService,
         packagePolicyService: fleet.packagePolicyService,
         packageService: fleet.packageService,
+        isPluginInitialized,
       };
     }
   );

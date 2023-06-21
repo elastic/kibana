@@ -23,9 +23,8 @@ export const setupCapabilitiesSwitcher = (
 function getSwitcher(license$: Observable<ILicense>, logger: Logger): CapabilitiesSwitcher {
   return async (request, capabilities) => {
     const isAnonymousRequest = !request.route.options.authRequired;
-
     if (isAnonymousRequest) {
-      return capabilities;
+      return {};
     }
 
     try {
@@ -34,11 +33,11 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
 
       // full license, leave capabilities as they were
       if (mlEnabled && isFullLicense(license)) {
-        return capabilities;
+        return {};
       }
 
-      const mlCaps = capabilities.ml as MlCapabilities;
-      const originalCapabilities = cloneDeep(mlCaps);
+      const originalCapabilities = capabilities.ml as MlCapabilities;
+      const mlCaps = cloneDeep(originalCapabilities);
 
       // not full licence, switch off all capabilities
       Object.keys(mlCaps).forEach((k) => {
@@ -50,10 +49,10 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
         basicLicenseMlCapabilities.forEach((c) => (mlCaps[c] = originalCapabilities[c]));
       }
 
-      return capabilities;
+      return { ml: mlCaps };
     } catch (e) {
       logger.debug(`Error updating capabilities for ML based on licensing: ${e}`);
-      return capabilities;
+      return {};
     }
   };
 }

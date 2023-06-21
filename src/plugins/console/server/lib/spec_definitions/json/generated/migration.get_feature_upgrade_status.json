@@ -1,0 +1,11 @@
+{
+  "migration.get_feature_upgrade_status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_migration/system_features"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/migration-api-feature-upgrade.html"
+  }
+}

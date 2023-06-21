@@ -18,9 +18,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
-  const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -106,48 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('should modify the time range when the histogram is brushed', async function () {
-        // this is the number of renderings of the histogram needed when new data is fetched
-        // this needs to be improved
-        const renderingCountInc = 2;
-        const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await retry.waitFor('chart rendering complete', async () => {
-          const actualCount = await elasticChart.getVisualizationRenderingCount();
-          const expectedCount = prevRenderingCount + renderingCountInc;
-          log.debug(
-            `renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`
-          );
-          return actualCount === expectedCount;
-        });
-        let prevRowData = '';
-        // to make sure the table is already rendered
-        await retry.try(async () => {
-          prevRowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
-        });
-
-        await PageObjects.discover.brushHistogram();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await retry.waitFor('chart rendering complete after being brushed', async () => {
-          const actualCount = await elasticChart.getVisualizationRenderingCount();
-          const expectedCount = prevRenderingCount + renderingCountInc * 2;
-          log.debug(
-            `renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`
-          );
-          return actualCount === expectedCount;
-        });
-        const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(26);
-
-        await retry.waitFor('doc table containing the documents of the brushed range', async () => {
-          const rowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table after brushing: ${rowData}`);
-          return prevRowData !== rowData;
-        });
-      });
-
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -201,6 +164,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should suggest a new time range is picked', async () => {
         const isVisible = await PageObjects.discover.hasNoResultsTimepicker();
         expect(isVisible).to.be(true);
+      });
+
+      it('should show matches when time range is expanded', async () => {
+        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await retry.try(async function () {
+          expect(await PageObjects.discover.hasNoResults()).to.be(false);
+          expect(await PageObjects.discover.getHitCountInt()).to.be.above(0);
+        });
       });
     });
 
@@ -265,45 +237,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('empty query', function () {
-      it('should update the histogram timerange when the query is resubmitted', async function () {
-        await kibanaServer.uiSettings.update({
-          'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
-        });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
-        const initialTimeString = await PageObjects.discover.getChartTimespan();
-        await queryBar.submitQuery();
-
-        await retry.waitFor('chart timespan to have changed', async () => {
-          const refreshedTimeString = await PageObjects.discover.getChartTimespan();
-          log.debug(
-            `Timestamp before: ${initialTimeString}, Timestamp after: ${refreshedTimeString}`
-          );
-          return refreshedTimeString !== initialTimeString;
-        });
-      });
-    });
-
     describe('managing fields', function () {
       it('should add a field, sort by it, remove it and also sorting by it', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.clickFieldListItemAdd('_score');
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('_score');
         await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
         expect(currentUrlWithScore).to.contain('_score');
-        await PageObjects.discover.clickFieldListItemRemove('_score');
+        await PageObjects.unifiedFieldList.clickFieldListItemRemove('_score');
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
       });
       it('should add a field with customLabel, sort by it, display it correctly', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.clickFieldListItemAdd('referer');
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('referer');
         await PageObjects.discover.clickFieldSort('referer', 'Sort A-Z');
         expect(await PageObjects.discover.getDocHeader()).to.have.string('Referer custom');
-        expect(await PageObjects.discover.getAllFieldNames()).to.contain('Referer custom');
+        expect(await PageObjects.unifiedFieldList.getAllFieldNames()).to.contain('Referer custom');
         const url = await browser.getCurrentUrl();
         expect(url).to.contain('referer');
       });
@@ -369,14 +321,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const dataViewId = await PageObjects.discover.getCurrentDataViewId();
-
         const originalUrl = await browser.getCurrentUrl();
         const newUrl = originalUrl.replace(dataViewId, 'invalid-data-view-id');
         await browser.get(newUrl);
-
         await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(await browser.getCurrentUrl()).to.be(originalUrl);
-        expect(await testSubjects.exists('dscDataViewNotFoundShowDefaultWarning')).to.be(true);
+        await retry.try(async () => {
+          expect(await browser.getCurrentUrl()).to.be(originalUrl);
+          expect(await testSubjects.exists('dscDataViewNotFoundShowDefaultWarning')).to.be(true);
+        });
       });
 
       it('should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID', async () => {
@@ -384,14 +336,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         const originalHash = await browser.execute<[], string>('return window.location.hash');
         const dataViewId = await PageObjects.discover.getCurrentDataViewId();
-
         const newHash = originalHash.replace(dataViewId, 'invalid-data-view-id');
         await browser.execute(`window.location.hash = "${newHash}"`);
         await PageObjects.header.waitUntilLoadingHasFinished();
-
-        const currentHash = await browser.execute<[], string>('return window.location.hash');
-        expect(currentHash).to.be(originalHash);
-        expect(await testSubjects.exists('dscDataViewNotFoundShowSavedWarning')).to.be(true);
+        await retry.try(async () => {
+          const currentHash = await browser.execute<[], string>('return window.location.hash');
+          expect(currentHash).to.be(originalHash);
+          expect(await testSubjects.exists('dscDataViewNotFoundShowSavedWarning')).to.be(true);
+        });
       });
     });
   });

@@ -11,7 +11,7 @@ import { SavedObjectReference } from '@kbn/core/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
-import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
+import { getDatasourceLayers } from './utils';
 
 export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;
 export const selectQuery = (state: LensState) => state.lens.query;
@@ -28,8 +28,6 @@ export const selectVisualization = (state: LensState) => state.lens.visualizatio
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
 export const selectStagedActiveData = (state: LensState) =>
   state.lens.stagedPreview?.activeData || state.lens.activeData;
-export const selectStagedRequestWarnings = (state: LensState) =>
-  state.lens.stagedPreview?.requestWarnings || state.lens.requestWarnings;
 export const selectAutoApplyEnabled = (state: LensState) => !state.lens.autoApplyDisabled;
 export const selectChangesApplied = (state: LensState) =>
   !state.lens.autoApplyDisabled || Boolean(state.lens.changesApplied);
@@ -237,4 +235,9 @@ export const selectFramePublicAPI = createSelector(
       dataViews,
     };
   }
+);
+
+export const selectFrameDatasourceAPI = createSelector(
+  [selectFramePublicAPI, selectExecutionContext],
+  (framePublicAPI, context) => ({ ...context, ...framePublicAPI })
 );

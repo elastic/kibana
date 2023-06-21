@@ -40,7 +40,7 @@ export const useButtonStyles = () => {
         background: transparentize(euiVars.euiColorVis6, 0.12),
         textDecoration: 'none',
       },
-      '&.isExpanded > span svg': {
+      '&.isExpanded > span svg:not(.alertIcon)': {
         transform: `rotate(180deg)`,
       },
       '&.isExpanded': {
@@ -55,7 +55,6 @@ export const useButtonStyles = () => {
     const buttonArrow: CSSObject = {
       marginLeft: size.xs,
     };
-
     const alertButton: CSSObject = {
       ...button,
       color: euiVars.euiColorDanger,
@@ -70,6 +69,14 @@ export const useButtonStyles = () => {
         background: euiVars.euiColorDanger,
         '&:hover, &:focus': {
           background: `${euiVars.euiColorDanger}`,
+        },
+      },
+
+      '& .euiButton__text': {
+        display: 'flex',
+        alignItems: 'center',
+        ' .alertIcon': {
+          marginLeft: '4px',
         },
       },
     };

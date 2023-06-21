@@ -18,19 +18,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const docTable = getService('docTable');
   const queryBar = getService('queryBar');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    hideAnnouncements: true,
   };
   const testSubjects = getService('testSubjects');
 
-  // FLAKY Chrome 103+ https://github.com/elastic/kibana/issues/138652
-  describe.skip('discover doc table', function describeIndexTests() {
+  describe('discover doc table', function describeIndexTests() {
     const rowsHardLimit = 500;
 
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
 
       // and load a set of makelogs data
@@ -42,6 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover.json');
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
     });
 
@@ -140,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(skipButtonText === activeElementText).to.be(true);
       });
 
-      describe('expand a document row', function () {
+      describe('expand a document row', async function () {
         const rowToInspect = 1;
         beforeEach(async function () {
           // close the toggle if open
@@ -194,9 +202,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(defaultMessageElResubmit).to.be.ok();
           });
         });
+
         it('should show allow toggling columns from the expanded document', async function () {
           await PageObjects.discover.clickNewSearchButton();
-          await testSubjects.click('dscExplorerCalloutClose');
           await retry.try(async function () {
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
 
@@ -204,6 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const fields = ['_id', '_index', 'agent'];
             for (const field of fields) {
               await testSubjects.click(`toggleColumnButton-${field}`);
+              await testSubjects.click(`tableDocViewRow-${field}`); // to suppress the appeared tooltip
             }
 
             const headerWithFields = await docTable.getHeaderFields();
@@ -212,6 +221,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // remove columns
             for (const field of fields) {
               await testSubjects.click(`toggleColumnButton-${field}`);
+              await testSubjects.click(`tableDocViewRow-${field}`);
             }
 
             const headerWithoutFields = await docTable.getHeaderFields();
@@ -220,21 +230,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('add and remove columns', function () {
+      describe('add and remove columns', async function () {
         const extraColumns = ['phpmemory', 'ip'];
 
         afterEach(async function () {
           for (const column of extraColumns) {
-            await PageObjects.discover.clickFieldListItemRemove(column);
+            await PageObjects.unifiedFieldList.clickFieldListItemRemove(column);
             await PageObjects.header.waitUntilLoadingHasFinished();
           }
         });
 
         it('should add more columns to the table', async function () {
           for (const column of extraColumns) {
-            await PageObjects.discover.clearFieldSearchInput();
-            await PageObjects.discover.findFieldByName(column);
-            await PageObjects.discover.clickFieldListItemAdd(column);
+            await PageObjects.unifiedFieldList.clearFieldSearchInput();
+            await PageObjects.unifiedFieldList.findFieldByName(column);
+            await retry.waitFor('field to appear', async function () {
+              return await testSubjects.exists(`field-${column}`);
+            });
+            await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
             await PageObjects.header.waitUntilLoadingHasFinished();
             // test the header now
             const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
@@ -245,14 +258,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should remove columns from the table', async function () {
           for (const column of extraColumns) {
-            await PageObjects.discover.clearFieldSearchInput();
-            await PageObjects.discover.findFieldByName(column);
-            log.debug(`add a ${column} column`);
-            await PageObjects.discover.clickFieldListItemAdd(column);
+            await PageObjects.unifiedFieldList.clearFieldSearchInput();
+            await PageObjects.unifiedFieldList.findFieldByName(column);
+            await retry.waitFor('field to appear', async function () {
+              return await testSubjects.exists(`field-${column}`);
+            });
+            await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
             await PageObjects.header.waitUntilLoadingHasFinished();
           }
           // remove the second column
-          await PageObjects.discover.clickFieldListItemRemove(extraColumns[1]);
+          await PageObjects.unifiedFieldList.clickFieldListItemRemove(extraColumns[1]);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // test that the second column is no longer there
           const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
@@ -261,9 +276,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should make the document table scrollable', async function () {
-        await PageObjects.discover.clearFieldSearchInput();
+        await PageObjects.unifiedFieldList.clearFieldSearchInput();
         const dscTableWrapper = await find.byCssSelector('.kbnDocTableWrapper');
-        const fieldNames = await PageObjects.discover.getAllFieldNames();
+        const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
         const clientHeight = await dscTableWrapper.getAttribute('clientHeight');
         let fieldCounter = 0;
         const checkScrollable = async () => {
@@ -273,7 +288,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return Number(scrollWidth) > Number(clientWidth);
         };
         const addColumn = async () => {
-          await PageObjects.discover.clickFieldListItemAdd(fieldNames[fieldCounter++]);
+          await PageObjects.unifiedFieldList.clickFieldListItemAdd(fieldNames[fieldCounter++]);
         };
 
         await addColumn();

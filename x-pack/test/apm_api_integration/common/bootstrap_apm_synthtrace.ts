@@ -4,31 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
-import { esTestConfig } from '@kbn/test';
 import { APM_TEST_PASSWORD } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
+  createLogger,
+  LogLevel,
+} from '@kbn/apm-synthtrace';
+import url from 'url';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function bootstrapApmSynthtrace(
   context: InheritedFtrProviderContext,
-  kibanaServerUrl: string
+  kibanaClient: ApmSynthtraceKibanaClient
 ) {
   const es = context.getService('es');
-  const kibanaVersion = esTestConfig.getVersion();
 
-  const kibanaClient = new apm.ApmSynthtraceKibanaClient(createLogger(LogLevel.info));
-  await kibanaClient.installApmPackage(
-    kibanaServerUrl,
-    kibanaVersion,
-    'elastic',
-    APM_TEST_PASSWORD
-  );
+  const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
+  await kibanaClient.installApmPackage(kibanaVersion);
 
-  const esClient = new apm.ApmSynthtraceEsClient(es, createLogger(LogLevel.info), {
-    forceLegacyIndices: false,
+  const esClient = new ApmSynthtraceEsClient({
+    client: es,
+    logger: createLogger(LogLevel.info),
+    version: kibanaVersion,
     refreshAfterIndex: true,
   });
 
   return esClient;
+}
+
+export function getApmSynthtraceKibanaClient(kibanaServerUrl: string) {
+  const kibanaServerUrlWithAuth = url
+    .format({
+      ...url.parse(kibanaServerUrl),
+      auth: `elastic:${APM_TEST_PASSWORD}`,
+    })
+    .slice(0, -1);
+
+  const kibanaClient = new ApmSynthtraceKibanaClient({
+    target: kibanaServerUrlWithAuth,
+    logger: createLogger(LogLevel.debug),
+  });
+
+  return kibanaClient;
 }

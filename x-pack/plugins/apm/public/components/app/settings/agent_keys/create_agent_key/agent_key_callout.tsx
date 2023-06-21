@@ -44,6 +44,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
           )}
         </p>
         <EuiFieldText
+          data-test-subj="apmAgentKeyCallOutFieldText"
           readOnly
           value={token}
           aria-label={i18n.translate(

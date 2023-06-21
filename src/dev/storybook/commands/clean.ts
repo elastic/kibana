@@ -7,7 +7,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { join } from 'path';
 import del from 'del';
 

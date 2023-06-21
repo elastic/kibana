@@ -6,6 +6,12 @@
 
 Pushes a case to an external service.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `POST <kibana host>:<port>/api/cases/<case_id>/connector/<connector_id>/_push`
@@ -14,7 +20,7 @@ Pushes a case to an external service.
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Actions and Connectors* feature in the
+You must have `all` privileges for the *{connectors-feature}* feature in the
 *Management* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>. You must also have `all`
 privileges for the *Cases* feature in the *Management*, *{observability}*, or

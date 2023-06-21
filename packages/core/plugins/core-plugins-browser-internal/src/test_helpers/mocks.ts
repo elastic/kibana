@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 
 export const createPluginInitializerContextMock = (config: unknown = {}) => {
@@ -23,8 +24,10 @@ export const createPluginInitializerContextMock = (config: unknown = {}) => {
         buildNum: 100,
         buildSha: 'buildSha',
         dist: false,
+        buildDate: new Date('2023-05-15T23:12:09.000Z'),
       },
     },
+    logger: loggerMock.create(),
     config: {
       get: <T>() => config as T,
     },

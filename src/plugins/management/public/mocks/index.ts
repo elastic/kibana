@@ -42,7 +42,7 @@ const createSetupContract = (): ManagementSetup => ({
 });
 
 const createStartContract = (): ManagementStart => ({
-  sections: {},
+  setIsSidebarEnabled: jest.fn(),
 });
 
 export const managementPluginMock = {

@@ -34,7 +34,8 @@ import {
   useUrlParams,
   useBreadcrumbs,
 } from '../../../hooks';
-import { AgentPolicySummaryLine, SearchBar } from '../../../components';
+import { SearchBar } from '../../../components';
+import { AgentPolicySummaryLine } from '../../../../../components';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
 import { CreateAgentPolicyFlyout } from './components';
@@ -103,7 +104,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        width: '20%',
+        width: '25%',
         render: (name: string, agentPolicy: AgentPolicy) => (
           <AgentPolicySummaryLine policy={agentPolicy} />
         ),

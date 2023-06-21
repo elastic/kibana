@@ -1,0 +1,113 @@
+{
+  "id": "@kbn/ml-local-storage",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-local-storage",
+        "id": "def-common.StorageContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "StorageContextProvider",
+        "description": [
+          "\nProvider to manage context for the `useStorage` hook."
+        ],
+        "signature": [
+          "({\n  children,\n  storage,\n  storageKeys,\n}: React.PropsWithChildren<StorageContextProviderProps<K>>) => JSX.Element"
+        ],
+        "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-local-storage",
+            "id": "def-common.StorageContextProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  storage,\n  storageKeys,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<StorageContextProviderProps<K>>"
+            ],
+            "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-local-storage",
+        "id": "def-common.useStorage",
+        "type": "Function",
+        "tags": [],
+        "label": "useStorage",
+        "description": [
+          "\nHook for consuming a storage value"
+        ],
+        "signature": [
+          "(key: K, initValue: T | undefined) => [T | undefined extends undefined ? T | undefined : Exclude<T, undefined>, (value: T) => void]"
+        ],
+        "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-local-storage",
+            "id": "def-common.useStorage.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "K"
+            ],
+            "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-local-storage",
+            "id": "def-common.useStorage.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "initValue",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

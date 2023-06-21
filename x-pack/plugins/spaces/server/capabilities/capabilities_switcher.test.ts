@@ -173,7 +173,7 @@ describe('capabilitiesSwitcher', () => {
 
     const result = await switcher(request, capabilities, false);
 
-    expect(result).toEqual(buildCapabilities());
+    expect(result).toEqual({});
     expect(spacesService.getActiveSpace).not.toHaveBeenCalled();
   });
 
@@ -191,7 +191,7 @@ describe('capabilitiesSwitcher', () => {
 
     const result = await switcher(request, capabilities, true);
 
-    expect(result).toEqual(buildCapabilities());
+    expect(result).toEqual({});
     expect(spacesService.getActiveSpace).not.toHaveBeenCalled();
   });
 

@@ -7,19 +7,32 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { waitGroup } from './kibana_migrator_utils';
 import { next } from './next';
-import { State } from './state';
+import type { State } from './state';
 
 describe('migrations v2 next', () => {
   it.todo('when state.retryDelay > 0 delays execution of the next action');
   it('DONE returns null', () => {
     const state = { controlState: 'DONE' } as State;
-    const action = next({} as ElasticsearchClient, (() => {}) as any)(state);
+    const action = next(
+      {} as ElasticsearchClient,
+      (() => {}) as any,
+      waitGroup(),
+      waitGroup(),
+      waitGroup()
+    )(state);
     expect(action).toEqual(null);
   });
   it('FATAL returns null', () => {
     const state = { controlState: 'FATAL', reason: '' } as State;
-    const action = next({} as ElasticsearchClient, (() => {}) as any)(state);
+    const action = next(
+      {} as ElasticsearchClient,
+      (() => {}) as any,
+      waitGroup(),
+      waitGroup(),
+      waitGroup()
+    )(state);
     expect(action).toEqual(null);
   });
 });

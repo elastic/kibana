@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UiComponent } from '@kbn/kibana-utils-plugin/public';
-import { Presentable } from '../util/presentable';
-import { Trigger } from '../triggers';
+import type { Presentable } from '@kbn/ui-actions-browser';
+import type { Trigger } from '../triggers';
 
 /**
  * During action execution we can provide additional information,
@@ -69,12 +68,6 @@ export interface Action<Context extends object = object>
   getDisplayName(context: ActionExecutionContext<Context>): string;
 
   /**
-   * `UiComponent` to render when displaying this action as a context menu item.
-   * If not provided, `getDisplayName` will be used instead.
-   */
-  MenuItem?: UiComponent<ActionMenuItemProps<Context>>;
-
-  /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
@@ -104,6 +97,12 @@ export interface Action<Context extends object = object>
    *
    */
   disabled?: boolean;
+
+  /**
+   * Determines if notification should be shown in menu for that action
+   *
+   */
+  showNotification?: boolean;
 }
 
 /**
@@ -151,6 +150,12 @@ export interface ActionDefinition<Context extends object = object>
    *
    */
   disabled?: boolean;
+
+  /**
+   * Determines if notification should be shown in menu for that action
+   *
+   */
+  showNotification?: boolean;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

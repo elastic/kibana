@@ -5,13 +5,25 @@
  * 2.0.
  */
 
-import type { AgentPolicy, Settings } from '../../types';
+import type { AgentPolicy, FleetProxy } from '../../types';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
 
-export type K8sMode = 'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES';
+export type K8sMode =
+  | 'IS_LOADING'
+  | 'IS_KUBERNETES'
+  | 'IS_NOT_KUBERNETES'
+  | 'IS_KUBERNETES_MULTIPAGE';
+
+export type CloudSecurityIntegrationType = 'kspm' | 'vuln_mgmt' | 'cspm';
+
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;
+
+export interface CloudSecurityIntegration {
+  integrationType: CloudSecurityIntegrationType | undefined;
+  cloudformationUrl: string | undefined;
+}
 
 export interface BaseProps {
   /**
@@ -19,11 +31,11 @@ export interface BaseProps {
    */
   agentPolicy?: AgentPolicy;
 
-  settings?: Settings;
-
   isFleetServerPolicySelected?: boolean;
 
   isK8s?: K8sMode;
+
+  cloudSecurityIntegration?: CloudSecurityIntegration;
 
   /**
    * There is a step in the agent enrollment process that allows users to see the data from an integration represented in the UI
@@ -51,4 +63,7 @@ export interface InstructionProps extends BaseProps {
   setSelectionType: (type: SelectionType) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId: (key?: string) => void;
+  fleetServerHosts: string[];
+  fleetProxy?: FleetProxy;
+  cloudFormationTemplateUrl?: string;
 }

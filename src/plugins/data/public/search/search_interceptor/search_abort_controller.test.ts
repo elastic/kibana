@@ -10,7 +10,7 @@ import { SearchAbortController } from './search_abort_controller';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
-  return new Promise((resolve) => setImmediate(resolve));
+  return new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 };
 
 describe('search abort controller', () => {
@@ -75,7 +75,7 @@ describe('search abort controller', () => {
 
   describe('timeout abort', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
     });
 
     afterEach(() => {

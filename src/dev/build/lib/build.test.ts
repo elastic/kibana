@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Config } from './config';
@@ -24,19 +24,24 @@ const config = new Config(
     workspaces: {
       packages: [],
     },
-  },
+  } as any,
   '1.2.3',
   REPO_ROOT,
   {
     buildNumber: 1234,
     buildSha: 'abcd1234',
     buildVersion: '8.0.0',
+    buildDate: '2023-05-15T23:12:09+0000',
   },
   false,
   false,
+  null,
+  '',
   '',
   false,
-  true
+  true,
+  true,
+  {}
 );
 
 const linuxPlatform = config.getPlatform('linux', 'x64');

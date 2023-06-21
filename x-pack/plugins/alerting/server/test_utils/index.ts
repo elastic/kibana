@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RawAlertInstance } from '../../common';
+
 interface Resolvable<T> {
   resolve: (arg: T) => void;
 }
@@ -20,4 +22,26 @@ export function resolvable<T>(): Promise<T> & Resolvable<T> {
       return setTimeout(() => resolve(arg), 0);
     },
   });
+}
+
+// Used to convert a raw Rule's UUID to something that can be used
+// to compare with a jest snapshot.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function alertWithAnyUUID(rawAlert: Record<string, any>): Record<string, any> {
+  if (!rawAlert?.meta?.uuid) return rawAlert;
+
+  const newAlert = JSON.parse(JSON.stringify(rawAlert));
+  newAlert.meta.uuid = expect.any(String);
+  return newAlert;
+}
+
+export function alertsWithAnyUUID(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rawAlerts: Record<string, any>
+): Record<string, RawAlertInstance> {
+  const newAlerts: Record<string, RawAlertInstance> = {};
+  for (const id of Object.keys(rawAlerts)) {
+    newAlerts[id] = alertWithAnyUUID(rawAlerts[id]);
+  }
+  return newAlerts;
 }

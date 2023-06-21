@@ -183,6 +183,23 @@ describe('Properties validator', () => {
     expect(errors).toEqual([]);
   });
 
+  it(`should allow copy_to to be an array of strings`, () => {
+    const properties = {
+      text1: { type: 'text', copy_to: ['field1', 'field2'] },
+      field1: { type: 'text' },
+      field2: { type: 'text' },
+    };
+
+    const { value, errors } = validateProperties(properties as any);
+
+    expect(value).toEqual({
+      text1: { type: 'text', copy_to: ['field1', 'field2'] },
+      field1: { type: 'text' },
+      field2: { type: 'text' },
+    });
+    expect(errors).toEqual([]);
+  });
+
   it('should strip field whose type is not a string or is unknown', () => {
     const properties = {
       prop1: { type: 123 },
@@ -254,7 +271,7 @@ describe('Properties validator', () => {
         ignore_malformed: 0,
         null_value_numeric: 'abc',
         null_value_boolean: [],
-        copy_to: [],
+        copy_to: [1],
         max_input_length: true,
         locale: 1,
         orientation: [],
@@ -312,7 +329,7 @@ describe('Properties validator', () => {
         orientation: 'ccw',
         boost: 1.5,
         scaling_factor: 2.5,
-        dynamic: 'strict', // true | false | 'strict' are allowed
+        dynamic: 'strict', // true | false | 'strict' | 'true' | 'false' | 'runtime' are allowed
         enabled: true,
         format: 'strict_date_optional_time',
         analyzer: 'standard',
@@ -350,16 +367,39 @@ describe('Properties validator', () => {
         type: 'object',
         dynamic: false,
       },
+      goodField4: {
+        type: 'object',
+        dynamic: 'true',
+      },
+      goodField5: {
+        type: 'object',
+        dynamic: 'false',
+      },
+      goodField6: {
+        type: 'object',
+        dynamic: 'runtime',
+      },
     };
 
     const { value, errors } = validateProperties(properties as any);
 
-    expect(Object.keys(value)).toEqual(['wrongField', 'goodField', 'goodField2', 'goodField3']);
+    expect(Object.keys(value)).toEqual([
+      'wrongField',
+      'goodField',
+      'goodField2',
+      'goodField3',
+      'goodField4',
+      'goodField5',
+      'goodField6',
+    ]);
 
     expect(value.wrongField).toEqual({ type: 'text' }); // All parameters have been stripped out but the "type".
     expect(value.goodField).toEqual(properties.goodField); // All parameters are stil there.
     expect(value.goodField2).toEqual(properties.goodField2);
     expect(value.goodField3).toEqual(properties.goodField3);
+    expect(value.goodField4).toEqual(properties.goodField4);
+    expect(value.goodField5).toEqual(properties.goodField5);
+    expect(value.goodField6).toEqual(properties.goodField6);
 
     const allWrongParameters = Object.keys(properties.wrongField).filter((v) => v !== 'type');
     expect(errors).toEqual(

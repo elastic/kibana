@@ -11,15 +11,15 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const pageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
   describe('security', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.security.forceLogout();
-      await PageObjects.common.navigateToApp('home');
+      await pageObjects.security.forceLogout();
+      await pageObjects.common.navigateToApp('home');
     });
 
     after(async () => {
@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should not render the "Stack" section', async () => {
-        await PageObjects.common.navigateToApp('management');
+        await pageObjects.common.navigateToApp('management');
         const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
         expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
       });
@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should render the "Data" section with Transform', async () => {
-        await PageObjects.common.navigateToApp('management');
+        await pageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
         expect(sections).to.have.length(1);
         expect(sections[0]).to.eql({

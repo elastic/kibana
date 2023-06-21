@@ -46,6 +46,7 @@ export const ManageKeysPopover: React.FC = () => {
         size="s"
         items={[
           <EuiContextMenuItem
+            key="viewApiKeys"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKeys-viewApiKeys`}
             icon="eye"
             onClick={() =>
@@ -64,6 +65,7 @@ export const ManageKeysPopover: React.FC = () => {
             </EuiText>
           </EuiContextMenuItem>,
           <EuiContextMenuItem
+            key="createNewApiKey"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKeys-createNewApiKey`}
             icon="plusInCircle"
             onClick={openGenerateModal}

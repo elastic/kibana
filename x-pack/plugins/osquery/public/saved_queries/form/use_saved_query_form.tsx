@@ -46,8 +46,8 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   description: payload.description,
   query: payload.query,
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
-  snapshot: payload.snapshot,
-  removed: payload.removed,
+  snapshot: payload.snapshot ?? true,
+  removed: payload.removed ?? false,
   platform: payload.platform,
   version: payload.version ? [payload.version] : [],
   ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
@@ -77,7 +77,7 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
 
 export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
   const { data } = useSavedQueries({});
-  const ids: string[] = useMemo<string[]>(() => map(data?.data, 'attributes.id') ?? [], [data]);
+  const ids: string[] = useMemo<string[]>(() => map(data?.data, 'id') ?? [], [data]);
   const idSet = useMemo<Set<string>>(() => {
     const res = new Set<string>(ids);
     if (defaultValue && defaultValue.id) res.delete(defaultValue.id);
@@ -96,6 +96,7 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
             query: '',
             interval: 3600,
             ecs_mapping: {},
+            snapshot: true,
           },
     }),
   };

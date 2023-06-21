@@ -30,16 +30,20 @@ const args: Args = {
   integration: '',
   categories: ['foobar'],
   isUnverified: false,
+  isUpdateAvailable: false,
 };
 
 const argTypes = {
   release: {
     control: {
       type: 'radio',
-      options: ['ga', 'beta', 'experimental'],
+      options: ['ga', 'beta', 'preview', 'rc'],
     },
   },
   isUnverified: {
+    control: 'boolean',
+  },
+  isUpdateAvailable: {
     control: 'boolean',
   },
 };

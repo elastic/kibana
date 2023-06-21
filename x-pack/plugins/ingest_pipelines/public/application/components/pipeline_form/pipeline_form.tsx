@@ -36,6 +36,7 @@ const defaultFormValue: Pipeline = Object.freeze({
   description: '',
   processors: [],
   on_failure: [],
+  _meta: {},
 });
 
 export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
@@ -131,6 +132,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           onFailure={processorsState.onFailure}
           onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
+          hasMeta={Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)}
           isEditing={isEditing}
           canEditName={canEditName}
         />

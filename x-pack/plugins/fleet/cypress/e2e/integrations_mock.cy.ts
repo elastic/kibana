@@ -16,26 +16,26 @@ describe('Add Integration - Mock API', () => {
     const oldVersion = '0.3.3';
     const newVersion = '1.3.4';
     beforeEach(() => {
-      cy.intercept('/api/fleet/epm/packages?experimental=true', {
+      cy.intercept('/api/fleet/epm/packages?prerelease=true', {
         items: [
           {
             name: 'apache',
             id: 'apache',
             version: newVersion,
-            savedObject: { attributes: { version: oldVersion } },
+            installationInfo: { version: oldVersion },
             status: 'installed',
           },
         ],
       });
 
-      cy.intercept(`/api/fleet/epm/packages/apache/${oldVersion}`, {
+      cy.intercept(`/api/fleet/epm/packages/apache/${oldVersion}*`, {
         item: {
           name: 'apache',
           version: oldVersion,
           latestVersion: newVersion,
           status: 'installed',
           assets: [],
-          savedObject: { attributes: { version: oldVersion } },
+          installationInfo: { version: oldVersion },
         },
       });
       cy.intercept('/api/fleet/epm/packages/apache/stats', { response: { agent_policy_count: 1 } });
@@ -99,14 +99,14 @@ describe('Add Integration - Mock API', () => {
 
       cy.getBySel(INTEGRATION_POLICIES_UPGRADE_CHECKBOX).uncheck({ force: true });
 
-      cy.intercept(`/api/fleet/epm/packages/apache/${newVersion}`, {
+      cy.intercept(`/api/fleet/epm/packages/apache/${newVersion}*`, {
         item: {
           name: 'apache',
           version: newVersion,
           latestVersion: newVersion,
           status: 'installed',
           assets: [],
-          savedObject: { attributes: { version: newVersion } },
+          installationInfo: { version: newVersion },
         },
       }).as('updatePackage');
       cy.getBySel(UPDATE_PACKAGE_BTN).click();
@@ -123,7 +123,7 @@ describe('Add Integration - Mock API', () => {
           latestVersion: newVersion,
           status: 'installed',
           assets: [],
-          savedObject: { attributes: { version: newVersion } },
+          installationInfo: { version: newVersion },
         },
       });
       cy.intercept('/api/fleet/epm/packages/apache/stats', { response: { agent_policy_count: 1 } });

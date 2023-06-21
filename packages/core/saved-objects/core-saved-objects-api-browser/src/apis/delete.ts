@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-/** @public */
+/**
+ * Options for deleting a saved object.
+ *
+ * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
+ */
 export interface SavedObjectsDeleteOptions {
-  /** Force deletion of an object that exists in multiple namespaces */
+  /** Force deletion of an object that exists in multiple namespaces (default=false) */
   force?: boolean;
 }

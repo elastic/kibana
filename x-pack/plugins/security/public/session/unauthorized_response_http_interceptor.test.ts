@@ -11,6 +11,8 @@ import fetchMock from 'fetch-mock/es5/client';
 import { setup } from '@kbn/core-test-helpers-http-setup-browser';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 
+import { SESSION_ERROR_REASON_HEADER } from '../../common/constants';
+import { LogoutReason } from '../../common/types';
 import { SessionExpired } from './session_expired';
 import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';
 
@@ -37,29 +39,43 @@ afterEach(() => {
   fetchMock.restore();
 });
 
-it(`logs out 401 responses`, async () => {
-  const http = setupHttp('/foo');
-  const sessionExpired = new SessionExpired(application, `${http.basePath}/logout`, tenant);
-  const logoutPromise = new Promise<void>((resolve) => {
-    jest.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
+for (const reason of [
+  LogoutReason.AUTHENTICATION_ERROR,
+  LogoutReason.SESSION_EXPIRED,
+  LogoutReason.CONCURRENCY_LIMIT,
+]) {
+  const headers =
+    reason === LogoutReason.SESSION_EXPIRED || reason === LogoutReason.CONCURRENCY_LIMIT
+      ? { [SESSION_ERROR_REASON_HEADER]: reason }
+      : undefined;
+
+  it(`logs out 401 responses (reason: ${reason})`, async () => {
+    const http = setupHttp('/foo');
+    const sessionExpired = new SessionExpired(application, `${http.basePath}/logout`, tenant);
+    const logoutPromise = new Promise<void>((resolve) => {
+      jest.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
+    });
+    const interceptor = new UnauthorizedResponseHttpInterceptor(
+      sessionExpired,
+      http.anonymousPaths
+    );
+    http.intercept(interceptor);
+    fetchMock.mock('*', { status: 401, headers });
+
+    let fetchResolved = false;
+    let fetchRejected = false;
+    http.fetch('/foo-api').then(
+      () => (fetchResolved = true),
+      () => (fetchRejected = true)
+    );
+
+    await logoutPromise;
+    await drainPromiseQueue();
+    expect(fetchResolved).toBe(false);
+    expect(fetchRejected).toBe(false);
+    expect(sessionExpired.logout).toHaveBeenCalledWith(reason);
   });
-  const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);
-  http.intercept(interceptor);
-  fetchMock.mock('*', 401);
-
-  let fetchResolved = false;
-  let fetchRejected = false;
-  http.fetch('/foo-api').then(
-    () => (fetchResolved = true),
-    () => (fetchRejected = true)
-  );
-
-  await logoutPromise;
-  await drainPromiseQueue();
-  expect(fetchResolved).toBe(false);
-  expect(fetchRejected).toBe(false);
-  expect(sessionExpired.logout).toHaveBeenCalledWith('AUTHENTICATION_ERROR');
-});
+}
 
 it(`ignores anonymous paths`, async () => {
   mockCurrentUrl('/foo/bar');

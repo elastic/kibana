@@ -176,6 +176,7 @@ function testInitialState(): FormBasedPrivateState {
     currentIndexPatternId: '1',
     layers: {
       first: {
+        sampling: 1,
         indexPatternId: '1',
         columnOrder: ['col1'],
         columns: {
@@ -458,7 +459,7 @@ describe('IndexPattern Data Source suggestions', () => {
     });
 
     describe('with a previous empty layer', () => {
-      function stateWithEmptyLayer() {
+      function stateWithEmptyLayer(): FormBasedPrivateState {
         const state = testInitialState();
         return {
           ...state,
@@ -758,6 +759,35 @@ describe('IndexPattern Data Source suggestions', () => {
               layerId: 'id1',
             },
             keptLayerIds: [],
+          })
+        );
+      });
+
+      it('should inherit the sampling rate when generating new layer, if avaialble', () => {
+        const state = stateWithEmptyLayer();
+        state.layers.previousLayer.sampling = 0.001;
+        const suggestions = getDatasourceSuggestionsForField(
+          state,
+          '1',
+          {
+            name: 'bytes',
+            displayName: 'bytes',
+            type: 'number',
+            aggregatable: true,
+            searchable: true,
+          },
+          expectedIndexPatterns
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: expect.objectContaining({
+                  sampling: 0.001,
+                }),
+              },
+            }),
           })
         );
       });
@@ -1547,6 +1577,7 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         ],
         indexPatternId: '1',
+        ignoreGlobalFilters: false,
       },
     ] as Layer[];
     function stateWithoutLayer() {
@@ -2051,6 +2082,27 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
             layerId: 'test',
           },
+        })
+      );
+    });
+
+    it('should repserve the ignoreGlobalFilter flag if set', () => {
+      const updatedContext = [{ ...context[0], ignoreGlobalFilters: true }];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext,
+        expectedIndexPatterns
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              test: expect.objectContaining({
+                ignoreGlobalFilters: true,
+              }),
+            },
+          }),
         })
       );
     });

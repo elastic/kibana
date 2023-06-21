@@ -10,7 +10,7 @@ import { FlyoutFooter } from './footer';
 import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId } from '../../../../../../common/types/timeline';
-import type { Ecs } from '../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockAlertDetailsData } from '../../../../../common/components/event_details/__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import {

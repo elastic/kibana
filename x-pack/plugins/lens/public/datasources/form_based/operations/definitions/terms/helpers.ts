@@ -265,6 +265,10 @@ export function isScriptedField(
   return fieldName.scripted;
 }
 
+export function isRuntimeField(field: IndexPatternField): boolean {
+  return Boolean(field.runtime);
+}
+
 export function getFieldsByValidationState(
   newIndexPattern: IndexPattern,
   column?: GenericIndexPatternColumn,
@@ -298,6 +302,7 @@ export function getFieldsByValidationState(
       newField &&
       supportedTypes.has(newField.type) &&
       newField.aggregatable &&
+      newField.timeSeriesMetric !== 'counter' &&
       (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms) &&
       (canAcceptScripted || !isScriptedField(newField));
 

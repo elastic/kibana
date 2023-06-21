@@ -31,6 +31,7 @@ exports[`IntegrationLink component renders a disabled link when href is undefine
 exports[`IntegrationLink component renders without errors 1`] = `
 <EuiLink
   aria-label="foo"
+  data-test-subj="syntheticsIntegrationLinkLink"
   href="/app/foo?kuery=localhost"
 >
   <EuiFlexGroup

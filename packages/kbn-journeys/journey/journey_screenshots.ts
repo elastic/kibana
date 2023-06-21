@@ -10,7 +10,7 @@ import Path from 'path';
 import Fsp from 'fs/promises';
 
 import * as Rx from 'rxjs';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
 
 import type { AnyStep } from './journey';
@@ -92,7 +92,7 @@ export class JourneyScreenshots {
     await this.lock(async () => {
       const filename = FtrScreenshotFilename.create(`${step.index}-${step.name}-failure`);
       const fullscreenFilename = FtrScreenshotFilename.create(
-        `${step.index}-${step.name}-failure-fullscreen`
+        `${step.index}-${step.name.replace(/\s/g, '-')}-failure-fullscreen`
       );
       this.#manifest.steps.push({
         type: 'failure',
@@ -113,7 +113,7 @@ export class JourneyScreenshots {
     await this.lock(async () => {
       const filename = FtrScreenshotFilename.create(`${step.index}-${step.name}`);
       const fullscreenFilename = FtrScreenshotFilename.create(
-        `${step.index}-${step.name}-fullscreen`
+        `${step.index}-${step.name.replace(/\s/g, '-')}-fullscreen`
       );
       this.#manifest.steps.push({
         type: 'success',

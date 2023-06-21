@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
+import type { FilterSpecification, Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
@@ -21,6 +21,7 @@ import { DataRequestContext } from '../../../actions';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { IMvtVectorSource } from '../../sources/vector_source';
 import { getAggsMeta } from '../../util/tile_meta_feature_utils';
+import { Mask } from '../vector_layer/mask';
 
 export class HeatmapLayer extends AbstractLayer {
   private readonly _style: HeatmapStyle;
@@ -46,6 +47,11 @@ export class HeatmapLayer extends AbstractLayer {
     } else {
       this._style = new HeatmapStyle(layerDescriptor.style);
     }
+  }
+
+  _isTiled(): boolean {
+    // Uses tiled maplibre source 'vector'
+    return true;
   }
 
   getLayerIcon(isTocIcon: boolean) {
@@ -87,6 +93,7 @@ export class HeatmapLayer extends AbstractLayer {
 
   async syncData(syncContext: DataRequestContext) {
     await syncMvtSourceData({
+      buffer: 0,
       hasLabels: false,
       layerId: this.getId(),
       layerName: await this.getDisplayName(),
@@ -180,6 +187,19 @@ export class HeatmapLayer extends AbstractLayer {
 
     this.syncVisibilityWithMb(mbMap, heatmapLayerId);
     mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
+
+    // heatmap can implement mask with filter expression because
+    // feature-state support is not needed since heatmap layers do not support joins
+    const maskDescriptor = metricField.getMask();
+    if (maskDescriptor) {
+      const mask = new Mask({
+        esAggField: metricField,
+        isGeometrySourceMvt: true,
+        ...maskDescriptor,
+      });
+      mbMap.setFilter(heatmapLayerId, mask.getMatchUnmaskedExpression() as FilterSpecification);
+    }
+
     mbMap.setLayerZoomRange(heatmapLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 

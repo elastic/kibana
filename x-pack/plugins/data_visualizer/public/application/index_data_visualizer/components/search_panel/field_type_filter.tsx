@@ -8,20 +8,22 @@
 import React, { FC, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { getFieldTypeName } from '@kbn/unified-field-list-plugin/public';
+import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { FieldTypesHelpPopover } from '../../../common/components/field_types_filter/field_types_help_popover';
-import type { SupportedFieldType } from '../../../../../common/types';
 import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 import { MultiSelectPicker, Option } from '../../../common/components/multi_select_picker';
-import { jobTypeLabels } from '../../../common/util/field_types_utils';
 
 export const DataVisualizerFieldTypeFilter: FC<{
-  indexedFieldTypes: SupportedFieldType[];
+  indexedFieldTypes: string[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
 }> = ({ indexedFieldTypes, setVisibleFieldTypes, visibleFieldTypes }) => {
+  const euiTheme = useCurrentEuiTheme();
   const options: Option[] = useMemo(() => {
     return indexedFieldTypes.map((indexedFieldName) => {
-      const label = jobTypeLabels[indexedFieldName] ?? '';
+      const label = getFieldTypeName(indexedFieldName) ?? indexedFieldName;
 
       return {
         value: indexedFieldName,
@@ -55,6 +57,11 @@ export const DataVisualizerFieldTypeFilter: FC<{
         checkedOptions={visibleFieldTypes}
         dataTestSubj={'dataVisualizerFieldTypeSelect'}
         postfix={<FieldTypesHelpPopover fieldTypes={indexedFieldTypes} />}
+        cssStyles={{
+          filterGroup: css`
+            margin-left: ${euiTheme.euiSizeS};
+          `,
+        }}
       />
     </>
   );

@@ -13,13 +13,20 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import {
   registerBulkResolveRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { loggerMock } from '@kbn/logging-mocks';
+import { setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
+
+const testTypes = [
+  { name: 'index-pattern', hide: false },
+  { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
+];
 
 describe('POST /api/saved_objects/_bulk_resolve', () => {
   let server: SetupServerReturn['server'];
@@ -27,6 +34,7 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
+  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -35,12 +43,23 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
     savedObjectsClient.bulkResolve.mockResolvedValue({
       resolved_objects: [],
     });
+
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
+      return testTypes
+        .map((typeDesc) => createHiddenTypeVariants(typeDesc))
+        .find((fullTest) => fullTest.name === typename);
+    });
+
     const router =
       httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsBulkResolve.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerBulkResolveRoute(router, { coreUsageData });
+    const logger = loggerMock.create();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+
+    const config = setupConfig();
+    registerBulkResolveRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });
@@ -97,6 +116,34 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
       .expect(200);
 
     expect(savedObjectsClient.bulkResolve).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkResolve).toHaveBeenCalledWith(docs);
+    expect(savedObjectsClient.bulkResolve).toHaveBeenCalledWith(docs, {
+      migrationVersionCompatibility: 'compatible',
+    });
+  });
+
+  it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_resolve')
+      .send([
+        {
+          id: 'hiddenID',
+          type: 'hidden-from-http',
+        },
+      ])
+      .expect(400);
+    expect(result.body.message).toContain('Unsupported saved object type(s):');
+  });
+
+  it('logs a warning message when called', async () => {
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_resolve')
+      .send([
+        {
+          id: 'abc123',
+          type: 'index-pattern',
+        },
+      ])
+      .expect(200);
+    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
 });

@@ -12,7 +12,7 @@ import type { Query } from '@kbn/es-query';
 import { asyncMap } from '@kbn/std';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { DataRequest } from '../../util/data_request';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
@@ -25,7 +25,7 @@ import {
   StyleDescriptor,
   StyleMetaDescriptor,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../../sources/source';
+import { ISource, SourceEditorArgs } from '../../sources/source';
 import { type DataRequestContext } from '../../../actions';
 import { getLayersExtent } from '../../../actions/get_layers_extent';
 import { ILayer, LayerIcon } from '../layer';
@@ -36,6 +36,10 @@ export function isLayerGroup(layer: ILayer) {
   return layer instanceof LayerGroup;
 }
 
+export const DEFAULT_LAYER_GROUP_LABEL = i18n.translate('xpack.maps.layerGroup.defaultName', {
+  defaultMessage: 'Layer group',
+});
+
 export class LayerGroup implements ILayer {
   protected readonly _descriptor: LayerGroupDescriptor;
   private _children: ILayer[] = [];
@@ -44,19 +48,17 @@ export class LayerGroup implements ILayer {
     return {
       ...options,
       type: LAYER_TYPE.LAYER_GROUP,
-      id: typeof options.id === 'string' && options.id.length ? options.id : uuid(),
+      id: typeof options.id === 'string' && options.id.length ? options.id : uuidv4(),
       label:
         typeof options.label === 'string' && options.label.length
           ? options.label
-          : i18n.translate('xpack.maps.layerGroup.defaultName', {
-              defaultMessage: 'Layer group',
-            }),
+          : DEFAULT_LAYER_GROUP_LABEL,
       sourceDescriptor: null,
       visible: typeof options.visible === 'boolean' ? options.visible : true,
     };
   }
 
-  constructor({ layerDescriptor }: { layerDescriptor: LayerGroupDescriptor }) {
+  constructor({ layerDescriptor }: { layerDescriptor: Partial<LayerGroupDescriptor> }) {
     this._descriptor = LayerGroup.createDescriptor(layerDescriptor);
   }
 
@@ -84,7 +86,7 @@ export class LayerGroup implements ILayer {
 
   async cloneDescriptor(): Promise<LayerDescriptor[]> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
-    clonedDescriptor.id = uuid();
+    clonedDescriptor.id = uuidv4();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
 
@@ -207,20 +209,34 @@ export class LayerGroup implements ILayer {
     return zoom >= this.getMinZoom() && zoom <= this.getMaxZoom();
   }
 
+  /*
+   * Returns smallest min from children or MIN_ZOOM when there are no children
+   */
   getMinZoom(): number {
-    let min = MIN_ZOOM;
+    let min: number | undefined;
     this._children.forEach((child) => {
-      min = Math.max(min, child.getMinZoom());
+      if (min !== undefined) {
+        min = Math.min(min, child.getMinZoom());
+      } else {
+        min = child.getMinZoom();
+      }
     });
-    return min;
+    return min !== undefined ? min : MIN_ZOOM;
   }
 
+  /*
+   * Returns largest max from children or MAX_ZOOM when there are no children
+   */
   getMaxZoom(): number {
-    let max = MAX_ZOOM;
+    let max: number | undefined;
     this._children.forEach((child) => {
-      max = Math.min(max, child.getMaxZoom());
+      if (max !== undefined) {
+        max = Math.max(max, child.getMaxZoom());
+      } else {
+        max = child.getMaxZoom();
+      }
     });
-    return max;
+    return max !== undefined ? max : MAX_ZOOM;
   }
 
   getMinSourceZoom(): number {
@@ -247,10 +263,6 @@ export class LayerGroup implements ILayer {
     return null;
   }
 
-  async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
-    return [];
-  }
-
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
     return null;
   }
@@ -271,9 +283,9 @@ export class LayerGroup implements ILayer {
     return undefined;
   }
 
-  isLayerLoading(): boolean {
+  isLayerLoading(zoom: number): boolean {
     return this._children.some((child) => {
-      return child.isLayerLoading();
+      return child.isLayerLoading(zoom);
     });
   }
 
@@ -312,10 +324,6 @@ export class LayerGroup implements ILayer {
 
   getLayerTypeIconName(): string {
     return 'layers';
-  }
-
-  isInitialDataLoadComplete(): boolean {
-    return true;
   }
 
   async getBounds(

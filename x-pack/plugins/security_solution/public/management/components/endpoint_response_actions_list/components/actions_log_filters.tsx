@@ -10,6 +10,7 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
   type DateRangePickerValues,
@@ -29,10 +30,12 @@ export const ActionsLogFilters = memo(
     onChangeCommandsFilter,
     onChangeStatusesFilter,
     onChangeUsersFilter,
+    onChangeTypeFilter,
     onRefresh,
     onRefreshChange,
     onTimeChange,
     showHostsFilter,
+    'data-test-subj': dataTestSubj,
   }: {
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
@@ -41,13 +44,18 @@ export const ActionsLogFilters = memo(
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
     onChangeStatusesFilter: (selectedStatuses: string[]) => void;
     onChangeUsersFilter: (selectedUsers: string[]) => void;
+    onChangeTypeFilter: (selectedTypes: string[]) => void;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
     showHostsFilter: boolean;
+    'data-test-subj'?: string;
   }) => {
-    const getTestId = useTestIdGenerator('response-actions-list');
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const responseActionsEnabled = useIsExperimentalFeatureEnabled(
+      'endpointResponseActionsEnabled'
+    );
     const filters = useMemo(() => {
       return (
         <>
@@ -56,25 +64,39 @@ export const ActionsLogFilters = memo(
               filterName={'hosts'}
               isFlyout={isFlyout}
               onChangeFilterOptions={onChangeHostsFilter}
+              data-test-subj={dataTestSubj}
             />
           )}
           <ActionsLogFilter
             filterName={'actions'}
             isFlyout={isFlyout}
             onChangeFilterOptions={onChangeCommandsFilter}
+            data-test-subj={dataTestSubj}
           />
           <ActionsLogFilter
             filterName={'statuses'}
             isFlyout={isFlyout}
             onChangeFilterOptions={onChangeStatusesFilter}
+            data-test-subj={dataTestSubj}
           />
+          {responseActionsEnabled && (
+            <ActionsLogFilter
+              filterName={'type'}
+              isFlyout={isFlyout}
+              onChangeFilterOptions={onChangeTypeFilter}
+              data-test-subj={dataTestSubj}
+            />
+          )}
         </>
       );
     }, [
+      dataTestSubj,
       isFlyout,
       onChangeCommandsFilter,
       onChangeHostsFilter,
+      onChangeTypeFilter,
       onChangeStatusesFilter,
+      responseActionsEnabled,
       showHostsFilter,
     ]);
 
@@ -83,7 +105,11 @@ export const ActionsLogFilters = memo(
     return (
       <EuiFlexGroup responsive gutterSize="s">
         <EuiFlexItem grow={isFlyout ? 1 : 2}>
-          <ActionsLogUsersFilter isFlyout={isFlyout} onChangeUsersFilter={onChangeUsersFilter} />
+          <ActionsLogUsersFilter
+            isFlyout={isFlyout}
+            onChangeUsersFilter={onChangeUsersFilter}
+            data-test-subj={dataTestSubj}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={isFlyout ? 1 : 1}>
           <EuiFilterGroup>{filters}</EuiFilterGroup>
@@ -92,10 +118,10 @@ export const ActionsLogFilters = memo(
           <ActionLogDateRangePicker
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isDataLoading}
-            isFlyout={isFlyout}
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
             onTimeChange={onTimeChange}
+            data-test-subj={dataTestSubj}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

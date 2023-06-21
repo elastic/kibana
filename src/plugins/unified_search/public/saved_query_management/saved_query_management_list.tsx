@@ -123,7 +123,7 @@ export function SavedQueryManagementList({
 }: SavedQueryManagementListProps) {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
-  const [selectedSavedQuery, setSelectedSavedQuery] = useState(null as SavedQuery | null);
+  const [selectedSavedQuery, setSelectedSavedQuery] = useState(loadedSavedQuery);
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState(null as SavedQuery | null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
@@ -138,7 +138,7 @@ export function SavedQueryManagementList({
         requestGotCancelled = true;
       };
 
-      const { queries: savedQueryItems } = await savedQueryService.findSavedQueries();
+      const savedQueryItems = await savedQueryService.getAllSavedQueries();
 
       if (requestGotCancelled) return;
 
@@ -174,6 +174,7 @@ export function SavedQueryManagementList({
 
         if (loadedSavedQuery && loadedSavedQuery.id === savedQueryId) {
           onClearSavedQuery();
+          setSelectedSavedQuery(undefined);
         }
 
         await savedQueryService.deleteSavedQuery(savedQueryId);
@@ -215,11 +216,7 @@ export function SavedQueryManagementList({
         title: itemTitle(savedQuery.attributes, format),
         'data-test-subj': `load-saved-query-${savedQuery.attributes.title}-button`,
         value: savedQuery.id,
-        checked:
-          (loadedSavedQuery && savedQuery.id === loadedSavedQuery.id) ||
-          (selectedSavedQuery && savedQuery.id === selectedSavedQuery.id)
-            ? 'on'
-            : undefined,
+        checked: selectedSavedQuery && savedQuery.id === selectedSavedQuery.id ? 'on' : undefined,
         data: {
           attributes: savedQuery.attributes,
         },
@@ -279,7 +276,7 @@ export function SavedQueryManagementList({
                 placeholder: i18n.translate(
                   'unifiedSearch.query.queryBar.indexPattern.findFilterSet',
                   {
-                    defaultMessage: 'Find a saved query',
+                    defaultMessage: 'Find a query',
                   }
                 ),
               }}
@@ -312,22 +309,7 @@ export function SavedQueryManagementList({
         </>
       )}
       <EuiPopoverFooter paddingSize="s">
-        <EuiFlexGroup
-          gutterSize="s"
-          justifyContent={canEditSavedObjects ? 'spaceBetween' : 'flexEnd'}
-        >
-          {canEditSavedObjects && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={http.basePath.prepend(
-                  `/app/management/kibana/objects?initialQuery=type:("query")`
-                )}
-                size="s"
-              >
-                Manage
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
+        <EuiFlexGroup gutterSize="s" direction="column">
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
@@ -337,26 +319,33 @@ export function SavedQueryManagementList({
               aria-label={i18n.translate(
                 'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                 {
-                  defaultMessage: 'Apply saved query',
+                  defaultMessage: 'Load query',
                 }
               )}
               data-test-subj="saved-query-management-apply-changes-button"
             >
-              {hasFiltersOrQuery
-                ? i18n.translate(
-                    'unifiedSearch.search.searchBar.savedQueryPopoverReplaceFilterSetLabel',
-                    {
-                      defaultMessage: 'Replace with selected saved query',
-                    }
-                  )
-                : i18n.translate(
-                    'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
-                    {
-                      defaultMessage: 'Apply saved query',
-                    }
-                  )}
+              {i18n.translate(
+                'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                {
+                  defaultMessage: 'Load query',
+                }
+              )}
             </EuiButton>
           </EuiFlexItem>
+          {canEditSavedObjects && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={http.basePath.prepend(
+                  `/app/management/kibana/objects?initialQuery=type:("query")`
+                )}
+                size="s"
+              >
+                {i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverManageLabel', {
+                  defaultMessage: 'Manage saved objects',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPopoverFooter>
       {showDeletionConfirmationModal && toBeDeletedSavedQuery && (

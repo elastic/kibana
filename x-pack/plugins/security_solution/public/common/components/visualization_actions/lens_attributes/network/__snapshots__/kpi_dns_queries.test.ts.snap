@@ -87,16 +87,28 @@ Object {
         "meta": Object {
           "alias": null,
           "disabled": false,
-          "key": "host.id",
+          "key": "source.ip",
           "negate": false,
           "params": Object {
-            "query": "123",
+            "query": "192.168.1.1",
           },
           "type": "phrase",
         },
         "query": Object {
-          "match_phrase": Object {
-            "host.id": "123",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "source.ip": "192.168.1.1",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "destination.ip": "192.168.1.1",
+                },
+              },
+            ],
           },
         },
       },
@@ -151,6 +163,23 @@ Object {
           },
         },
       },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
     ],
     "query": Object {
       "language": "kql",
@@ -158,6 +187,7 @@ Object {
     },
     "visualization": Object {
       "accessor": "0374e520-eae0-4ac1-bcfe-37565e7fc9e3",
+      "autoScaleMetricAlignment": "left",
       "colorMode": "None",
       "layerId": "cea37c70-8f91-43bf-b9fe-72d8c049f6a3",
       "layerType": "data",

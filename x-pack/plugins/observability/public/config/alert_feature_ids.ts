@@ -13,4 +13,6 @@ export const observabilityAlertFeatureIds: ValidFeatureId[] = [
   AlertConsumers.INFRASTRUCTURE,
   AlertConsumers.LOGS,
   AlertConsumers.UPTIME,
+  AlertConsumers.SLO,
+  AlertConsumers.OBSERVABILITY,
 ];

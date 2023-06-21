@@ -15,8 +15,7 @@ import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
-import { ObservabilityAppServices } from '../../../application/types';
-import { TopAlert } from '../../alerts';
+import type { TopAlert } from '../../../typings/alerts';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -26,10 +25,10 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
   const {
     http,
     cases: {
-      hooks: { getUseCasesAddToExistingCaseModal },
+      hooks: { useCasesAddToExistingCaseModal },
     },
-    triggersActionsUi: { getEditAlertFlyout, getRuleSnoozeModal },
-  } = useKibana<ObservabilityAppServices>().services;
+    triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
+  } = useKibana().services;
 
   const { rule, reloadRule } = useFetchRule({
     http,
@@ -40,7 +39,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
   const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
-  const selectCaseModal = getUseCasesAddToExistingCaseModal();
+  const selectCaseModal = useCasesAddToExistingCaseModal();
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);
@@ -62,7 +61,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
 
   const handleAddToCase = () => {
     setIsPopoverOpen(false);
-    selectCaseModal.open({ attachments });
+    selectCaseModal.open({ getAttachments: () => attachments });
   };
 
   const handleViewRuleDetails = () => {
@@ -94,7 +93,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           </EuiButton>
         }
       >
-        <EuiFlexGroup direction="column" alignItems="flexStart">
+        <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
           <EuiButtonEmpty
             size="s"
             color="text"
@@ -137,24 +136,24 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
         </EuiFlexGroup>
       </EuiPopover>
 
-      {rule && ruleConditionsFlyoutOpen
-        ? getEditAlertFlyout({
-            initialRule: rule,
-            onClose: () => {
-              setRuleConditionsFlyoutOpen(false);
-            },
-            onSave: reloadRule,
-          })
-        : null}
+      {rule && ruleConditionsFlyoutOpen ? (
+        <EditRuleFlyout
+          initialRule={rule}
+          onClose={() => {
+            setRuleConditionsFlyoutOpen(false);
+          }}
+          onSave={reloadRule}
+        />
+      ) : null}
 
-      {rule && snoozeModalOpen
-        ? getRuleSnoozeModal({
-            rule,
-            onClose: () => setSnoozeModalOpen(false),
-            onRuleChanged: reloadRule,
-            onLoading: noop,
-          })
-        : null}
+      {rule && snoozeModalOpen ? (
+        <RuleSnoozeModal
+          rule={rule}
+          onClose={() => setSnoozeModalOpen(false)}
+          onRuleChanged={reloadRule}
+          onLoading={noop}
+        />
+      ) : null}
     </>
   );
 }

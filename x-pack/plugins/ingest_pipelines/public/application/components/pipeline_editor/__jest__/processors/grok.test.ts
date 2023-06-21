@@ -17,7 +17,7 @@ describe('Processor: Grok', () => {
   const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     // disable all react-beautiful-dnd development warnings
     (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
   });

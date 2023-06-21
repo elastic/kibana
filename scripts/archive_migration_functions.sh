@@ -1,13 +1,29 @@
+#!/bin/bash
+
+# ??? Should we migrate
+#     x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space
+# ### Yes, it needs migration
+#   ### Saved Object type(s) that we care about:
+#     index-pattern
+#   ### Test file(s) that use it:
+#     x-pack/test/api_integration/apis/security_solution/timeline_migrations.ts
+#   ### Config(s) that govern the test file(s):
+#     x-pack/test/api_integration/config.ts
+# The other types it contains:
+# config
+# index-pattern
+# siem-ui-timeline
+# siem-ui-timeline-note
+# siem-ui-timeline-pinned-event
+# space
+
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
-orig_archive="x-pack/test/functional/es_archives/banners/multispace"
-new_archive="x-pack/test/functional/fixtures/kbn_archiver/banners/multi_space"
+orig_archive="test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects"
+new_archive="x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects"
+testFiles=("test/plugin_functional/test_suites/saved_objects_management/scroll_count.ts")
 
-# newArchives=("x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space")
-
-# testFiles=("x-pack/test/functional/apps/discover/preserve_url.ts")
-
-test_config="x-pack/test/banners_functional/config.ts"
+test_config="test/plugin_functional/config.ts"
 
 list_stragglers() {
 
@@ -370,11 +386,25 @@ load_kbn() {
   local space=${1:-default}
   local archive=${2:-${new_archive}}
 
+  set -x
+  node scripts/kbn_archiver.js --config "$test_config" load "$archive" --space "$space"
+  set +x
+}
+
+load_kbn_list() {
+  local space=${1:-default}
+  local archive=${2:-${new_archive}}
+  local newArchives=("${:-${archive}}")
+
   for x in "${newArchives[@]}"; do
-    set -x
-    node scripts/kbn_archiver.js --config "$test_config" load "$x" --space "$space"
-    set +x
+    load_kbn default "${x}"
   done
+}
+
+print_so_types() {
+  set -x
+  node scripts/saved_objs_info.js --esUrl http://elastic:changeme@localhost:9220
+  set +x
 }
 
 load_created_kbn_archive() {

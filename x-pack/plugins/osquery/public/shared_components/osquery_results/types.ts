@@ -5,8 +5,18 @@
  * 2.0.
  */
 
+import type { Ecs } from '@kbn/cases-plugin/common';
+import type { ActionEdges } from '../../../common/search_strategy';
+
 export interface OsqueryActionResultsProps {
-  agentIds?: string[];
-  ruleName?: string[];
-  alertId: string;
+  ruleName?: string;
+  ecsData?: Ecs | null;
+  actionItems?: ActionEdges;
+}
+
+export interface OsqueryActionResultProps {
+  ruleName?: string;
+  ecsData?: Ecs | null;
+  actionId: string;
+  startDate: string;
 }

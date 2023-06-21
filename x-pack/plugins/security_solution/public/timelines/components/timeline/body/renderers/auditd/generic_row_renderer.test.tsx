@@ -10,8 +10,8 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import type { RowRenderer } from '../../../../../../../common/types';
-import { TimelineId } from '../../../../../../../common/types';
-import type { Ecs } from '../../../../../../../common/ecs';
+import { TimelineId } from '../../../../../../../common/types/timeline';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import {

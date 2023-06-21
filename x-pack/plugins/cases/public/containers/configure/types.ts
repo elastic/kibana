@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticUser } from '../types';
+import type { CaseUser } from '../types';
 import type {
   ActionConnector,
   ActionTypeConnector,
   ActionType,
   CaseConnector,
   CaseField,
-  CasesConfigure,
   ClosureType,
   ThirdPartyField,
+  ConfigurationAttributes,
 } from '../../../common/api';
 
 export type {
@@ -36,13 +36,13 @@ export interface CaseConnectorMapping {
 export interface CaseConfigure {
   id: string;
   closureType: ClosureType;
-  connector: CasesConfigure['connector'];
+  connector: ConfigurationAttributes['connector'];
   createdAt: string;
-  createdBy: ElasticUser;
+  createdBy: CaseUser;
   error: string | null;
   mappings: CaseConnectorMapping[];
   updatedAt: string;
-  updatedBy: ElasticUser;
+  updatedBy: CaseUser;
   version: string;
   owner: string;
 }

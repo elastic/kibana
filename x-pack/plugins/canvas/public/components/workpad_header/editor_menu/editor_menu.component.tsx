@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
+import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 
 const strings = {
   getEditorMenuButtonLabel: () =>
@@ -33,7 +33,6 @@ interface FactoryGroup {
 
 interface Props {
   factories: EmbeddableFactoryDefinition[];
-  isDarkThemeEnabled?: boolean;
   promotedVisTypes: BaseVisType[];
   visTypeAliases: VisTypeAlias[];
   createNewVisType: (visType?: BaseVisType | VisTypeAlias) => () => void;
@@ -42,7 +41,6 @@ interface Props {
 
 export const EditorMenu: FC<Props> = ({
   factories,
-  isDarkThemeEnabled,
   promotedVisTypes,
   visTypeAliases,
   createNewVisType,
@@ -145,11 +143,9 @@ export const EditorMenu: FC<Props> = ({
   ];
 
   return (
-    <SolutionToolbarPopover
+    <ToolbarPopover
       ownFocus
       label={strings.getEditorMenuButtonLabel()}
-      iconType="arrowDown"
-      iconSide="right"
       panelPaddingSize="none"
       data-test-subj="canvasEditorMenuButton"
     >
@@ -157,14 +153,9 @@ export const EditorMenu: FC<Props> = ({
         <EuiContextMenu
           initialPanelId={0}
           panels={editorMenuPanels}
-          className={`canvasSolutionToolbar__editorContextMenu ${
-            isDarkThemeEnabled
-              ? 'canvasSolutionToolbar__editorContextMenu--dark'
-              : 'canvasSolutionToolbar__editorContextMenu--light'
-          }`}
           data-test-subj="canvasEditorContextMenu"
         />
       )}
-    </SolutionToolbarPopover>
+    </ToolbarPopover>
   );
 };

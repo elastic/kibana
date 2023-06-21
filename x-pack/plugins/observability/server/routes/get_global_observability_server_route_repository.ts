@@ -4,20 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ObservabilityConfig } from '..';
-import { rulesRouteRepository } from './rules/route';
-import { slosRouteRepository } from './slo/route';
 
-export function getGlobalObservabilityServerRouteRepository(config: ObservabilityConfig) {
-  const isSloFeatureEnabled = config.unsafe.slo.enabled;
+import { ObservabilityConfig } from '..';
+import { compositeSloRouteRepository } from './composite_slo/route';
+import { observabilityCoPilotRouteRepository } from './copilot/route';
+import { rulesRouteRepository } from './rules/route';
+import { sloRouteRepository } from './slo/route';
+
+export function getObservabilityServerRouteRepository(config: ObservabilityConfig) {
+  const isCompositeSloFeatureEnabled = config.compositeSlo.enabled;
 
   const repository = {
     ...rulesRouteRepository,
-    ...(isSloFeatureEnabled ? slosRouteRepository : {}),
+    ...sloRouteRepository,
+    ...(isCompositeSloFeatureEnabled ? compositeSloRouteRepository : {}),
+    ...observabilityCoPilotRouteRepository,
   };
   return repository;
 }
 
 export type ObservabilityServerRouteRepository = ReturnType<
-  typeof getGlobalObservabilityServerRouteRepository
+  typeof getObservabilityServerRouteRepository
 >;

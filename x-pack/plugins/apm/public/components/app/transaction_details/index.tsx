@@ -11,22 +11,21 @@ import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { TransactionDetailsTabs } from './transaction_details_tabs';
-import {
-  isMobileAgentName,
-  isServerlessAgent,
-} from '../../../../common/agent_name';
-import { MobileTransactionCharts } from '../../shared/charts/transaction_charts/mobile_transaction_charts';
+import { isServerlessAgent } from '../../../../common/agent_name';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { SloCallout } from '../../shared/slo_callout';
 
 export function TransactionDetails() {
-  const { path, query } = useApmParams(
-    '/services/{serviceName}/transactions/view'
+  const { path, query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
   );
   const {
     transactionName,
@@ -35,11 +34,16 @@ export function TransactionDetails() {
     transactionType: transactionTypeFromUrl,
     comparisonEnabled,
     offset,
+    environment,
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
-  const { transactionType, fallbackToTransactions, runtimeName, agentName } =
-    useApmServiceContext();
+  const {
+    transactionType,
+    fallbackToTransactions,
+    serverlessType,
+    serviceName,
+  } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -59,11 +63,25 @@ export function TransactionDetails() {
     [apmRouter, path, query, transactionName]
   );
 
-  const isServerless = isServerlessAgent(runtimeName);
-  const isMobileAgent = isMobileAgentName(agentName);
+  const isServerless = isServerlessAgent(serverlessType);
+  const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
+    'apm.sloCalloutDismissed',
+    false
+  );
 
   return (
     <>
+      {!sloCalloutDismissed && (
+        <SloCallout
+          dismissCallout={() => {
+            setSloCalloutDismissed(true);
+          }}
+          serviceName={serviceName}
+          environment={environment}
+          transactionType={transactionType}
+          transactionName={transactionName}
+        />
+      )}
       {fallbackToTransactions && <AggregatedTransactionsBadge />}
       <EuiSpacer size="s" />
 
@@ -74,25 +92,17 @@ export function TransactionDetails() {
       <EuiSpacer size="m" />
 
       <ChartPointerEventContextProvider>
-        {isMobileAgent ? (
-          <MobileTransactionCharts
-            kuery={query.kuery}
-            environment={query.environment}
-            start={start}
-            end={end}
-          />
-        ) : (
-          <TransactionCharts
-            kuery={query.kuery}
-            environment={query.environment}
-            start={start}
-            end={end}
-            transactionName={transactionName}
-            isServerlessContext={isServerless}
-            comparisonEnabled={comparisonEnabled}
-            offset={offset}
-          />
-        )}
+        <TransactionCharts
+          serviceName={serviceName}
+          kuery={query.kuery}
+          environment={query.environment}
+          start={start}
+          end={end}
+          transactionName={transactionName}
+          isServerlessContext={isServerless}
+          comparisonEnabled={comparisonEnabled}
+          offset={offset}
+        />
       </ChartPointerEventContextProvider>
 
       <EuiSpacer size="m" />

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { useQueryClient } from '@tanstack/react-query';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';
@@ -18,26 +20,39 @@ const OsqueryActionWrapper = styled.div`
 
 export interface OsqueryFlyoutProps {
   agentId?: string;
-  defaultValues?: {};
+  defaultValues?: {
+    alertIds?: string[];
+    query?: string;
+    ecs_mapping?: { [key: string]: {} };
+    queryField?: boolean;
+  };
   onClose: () => void;
+  ecsData?: Ecs;
 }
-export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
+
+// Make sure we keep this and ACTIONS_QUERY_KEY in use_all_live_queries.ts in sync.
+const ACTIONS_QUERY_KEY = 'actions';
+
+const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
   agentId,
   defaultValues,
   onClose,
+  ecsData,
 }) => {
   const {
     services: { osquery },
   } = useKibana();
+  const queryClient = useQueryClient();
+
+  const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: [ACTIONS_QUERY_KEY, { alertId: defaultValues?.alertIds?.[0] }],
+    });
+  }, [defaultValues?.alertIds, queryClient]);
 
   if (osquery?.OsqueryAction) {
     return (
-      <EuiFlyout
-        ownFocus
-        maskProps={{ style: 'z-index: 5000' }} // For an edge case to display above the timeline flyout
-        size="m"
-        onClose={onClose}
-      >
+      <EuiFlyout size="m" onClose={onClose}>
         <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
           <EuiTitle>
             <h2>{ACTION_OSQUERY}</h2>
@@ -49,6 +64,8 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
               agentId={agentId}
               formType="steps"
               defaultValues={defaultValues}
+              ecsData={ecsData}
+              onSuccess={invalidateQueries}
             />
           </OsqueryActionWrapper>
         </EuiFlyoutBody>

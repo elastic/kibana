@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/tooling-log",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-errors",
+    "@kbn/ts-projects",
+    "@kbn/dev-cli-runner",
+    "@kbn/std",
+    "@kbn/some-dev-log",
+  ]
+}

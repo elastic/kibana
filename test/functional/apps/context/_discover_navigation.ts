@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'context',
     'header',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -43,11 +44,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemAdd(columnName);
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd(columnName);
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await filterBar.addFilter(columnName, 'is', value);
+        await filterBar.addFilter({ field: columnName, operation: 'is', value });
+        await PageObjects.header.waitUntilLoadingHasFinished();
       }
     });
 
@@ -82,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('next anchor timestamp matches previous anchor timestamp', async () => {
         // get the timestamp of the first row
         const firstContextTimestamp = await getTimestamp(false);
-        await dataGrid.clickRowToggle({ isAnchorRow: true });
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
 
         const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
         await rowActions[1].click();
@@ -143,10 +145,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
       await rowActions[0].click();
       await PageObjects.common.sleep(250);
-      // accept alert if it pops up
+
+      // close popup
       const alert = await browser.getAlert();
       await alert?.accept();
-      expect(await browser.getCurrentUrl()).to.contain('#/doc');
+      if (await testSubjects.exists('confirmModalConfirmButton')) {
+        await testSubjects.click('confirmModalConfirmButton');
+      }
+
+      await retry.waitFor('navigate to doc view', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        return currentUrl.includes('#/doc');
+      });
       await retry.waitFor('doc view being rendered', async () => {
         return await PageObjects.discover.isShowingDocViewer();
       });

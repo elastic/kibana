@@ -10,7 +10,6 @@ import { find } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-// @ts-ignore
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
@@ -97,7 +96,7 @@ export const ElasticsearchCcrPage: React.FC<ComponentProps> = ({ clusters }) => 
         render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
-            <Ccr data={data.data} alerts={alerts} />
+            <Ccr data={data} alerts={alerts} />
             {bottomBarComponent}
           </SetupModeContext.Provider>
         )}

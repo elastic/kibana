@@ -1,0 +1,8 @@
+.unifiedFieldList__fieldsAccordion__titleTooltip {
+  margin-right: $euiSizeXS;
+}
+
+.unifiedFieldList__fieldsAccordion__fieldItems {
+  // Quick fix for making sure the shadow and focus rings are visible outside the accordion bounds
+  padding: $euiSizeXS;
+}

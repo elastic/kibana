@@ -153,7 +153,7 @@ export function getColorPalette(colorPaletteId: string): string[] {
   const colorPalette = COLOR_PALETTES.find(({ value }: COLOR_PALETTE) => {
     return value === colorPaletteId;
   });
-  return colorPalette ? (colorPalette.palette as string[]) : [];
+  return colorPalette ? [...(colorPalette.palette as string[])] : [];
 }
 
 export function getColorRampCenterColor(colorPaletteId: string): string | null {
@@ -169,7 +169,8 @@ export function getColorRampCenterColor(colorPaletteId: string): string | null {
 export function getOrdinalMbColorRampStops(
   colorPaletteId: string | null,
   min: number,
-  max: number
+  max: number,
+  invert: boolean
 ): Array<number | string> | null {
   if (!colorPaletteId) {
     return null;
@@ -180,6 +181,10 @@ export function getOrdinalMbColorRampStops(
   }
 
   const palette = getColorPalette(colorPaletteId);
+  if (invert) {
+    palette.reverse();
+  }
+
   if (palette.length === 0) {
     return null;
   }
@@ -193,7 +198,8 @@ export function getOrdinalMbColorRampStops(
   return palette.reduce(
     (accu: Array<number | string>, stopColor: string, idx: number, srcArr: string[]) => {
       const stopNumber = min + (delta * idx) / srcArr.length;
-      return [...accu, stopNumber, stopColor];
+      accu.push(stopNumber, stopColor);
+      return accu;
     },
     []
   );
@@ -203,7 +209,8 @@ export function getOrdinalMbColorRampStops(
 // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
 export function getPercentilesMbColorRampStops(
   colorPaletteId: string | null,
-  percentiles: PercentilesFieldMeta
+  percentiles: PercentilesFieldMeta,
+  invert: boolean
 ): Array<number | string> | null {
   if (!colorPaletteId) {
     return null;
@@ -213,13 +220,18 @@ export function getPercentilesMbColorRampStops(
     return value === colorPaletteId;
   });
 
-  return paletteObject
-    ? paletteObject
-        .getPalette(percentiles.length)
-        .reduce((accu: Array<number | string>, stopColor: string, idx: number) => {
-          return [...accu, percentiles[idx].value, stopColor];
-        }, [])
-    : null;
+  if (!paletteObject) {
+    return null;
+  }
+
+  const palette = paletteObject.getPalette(percentiles.length);
+  if (invert) {
+    palette.reverse();
+  }
+  return palette.reduce((accu: Array<number | string>, stopColor: string, idx: number) => {
+    accu.push(percentiles[idx].value, stopColor);
+    return accu;
+  }, []);
 }
 
 export function getLinearGradient(colorStrings: string[]): string {

@@ -35,7 +35,11 @@ export default function spaceSelectorFunctionalTests({
       }
     });
 
-    this.tags('includeFirefox');
+    // FLAKY: https://github.com/elastic/kibana/issues/157760 (amongst others)
+    // Skipping only Firefox, as the flaky failures are caused by slow CI execution with new version of Firefox
+    // See also https://github.com/elastic/kibana/pull/158545
+    // Can un-comment line below when issue is resolved
+    // this.tags('includeFirefox');
     describe('Login Space Selector', () => {
       before(async () => {
         await PageObjects.security.forceLogout();
@@ -94,7 +98,7 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    describe('Search spaces in popover', () => {
+    describe('Search spaces in popover', function () {
       const spaceId = 'default';
       before(async () => {
         await PageObjects.security.forceLogout();
@@ -126,7 +130,7 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    describe('Spaces Data', () => {
+    describe('Spaces Data', function () {
       const spaceId = 'another-space';
       const sampleDataHash = '/tutorial_directory/sampleData';
 

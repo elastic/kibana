@@ -462,6 +462,14 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Opens a blank new tab.
+   * @return {Promise<string>}
+   */
+  public async openNewTab() {
+    await this.driver.switchTo().newWindow('tab');
+  }
+
+  /**
    * Sets a value in local storage for the focused window/frame.
    *
    * @param {string} key
@@ -502,6 +510,16 @@ class BrowserService extends FtrService {
    */
   public async clearSessionStorage(): Promise<void> {
     await this.driver.executeScript('return window.sessionStorage.clear();');
+  }
+
+  /**
+   * Get from the "local storage" by key
+   *
+   * @param {string} key
+   * @return {Promise<string>}
+   */
+  public async getLocalStorageItem(key: string): Promise<string | null> {
+    return await this.driver.executeScript<string>(`return window.localStorage.getItem("${key}");`);
   }
 
   /**
@@ -552,7 +570,14 @@ class BrowserService extends FtrService {
     a2: A2,
     a3: A3
   ): Promise<T>;
-  public async executeAsync<T = unknown>(fn: (...args: any[]) => void, ...args: any[]): Promise<T> {
+  public async executeAsync<T = unknown, A1 = unknown, A2 = unknown, A3 = unknown>(
+    fn: string,
+    ...args: any[]
+  ): Promise<T>;
+  public async executeAsync<T = unknown>(
+    fn: string | ((...args: any[]) => void),
+    ...args: any[]
+  ): Promise<T> {
     return await this.driver.executeAsyncScript<T>(
       fn,
       ...cloneDeepWith<any>(args, (arg) => {

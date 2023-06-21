@@ -6,7 +6,7 @@
  */
 
 import { getCriteriaFromNetworkType } from './get_criteria_from_network_type';
-import { NetworkType } from '../../../../network/store/model';
+import { NetworkType } from '../../../../explore/network/store/model';
 import { FlowTarget } from '../../../../../common/search_strategy';
 
 describe('get_criteria_from_network_type', () => {

@@ -7,7 +7,12 @@
  */
 
 export { JourneyConfig } from './journey/journey_config';
-export type { ScalabilityAction, ScalabilitySetup } from './journey/journey_config';
+export { JOURNEY_APM_CONFIG } from './journey/journey_apm_config';
+export type {
+  ScalabilityAction,
+  ScalabilitySetup,
+  ResponseTimeMetric,
+} from './journey/journey_config';
 
 export { Journey } from './journey/journey';
 export type { Step } from './journey/journey';

@@ -8,6 +8,7 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
 import type { FilterOptions, PaginationOptions, Rule, SortingOptions } from '../../logic';
 import { fetchRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
@@ -18,7 +19,7 @@ export interface FindRulesQueryArgs {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
 }
 
-const FIND_RULES_QUERY_KEY = 'findRules';
+const FIND_RULES_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL_FIND];
 
 export interface RulesQueryResponse {
   rules: Rule[];
@@ -37,7 +38,7 @@ export interface RulesQueryResponse {
  */
 export const useFindRulesQuery = (
   queryArgs: FindRulesQueryArgs,
-  queryOptions: UseQueryOptions<
+  queryOptions?: UseQueryOptions<
     RulesQueryResponse,
     Error,
     RulesQueryResponse,
@@ -45,7 +46,7 @@ export const useFindRulesQuery = (
   >
 ) => {
   return useQuery(
-    [FIND_RULES_QUERY_KEY, queryArgs],
+    [...FIND_RULES_QUERY_KEY, queryArgs],
     async ({ signal }) => {
       const response = await fetchRules({ signal, ...queryArgs });
 
@@ -53,6 +54,9 @@ export const useFindRulesQuery = (
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
+      // Mark this query as immediately stale helps to avoid problems related to filtering.
+      // e.g. enabled and disabled state filter require data update which happens at the backend side
+      staleTime: 0,
       ...queryOptions,
     }
   );
@@ -73,7 +77,7 @@ export const useInvalidateFindRulesQuery = () => {
      * Invalidate all queries that start with FIND_RULES_QUERY_KEY. This
      * includes the in-memory query cache and paged query cache.
      */
-    queryClient.invalidateQueries([FIND_RULES_QUERY_KEY], {
+    queryClient.invalidateQueries(FIND_RULES_QUERY_KEY, {
       refetchType: 'active',
     });
   }, [queryClient]);
@@ -98,7 +102,7 @@ export const useUpdateRulesCache = () => {
   return useCallback(
     (newRules: Rule[]) => {
       queryClient.setQueriesData<ReturnType<typeof useFindRulesQuery>['data']>(
-        [FIND_RULES_QUERY_KEY],
+        FIND_RULES_QUERY_KEY,
         (currentData) =>
           currentData
             ? {

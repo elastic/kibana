@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { AppStateUrl } from '../services/discover_app_state_container';
 import { cleanupUrlState } from './cleanup_url_state';
-import { AppStateUrl } from '../services/discover_state';
 
 describe('cleanupUrlState', () => {
   test('cleaning up legacy sort', async () => {

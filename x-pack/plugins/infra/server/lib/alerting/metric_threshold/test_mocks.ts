@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as utils from '../common/utils';
-jest
-  .spyOn(utils, 'getViewInAppUrl')
-  .mockReturnValue('http://localhost:5601/eyg/app/metrics/explorer');
 
 const bucketsA = (from: number) => [
   {

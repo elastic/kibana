@@ -14,6 +14,7 @@ import type { FilterSpecification, Map as MbMap, GeoJSONSource } from '@kbn/mapb
 import {
   EMPTY_FEATURE_COLLECTION,
   FEATURE_VISIBLE_PROPERTY_NAME,
+  GEOJSON_FEATURE_ID_PROPERTY_NAME,
   LAYER_TYPE,
   SOURCE_BOUNDS_DATA_REQUEST_ID,
 } from '../../../../../common/constants';
@@ -35,7 +36,6 @@ import {
 } from '../vector_layer';
 import { DataRequestAbortError } from '../../../util/data_request';
 import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
-import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
 import { syncGeojsonSourceData } from './geojson_source_data';
 import { performInnerJoins } from './perform_inner_joins';
 import { pluckStyleMetaFromFeatures } from './pluck_style_meta_from_features';
@@ -58,6 +58,11 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     }
 
     return layerDescriptor;
+  }
+
+  _isTiled(): boolean {
+    // Uses untiled maplibre source 'geojson'
+    return false;
   }
 
   async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
@@ -93,7 +98,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       this.getSource().getSourceStatus(sourceDataRequest);
     return {
       icon: isDeprecated ? (
-        <EuiIcon type="alert" color="danger" />
+        <EuiIcon type="warning" color="danger" />
       ) : (
         this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed)
       ),
@@ -261,7 +266,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         return;
       }
 
-      const joinStates = await this._syncJoins(syncContext, style);
+      const joinStates = await this._syncJoins(syncContext, style, sourceResult.featureCollection);
       await performInnerJoins(
         sourceResult,
         joinStates,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { createFailError } from '@kbn/dev-cli-errors';
 import * as path from 'path';
 import { getProperty, getPropertyValue } from './utils';

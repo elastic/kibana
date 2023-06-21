@@ -11,6 +11,8 @@ import { act, render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { SignalsByCategory } from './signals_by_category';
 
+jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
   return {

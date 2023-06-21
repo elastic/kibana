@@ -26,12 +26,12 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
 
   const isLineChart = stateParams.seriesParams.some(
     ({ type, data: { id: paramId } }) =>
-      type === ChartType.Line && aggs.aggs.find(({ id }) => id === paramId)?.enabled
+      type === ChartType.Line && aggs?.aggs.find(({ id }) => id === paramId)?.enabled
   );
 
   const isAreaChart = stateParams.seriesParams.some(
     ({ type, data: { id: paramId } }) =>
-      type === ChartType.Area && aggs.aggs.find(({ id }) => id === paramId)?.enabled
+      type === ChartType.Area && aggs?.aggs.find(({ id }) => id === paramId)?.enabled
   );
 
   useEffect(() => {

@@ -4,17 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { PackagePolicy, AgentPolicy } from '../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../hooks';
-import { FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../common';
+import {
+  FLEET_KUBERNETES_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+  FLEET_CLOUD_DEFEND_PACKAGE,
+} from '../../../common';
+import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../services';
 
-import type { K8sMode } from './types';
+import type { K8sMode, CloudSecurityIntegrationType } from './types';
 
 // Packages that requires custom elastic-agent manifest
-const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_SECURITY_POSTURE_PACKAGE]);
+const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_DEFEND_PACKAGE]);
 
 export function useAgentPolicyWithPackagePolicies(policyId?: string) {
   const [agentPolicyWithPackagePolicies, setAgentPolicy] = useState<AgentPolicy | null>(null);
@@ -47,6 +52,7 @@ export function useAgentPolicyWithPackagePolicies(policyId?: string) {
 
 export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
   const [isK8s, setIsK8s] = useState<K8sMode>('IS_LOADING');
+
   useEffect(() => {
     async function checkifK8s() {
       if (!agentPolicy) {
@@ -60,10 +66,44 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
           : 'IS_NOT_KUBERNETES'
       );
     }
+
     checkifK8s();
   }, [agentPolicy]);
 
   return { isK8s };
 }
 
-const isK8sPackage = (pkg: PackagePolicy) => K8S_PACKAGES.has(pkg.package?.name as string);
+export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
+  const cloudSecurityIntegration = useMemo(() => {
+    if (!agentPolicy) {
+      return undefined;
+    }
+
+    const integrationType = getCloudSecurityIntegrationTypeFromPackagePolicy(agentPolicy);
+    const cloudformationUrl = getCloudFormationTemplateUrlFromPackagePolicy(agentPolicy);
+
+    return {
+      integrationType,
+      cloudformationUrl,
+    };
+  }, [agentPolicy]);
+
+  return { cloudSecurityIntegration };
+}
+
+const isK8sPackage = (pkg: PackagePolicy) => {
+  const name = pkg.package?.name as string;
+
+  return K8S_PACKAGES.has(name);
+};
+
+const getCloudSecurityIntegrationTypeFromPackagePolicy = (
+  agentPolicy: AgentPolicy
+): CloudSecurityIntegrationType | undefined => {
+  const packagePolicy = agentPolicy?.package_policies?.find(
+    (input) => input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
+  );
+  if (!packagePolicy) return undefined;
+  return packagePolicy?.inputs?.find((input) => input.enabled)
+    ?.policy_template as CloudSecurityIntegrationType;
+};

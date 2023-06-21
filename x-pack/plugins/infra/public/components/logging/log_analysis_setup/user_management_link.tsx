@@ -8,7 +8,7 @@
 import { EuiButton, EuiButtonProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = (props) => {
@@ -27,7 +27,13 @@ export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = (prop
   if (!canAccessUserManagement) return null;
 
   return (
-    <EuiButton color="primary" fill {...linkProps} {...props}>
+    <EuiButton
+      data-test-subj="infraUserManagementLinkManageUsersButton"
+      color="primary"
+      fill
+      {...linkProps}
+      {...props}
+    >
       <FormattedMessage
         id="xpack.infra.logs.analysis.userManagementButtonLabel"
         defaultMessage="Manage users"

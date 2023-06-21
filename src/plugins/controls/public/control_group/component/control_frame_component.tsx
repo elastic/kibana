@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import {
-  EuiButtonIcon,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
   EuiLoadingChart,
   EuiToolTip,
 } from '@elastic/eui';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
-import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ControlGroupReduxState } from '../types';
-import { pluginServices } from '../../services';
-import { EditControlButton } from '../editor/edit_control';
+import {
+  controlGroupSelector,
+  useControlGroupContainer,
+} from '../embeddable/control_group_container';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { TIME_SLIDER_CONTROL } from '../../../common';
+import { ControlError } from './control_error_component';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -40,86 +41,38 @@ export const ControlFrame = ({
   embeddableType,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const [hasFatalError, setHasFatalError] = useState(false);
 
-  const {
-    useEmbeddableSelector: select,
-    containerActions: { untilEmbeddableLoaded, removeEmbeddable },
-  } = useReduxContainerContext<ControlGroupReduxState>();
+  const controlGroup = useControlGroupContainer();
 
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
+  const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
+  const disabledActions = controlGroupSelector((state) => state.explicitInput.disabledActions);
 
-  // Controls Services Context
-  const {
-    overlays: { openConfirm },
-  } = pluginServices.getServices();
-
-  const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId, embeddableType });
+  const embeddable = useChildEmbeddable({
+    untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),
+    embeddableType,
+    embeddableId,
+  });
 
   const [title, setTitle] = useState<string>();
 
   const usingTwoLineLayout = controlStyle === 'twoLine';
 
   useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
-      embeddable.render(embeddableRoot.current);
+    if (embeddableRoot.current) {
+      embeddable?.render(embeddableRoot.current);
     }
     const inputSubscription = embeddable
       ?.getInput$()
       .subscribe((newInput) => setTitle(newInput.title));
-    const errorSubscription = embeddable?.getOutput$().subscribe({
-      error: (error: Error) => {
-        if (!embeddableRoot.current) return;
-        const errorEmbeddable = new ErrorEmbeddable(error, { id: embeddable.id }, undefined, true);
-        errorEmbeddable.render(embeddableRoot.current);
-        setHasFatalError(true);
-      },
-    });
     return () => {
       inputSubscription?.unsubscribe();
-      errorSubscription?.unsubscribe();
     };
   }, [embeddable, embeddableRoot]);
-
-  const floatingActions = (
-    <div
-      className={classNames('controlFrameFloatingActions', {
-        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
-        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
-      })}
-    >
-      {!hasFatalError && embeddableType !== TIME_SLIDER_CONTROL && (
-        <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
-          <EditControlButton embeddableId={embeddableId} />
-        </EuiToolTip>
-      )}
-      <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
-        <EuiButtonIcon
-          data-test-subj={`control-action-${embeddableId}-delete`}
-          aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
-          onClick={() =>
-            openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
-              confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
-              cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
-              title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
-              buttonColor: 'danger',
-            }).then((confirmed) => {
-              if (confirmed) {
-                removeEmbeddable(embeddableId);
-              }
-            })
-          }
-          iconType="cross"
-          color="danger"
-        />
-      </EuiToolTip>
-    </div>
-  );
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
     'controlFrame--oneLine': controlStyle === 'oneLine',
-    'controlFrame--fatalError': hasFatalError,
   });
 
   function renderEmbeddablePrepend() {
@@ -154,7 +107,9 @@ export const ControlFrame = ({
           className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
           ref={embeddableRoot}
-        />
+        >
+          {isErrorEmbeddable(embeddable) && <ControlError error={embeddable.error} />}
+        </div>
       )}
       {!embeddable && (
         <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
@@ -167,8 +122,16 @@ export const ControlFrame = ({
   );
 
   return (
-    <>
-      {embeddable && enableActions && floatingActions}
+    <FloatingActions
+      className={classNames({
+        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
+      })}
+      viewMode={viewMode}
+      embeddable={embeddable}
+      disabledActions={disabledActions}
+      isEnabled={embeddable && enableActions}
+    >
       <EuiFormRow
         data-test-subj="control-frame-title"
         fullWidth
@@ -180,6 +143,6 @@ export const ControlFrame = ({
       >
         {form}
       </EuiFormRow>
-    </>
+    </FloatingActions>
   );
 };

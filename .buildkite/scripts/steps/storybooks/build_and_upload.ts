@@ -14,10 +14,13 @@ import path from 'path';
 const STORYBOOKS = [
   'apm',
   'canvas',
+  'cases',
+  'cell_actions',
   'ci_composite',
   'cloud_chat',
   'coloring',
   'chart_icons',
+  'content_management_examples',
   'controls',
   'custom_integrations',
   'dashboard_enhanced',
@@ -31,8 +34,8 @@ const STORYBOOKS = [
   'expression_reveal_image',
   'expression_shape',
   'expression_tagcloud',
-  'files',
   'fleet',
+  'grouping',
   'home',
   'infra',
   'kibana_react',
@@ -40,11 +43,14 @@ const STORYBOOKS = [
   'observability',
   'presentation',
   'security_solution',
+  'serverless',
   'shared_ux',
   'triggers_actions_ui',
   'ui_actions_enhanced',
   'language_documentation_popover',
   'unified_search',
+  'random_sampling',
+  'text_based_editor',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { OverviewCardWithActions } from './overview_card';
 import {
   createSecuritySolutionStorageMock,
@@ -19,7 +19,7 @@ import { SeverityBadge } from '../../../../detections/components/rules/severity_
 import type { State } from '../../../store';
 import { createStore } from '../../../store';
 import { TimelineId } from '../../../../../common/types';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 
 const state: State = {
   ...mockGlobalState,
@@ -35,13 +35,7 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 const props = {
   title: 'Severity',
@@ -81,23 +75,33 @@ const props = {
 
 jest.mock('../../../lib/kibana');
 
+const mockAction = createAction({
+  id: 'test_action',
+  execute: async () => {},
+  getIconType: () => 'test-icon',
+  getDisplayName: () => 'test-actions',
+});
+
+// jest.useFakeTimers();
+
 describe('OverviewCardWithActions', () => {
-  test('it renders correctly', () => {
-    const { getByText } = render(
-      <TestProviders store={store}>
-        <OverviewCardWithActions {...props}>
-          <SeverityBadge value="medium" />
-        </OverviewCardWithActions>
-      </TestProviders>
-    );
+  test('it renders correctly', async () => {
+    await act(async () => {
+      const { getByText, findByTestId } = render(
+        <TestProviders store={store} cellActions={[mockAction]}>
+          <OverviewCardWithActions {...props}>
+            <SeverityBadge value="medium" />
+          </OverviewCardWithActions>
+        </TestProviders>
+      );
+      // Headline
+      getByText('Severity');
 
-    // Headline
-    getByText('Severity');
+      // Content
+      getByText('Medium');
 
-    // Content
-    getByText('Medium');
-
-    // Hover actions
-    getByText('Add To Timeline');
+      // Hover actions
+      await findByTestId('actionItem-test_action');
+    });
   });
 });

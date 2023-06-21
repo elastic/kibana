@@ -1,5 +1,9 @@
 {
   "ml.put_trained_model": {
+    "url_params": {
+      "defer_definition_decompression": "__flag__",
+      "wait_for_completion": "__flag__"
+    },
     "methods": [
       "PUT"
     ],

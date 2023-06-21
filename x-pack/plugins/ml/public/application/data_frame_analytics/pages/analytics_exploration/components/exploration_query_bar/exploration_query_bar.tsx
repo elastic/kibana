@@ -6,35 +6,31 @@
  */
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
 import { debounce } from 'lodash';
-import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { Dictionary } from '../../../../../../../common/types/common';
+import { QueryErrorMessage } from '@kbn/ml-error-utils';
 
+import { Dictionary } from '../../../../../../../common/types/common';
 import {
   SEARCH_QUERY_LANGUAGE,
   SearchQueryLanguage,
 } from '../../../../../../../common/constants/search';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { useMlKibana } from '../../../../../contexts/kibana';
-
-interface ErrorMessage {
-  query: string;
-  message: string;
-}
 
 export interface ExplorationQueryBarProps {
   indexPattern: DataView;
   setSearchQuery: (update: {
     queryString: string;
-    query?: SavedSearchQuery;
+    query?: estypes.QueryDslQueryContainer;
     language: SearchQueryLanguage;
   }) => void;
   includeQueryString?: boolean;
@@ -55,7 +51,9 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(query);
   const [idToSelectedMap, setIdToSelectedMap] = useState<{ [id: string]: boolean }>({});
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
+  const [queryErrorMessage, setQueryErrorMessage] = useState<QueryErrorMessage | undefined>(
+    undefined
+  );
 
   const { services } = useMlKibana();
   const {
@@ -119,7 +117,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
           convertedQuery = luceneStringToDsl(query.query as string);
           break;
         default:
-          setErrorMessage({
+          setQueryErrorMessage({
             query: query.query as string,
             message: i18n.translate('xpack.ml.queryBar.queryLanguageNotSupported', {
               defaultMessage: 'Query language is not supported',
@@ -133,7 +131,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         language: query.language,
       });
     } catch (e) {
-      setErrorMessage({ query: query.query as string, message: e.message });
+      setQueryErrorMessage({ query: query.query as string, message: e.message });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.query]);
@@ -187,7 +185,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   return (
     <EuiInputPopover
       style={{ maxWidth: '100%' }}
-      closePopover={() => setErrorMessage(undefined)}
+      closePopover={() => setQueryErrorMessage(undefined)}
       input={
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -249,14 +247,14 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
           )}
         </EuiFlexGroup>
       }
-      isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+      isOpen={queryErrorMessage?.query === searchInput.query && queryErrorMessage?.message !== ''}
     >
       <EuiCode>
         {i18n.translate('xpack.ml.stepDefineForm.invalidQuery', {
           defaultMessage: 'Invalid Query',
         })}
         {': '}
-        {errorMessage?.message.split('\n')[0]}
+        {queryErrorMessage?.message.split('\n')[0]}
       </EuiCode>
     </EuiInputPopover>
   );

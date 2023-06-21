@@ -818,7 +818,7 @@
             "section": "def-common.TemplateSerialized",
             "text": "TemplateSerialized"
           },
-          ", setting: \"aliases\" | \"settings\" | \"mappings\") => ",
+          ", setting: \"settings\" | \"mappings\" | \"aliases\") => ",
           {
             "pluginId": "indexManagement",
             "scope": "common",
@@ -869,7 +869,7 @@
             "label": "setting",
             "description": [],
             "signature": [
-              "\"aliases\" | \"settings\" | \"mappings\""
+              "\"settings\" | \"mappings\" | \"aliases\""
             ],
             "path": "x-pack/plugins/index_management/common/lib/utils.ts",
             "deprecated": false,
@@ -2627,7 +2627,7 @@
         "label": "TemplateType",
         "description": [],
         "signature": [
-          "\"default\" | \"system\" | \"managed\" | \"cloudManaged\""
+          "\"managed\" | \"default\" | \"system\" | \"cloudManaged\""
         ],
         "path": "x-pack/plugins/index_management/common/types/templates.ts",
         "deprecated": false,

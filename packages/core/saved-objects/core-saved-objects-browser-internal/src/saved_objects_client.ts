@@ -32,7 +32,6 @@ import type {
   SimpleSavedObject,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-browser';
-
 import { SimpleSavedObjectImpl } from './simple_saved_object';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
@@ -104,6 +103,7 @@ const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
  * HTTP API for interacting with Saved Objects.
  *
  * @internal
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export class SavedObjectsClient implements SavedObjectsClientContract {
   private http: HttpSetup;
@@ -206,6 +206,8 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       body: JSON.stringify({
         attributes,
         migrationVersion: options.migrationVersion,
+        typeMigrationVersion: options.typeMigrationVersion,
+        managed: options.managed,
         references: options.references,
       }),
     });
@@ -216,7 +218,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, references, migrationVersion }]
+   * @param {array} objects - [{ type, id, attributes, references, migrationVersion, typeMigrationVersion, managed }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false]
    * @returns The result of the create operation containing created saved objects.

@@ -35,6 +35,7 @@ const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
   [ServiceInventoryFieldName.Throughput]: (item) => item.throughput ?? -1,
   [ServiceInventoryFieldName.TransactionErrorRate]: (item) =>
     item.transactionErrorRate ?? -1,
+  [ServiceInventoryFieldName.AlertsCount]: (item) => item.alertsCount ?? -1,
 };
 
 function reverseSortDirection(sortDirection: 'asc' | 'desc') {
@@ -70,6 +71,5 @@ export function orderServiceItems({
       [sortDirection, tiebreakerSortDirection]
     );
   }
-
-  return orderBy(items, sortFn, sortDirection);
+  return orderBy(items, [sortFn], [sortDirection]);
 }

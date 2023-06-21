@@ -65,7 +65,7 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="alert" color="warning" />
+          <EuiIcon type="warning" color="warning" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTextColor color="warning">

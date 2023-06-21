@@ -28,16 +28,22 @@ export const SnapshotContainer = ({ render }: Props) => {
   const { metric, groupBy, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
-  const { loading, nodes, reload, interval } = useSnapshot(
-    filterQueryAsJson,
-    [metric],
+  const {
+    loading,
+    nodes,
+    reload,
+    interval = '60s',
+  } = useSnapshot({
+    filterQuery: filterQueryAsJson,
+    metrics: [metric],
     groupBy,
     nodeType,
     sourceId,
     currentTime,
     accountId,
     region,
-    false
-  );
+    sendRequestImmediately: false,
+  });
+
   return render({ loading, nodes, reload, interval });
 };

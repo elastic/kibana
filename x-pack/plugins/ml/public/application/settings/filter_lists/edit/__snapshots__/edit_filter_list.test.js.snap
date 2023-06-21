@@ -84,10 +84,12 @@ exports[`EditFilterList adds new items to filter list 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="mlFilterListSaveButton"
           disabled={false}
           fill={true}
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Save"
@@ -190,10 +192,12 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="mlFilterListSaveButton"
           disabled={false}
           fill={true}
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Save"
@@ -291,10 +295,12 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="mlFilterListSaveButton"
           disabled={false}
           fill={true}
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Save"
@@ -376,10 +382,12 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="mlFilterListSaveButton"
           disabled={true}
           fill={true}
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Save"
@@ -461,10 +469,12 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="mlFilterListSaveButton"
           disabled={false}
           fill={true}
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Save"
@@ -563,10 +573,12 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="mlFilterListSaveButton"
           disabled={false}
           fill={true}
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Save"
@@ -665,10 +677,12 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="mlFilterListSaveButton"
           disabled={false}
           fill={true}
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Save"
@@ -767,10 +781,12 @@ exports[`EditFilterList updates the items per page 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="mlFilterListSaveButton"
           disabled={false}
           fill={true}
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Save"

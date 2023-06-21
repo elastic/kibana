@@ -15,16 +15,25 @@ import { ensurePreconfiguredPackagesAndPolicies } from '.';
 import { appContextService } from './app_context';
 import { getInstallations } from './epm/packages';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
-import { setupFleet } from './setup';
+import { setupFleet, ensureFleetFileUploadIndices } from './setup';
+
+import { ensureFileUploadWriteIndices } from './epm/elasticsearch/template/install';
 
 jest.mock('./preconfiguration');
 jest.mock('./preconfiguration/outputs');
+jest.mock('./preconfiguration/fleet_proxies');
 jest.mock('./settings');
 jest.mock('./output');
 jest.mock('./download_source');
 jest.mock('./epm/packages');
 jest.mock('./managed_package_policies');
 jest.mock('./setup/upgrade_package_install_version');
+jest.mock('./epm/elasticsearch/template/install', () => {
+  return {
+    ...jest.requireActual('./epm/elasticsearch/template/install'),
+    ensureFileUploadWriteIndices: jest.fn(),
+  };
+});
 
 const mockedMethodThrowsError = (mockFn: jest.Mock) =>
   mockFn.mockImplementation(() => {
@@ -60,6 +69,9 @@ describe('setupFleet', () => {
     (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([]);
 
     soClient.find.mockResolvedValue({ saved_objects: [] } as any);
+    soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as any);
+
+    (ensureFileUploadWriteIndices as jest.Mock).mockResolvedValue({});
   });
 
   afterEach(async () => {
@@ -125,5 +137,13 @@ describe('setupFleet', () => {
         },
       ],
     });
+  });
+
+  it('should create agent file upload write indices', async () => {
+    await ensureFleetFileUploadIndices(soClient, esClient);
+
+    expect((ensureFileUploadWriteIndices as jest.Mock).mock.calls[0][0].integrationNames).toEqual([
+      'elastic_agent',
+    ]);
   });
 });

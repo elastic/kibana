@@ -65,10 +65,10 @@ describe('Aggs service', () => {
           "filters",
           "significant_terms",
           "significant_text",
-          "geohash_grid",
           "geotile_grid",
           "sampler",
           "diversified_sampler",
+          "time_series",
           "foo",
         ]
       `);
@@ -87,6 +87,7 @@ describe('Aggs service', () => {
           "value_count",
           "percentiles",
           "percentile_ranks",
+          "rate",
           "top_hits",
           "top_metrics",
           "derivative",
@@ -119,10 +120,10 @@ describe('Aggs service', () => {
           "filters",
           "significant_terms",
           "significant_text",
-          "geohash_grid",
           "geotile_grid",
           "sampler",
           "diversified_sampler",
+          "time_series",
         ]
       `);
       expect(bStart.types.getAll().metrics.map((t) => t.name)).toMatchInlineSnapshot(`
@@ -140,6 +141,7 @@ describe('Aggs service', () => {
           "value_count",
           "percentiles",
           "percentile_ranks",
+          "rate",
           "top_hits",
           "top_metrics",
           "derivative",
@@ -206,7 +208,7 @@ describe('Aggs service', () => {
     test('types registry returns initialized type providers', () => {
       service.setup(setupDeps);
       const start = service.start(startDeps);
-      expect(start.types.get('terms').name).toBe('terms');
+      expect(start.types.get('terms')?.name).toBe('terms');
     });
   });
 });

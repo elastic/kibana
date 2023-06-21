@@ -18,7 +18,13 @@
             "text": "DevToolsPlugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
           "<",
           {
             "pluginId": "devTools",
@@ -42,7 +48,13 @@
             "description": [],
             "signature": [
               "(coreSetup: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>, { urlForwarding }: { urlForwarding: { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }; }) => { register: (devToolArgs: ",
               "CreateDevToolArgs",
               ") => ",
@@ -61,7 +73,13 @@
                 "label": "coreSetup",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/dev_tools/public/plugin.ts",

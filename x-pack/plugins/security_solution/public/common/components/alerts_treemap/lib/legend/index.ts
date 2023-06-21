@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
+import { firstNonNullValue } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { LegendItem } from '../../../charts/draggable_legend_item';
 import { getFillColor } from '../chart_palette';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
@@ -28,21 +29,21 @@ export const getLegendItemFromRawBucket = ({
 }): LegendItem => ({
   color: showColor
     ? getFillColor({
-        riskScore: maxRiskSubAggregations[bucket.key] ?? 0,
+        riskScore: maxRiskSubAggregations[firstNonNullValue(bucket.key) ?? ''] ?? 0,
         colorPalette,
       })
     : undefined,
   count: bucket.doc_count,
   dataProviderId: escapeDataProviderId(
-    `draggable-legend-item-treemap-${stackByField0}-${bucket.key}-${uuid.v4()}`
+    `draggable-legend-item-treemap-${stackByField0}-${bucket.key}-${uuidv4()}`
   ),
   render: () =>
     getLabel({
-      baseLabel: bucket.key_as_string ?? bucket.key, // prefer key_as_string when available, because it contains a formatted date
+      baseLabel: bucket.key_as_string ?? firstNonNullValue(bucket.key) ?? '', // prefer key_as_string when available, because it contains a formatted date
       riskScore: bucket.maxRiskSubAggregation?.value,
     }),
   field: stackByField0,
-  value: bucket.key_as_string ?? bucket.key,
+  value: bucket.key_as_string ?? firstNonNullValue(bucket.key) ?? 0,
 });
 
 export const getLegendItemFromFlattenedBucket = ({
@@ -59,12 +60,12 @@ export const getLegendItemFromFlattenedBucket = ({
   stackByField1: string | undefined;
 }): LegendItem => ({
   color: getFillColor({
-    riskScore: maxRiskSubAggregations[key] ?? 0,
+    riskScore: maxRiskSubAggregations[firstNonNullValue(key) ?? ''] ?? 0,
     colorPalette,
   }),
   count: stackByField1DocCount,
   dataProviderId: escapeDataProviderId(
-    `draggable-legend-item-treemap-${key}-${stackByField1Key}-${uuid.v4()}`
+    `draggable-legend-item-treemap-${key}-${stackByField1Key}-${uuidv4()}`
   ),
   render: () => `${stackByField1Key}`,
   field: `${stackByField1}`,
@@ -106,7 +107,7 @@ export const getLegendMap = ({
   buckets.reduce<Record<string, LegendItem[]>>(
     (acc, bucket) => ({
       ...acc,
-      [bucket.key]: [
+      [firstNonNullValue(bucket.key) ?? '']: [
         getLegendItemFromRawBucket({
           bucket,
           colorPalette,

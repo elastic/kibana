@@ -35,7 +35,7 @@ const IntegrationVersionMismatchIconComponent: React.FC<IntegrationVersionMismat
   return (
     <VersionWarningIconContainer>
       <EuiIconTip
-        type={'alert'}
+        type={'warning'}
         color={'warning'}
         content={i18n.INTEGRATIONS_INSTALLED_VERSION_TOOLTIP(
           installationStatus.installedVersion,

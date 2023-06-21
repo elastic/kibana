@@ -14,7 +14,7 @@ import { TakeActionDropdown } from '.';
 import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
 import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineId } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
@@ -22,11 +22,10 @@ import { useKibana, useGetUserCasesPermissions, useHttp } from '../../../common/
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
-} from '../endpoint_responder/responder_context_menu_item';
+} from '../endpoint_responder/translations';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import {
@@ -320,7 +319,11 @@ describe('take action dropdown', () => {
         setAlertDetailsDataMockToEvent();
       });
 
-      test('should enable the "Add Endpoint event filter" button if provided endpoint event', async () => {
+      test('should enable the "Add Endpoint event filter" button if provided endpoint event and has right privileges', async () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...mockInitialUserPrivilegesState(),
+          endpointPrivileges: { loading: false, canWriteEventFilters: true },
+        });
         wrapper = mount(
           <TestProviders>
             <TakeActionDropdown {...defaultProps} />
@@ -334,10 +337,10 @@ describe('take action dropdown', () => {
         });
       });
 
-      test('should disable the "Add Endpoint event filter" button if no endpoint management privileges', async () => {
+      test('should hide the "Add Endpoint event filter" button if no write event filters privileges', async () => {
         (useUserPrivileges as jest.Mock).mockReturnValue({
           ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+          endpointPrivileges: { loading: false, canWriteEventFilters: false },
         });
         wrapper = mount(
           <TestProviders>
@@ -346,9 +349,7 @@ describe('take action dropdown', () => {
         );
         wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
         await waitFor(() => {
-          expect(
-            wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
-          ).toBeDisabled();
+          expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
         });
       });
 
@@ -452,31 +453,10 @@ describe('take action dropdown', () => {
         apiMocks = endpointMetadataHttpMocks(mockStartServicesMock.http as jest.Mocked<HttpSetup>);
       });
 
-      describe('when the `responseActionsConsoleEnabled` feature flag is false', () => {
-        beforeAll(() => {
-          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((featureKey) => {
-            if (featureKey === 'responseActionsConsoleEnabled') {
-              return false;
-            }
-            return true;
-          });
-        });
-
-        afterAll(() => {
-          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => true);
-        });
-
-        it('should hide the button if feature flag if off', async () => {
-          render();
-
-          expect(findLaunchResponderButton()).toHaveLength(0);
-        });
-      });
-
-      it('should not display the button if user is not allowed to manage endpoints', async () => {
+      it('should not display the button if user is not allowed to write event filters', async () => {
         (useUserPrivileges as jest.Mock).mockReturnValue({
           ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+          endpointPrivileges: { loading: false, canWriteEventFilters: false },
         });
         render();
 

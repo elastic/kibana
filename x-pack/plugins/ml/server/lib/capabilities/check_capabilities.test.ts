@@ -47,7 +47,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(37);
+      expect(count).toBe(39);
     });
   });
 
@@ -65,7 +65,9 @@ describe('check_capabilities', () => {
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(isPlatinumOrTrialLicense).toBe(true);
 
-      expect(capabilities.canAccessML).toBe(true);
+      expect(capabilities.canGetFieldInfo).toBe(true);
+      expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -118,7 +120,9 @@ describe('check_capabilities', () => {
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(isPlatinumOrTrialLicense).toBe(true);
 
-      expect(capabilities.canAccessML).toBe(true);
+      expect(capabilities.canGetFieldInfo).toBe(true);
+      expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -171,7 +175,9 @@ describe('check_capabilities', () => {
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(isPlatinumOrTrialLicense).toBe(true);
 
-      expect(capabilities.canAccessML).toBe(true);
+      expect(capabilities.canGetFieldInfo).toBe(true);
+      expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -224,7 +230,9 @@ describe('check_capabilities', () => {
       expect(mlFeatureEnabledInSpace).toBe(true);
       expect(isPlatinumOrTrialLicense).toBe(true);
 
-      expect(capabilities.canAccessML).toBe(true);
+      expect(capabilities.canGetFieldInfo).toBe(true);
+      expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -277,7 +285,9 @@ describe('check_capabilities', () => {
       expect(mlFeatureEnabledInSpace).toBe(false);
       expect(isPlatinumOrTrialLicense).toBe(true);
 
-      expect(capabilities.canAccessML).toBe(false);
+      expect(capabilities.canGetFieldInfo).toBe(false);
+      expect(capabilities.canGetMlInfo).toBe(false);
+      expect(capabilities.canUseAiops).toBe(false);
       expect(capabilities.canGetJobs).toBe(false);
       expect(capabilities.canGetDatafeeds).toBe(false);
       expect(capabilities.canGetCalendars).toBe(false);
@@ -332,7 +342,8 @@ describe('check_capabilities', () => {
     expect(mlFeatureEnabledInSpace).toBe(false);
     expect(isPlatinumOrTrialLicense).toBe(false);
 
-    expect(capabilities.canAccessML).toBe(false);
+    expect(capabilities.canGetFieldInfo).toBe(false);
+    expect(capabilities.canGetMlInfo).toBe(false);
     expect(capabilities.canGetJobs).toBe(false);
     expect(capabilities.canGetDatafeeds).toBe(false);
     expect(capabilities.canGetCalendars).toBe(false);

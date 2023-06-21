@@ -42,7 +42,7 @@ describe('When using CommandExecutionOutput component', () => {
   });
 
   it('should show long running hint message if pending and >15s have passed', () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     render();
 
     expect(renderResult.queryByTestId('test-longRunningCommandHint')).toBeNull();
@@ -55,7 +55,7 @@ describe('When using CommandExecutionOutput component', () => {
   });
 
   it('should remove long running hint message if command completes', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     render();
 
     act(() => {
