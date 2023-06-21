@@ -21,7 +21,7 @@ export async function getAllLocations({
 }) {
   try {
     const [privateLocations, { locations: publicLocations, throttling }] = await Promise.all([
-      getPrivateLocations(syntheticsMonitorClient, savedObjectsClient),
+      getPrivateLocations(savedObjectsClient),
       getServicePublicLocations(server, syntheticsMonitorClient),
     ]);
     return {

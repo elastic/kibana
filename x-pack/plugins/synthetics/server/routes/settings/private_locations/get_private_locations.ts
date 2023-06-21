@@ -10,10 +10,7 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import {
-  privateLocationsSavedObjectId,
-  privateLocationsSavedObjectName,
-} from '../../../../common/saved_objects/private_locations';
+import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { toClientContract } from './helpers';
@@ -39,7 +36,7 @@ export const getPrivateLocationsAndAgentPolicies = async (
 ): Promise<SyntheticsPrivateLocationsAttributes & { agentPolicies: AgentPolicy[] }> => {
   try {
     const [privateLocations, agentPolicies] = await Promise.all([
-      getPrivateLocationsSO(savedObjectsClient),
+      getPrivateLocations(savedObjectsClient),
       syntheticsMonitorClient.privateLocationAPI.getAgentPolicies(),
     ]);
     return {
@@ -49,23 +46,6 @@ export const getPrivateLocationsAndAgentPolicies = async (
   } catch (getErr) {
     if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
       return { locations: [], agentPolicies: [] };
-    }
-    throw getErr;
-  }
-};
-
-export const getPrivateLocationsSO = async (
-  client: SavedObjectsClientContract
-): Promise<SyntheticsPrivateLocationsAttributes['locations']> => {
-  try {
-    const obj = await client.get<SyntheticsPrivateLocationsAttributes>(
-      privateLocationsSavedObjectName,
-      privateLocationsSavedObjectId
-    );
-    return obj?.attributes.locations ?? [];
-  } catch (getErr) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-      return [];
     }
     throw getErr;
   }
