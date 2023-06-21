@@ -42,6 +42,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should able to sort a keyword column in a table', async () => {
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'last_value',
+        field: 'geo.dest',
+      });
+
+      await PageObjects.lens.changeTableSortingBy(3, 'ascending');
+      await PageObjects.lens.waitForVisualization();
+      expect(await PageObjects.lens.getDatatableCellText(0, 3)).to.eql('CN');
+
+      await PageObjects.lens.changeTableSortingBy(3, 'descending');
+      await PageObjects.lens.waitForVisualization();
+      expect(await PageObjects.lens.getDatatableCellText(0, 3)).to.eql('PH');
+
+      await retry.try(async () => {
+        await PageObjects.lens.changeTableSortingBy(3, 'none');
+        await PageObjects.lens.waitForVisualization();
+        expect(await PageObjects.lens.isDatatableHeaderSorted(0)).to.eql(false);
+      });
+    });
+
     it('should able to use filters cell actions in table', async () => {
       const firstCellContent = await PageObjects.lens.getDatatableCellText(0, 0);
       await retry.try(async () => {
