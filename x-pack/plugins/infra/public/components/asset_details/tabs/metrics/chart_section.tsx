@@ -91,13 +91,8 @@ export const ChartSection = ({
             visible: true,
           }}
         />
-        <Tooltip
-          headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')}
-        />
-        <Settings
-          {...getTimelineChartThemes(isDarkMode)}
-          onPointerUpdate={onPointerUpdate}
-        />
+        <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
+        <Settings {...getTimelineChartThemes(isDarkMode)} onPointerUpdate={onPointerUpdate} />
       </Chart>
     </>
   );
