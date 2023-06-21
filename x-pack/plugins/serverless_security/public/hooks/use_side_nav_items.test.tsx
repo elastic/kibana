@@ -100,6 +100,7 @@ describe('useSideNavItems', () => {
       {
         id: SecurityPageName.landing,
         title: 'Get Started',
+        sideNavIcon: 'launch',
       },
     ]);
     const { result } = renderHook(useSideNavItems, { wrapper: KibanaServicesProvider });
