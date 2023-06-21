@@ -129,7 +129,7 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
   }
 
   const tooltipContent = i18n.translate('xpack.observability.coPilotPrompt.askCoPilot', {
-    defaultMessage: 'Ask Observability Co-Pilot for assistence',
+    defaultMessage: 'Ask Observability AI Assistent for help',
   });
 
   return (
