@@ -8,8 +8,8 @@
 import {
   ObservabilityOnboardingUsername,
   OBSERVABILITY_ONBOARDING_TEST_PASSWORD,
-} from '@kbn/observability-onboarding-plugin/server/test_helpers/create_apm_users/authentication';
-import { createObservabilityOnboardingUsers } from '@kbn/observability-onboarding-plugin/server/test_helpers/create_apm_users/create_apm_users';
+} from '@kbn/observability-onboarding-plugin/server/test_helpers/create_observability_onboarding_users/authentication';
+import { createObservabilityOnboardingUsers } from '@kbn/observability-onboarding-plugin/server/test_helpers/create_observability_onboarding_users';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
@@ -92,7 +92,7 @@ export function createTestConfig(
     return {
       testFiles: [require.resolve('../tests')],
       servers,
-      servicesRequiredForTestAnalysis: ['registry'],
+      servicesRequiredForTestAnalysis: ['observabilityOnboardingFtrConfig', 'registry'],
       services: {
         ...services,
         observabilityOnboardingFtrConfig: () => config,

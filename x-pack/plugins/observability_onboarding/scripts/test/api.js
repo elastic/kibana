@@ -12,6 +12,16 @@ const path = require('path');
 const childProcess = require('child_process');
 
 const { argv } = yargs(process.argv.slice(2))
+  .option('basic', {
+    default: false,
+    type: 'boolean',
+    description: 'Run tests with basic license',
+  })
+  .option('cloud', {
+    default: false,
+    type: 'boolean',
+    description: 'Run tests with trial license',
+  })
   .option('server', {
     default: false,
     type: 'boolean',
@@ -52,7 +62,13 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const { server, runner, grep, grepFiles, updateSnapshots } = argv;
+const { basic, cloud, server, runner, grep, grepFiles, updateSnapshots } = argv;
+
+if (cloud === false && basic === false) {
+  throw new Error('Please specify either --basic or --cloud');
+}
+
+const license = basic ? 'basic' : 'cloud';
 
 let ftrScript = 'functional_tests';
 if (server) {
@@ -66,7 +82,7 @@ const cmd = [
   `../../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
-  `--config ../../../../test/observability_onboarding_api_integration/basic/config.ts`,
+  `--config ../../../../test/observability_onboarding_api_integration/${license}/config.ts`,
 ].join(' ');
 
 console.log(`Running: "${cmd}"`);

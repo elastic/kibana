@@ -45,7 +45,7 @@ export const users: Record<
     builtInRoleNames: ['editor'],
   },
   [ObservabilityOnboardingUsername.logMonitoringUser]: {
-    builtInRoleNames: ['viewer'],
+    builtInRoleNames: ['editor'],
     customRoleNames: [ObservabilityOnboardingCustomRolename.logMonitoringUser],
   },
 };
