@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,13 +31,16 @@ export const ViewLocationMonitors = ({
 
   const history = useHistory();
 
+  const formattedLocationName = useMemo(() => <strong>{locationName}</strong>, [locationName]);
+
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <FormattedMessage
-        id="xpack.synthetics.monitorManagement.viewMonitors"
-        defaultMessage="{name} is used in {count, number} {count, plural,one {monitor} other {monitors}}."
-        values={{ count, name: <strong>{locationName}</strong> }}
-      />
+      {count > 0 ? (
+        <GreaterThanZeroMessage count={count} name={formattedLocationName} />
+      ) : (
+        <ZeroMessage name={formattedLocationName} />
+      )}
+
       <EuiSpacer size="s" />
       {count > 0 ? (
         <EuiButton
@@ -56,7 +59,7 @@ export const ViewLocationMonitors = ({
             pathname: '/add-monitor',
           })}
         >
-          {CREATE_MONITOR}
+          {count > 0 ? VIEW_MESSAGE : CREATE_MONITOR}
         </EuiButton>
       )}
     </EuiPopover>
@@ -73,3 +76,23 @@ const VIEW_LOCATION_MONITORS = i18n.translate(
 const CREATE_MONITOR = i18n.translate('xpack.synthetics.monitorManagement.createLocationMonitors', {
   defaultMessage: 'Create monitor',
 });
+
+const VIEW_MESSAGE = i18n.translate('xpack.synthetics.monitorManagement.viewMessage', {
+  defaultMessage: 'View monitors',
+});
+
+const GreaterThanZeroMessage = ({ count, name }: { count: number; name: JSX.Element }) => (
+  <FormattedMessage
+    id="xpack.synthetics.monitorManagement.viewMonitors"
+    defaultMessage="{name} is used in {count, number} {count, plural,one {monitor} other {monitors}}."
+    values={{ count, name }}
+  />
+);
+
+const ZeroMessage = ({ name }: { name: JSX.Element }) => (
+  <FormattedMessage
+    id="xpack.synthetics.monitorManagement.viewZeroMonitors"
+    defaultMessage="{name} isn't used in any monitors yet."
+    values={{ name }}
+  />
+);
