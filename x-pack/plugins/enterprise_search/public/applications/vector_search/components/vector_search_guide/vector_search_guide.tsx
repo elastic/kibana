@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 
 import {
   EuiCard,
-  EuiCodeBlock,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -27,6 +27,7 @@ import nlpIllustration from '../../../../assets/images/nlp.svg';
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { DevToolsConsoleCodeBlock } from '../dev_tools_console_code_block/dev_tools_console_code_block';
 import { EnterpriseSearchVectorSearchPageTemplate } from '../layout/page_template';
 
 const CREATE_INDEX_SNIPPET = `PUT /image-index
@@ -61,8 +62,7 @@ const INGEST_SNIPPET = `POST /image-index/_bulk?refresh=true
 { "index": { "_id": "2" } }
 { "image-vector": [42, 8, -15], "title-vector": [25, 1, 4, -12, 2], "title": "alpine lake", "file-type": "png" }
 { "index": { "_id": "3" } }
-{ "image-vector": [15, 11, 23], "title-vector": [1, 5, 25, 50, 20], "title": "full moon", "file-type": "jpg" }
-...`;
+{ "image-vector": [15, 11, 23], "title-vector": [1, 5, 25, 50, 20], "title": "full moon", "file-type": "jpg" }`;
 
 const QUERY_SNIPPET = `POST /image-index/_search
 {
@@ -120,13 +120,13 @@ export const VectorSearchGuide: React.FC = () => {
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.createIndex.description"
                 defaultMessage="Start by creating an index with one or more {denseVector} fields."
-                values={{ denseVector: <span>dense_vector</span> }}
+                values={{ denseVector: <EuiCode>dense_vector</EuiCode> }}
               />
             </p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={6}>
-          <EuiCodeBlock>{CREATE_INDEX_SNIPPET}</EuiCodeBlock>
+          <DevToolsConsoleCodeBlock>{CREATE_INDEX_SNIPPET}</DevToolsConsoleCodeBlock>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule />
@@ -150,7 +150,7 @@ export const VectorSearchGuide: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={6}>
-          <EuiCodeBlock>{INGEST_SNIPPET}</EuiCodeBlock>
+          <DevToolsConsoleCodeBlock>{INGEST_SNIPPET}</DevToolsConsoleCodeBlock>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule />
@@ -174,7 +174,7 @@ export const VectorSearchGuide: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={6}>
-          <EuiCodeBlock>{QUERY_SNIPPET}</EuiCodeBlock>
+          <DevToolsConsoleCodeBlock>{QUERY_SNIPPET}</DevToolsConsoleCodeBlock>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule />
