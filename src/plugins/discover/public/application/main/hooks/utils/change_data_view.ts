@@ -37,7 +37,7 @@ export async function changeDataView(
   let nextDataView: DataView | null = null;
 
   try {
-    nextDataView = typeof id === 'string' ? await dataViews.get(id, false, true) : id;
+    nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
   } catch (e) {
     //
   }
