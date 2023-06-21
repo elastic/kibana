@@ -120,7 +120,7 @@ export const createMetricThresholdExecutor = ({
     });
 
     // TODO: check if we need to use "savedObjectsClient"=> https://github.com/elastic/kibana/issues/159340
-    const { alertWithLifecycle, getAlertUuid, getAlertByAlertUuid, dataViews } = services;
+    const { alertWithLifecycle, getAlertUuid, getAlertByAlertUuid, searchSourceClient } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (
       id,
@@ -138,9 +138,8 @@ export const createMetricThresholdExecutor = ({
           ...flattenAdditionalContext(additionalContext),
         },
       });
-    // TODO: check if we need to use "sourceId"
+
     const { alertOnNoData, alertOnGroupDisappear: _alertOnGroupDisappear } = params as {
-      sourceId?: string;
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
     };
@@ -188,9 +187,9 @@ export const createMetricThresholdExecutor = ({
       alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
         ? state.missingGroups
         : [];
-    // TODO: check the DATA VIEW
-    const defaultDataView = await dataViews.getDefaultDataView();
-    const dataView = defaultDataView?.getIndexPattern();
+
+    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
+    const dataView = initialSearchSource.getField('index')!.getIndexPattern();
     if (!dataView) {
       throw new Error('No matched data view');
     }
