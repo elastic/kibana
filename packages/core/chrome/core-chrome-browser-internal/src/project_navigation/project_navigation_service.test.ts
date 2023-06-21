@@ -159,11 +159,13 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
+          isActive: true,
           path: ['root'],
         },
         {
           id: 'item1',
           title: 'Item 1',
+          isActive: true,
           path: ['root', 'item1'],
           deepLink: {
             id: 'item1',
@@ -208,11 +210,13 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
+          isActive: true,
           path: ['root'],
         },
         {
           id: 'item1',
           title: 'Item 1',
+          isActive: true,
           path: ['root', 'item1'],
           getIsActive: expect.any(Function),
         },
