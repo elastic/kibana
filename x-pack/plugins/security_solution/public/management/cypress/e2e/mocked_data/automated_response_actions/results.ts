@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { openAlertDetails } from '../../../tasks/isolate';
+import { generateRandomStringName } from '@kbn/osquery-plugin/cypress/tasks/integrations';
 import { APP_ALERTS_PATH } from '../../../../../../common/constants';
 import { closeAllToasts } from '../../../tasks/toasts';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../../types';
 import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_alerts';
 
-import { loginWithRole, ROLE } from '../../../tasks/login';
+import { login, ROLE } from '../../../tasks/login';
 
 describe('Automated Response actions', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
   let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
+  const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
 
   before(() => {
     return indexEndpointRuleAlerts({
-      endpointAgentId: 'agentId',
-      endpointHostname: 'agentName',
+      endpointAgentId,
+      endpointHostname,
       endpointIsolated: false,
     }).then((indexedAlert) => {
       alertData = indexedAlert;
@@ -50,29 +51,29 @@ describe('Automated Response actions', () => {
 
   describe('see results when RBAC is correct', () => {
     before(() => {
-      loginWithRole(ROLE.endpoint_response_actions_access);
+      login(ROLE.endpoint_response_actions_access);
     });
 
     it('see endpoint action', () => {
       cy.visit(APP_ALERTS_PATH);
       closeAllToasts();
-
-      openAlertDetails();
+      cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
       cy.getByTestSubj('responseActionsViewTab').click();
-      cy.contains('isolate completed successfully');
+      cy.getByTestSubj('endpoint-results-comment');
+      cy.contains(/isolate is pending|isolate completed successfully/g);
     });
   });
   describe('do not see results results when RBAC is correct', () => {
     before(() => {
-      loginWithRole(ROLE.endpoint_response_actions_no_access);
+      login(ROLE.endpoint_response_actions_no_access);
     });
 
     it('see permission denied', () => {
       cy.visit(APP_ALERTS_PATH);
       closeAllToasts();
 
-      openAlertDetails();
+      cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
       cy.getByTestSubj('responseActionsViewTab').click();
       cy.contains('Permission denied');

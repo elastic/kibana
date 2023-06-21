@@ -12,7 +12,6 @@ import { fillUpNewRule } from '../../../tasks/response_actions';
 import { login, loginWithRole, ROLE } from '../../../tasks/login';
 import type { ReturnTypeFromChainable } from '../../../types';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import { openAlertDetails } from '../../../tasks/isolate';
 import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_alerts';
 
 describe('No License', { env: { ftrConfig: { license: 'basic' } } }, () => {
@@ -37,17 +36,16 @@ describe('No License', { env: { ftrConfig: { license: 'basic' } } }, () => {
   describe('User cannot see results', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
-
+    const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
     before(() => {
       login();
       return indexEndpointRuleAlerts({
-        endpointAgentId: 'agentId',
-        endpointHostname: 'agentName',
+        endpointAgentId,
+        endpointHostname,
         endpointIsolated: false,
       }).then((indexedAlert) => {
         alertData = indexedAlert;
         const alertId = alertData.alerts[0]._id;
-        console.log({ alertId });
         return indexEndpointHosts({
           withResponseActions: true,
           numResponseActions: 1,
@@ -72,8 +70,7 @@ describe('No License', { env: { ftrConfig: { license: 'basic' } } }, () => {
     it('render the permission denied screense', () => {
       cy.visit(APP_ALERTS_PATH);
       closeAllToasts();
-
-      openAlertDetails();
+      cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
       cy.getByTestSubj('responseActionsViewTab').click();
       cy.contains('Permission denied');
