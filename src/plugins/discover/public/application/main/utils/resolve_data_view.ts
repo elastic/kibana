@@ -90,6 +90,7 @@ export async function loadDataView({
     try {
       defaultDataView = await dataViews.getDefaultDataView({
         displayErrors: false,
+        refreshFields: true,
       });
     } catch (e) {
       //
