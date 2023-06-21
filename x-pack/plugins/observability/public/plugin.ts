@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   AppDeepLink,
@@ -103,6 +104,7 @@ export interface ObservabilityPublicPluginsStart {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
