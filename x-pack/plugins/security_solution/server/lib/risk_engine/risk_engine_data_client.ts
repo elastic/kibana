@@ -42,16 +42,16 @@ export class RiskEngineDataClient {
   private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
-  public async getWriter({ namespace }: { namespace: string }) {
+  public async getWriter({ namespace }: { namespace: string }): Promise<Writer> {
     if (this.writerCache.get(namespace)) {
-      return this.writerCache.get(namespace);
+      return this.writerCache.get(namespace) as Writer;
     }
 
     await this.initializeResources({ namespace });
-    return this.writerCache.get(namespace);
+    return this.writerCache.get(namespace) as Writer;
   }
 
-  private async initializeWriter(namespace: string) {
+  private async initializeWriter(namespace: string): Promise<Writer> {
     const writer: Writer = {
       bulk: async () => {},
     };

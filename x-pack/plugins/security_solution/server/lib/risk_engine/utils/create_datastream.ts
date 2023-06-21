@@ -181,7 +181,7 @@ export const createDataStream = async ({
     }
   }
 
-  const isDataStreamsExist = dataStreams.length > 0;
+  const dataStreamsExist = dataStreams.length > 0;
 
   // if a concrete write datastream already exists, update the underlying mapping
   if (dataStreams.length > 0) {
@@ -189,7 +189,7 @@ export const createDataStream = async ({
   }
 
   // check if a concrete write datastream already exists
-  if (!isDataStreamsExist) {
+  if (!dataStreamsExist) {
     try {
       await retryTransientEsErrors(
         () =>
