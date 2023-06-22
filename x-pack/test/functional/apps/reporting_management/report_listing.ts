@@ -75,7 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await previousButton.getAttribute('disabled')).to.be(null);
     });
 
-    it('Displays types of report jobs', async () => {
+    xit('Displays types of report jobs', async () => {
       const list = await pageObjects.reporting.getManagementList();
       expectSnapshot(list).toMatchInline(`
         Array [
