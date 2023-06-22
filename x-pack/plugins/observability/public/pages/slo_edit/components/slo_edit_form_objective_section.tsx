@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiFieldNumber,
   EuiFlexGrid,
@@ -22,13 +22,29 @@ import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
-import { BUDGETING_METHOD_OPTIONS, TIMEWINDOW_OPTIONS } from '../constants';
+import {
+  BUDGETING_METHOD_OPTIONS,
+  CALENDARALIGNED_TIMEWINDOW_OPTIONS,
+  ROLLING_TIMEWINDOW_OPTIONS,
+  TIMEWINDOW_TYPE_OPTIONS,
+} from '../constants';
 import { maxWidth } from './slo_edit_form';
 
 export function SloEditFormObjectiveSection() {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
+  const { control, watch, getFieldState, resetField } = useFormContext<CreateSLOInput>();
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
+  const timeWindowTypeSelect = useGeneratedHtmlId({ prefix: 'timeWindowTypeSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
+  const timeWindowType = watch('timeWindow.type');
+
+  useEffect(() => {
+    resetField('timeWindow.duration', {
+      defaultValue:
+        timeWindowType === 'calendarAligned'
+          ? CALENDARALIGNED_TIMEWINDOW_OPTIONS[1].value
+          : ROLLING_TIMEWINDOW_OPTIONS[1].value,
+    });
+  }, [timeWindowType, resetField]);
 
   return (
     <EuiPanel
@@ -38,6 +54,88 @@ export function SloEditFormObjectiveSection() {
       style={{ maxWidth }}
       data-test-subj="sloEditFormObjectiveSection"
     >
+      <EuiFlexGrid columns={3}>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.timeWindowType.label', {
+                  defaultMessage: 'Time window',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.observability.slo.sloEdit.timeWindowType.tooltip',
+                    {
+                      defaultMessage: 'Choose between a rolling or a calendar aligned window.',
+                    }
+                  )}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="timeWindow.type"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect
+                  {...field}
+                  required
+                  id={timeWindowTypeSelect}
+                  data-test-subj="sloFormTimeWindowTypeSelect"
+                  options={TIMEWINDOW_TYPE_OPTIONS}
+                  value={String(field.value)}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <span>
+                {i18n.translate('xpack.observability.slo.sloEdit.timeWindowDuration.label', {
+                  defaultMessage: 'Duration',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.observability.slo.sloEdit.timeWindowDuration.tooltip',
+                    {
+                      defaultMessage: 'The time window duration used to compute the SLO over.',
+                    }
+                  )}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="timeWindow.duration"
+              control={control}
+              shouldUnregister
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect
+                  {...field}
+                  required
+                  id={timeWindowSelect}
+                  data-test-subj="sloFormTimeWindowDurationSelect"
+                  options={
+                    timeWindowType === 'calendarAligned'
+                      ? CALENDARALIGNED_TIMEWINDOW_OPTIONS
+                      : ROLLING_TIMEWINDOW_OPTIONS
+                  }
+                  value={String(field.value)}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+
+      <EuiSpacer size="l" />
+
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormRow
@@ -76,41 +174,14 @@ export function SloEditFormObjectiveSection() {
           </EuiFormRow>
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiFormRow
-            label={
-              <span>
-                {i18n.translate('xpack.observability.slo.sloEdit.timeWindow.label', {
-                  defaultMessage: 'Time window',
-                })}{' '}
-                <EuiIconTip
-                  content={i18n.translate('xpack.observability.slo.sloEdit.timeWindow.tooltip', {
-                    defaultMessage:
-                      'The rolling time window duration used to compute the SLO over.',
-                  })}
-                  position="top"
-                />
-              </span>
-            }
-          >
-            <Controller
-              name="timeWindow.duration"
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { ref, ...field } }) => (
-                <EuiSelect
-                  {...field}
-                  required
-                  id={timeWindowSelect}
-                  data-test-subj="sloFormTimeWindowDurationSelect"
-                  options={TIMEWINDOW_OPTIONS}
-                  value={String(field.value)}
-                />
-              )}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
+        {watch('budgetingMethod') === 'timeslices' ? (
+          <SloEditFormObjectiveSectionTimeslices />
+        ) : null}
+      </EuiFlexGrid>
 
+      <EuiSpacer size="l" />
+
+      <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormRow
             isInvalid={getFieldState('objective.target').invalid}
@@ -153,13 +224,6 @@ export function SloEditFormObjectiveSection() {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGrid>
-
-      {watch('budgetingMethod') === 'timeslices' ? (
-        <>
-          <EuiSpacer size="xl" />
-          <SloEditFormObjectiveSectionTimeslices />
-        </>
-      ) : null}
     </EuiPanel>
   );
 }

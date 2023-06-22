@@ -402,13 +402,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onCancel={() => setFormState('VALID')}
           />
         )}
-        {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
-          <PostInstallAddAgentModal
-            packageInfo={packageInfo}
-            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-          />
-        )}
+        {formState === 'SUBMITTED_NO_AGENTS' &&
+          agentPolicy &&
+          packageInfo &&
+          savedPackagePolicy && (
+            <PostInstallAddAgentModal
+              packageInfo={packageInfo}
+              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+            />
+          )}
         {packageInfo && (
           <IntegrationBreadcrumb
             pkgTitle={integrationInfo?.title || packageInfo.title}

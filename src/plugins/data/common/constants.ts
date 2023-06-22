@@ -37,3 +37,5 @@ export const UI_SETTINGS = {
   DATE_FORMAT: 'dateFormat',
   DATEFORMAT_TZ: 'dateFormat:tz',
 } as const;
+
+export const SAVED_QUERY_BASE_URL = '/internal/saved_query';

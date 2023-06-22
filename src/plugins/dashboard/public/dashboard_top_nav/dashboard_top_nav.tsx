@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -35,6 +34,7 @@ import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_edit
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
+import classNames from 'classnames';
 
 export interface InternalDashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
@@ -84,6 +84,7 @@ export function InternalDashboardTopNav({
   const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const query = dashboard.select((state) => state.explicitInput.query);
   const title = dashboard.select((state) => state.explicitInput.title);
@@ -220,7 +221,6 @@ export function InternalDashboardTopNav({
   return (
     <div
       className={classNames('dashboardTopNav', {
-        'dashboardTopNav-fullscreenMode': fullScreenMode,
         'dashboardTopNav-noBackgroundColor': !visibilityProps.showBackgroundColor,
         'dashboardTopNav-right': topNavMenuAlignRight,
       })}
