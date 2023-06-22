@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { ManagementLandingPageProps } from './src';
+export type { CardsNavigationProps, CardsNavigationComponentProps } from './src';
 
 export { CardsNavigation } from './src';
