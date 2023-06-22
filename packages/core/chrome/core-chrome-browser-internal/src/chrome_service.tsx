@@ -263,11 +263,23 @@ export class ChromeService {
     const getHeaderComponent = () => {
       if (chromeStyle$.getValue() === 'project') {
         const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
+        const projectNavigation$ = projectNavigation
+          .getProjectNavigation$()
+          .pipe(takeUntil(this.stop$));
+        const projectBreadcrumbs$ = projectNavigation
+          .getProjectBreadcrumbs$()
+          .pipe(takeUntil(this.stop$));
         const activeNodes$ = projectNavigation.getActiveNodes$();
 
         const ProjectHeaderWithNavigation = () => {
           const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
           const activeNodes = useObservable(activeNodes$, []);
+
+          const currentProjectNavigation = useObservable(projectNavigation$, undefined);
+          // TODO: remove this switch once security sets project navigation tree
+          const currentProjectBreadcrumbs$ = currentProjectNavigation
+            ? projectBreadcrumbs$
+            : breadcrumbs$;
 
           let SideNavComponent: ISideNavComponent = () => null;
 
@@ -279,13 +291,6 @@ export class ChromeService {
                 : ProjectSideNavigation;
           }
 
-          // if projectNavigation wasn't set fallback to the default breadcrumbs
-          // TODO: Uncommented when we support the project navigation config
-          // const projectBreadcrumbs$ = projectNavigationConfig
-          //   ? projectNavigation.getProjectBreadcrumbs$()
-          //   : breadcrumbs$;
-          const projectBreadcrumbs$ = breadcrumbs$;
-
           return (
             <ProjectHeader
               {...{
@@ -293,7 +298,7 @@ export class ChromeService {
                 globalHelpExtensionMenuLinks$,
               }}
               actionMenu$={application.currentActionMenu$}
-              breadcrumbs$={projectBreadcrumbs$.pipe(takeUntil(this.stop$))}
+              breadcrumbs$={currentProjectBreadcrumbs$}
               helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
               helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
               navControlsLeft$={navControls.getLeft$()}

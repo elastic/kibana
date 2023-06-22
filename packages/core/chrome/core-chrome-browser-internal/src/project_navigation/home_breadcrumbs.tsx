@@ -10,14 +10,25 @@ import { ChromeProjectBreadcrumb } from '@kbn/core-chrome-browser';
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 
-export const createHomeBreadcrumb = ({
-  homeHref,
-}: {
-  homeHref: string;
-}): ChromeProjectBreadcrumb => {
+export const createHomeBreadcrumb = (
+  {
+    homeHref,
+  }: {
+    homeHref: string;
+  },
+  { navigateToUrl }: { navigateToUrl?: (url: string) => void }
+): ChromeProjectBreadcrumb => {
+  const navigateHome = (event: React.MouseEvent) => {
+    if (navigateToUrl) {
+      event.preventDefault();
+      navigateToUrl(homeHref);
+    }
+  };
+
   return {
     text: <EuiIcon type="home" />,
     title: 'Home',
     href: homeHref,
+    onClick: navigateHome,
   };
 };

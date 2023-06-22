@@ -25,6 +25,7 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Observability',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
+      breadcrumbStatus: 'hidden',
       children: [
         {
           id: 'services-infra',

@@ -25,6 +25,7 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Elasticsearch',
       icon: 'logoElasticsearch',
       defaultIsCollapsed: false,
+      breadcrumbStatus: 'hidden',
       children: [
         {
           id: 'search_getting_started',
