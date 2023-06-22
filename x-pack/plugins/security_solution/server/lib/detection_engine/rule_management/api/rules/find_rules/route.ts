@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
-import type { FindRulesRequestQueryDecoded } from '../../../../../../../common/detection_engine/rule_management';
+import type {
+  FindRulesRequestQueryDecoded,
+  FindRulesResponse,
+} from '../../../../../../../common/detection_engine/rule_management';
 import {
   FindRulesRequestQuery,
   validateFindRulesRequestQuery,
@@ -34,7 +37,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<FindRulesResponse>> => {
       const siemResponse = buildSiemResponse(response);
 
       const validationErrors = validateFindRulesRequestQuery(request.query);

@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { DefaultPerPage, DefaultPage } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PerPage, Page } from '../../../../schemas/common';
 import { queryFilter, fields, SortOrder } from '../../../../schemas/common';
+import type { RuleResponse } from '../../../../rule_schema';
 
 export type FindRulesSortField = t.TypeOf<typeof FindRulesSortField>;
 export const FindRulesSortField = t.union([
@@ -50,3 +51,10 @@ export type FindRulesRequestQueryDecoded = Omit<FindRulesRequestQuery, 'per_page
   page: Page;
   per_page: PerPage;
 };
+
+export interface FindRulesResponse {
+  page: number;
+  perPage: number;
+  total: number;
+  data: RuleResponse[];
+}
