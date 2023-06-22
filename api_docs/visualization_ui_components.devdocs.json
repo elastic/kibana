@@ -1093,7 +1093,7 @@
                 "signature": [
                   "{ value: Icon; label: string; icon?: ",
                   "IconType",
-                  " | Icon | undefined; shouldRotate?: boolean | undefined; canFill?: boolean | undefined; }[]"
+                  " | Icon | undefined; shouldRotate?: boolean | undefined; }[]"
                 ],
                 "path": "src/plugins/visualization_ui_components/public/components/icon_select.tsx",
                 "deprecated": false,
@@ -1208,7 +1208,7 @@
                 "signature": [
                   "{ value: Icon; label: string; icon?: ",
                   "IconType",
-                  " | Icon | undefined; shouldRotate?: boolean | undefined; canFill?: boolean | undefined; }[]"
+                  " | Icon | undefined; shouldRotate?: boolean | undefined; }[]"
                 ],
                 "path": "src/plugins/visualization_ui_components/public/components/icon_select.tsx",
                 "deprecated": false,
@@ -2642,7 +2642,7 @@
         "signature": [
           "{ value: T; label: string; icon?: ",
           "IconType",
-          " | T | undefined; shouldRotate?: boolean | undefined; canFill?: boolean | undefined; }[]"
+          " | T | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/plugins/visualization_ui_components/public/components/icon_select.tsx",
         "deprecated": false,

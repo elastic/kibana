@@ -76,40 +76,45 @@ export function getGroupsFromJobs(jobs: MlSummaryJobs): {
 
 export function getStatsBarData(jobsList: any) {
   const jobStats = {
+    total: {
+      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.totalJobsLabel', {
+        defaultMessage: 'Total',
+      }),
+      value: 0,
+      show: true,
+      group: 0,
+    },
+    open: {
+      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.openJobsLabel', {
+        defaultMessage: 'Open',
+      }),
+      value: 0,
+      show: true,
+      group: 0,
+    },
+    closed: {
+      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.closedJobsLabel', {
+        defaultMessage: 'Closed',
+      }),
+      value: 0,
+      show: true,
+      group: 0,
+    },
+    failed: {
+      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.failedJobsLabel', {
+        defaultMessage: 'Failed',
+      }),
+      value: 0,
+      show: false,
+      group: 0,
+    },
     activeNodes: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
         defaultMessage: 'Active ML nodes',
       }),
       value: 0,
       show: true,
-    },
-    total: {
-      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.totalJobsLabel', {
-        defaultMessage: 'Total jobs',
-      }),
-      value: 0,
-      show: true,
-    },
-    open: {
-      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.openJobsLabel', {
-        defaultMessage: 'Open jobs',
-      }),
-      value: 0,
-      show: true,
-    },
-    closed: {
-      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.closedJobsLabel', {
-        defaultMessage: 'Closed jobs',
-      }),
-      value: 0,
-      show: true,
-    },
-    failed: {
-      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.failedJobsLabel', {
-        defaultMessage: 'Failed jobs',
-      }),
-      value: 0,
-      show: false,
+      group: 1,
     },
     activeDatafeeds: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.activeDatafeedsLabel', {
@@ -117,6 +122,7 @@ export function getStatsBarData(jobsList: any) {
       }),
       value: 0,
       show: true,
+      group: 1,
     },
   };
 
@@ -157,6 +163,14 @@ export function getStatsBarData(jobsList: any) {
   }
 
   jobStats.activeNodes.value = Object.keys(mlNodes).length;
+
+  if (jobStats.total.value === 0) {
+    for (const [statKey, val] of Object.entries(jobStats)) {
+      if (statKey !== 'total') {
+        val.show = false;
+      }
+    }
+  }
 
   return jobStats;
 }

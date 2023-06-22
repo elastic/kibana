@@ -31,6 +31,11 @@ import { css } from '@emotion/react';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TopAlert } from '../../../typings/alerts';
 import { ExperimentalBadge } from '../../../components/experimental_badge';
+import {
+  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from '../alert_details';
 
 export interface PageTitleProps {
   alert: TopAlert | null;
@@ -45,10 +50,6 @@ export function pageTitleContent(ruleCategory: string) {
     },
   });
 }
-
-const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
-const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
-const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
 
 export function PageTitle({ alert }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
