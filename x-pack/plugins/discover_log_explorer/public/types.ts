@@ -6,13 +6,9 @@
  */
 import { Plugin } from '@kbn/core/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { DatasetsServiceStart } from './services/datasets';
 
 export type DiscoverLogExplorerPluginSetup = void;
-
-export interface DiscoverLogExplorerPluginStart {
-  datasetsService: DatasetsServiceStart;
-}
+export type DiscoverLogExplorerPluginStart = void;
 
 export interface DiscoverLogExplorerStartDeps {
   discover: DiscoverStart;
