@@ -178,8 +178,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/156437
-      describe.skip('infrastructure landing page with data', () => {
+      describe('infrastructure landing page with data', () => {
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
@@ -193,7 +192,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await PageObjects.infraHome.waitForLoading();
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await testSubjects.existOrFail('~waffleMap');
         });
