@@ -6,14 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { encode } from '@kbn/rison';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { v1 as uuidv1 } from 'uuid';
+
+import { paths } from '../../config/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
 export function useCreateSlo() {
   const {
+    application: { navigateToUrl },
     http,
     notifications: { toasts },
   } = useKibana().services;
@@ -64,6 +68,10 @@ export function useCreateSlo() {
             values: { name: slo.name },
           }),
         });
+
+        navigateToUrl(
+          http.basePath.prepend(paths.observability.sloCreateWithEncodedForm(encode(slo)))
+        );
       },
     }
   );

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -30,6 +30,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import {
   transformCreateSLOFormToCreateSLOInput,
+  transformCreateSLOInputToCreateSLOForm,
   transformSloResponseToCreateSloForm,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
@@ -69,7 +70,7 @@ export function SloEditForm({ slo }: Props) {
     useHashQuery: false,
   });
 
-  const urlParams = urlStateStorage.get<CreateSLOForm>('_a');
+  const urlParams = urlStateStorage.get<CreateSLOInput>('_a');
   const searchParams = new URLSearchParams(search);
   const isEditMode = slo !== undefined;
 
@@ -87,7 +88,11 @@ export function SloEditForm({ slo }: Props) {
   }, [isEditMode, rules, slo]);
 
   const methods = useForm<CreateSLOForm>({
-    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, urlParams), // TODO handle merge
+    defaultValues: Object.assign(
+      {},
+      SLO_EDIT_FORM_DEFAULT_VALUES,
+      urlParams ? transformCreateSLOInputToCreateSLOForm(urlParams) : null
+    ),
     values: transformSloResponseToCreateSloForm(slo),
     mode: 'all',
   });
