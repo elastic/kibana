@@ -173,7 +173,10 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
 };
 
 type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
-type EsClientMockMethods = keyof Pick<EsClientMock, 'get' | 'create' | 'delete' | 'search'>;
+type EsClientMockMethods = keyof Pick<
+  EsClientMock,
+  'get' | 'create' | 'delete' | 'search' | 'bulk'
+>;
 
 export const setEsClientMethodResponseToError = (
   esClientMock: EsClientMock,
