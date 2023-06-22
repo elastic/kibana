@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/160164
-  describe.skip('metric chart', function () {
+  describe('metric chart', function () {
     before(async function () {
       await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
@@ -133,13 +132,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '1st percentile of machine.ram',
         '3,221,225,472',
         '5th percentile of machine.ram',
-        '7,516,192,768',
+        '7,327,763,246.332',
         '25th percentile of machine.ram',
-        '12,884,901,888',
+        '12,528,309,967.035',
         '50th percentile of machine.ram',
-        '18,253,611,008',
+        '17,952,676,286.659',
         '75th percentile of machine.ram',
-        '32,212,254,720',
+        '28,573,850,765.683',
         '95th percentile of machine.ram',
         '32,212,254,720',
         '99th percentile of machine.ram',
