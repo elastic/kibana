@@ -65,6 +65,8 @@ const isSystemCell = (columnId: string): columnId is SystemCellId => {
   return systemCells.includes(columnId as SystemCellId);
 };
 
+const SECTION_ALERT_TABLE_STYLE = { width: '100%' };
+
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [activeRowClasses, setActiveRowClasses] = useState<
@@ -149,9 +151,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
   const handleFlyoutAlert = useCallback(
     (alert) => {
-      const idx = alerts.findIndex((a) =>
-        (a as any)[ALERT_UUID].includes(alert.fields[ALERT_UUID])
-      );
+      const idx = alerts.findIndex((a) => (a[ALERT_UUID] ?? []).includes(alert.fields[ALERT_UUID]));
       setFlyoutAlertIndex(idx);
     },
     [alerts, setFlyoutAlertIndex]
@@ -206,6 +206,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     props.toolbarVisibility,
   ])();
 
+  const openFlyoutAlertIndex = useCallback(
+    (visibleRowIndex: number) => () => setFlyoutAlertIndex(visibleRowIndex),
+    [setFlyoutAlertIndex]
+  );
+
   const leadingControlColumns = useMemo(() => {
     const isActionButtonsColumnActive =
       props.showExpandToDetails || Boolean(renderCustomActionsRow);
@@ -238,9 +243,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                         size="s"
                         iconType="expand"
                         color="primary"
-                        onClick={() => {
-                          setFlyoutAlertIndex(visibleRowIndex);
-                        }}
+                        onClick={openFlyoutAlertIndex(visibleRowIndex)}
                         data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
                         aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
                       />
@@ -275,21 +278,21 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
     return controlColumns;
   }, [
+    props.showExpandToDetails,
+    props.leadingControlColumns,
+    props.id,
+    renderCustomActionsRow,
+    isBulkActionsColumnActive,
     actionsColumnWidth,
+    openFlyoutAlertIndex,
+    ecsAlertsData,
     alerts,
     oldAlertsData,
-    ecsAlertsData,
-    getBulkActionsLeadingControlColumn,
     handleFlyoutAlert,
-    isBulkActionsColumnActive,
-    props.id,
-    props.leadingControlColumns,
-    props.showExpandToDetails,
-    renderCustomActionsRow,
-    setFlyoutAlertIndex,
     getSetIsActionLoadingCallback,
     refresh,
     clearSelection,
+    getBulkActionsLeadingControlColumn,
   ]);
 
   useEffect(() => {
@@ -449,9 +452,29 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     return mergedGridStyle;
   }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
 
+  const columnVisibilityDataGrid = useMemo(
+    () => ({ visibleColumns, setVisibleColumns: onChangeVisibleColumns }),
+    [onChangeVisibleColumns, visibleColumns]
+  );
+
+  const sortingDataGrid = useMemo(
+    () => ({ columns: sortingColumns, onSort }),
+    [onSort, sortingColumns]
+  );
+
+  const paginationDataGrid = useMemo(
+    () => ({
+      ...pagination,
+      pageSizeOptions: props.pageSizeOptions,
+      onChangeItemsPerPage: onChangePageSize,
+      onChangePage: onChangePageIndex,
+    }),
+    [onChangePageIndex, onChangePageSize, pagination, props.pageSizeOptions]
+  );
+
   return (
     <InspectButtonContainer>
-      <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
+      <section style={SECTION_ALERT_TABLE_STYLE} data-test-subj={props['data-test-subj']}>
         <Suspense fallback={null}>
           {flyoutAlertIndex > -1 && (
             <AlertsFlyout
@@ -471,20 +494,15 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             aria-label="Alerts table"
             data-test-subj="alertsTable"
             columns={columnsWithCellActions}
-            columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
+            columnVisibility={columnVisibilityDataGrid}
             trailingControlColumns={props.trailingControlColumns}
             leadingControlColumns={leadingControlColumns}
             rowCount={alertsCount}
             renderCellValue={handleRenderCellValue}
             gridStyle={actualGridStyle}
-            sorting={{ columns: sortingColumns, onSort }}
+            sorting={sortingDataGrid}
             toolbarVisibility={toolbarVisibility}
-            pagination={{
-              ...pagination,
-              pageSizeOptions: props.pageSizeOptions,
-              onChangeItemsPerPage: onChangePageSize,
-              onChangePage: onChangePageIndex,
-            }}
+            pagination={paginationDataGrid}
             rowHeightsOptions={props.rowHeightsOptions}
             ref={dataGridRef}
           />

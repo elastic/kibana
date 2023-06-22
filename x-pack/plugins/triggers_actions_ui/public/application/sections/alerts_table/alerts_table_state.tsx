@@ -30,6 +30,7 @@ import type {
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider } from '@tanstack/react-query';
+import memoizeOne from 'memoize-one';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
 import { BulkActionsContext } from './bulk_actions/context';
@@ -143,6 +144,19 @@ const AlertsTableState = (props: AlertsTableStateProps) => {
   );
 };
 
+const getAlertsTableConfiguration = memoizeOne(
+  (
+    configurationId: string,
+    alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>
+  ) => {
+    if (alertsTableConfigurationRegistry?.has(configurationId)) {
+      return alertsTableConfigurationRegistry.get(configurationId);
+    }
+    return EmptyConfiguration;
+  },
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+);
+
 const AlertsTableStateWithQueryProvider = ({
   alertsTableConfigurationRegistry,
   configurationId,
@@ -173,14 +187,21 @@ const AlertsTableStateWithQueryProvider = ({
     // eslint-disable-next-line no-console
     console.warn(`Missing Alert Table configuration for configuration ID: ${configurationId}`);
 
-  const alertsTableConfiguration = hasAlertsTableConfiguration
-    ? alertsTableConfigurationRegistry.get(configurationId)
-    : EmptyConfiguration;
+  const alertsTableConfiguration = getAlertsTableConfiguration(
+    configurationId,
+    alertsTableConfigurationRegistry
+  );
 
   const storage = useRef(new Storage(window.localStorage));
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
-  const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
-  const showInspectButton = alertsTableConfiguration?.showInspectButton ?? false;
+  const persistentControls = useMemo(
+    () => alertsTableConfiguration?.usePersistentControls?.(),
+    [alertsTableConfiguration]
+  );
+  const showInspectButton = useMemo(
+    () => alertsTableConfiguration?.showInspectButton ?? false,
+    [alertsTableConfiguration?.showInspectButton]
+  );
 
   const columnConfigByClient =
     propColumns && !isEmpty(propColumns) ? propColumns : alertsTableConfiguration?.columns ?? [];
@@ -272,8 +293,9 @@ const AlertsTableStateWithQueryProvider = ({
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
   const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);
 
-  const casesPermissions = casesService?.helpers.canUseCases(
-    alertsTableConfiguration?.cases?.owner ?? []
+  const casesPermissions = useMemo(
+    () => casesService?.helpers.canUseCases(alertsTableConfiguration?.cases?.owner ?? []),
+    [alertsTableConfiguration?.cases?.owner, casesService?.helpers]
   );
 
   const hasCaseReadPermissions = Boolean(casesPermissions?.read);
@@ -434,6 +456,16 @@ const AlertsTableStateWithQueryProvider = ({
     ]
   );
 
+  const casesContextFeatures = useMemo(
+    () => ({ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }),
+    [alertsTableConfiguration.cases?.syncAlerts]
+  );
+
+  const casesContextOwner = useMemo(
+    () => alertsTableConfiguration.cases?.owner ?? [],
+    [alertsTableConfiguration.cases?.owner]
+  );
+
   return hasAlertsTableConfiguration ? (
     <>
       {!isLoading && alertsCount === 0 && (
@@ -450,9 +482,9 @@ const AlertsTableStateWithQueryProvider = ({
       )}
       {alertsCount !== 0 && isCasesContextAvailable && (
         <CasesContext
-          owner={alertsTableConfiguration.cases?.owner ?? []}
+          owner={casesContextOwner}
           permissions={casesPermissions}
-          features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
+          features={casesContextFeatures}
         >
           <AlertsTableWithBulkActionsContext
             tableProps={tableProps}

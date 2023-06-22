@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -29,6 +29,7 @@ const heights = {
 const panelStyle = {
   maxWidth: 500,
 };
+const EUI_IMG_STYLE = { width: 200, height: 148 };
 
 export const EmptyState: React.FC<{
   height?: keyof typeof heights;
@@ -36,6 +37,7 @@ export const EmptyState: React.FC<{
   getInspectQuery: GetInspectQuery;
   showInpectButton?: boolean;
 }> = ({ height = 'tall', controls, getInspectQuery, showInpectButton }) => {
+  const euiFlexGroupHeightStyle = useMemo(() => ({ height: heights[height] }), [height]);
   return (
     <EuiPanel color="subdued" data-test-subj="alertsStateTableEmptyState">
       <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
@@ -46,7 +48,7 @@ export const EmptyState: React.FC<{
         )}
         {controls?.right && <EuiFlexItem grow={false}>{controls.right}</EuiFlexItem>}
       </EuiFlexGroup>
-      <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
+      <EuiFlexGroup style={euiFlexGroupHeightStyle} alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={true} style={panelStyle}>
             <EuiFlexGroup>
@@ -69,7 +71,7 @@ export const EmptyState: React.FC<{
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiImage style={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
+                <EuiImage style={EUI_IMG_STYLE} size="200" alt="" url={icon} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiLink, EuiSkeletonText } from '@elastic/eui';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
 import type { CaseTooltipContentProps } from '@kbn/cases-components';
@@ -36,16 +36,18 @@ const CasesCellComponent: React.FC<CellComponentProps> = (props) => {
     .map((id) => cases.get(id))
     .filter((theCase): theCase is Case => theCase != null);
 
+  const onClick = useCallback(
+    (caseId: string) => () => navigateToCaseView({ caseId }),
+    [navigateToCaseView]
+  );
+
   return (
     <EuiSkeletonText lines={1} isLoading={isLoading} size="s" data-test-subj="cases-cell-loading">
       {validCases.length !== 0
         ? validCases.map((theCase, index) => [
             index > 0 && index < validCases.length && ', ',
             <CaseTooltip loading={false} content={formatCase(theCase)} key={theCase.id}>
-              <EuiLink
-                onClick={() => navigateToCaseView({ caseId: theCase.id })}
-                data-test-subj="cases-cell-link"
-              >
+              <EuiLink onClick={onClick(theCase.id)} data-test-subj="cases-cell-link">
                 {theCase.title}
               </EuiLink>
             </CaseTooltip>,
