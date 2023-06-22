@@ -12934,8 +12934,6 @@
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.documentFlyout.fieldLabel": "字段",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.documentFlyout.valueLabel": "值",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.improveResultsLink": "改进这些结果",
-    "xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.inputView.label": "搜索输入",
-    "xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.inputView.placeholder": "搜索",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.pageChrome": "搜索预览",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.fromIndex": "来自",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.nameColumn": "字段",

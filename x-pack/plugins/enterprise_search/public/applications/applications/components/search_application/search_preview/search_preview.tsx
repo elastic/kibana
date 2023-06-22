@@ -72,7 +72,6 @@ import { DocumentFlyout } from './document_flyout';
 import { SearchApplicationSearchPreviewLogic } from './search_preview_logic';
 
 import {
-  InputView,
   PagingInfoView,
   RESULTS_PER_PAGE_OPTIONS,
   ResultView,
