@@ -1,164 +1,164 @@
 pageLoadAssetSize:
-  actions: 88650
-  advancedSettings: 72862
-  aiops: 47032
-  alerting: 163597
+  actions: 20000
+  advancedSettings: 27596
+  aiops: 10000
+  alerting: 106936
   apm: 64385
-  banners: 61933
-  bfetch: 71543
+  banners: 17946
+  bfetch: 22837
   canvas: 1066647
   cases: 180037
-  charts: 231000
-  cloud: 40056
-  cloudChat: 44209
+  charts: 55000
+  cloud: 21076
+  cloudChat: 19894
   cloudChatProvider: 17114
-  cloudDataMigration: 37140
-  cloudDefend: 91426
+  cloudDataMigration: 19170
+  cloudDefend: 18697
   cloudExperiments: 59358
   cloudFullStory: 18493
   cloudGainsight: 18710
   cloudLinks: 17629
-  cloudSecurityPosture: 107238
-  console: 144490
-  contentManagement: 62531
-  controls: 203095
+  cloudSecurityPosture: 19109
+  console: 46091
+  contentManagement: 16254
+  controls: 40000
   core: 435325
   crossClusterReplication: 65408
-  customIntegrations: 58681
+  customIntegrations: 22034
   dashboard: 82025
-  dashboardEnhanced: 114040
+  dashboardEnhanced: 65646
   data: 454087
-  dataViewEditor: 86302
-  dataViewFieldEditor: 170324
-  dataViewManagement: 36818
-  dataViews: 220601
+  dataViewEditor: 12000
+  dataViewFieldEditor: 27000
+  dataViewManagement: 5000
+  dataViews: 47000
   dataVisualizer: 27530
-  devTools: 84767
+  devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
-  embeddable: 412558
-  embeddableEnhanced: 46191
-  enterpriseSearch: 108780
+  embeddable: 87309
+  embeddableEnhanced: 22107
+  enterpriseSearch: 50858
   essSecurity: 16573
-  esUiShared: 844306
-  eventAnnotation: 353812
-  exploratoryView: 225865
-  expressionError: 51738
-  expressionGauge: 88604
+  esUiShared: 326654
+  eventAnnotation: 48565
+  exploratoryView: 74673
+  expressionError: 22127
+  expressionGauge: 25000
   expressionHeatmap: 27505
-  expressionImage: 42658
-  expressionLegacyMetricVis: 69479
-  expressionMetric: 46258
-  expressionMetricVis: 91899
-  expressionPartitionVis: 131364
-  expressionRepeatImage: 48732
-  expressionRevealImage: 51369
-  expressions: 477230
-  expressionShape: 150858
-  expressionTagcloud: 65235
-  expressionXY: 169575
+  expressionImage: 19288
+  expressionLegacyMetricVis: 23121
+  expressionMetric: 22238
+  expressionMetricVis: 23121
+  expressionPartitionVis: 26338
+  expressionRepeatImage: 22341
+  expressionRevealImage: 25675
+  expressions: 140958
+  expressionShape: 34008
+  expressionTagcloud: 27505
+  expressionXY: 39500
   features: 21723
-  fieldFormats: 251910
-  files: 64312
+  fieldFormats: 65209
+  files: 22673
   filesManagement: 18683
   fileUpload: 25664
   fleet: 142263
-  globalSearch: 52081
-  globalSearchBar: 142405
+  globalSearch: 29696
+  globalSearchBar: 50403
   globalSearchProviders: 25554
   graph: 31504
   grokdebugger: 26779
-  guidedOnboarding: 229875
+  guidedOnboarding: 42965
   home: 30182
-  imageEmbeddable: 61840
-  indexLifecycleManagement: 126936
+  imageEmbeddable: 12500
+  indexLifecycleManagement: 107090
   indexManagement: 140608
   infra: 184320
-  ingestPipelines: 83348
+  ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
-  interactiveSetup: 232469
+  interactiveSetup: 80000
   kibanaOverview: 56279
-  kibanaReact: 471717
+  kibanaReact: 74422
   kibanaUsageCollection: 16463
-  kibanaUtils: 347128
+  kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 165853
-  licenseManagement: 81306
-  licensing: 54731
+  lens: 37000
+  licenseManagement: 41817
+  licensing: 29004
   lists: 22900
-  logstash: 87675
+  logstash: 53548
   management: 46112
   maps: 90000
-  mapsEms: 44289
+  mapsEms: 26072
   ml: 82187
-  monitoring: 135496
-  navigation: 80663
-  newsfeed: 73784
-  observability: 364697
-  observabilityOnboarding: 35251
+  monitoring: 80000
+  navigation: 37269
+  newsfeed: 42228
+  observability: 115443
+  observabilityOnboarding: 19573
   observabilityShared: 52256
-  osquery: 209148
+  osquery: 107090
   painlessLab: 179748
-  presentationUtil: 169866
-  profiling: 74702
+  presentationUtil: 58834
+  profiling: 18628
   remoteClusters: 51327
-  reporting: 217456
+  reporting: 57003
   rollup: 97204
-  runtimeFields: 67934
-  savedObjects: 159959
+  runtimeFields: 41752
+  savedObjects: 108518
   savedObjectsFinder: 21691
   savedObjectsManagement: 101836
-  savedObjectsTagging: 129861
+  savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
-  savedSearch: 52612
-  screenshotMode: 34380
-  screenshotting: 72667
-  searchprofiler: 99927
+  savedSearch: 16225
+  screenshotMode: 17856
+  screenshotting: 22870
+  searchprofiler: 67080
   security: 65433
   securitySolution: 66738
-  serverless: 61952
-  serverlessObservability: 125655
-  serverlessSearch: 138217
-  serverlessSecurity: 624012
+  serverless: 16573
+  serverlessObservability: 68747
+  serverlessSearch: 71995
+  serverlessSecurity: 70441
   sessionView: 77750
-  share: 232781
+  share: 71239
   snapshotRestore: 79032
-  spaces: 194432
-  stackAlerts: 81655
-  stackConnectors: 186302
-  synthetics: 1776361
-  telemetry: 118450
+  spaces: 57868
+  stackAlerts: 58316
+  stackConnectors: 36314
+  synthetics: 40958
+  telemetry: 51957
   telemetryManagementSection: 38586
   textBasedLanguages: 37000
-  threatIntelligence: 165489
-  timelines: 385297
-  transform: 100193
+  threatIntelligence: 44299
+  timelines: 327300
+  transform: 41007
   triggersActionsUi: 135613
-  uiActions: 108549
+  uiActions: 35121
   uiActionsEnhanced: 38494
-  unifiedFieldList: 321425
-  unifiedHistogram: 59072
+  unifiedFieldList: 65500
+  unifiedHistogram: 19928
   unifiedSearch: 71059
   upgradeAssistant: 81241
   uptime: 37842
-  urlDrilldown: 69998
+  urlDrilldown: 30063
   urlForwarding: 32579
   usageCollection: 39762
-  ux: 43448
+  ux: 20784
   visDefaultEditor: 50178
-  visTypeGauge: 66780
-  visTypeHeatmap: 62569
-  visTypeMarkdown: 52835
-  visTypeMetric: 60882
-  visTypePie: 55427
+  visTypeGauge: 24113
+  visTypeHeatmap: 25340
+  visTypeMarkdown: 30896
+  visTypeMetric: 23332
+  visTypePie: 35583
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
-  visTypeTimeseries: 107508
+  visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 133744
-  visualizations: 281051
-  visualizationUiComponents: 336440
+  visTypeXy: 46868
+  visualizations: 90000
+  visualizationUiComponents: 76424
   watcher: 43598
