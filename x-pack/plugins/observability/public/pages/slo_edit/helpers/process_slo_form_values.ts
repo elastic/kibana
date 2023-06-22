@@ -88,27 +88,21 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
   };
 }
 
-export function transformCreateSLOInputToCreateSLOForm(values: CreateSLOInput): CreateSLOForm {
+export function transformCreateSLOInputToCreateSLOForm(
+  values: Partial<CreateSLOInput>
+): Partial<CreateSLOForm> {
   return {
-    name: values.name,
-    description: values.description,
-    indicator: values.indicator,
-    budgetingMethod: values.budgetingMethod,
-    timeWindow: {
-      duration: values.timeWindow.duration,
-      type: values.timeWindow.type,
-    },
-    objective: {
-      target: values.objective.target * 100,
-      ...(values.budgetingMethod === 'timeslices' &&
-        values.objective.timesliceTarget && {
+    ...values,
+    ...(values.objective && {
+      objective: {
+        target: values.objective.target * 100,
+        ...(values.objective.timesliceTarget && {
           timesliceTarget: values.objective.timesliceTarget * 100,
         }),
-      ...(values.budgetingMethod === 'timeslices' &&
-        values.objective.timesliceWindow && {
+        ...(values.objective.timesliceWindow && {
           timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
         }),
-    },
-    tags: values?.tags ?? [],
+      },
+    }),
   };
 }

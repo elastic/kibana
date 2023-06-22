@@ -70,7 +70,7 @@ export function SloEditForm({ slo }: Props) {
     useHashQuery: false,
   });
 
-  const urlParams = urlStateStorage.get<CreateSLOInput>('_a');
+  const urlParams = urlStateStorage.get<Partial<CreateSLOInput>>('_a');
   const searchParams = new URLSearchParams(search);
   const isEditMode = slo !== undefined;
 
@@ -91,7 +91,7 @@ export function SloEditForm({ slo }: Props) {
     defaultValues: Object.assign(
       {},
       SLO_EDIT_FORM_DEFAULT_VALUES,
-      urlParams ? transformCreateSLOInputToCreateSLOForm(urlParams) : null
+      !!urlParams ? transformCreateSLOInputToCreateSLOForm(urlParams) : null
     ),
     values: transformSloResponseToCreateSloForm(slo),
     mode: 'all',
