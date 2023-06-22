@@ -17,6 +17,7 @@ const mockProps = {
   observedUser: mockObservedUser,
   riskScoreState: mockRiskScoreState,
   contextID: 'test-user-details',
+  scopeId: 'test-scope-id',
   isDraggable: false,
 };
 
