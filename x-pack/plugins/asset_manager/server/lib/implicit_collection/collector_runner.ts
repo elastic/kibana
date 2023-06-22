@@ -33,8 +33,8 @@ export class CollectorRunner {
 
       const transaction = apm.startTransaction(transactionName(name), TRANSACTION_TYPE);
       const collectorOptions: CollectorOptions = {
-        from,
-        to,
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
         client: this.options.inputClient,
         transaction,
         sourceIndices: this.options.sourceIndices,

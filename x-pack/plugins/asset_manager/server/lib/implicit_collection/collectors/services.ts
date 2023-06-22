@@ -17,8 +17,21 @@ export async function collectServices({
   transaction,
   sourceIndices,
   afterKey,
+  filters = {},
 }: CollectorOptions) {
   const { traces, serviceMetrics, serviceLogs } = sourceIndices;
+  const musts: estypes.QueryDslQueryContainer[] = [
+    {
+      exists: {
+        field: 'service.name',
+      },
+    },
+  ];
+
+  for (const [term, value] of Object.entries(filters)) {
+    musts.push({ term: { [term]: value } });
+  }
+
   const dsl: estypes.SearchRequest = {
     index: [traces, serviceMetrics, serviceLogs],
     size: 0,
@@ -35,13 +48,7 @@ export async function collectServices({
             },
           },
         ],
-        must: [
-          {
-            exists: {
-              field: 'service.name',
-            },
-          },
-        ],
+        must: musts,
       },
     },
     aggs: {
