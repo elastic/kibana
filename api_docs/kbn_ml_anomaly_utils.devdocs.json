@@ -2465,6 +2465,20 @@
             "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.MlKibanaUrlConfig.is_custom_time_range",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_custom_time_range",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

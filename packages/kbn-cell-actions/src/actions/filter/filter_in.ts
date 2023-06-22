@@ -22,9 +22,18 @@ export const createFilterInActionFactory = createCellActionFactory(
     getIconType: () => ICON,
     getDisplayName: () => FILTER_IN,
     getDisplayNameTooltip: () => FILTER_IN,
-    isCompatible: async ({ field }) => !!field.name,
-    execute: async ({ field }) => {
-      addFilterIn({ filterManager, fieldName: field.name, value: field.value });
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 && // TODO Add support for multiple values
+        !!field.name
+      );
+    },
+    execute: async ({ data }) => {
+      const field = data[0]?.field;
+      const value = data[0]?.value;
+      addFilterIn({ filterManager, fieldName: field.name, value });
     },
   })
 );
