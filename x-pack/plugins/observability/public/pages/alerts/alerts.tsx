@@ -106,7 +106,8 @@ function InternalAlertsPage() {
         bucketSize?.intervalString || DEFAULT_INTERVAL,
         bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
       ),
-    [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, bucketSize]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, bucketSize, esQuery]
   );
 
   useBreadcrumbs([
