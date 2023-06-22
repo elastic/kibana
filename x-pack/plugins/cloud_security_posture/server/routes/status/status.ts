@@ -166,16 +166,28 @@ export const getCspStatus = async ({
     checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger),
     checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'cspm'),
-    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'cspm'),
-    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'cspm'),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'cspm', 1),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'cspm', 1),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'cspm', 1),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'kspm'),
-    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'kspm'),
-    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm'),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'kspm', 1),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'kspm', 1),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm', 1),
 
-    checkIndexStatus(esClient, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger),
-    checkIndexStatus(esClient, VULNERABILITIES_INDEX_PATTERN, logger, VULN_MGMT_POLICY_TEMPLATE),
+    checkIndexStatus(
+      esClient,
+      LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+      logger,
+      VULN_MGMT_POLICY_TEMPLATE,
+      96
+    ),
+    checkIndexStatus(
+      esClient,
+      VULNERABILITIES_INDEX_PATTERN,
+      logger,
+      VULN_MGMT_POLICY_TEMPLATE,
+      96
+    ),
 
     packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
     packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
@@ -264,6 +276,7 @@ export const getCspStatus = async ({
       latest: findingsLatestIndexStatusCspm,
       stream: findingsIndexStatusCspm,
       score: scoreIndexStatusCspm,
+      // score: scoreIndexStatus,
     },
     installation,
     healthyAgentsCspm,
@@ -277,6 +290,7 @@ export const getCspStatus = async ({
       latest: findingsLatestIndexStatusKspm,
       stream: findingsIndexStatusKspm,
       score: scoreIndexStatusKspm,
+      // score: scoreIndexStatus,
     },
     installation,
     healthyAgentsKspm,
@@ -289,6 +303,7 @@ export const getCspStatus = async ({
     {
       latest: vulnerabilitiesLatestIndexStatus,
       stream: vulnerabilitiesIndexStatus,
+      score: scoreIndexStatus,
     },
     installation,
     healthyAgentsVulMgmt,
@@ -403,3 +418,4 @@ const getStatusResponse = (statusResponseInfo: StatusResponseInfo) => {
     latestPackageVersion: latestCspPackageVersion,
   };
 };
+

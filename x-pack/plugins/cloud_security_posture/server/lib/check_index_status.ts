@@ -13,16 +13,37 @@ export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
   index: string,
   logger: Logger,
-  postureType?: PostureTypes
+  postureType?: PostureTypes,
+  retentionTime?: number
 ): Promise<IndexStatus> => {
+
   const query =
     !postureType || postureType === 'all' || postureType === 'vuln_mgmt'
-      ? undefined
+      ? {
+          must: {
+            range: {
+              '@timestamp': {
+                gte: `now-${retentionTime}h/h`,
+                lte: 'now/h',
+              },
+            },
+          },
+        }
       : {
           bool: {
-            filter: {
-              term: {
-                safe_posture_type: postureType,
+            filter: [
+              {
+                term: {
+                  safe_posture_type: postureType,
+                },
+              },
+            ],
+            must: {
+              range: {
+                '@timestamp': {
+                  gte: `now-${retentionTime}h/h`,
+                  lte: 'now/h',
+                },
               },
             },
           },
@@ -37,7 +58,7 @@ export const checkIndexStatus = async (
       query,
       size: 1,
     });
-
+    // if(isScore){console.log(queryResult)}
     return queryResult.hits.hits.length ? 'not-empty' : 'empty';
   } catch (e) {
     logger.debug(e);
@@ -49,3 +70,4 @@ export const checkIndexStatus = async (
     return 'empty';
   }
 };
+
