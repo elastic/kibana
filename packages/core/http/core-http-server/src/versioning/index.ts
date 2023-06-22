@@ -16,4 +16,6 @@ export type {
   VersionedRouteConfig,
   VersionedRouteRegistrar,
   VersionedRouter,
+  FullValidationConfig as VersionedFullValidationConfig,
+  VersionedRouteResponseValidationEntry,
 } from './types';
