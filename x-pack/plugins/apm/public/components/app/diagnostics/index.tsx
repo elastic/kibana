@@ -28,7 +28,7 @@ import { useDiagnosticsContext } from './context/use_diagnostics';
 import { getIndexTemplateStatus } from './summary_tab/index_templates_status';
 import { getDataStreamTabStatus } from './summary_tab/data_streams_status';
 import { getIndicesTabStatus } from './summary_tab/indicies_status';
-import { DiagnosticsApmEvents } from './apm_events_tab';
+import { DiagnosticsApmDocuments } from './apm_documents_tab';
 
 const params = t.type({
   query: t.intersection([
@@ -77,8 +77,8 @@ export const diagnosticsRoute = {
         element: <DiagnosticsIndices />,
         params,
       },
-      '/diagnostics/events': {
-        element: <DiagnosticsApmEvents />,
+      '/diagnostics/documents': {
+        element: <DiagnosticsApmDocuments />,
         params,
       },
       '/diagnostics/import-export': {
@@ -107,6 +107,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         description: <TemplateDescription />,
         tabs: [
           {
+            'data-test-subj': 'summary-tab',
             href: router.link('/diagnostics', { query }),
             label: i18n.translate('xpack.apm.diagnostics.tab.summary', {
               defaultMessage: 'Summary',
@@ -114,6 +115,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics',
           },
           {
+            'data-test-subj': 'index-pattern-tab',
             prepend: !getIndexPatternTabStatus(diagnosticsBundle) && (
               <EuiIcon type="warning" color="red" />
             ),
@@ -127,6 +129,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics/index-pattern-settings',
           },
           {
+            'data-test-subj': 'index-templates-tab',
             prepend: !getIndexTemplateStatus(diagnosticsBundle) && (
               <EuiIcon type="warning" color="red" />
             ),
@@ -137,6 +140,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics/index-templates',
           },
           {
+            'data-test-subj': 'data-streams-tab',
             prepend: !getDataStreamTabStatus(diagnosticsBundle) && (
               <EuiIcon type="warning" color="red" />
             ),
@@ -147,6 +151,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics/data-streams',
           },
           {
+            'data-test-subj': 'indices-tab',
             prepend: !getIndicesTabStatus(diagnosticsBundle) && (
               <EuiIcon type="warning" color="red" />
             ),
@@ -157,13 +162,15 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics/indices',
           },
           {
-            href: router.link('/diagnostics/events', { query }),
+            'data-test-subj': 'documents-tab',
+            href: router.link('/diagnostics/documents', { query }),
             label: i18n.translate('xpack.apm.diagnostics.tab.apmEvents', {
               defaultMessage: 'Documents',
             }),
-            isSelected: routePath === '/diagnostics/events',
+            isSelected: routePath === '/diagnostics/documents',
           },
           {
+            'data-test-subj': 'import-export-tab',
             href: router.link('/diagnostics/import-export', { query }),
             label: i18n.translate('xpack.apm.diagnostics.tab.import_export', {
               defaultMessage: 'Import/Export',

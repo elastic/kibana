@@ -22,14 +22,14 @@ import { useDiagnosticsContext } from './context/use_diagnostics';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 
-export function DiagnosticsApmEvents() {
+export function DiagnosticsApmDocuments() {
   const { diagnosticsBundle, isImported } = useDiagnosticsContext();
   const { discover } = useKibana<ApmPluginStartDeps>().services;
   const [sortField, setSortField] = useState<keyof ApmEvent>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/diagnostics/events');
+  } = useApmParams('/diagnostics/documents');
 
   const items = diagnosticsBundle?.apmEvents ?? [];
   const columns: Array<EuiBasicTableColumn<ApmEvent>> = [
@@ -117,6 +117,7 @@ export function DiagnosticsApmEvents() {
       )}
 
       <EuiBasicTable
+        data-test-subj="documents-table"
         items={orderBy(items, sortField, sortDirection)}
         sorting={{
           enableAllColumns: true,
