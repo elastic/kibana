@@ -8,9 +8,24 @@
 import * as t from 'io-ts';
 import { enumeration, NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
+/**
+ * Rule activity (status) filter applicable to two groups of rules
+ * - installed from a Fleet package, custom and customized which are installed but customized later on which
+ *  can be either enabled or disabled
+ * - available to be installed from a Fleet package rules
+ */
 export enum CoverageOverviewRuleActivity {
+  /**
+   * Enabled rules (installed from a Fleet package, custom or customized)
+   */
   Enabled = 'enabled',
+  /**
+   * Disabled rules (installed from a Fleet package, custom or customized)
+   */
   Disabled = 'disabled',
+  /**
+   * Available to be installed from a Fleet package rules (Elastic prebuilt rules)
+   */
   Available = 'available',
 }
 export const CoverageOverviewRuleActivitySchema = enumeration(
@@ -18,9 +33,21 @@ export const CoverageOverviewRuleActivitySchema = enumeration(
   CoverageOverviewRuleActivity
 );
 
+/**
+ * Rule source (origin) filter representing from where the rules came from
+ */
 export enum CoverageOverviewRuleSource {
+  /**
+   * Rules installed from a Fleet package of Elastic prebuilt rules
+   */
   Prebuilt = 'prebuilt',
+  /**
+   * Rules created manually
+   */
   Custom = 'custom',
+  /**
+   * Rules installed from a Fleet package but modified later on
+   */
   Customized = 'customized',
 }
 export const CoverageOverviewRuleSourceSchema = enumeration(
