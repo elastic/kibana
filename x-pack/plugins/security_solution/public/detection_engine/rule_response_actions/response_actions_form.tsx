@@ -86,17 +86,19 @@ export const ResponseActionsForm = ({
       <EuiSpacer size="xxl" data-test-subj={'response-actions-form'} />
       <ResponseActionsHeader />
       {uiFieldErrors?.length ? (
-        <p>
-          <EuiCallOut
-            data-test-subj="response-actions-error"
-            title={FORM_ERRORS_TITLE}
-            color="danger"
-            iconType="warning"
-          >
-            <ReactMarkdown>{uiFieldErrors}</ReactMarkdown>
-          </EuiCallOut>
+        <>
+          <p>
+            <EuiCallOut
+              data-test-subj="response-actions-error"
+              title={FORM_ERRORS_TITLE}
+              color="danger"
+              iconType="warning"
+            >
+              <ReactMarkdown>{uiFieldErrors}</ReactMarkdown>
+            </EuiCallOut>
+          </p>
           <EuiSpacer />
-        </p>
+        </>
       ) : null}
       {formContent}
     </>
