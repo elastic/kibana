@@ -42,11 +42,6 @@ describe('syncEditedMonitor', () => {
       },
     },
     fleet: {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
         getByIDs: jest.fn().mockReturnValue([]),

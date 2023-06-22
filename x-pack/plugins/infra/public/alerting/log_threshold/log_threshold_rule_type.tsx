@@ -18,6 +18,30 @@ import { InfraClientCoreSetup } from '../../types';
 import { createRuleFormatter } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
+const logThresholdDefaultActionMessage = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.defaultActionMessage',
+  {
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} is active.
+
+\\{\\{^context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\}\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}\\{\\{/context.isRatio\\}\\}
+\\{\\{#context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\} Ratio of the count of log entries matching \\{\\{context.numeratorConditions\\}\\} to the count of log entries matching \\{\\{context.denominatorConditions\\}\\} was \\{\\{context.ratio\\}\\}\\{\\{/context.isRatio\\}\\}
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+const logThresholdDefaultRecoveryMessage = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.defaultRecoveryMessage',
+  {
+    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+
 export function createLogThresholdRuleType(
   core: InfraClientCoreSetup,
   logsLocator: LocatorPublic<LogsLocatorParams>
@@ -44,12 +68,8 @@ export function createLogThresholdRuleType(
     alertDetailsAppSection,
     ruleParamsExpression,
     validate: validateExpression,
-    defaultActionMessage: i18n.translate(
-      'xpack.infra.logs.alerting.threshold.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{^context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\}\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}\\{\\{/context.isRatio\\}\\}\\{\\{#context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\} Ratio of the count of log entries matching \\{\\{context.numeratorConditions\\}\\} to the count of log entries matching \\{\\{context.denominatorConditions\\}\\} was \\{\\{context.ratio\\}\\}\\{\\{/context.isRatio\\}\\}`,
-      }
-    ),
+    defaultActionMessage: logThresholdDefaultActionMessage,
+    defaultRecoveryMessage: logThresholdDefaultRecoveryMessage,
     requiresAppContext: false,
     format: createRuleFormatter(logsLocator),
   };

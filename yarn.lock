@@ -1552,10 +1552,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@81.3.0":
-  version "81.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-81.3.0.tgz#dd1de5849d926c44a36eab2830d1a45415995352"
-  integrity sha512-IxZfBZ5ORpVrnFwfSJdY2brh/A4B4PEykL9D8e1S+BNKkRhU77IGBsGQ950/IBBMMrYed31IHhHUrwdGZV6UGA==
+"@elastic/eui@82.1.0":
+  version "82.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-82.1.0.tgz#39816294a573c68b16eb729d80adebdd86614420"
+  integrity sha512-Y5zuPm4/n3dKKc0yxJxoq8m4UfjumKPixW5CCtKwFgjaZFw4RICDuNCkS11oSMQD7aYX2a1ie1EvD4OA4pa7ug==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.194"
@@ -4125,6 +4125,10 @@
   uid ""
 
 "@kbn/developer-examples-plugin@link:examples/developer_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/discover-customization-examples-plugin@link:examples/discover_customization_examples":
   version "0.0.0"
   uid ""
 
@@ -8611,7 +8615,7 @@
   resolved "https://registry.yarnpkg.com/@types/he/-/he-1.1.1.tgz#19e14033c4ee8f1a702c74dcc6182664839ac2b7"
   integrity sha512-jpzrsR1ns0n3kyWt92QfOUQhIuJGQ9+QGa7M62rO6toe98woQjnsnzjdMtsQXCdvjjmqjS2ZBCC7xKw0cdzU+Q==
 
-"@types/history@^4.7.9", "@types/history@^4.7.11":
+"@types/history@^4.7.11", "@types/history@^4.7.9":
   version "4.7.11"
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.7.11.tgz#56588b17ae8f50c53983a524fc3cc47437969d64"
   integrity sha512-qjDJRrmvBMiTx+jyLxvLfJU7UznFuokDv4f3WRuriHKERccVpFU+8XMQUAbDzoiJCsmexxRExQeMwwCdamSKDA==
@@ -12938,10 +12942,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.29.0, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.29.0"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.29.0.tgz#0273e142b67761058bcde5615c503c7406b572d6"
-  integrity sha512-VG23vuEisJNkGl6XQmFJd3rEG/so/CNatqeE+7uZAwTSwFeB/qaO0be8xZYUNWprJ/GIwL8aMt9cj1kvbpTZhg==
+core-js@^3.0.4, core-js@^3.31.0, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.31.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.31.0.tgz#4471dd33e366c79d8c0977ed2d940821719db344"
+  integrity sha512-NIp2TQSGfR6ba5aalZD+ZQ1fSxGhDo/s1w0nx3RYzf2pnJxt7YynxFlFScP6eV7+GZsKO95NSjGxyJsU3DZgeQ==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"

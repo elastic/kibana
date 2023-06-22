@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   AppDeepLink,
@@ -26,6 +27,7 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -81,7 +83,7 @@ export interface ConfigSchema {
     };
   };
   compositeSlo: { enabled: boolean };
-  coPilot?: {
+  aiAssistant?: {
     enabled?: boolean;
   };
 }
@@ -102,6 +104,7 @@ export interface ObservabilityPublicPluginsStart {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
@@ -117,6 +120,7 @@ export interface ObservabilityPublicPluginsStart {
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
+  cloud?: CloudStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -326,7 +330,7 @@ export class Plugin
     );
 
     this.coPilotService = createCoPilotService({
-      enabled: !!config.coPilot?.enabled,
+      enabled: !!config.aiAssistant?.enabled,
       http: coreSetup.http,
     });
 

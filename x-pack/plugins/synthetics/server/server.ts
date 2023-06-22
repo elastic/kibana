@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { registerSyntheticsTLSCheckRule } from './alert_rules/tls_rule/tls_rule';
 import { registerSyntheticsStatusCheckRule } from './alert_rules/status_rule/monitor_status_rule';
 import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -69,4 +70,14 @@ export const initSyntheticsServer = (
   );
 
   registerType(statusAlert);
+
+  const tlsRule = registerSyntheticsTLSCheckRule(
+    server,
+    libs,
+    plugins,
+    syntheticsMonitorClient,
+    ruleDataClient
+  );
+
+  registerType(tlsRule);
 };

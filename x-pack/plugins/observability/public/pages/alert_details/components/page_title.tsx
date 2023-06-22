@@ -21,6 +21,7 @@ import {
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_TYPE_ID,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   TIMESTAMP,
@@ -29,6 +30,12 @@ import moment from 'moment';
 import { css } from '@emotion/react';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TopAlert } from '../../../typings/alerts';
+import { ExperimentalBadge } from '../../../components/experimental_badge';
+import {
+  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from '../alert_details';
 
 export interface PageTitleProps {
   alert: TopAlert | null;
@@ -49,9 +56,17 @@ export function PageTitle({ alert }: PageTitleProps) {
 
   if (!alert) return <EuiLoadingSpinner />;
 
+  const showExperimentalBadge =
+    alert.fields[ALERT_RULE_TYPE_ID] === LOG_DOCUMENT_COUNT_RULE_TYPE_ID ||
+    alert.fields[ALERT_RULE_TYPE_ID] === METRIC_THRESHOLD_ALERT_TYPE_ID ||
+    alert.fields[ALERT_RULE_TYPE_ID] === METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
+
   return (
     <div data-test-subj="page-title-container">
-      {pageTitleContent(alert.fields[ALERT_RULE_CATEGORY])}
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+        {pageTitleContent(alert.fields[ALERT_RULE_CATEGORY])}
+        {showExperimentalBadge && <ExperimentalBadge />}
+      </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>

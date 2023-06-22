@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
-import { NavigateToPath } from '../../../contexts/kibana';
+import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
 import { basicResolvers } from '../../resolvers';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
@@ -188,19 +188,32 @@ export const geoRouteFactory = (navigateToPath: NavigateToPath, basePath: string
   breadcrumbs: getGeoBreadcrumbs(navigateToPath, basePath),
 });
 
-const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
+const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
   const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
 
+  const {
+    services: {
+      data: { dataViews: dataViewsService },
+      savedSearch: savedSearchService,
+    },
+  } = useMlKibana();
+
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
     ...basicResolvers(),
     // TODO useRouteResolver should be responsible for the redirect
     privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
     jobCaps: () =>
-      loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, ANOMALY_DETECTOR),
+      loadNewJobCapabilities(
+        index,
+        savedSearchId,
+        dataViewsService,
+        savedSearchService,
+        ANOMALY_DETECTOR
+      ),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
 
