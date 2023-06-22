@@ -34,7 +34,7 @@ export const ActionsPopoverComponent = ({
       button={
         <EuiButton
           aria-label={i18n.translate(
-            'xpack.synthetics.monitorList.observabilityIntegrationsColumn.popoverIconButton.ariaLabel',
+            'xpack.uptime.monitorList.observabilityIntegrationsColumn.popoverIconButton.ariaLabel',
             {
               defaultMessage: 'Opens integrations popover for monitor with url {monitorUrl}',
               description:
@@ -42,13 +42,13 @@ export const ActionsPopoverComponent = ({
               values: { monitorUrl },
             }
           )}
-          data-test-subj={`xpack.synthetics.monitorList.actionsPopover.${summary.monitor_id}`}
+          data-test-subj={`xpack.uptime.monitorList.actionsPopover.${summary.monitor_id}`}
           onClick={() => togglePopoverIsVisible({ id: popoverId, open: true })}
           iconType="arrowDown"
           iconSide="right"
         >
           {i18n.translate(
-            'xpack.synthetics.monitorList.observabilityInvestigateColumn.popoverIconButton.label',
+            'xpack.uptime.monitorList.observabilityInvestigateColumn.popoverIconButton.label',
             {
               defaultMessage: 'Investigate',
             }

@@ -22,7 +22,7 @@ export const MonitorListHeader: React.FC = () => {
         <EuiTitle size="xs">
           <h2>
             <FormattedMessage
-              id="xpack.synthetics.monitorList.monitoringStatusTitle"
+              id="xpack.uptime.monitorList.monitoringStatusTitle"
               defaultMessage="Monitors"
             />
           </h2>

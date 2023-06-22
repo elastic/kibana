@@ -57,7 +57,7 @@ export const MonitorStatusList = ({ summaryPings }: MonitorStatusListProps) => {
           <EuiSpacer size="s" />
           <EuiCallOut color="warning">
             <FormattedMessage
-              id="xpack.synthetics.monitorList.drawer.missingLocation"
+              id="xpack.uptime.monitorList.drawer.missingLocation"
               defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."
               values={{ link: <LocationLink /> }}
             />

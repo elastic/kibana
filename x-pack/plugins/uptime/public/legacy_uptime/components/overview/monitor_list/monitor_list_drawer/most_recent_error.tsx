@@ -45,7 +45,7 @@ export const MostRecentError = ({ error, monitorId, timestamp }: MostRecentError
   return (
     <EuiDescriptionList>
       <EuiDescriptionListTitle>
-        {i18n.translate('xpack.synthetics.monitorList.mostRecentError.title', {
+        {i18n.translate('xpack.uptime.monitorList.mostRecentError.title', {
           defaultMessage: 'Most recent error ({timestamp})',
           values: { timestamp: timestampStr },
           description: 'Most Recent Error title in Monitor List Expanded row',

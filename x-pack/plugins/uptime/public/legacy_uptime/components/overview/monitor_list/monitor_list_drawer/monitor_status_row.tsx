@@ -38,7 +38,7 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
       <EuiBadge color={color}>{getHealthMessage(status)}</EuiBadge>
       <EuiSpacer size="xs" />
       <span
-        aria-label={i18n.translate('xpack.synthetics.monitorList.drawer.statusRowLocationList', {
+        aria-label={i18n.translate('xpack.uptime.monitorList.drawer.statusRowLocationList', {
           defaultMessage: 'A list of locations with "{status}" status when last checked.',
           values: { status },
         })}

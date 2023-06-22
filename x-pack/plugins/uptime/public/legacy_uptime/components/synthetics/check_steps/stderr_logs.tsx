@@ -144,21 +144,18 @@ export const StdErrorLogs = ({
   );
 };
 
-export const TIMESTAMP_LABEL = i18n.translate('xpack.synthetics.monitorList.timestamp', {
+export const TIMESTAMP_LABEL = i18n.translate('xpack.uptime.monitorList.timestamp', {
   defaultMessage: 'Timestamp',
 });
 
-export const ERROR_SUMMARY_LABEL = i18n.translate('xpack.synthetics.monitorList.errorSummary', {
+export const ERROR_SUMMARY_LABEL = i18n.translate('xpack.uptime.monitorList.errorSummary', {
   defaultMessage: 'Error summary',
 });
 
-export const VIEW_IN_DISCOVER_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.viewInDiscover',
-  {
-    defaultMessage: 'View in discover',
-  }
-);
+export const VIEW_IN_DISCOVER_LABEL = i18n.translate('xpack.uptime.monitorList.viewInDiscover', {
+  defaultMessage: 'View in discover',
+});
 
-export const TEST_RUN_LOGS_LABEL = i18n.translate('xpack.synthetics.monitorList.testRunLogs', {
+export const TEST_RUN_LOGS_LABEL = i18n.translate('xpack.uptime.monitorList.testRunLogs', {
   defaultMessage: 'Test run logs',
 });

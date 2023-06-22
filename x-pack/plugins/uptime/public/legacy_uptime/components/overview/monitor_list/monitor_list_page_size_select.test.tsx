@@ -17,11 +17,11 @@ describe('MonitorListPageSizeSelect', () => {
       <MonitorListPageSizeSelectComponent size={10} setSize={setSize} setUrlParams={setUrlParams} />
     );
     wrapper
-      .find('[data-test-subj="xpack.synthetics.monitorList.pageSizeSelect.popoverOpen"]')
+      .find('[data-test-subj="xpack.uptime.monitorList.pageSizeSelect.popoverOpen"]')
       .first()
       .simulate('click');
     wrapper
-      .find('[data-test-subj="xpack.synthetics.monitorList.pageSizeSelect.sizeSelectItem25"]')
+      .find('[data-test-subj="xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem25"]')
       .first()
       .simulate('click');
     expect(setSize).toHaveBeenCalledTimes(1);

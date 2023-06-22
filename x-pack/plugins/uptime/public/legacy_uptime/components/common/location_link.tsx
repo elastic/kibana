@@ -32,7 +32,7 @@ export const LocationLink = ({ location, textSize }: LocationLinkProps) => {
       href={locationDocsLink}
       target="_blank"
     >
-      {i18n.translate('xpack.synthetics.monitorList.geoName.helpLinkAnnotation', {
+      {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {
         defaultMessage: 'Add location',
         description:
           'Text that instructs the user to navigate to our docs to add a geographic location to their data',

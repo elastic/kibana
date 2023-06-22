@@ -33,7 +33,7 @@ export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
         onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         data-test-subj="uptimeMonitorRedirectInfo"
       >
-        {i18n.translate('xpack.synthetics.monitorList.redirects.title.number', {
+        {i18n.translate('xpack.uptime.monitorList.redirects.title.number', {
           defaultMessage: '{number}',
           values: {
             number: list?.length ?? 0,

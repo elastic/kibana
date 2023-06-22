@@ -41,7 +41,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
         iconType: 'popout',
         iconSize: 's',
         alwaysShow: true,
-        'aria-label': i18n.translate('xpack.synthetics.monitorList.redirects.openWindow', {
+        'aria-label': i18n.translate('xpack.uptime.monitorList.redirects.openWindow', {
           defaultMessage: 'Link will open in new window.',
         }),
       },
@@ -59,7 +59,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
         color: 'text',
         iconType: 'popout',
         iconSize: 's',
-        'aria-label': i18n.translate('xpack.synthetics.monitorList.redirects.openWindow', {
+        'aria-label': i18n.translate('xpack.uptime.monitorList.redirects.openWindow', {
           defaultMessage: 'Link will open in new window.',
         }),
         alwaysShow: true,
@@ -74,7 +74,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       {showTitle && (
         <EuiText size="xs">
           <h3>
-            {i18n.translate('xpack.synthetics.monitorList.redirects.title', {
+            {i18n.translate('xpack.uptime.monitorList.redirects.title', {
               defaultMessage: 'Redirects',
             })}
           </h3>
@@ -83,7 +83,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       <EuiSpacer size="xs" />
       {
         <EuiText>
-          {i18n.translate('xpack.synthetics.monitorList.redirects.description', {
+          {i18n.translate('xpack.uptime.monitorList.redirects.description', {
             defaultMessage: 'Heartbeat followed {number} redirects while executing ping.',
             values: {
               number: list?.length ?? 0,

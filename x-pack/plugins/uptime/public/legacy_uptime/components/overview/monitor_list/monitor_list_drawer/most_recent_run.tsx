@@ -24,7 +24,7 @@ export const MostRecentRun = ({ summary }: Props) => {
   return (
     <EuiDescriptionList>
       <EuiDescriptionListTitle>
-        {i18n.translate('xpack.synthetics.monitorList.drawer.mostRecentRun', {
+        {i18n.translate('xpack.uptime.monitorList.drawer.mostRecentRun', {
           defaultMessage: 'Most recent test run',
         })}
       </EuiDescriptionListTitle>

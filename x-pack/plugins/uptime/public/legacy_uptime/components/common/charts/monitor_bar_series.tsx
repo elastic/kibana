@@ -92,7 +92,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
           id={id}
           color={danger}
           data={(histogramSeries || []).map(({ timestamp, down }) => [timestamp, down])}
-          name={i18n.translate('xpack.synthetics.monitorList.downLineSeries.downLabel', {
+          name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
             defaultMessage: 'Down checks',
           })}
           timeZone="local"
@@ -108,7 +108,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
       position="top"
       content={
         <FormattedMessage
-          id="xpack.synthetics.monitorList.noDownHistory"
+          id="xpack.uptime.monitorList.noDownHistory"
           defaultMessage="This monitor has never been {emphasizedText} during the selected time range."
           values={{ emphasizedText: <strong>down</strong> }}
         />

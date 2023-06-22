@@ -101,7 +101,7 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
 
   const upsMessage =
     upPings.size > 0
-      ? i18n.translate('xpack.synthetics.monitorList.statusColumn.locStatusMessage.tooltip.up', {
+      ? i18n.translate('xpack.uptime.monitorList.statusColumn.locStatusMessage.tooltip.up', {
           defaultMessage: 'Up in {locs}',
           values: { locs: [...upPings].join(', ') },
         })
@@ -109,7 +109,7 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
 
   const downMessage =
     downPings.size > 0
-      ? i18n.translate('xpack.synthetics.monitorList.statusColumn.locStatusMessage.tooltip.down', {
+      ? i18n.translate('xpack.uptime.monitorList.statusColumn.locStatusMessage.tooltip.down', {
           defaultMessage: 'Down in {locs}',
           values: { locs: [...downPings].join(', ') },
         })
@@ -129,7 +129,7 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
   if (totalLocations > 1) {
     return {
       statusMessage: i18n.translate(
-        'xpack.synthetics.monitorList.statusColumn.locStatusMessage.multiple',
+        'xpack.uptime.monitorList.statusColumn.locStatusMessage.multiple',
         {
           defaultMessage: 'in {noLoc} locations',
           values: { noLoc: statusMessage },
@@ -146,7 +146,7 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
   }
 
   return {
-    statusMessage: i18n.translate('xpack.synthetics.monitorList.statusColumn.locStatusMessage', {
+    statusMessage: i18n.translate('xpack.uptime.monitorList.statusColumn.locStatusMessage', {
       defaultMessage: 'in {noLoc} location',
       values: { noLoc: statusMessage },
     }),
@@ -207,7 +207,7 @@ export const MonitorListStatusColumn = ({
 };
 
 const getCheckedLabel = (timestamp: Moment) => {
-  return i18n.translate('xpack.synthetics.monitorList.statusColumn.checkedTimestamp', {
+  return i18n.translate('xpack.uptime.monitorList.statusColumn.checkedTimestamp', {
     defaultMessage: 'Checked {timestamp}',
     values: { timestamp: getShortTimeStamp(timestamp) },
   });

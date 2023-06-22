@@ -52,7 +52,7 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
   return (
     <EuiDescriptionList>
       <EuiDescriptionListTitle>
-        {i18n.translate('xpack.synthetics.monitorList.enabledAlerts.title', {
+        {i18n.translate('xpack.uptime.monitorList.enabledAlerts.title', {
           defaultMessage: 'Enabled rules',
           description: 'Rules enabled for this monitor',
         })}
@@ -61,7 +61,7 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
         {listItems.length === 0 && !loading && (
           <EuiCallOut
             size="s"
-            title={i18n.translate('xpack.synthetics.monitorList.enabledAlerts.noAlert', {
+            title={i18n.translate('xpack.uptime.monitorList.enabledAlerts.noAlert', {
               defaultMessage: 'No rules are enabled for this monitor.',
             })}
           />

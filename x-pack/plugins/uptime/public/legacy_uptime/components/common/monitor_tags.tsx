@@ -37,7 +37,7 @@ const getTagsFromPing = (ping: Ping) => {
 };
 
 const getFilterLabel = (tag: string) => {
-  return i18n.translate('xpack.synthetics.monitorList.tags.filter', {
+  return i18n.translate('xpack.uptime.monitorList.tags.filter', {
     defaultMessage: 'Filter all monitors with tag {tag}',
     values: {
       tag,

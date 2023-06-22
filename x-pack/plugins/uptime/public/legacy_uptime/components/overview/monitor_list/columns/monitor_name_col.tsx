@@ -51,7 +51,7 @@ export const MonitorNameColumn = ({ summary }: Props) => {
 
   useFilterUpdate('monitor.type', filterType, excludedTypeFilters);
 
-  const filterLabel = i18n.translate('xpack.synthetics.monitorList.monitorType.filter', {
+  const filterLabel = i18n.translate('xpack.uptime.monitorList.monitorType.filter', {
     defaultMessage: 'Filter all monitors with type {type}',
     values: {
       type: summary.state.monitor.type,

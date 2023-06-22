@@ -21,7 +21,7 @@ export const MonitorUrl = ({ monitorUrl }: Props) => {
   return (
     <EuiDescriptionList>
       <EuiDescriptionListTitle>
-        {i18n.translate('xpack.synthetics.monitorList.drawer.url', {
+        {i18n.translate('xpack.uptime.monitorList.drawer.url', {
           defaultMessage: 'Url',
         })}
       </EuiDescriptionListTitle>
