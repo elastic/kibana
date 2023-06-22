@@ -13,35 +13,42 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { isSavedQueryPrebuilt } from './utils';
 
 export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
-  router.delete(
-    {
+  router.versioned
+    .delete({
+      access: 'public',
       path: '/api/osquery/saved_queries/{id}',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
-    },
-    async (context, request, response) => {
-      const coreContext = await context.core;
-      const savedObjectsClient = coreContext.savedObjects.client;
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        const coreContext = await context.core;
+        const savedObjectsClient = coreContext.savedObjects.client;
 
-      const isPrebuilt = await isSavedQueryPrebuilt(
-        osqueryContext.service.getPackageService()?.asInternalUser,
-        request.params.id
-      );
-      if (isPrebuilt) {
-        return response.conflict({ body: `Elastic prebuilt Saved query cannot be deleted.` });
+        const isPrebuilt = await isSavedQueryPrebuilt(
+          osqueryContext.service.getPackageService()?.asInternalUser,
+          request.params.id
+        );
+        if (isPrebuilt) {
+          return response.conflict({ body: `Elastic prebuilt Saved query cannot be deleted.` });
+        }
+
+        await savedObjectsClient.delete(savedQuerySavedObjectType, request.params.id, {
+          refresh: 'wait_for',
+        });
+
+        return response.ok({
+          body: {},
+        });
       }
-
-      await savedObjectsClient.delete(savedQuerySavedObjectType, request.params.id, {
-        refresh: 'wait_for',
-      });
-
-      return response.ok({
-        body: {},
-      });
-    }
-  );
+    );
 };

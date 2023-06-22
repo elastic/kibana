@@ -16,82 +16,89 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray } from '../utils';
 
 export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: '/api/osquery/saved_queries',
-      validate: {
-        body: buildRouteValidation<
-          typeof createSavedQueryRequestSchema,
-          CreateSavedQueryRequestSchemaDecoded
-        >(createSavedQueryRequestSchema),
-      },
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
-    },
-    async (context, request, response) => {
-      const coreContext = await context.core;
-      const savedObjectsClient = coreContext.savedObjects.client;
-
-      const {
-        id,
-        description,
-        platform,
-        query,
-        version,
-        interval,
-        snapshot,
-        removed,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        ecs_mapping,
-      } = request.body;
-
-      const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
-
-      const conflictingEntries = await savedObjectsClient.find({
-        type: savedQuerySavedObjectType,
-        filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
-      });
-
-      if (
-        conflictingEntries.saved_objects.length &&
-        some(conflictingEntries.saved_objects, ['attributes.id', id])
-      ) {
-        return response.conflict({ body: `Saved query with id "${id}" already exists.` });
-      }
-
-      const savedQuerySO = await savedObjectsClient.create(
-        savedQuerySavedObjectType,
-        pickBy(
-          {
-            id,
-            description,
-            query,
-            platform,
-            version,
-            interval,
-            snapshot,
-            removed,
-            ecs_mapping: convertECSMappingToArray(ecs_mapping),
-            created_by: currentUser,
-            created_at: new Date().toISOString(),
-            updated_by: currentUser,
-            updated_at: new Date().toISOString(),
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: buildRouteValidation<
+              typeof createSavedQueryRequestSchema,
+              CreateSavedQueryRequestSchemaDecoded
+            >(createSavedQueryRequestSchema),
           },
-          (value) => !isEmpty(value) || isBoolean(value)
-        )
-      );
-
-      return response.ok({
-        body: {
-          data: pickBy(
-            {
-              ...savedQuerySO.attributes,
-              saved_object_id: savedQuerySO.id,
-              ecs_mapping,
-            },
-            (value) => !isEmpty(value)
-          ),
         },
-      });
-    }
-  );
+      },
+      async (context, request, response) => {
+        const coreContext = await context.core;
+        const savedObjectsClient = coreContext.savedObjects.client;
+
+        const {
+          id,
+          description,
+          platform,
+          query,
+          version,
+          interval,
+          snapshot,
+          removed,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          ecs_mapping,
+        } = request.body;
+
+        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+
+        const conflictingEntries = await savedObjectsClient.find({
+          type: savedQuerySavedObjectType,
+          filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
+        });
+
+        if (
+          conflictingEntries.saved_objects.length &&
+          some(conflictingEntries.saved_objects, ['attributes.id', id])
+        ) {
+          return response.conflict({ body: `Saved query with id "${id}" already exists.` });
+        }
+
+        const savedQuerySO = await savedObjectsClient.create(
+          savedQuerySavedObjectType,
+          pickBy(
+            {
+              id,
+              description,
+              query,
+              platform,
+              version,
+              interval,
+              snapshot,
+              removed,
+              ecs_mapping: convertECSMappingToArray(ecs_mapping),
+              created_by: currentUser,
+              created_at: new Date().toISOString(),
+              updated_by: currentUser,
+              updated_at: new Date().toISOString(),
+            },
+            (value) => !isEmpty(value) || isBoolean(value)
+          )
+        );
+
+        return response.ok({
+          body: {
+            data: pickBy(
+              {
+                ...savedQuerySO.attributes,
+                saved_object_id: savedQuerySO.id,
+                ecs_mapping,
+              },
+              (value) => !isEmpty(value)
+            ),
+          },
+        });
+      }
+    );
 };

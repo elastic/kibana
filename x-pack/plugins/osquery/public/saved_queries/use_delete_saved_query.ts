@@ -27,21 +27,24 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(() => http.delete(`/api/osquery/saved_queries/${savedQueryId}`), {
-    onError: (error: { body: { error: string; message: string } }) => {
-      setErrorToast(error, {
-        title: error.body.error,
-        toastMessage: error.body.message,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries([SAVED_QUERIES_ID]);
-      navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
-      toasts.addSuccess(
-        i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {
-          defaultMessage: 'Successfully deleted saved query',
-        })
-      );
-    },
-  });
+  return useMutation(
+    () => http.delete(`/api/osquery/saved_queries/${savedQueryId}`, { version: '2023-10-31' }),
+    {
+      onError: (error: { body: { error: string; message: string } }) => {
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries([SAVED_QUERIES_ID]);
+        navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
+        toasts.addSuccess(
+          i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {
+            defaultMessage: 'Successfully deleted saved query',
+          })
+        );
+      },
+    }
+  );
 };
