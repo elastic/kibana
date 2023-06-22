@@ -349,10 +349,22 @@ describe('ManifestManager', () => {
 
     test('Builds fully new manifest if no baseline parameter passed and present exception list items', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
-      const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
-      const eventFiltersListItem = getExceptionListItemSchemaMock({ os_types: ['windows'] });
-      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
-      const blocklistsListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: ['policy:all'],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: ['policy:all'],
+      });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
@@ -417,10 +429,22 @@ describe('ManifestManager', () => {
 
     test('Reuses artifacts when baseline parameter passed and present exception list items', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
-      const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
-      const eventFiltersListItem = getExceptionListItemSchemaMock({ os_types: ['windows'] });
-      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
-      const blocklistsListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: ['policy:all'],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: ['policy:all'],
+      });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
@@ -486,15 +510,18 @@ describe('ManifestManager', () => {
       }
     });
 
-    //
     test('Builds manifest with policy specific exception list items for trusted apps', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
-      const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
       const trustedAppListItemPolicy2 = getExceptionListItemSchemaMock({
         os_types: ['linux'],
         entries: [
           { field: 'other.field', operator: 'included', type: 'match', value: 'other value' },
         ],
+        tags: [`policy:${TEST_POLICY_ID_2}`],
       });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
@@ -502,8 +529,7 @@ describe('ManifestManager', () => {
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
         [ENDPOINT_TRUSTED_APPS_LIST_ID]: {
-          linux: [trustedAppListItem],
-          [`linux-${TEST_POLICY_ID_2}`]: [trustedAppListItem, trustedAppListItemPolicy2],
+          linux: [trustedAppListItem, trustedAppListItemPolicy2],
         },
       });
       context.packagePolicyService.listIds = mockPolicyListIdsResponse([
@@ -572,16 +598,12 @@ describe('ManifestManager', () => {
           ARTIFACT_ID_EXCEPTIONS_MACOS,
           ARTIFACT_ID_EXCEPTIONS_WINDOWS,
         ])
-      ).resolves.toStrictEqual([]);
+      ).resolves.toStrictEqual(undefined);
 
-      expect(context.artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
-        1,
-        ARTIFACT_ID_EXCEPTIONS_MACOS
-      );
-      expect(context.artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
-        2,
-        ARTIFACT_ID_EXCEPTIONS_WINDOWS
-      );
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_ID_EXCEPTIONS_MACOS,
+        ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+      ]);
     });
 
     test('Returns errors for partial failures', async () => {
@@ -590,8 +612,8 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
       const error = new Error();
 
-      artifactClient.deleteArtifact.mockImplementation(async (id) => {
-        if (id === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
+      artifactClient.bulkDeleteArtifacts.mockImplementation(async (ids) => {
+        if (ids[1] === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
           throw error;
         }
       });
@@ -601,17 +623,13 @@ describe('ManifestManager', () => {
           ARTIFACT_ID_EXCEPTIONS_MACOS,
           ARTIFACT_ID_EXCEPTIONS_WINDOWS,
         ])
-      ).resolves.toStrictEqual([error]);
+      ).resolves.toStrictEqual(error);
 
-      expect(artifactClient.deleteArtifact).toHaveBeenCalledTimes(2);
-      expect(artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
-        1,
-        ARTIFACT_ID_EXCEPTIONS_MACOS
-      );
-      expect(artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
-        2,
-        ARTIFACT_ID_EXCEPTIONS_WINDOWS
-      );
+      expect(artifactClient.bulkDeleteArtifacts).toHaveBeenCalledTimes(1);
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_ID_EXCEPTIONS_MACOS,
+        ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+      ]);
     });
   });
 

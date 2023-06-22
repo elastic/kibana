@@ -127,7 +127,7 @@ export const getManifestManagerMock = (
           context.exceptionListClient.findExceptionListItem = jest
             .fn()
             .mockRejectedValue(new Error('unexpected thing happened'));
-          return super.buildExceptionListArtifacts();
+          return super.buildExceptionListArtifacts([]);
         case ManifestManagerMockType.NormalFlow:
           return getMockArtifactsWithDiff();
       }

@@ -173,9 +173,10 @@ export class ManifestManager {
     const filter = (exception: ExceptionListItemSchema) =>
       policyId
         ? exception.tags.includes('policy:all') || exception.tags.includes(`policy:${policyId}`)
-        : exception.tags.includes('policy:all') || isEmpty(exception.tags);
+        : exception.tags.includes('policy:all');
 
-    const exceptions: ExceptionListItemSchema[] = allExceptionsByListId.filter(filter);
+    const exceptions: ExceptionListItemSchema[] =
+      listId === ENDPOINT_LIST_ID ? allExceptionsByListId : allExceptionsByListId.filter(filter);
 
     const translatedExceptions = {
       entries: translateToEndpointExceptions(exceptions, schemaVersion),

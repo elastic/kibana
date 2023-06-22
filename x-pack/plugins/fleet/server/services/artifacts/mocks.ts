@@ -26,6 +26,7 @@ export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterfac
     createArtifact: jest.fn().mockResolvedValue(generateArtifactMock()),
     bulkCreateArtifacts: jest.fn().mockResolvedValue({ artifacts: generateArtifactMock() }),
     deleteArtifact: jest.fn(),
+    bulkDeleteArtifacts: jest.fn(),
     listArtifacts: jest.fn().mockResolvedValue({
       items: [generateArtifactMock()],
       total: 1,
