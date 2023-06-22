@@ -23,7 +23,7 @@ import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 const ExceptionsRoutes = () => (
-  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
+  <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.exceptions}>
       <SharedLists />
       <SpyRoute pageName={SecurityPageName.exceptions} />
@@ -32,7 +32,7 @@ const ExceptionsRoutes = () => (
 );
 
 const ExceptionsListDetailRoute = () => (
-  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
+  <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.exceptions}>
       <ListsDetailView />
     </TrackApplicationView>
