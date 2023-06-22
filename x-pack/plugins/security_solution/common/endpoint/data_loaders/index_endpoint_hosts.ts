@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient } from '@kbn/test';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Agent, CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
+import { AutomatedActionGenerator } from '../data_generators/automated_action_generator';
 import { EndpointDocGenerator } from '../generate_data';
 import type { HostMetadata, HostPolicyResponse } from '../types';
 import type {
@@ -200,18 +201,14 @@ export async function indexEndpointHostDocs({
 
       if (withResponseActions) {
         // Create some fleet endpoint actions and .logs-endpoint actions for this Host
+        const responseActionsFleetActionGenerator = new AutomatedActionGenerator();
         const actionsResponse = await indexEndpointAndFleetActionsForHost(
           client,
           hostMetadata,
-          undefined,
+          alertIds ? responseActionsFleetActionGenerator : undefined,
           {
-            alertIds,
+            ...(alertIds ? { alertIds } : {}),
             numResponseActions,
-            overrides: {
-              data: {
-                command: 'isolate',
-              },
-            },
           }
         );
         mergeAndAppendArrays(response, actionsResponse);

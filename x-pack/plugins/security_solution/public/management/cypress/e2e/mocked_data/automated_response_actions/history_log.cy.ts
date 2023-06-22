@@ -32,7 +32,6 @@ describe('History Log', () => {
       alertData = indexedAlert;
       const alertId = alertData.alerts[0]._id;
       return indexEndpointHosts({
-        withResponseActions: true,
         numResponseActions: 1,
         alertIds: [alertId],
       }).then((indexEndpoints) => {
@@ -70,6 +69,7 @@ describe('History Log', () => {
     cy.getByTestSubj('type-filter-option').contains('Triggered by rule').click();
     cy.getByTestSubj('response-actions-list').within(() => {
       cy.get('tbody .euiTableRow').should('have.lengthOf', 1);
+      cy.get('tbody .euiTableRow').eq(0).contains('Triggered by rule');
     });
     cy.getByTestSubj('type-filter-option').contains('Triggered by rule').click();
     cy.getByTestSubj('response-actions-list').within(() => {
@@ -82,6 +82,9 @@ describe('History Log', () => {
     cy.getByTestSubj('type-filter-option').contains('Triggered by rule').click();
     cy.getByTestSubj('response-actions-list').within(() => {
       cy.get('tbody .euiTableRow').should('have.lengthOf', maxLength);
+      cy.get('tbody .euiTableRow').eq(0).contains('Triggered by rule').click();
     });
+    // check if we were moved to Rules app after clicking Triggered by rule
+    cy.getByTestSubj('breadcrumb last').contains('Rules');
   });
 });

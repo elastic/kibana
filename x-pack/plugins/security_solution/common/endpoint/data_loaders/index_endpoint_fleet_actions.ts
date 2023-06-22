@@ -8,7 +8,6 @@
 import type { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import type { ResponseActionsApiCommandNames } from '../service/response_actions/constants';
 import type {
   EndpointAction,
   EndpointActionResponse,
@@ -36,7 +35,6 @@ export interface IndexedEndpointAndFleetActionsForHostResponse {
 export interface IndexEndpointAndFleetActionsForHostOptions {
   numResponseActions?: number;
   alertIds?: string[];
-  overrides?: { data: { command: ResponseActionsApiCommandNames } };
 }
 /**
  * Indexes a random number of Endpoint (via Fleet) Actions for a given host
@@ -72,9 +70,10 @@ export const indexEndpointAndFleetActionsForHost = async (
 
   for (let i = 0; i < total; i++) {
     // create an action
-    const action = fleetActionGenerator.generate({
-      data: { ...options.overrides?.data, comment: 'data generator: this host is bad' },
-    });
+    const action: EndpointAction & { rule?: { name: string; id: string } } =
+      fleetActionGenerator.generate({
+        data: { comment: 'data generator: this host is bad' },
+      });
 
     action.agents = [agentId];
     const indexFleetActions = esClient
@@ -110,6 +109,7 @@ export const indexEndpointAndFleetActionsForHost = async (
       user: {
         id: action.user_id,
       },
+      ...(action.rule ? { rule: action.rule } : {}),
     };
 
     await Promise.all([

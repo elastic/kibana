@@ -33,9 +33,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
         agents: [this.seededUUIDv4()],
         user_id: 'elastic',
         data: {
-          command: overrides.data?.command
-            ? overrides.data?.command
-            : this.randomResponseActionCommand(),
+          command: this.randomResponseActionCommand(),
           comment: this.randomString(15),
           parameter: undefined,
           output: undefined,

@@ -15,7 +15,7 @@ import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_alerts';
 
 describe('No License', { env: { ftrConfig: { license: 'basic' } } }, () => {
-  describe('User without license should not be able to use response actions even though RBAC is correct', () => {
+  describe('User cannot use endpoint action in form', () => {
     const [ruleName, ruleDescription] = generateRandomStringName(2);
 
     before(() => {
