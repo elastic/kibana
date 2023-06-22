@@ -6,13 +6,12 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-export { METRIC_TYPE } from '@kbn/analytics';
+import { EventReporter } from './telemetry';
 
 /* @internal */
 export enum COUNT_METRIC {
   UNHANDLED_ERROR = 'unhandled_error',
   SHORTCUT_USED = 'shortcut_used',
-  SEARCH_BLUR = 'search_blur',
   SEARCH_FOCUS = 'search_focus',
   SEARCH_REQUEST = 'search_request',
 }
@@ -23,25 +22,41 @@ export enum CLICK_METRIC {
   USER_NAVIGATED_TO_SAVED_OBJECT = 'user_navigated_to_saved_object',
 }
 
-export interface TrackedApplicationClick {
-  application: string;
-}
-export interface TrackedSavedObjectClick {
-  type: string;
-}
-export interface TrackedError {
-  message: string | Error;
+/* @internal */
+export enum EVENT_TYPE {
+  SEARCH_BLUR = 'global_search_bar_blur',
+  CLICK_APPLICATION = 'global_search_bar_click_application',
+  CLICK_SAVED_OBJECT = 'global_search_bar_click_saved_object',
+  ERROR = 'global_search_bar_unhandled_error',
 }
 
-export type TrackingContext = (TrackedApplicationClick | TrackedSavedObjectClick | TrackedError) & {
-  searchValue?: string;
-};
-
+/* @internal */
 type EventType = COUNT_METRIC | CLICK_METRIC;
 
 /* @internal */
-export type TrackUiMetricFn = (
+type UiCounterTrackingFn = (
   metricType: UiCounterMetricType,
   eventName: EventType,
-  context?: TrackingContext
+  context?: string
 ) => void;
+
+/* @internal */
+export interface TrackedApplicationClick {
+  application: string;
+  searchValue?: string;
+}
+/* @internal */
+export interface TrackedSavedObjectClick {
+  type: string;
+  searchValue?: string;
+}
+/* @internal */
+export interface TrackedError {
+  message: string | Error;
+  searchValue?: string;
+}
+
+type IEventReporter = Pick<EventReporter, keyof EventReporter>; // public methods of EventReporter
+
+/* @internal */
+export type TrackUiMetricFn = UiCounterTrackingFn & IEventReporter;

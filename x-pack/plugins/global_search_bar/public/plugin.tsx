@@ -14,7 +14,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { SearchBar } from './components/search_bar';
-import { getTracking } from './lib/tracking';
+import { getEventTypes, getTrackUiMetric } from './telemetry';
 
 export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
@@ -24,17 +24,8 @@ export interface GlobalSearchBarPluginStartDeps {
 
 export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
   public setup({ analytics }: CoreSetup) {
-    analytics.registerEventType({
-      eventType: 'global_search_bar_blur',
-      schema: {
-        focus_time_ms: {
-          type: 'long',
-          _meta: {
-            description:
-              'The length in milliseconds the user viewed the global search bar before closing without navigating',
-          },
-        },
-      },
+    getEventTypes().forEach((eventType) => {
+      analytics.registerEventType(eventType);
     });
 
     return {};
@@ -62,7 +53,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
                 basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
                 darkMode={uiSettings.get('theme:darkMode')}
                 chromeStyle$={core.chrome.getChromeStyle$()}
-                trackUiMetric={getTracking({ analytics: core.analytics, usageCollection })}
+                trackUiMetric={getTrackUiMetric({ analytics: core.analytics, usageCollection })}
               />
             </I18nProvider>
           </KibanaThemeProvider>,

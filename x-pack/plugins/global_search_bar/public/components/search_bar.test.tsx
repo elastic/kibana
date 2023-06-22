@@ -12,10 +12,11 @@ import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { getTracking } from '../lib/tracking';
+import { getTrackUiMetric } from '../telemetry';
 import type { TrackUiMetricFn } from '../types';
 import { SearchBar } from './search_bar';
 
@@ -70,7 +71,7 @@ describe('SearchBar', () => {
     reportEvent = jest.fn();
     core.analytics.reportEvent = reportEvent;
 
-    trackUiMetric = getTracking({ analytics: core.analytics, usageCollection });
+    trackUiMetric = getTrackUiMetric({ analytics: core.analytics, usageCollection });
   });
 
   const update = () => {
@@ -229,31 +230,44 @@ describe('SearchBar', () => {
         </IntlProvider>
       );
 
-      expect(searchService.find).toHaveBeenCalledTimes(0);
-
       await focusAndUpdate();
-
-      expect(searchService.find).toHaveBeenCalledTimes(1);
-      expect(searchService.find).toHaveBeenCalledWith({}, {});
-      await assertSearchResults(['Discover • Kibana']);
-
-      const navSearchOptionToClick = await screen.findByTestId('nav-search-option');
-      act(() => {
-        fireEvent.click(navSearchOptionToClick);
-      });
-
-      expect(reportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'search_focus');
-      expect(reportUiCounter).nthCalledWith(2, 'global_search_bar', 'click', [
-        'user_navigated_to_application',
-        'user_navigated_to_application_discover',
-      ]);
-      expect(reportUiCounter).nthCalledWith(3, 'global_search_bar', 'count', 'search_blur');
-      expect(reportUiCounter).nthCalledWith(4, 'global_search_bar', 'count', 'search_blur'); // FIXME why is blur called twice
-      expect(reportUiCounter).toHaveBeenCalledTimes(4);
+      fireEvent.click(await screen.findByTestId('nav-search-option'));
 
       expect(reportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
         application: 'discover',
         terms: '',
+      });
+      expect(reportEvent).nthCalledWith(2, 'global_search_bar_blur', {
+        focus_time_ms: expect.any(Number),
+      });
+      expect(reportEvent).toHaveBeenCalledTimes(2);
+    });
+
+    it('tracks the searchValue', async () => {
+      searchService.find.mockReturnValueOnce(
+        of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
+      );
+
+      render(
+        <IntlProvider locale="en">
+          <SearchBar
+            globalSearch={searchService}
+            navigateToUrl={applications.navigateToUrl}
+            basePathUrl={basePathUrl}
+            darkMode={darkMode}
+            chromeStyle$={chromeStyle$}
+            trackUiMetric={trackUiMetric}
+          />
+        </IntlProvider>
+      );
+
+      await focusAndUpdate();
+      userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
+      fireEvent.click(await screen.findByTestId('nav-search-option'));
+
+      expect(reportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
+        application: 'discover',
+        terms: 'Ahoy!',
       });
       expect(reportEvent).nthCalledWith(2, 'global_search_bar_blur', {
         focus_time_ms: expect.any(Number),

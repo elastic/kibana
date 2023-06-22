@@ -30,7 +30,7 @@ import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
-import { CLICK_METRIC, COUNT_METRIC, METRIC_TYPE } from '../types';
+import { CLICK_METRIC, COUNT_METRIC } from '../types';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
@@ -165,10 +165,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
             setOptions(aggregatedResults, suggestions, searchParams.tags);
           },
-          error: () => {
+          error: (err) => {
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
             trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.UNHANDLED_ERROR);
+            trackUiMetric.error(err);
           },
           complete: () => {},
         });
@@ -217,15 +218,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         if (type === 'application') {
           const key = selected.key ?? 'unknown';
           const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
-          trackUiMetric(METRIC_TYPE.CLICK, CLICK_METRIC.USER_NAVIGATED_TO_APPLICATION, {
-            application,
-            searchValue,
-          });
+          trackUiMetric(METRIC_TYPE.CLICK, CLICK_METRIC.USER_NAVIGATED_TO_APPLICATION, application);
+          trackUiMetric.navigateToApplication({ application, searchValue });
         } else {
-          trackUiMetric(METRIC_TYPE.CLICK, CLICK_METRIC.USER_NAVIGATED_TO_SAVED_OBJECT, {
-            type,
-            searchValue,
-          });
+          trackUiMetric(METRIC_TYPE.CLICK, CLICK_METRIC.USER_NAVIGATED_TO_SAVED_OBJECT, type);
+          trackUiMetric.navigateToSavedObject({ type, searchValue });
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -314,11 +311,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         placeholder: i18nStrings.placeholderText,
         onFocus: () => {
           trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SEARCH_FOCUS);
+          trackUiMetric.searchFocus();
           setInitialLoad(true);
           setShowAppend(false);
         },
         onBlur: () => {
-          trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SEARCH_BLUR);
+          trackUiMetric.searchBlur();
           setShowAppend(!searchValue.length);
         },
         fullWidth: true,
