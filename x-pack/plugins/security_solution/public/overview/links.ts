@@ -14,6 +14,7 @@ import {
   OVERVIEW_PATH,
   SecurityPageName,
   SERVER_APP_ID,
+  MITRE_ATTACK_COVERAGE_PATH,
 } from '../../common/constants';
 import {
   DATA_QUALITY,
@@ -21,6 +22,7 @@ import {
   GETTING_STARTED,
   OVERVIEW,
   ENTITY_ANALYTICS,
+  MITRE_ATTACK_COVERAGE,
 } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
@@ -108,4 +110,25 @@ export const ecsDataQualityDashboardLinks: LinkItem = {
       defaultMessage: 'Data Quality',
     }),
   ],
+};
+
+export const mitreAttackCoverageDashboardLinks: LinkItem = {
+  id: SecurityPageName.mitreAttackCoverage,
+  title: MITRE_ATTACK_COVERAGE,
+  landingImage: dataQualityDashboardPageImg,
+  description: i18n.translate(
+    'xpack.securitySolution.appLinks.mitreAttackCoverageDashboardDescription',
+    {
+      defaultMessage:
+        'An overview of rule coverage according to the MITRE ATT&CK\u00AE specifications',
+    }
+  ),
+  path: MITRE_ATTACK_COVERAGE_PATH,
+  capabilities: [`${SERVER_APP_ID}.show`],
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.mitreAttackCoverageDashboard', {
+      defaultMessage: 'MITRE ATT&CK Coverage',
+    }),
+  ],
+  experimentalKey: 'detectionsCoverageOverview',
 };

@@ -29,6 +29,13 @@ export const DATA_QUALITY_TITLE = i18n.translate(
   }
 );
 
+export const MITRE_ATTACK_COVERAGE_TITLE = i18n.translate(
+  'xpack.securitySolution.mitreAttackCoverageDashboard.pageTitle',
+  {
+    defaultMessage: 'MITRE ATT&CK\u00AE Coverage',
+  }
+);
+
 export const ELASTIC_COMMON_SCHEMA = i18n.translate(
   'xpack.securitySolution.dataQualityDashboard.elasticCommonSchemaReferenceLink',
   {

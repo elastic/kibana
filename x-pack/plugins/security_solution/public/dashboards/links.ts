@@ -18,6 +18,7 @@ import {
   detectionResponseLinks,
   entityAnalyticsLinks,
   overviewLinks,
+  mitreAttackCoverageDashboardLinks,
 } from '../overview/links';
 
 export const dashboardsLandingLinks: LinkItem = {
@@ -39,6 +40,7 @@ export const dashboardsLandingLinks: LinkItem = {
     vulnerabilityDashboardLink,
     entityAnalyticsLinks,
     ecsDataQualityDashboardLinks,
+    mitreAttackCoverageDashboardLinks,
   ],
   skipUrlState: false,
 };
