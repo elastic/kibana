@@ -42,7 +42,7 @@ interface Props {
   page: Page;
   sort: CertSort;
   onChange: (page: Page, sort: CertSort) => void;
-  certificates: CertResult & { loading?: boolean };
+  certificates: CertResult & { isLoading?: boolean };
 }
 
 export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onChange }) => {
@@ -101,7 +101,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
 
   return (
     <EuiBasicTable
-      loading={certificates.loading}
+      loading={certificates.isLoading}
       columns={columns}
       items={certificates?.certs ?? []}
       pagination={pagination}
@@ -113,7 +113,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
         },
       }}
       noItemsMessage={
-        certificates.loading ? (
+        certificates.isLoading ? (
           LOADING_CERTIFICATES
         ) : (
           <span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>
