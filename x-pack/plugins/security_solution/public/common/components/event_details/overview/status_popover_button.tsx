@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanel, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
@@ -56,6 +56,8 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
       refetch: refetchGlobalQuery,
     });
 
+    const panels = useMemo(() => [{ id: 0, items: actionItems }], [actionItems]);
+
     // statusPopoverVisible includes the logic for the visibility of the popover in
     // case actionItems is an empty array ( ex, when user has read access ).
     const statusPopoverVisible = useMemo(() => actionItems.length > 0, [actionItems]);
@@ -94,9 +96,10 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
         data-test-subj="alertStatus"
       >
         <EuiPopoverTitle paddingSize="m">{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
-        <EuiContextMenuPanel
+        <EuiContextMenu
+          panels={panels}
+          initialPanelId={0}
           data-test-subj="event-details-alertStatusPopover"
-          items={actionItems}
         />
       </EuiPopover>
     );
