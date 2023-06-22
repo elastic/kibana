@@ -21,7 +21,6 @@ import {
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  FLEET_SERVER_PACKAGE,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
 import type {
@@ -52,8 +51,9 @@ import { normalizeKuery } from '../../saved_object';
 
 import { auditLoggingService } from '../../audit_logging';
 
-import { createInstallableFrom } from '.';
 import { getFilteredSearchPackages } from '../filtered_packages';
+
+import { createInstallableFrom } from '.';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
