@@ -7,16 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TIME_SERIES_LABEL = i18n.translate('xpack.maps.source.esGeoLine.groupBy.timeseriesLabel', {
-  defaultMessage: 'Time series',
-});
-
-export const TERMS_LABEL = i18n.translate(
-  'xpack.maps.source.esGeoLine.groupBy.termsLabel',
+export const TIME_SERIES_LABEL = i18n.translate(
+  'xpack.maps.source.esGeoLine.groupBy.timeseriesLabel',
   {
-    defaultMessage: 'Top terms',
+    defaultMessage: 'Time series',
   }
 );
+
+export const TERMS_LABEL = i18n.translate('xpack.maps.source.esGeoLine.groupBy.termsLabel', {
+  defaultMessage: 'Top terms',
+});
 
 export const ENTITY_INPUT_LABEL = i18n.translate('xpack.maps.source.esGeoLine.splitFieldLabel', {
   defaultMessage: 'Entity',

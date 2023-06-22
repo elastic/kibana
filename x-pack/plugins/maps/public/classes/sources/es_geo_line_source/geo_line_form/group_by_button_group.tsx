@@ -20,7 +20,7 @@ const GROUP_BY_OPTIONS = [
   {
     id: GROUP_BY_TERM,
     label: TERMS_LABEL,
-  }
+  },
 ];
 
 interface Props {
