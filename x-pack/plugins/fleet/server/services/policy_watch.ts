@@ -85,7 +85,6 @@ export class PolicyWatcher {
           perPage: 100,
           kuery: AGENT_POLICY_SAVED_OBJECT_TYPE,
         });
-        this.logger.info(`this is the response' ${response}`);
       } catch (e) {
         this.logger.warn(
           `Unable to verify agent policies in line with license change: failed to fetch agent policies: ${e.message}`
@@ -93,13 +92,13 @@ export class PolicyWatcher {
         return;
       }
 
-      /* for (const policy of response.items as PackagePolicy[]) {
+      for (const policy of response.items as AgentPolicy[]) {
         // const updatePolicy = getAgentPolicyDataForUpdate(policy);
         // const policyConfig = updatePolicy.inputs[0].config.policy.value;
 
         try {
-          if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
-            updatePolicy.inputs[0].config.policy.value = unsetPolicyFeaturesAccordingToLicenseLevel(
+          if (!isAgentPolicyValidForLicense(policyConfig, license)) {
+            updatePolicy.inputs[0].config.policy.value = unsetAgentPolicyAccordingToLicenseLevel(
               policyConfig,
               license
             );
@@ -131,7 +130,7 @@ export class PolicyWatcher {
           );
           this.logger.warn(error);
         }
-      } */
+      }
     } while (response.page * response.perPage < response.total);
   }
 }

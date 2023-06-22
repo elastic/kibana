@@ -491,7 +491,6 @@ export class FleetPlugin
       uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
-
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.bulkActionsResolver?.start(plugins.taskManager);
     this.fleetUsageSender?.start(plugins.taskManager);
@@ -499,6 +498,15 @@ export class FleetPlugin
     startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
+
+    this.policyWatcher = new PolicyWatcher(
+      agentPolicyService,
+      core.savedObjects,
+      core.elasticsearch,
+      logger
+    );
+
+    this.policyWatcher.start(licenseService);
 
     const fleetSetupPromise = (async () => {
       try {
@@ -522,14 +530,6 @@ export class FleetPlugin
           )
           .toPromise();
 
-        this.policyWatcher = new PolicyWatcher(
-          agentPolicyService,
-          core.savedObjects,
-          core.elasticsearch,
-          logger
-        );
-
-        this.policyWatcher.start(licenseService);
         await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
           core.elasticsearch.client.asInternalUser
