@@ -83,7 +83,7 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
       error={error}
       fullWidth
     >
-      <CodeEditor // TODO JsonEditor is used many places. Need CodeOwners help to verify. One Example: theme provided in x-pack/plugins/index_management/public/application/index.tsx
+      <CodeEditor
         languageId="json"
         height={500}
         options={{

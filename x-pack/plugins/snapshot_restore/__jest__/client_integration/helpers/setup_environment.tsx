@@ -61,14 +61,11 @@ const appDependencies = {
   },
   plugins: {},
 };
-// TODO need to provide theme in x-pack/plugins/snapshot_restore/public/application/app_context.tsx and mock here
+
 const kibanaContextDependencies = {
   uiSettings: core.uiSettings,
   settings: core.settings,
   theme: core.theme,
-};
-  uiSettings: core.uiSettings,
-  settings: core.settings,
 };
 
 export const setupEnvironment = () => {

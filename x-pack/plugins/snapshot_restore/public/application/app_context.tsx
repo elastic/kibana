@@ -37,12 +37,6 @@ export const AppContextProvider = ({
   value: AppDependencies;
   children: React.ReactNode;
 }) => {
-  /*
-   * TODO theme needs to be provided here for
-   *  x-pack/plugins/snapshot_restore/public/application/components/repository_form/type_settings/hdfs_settings.tsx
-   *  and
-   *  x-pack/plugins/snapshot_restore/public/application/components/restore_snapshot_form/steps/step_settings.tsx
-   */
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
