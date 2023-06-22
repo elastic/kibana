@@ -147,6 +147,7 @@ it('indexes documents using the bulk client helper', async () => {
             ],
             "onDocument": [Function],
             "onDrop": [Function],
+            "refreshOnCompletion": true,
             "retries": 5,
           },
           Object {
@@ -170,6 +171,7 @@ it('indexes documents using the bulk client helper', async () => {
             ],
             "onDocument": [Function],
             "onDrop": [Function],
+            "refreshOnCompletion": true,
             "retries": 5,
           },
           Object {
