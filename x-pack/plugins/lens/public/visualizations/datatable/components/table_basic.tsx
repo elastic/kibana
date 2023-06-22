@@ -485,7 +485,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowCount={firstLocalTable.rows.length}
           renderCellValue={renderCellValue}
           gridStyle={gridStyle}
-          inMemory={{ level: 'sorting' }}
           sorting={sorting}
           pagination={
             pagination && {
