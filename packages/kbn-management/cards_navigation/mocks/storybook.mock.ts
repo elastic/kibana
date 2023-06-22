@@ -40,7 +40,6 @@ export class ProjectSwitcherStorybookMock extends AbstractStorybookMock<
   getProps(params?: ProjectSwitcherStorybookParams): ProjectSwitcherProps {
     return {
       currentProjectType: this.getArgumentValue('currentProjectType', params),
-      test: 'hola mundo',
     };
   }
 

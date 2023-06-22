@@ -8,4 +8,4 @@
 
 export type { ProjectSwitcherProps, KibanaDependencies } from './src';
 
-export { ProjectSwitcher, ProjectSwitcherKibanaProvider, ProjectSwitcherProvider } from './src';
+export { CardsNavigation } from './src';
