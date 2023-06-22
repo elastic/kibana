@@ -235,7 +235,7 @@ export const ADD_CATEGORY = i18n.translate('xpack.cases.caseView.addCategory', {
   defaultMessage: 'added the category',
 });
 
-export const REMOVE_CATEGORY = i18n.translate('xpack.cases.caseView.removeCategory', {
+export const REMOVE_CATEGORY = i18n.translate('xpack.cases.caseView.userAction.removeCategory', {
   defaultMessage: 'removed the category',
 });
 
