@@ -15,11 +15,10 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { paths } from '../../../config/paths';
@@ -30,10 +29,10 @@ import { useKibana } from '../../../utils/kibana_react';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import {
   transformCreateSLOFormToCreateSLOInput,
-  transformCreateSLOInputToCreateSLOForm,
   transformSloResponseToCreateSloForm,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
+import { useParseUrlState } from '../hooks/use_parse_url_state';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
 import { CreateSLOForm } from '../types';
@@ -57,20 +56,13 @@ export function SloEditForm({ slo }: Props) {
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
-  const history = useHistory();
   const { search } = useLocation();
 
   const { data: rules, isInitialLoading } = useFetchRulesForSlo({
     sloIds: slo?.id ? [slo.id] : undefined,
   });
+  const sloFormValuesUrlState = useParseUrlState();
 
-  const urlStateStorage = createKbnUrlStateStorage({
-    history,
-    useHash: false,
-    useHashQuery: false,
-  });
-
-  const urlParams = urlStateStorage.get<Partial<CreateSLOInput>>('_a');
   const searchParams = new URLSearchParams(search);
   const isEditMode = slo !== undefined;
 
@@ -88,11 +80,7 @@ export function SloEditForm({ slo }: Props) {
   }, [isEditMode, rules, slo]);
 
   const methods = useForm<CreateSLOForm>({
-    defaultValues: Object.assign(
-      {},
-      SLO_EDIT_FORM_DEFAULT_VALUES,
-      !!urlParams ? transformCreateSLOInputToCreateSLOForm(urlParams) : null
-    ),
+    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, sloFormValuesUrlState),
     values: transformSloResponseToCreateSloForm(slo),
     mode: 'all',
   });

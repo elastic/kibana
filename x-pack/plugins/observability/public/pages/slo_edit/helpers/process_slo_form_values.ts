@@ -88,7 +88,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
   };
 }
 
-export function transformCreateSLOInputToCreateSLOForm(
+export function transformPartialCreateSLOInputToPartialCreateSLOForm(
   values: Partial<CreateSLOInput>
 ): Partial<CreateSLOForm> {
   return {
