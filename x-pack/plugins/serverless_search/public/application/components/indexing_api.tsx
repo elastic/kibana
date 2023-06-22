@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -18,10 +18,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
+import { useKibanaServices } from '../hooks/use_kibana';
 import { CodeBox } from './code_box';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { LanguageDefinition } from './languages/types';
+import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
 
 import { OverviewPanel } from './overview_panels/overview_panel';
 import { LanguageClientPanel } from './overview_panels/language_client_panel';
@@ -49,8 +51,16 @@ const NoIndicesContent = () => (
 );
 
 export const ElasticsearchIndexingApi = () => {
+  const { cloud } = useKibanaServices();
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
+  const elasticsearchURL = useMemo(() => {
+    return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
+  }, [cloud]);
+  const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
+    url: elasticsearchURL,
+    apiKey: API_KEY_PLACEHOLDER,
+  };
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchIndexingApiPage">
@@ -107,7 +117,7 @@ export const ElasticsearchIndexingApi = () => {
               <EuiSpacer />
               <CodeBox
                 code="ingestData"
-                codeArgs={{ url: '', apiKey: '' }}
+                codeArgs={codeSnippetArguments}
                 languages={languageDefinitions}
                 selectedLanguage={selectedLanguage}
                 setSelectedLanguage={setSelectedLanguage}
