@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { APPLICATIONS_PLUGIN } from '../../../../../../../common/constants';
-import { ENGINES_PATH } from '../../../../../applications/routes';
+import { SEARCH_APPLICATIONS_PATH } from '../../../../../applications/routes';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
 import { CreateEngineMenuItem } from './create_engine_menu_item';
@@ -65,7 +65,7 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
             data-telemetry-id={`entSearchContent-${ingestionMethod}-header-searchEngines-viewEngines`}
             icon="eye"
             onClick={() => {
-              KibanaLogic.values.navigateToUrl(APPLICATIONS_PLUGIN.URL + ENGINES_PATH, {
+              KibanaLogic.values.navigateToUrl(APPLICATIONS_PLUGIN.URL + SEARCH_APPLICATIONS_PATH, {
                 shouldNotCreateHref: true,
               });
             }}
