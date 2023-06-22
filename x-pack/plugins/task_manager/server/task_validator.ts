@@ -60,7 +60,7 @@ export class TaskValidator {
     // TODO: Remove once all task types have defined their state schema.
     // https://github.com/elastic/kibana/issues/159347
     // Otherwise, failures on read / write would occur. (don't forget to unskip test)
-    if (!lastestStateSchema) {
+    if (!latestStateSchema) {
       return task;
     }
 
@@ -68,9 +68,9 @@ export class TaskValidator {
       let state = task.state;
       try {
         state = this.getValidatedStateSchema(
-          this.migrateTaskState(task.state, task.stateVersion, taskTypeDef, lastestStateSchema),
+          this.migrateTaskState(task.state, task.stateVersion, taskTypeDef, latestStateSchema),
           task.taskType,
-          lastestStateSchema,
+          latestStateSchema,
           'ignore'
         );
       } catch (e) {
@@ -91,8 +91,8 @@ export class TaskValidator {
     // We are doing a write operation which must validate against the latest state schema
     return {
       ...task,
-      state: this.getValidatedStateSchema(task.state, task.taskType, lastestStateSchema, 'forbid'),
-      stateVersion: lastestStateSchema?.version,
+      state: this.getValidatedStateSchema(task.state, task.taskType, latestStateSchema, 'forbid'),
+      stateVersion: latestStateSchema?.version,
     };
   }
 
@@ -100,14 +100,14 @@ export class TaskValidator {
     state: ConcreteTaskInstance['state'],
     currentVersion: number | undefined,
     taskTypeDef: TaskDefinition,
-    lastestStateSchema: LatestStateSchema
+    latestStateSchema: LatestStateSchema
   ) {
-    if (!lastestStateSchema || (currentVersion && currentVersion >= lastestStateSchema.version)) {
+    if (!latestStateSchema || (currentVersion && currentVersion >= latestStateSchema.version)) {
       return state;
     }
 
     let migratedState = state;
-    for (let i = currentVersion || 1; i <= lastestStateSchema.version; i++) {
+    for (let i = currentVersion || 1; i <= latestStateSchema.version; i++) {
       if (!taskTypeDef.stateSchemaByVersion || !taskTypeDef.stateSchemaByVersion[`${i}`]) {
         throw new Error(
           `[TaskValidator] state schema for ${taskTypeDef.type} missing version: ${i}`
