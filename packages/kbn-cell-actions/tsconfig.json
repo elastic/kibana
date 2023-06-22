@@ -19,6 +19,7 @@
     "@kbn/data-plugin",
     "@kbn/es-query",
     "@kbn/ui-actions-plugin",
+    "@kbn/data-views-plugin",
   ],
   "exclude": ["target/**/*"]
 }
