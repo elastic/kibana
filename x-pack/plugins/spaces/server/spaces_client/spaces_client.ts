@@ -127,7 +127,6 @@ export class SpacesClient implements ISpacesClient {
 
     this.debugLogger(`SpacesClient.create(), using RBAC. Attempting to create space`);
 
-    // const attributes = omit(space, ['id', '_reserved']);
     const id = space.id;
     const createdSavedObject = await this.repository.create(
       'space',
@@ -141,7 +140,6 @@ export class SpacesClient implements ISpacesClient {
   }
 
   public async update(id: string, space: v1.Space) {
-    // const attributes = omit(space, 'id', '_reserved');
     await this.repository.update('space', id, this.generateSpaceAttributes(space));
     const updatedSavedObject = await this.repository.get('space', id);
     return this.transformSavedObjectToSpace(updatedSavedObject);
