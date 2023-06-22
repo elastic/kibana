@@ -18,8 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
-  // Failing: See https://github.com/elastic/kibana/issues/156511
-  describe.skip('infrastructure security', () => {
+  describe('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
       before(async () => {
         await security.role.create('global_infrastructure_all_role', {
@@ -194,6 +193,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
+          await PageObjects.infraHome.waitForLoading();
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await testSubjects.existOrFail('~waffleMap');
         });
