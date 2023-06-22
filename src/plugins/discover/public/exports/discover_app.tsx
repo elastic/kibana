@@ -7,16 +7,20 @@
  */
 
 import React, { Suspense, useCallback } from 'react';
-import { DiscoverServices } from '../build_services';
 import type { MainRouteProps as DiscoverMainRouteProps } from '../application/main/discover_main_route';
 import { setHeaderActionMenuMounter, setScopedHistory } from '../kibana_services';
 import { ServicesContextProvider } from '../application/services_provider';
+import { DiscoverServices } from '../build_services';
 
-export type ExportedDiscoverMainRoute = Omit<DiscoverMainRouteProps, 'providedServices'>;
+export type ExportedDiscoverMainRoute = DiscoverMainRouteProps;
 
 const DiscoverMainRoute = React.lazy(() => import('../application/main/discover_main_route'));
 
-export const useDiscoverMainRoute = (services: DiscoverServices) => {
+export interface UseDiscoverMainRouteInternalProps {
+  services: DiscoverServices;
+}
+
+export const useDiscoverMainRouteInternal = ({ services }: UseDiscoverMainRouteInternalProps) => {
   return useCallback(
     (history) => (props: ExportedDiscoverMainRoute) => {
       setScopedHistory(history);
@@ -24,7 +28,10 @@ export const useDiscoverMainRoute = (services: DiscoverServices) => {
       return (
         <ServicesContextProvider services={services}>
           <Suspense fallback={null}>
-            <DiscoverMainRoute {...{ ...props }} providedServices={services} />
+            <DiscoverMainRoute
+              isDev={props.isDev}
+              customizationCallbacks={props.customizationCallbacks}
+            />
           </Suspense>
         </ServicesContextProvider>
       );

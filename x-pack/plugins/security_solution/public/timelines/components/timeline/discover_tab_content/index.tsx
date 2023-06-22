@@ -23,6 +23,7 @@ export const DiscoverTabContent = () => {
       discoverDataService,
       discover,
       discoverFilterManager,
+      data,
     },
   } = useKibana();
 
@@ -31,6 +32,7 @@ export const DiscoverTabContent = () => {
   } = unifiedSearch;
 
   const { useDiscoverMainRoute } = discover;
+
   const CustomStatefulTopMenu = useMemo(() => {
     const CustomSearchBar = getCustomSearchBar({
       data: discoverDataService,
@@ -45,23 +47,28 @@ export const DiscoverTabContent = () => {
       },
     });
   }, [discoverDataService, getCustomSearchBar, createTopNavWithCustomContext, unifiedSearch]);
+
   const getDiscoverLayout = useDiscoverMainRoute({
-    filterManager: discoverFilterManager,
-    data: discoverDataService,
+    services: {
+      filterManager: discoverFilterManager,
+      data: discoverDataService,
+    },
   });
-  const DiscoverLayout = getDiscoverLayout(history);
+
+  const DiscoverMainRoute = getDiscoverLayout(history);
+
   const { setDiscoverStateContainer, discoverStateContainer } =
     useDiscoverCustomizationServiceForSecuritySolution();
 
   const customizationCallback: CustomizationCallback = useCallback(
     ({ customizations, stateContainer }) => {
-      if (!discoverStateContainer) setDiscoverStateContainer(stateContainer);
+      // if (!discoverStateContainer) setDiscoverStateContainer(stateContainer);
       customizations.set({
         id: 'search_bar',
         CustomQueryBar: CustomStatefulTopMenu,
       });
     },
-    [setDiscoverStateContainer, discoverStateContainer, CustomStatefulTopMenu]
+    [CustomStatefulTopMenu]
   );
 
   return (
@@ -71,7 +78,7 @@ export const DiscoverTabContent = () => {
         overflow: scroll;
       `}
     >
-      <DiscoverLayout isDev={false} customizationCallbacks={[customizationCallback]} />
+      <DiscoverMainRoute isDev={false} customizationCallbacks={[customizationCallback]} />
     </div>
   );
 };

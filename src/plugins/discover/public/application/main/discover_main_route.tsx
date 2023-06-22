@@ -16,7 +16,6 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -33,7 +32,6 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
-import { DiscoverServices } from '../../build_services';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
@@ -45,18 +43,12 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
-
-  providedServices?: Partial<CoreStart> & DiscoverServices;
 }
 
-export function DiscoverMainRoute({
-  customizationCallbacks,
-  isDev,
-  providedServices,
-}: MainRouteProps) {
+export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
   const history = useHistory();
   const discoverService = useDiscoverServices();
-  const services = providedServices ?? discoverService;
+  const services = discoverService;
   const {
     core,
     chrome,
@@ -65,6 +57,7 @@ export function DiscoverMainRoute({
     http: { basePath },
     dataViewEditor,
   } = services;
+
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
     getDiscoverStateContainer({
@@ -271,10 +264,7 @@ export function DiscoverMainRoute({
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <DiscoverMainAppMemoized
-          stateContainer={stateContainer}
-          providedServices={providedServices}
-        />
+        <DiscoverMainAppMemoized stateContainer={stateContainer} />
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );

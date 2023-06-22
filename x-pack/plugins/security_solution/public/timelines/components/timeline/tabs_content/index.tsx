@@ -305,6 +305,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineDescription,
 }) => {
   const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
@@ -474,15 +475,17 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               <span>{i18n.SECURITY_ASSISTANT}</span>
             </StyledEuiTab>
           )}
-          <StyledEuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.discover}`}
-            onClick={setDiscoverAsActiveTab}
-            isSelected={activeTab === TimelineTabs.discover}
-            disabled={false}
-            key={TimelineTabs.discover}
-          >
-            <span>{'Discover'}</span>
-          </StyledEuiTab>
+          {isDiscoverInTimelineEnabled && (
+            <StyledEuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.discover}`}
+              onClick={setDiscoverAsActiveTab}
+              isSelected={activeTab === TimelineTabs.discover}
+              disabled={false}
+              key={TimelineTabs.discover}
+            >
+              <span>{i18n.DISCOVER_IN_TIMELINE_TAB}</span>
+            </StyledEuiTab>
+          )}
         </EuiTabs>
       )}
 
