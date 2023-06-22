@@ -332,13 +332,14 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
     afterEach(() => {
       resetFilters();
     });
-    it('should recover from invalide kql Query result', () => {
+
+    it('should recover from invalid kql Query result', () => {
       // do an invalid search
       //
       kqlSearch('\\');
       cy.get(ALERTS_REFRESH_BTN).trigger('click');
-      waitForPageFilters();
       cy.get(TOASTER).should('contain.text', 'KQLSyntaxError');
+      waitForPageFilters();
       togglePageFilterPopover(0);
       cy.get(OPTION_SELECTABLE(0, 'open')).should('be.visible');
       cy.get(OPTION_SELECTABLE(0, 'open')).should('contain.text', 'open');
