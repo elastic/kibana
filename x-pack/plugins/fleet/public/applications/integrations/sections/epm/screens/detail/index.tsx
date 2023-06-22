@@ -131,6 +131,7 @@ export function Detail() {
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
+  const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
 
   const canInstallPackages = useAuthz().integrations.installPackages;
   const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
@@ -186,9 +187,9 @@ export function Detail() {
   const { data: settings } = useGetSettingsQuery();
 
   useEffect(() => {
-    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled) || prerelease;
     setPrereleaseIntegrationsEnabled(isEnabled);
-  }, [settings?.item.prerelease_integrations_enabled]);
+  }, [settings?.item.prerelease_integrations_enabled, prerelease]);
 
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
