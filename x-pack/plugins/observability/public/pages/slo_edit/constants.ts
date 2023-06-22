@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  APMTransactionDurationIndicatorSchema,
-  APMTransactionErrorRateIndicatorSchema,
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
   BudgetingMethod,
   IndicatorType,
   KQLCustomIndicator,
@@ -118,7 +118,7 @@ export const CUSTOM_METRIC_DEFAULT_VALUES: MetricCustomIndicator = {
   },
 };
 
-export const APM_LATENCY_DEFAULT_VALUES: APMTransactionDurationIndicatorSchema = {
+export const APM_LATENCY_DEFAULT_VALUES: APMTransactionDurationIndicator = {
   type: 'sli.apm.transactionDuration' as const,
   params: {
     service: '',
@@ -131,7 +131,7 @@ export const APM_LATENCY_DEFAULT_VALUES: APMTransactionDurationIndicatorSchema =
   },
 };
 
-export const APM_AVAILABILITY_DEFAULT_VALUES: APMTransactionErrorRateIndicatorSchema = {
+export const APM_AVAILABILITY_DEFAULT_VALUES: APMTransactionErrorRateIndicator = {
   type: 'sli.apm.transactionErrorRate' as const,
   params: {
     service: '',
