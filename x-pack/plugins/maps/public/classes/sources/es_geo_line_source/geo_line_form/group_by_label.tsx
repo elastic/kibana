@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_SERIES_LABEL, TERMS_LABEL } from './i18n_constants';
+import { MAX_TERMS_TRACKS } from '../constants';
 
 export function GroupByLabel() {
   return (
@@ -31,7 +32,8 @@ export function GroupByLabel() {
               <p>
                 <FormattedMessage
                   id="xpack.maps.source.esGeoGrid.groupBy.termsDescription"
-                  defaultMessage="Create a track for each top term. Track is truncated when number of points exceeds limit."
+                  defaultMessage="Create a track for top {maxTermsTracks} terms. Track is truncated when number of points exceeds limit."
+                  values={{ maxTermsTracks: MAX_TERMS_TRACKS }}
                 />
               </p>
             </dd>
