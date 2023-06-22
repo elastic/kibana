@@ -251,7 +251,12 @@ export function MetricIndicator({
                 ),
               ]}
             >
-              <EuiFieldText {...field} isInvalid={fieldState.invalid} fullWidth />
+              <EuiFieldText
+                {...field}
+                isInvalid={fieldState.invalid}
+                fullWidth
+                data-test-subj="o11yCustomMetricEquation"
+              />
             </EuiFormRow>
           )}
         />
