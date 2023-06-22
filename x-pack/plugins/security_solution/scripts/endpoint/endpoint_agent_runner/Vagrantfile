@@ -1,13 +1,16 @@
 hostname = ENV["VMNAME"] || 'ubuntu'
+cachedAgentSource = ENV["CACHED_AGENT_SOURCE"] || ''
+cachedAgentFilename = ENV["CACHED_AGENT_FILENAME"] || ''
 
 Vagrant.configure("2") do |config|
   config.vm.hostname = hostname
+  config.vm.box = 'ubuntu/jammy64'
 
   config.vm.provider :virtualbox do |vb|
-    vb.vm.box = 'ubuntu/jammy64'
     vb.memory = 4096
     vb.cpus = 2
   end
+  config.vm.provision "file", source: cachedAgentSource, destination: "~/#{cachedAgentFilename}"
 end
 
 # Vagrant.configure("2") do |config|
@@ -41,4 +44,5 @@ end
 #         v.linked_clone = false
 #         v.vmx["ethernet0.virtualdev"] = "vmxnet3"
 #     end
+#     config.vm.provision "file", source: cachedAgentSource, destination: "~/#{cachedAgentFilename}"
 # end

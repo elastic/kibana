@@ -62,30 +62,33 @@ export const createAndEnrollEndpointHost = async ({
     deleted: [],
   });
 
-  const [vm, agentDownload, fleetServerUrl, enrollmentToken] = await Promise.all([
+  const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
+
+  const agentDownload = await getAgentDownloadUrl(version, useClosestVersionMatch, log).then<{
+    url: string;
+    cache?: DownloadedAgentInfo;
+  }>((url) => {
+    if (useCache) {
+      cacheCleanupPromise = cleanupDownloads();
+
+      return downloadAndStoreAgent(url).then((cache) => {
+        return {
+          url,
+          cache,
+        };
+      });
+    }
+
+    return { url };
+  });
+
+  const [vm, fleetServerUrl, enrollmentToken] = await Promise.all([
     createMultipassVm({
-      vmName: hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`,
+      vmName,
       disk,
       cpus,
       memory,
-    }),
-
-    getAgentDownloadUrl(version, useClosestVersionMatch, log).then<{
-      url: string;
-      cache?: DownloadedAgentInfo;
-    }>((url) => {
-      if (useCache) {
-        cacheCleanupPromise = cleanupDownloads();
-
-        return downloadAndStoreAgent(url).then((cache) => {
-          return {
-            url,
-            cache,
-          };
-        });
-      }
-
-      return { url };
+      cachedAgentDownload: agentDownload.cache,
     }),
 
     fetchFleetServerUrl(kbnClient),
@@ -169,14 +172,16 @@ const createMultipassVm = async ({
   disk = '8G',
   cpus = 1,
   memory = '1G',
+  cachedAgentDownload,
 }: CreateMultipassVmOptions): Promise<CreateMultipassVmResponse> => {
   if (process.env.CI) {
     console.log('VAGRANT_CWD', VAGRANT_CWD, __dirname);
-    // await execa.command(`vagrant up --provider qemu`, {
     await execa.command(`vagrant up`, {
       env: {
         VAGRANT_CWD,
         VMNAME: vmName,
+        CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
+        CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
       },
       stdio: ['inherit', 'inherit', 'inherit'],
     });
@@ -193,7 +198,11 @@ const createMultipassVm = async ({
 
 const deleteMultipassVm = async (vmName: string): Promise<void> => {
   if (process.env.CI) {
-    await execa.command(`vagrant destroy ${vmName} -f`);
+    await execa.command(`vagrant destroy -f`, {
+      env: {
+        VAGRANT_CWD,
+      },
+    });
   } else {
     await execa.command(`multipass delete -p ${vmName}`);
   }
@@ -221,19 +230,34 @@ const enrollHostWithFleet = async ({
   const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
   const vmDirName = agentDownloadedFile.replace(/\.tar\.gz$/, '');
 
-  if (cachedAgentDownload && !process.env.CI) {
+  if (cachedAgentDownload) {
     log.verbose(
       `Installing agent on host using cached download from [${cachedAgentDownload.fullFilePath}]`
     );
 
-    // mount local folder on VM
-    await execa.command(
-      `multipass mount ${cachedAgentDownload.directory} ${vmName}:~/_agent_downloads`
-    );
-    await execa.command(
-      `multipass exec ${vmName} -- tar -zxf _agent_downloads/${cachedAgentDownload.filename}`
-    );
-    await execa.command(`multipass unmount ${vmName}:~/_agent_downloads`);
+    if (process.env.CI) {
+      await execa.command(`vagrant ssh -- tar -zxf ${cachedAgentDownload.filename}`, {
+        env: {
+          VAGRANT_CWD,
+        },
+        stdio: ['inherit', 'inherit', 'inherit'],
+      });
+      await execa.command(`vagrant ssh -- rm -f ${cachedAgentDownload.filename}`, {
+        env: {
+          VAGRANT_CWD,
+        },
+        stdio: ['inherit', 'inherit', 'inherit'],
+      });
+    } else {
+      // mount local folder on VM
+      await execa.command(
+        `multipass mount ${cachedAgentDownload.directory} ${vmName}:~/_agent_downloads`
+      );
+      await execa.command(
+        `multipass exec ${vmName} -- tar -zxf _agent_downloads/${cachedAgentDownload.filename}`
+      );
+      await execa.command(`multipass unmount ${vmName}:~/_agent_downloads`);
+    }
   } else {
     log.verbose(`downloading and installing agent from URL [${agentDownloadUrl}]`);
 

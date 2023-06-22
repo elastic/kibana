@@ -6,6 +6,7 @@
  */
 
 import type { Agent } from '@kbn/fleet-plugin/common';
+import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
@@ -14,14 +15,50 @@ import { login } from '../../tasks/login';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   createAgentPolicyTask,
-  getAgentByHostName,
   getEndpointIntegrationVersion,
   reassignAgentPolicy,
 } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 describe('Automated Response Actions', () => {
-  const endpointHostname = 'dev-m1';
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let createdHost: CreateAndEnrollEndpointHostResponse;
+
+  before(() => {
+    getEndpointIntegrationVersion().then((version) => {
+      createAgentPolicyTask(version, 'automated_response_actions').then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
+
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
+          });
+        });
+      });
+    });
+  });
+
+  after(() => {
+    if (createdHost) {
+      cy.task('destroyEndpointHost', createdHost).then(() => {});
+    }
+
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+    }
+
+    if (createdHost) {
+      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
+  });
+
   const hostname = Cypress.env('hostname');
   const fleetHostname = `dev-fleet-server.${hostname}`;
 
@@ -36,15 +73,6 @@ describe('Automated Response Actions', () => {
     let ruleName: string;
 
     before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
-
-      getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version).then((data) => {
-          response = data;
-        });
-      });
       loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
@@ -65,7 +93,7 @@ describe('Automated Response Actions', () => {
 
     it('should have generated endpoint and rule', () => {
       cy.visit(APP_ENDPOINTS_PATH);
-      cy.contains(endpointHostname).should('exist');
+      cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
     });
@@ -79,9 +107,9 @@ describe('Automated Response Actions', () => {
       cy.getByTestSubj('responseActionsViewTab').click();
       cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
 
-      cy.getByTestSubj(`response-results-${endpointHostname}-details-tray`)
+      cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
         .should('contain', 'isolate completed successfully')
-        .and('contain', endpointHostname);
+        .and('contain', createdHost.hostname);
 
       cy.getByTestSubj(`response-results-${fleetHostname}-details-tray`)
         .should('contain', 'The host does not have Elastic Defend integration installed')

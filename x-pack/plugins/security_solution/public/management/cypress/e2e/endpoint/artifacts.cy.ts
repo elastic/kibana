@@ -6,8 +6,9 @@
  */
 
 import { recurse } from 'cypress-recurse';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
-import type { MetadataListResponse } from '../../../../../common/endpoint/types';
+import type { MetadataListResponse, PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';
@@ -15,7 +16,15 @@ import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoi
 import { login } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
 import { request } from '../../tasks/common';
-import { yieldEndpointPolicyRevision } from '../../tasks/fleet';
+import {
+  createAgentPolicyTask,
+  getEndpointIntegrationVersion,
+  yieldEndpointPolicyRevision,
+} from '../../tasks/fleet';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
   request<MetadataListResponse>({
@@ -29,7 +38,25 @@ const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
 const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
 describe('Artifact pages', () => {
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let createdHost: CreateAndEnrollEndpointHostResponse;
+
   before(() => {
+    getEndpointIntegrationVersion().then((version) => {
+      createAgentPolicyTask(version, 'alerts test').then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
+
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
+          });
+        });
+      });
+    });
+
     login();
     loadEndpointDataForEventFiltersIfNeeded();
     removeAllArtifacts();
@@ -54,6 +81,18 @@ describe('Artifact pages', () => {
 
   after(() => {
     removeAllArtifacts();
+
+    if (createdHost) {
+      cy.task('destroyEndpointHost', createdHost).then(() => {});
+    }
+
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+    }
+
+    if (createdHost) {
+      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
   });
 
   for (const testData of getArtifactsListTestsData()) {

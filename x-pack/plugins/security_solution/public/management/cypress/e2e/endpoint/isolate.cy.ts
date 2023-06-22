@@ -6,6 +6,7 @@
  */
 
 import type { Agent } from '@kbn/fleet-plugin/common';
+import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_CASES_PATH, APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import {
@@ -31,11 +32,49 @@ import {
   getEndpointIntegrationVersion,
   reassignAgentPolicy,
 } from '../../tasks/fleet';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 describe('Isolate command', () => {
-  const endpointHostname = 'dev-m1';
-  const isolateComment = `Isolating ${endpointHostname}`;
-  const releaseComment = `Releasing ${endpointHostname}`;
+  let isolateComment: string;
+  let releaseComment: string;
+  let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+  let policy: PolicyData;
+  let createdHost: CreateAndEnrollEndpointHostResponse;
+
+  before(() => {
+    getEndpointIntegrationVersion().then((version) => {
+      createAgentPolicyTask(version, 'alerts test').then((data) => {
+        indexedPolicy = data;
+        policy = indexedPolicy.integrationPolicies[0];
+
+        return enableAllPolicyProtections(policy.id).then(() => {
+          // Create and enroll a new Endpoint host
+          return createEndpointHost(policy.policy_id).then((host) => {
+            createdHost = host as CreateAndEnrollEndpointHostResponse;
+            isolateComment = `Isolating ${host.hostname}`;
+            releaseComment = `Releasing ${host.hostname}`;
+          });
+        });
+      });
+    });
+  });
+
+  after(() => {
+    if (createdHost) {
+      cy.task('destroyEndpointHost', createdHost).then(() => {});
+    }
+
+    if (indexedPolicy) {
+      cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+    }
+
+    if (createdHost) {
+      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
+  });
 
   beforeEach(() => {
     login();
@@ -46,7 +85,7 @@ describe('Isolate command', () => {
     let initialAgentData: Agent;
 
     before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
+      getAgentByHostName(createdHost.hostname).then((agentData) => {
         initialAgentData = agentData;
       });
 
@@ -78,11 +117,11 @@ describe('Isolate command', () => {
       cy.getByTestSubj('endpointTableRowActions').click();
       cy.getByTestSubj('isolateLink').click();
 
-      cy.contains(`Isolate host ${endpointHostname} from network.`);
+      cy.contains(`Isolate host ${createdHost.hostname} from network.`);
       cy.getByTestSubj('endpointHostIsolationForm');
       cy.getByTestSubj('host_isolation_comment').type(isolateComment);
       cy.getByTestSubj('hostIsolateConfirmButton').click();
-      cy.contains(`Isolation on host ${endpointHostname} successfully submitted`);
+      cy.contains(`Isolation on host ${createdHost.hostname} successfully submitted`);
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       cy.getByTestSubj('rowHostStatus-actionStatuses').should('contain.text', 'Isolated');
       filterOutIsolatedHosts();
@@ -91,7 +130,7 @@ describe('Isolate command', () => {
 
       cy.getByTestSubj('endpointTableRowActions').click();
       cy.getByTestSubj('unIsolateLink').click();
-      releaseHostWithComment(releaseComment, endpointHostname);
+      releaseHostWithComment(releaseComment, createdHost.hostname);
       cy.contains('Confirm').click();
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       cy.getByTestSubj('adminSearchBar').click().type('{selectall}{backspace}');
@@ -107,7 +146,7 @@ describe('Isolate command', () => {
     let ruleName: string;
 
     before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
+      getAgentByHostName(createdHost.hostname).then((agentData) => {
         initialAgentData = agentData;
       });
 
@@ -136,7 +175,7 @@ describe('Isolate command', () => {
 
     it('should have generated endpoint and rule', () => {
       cy.visit(APP_ENDPOINTS_PATH);
-      cy.contains(endpointHostname).should('exist');
+      cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
     });
@@ -144,25 +183,25 @@ describe('Isolate command', () => {
     it('should isolate and release host', () => {
       visitRuleAlerts(ruleName);
 
-      filterOutEndpoints(endpointHostname);
+      filterOutEndpoints(createdHost.hostname);
 
       closeAllToasts();
       openAlertDetails();
 
-      isolateHostWithComment(isolateComment, endpointHostname);
+      isolateHostWithComment(isolateComment, createdHost.hostname);
 
       cy.getByTestSubj('hostIsolateConfirmButton').click();
-      cy.contains(`Isolation on host ${endpointHostname} successfully submitted`);
+      cy.contains(`Isolation on host ${createdHost.hostname} successfully submitted`);
 
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       openAlertDetails();
 
       checkFlyoutEndpointIsolation();
 
-      releaseHostWithComment(releaseComment, endpointHostname);
+      releaseHostWithComment(releaseComment, createdHost.hostname);
       cy.contains('Confirm').click();
 
-      cy.contains(`Release on host ${endpointHostname} successfully submitted`);
+      cy.contains(`Release on host ${createdHost.hostname} successfully submitted`);
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       openAlertDetails();
       cy.getByTestSubj('event-field-agent.status').within(() => {
@@ -181,7 +220,7 @@ describe('Isolate command', () => {
     const caseOwner = 'securitySolution';
 
     before(() => {
-      getAgentByHostName(endpointHostname).then((agentData) => {
+      getAgentByHostName(createdHost.hostname).then((agentData) => {
         initialAgentData = agentData;
       });
       getEndpointIntegrationVersion().then((version) =>
@@ -220,14 +259,14 @@ describe('Isolate command', () => {
 
     it('should have generated endpoint and rule', () => {
       cy.visit(APP_ENDPOINTS_PATH);
-      cy.contains(endpointHostname).should('exist');
+      cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
     });
 
     it('should isolate and release host', () => {
       visitRuleAlerts(ruleName);
-      filterOutEndpoints(endpointHostname);
+      filterOutEndpoints(createdHost.hostname);
       closeAllToasts();
 
       openAlertDetails();
@@ -243,7 +282,7 @@ describe('Isolate command', () => {
 
         closeAllToasts();
         openCaseAlertDetails(caseAlertId);
-        isolateHostWithComment(isolateComment, endpointHostname);
+        isolateHostWithComment(isolateComment, createdHost.hostname);
         cy.getByTestSubj('hostIsolateConfirmButton').click();
 
         cy.getByTestSubj('euiFlyoutCloseButton').click();
@@ -256,11 +295,11 @@ describe('Isolate command', () => {
 
         waitForReleaseOption(caseAlertId);
 
-        releaseHostWithComment(releaseComment, endpointHostname);
+        releaseHostWithComment(releaseComment, createdHost.hostname);
 
         cy.contains('Confirm').click();
 
-        cy.contains(`Release on host ${endpointHostname} successfully submitted`);
+        cy.contains(`Release on host ${createdHost.hostname} successfully submitted`);
         cy.getByTestSubj('euiFlyoutCloseButton').click();
 
         cy.getByTestSubj('user-actions-list').within(() => {
