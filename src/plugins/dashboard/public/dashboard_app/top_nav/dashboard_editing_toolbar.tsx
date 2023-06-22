@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
+import { css, SerializedStyles } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { IconType, useEuiTheme } from '@elastic/eui';
@@ -32,7 +32,7 @@ import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 
-export function DashboardEditingToolbar() {
+export function DashboardEditingToolbar({ wrapperCss }: { wrapperCss?: SerializedStyles }) {
   const {
     usageCollection,
     data: { search },
@@ -185,9 +185,12 @@ export function DashboardEditingToolbar() {
 
   return (
     <div
-      css={css`
-        padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
-      `}
+      css={{
+        ...css`
+          padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
+        `,
+        ...(wrapperCss ?? {}),
+      }}
     >
       <Toolbar>
         {{

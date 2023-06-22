@@ -26,15 +26,12 @@ const LazyDashboardTopNav = React.lazy(() =>
   })().then((module) => module)
 );
 
-export const DashboardTopNav = ({
-  dashboardContainer,
-  embedSettings,
-  redirectTo,
-}: DashboardTopNavProps) => {
+export const DashboardTopNav = (props: DashboardTopNavProps) => {
+  const { dashboardContainer, ...rest } = props;
   return dashboardContainer ? (
     <Suspense fallback={<div />}>
       <DashboardAPIContext.Provider value={dashboardContainer}>
-        <LazyDashboardTopNav embedSettings={embedSettings} redirectTo={redirectTo} />
+        <LazyDashboardTopNav {...rest} />
       </DashboardAPIContext.Provider>
     </Suspense>
   ) : null;

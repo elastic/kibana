@@ -131,10 +131,11 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   }
 
   function renderLayout() {
-    const { setMenuMountPoint, visible } = props;
+    const { setMenuMountPoint, visible, alignRight } = props;
     const menuClassName = classNames('kbnTopNavMenu', props.className);
     const wrapperClassName = classNames('kbnTopNavMenu__wrapper', {
       'kbnTopNavMenu__wrapper--hidden': visible === false,
+      'kbnTopNavMenu__wrapper--right': alignRight === true,
     });
     if (setMenuMountPoint) {
       return (

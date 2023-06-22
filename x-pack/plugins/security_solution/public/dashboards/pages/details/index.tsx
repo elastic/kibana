@@ -13,8 +13,9 @@ import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 
 import { pick } from 'lodash/fp';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type { ViewMode } from '@kbn/embeddable-plugin/common';
+import { css } from '@emotion/react';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
@@ -44,6 +45,7 @@ const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   initialViewMode,
 }: DashboardViewProps) => {
+  const { euiTheme } = useEuiTheme();
   const { fromStr, toStr, from, to } = useDeepEqualSelector((state) =>
     pick(['fromStr', 'toStr', 'from', 'to'], inputsSelectors.globalTimeRangeSelector(state))
   );
@@ -142,7 +144,12 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
                     forceShowDatePicker: false,
                     showBorderBottom: false,
                     showFullScreenButton: false,
+                    showBackgroundColor: false,
                   }}
+                  editingToolBarCss={css`
+                    padding: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
+                  `}
+                  topNavMenuAlignRight={true}
                 />
               )}
             </HeaderPage>
