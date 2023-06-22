@@ -104,11 +104,15 @@ export const getCase = async (
   return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
-export const resolveCase = async (
-  caseId: string,
-  includeComments: boolean = true,
-  signal: AbortSignal
-): Promise<ResolvedCase> => {
+export const resolveCase = async ({
+  caseId,
+  includeComments = true,
+  signal,
+}: {
+  caseId: string;
+  includeComments?: boolean;
+  signal?: AbortSignal;
+}): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
@@ -122,7 +126,13 @@ export const resolveCase = async (
   return convertCaseResolveToCamelCase(decodeCaseResolveResponse(response));
 };
 
-export const getTags = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {
+export const getTags = async ({
+  owner,
+  signal,
+}: {
+  owner: string[];
+  signal?: AbortSignal;
+}): Promise<string[]> => {
   const response = await KibanaServices.get().http.fetch<string[]>(CASE_TAGS_URL, {
     method: 'GET',
     signal,
@@ -131,7 +141,13 @@ export const getTags = async (signal: AbortSignal, owner: string[]): Promise<str
   return response ?? [];
 };
 
-export const getCategories = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {
+export const getCategories = async ({
+  owner,
+  signal,
+}: {
+  owner: string[];
+  signal?: AbortSignal;
+}): Promise<string[]> => {
   const response = await KibanaServices.get().http.fetch<string[]>(
     INTERNAL_GET_CASE_CATEGORIES_URL,
     {
@@ -155,7 +171,7 @@ export const getReporters = async (signal: AbortSignal, owner: string[]): Promis
 export const getSingleCaseMetrics = async (
   caseId: string,
   features: SingleCaseMetricsFeature[],
-  signal: AbortSignal
+  signal?: AbortSignal
 ): Promise<SingleCaseMetrics> => {
   const response = await KibanaServices.get().http.fetch<SingleCaseMetricsResponse>(
     getCaseDetailsMetricsUrl(caseId),
@@ -178,7 +194,7 @@ export const findCaseUserActions = async (
     page: number;
     perPage: number;
   },
-  signal: AbortSignal
+  signal?: AbortSignal
 ): Promise<FindCaseUserActions> => {
   const query = {
     types: params.type !== 'all' ? [params.type] : [],
@@ -206,7 +222,7 @@ export const findCaseUserActions = async (
 
 export const getCaseUserActionsStats = async (
   caseId: string,
-  signal: AbortSignal
+  signal?: AbortSignal
 ): Promise<CaseUserActionsStats> => {
   const response = await KibanaServices.get().http.fetch<CaseUserActionStatsResponse>(
     getCaseUserActionStatsUrl(caseId),
@@ -391,7 +407,7 @@ export const pushCase = async (
   return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
-export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {
+export const getActionLicense = async (signal?: AbortSignal): Promise<ActionLicense[]> => {
   const response = await KibanaServices.get().http.fetch<ActionLicense[]>(
     getAllConnectorTypesUrl(),
     {
@@ -435,10 +451,13 @@ export const deleteFileAttachments = async ({
   });
 };
 
-export const getFeatureIds = async (
-  query: { registrationContext: string[] },
-  signal: AbortSignal
-): Promise<ValidFeatureId[]> => {
+export const getFeatureIds = async ({
+  query,
+  signal,
+}: {
+  query: { registrationContext: string[] };
+  signal?: AbortSignal;
+}): Promise<ValidFeatureId[]> => {
   return KibanaServices.get().http.fetch<ValidFeatureId[]>(
     `${BASE_RAC_ALERTS_API_PATH}/_feature_ids`,
     {
@@ -450,7 +469,7 @@ export const getFeatureIds = async (
 
 export const getCaseConnectors = async (
   caseId: string,
-  signal: AbortSignal
+  signal?: AbortSignal
 ): Promise<CaseConnectors> => {
   const res = await KibanaServices.get().http.fetch<GetCaseConnectorsResponse>(
     getCaseConnectorsUrl(caseId),
@@ -470,7 +489,13 @@ export const getCaseConnectors = async (
   }, {});
 };
 
-export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> => {
+export const getCaseUsers = async ({
+  caseId,
+  signal,
+}: {
+  caseId: string;
+  signal?: AbortSignal;
+}): Promise<CaseUsers> => {
   return KibanaServices.get().http.fetch<CaseUsers>(getCaseUsersUrl(caseId), {
     method: 'GET',
     signal,

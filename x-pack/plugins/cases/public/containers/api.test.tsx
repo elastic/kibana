@@ -166,7 +166,7 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await resolveCase(caseId, true, abortCtrl.signal);
+      await resolveCase({ caseId, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${caseId}/resolve`, {
         method: 'GET',
         query: { includeComments: true },
@@ -175,7 +175,7 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await resolveCase(caseId, true, abortCtrl.signal);
+      const resp = await resolveCase({ caseId, signal: abortCtrl.signal });
       expect(resp).toEqual({ ...basicResolveCase, case: basicCase, aliasTargetId });
     });
 
@@ -186,7 +186,7 @@ describe('Cases API', () => {
         alias_target_id: aliasTargetId,
       });
 
-      const resp = await resolveCase(caseId, true, abortCtrl.signal);
+      const resp = await resolveCase({ caseId, signal: abortCtrl.signal });
       expect(resp).toEqual({
         ...basicResolveCase,
         case: caseWithRegisteredAttachments,
@@ -607,7 +607,7 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      await getTags({ owner: [SECURITY_SOLUTION_OWNER], signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/tags`, {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -618,7 +618,7 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      const resp = await getTags({ owner: [SECURITY_SOLUTION_OWNER], signal: abortCtrl.signal });
       expect(resp).toEqual(tags);
     });
   });
@@ -630,7 +630,7 @@ describe('Cases API', () => {
     });
 
     it('should be called with the correct check url, method, signal', async () => {
-      await getCategories(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      await getCategories({ owner: [SECURITY_SOLUTION_OWNER], signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith(INTERNAL_GET_CASE_CATEGORIES_URL, {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -641,7 +641,10 @@ describe('Cases API', () => {
     });
 
     it('should return the correct response', async () => {
-      const resp = await getCategories(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      const resp = await getCategories({
+        owner: [SECURITY_SOLUTION_OWNER],
+        signal: abortCtrl.signal,
+      });
       expect(resp).toEqual(categories);
     });
   });
@@ -968,10 +971,10 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      const resp = await getFeatureIds(
-        { registrationContext: ['security', 'observability.logs'] },
-        abortCtrl.signal
-      );
+      const resp = await getFeatureIds({
+        query: { registrationContext: ['security', 'observability.logs'] },
+        signal: abortCtrl.signal,
+      });
 
       expect(fetchMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/_feature_ids`, {
         query: { registrationContext: ['security', 'observability.logs'] },
