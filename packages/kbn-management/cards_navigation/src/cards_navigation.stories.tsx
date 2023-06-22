@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { CardsNavigation as Component } from './cards_navigation';
+import { CardsNavigationComponent as Component } from './cards_navigation.component';
 import { mockProps } from '../mocks/storybook.mock';
 
 import mdx from '../README.mdx';
