@@ -36,12 +36,14 @@ describe('Buffered Task Store', () => {
       expect(taskStore.taskValidator.getValidatedTaskInstance).toHaveBeenNthCalledWith(
         1,
         task,
-        'write'
+        'write',
+        { validate: true }
       );
       expect(taskStore.taskValidator.getValidatedTaskInstance).toHaveBeenNthCalledWith(
         2,
         task,
-        'read'
+        'read',
+        { validate: true }
       );
     });
 
@@ -56,7 +58,9 @@ describe('Buffered Task Store', () => {
       expect(await bufferedStore.update(task, { validate: false })).toMatchObject(task);
       expect(taskStore.bulkUpdate).toHaveBeenCalledWith([task], { validate: false });
 
-      expect(taskStore.taskValidator.getValidatedTaskInstance).not.toHaveBeenCalled();
+      expect(taskStore.taskValidator.getValidatedTaskInstance).toHaveBeenCalledWith(task, 'write', {
+        validate: false,
+      });
     });
 
     test('handles partially successfull bulkUpdates resolving each call appropriately', async () => {

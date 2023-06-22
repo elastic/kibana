@@ -482,8 +482,12 @@ describe('TaskStore', () => {
       const result = await store.update(task, { validate: true });
 
       expect(mockGetValidatedTaskInstance).toHaveBeenCalledTimes(2);
-      expect(mockGetValidatedTaskInstance).toHaveBeenNthCalledWith(1, task, 'write');
-      expect(mockGetValidatedTaskInstance).toHaveBeenNthCalledWith(2, task, 'read');
+      expect(mockGetValidatedTaskInstance).toHaveBeenNthCalledWith(1, task, 'write', {
+        validate: true,
+      });
+      expect(mockGetValidatedTaskInstance).toHaveBeenNthCalledWith(2, task, 'read', {
+        validate: true,
+      });
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
         'task',
         task.id,
@@ -548,7 +552,7 @@ describe('TaskStore', () => {
 
       await store.update(task, { validate: false });
 
-      expect(mockGetValidatedTaskInstance).not.toHaveBeenCalled();
+      expect(mockGetValidatedTaskInstance).toHaveBeenCalledWith(task, 'write', { validate: false });
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -629,7 +633,7 @@ describe('TaskStore', () => {
 
       await store.bulkUpdate([task], { validate: false });
 
-      expect(mockGetValidatedTaskInstance).not.toHaveBeenCalled();
+      expect(mockGetValidatedTaskInstance).toHaveBeenCalledWith(task, 'write', { validate: false });
     });
 
     test('pushes error from saved objects client to errors$', async () => {
