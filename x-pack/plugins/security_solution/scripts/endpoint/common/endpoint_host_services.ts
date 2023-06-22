@@ -176,8 +176,9 @@ const createMultipassVm = async ({
 }: CreateMultipassVmOptions): Promise<CreateMultipassVmResponse> => {
   if (process.env.CI) {
     console.log('VAGRANT_CWD', VAGRANT_CWD, __dirname);
+    console.log('cachedAgentDownload', cachedAgentDownload);
     try {
-      await execa.command(`vagrant up`, {
+      await execa.command(`vagrant up --debug`, {
         env: {
           VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
           VAGRANT_CWD,
