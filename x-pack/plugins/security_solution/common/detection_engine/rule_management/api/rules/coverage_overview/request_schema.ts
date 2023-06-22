@@ -58,7 +58,9 @@ export const CoverageOverviewRuleSourceSchema = enumeration(
 export type CoverageOverviewFilter = t.TypeOf<typeof CoverageOverviewFilter>;
 export const CoverageOverviewFilter = t.partial({
   /**
-   * A search term to filter the response by rule name, index pattern, MITRE ATT&CK tactic or technique
+   * A search term to filter the response by rule name, index pattern, MITRE ATT&CK™ tactic or technique
+   *
+   * @example "Defense Evasion" or "TA0005"
    */
   search_term: NonEmptyString,
   /**
