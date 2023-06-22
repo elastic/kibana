@@ -14,11 +14,11 @@ export interface CoverageOverviewMitreTechnique {
    */
   reference: string;
   /**
-   * A number of covered subtechniques (having as minimum one rule enabled)
+   * A number of covered subtechniques (having at least one enabled rule associated with it)
    */
   numOfCoveredSubtechniques: number;
   /**
-   * A total number of subtechniques related to this technique
+   * A total number of subtechniques associated with this technique
    */
   numOfSubtechniques: number;
   enabledRules: CoverageOverviewRule[];

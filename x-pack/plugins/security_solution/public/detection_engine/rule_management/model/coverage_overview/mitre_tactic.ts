@@ -15,7 +15,7 @@ export interface CoverageOverviewMitreTactic {
    */
   reference: string;
   /**
-   * A list if techniques related to this tactic
+   * A list if techniques associated with this tactic
    */
   techniques: CoverageOverviewMitreTechnique[];
   enabledRules: CoverageOverviewRule[];
