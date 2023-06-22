@@ -16,7 +16,6 @@ export const checkIndexStatus = async (
   postureType?: PostureTypes,
   retentionTime?: number
 ): Promise<IndexStatus> => {
-
   const query =
     !postureType || postureType === 'all' || postureType === 'vuln_mgmt'
       ? {
