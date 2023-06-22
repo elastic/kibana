@@ -187,7 +187,7 @@ export const getMaxPackageName = (
   packageName: string,
   packagePolicies?: Array<{ name: string }>
 ) => {
-  // Retrieve highest number appended to package policy name and increment it by one
+  // Retrieve the highest number appended to package policy name and increment it by one
   const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
 
   const maxPkgPolicyName = Math.max(

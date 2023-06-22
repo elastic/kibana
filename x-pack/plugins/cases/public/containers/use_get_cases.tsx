@@ -26,6 +26,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   status: StatusAll,
   tags: [],
   owner: [],
+  category: [],
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {

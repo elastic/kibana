@@ -85,6 +85,5 @@ export interface CloudSecurityInstallationStats {
   agent_policy_id: string;
   deployment_mode: string;
   created_at: string;
-  created_by: string;
   agent_count: number;
 }

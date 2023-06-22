@@ -1310,7 +1310,7 @@
           "The preset that can be pass to the NavigationBucket component"
         ],
         "signature": [
-          "\"ml\" | \"analytics\" | \"management\" | \"devtools\""
+          "\"ml\" | \"management\" | \"analytics\" | \"devtools\""
         ],
         "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
         "deprecated": false,

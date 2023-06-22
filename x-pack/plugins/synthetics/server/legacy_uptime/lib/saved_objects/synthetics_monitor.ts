@@ -60,6 +60,7 @@ export const getSyntheticsMonitorSavedObjectType = (
     migrations: {
       '8.6.0': monitorMigrations['8.6.0'](encryptedSavedObjects),
       '8.8.0': monitorMigrations['8.8.0'](encryptedSavedObjects),
+      '8.9.0': monitorMigrations['8.9.0'](encryptedSavedObjects),
     },
     mappings: {
       dynamic: false,
@@ -161,6 +162,13 @@ export const getSyntheticsMonitorSavedObjectType = (
         alert: {
           properties: {
             status: {
+              properties: {
+                enabled: {
+                  type: 'boolean',
+                },
+              },
+            },
+            tls: {
               properties: {
                 enabled: {
                   type: 'boolean',
