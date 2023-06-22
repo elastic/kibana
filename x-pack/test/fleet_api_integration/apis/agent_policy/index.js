@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { setupTestUsers } from '../test_users';
 
-export default function loadTests({ loadTestFile }) {
+export default function loadTests({ loadTestFile, getService }) {
   describe('Agent policies', () => {
+    before(async () => {
+      await setupTestUsers(getService('security'));
+    });
+
     loadTestFile(require.resolve('./agent_policy_with_agents_setup'));
     loadTestFile(require.resolve('./agent_policy'));
     loadTestFile(require.resolve('./agent_policy_datastream_permissions'));
+    loadTestFile(require.resolve('./agent_policy_uninstall_tokens'));
   });
 }

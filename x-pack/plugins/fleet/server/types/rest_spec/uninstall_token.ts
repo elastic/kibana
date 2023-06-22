@@ -13,9 +13,3 @@ export const GetUninstallTokensMetadataRequestSchema = {
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
   }),
 };
-
-export const GetUninstallTokensByPolicyIdRequestSchema = {
-  params: schema.object({
-    agentPolicyId: schema.string(),
-  }),
-};

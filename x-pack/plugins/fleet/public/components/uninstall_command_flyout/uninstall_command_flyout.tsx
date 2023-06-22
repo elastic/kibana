@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../hooks';
 
-import { useGetUninstallTokensByPolicyId } from '../../hooks/use_request/uninstall_tokens';
+import { useGetUninstallTokensByPolicyId } from '../../hooks/use_request/agent_policy';
 
 import { Error } from '../error';
 import { Loading } from '../loading';

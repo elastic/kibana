@@ -6,19 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  AGENT_POLICY_API_ROUTES,
-  CreateAgentPolicyResponse,
-  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-} from '@kbn/fleet-plugin/common';
-import {
-  GetUninstallTokensByPolicyIdResponse,
-  GetUninstallTokensMetadataResponse,
-} from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
-import * as uuid from 'uuid';
+import { GetUninstallTokensMetadataResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services';
 import { testUsers } from '../test_users';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { addUninstallTokenToPolicy, generateNPolicies } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -30,21 +22,21 @@ export default function (providerContext: FtrProviderContext) {
     let generatedPolicyIds: Set<string>;
 
     before(async () => {
-      await cleanSavedObjects();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     after(async () => {
-      await cleanSavedObjects();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('GET uninstall_tokens', () => {
       describe('pagination', () => {
         before(async () => {
-          generatedPolicyIds = new Set(await generatePolicies(20));
+          generatedPolicyIds = new Set(await generateNPolicies(supertest, 20));
         });
 
         after(async () => {
-          await cleanSavedObjects();
+          await kibanaServer.savedObjects.cleanStandardList();
         });
 
         it('should return token metadata for all policies if number of policies is below default perPage', async () => {
@@ -79,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return default perPage number of token metadata if total is above default perPage', async () => {
-          generatedPolicyIds.add((await generatePolicies(1))[0]);
+          generatedPolicyIds.add((await generateNPolicies(supertest, 1))[0]);
 
           const response1 = await supertest
             .get(uninstallTokensRouteService.getListPath())
@@ -159,20 +151,20 @@ export default function (providerContext: FtrProviderContext) {
         let timestampBeforeAddingNewTokens: number;
 
         before(async () => {
-          generatedPolicyIdsArray = await generatePolicies(20);
+          generatedPolicyIdsArray = await generateNPolicies(supertest, 20);
           generatedPolicyIds = new Set(generatedPolicyIdsArray);
 
           timestampBeforeAddingNewTokens = Date.now();
 
           const savingAdditionalTokensPromises = generatedPolicyIdsArray.map((id) =>
-            saveAdditionalToken(id, `${id} latest token`)
+            addUninstallTokenToPolicy(kibanaServer, id, `${id} latest token`)
           );
 
           await Promise.all(savingAdditionalTokensPromises);
         });
 
         after(async () => {
-          await cleanSavedObjects();
+          await kibanaServer.savedObjects.cleanStandardList();
         });
 
         it("should return only the latest token's metadata for every policy", async () => {
@@ -194,11 +186,11 @@ export default function (providerContext: FtrProviderContext) {
 
       describe('when `policyId` query param is used', () => {
         before(async () => {
-          generatedPolicyIds = new Set(await generatePolicies(5));
+          generatedPolicyIds = new Set(await generateNPolicies(supertest, 5));
         });
 
         after(async () => {
-          await cleanSavedObjects();
+          await kibanaServer.savedObjects.cleanStandardList();
         });
 
         it('should return token metadata for full policyID if found', async () => {
@@ -271,133 +263,5 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
     });
-
-    describe('GET uninstall_tokens/{policy_id}', () => {
-      let generatedPolicyId: string;
-
-      before(async () => {
-        generatedPolicyId = (await generatePolicies(1))[0];
-
-        await saveAdditionalToken(generatedPolicyId, 'second latest');
-        await saveAdditionalToken(generatedPolicyId, 'latest');
-      });
-
-      after(async () => {
-        await cleanSavedObjects();
-      });
-
-      it('should return the decrypted uninstall token on success', async () => {
-        const response = await supertest
-          .get(uninstallTokensRouteService.getInfoPath(generatedPolicyId))
-          .expect(200);
-
-        const body: GetUninstallTokensByPolicyIdResponse = response.body;
-
-        expect(body.items.length).to.equal(body.total);
-        expect(body.items[0]).to.have.property('policy_id', generatedPolicyId);
-        expect(body.items[0]).to.have.keys('created_at', 'token');
-      });
-
-      it('should return all tokens with the latest on top', async () => {
-        const response = await supertest
-          .get(uninstallTokensRouteService.getInfoPath(generatedPolicyId))
-          .expect(200);
-
-        const body: GetUninstallTokensByPolicyIdResponse = response.body;
-
-        expect(body.total).to.equal(3);
-        expect(body.items.length).to.equal(3);
-
-        expect(body.items[0].token).to.equal('latest');
-        expect(body.items[1].token).to.equal('second latest');
-      });
-
-      it('should return 404 if no uninstall token found', async () => {
-        const response = await supertest
-          .get(uninstallTokensRouteService.getInfoPath('i-dont-exist'))
-          .expect(404);
-
-        expect(response.body).to.have.property('statusCode', 404);
-        expect(response.body).to.have.property(
-          'message',
-          'Uninstall Token not found for Agent Policy i-dont-exist'
-        );
-      });
-
-      it('should return 500 if token is missing', async () => {
-        const savedObjectId = await saveAdditionalToken(generatedPolicyId, '');
-
-        const response = await supertest
-          .get(uninstallTokensRouteService.getInfoPath(generatedPolicyId))
-          .expect(500);
-
-        expect(response.body.message).to.equal('Uninstall Token is missing the token.');
-
-        await deleteAdditionalToken(savedObjectId);
-      });
-
-      describe('authorization', () => {
-        it('should return 200 if the user has FLEET ALL (and INTEGRATIONS READ) privilege', async () => {
-          const { username, password } = testUsers.fleet_all_int_read;
-
-          await supertestWithoutAuth
-            .get(uninstallTokensRouteService.getInfoPath(generatedPolicyId))
-            .auth(username, password)
-            .expect(200);
-        });
-
-        it('should return 403 if the user does not have FLEET ALL privilege', async () => {
-          const { username, password } = testUsers.fleet_no_access;
-
-          await supertestWithoutAuth
-            .get(uninstallTokensRouteService.getInfoPath(generatedPolicyId))
-            .auth(username, password)
-            .expect(403);
-        });
-      });
-    });
   });
-
-  const generatePolicies = async (number: number) => {
-    const promises = [];
-
-    for (let i = 0; i < number; i++) {
-      promises.push(
-        supertest
-          .post(AGENT_POLICY_API_ROUTES.CREATE_PATTERN)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ name: `Agent Policy ${uuid.v4()}`, namespace: 'default' })
-          .expect(200)
-      );
-    }
-
-    const responses = await Promise.all(promises);
-    const policyIds = responses.map(({ body }) => (body as CreateAgentPolicyResponse).item.id);
-
-    return policyIds;
-  };
-
-  const cleanSavedObjects = async () => {
-    await kibanaServer.savedObjects.cleanStandardList();
-    await kibanaServer.savedObjects.clean({ types: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE] });
-  };
-
-  const saveAdditionalToken = async (policyId: string, token: string) => {
-    const savedObject = await kibanaServer.savedObjects.create({
-      type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-      attributes: {
-        policy_id: policyId,
-        token,
-      },
-      overwrite: false,
-    });
-
-    return savedObject.id;
-  };
-
-  const deleteAdditionalToken = async (savedObjectId: string) =>
-    kibanaServer.savedObjects.delete({
-      type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-      id: savedObjectId,
-    });
 }

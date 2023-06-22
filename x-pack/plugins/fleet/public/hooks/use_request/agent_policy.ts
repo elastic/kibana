@@ -6,6 +6,8 @@
  */
 import { useQuery } from '@tanstack/react-query';
 
+import type { GetUninstallTokensByPolicyIdResponse } from '../../../common/types/rest_spec/agent_policy';
+
 import { agentPolicyRouteService } from '../../services';
 
 import type {
@@ -140,5 +142,12 @@ export const sendResetAllPreconfiguredAgentPolicies = () => {
     path: agentPolicyRouteService.getResetAllPreconfiguredAgentPolicyPath(),
     method: 'post',
     body: JSON.stringify({}),
+  });
+};
+
+export const useGetUninstallTokensByPolicyId = (policyId: string) => {
+  return useRequest<GetUninstallTokensByPolicyIdResponse>({
+    method: 'get',
+    path: agentPolicyRouteService.getUninstallTokensPath(policyId),
   });
 };

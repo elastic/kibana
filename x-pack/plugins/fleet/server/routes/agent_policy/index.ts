@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { AGENT_POLICY_API_ROUTES } from '../../constants';
@@ -18,9 +20,12 @@ import {
   GetFullAgentPolicyRequestSchema,
   GetK8sManifestRequestSchema,
   BulkGetAgentPoliciesRequestSchema,
+  GetUninstallTokensByPolicyIdRequestSchema,
 } from '../../types';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
+
+import type { FleetConfigType } from '../../config';
 
 import {
   getAgentPoliciesHandler,
@@ -34,9 +39,12 @@ import {
   downloadK8sManifest,
   getK8sManifest,
   bulkGetAgentPoliciesHandler,
+  getUninstallTokensByPolicyIdHandler,
 } from './handlers';
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+
   // List - Fleet Server needs access to run setup
   router.get(
     {
@@ -168,4 +176,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     },
     downloadK8sManifest
   );
+
+  if (experimentalFeatures.agentTamperProtectionEnabled) {
+    // Get unintall tokens
+    router.get(
+      {
+        path: AGENT_POLICY_API_ROUTES.UNINSTALL_TOKENS_PATTERN,
+        validate: GetUninstallTokensByPolicyIdRequestSchema,
+        fleetAuthz: {
+          fleet: { all: true },
+        },
+      },
+      getUninstallTokensByPolicyIdHandler
+    );
+  }
 };

@@ -77,6 +77,7 @@ export const AGENT_POLICY_API_ROUTES = {
   DELETE_PATTERN: `${AGENT_POLICY_API_ROOT}/delete`,
   FULL_INFO_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/full`,
   FULL_INFO_DOWNLOAD_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/download`,
+  UNINSTALL_TOKENS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/uninstall_tokens`,
 };
 
 // Kubernetes Manifest API routes
@@ -171,7 +172,6 @@ export const ENROLLMENT_API_KEY_ROUTES = {
 
 export const UNINSTALL_TOKEN_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/uninstall_tokens`,
-  INFO_PATTERN: `${API_ROOT}/uninstall_tokens/{agentPolicyId}`,
 };
 
 // Agents setup API routes

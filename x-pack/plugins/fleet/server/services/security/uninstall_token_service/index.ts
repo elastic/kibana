@@ -29,10 +29,8 @@ import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/ty
 
 import { UninstallTokenError } from '../../../../common/errors';
 
-import type {
-  GetUninstallTokensByPolicyIdResponse,
-  GetUninstallTokensMetadataResponse,
-} from '../../../../common/types/rest_spec/uninstall_token';
+import type { GetUninstallTokensMetadataResponse } from '../../../../common/types/rest_spec/uninstall_token';
+import type { GetUninstallTokensByPolicyIdResponse } from '../../../../common/types/rest_spec/agent_policy';
 
 import type {
   UninstallToken,

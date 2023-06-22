@@ -9,18 +9,19 @@ import React from 'react';
 
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
-import type { GetUninstallTokensByPolicyIdResponse } from '../../../common/types/rest_spec/uninstall_token';
+import type { GetUninstallTokensByPolicyIdResponse } from '../../../common/types/rest_spec/agent_policy';
 
 import { createFleetTestRendererMock } from '../../mock';
 
-import { useGetUninstallTokensByPolicyId } from '../../hooks/use_request/uninstall_tokens';
+import { useGetUninstallTokensByPolicyId } from '../../hooks/use_request/agent_policy';
 
 import type { RequestError } from '../../hooks';
 
 import type { UninstallCommandFlyoutProps } from './uninstall_command_flyout';
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
 
-jest.mock('../../hooks/use_request/uninstall_tokens', () => ({
+jest.mock('../../hooks/use_request/agent_policy', () => ({
+  ...jest.requireActual('../../hooks/use_request/agent_policy'),
   useGetUninstallTokensByPolicyId: jest.fn(),
 }));
 

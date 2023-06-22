@@ -7,20 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core-http-server';
-
 import { appContextService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
-import type {
-  GetUninstallTokensByPolicyIdRequestSchema,
-  GetUninstallTokensMetadataRequestSchema,
-} from '../../types/rest_spec/uninstall_token';
+import type { GetUninstallTokensMetadataRequestSchema } from '../../types/rest_spec/uninstall_token';
 import { defaultFleetErrorHandler } from '../../errors';
-
-const UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR: CustomHttpResponseOptions<ResponseError> = {
-  statusCode: 500,
-  body: { message: 'Uninstall Token Service is unavailable.' },
-};
 
 export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   unknown,
@@ -28,7 +18,10 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const uninstallTokenService = appContextService.getUninstallTokenService();
   if (!uninstallTokenService) {
-    return response.customError(UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR);
+    return response.customError({
+      statusCode: 500,
+      body: { message: 'Uninstall Token Service is unavailable.' },
+    });
   }
 
   try {
@@ -37,31 +30,6 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
     const body = await uninstallTokenService.getTokenMetadata(policyId?.trim(), page, perPage);
 
     return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
-
-export const getUninstallTokensByPolicyIdHandler: FleetRequestHandler<
-  TypeOf<typeof GetUninstallTokensByPolicyIdRequestSchema.params>
-> = async (context, request, response) => {
-  const uninstallTokenService = appContextService.getUninstallTokenService();
-  if (!uninstallTokenService) {
-    return response.customError(UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR);
-  }
-
-  try {
-    const { agentPolicyId } = request.params;
-
-    const tokensForOnePolicy = await uninstallTokenService.getTokenHistoryForPolicy(agentPolicyId);
-
-    if (tokensForOnePolicy.total === 0) {
-      return response.notFound({
-        body: { message: `Uninstall Token not found for Agent Policy ${agentPolicyId}` },
-      });
-    }
-
-    return response.ok({ body: tokensForOnePolicy });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

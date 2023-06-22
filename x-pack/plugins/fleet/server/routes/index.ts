@@ -35,7 +35,7 @@ export async function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config:
   registerEPMRoutes(fleetAuthzRouter);
 
   registerSetupRoutes(fleetAuthzRouter, config);
-  registerAgentPolicyRoutes(fleetAuthzRouter);
+  registerAgentPolicyRoutes(fleetAuthzRouter, config);
   registerPackagePolicyRoutes(fleetAuthzRouter);
   registerOutputRoutes(fleetAuthzRouter);
   registerSettingsRoutes(fleetAuthzRouter);

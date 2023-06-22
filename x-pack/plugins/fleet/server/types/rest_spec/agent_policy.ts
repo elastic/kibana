@@ -76,3 +76,9 @@ export const GetK8sManifestRequestSchema = {
     enrolToken: schema.maybe(schema.string()),
   }),
 };
+
+export const GetUninstallTokensByPolicyIdRequestSchema = {
+  params: schema.object({
+    agentPolicyId: schema.string(),
+  }),
+};
