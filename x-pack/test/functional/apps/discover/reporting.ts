@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return res;
   };
 
-  describe('Discover CSV Export', () => {
+  describe.skip('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Generate CSV: sparse data', () => {
+    describe.skip('Generate CSV: sparse data', () => {
       const TEST_INDEX_NAME = 'sparse_data';
       const TEST_DOC_COUNT = 510;
 

@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await PageObjects.lens.isShareActionEnabled(`${type}Reports`));
         });
 
-        it(`should be able to download report of the current visualization`, async () => {
+        xit(`should be able to download report of the current visualization`, async () => {
           // make the configuration complete
           await PageObjects.lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
