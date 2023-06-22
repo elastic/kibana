@@ -45,9 +45,9 @@ export const ColumnHeader = React.memo(
 
     const calculateHeaderOffset = () => {
       const { top: containerTop = 0 } = containerRef.current?.getBoundingClientRect() ?? {};
-      const buttonViewPortPosition = containerTop + window.scrollY;
+      const headerOffset = containerTop + window.scrollY;
 
-      return buttonViewPortPosition;
+      return headerOffset;
     };
 
     const onButtonClick = useCallback(
