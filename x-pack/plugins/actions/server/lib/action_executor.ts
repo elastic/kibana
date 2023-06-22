@@ -165,7 +165,7 @@ export class ActionExecutor {
               secrets,
               rawAction,
               isPreconfigured,
-              requeueInvalidTasksConfig,
+              shouldValidateRawAction: requeueInvalidTasksConfig?.enabled,
               taskInfo,
             },
             { configurationUtilities }
@@ -494,7 +494,7 @@ interface ValidateActionOpts {
   secrets: unknown;
   rawAction: RawAction;
   isPreconfigured?: boolean;
-  requeueInvalidTasksConfig?: RequeueInvalidTasksConfig;
+  shouldValidateRawAction?: boolean;
   taskInfo?: TaskInfo;
 }
 
@@ -507,7 +507,7 @@ function validateAction(
     secrets,
     rawAction,
     isPreconfigured = false,
-    requeueInvalidTasksConfig,
+    shouldValidateRawAction = false,
     taskInfo,
   }: ValidateActionOpts,
   validatorServices: ValidatorServices
@@ -526,7 +526,7 @@ function validateAction(
         secrets,
       });
     }
-    if (requeueInvalidTasksConfig?.enabled) {
+    if (shouldValidateRawAction) {
       validateRawAction({ isPreconfigured, rawAction });
     }
 
