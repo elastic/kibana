@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  describe('metric chart', function () {
+  // FAILING FORWARD ES COMPATIBILITY: https://github.com/elastic/kibana/issues/160283
+  describe.skip('metric chart', function () {
     before(async function () {
       await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
