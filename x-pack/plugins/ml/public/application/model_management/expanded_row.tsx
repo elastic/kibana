@@ -26,10 +26,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { PartialBy } from '../../../common/types/common';
 import type { ModelItemFull } from './models_list';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
-import type { AllocatedModel } from '../../../common/types/trained_models';
+import type { AllocatedModel, TrainedModelStat } from '../../../common/types/trained_models';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 
 interface ExpandedRowProps {
@@ -129,6 +130,19 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     pipelines,
     description,
   } = item;
+
+  const inferenceStats = useMemo(() => {
+    if (!isPopulatedObject(stats.inference_stats)) return;
+
+    const result = { ...stats.inference_stats } as PartialBy<
+      Exclude<TrainedModelStat['inference_stats'], undefined>,
+      'cache_miss_count'
+    >;
+    if (item.model_type === 'pytorch') {
+      delete result.cache_miss_count;
+    }
+    return result;
+  }, [stats.inference_stats, item.model_type]);
 
   const { analytics_config: analyticsConfig, ...restMetaData } = metadata ?? {};
 
@@ -327,7 +341,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 ) : null}
 
                 <EuiFlexGrid columns={2} gutterSize={'m'}>
-                  {stats.inference_stats ? (
+                  {inferenceStats ? (
                     <EuiFlexItem>
                       <EuiPanel>
                         <EuiTitle size={'xs'}>
@@ -342,13 +356,13 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                         <EuiDescriptionList
                           compressed={true}
                           type="column"
-                          listItems={formatToListItems(stats.inference_stats)}
+                          listItems={formatToListItems(inferenceStats)}
                         />
                       </EuiPanel>
                     </EuiFlexItem>
                   ) : null}
                   {isPopulatedObject(stats.model_size_stats) &&
-                  !isPopulatedObject(stats.inference_stats) ? (
+                  !isPopulatedObject(inferenceStats) ? (
                     <EuiFlexItem>
                       <EuiPanel>
                         <EuiTitle size={'xs'}>
