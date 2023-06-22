@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
 import { sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { paths } from '../../../config/paths';
@@ -32,6 +31,10 @@ import {
   transformSloResponseToCreateSloForm,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
+import {
+  CREATE_RULE_SEARCH_PARAM,
+  useAddRuleFlyoutState,
+} from '../hooks/use_add_rule_flyout_state';
 import { useParseUrlState } from '../hooks/use_parse_url_state';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
@@ -46,8 +49,6 @@ export interface Props {
 
 export const maxWidth = 775;
 
-const CREATE_RULE_SEARCH_PARAM = 'create-rule';
-
 export function SloEditForm({ slo }: Props) {
   const {
     application: { navigateToUrl },
@@ -56,22 +57,14 @@ export function SloEditForm({ slo }: Props) {
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
-  const { search } = useLocation();
-
+  const isEditMode = slo !== undefined;
   const { data: rules, isInitialLoading } = useFetchRulesForSlo({
     sloIds: slo?.id ? [slo.id] : undefined,
   });
+
   const sloFormValuesUrlState = useParseUrlState();
-
-  const searchParams = new URLSearchParams(search);
-  const isEditMode = slo !== undefined;
-
-  const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
+  const isAddRuleFlyoutOpen = useAddRuleFlyoutState(isEditMode);
   const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(true);
-
-  if (searchParams.has(CREATE_RULE_SEARCH_PARAM) && isEditMode && !isAddRuleFlyoutOpen) {
-    setIsAddRuleFlyoutOpen(true);
-  }
 
   useEffect(() => {
     if (isEditMode && rules && rules[slo.id].length) {
@@ -293,7 +286,7 @@ export function SloEditForm({ slo }: Props) {
         <AddRuleFlyout
           canChangeTrigger={false}
           consumer={sloFeatureId}
-          initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
+          initialValues={{ name: `${slo.name} burn rate rule`, params: { sloId: slo.id } }}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           onClose={handleCloseRuleFlyout}
           onSave={handleCloseRuleFlyout}
