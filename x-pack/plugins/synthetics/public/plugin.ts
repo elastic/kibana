@@ -114,8 +114,6 @@ export class UptimePlugin
 
     registerSyntheticsRoutesWithNavigation(core, plugins);
 
-    core.getStartServices().then(([coreStart, clientPluginsStart]) => {});
-
     const appKeywords = [
       'Synthetics',
       'availability',

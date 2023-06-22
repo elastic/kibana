@@ -7,7 +7,6 @@
 
 import { PluginInitializerContext } from '@kbn/core/public';
 import { UptimePlugin } from './plugin';
-export { useEditMonitorLocator } from './apps/synthetics/hooks';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new UptimePlugin(initializerContext);
