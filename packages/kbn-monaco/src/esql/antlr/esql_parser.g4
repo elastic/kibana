@@ -30,6 +30,7 @@ processingCommand
     : evalCommand
     | limitCommand
     | projectCommand
+    | keepCommand
     | renameCommand
     | dropCommand
     | dissectCommand
@@ -42,7 +43,7 @@ processingCommand
     ;
 
 enrichCommand
-    : ENRICH policyName=projectIdentifier (ON matchField=enrichFieldIdentifier)? (WITH enrichWithClause (COMMA enrichWithClause)*)?
+    : ENRICH policyName=enrichIdentifier (ON matchField=enrichFieldIdentifier)? (WITH enrichWithClause (COMMA enrichWithClause)*)?
     ;
 
 enrichWithClause
@@ -126,8 +127,8 @@ field
     ;
 
 enrichFieldIdentifier
-    : PRJ_UNQUOTED_IDENTIFIER
-    | PRJ_QUOTED_IDENTIFIER
+    : ENR_UNQUOTED_IDENTIFIER
+    | ENR_QUOTED_IDENTIFIER
     ;
 
 userVariable
@@ -151,9 +152,9 @@ sourceIdentifier
     | SRC_QUOTED_IDENTIFIER
     ;
 
-projectIdentifier
-    : PRJ_UNQUOTED_IDENTIFIER
-    | PRJ_QUOTED_IDENTIFIER
+enrichIdentifier
+    : ENR_UNQUOTED_IDENTIFIER
+    | ENR_QUOTED_IDENTIFIER
     ;
 
 functionExpressionArgument
@@ -222,6 +223,11 @@ orderExpression
 projectCommand
     :  PROJECT qualifiedNames
     ;
+
+keepCommand
+    :  KEEP qualifiedNames
+    ;
+
 
 dropCommand
     :  DROP qualifiedNames

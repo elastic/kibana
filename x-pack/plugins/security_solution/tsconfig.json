@@ -162,6 +162,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/dev-proc-runner",
     "@kbn/expressions-plugin",
-    "@kbn/text-based-editor"
+    "@kbn/text-based-editor",
+    "@kbn/cloud-chat-plugin"
   ]
 }

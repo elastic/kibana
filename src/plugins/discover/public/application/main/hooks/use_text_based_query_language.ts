@@ -21,7 +21,7 @@ import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
-const TRANSFORMATIONAL_COMMANDS = ['stats', 'project'];
+const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
 /**
  * Hook to take care of text based query language state transformations when a new result is returned

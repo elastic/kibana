@@ -69,7 +69,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "cloudChat"
     ],
     "extraPublicDirs": [
       "common"

@@ -22,7 +22,8 @@ PROJECT : P R O J E C T -> pushMode(EXPRESSION);
 DROP : D R O P -> pushMode(EXPRESSION);
 RENAME : R E N A M E -> pushMode(EXPRESSION);
 SHOW : S H O W -> pushMode(EXPRESSION);
-ENRICH : E N R I C H -> pushMode(PROJECT_IDENTIFIERS);
+ENRICH : E N R I C H -> pushMode(ENRICH_IDENTIFIERS);
+KEEP : K E E P -> pushMode(EXPRESSION);
 
 LINE_COMMENT
     : '//' ~[\r\n]* '\r'? '\n'? -> channel(HIDDEN)
@@ -246,38 +247,38 @@ SRC_WS
     : WS -> channel(HIDDEN)
     ;
 
-mode PROJECT_IDENTIFIERS;
+mode ENRICH_IDENTIFIERS;
 
 ON : O N;
 WITH : W I T H;
 
-PRJ_PIPE : '|' -> type(PIPE), popMode;
-PRJ_CLOSING_BRACKET : ']' -> popMode, popMode, type(CLOSING_BRACKET);
-PRJ_COMMA : ',' -> type(COMMA);
-PRJ_ASSIGN : '=' -> type(ASSIGN);
+ENR_PIPE : '|' -> type(PIPE), popMode;
+ENR_CLOSING_BRACKET : ']' -> popMode, popMode, type(CLOSING_BRACKET);
+ENR_COMMA : ',' -> type(COMMA);
+ENR_ASSIGN : '=' -> type(ASSIGN);
 
-PRJ_UNQUOTED_IDENTIFIER
-    : PRJ_UNQUOTED_IDENTIFIER_PART+
+ENR_UNQUOTED_IDENTIFIER
+    : ENR_UNQUOTED_IDENTIFIER_PART+
     ;
 
-fragment PRJ_UNQUOTED_IDENTIFIER_PART
+fragment ENR_UNQUOTED_IDENTIFIER_PART
     : ~[=`|,[\]/ \t\r\n]+
     | '/' ~[*/] // allow single / but not followed by another / or * which would start a comment
     ;
 
-PRJ_QUOTED_IDENTIFIER
+ENR_QUOTED_IDENTIFIER
     : QUOTED_IDENTIFIER
     ;
 
-PRJ_LINE_COMMENT
+ENR_LINE_COMMENT
     : LINE_COMMENT -> channel(HIDDEN)
     ;
 
-PRJ_MULTILINE_COMMENT
+ENR_MULTILINE_COMMENT
     : MULTILINE_COMMENT -> channel(HIDDEN)
     ;
 
-PRJ_WS
+ENR_WS
     : WS -> channel(HIDDEN)
     ;
 
