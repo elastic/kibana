@@ -1538,6 +1538,20 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.DatasourcePublicAPI.datasourceAliasIds",
+            "type": "Array",
+            "tags": [],
+            "label": "datasourceAliasIds",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.DatasourcePublicAPI.getTableSpec",
             "type": "Function",
             "tags": [],
@@ -5033,6 +5047,20 @@
             "label": "id",
             "description": [
               "Plugin ID, such as \"lnsXY\""
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.alias",
+            "type": "Array",
+            "tags": [],
+            "label": "alias",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
