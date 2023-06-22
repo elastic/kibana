@@ -9,21 +9,18 @@ import Url from 'url';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export async function DefendWorkflowsCypressCliTestRunner(context: FtrProviderContext) {
-  return startDefendWorkflowsCypress(context, 'dw:run');
+  return startDefendWorkflowsCypress(context);
 }
 
 export async function DefendWorkflowsCypressVisualTestRunner(context: FtrProviderContext) {
-  return startDefendWorkflowsCypress(context, 'dw:open');
+  return startDefendWorkflowsCypress(context);
 }
 
 export async function DefendWorkflowsCypressEndpointTestRunner(context: FtrProviderContext) {
-  return startDefendWorkflowsCypress(context, 'dw:endpoint:open');
+  return startDefendWorkflowsCypress(context);
 }
 
-function startDefendWorkflowsCypress(
-  context: FtrProviderContext,
-  cypressCommand: 'dw:endpoint:open' | 'dw:open' | 'dw:run'
-) {
+function startDefendWorkflowsCypress(context: FtrProviderContext) {
   const config = context.getService('config');
 
   return {

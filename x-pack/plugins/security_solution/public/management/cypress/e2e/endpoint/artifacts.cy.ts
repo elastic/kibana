@@ -12,7 +12,7 @@ import type { MetadataListResponse, PolicyData } from '../../../../../common/end
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';
-import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
+// import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 import { login } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
 import { request } from '../../tasks/common';
@@ -58,7 +58,7 @@ describe('Artifact pages', () => {
     });
 
     login();
-    loadEndpointDataForEventFiltersIfNeeded();
+    // loadEndpointDataForEventFiltersIfNeeded();
     removeAllArtifacts();
 
     // wait for ManifestManager to pick up artifact changes that happened either here

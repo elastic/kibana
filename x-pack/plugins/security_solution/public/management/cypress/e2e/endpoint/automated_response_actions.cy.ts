@@ -59,7 +59,7 @@ describe('Automated Response Actions', () => {
     }
   });
 
-  const hostname = Cypress.env('hostname');
+  const hostname = new URL(Cypress.env('FLEET_SERVER_URL')).port;
   const fleetHostname = `dev-fleet-server.${hostname}`;
 
   beforeEach(() => {

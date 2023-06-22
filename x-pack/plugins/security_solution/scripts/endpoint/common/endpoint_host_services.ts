@@ -83,13 +83,18 @@ export const createAndEnrollEndpointHost = async ({
   });
 
   const [vm, fleetServerUrl, enrollmentToken] = await Promise.all([
-    createMultipassVm({
-      vmName,
-      disk,
-      cpus,
-      memory,
-      cachedAgentDownload: agentDownload.cache,
-    }),
+    process.env.CI
+      ? createVagrantVm({
+          vmName,
+          log,
+          cachedAgentDownload: agentDownload.cache as DownloadedAgentInfo,
+        })
+      : createMultipassVm({
+          vmName,
+          disk,
+          cpus,
+          memory,
+        }),
 
     fetchFleetServerUrl(kbnClient),
 
@@ -150,6 +155,54 @@ export const destroyEndpointHost = async (
   ]);
 };
 
+interface CreateVmResponse {
+  vmName: string;
+}
+
+interface CreateVagrantVmOptions {
+  vmName: string;
+  cachedAgentDownload: DownloadedAgentInfo;
+  log: ToolingLog;
+}
+
+/**
+ * Creates a new VM using `vagrant`
+ */
+const createVagrantVm = async ({
+  vmName,
+  cachedAgentDownload,
+  log,
+}: CreateVagrantVmOptions): Promise<CreateVmResponse> => {
+  try {
+    await execa.command(`vagrant destroy -f`, {
+      env: {
+        VAGRANT_CWD,
+      },
+    });
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+
+  try {
+    await execa.command(`vagrant up`, {
+      env: {
+        VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
+        VAGRANT_CWD,
+        VMNAME: vmName,
+        CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
+        CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
+      },
+      stdio: ['inherit', 'inherit', 'inherit'],
+    });
+  } catch (e) {
+    log.error(e);
+    throw e;
+  }
+
+  return {
+    vmName,
+  };
+};
+
 interface CreateMultipassVmOptions {
   vmName: string;
   /** Number of CPUs */
@@ -160,10 +213,6 @@ interface CreateMultipassVmOptions {
   memory?: string;
 }
 
-interface CreateMultipassVmResponse {
-  vmName: string;
-}
-
 /**
  * Creates a new VM using `multipass`
  */
@@ -172,31 +221,10 @@ const createMultipassVm = async ({
   disk = '8G',
   cpus = 1,
   memory = '1G',
-  cachedAgentDownload,
-}: CreateMultipassVmOptions): Promise<CreateMultipassVmResponse> => {
-  if (process.env.CI) {
-    console.log('VAGRANT_CWD', VAGRANT_CWD, __dirname);
-    console.log('cachedAgentDownload', cachedAgentDownload);
-    try {
-      await execa.command(`vagrant up --debug`, {
-        env: {
-          VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
-          VAGRANT_CWD,
-          VMNAME: vmName,
-          CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
-          CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
-        },
-        stdio: ['inherit', 'inherit', 'inherit'],
-      });
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
-  } else {
-    await execa.command(
-      `multipass launch --name ${vmName} --disk ${disk} --cpus ${cpus} --memory ${memory}`
-    );
-  }
+}: CreateMultipassVmOptions): Promise<CreateVmResponse> => {
+  await execa.command(
+    `multipass launch --name ${vmName} --disk ${disk} --cpus ${cpus} --memory ${memory}`
+  );
 
   return {
     vmName,
@@ -242,20 +270,7 @@ const enrollHostWithFleet = async ({
       `Installing agent on host using cached download from [${cachedAgentDownload.fullFilePath}]`
     );
 
-    if (process.env.CI) {
-      await execa.command(`vagrant ssh -- tar -zxf ${cachedAgentDownload.filename}`, {
-        env: {
-          VAGRANT_CWD,
-        },
-        stdio: ['inherit', 'inherit', 'inherit'],
-      });
-      await execa.command(`vagrant ssh -- rm -f ${cachedAgentDownload.filename}`, {
-        env: {
-          VAGRANT_CWD,
-        },
-        stdio: ['inherit', 'inherit', 'inherit'],
-      });
-    } else {
+    if (!process.env.CI) {
       // mount local folder on VM
       await execa.command(
         `multipass mount ${cachedAgentDownload.directory} ${vmName}:~/_agent_downloads`
@@ -268,26 +283,7 @@ const enrollHostWithFleet = async ({
   } else {
     log.verbose(`downloading and installing agent from URL [${agentDownloadUrl}]`);
 
-    if (process.env.CI) {
-      await execa.command(`vagrant ssh -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`, {
-        env: {
-          VAGRANT_CWD,
-        },
-        stdio: ['inherit', 'inherit', 'inherit'],
-      });
-      await execa.command(`vagrant ssh -- tar -zxf ${agentDownloadedFile}`, {
-        env: {
-          VAGRANT_CWD,
-        },
-        stdio: ['inherit', 'inherit', 'inherit'],
-      });
-      await execa.command(`vagrant ssh -- rm -f ${agentDownloadedFile}`, {
-        env: {
-          VAGRANT_CWD,
-        },
-        stdio: ['inherit', 'inherit', 'inherit'],
-      });
-    } else {
+    if (!process.env.CI) {
       // download into VM
       await execa.command(
         `multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`

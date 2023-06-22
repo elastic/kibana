@@ -11,6 +11,7 @@ Vagrant.configure("2") do |config|
     vb.cpus = 2
   end
   config.vm.provision "file", source: cachedAgentSource, destination: "~/#{cachedAgentFilename}"
+  config.vm.provision "shell", inline: "tar -zxf #{cachedAgentFilename} && rm -f #{cachedAgentFilename}"
 end
 
 # Vagrant.configure("2") do |config|
@@ -26,4 +27,5 @@ end
 #     end
 #     config.vm.network "private_network", type: "dhcp"
 #     config.vm.provision "file", source: cachedAgentSource, destination: "~/#{cachedAgentFilename}"
+#     config.vm.provision "shell", inline: "tar -zxf #{cachedAgentFilename} && rm -f #{cachedAgentFilename}"
 # end
