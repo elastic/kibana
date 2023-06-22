@@ -7,6 +7,7 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
 
 export interface APMIndices {
@@ -35,6 +36,25 @@ export const apmIndices: SavedObjectsType = {
       i18n.translate('xpack.apm.apmSettings.index', {
         defaultMessage: 'APM Settings - Index',
       }),
+  },
+  modelVersions: {
+    '1': {
+      changes: [],
+      schemas: {
+        create: schema.object({
+          apmIndices: schema.maybe(
+            schema.object({
+              error: schema.maybe(schema.string()),
+              onboarding: schema.maybe(schema.string()),
+              span: schema.maybe(schema.string()),
+              transaction: schema.maybe(schema.string()),
+              metric: schema.maybe(schema.string()),
+            })
+          ),
+          isSpaceAware: schema.maybe(schema.boolean()),
+        }),
+      },
+    },
   },
   migrations: {
     '7.16.0': (doc) => {

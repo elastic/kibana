@@ -33,6 +33,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-analytics-browser",
   ],
   "exclude": [
     "target/**/*",

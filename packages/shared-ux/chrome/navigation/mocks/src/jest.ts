@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ChromeNavLink } from '@kbn/core-chrome-browser';
-import { BehaviorSubject } from 'rxjs';
-import { NavigationServices, ChromeNavigationNodeViewModel } from '../../types';
+import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { BehaviorSubject, of } from 'rxjs';
+import { NavigationServices } from '../../types';
 import { navLinksMock } from './navlinks';
+
+const activeNodes: ChromeProjectNavigationNode[][] = [];
 
 export const getServicesMock = ({
   navLinks = navLinksMock,
@@ -26,55 +28,6 @@ export const getServicesMock = ({
     navIsOpen: true,
     navigateToUrl,
     onProjectNavigationChange: jest.fn(),
+    activeNodes$: of(activeNodes),
   };
 };
-
-export const getSolutionPropertiesMock = (): ChromeNavigationNodeViewModel => ({
-  id: 'example_project',
-  icon: 'logoObservability',
-  title: 'Example project',
-  items: [
-    {
-      id: 'root',
-      title: '',
-      items: [
-        {
-          id: 'get_started',
-          title: 'Get started',
-          href: '/app/example_project/get_started',
-        },
-        {
-          id: 'alerts',
-          title: 'Alerts',
-          href: '/app/example_project/alerts',
-        },
-        {
-          id: 'cases',
-          title: 'Cases',
-          href: '/app/example_project/cases',
-        },
-      ],
-    },
-    {
-      id: 'example_settings',
-      title: 'Settings',
-      items: [
-        {
-          id: 'logs',
-          title: 'Logs',
-          href: '/app/management/logs',
-        },
-        {
-          id: 'signals',
-          title: 'Signals',
-          href: '/app/management/signals',
-        },
-        {
-          id: 'tracing',
-          title: 'Tracing',
-          href: '/app/management/tracing',
-        },
-      ],
-    },
-  ],
-});

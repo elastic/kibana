@@ -197,10 +197,6 @@ interface FilterField {
   type?: string;
 }
 
-interface NestedFilterField extends FilterField {
-  nestedField: string;
-}
-
 export const buildFilter = ({
   filters,
   field,
@@ -218,48 +214,7 @@ export const buildFilter = ({
   }
 
   return nodeBuilder[operator](
-    filtersAsArray.map((filter) =>
-      nodeBuilder.is(`${escapeKuery(type)}.attributes.${escapeKuery(field)}`, escapeKuery(filter))
-    )
-  );
-};
-
-/**
- * Creates a KueryNode filter for the Saved Object find API's filter field. This handles constructing a filter for
- * a nested field.
- *
- * @param filters is a string or array of strings that defines the values to search for
- * @param field is the location to search for
- * @param nestedField is the field in the saved object that has a type of 'nested'
- * @param operator whether to 'or'/'and' the created filters together
- * @type the type of saved object being searched
- * @returns a constructed KueryNode representing the filter or undefined if one could not be built
- */
-export const buildNestedFilter = ({
-  filters,
-  field,
-  nestedField,
-  operator,
-  type = CASE_SAVED_OBJECT,
-}: NestedFilterField): KueryNode | undefined => {
-  if (filters === undefined) {
-    return;
-  }
-
-  const filtersAsArray = Array.isArray(filters) ? filters : [filters];
-
-  if (filtersAsArray.length === 0) {
-    return;
-  }
-
-  return nodeBuilder[operator](
-    filtersAsArray.map((filter) =>
-      fromKueryExpression(
-        `${escapeKuery(type)}.attributes.${escapeKuery(nestedField)}:{ ${escapeKuery(
-          field
-        )}: ${escapeKuery(filter)} }`
-      )
-    )
+    filtersAsArray.map((filter) => nodeBuilder.is(`${type}.attributes.${field}`, filter))
   );
 };
 
@@ -365,7 +320,7 @@ export const buildAssigneesFilter = ({
   );
 
   const assigneesFilter = assigneesWithoutNone.map((filter) =>
-    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, filter)
   );
 
   if (!hasNoneAssignee) {
@@ -501,6 +456,15 @@ export const getCaseToUpdate = (
     { id: queryCase.id, version: queryCase.version }
   );
 
+/**
+ * TODO: Backend is not connected with the
+ * frontend in x-pack/plugins/cases/common/ui/types.ts.
+ * It is easy to forget to update a sort field.
+ * We should fix it and make it common.
+ * Also the sortField in x-pack/plugins/cases/common/api/cases/case.ts
+ * is set to string. We should narrow it to the
+ * acceptable values
+ */
 enum SortFieldCase {
   closedAt = 'closed_at',
   createdAt = 'created_at',
@@ -508,6 +472,7 @@ enum SortFieldCase {
   title = 'title.keyword',
   severity = 'severity',
   updatedAt = 'updated_at',
+  category = 'category',
 }
 
 export const convertSortField = (sortField: string | undefined): SortFieldCase => {
@@ -527,6 +492,8 @@ export const convertSortField = (sortField: string | undefined): SortFieldCase =
     case 'updatedAt':
     case 'updated_at':
       return SortFieldCase.updatedAt;
+    case 'category':
+      return SortFieldCase.category;
     default:
       return SortFieldCase.createdAt;
   }
