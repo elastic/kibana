@@ -32,6 +32,14 @@ export class EventReporter {
     }
   }
 
+  public searchBarClose() {
+    // TODO
+  }
+
+  public searchBarOpen() {
+    // TODO
+  }
+
   public navigateToApplication(context: TrackedApplicationClick) {
     const application = context?.application ?? 'unknown';
     const terms = context?.searchValue ?? null;

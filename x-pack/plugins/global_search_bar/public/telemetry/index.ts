@@ -36,6 +36,8 @@ export const getTrackUiMetric = ({ analytics, usageCollection }: ReporterOpts): 
   // create references of the public methods of EventReporter
   track.searchFocus = reportEvent.searchFocus.bind(reportEvent);
   track.searchBlur = reportEvent.searchBlur.bind(reportEvent);
+  track.searchBarOpen = reportEvent.searchBarOpen.bind(reportEvent);
+  track.searchBarClose = reportEvent.searchBarClose.bind(reportEvent);
   track.navigateToApplication = reportEvent.navigateToApplication.bind(reportEvent);
   track.navigateToSavedObject = reportEvent.navigateToSavedObject.bind(reportEvent);
   track.error = reportEvent.error.bind(reportEvent);

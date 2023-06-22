@@ -185,6 +185,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
         trackUiMetric(METRIC_TYPE.COUNT, CountMetric.SHORTCUT_USED);
+        trackUiMetric.searchBarOpen();
         if (chromeStyle === 'project' && !isVisible) {
           visibilityButtonRef.current?.click();
         } else if (searchRef) {
@@ -250,9 +251,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   useEvent('keydown', onKeyDown);
 
   if (chromeStyle === 'project' && !isVisible) {
-    const onShowSearch = () => {
-      setIsVisible(true);
-    };
     return (
       <EuiButtonIcon
         aria-label={i18nStrings.showSearchAriaText}
@@ -260,7 +258,10 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         color="text"
         data-test-subj="nav-search-reveal"
         iconType="search"
-        onClick={onShowSearch}
+        onClick={() => {
+          trackUiMetric.searchBarClose();
+          setIsVisible(true);
+        }}
       />
     );
   }
@@ -274,6 +275,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           data-test-subj="nav-search-conceal"
           iconType="cross"
           onClick={() => {
+            trackUiMetric.searchBarOpen();
             setIsVisible(false);
           }}
         />
