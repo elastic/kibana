@@ -44,27 +44,22 @@ export const buildStateSubscribe =
   }) =>
   async (nextState: DiscoverAppState) => {
     const prevState = appState.getPrevious();
+    const nextQuery = nextState.query;
     const savedSearch = savedSearchState.getState();
-    if (isEqualState(prevState, nextState)) {
+    const prevQuery = savedSearch.searchSource.getField('query');
+    const queryChanged = !isEqual(nextQuery, prevQuery);
+
+    if (isEqualState(prevState, nextState) && !queryChanged) {
       addLog('[appstate] subscribe update ignored due to no changes', { prevState, nextState });
       return;
     }
     addLog('[appstate] subscribe triggered', nextState);
-    const {
-      hideChart,
-      interval,
-      breakdownField,
-      sort,
-      index,
-      query: prevQuery,
-    } = appState.getPrevious();
-    const nextQuery = nextState.query;
+    const { hideChart, interval, breakdownField, sort, index } = prevState;
 
     const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
-
     if (isTextBasedQueryLang) {
-      const isTextBasedQueryLandPrev = isTextBasedQuery(prevQuery);
-      if (!isTextBasedQueryLandPrev) {
+      const isTextBasedQueryLangPrev = isTextBasedQuery(prevQuery);
+      if (!isTextBasedQueryLangPrev) {
         savedSearchState.update({ nextState });
         dataState.reset(savedSearch);
       }
@@ -76,7 +71,6 @@ export const buildStateSubscribe =
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isTextBasedQueryLang;
     const dataViewChanged = !isEqual(nextState.index, index) && !isTextBasedQueryLang;
-    const queryChanged = !isEqual(nextQuery, prevQuery);
     let savedSearchDataView;
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
