@@ -48,7 +48,7 @@ export const StatusByLocations = ({ locations }: StatusByLocationsProps) => {
       <h2>
         {locations.length <= 1 ? (
           <FormattedMessage
-            id="xpack.synthetics.monitorStatusBar.locations.oneLocStatus"
+            id="xpack.uptime.monitorStatusBar.locations.oneLocStatus"
             values={{
               status,
               loc: statusMessage,
@@ -57,7 +57,7 @@ export const StatusByLocations = ({ locations }: StatusByLocationsProps) => {
           />
         ) : (
           <FormattedMessage
-            id="xpack.synthetics.monitorStatusBar.locations.upStatus"
+            id="xpack.uptime.monitorStatusBar.locations.upStatus"
             values={{
               status,
               loc: statusMessage,

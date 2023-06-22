@@ -48,19 +48,19 @@ export const MonListDescription = styled(EuiDescriptionListDescription)`
 export const renderMonitorType = (type: string | undefined) => {
   switch (type) {
     case 'http':
-      return i18n.translate('xpack.synthetics.monitorDetails.statusBar.pingType.http', {
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.http', {
         defaultMessage: 'HTTP',
       });
     case 'tcp':
-      return i18n.translate('xpack.synthetics.monitorDetails.statusBar.pingType.tcp', {
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.tcp', {
         defaultMessage: 'TCP',
       });
     case 'icmp':
-      return i18n.translate('xpack.synthetics.monitorDetails.statusBar.pingType.icmp', {
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.icmp', {
         defaultMessage: 'ICMP',
       });
     case 'browser':
-      return i18n.translate('xpack.synthetics.monitorDetails.statusBar.pingType.browser', {
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.browser', {
         defaultMessage: 'Browser',
       });
     default:

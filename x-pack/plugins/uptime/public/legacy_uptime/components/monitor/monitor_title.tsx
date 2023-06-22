@@ -42,28 +42,28 @@ export const MonitorPageTitleContent: React.FC = () => {
       case 'http':
         return (
           <FormattedMessage
-            id="xpack.synthetics.monitorDetails.title.pingType.http"
+            id="xpack.uptime.monitorDetails.title.pingType.http"
             defaultMessage="HTTP ping"
           />
         );
       case 'tcp':
         return (
           <FormattedMessage
-            id="xpack.synthetics.monitorDetails.title.pingType.tcp"
+            id="xpack.uptime.monitorDetails.title.pingType.tcp"
             defaultMessage="TCP ping"
           />
         );
       case 'icmp':
         return (
           <FormattedMessage
-            id="xpack.synthetics.monitorDetails.title.pingType.icmp"
+            id="xpack.uptime.monitorDetails.title.pingType.icmp"
             defaultMessage="ICMP ping"
           />
         );
       case 'browser':
         return (
           <FormattedMessage
-            id="xpack.synthetics.monitorDetails.title.pingType.browser"
+            id="xpack.uptime.monitorDetails.title.pingType.browser"
             defaultMessage="Browser"
           />
         );
@@ -85,7 +85,7 @@ export const MonitorPageTitleContent: React.FC = () => {
             <EuiBadge color="hollow">
               {renderMonitorType(type)}{' '}
               <FormattedMessage
-                id="xpack.synthetics.monitorDetails.title.disclaimer.description"
+                id="xpack.uptime.monitorDetails.title.disclaimer.description"
                 defaultMessage="(BETA)"
               />
             </EuiBadge>
@@ -100,7 +100,7 @@ export const MonitorPageTitleContent: React.FC = () => {
                 target="_blank"
               >
                 <FormattedMessage
-                  id="xpack.synthetics.monitorDetails.title.disclaimer.link"
+                  id="xpack.uptime.monitorDetails.title.disclaimer.link"
                   defaultMessage="See more"
                 />
               </EuiLink>

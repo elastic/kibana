@@ -31,14 +31,14 @@ export const ConfirmJobDeletion: React.FC<Props> = ({ loading, onConfirm, onCanc
       {!loading ? (
         <p>
           <FormattedMessage
-            id="xpack.synthetics.monitorDetails.ml.confirmDeleteMessage"
+            id="xpack.uptime.monitorDetails.ml.confirmDeleteMessage"
             defaultMessage="Are you sure you want to delete this job?"
           />
         </p>
       ) : (
         <p>
           <FormattedMessage
-            id="xpack.synthetics.monitorDetails.ml.deleteMessage"
+            id="xpack.uptime.monitorDetails.ml.deleteMessage"
             defaultMessage="Deleting jobs..."
           />
           )
@@ -47,7 +47,7 @@ export const ConfirmJobDeletion: React.FC<Props> = ({ loading, onConfirm, onCanc
       {!loading ? (
         <p>
           <FormattedMessage
-            id="xpack.synthetics.monitorDetails.ml.deleteJobWarning"
+            id="xpack.uptime.monitorDetails.ml.deleteJobWarning"
             defaultMessage="Deleting a job can be time consuming.
               It will be deleted in the background and data may not disappear instantly."
           />

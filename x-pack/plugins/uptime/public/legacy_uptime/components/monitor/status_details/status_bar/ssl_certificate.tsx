@@ -40,7 +40,7 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
     <>
       <MonListTitle>
         <FormattedMessage
-          id="xpack.synthetics.monitorStatusBar.sslCertificate.title"
+          id="xpack.uptime.monitorStatusBar.sslCertificate.title"
           defaultMessage="TLS Certificate"
         />
       </MonListTitle>

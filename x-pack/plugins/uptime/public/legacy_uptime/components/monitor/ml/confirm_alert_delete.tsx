@@ -29,7 +29,7 @@ export const ConfirmAlertDeletion: React.FC<Props> = ({ onConfirm, onCancel }) =
     >
       <p>
         <FormattedMessage
-          id="xpack.synthetics.monitorDetails.ml.confirmAlertDeleteMessage"
+          id="xpack.uptime.monitorDetails.ml.confirmAlertDeleteMessage"
           defaultMessage="Are you sure you want to delete the alert for anomalies?"
         />
       </p>

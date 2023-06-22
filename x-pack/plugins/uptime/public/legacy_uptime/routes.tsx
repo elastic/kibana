@@ -62,7 +62,7 @@ export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.synthetics.overvi
 const getRoutes = (): RouteProps[] => {
   return [
     {
-      title: i18n.translate('xpack.synthetics.monitorRoute.title', {
+      title: i18n.translate('xpack.uptime.monitorRoute.title', {
         defaultMessage: 'Monitor | {baseTitle}',
         values: { baseTitle },
       }),
