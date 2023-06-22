@@ -22,6 +22,7 @@ import {
   EuiPageHeader,
   EuiHorizontalRule,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
@@ -29,6 +30,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { ViewerStatus, EmptyViewerState } from '@kbn/securitysolution-exception-list-components';
 
+import { css } from '@emotion/react';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -80,6 +82,7 @@ const SORT_FIELDS: Array<{ field: string; label: string; defaultOrder: 'asc' | '
 ];
 
 export const SharedLists = React.memo(() => {
+  const { euiTheme } = useEuiTheme();
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
   const { loading: listsConfigLoading } = useListsConfig();
@@ -445,7 +448,11 @@ export const SharedLists = React.memo(() => {
   }, [isSearchingExceptions, hasNoExceptions, exceptionsLoaded, isLoadingExceptions]);
 
   return (
-    <>
+    <div
+      css={css`
+        padding: ${euiTheme.size.l};
+      `}
+    >
       <MissingPrivilegesCallOut />
       <EuiPageHeader
         pageTitle={i18n.ALL_EXCEPTIONS}
@@ -640,7 +647,7 @@ export const SharedLists = React.memo(() => {
           titleText={i18n.REFERENCE_MODAL_TITLE}
         />
       </div>
-    </>
+    </div>
   );
 });
 
