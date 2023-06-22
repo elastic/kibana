@@ -9,10 +9,10 @@ export interface BulkCreateResponse {
   status: 'success' | 'failed' | 'mixed';
   items: Array<{
     status: 'success' | 'error';
-    // action_id
-    id: string;
+    id: string; // same as action_id
   }>;
 }
+
 export interface FleetActionsClientInterface {
   /**
    *
@@ -107,6 +107,7 @@ export interface FleetActionRequest extends CommonFleetActionResultDocFields {
   timeout: number;
   type: string;
   user_id: string;
+
   // allow other fields that are not mapped
   [k: string]: unknown;
 }
