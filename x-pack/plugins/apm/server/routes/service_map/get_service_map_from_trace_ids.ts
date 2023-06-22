@@ -5,43 +5,38 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import { find, uniqBy } from 'lodash';
 import { Connection, ConnectionNode } from '../../../common/service_map';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
-import { getConnectionId } from './transform_service_map_responses';
 
 export function getConnections({
   paths,
 }: {
   paths: ConnectionNode[][] | undefined;
-}): Connection[] {
+}) {
   if (!paths) {
     return [];
   }
 
-  const connectionsById: Map<string, Connection> = new Map();
-
-  paths.forEach((path) => {
-    path.forEach((location, i) => {
-      const prev = path[i - 1];
-
+  const connectionsArr = paths.flatMap((path) => {
+    return path.reduce((conns, location, index) => {
+      const prev = path[index - 1];
       if (prev) {
-        const connection = {
+        return conns.concat({
           source: prev,
           destination: location,
-        };
-
-        const id = getConnectionId(connection);
-
-        if (!connectionsById.has(id)) {
-          connectionsById.set(id, connection);
-        }
+        });
       }
-    });
-  });
+      return conns;
+    }, [] as Connection[]);
+  }, [] as Connection[]);
 
-  return Array.from(connectionsById.values());
+  const connections = uniqBy(connectionsArr, (value) =>
+    find(connectionsArr, value)
+  );
+
+  return connections;
 }
 
 export async function getServiceMapFromTraceIds({
@@ -49,26 +44,14 @@ export async function getServiceMapFromTraceIds({
   traceIds,
   start,
   end,
-  terminateAfter,
-  logger,
 }: {
   apmEventClient: APMEventClient;
   traceIds: string[];
   start: number;
   end: number;
-  terminateAfter: number;
-  logger: Logger;
 }) {
   const serviceMapFromTraceIdsScriptResponse =
-    await fetchServicePathsFromTraceIds({
-      apmEventClient,
-      traceIds,
-      start,
-      end,
-      terminateAfter,
-    });
-
-  logger.debug('Received scripted metric agg response');
+    await fetchServicePathsFromTraceIds(apmEventClient, traceIds, start, end);
 
   const serviceMapScriptedAggValue =
     serviceMapFromTraceIdsScriptResponse.aggregations?.service_map.value;
