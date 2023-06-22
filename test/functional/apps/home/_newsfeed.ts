@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Newsfeed', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', undefined);
+      await PageObjects.newsfeed.resetPage();
     });
 
     it('has red icon which is a sign of not checked news', async () => {

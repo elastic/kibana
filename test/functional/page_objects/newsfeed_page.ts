@@ -17,12 +17,11 @@ export class NewsfeedPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
 
   async sleep(sleepMilliseconds: number) {
-    this.log.debug(`... sleep(${sleepMilliseconds}) start`);
     await setTimeoutAsync(sleepMilliseconds);
-    this.log.debug(`... sleep(${sleepMilliseconds}) end`);
   }
+
   async resetPage() {
-    await this.common.navigateToUrl('home'); // navigateToApp sets `disableWelcomePrompt` to true under the hood. `navigateToUrl` explicitly disables the welcome screen.
+    await this.common.navigateToUrl('home', undefined); // navigateToApp sets `disableWelcomePrompt` to true under the hood. `navigateToUrl` explicitly disables the welcome screen.
   }
 
   async closeNewsfeedPanel() {
