@@ -156,7 +156,7 @@ export function DiscoverGridFlyout({
                     iconSize="s"
                     iconType="document"
                     flush="left"
-                    data-test-subj="docTableRowAction"
+                    data-test-subj="docTableViewSingleDocument"
                     href={singleDocHref}
                     onClick={onOpenSingleDoc}
                   >
@@ -176,7 +176,7 @@ export function DiscoverGridFlyout({
                         flush="left"
                         onClick={onOpenContextView}
                         href={contextViewHref}
-                        data-test-subj="docTableRowAction"
+                        data-test-subj="docTableViewSurroundingDocuments"
                       >
                         {i18n.translate(
                           'discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple',
