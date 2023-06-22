@@ -105,7 +105,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
       </EuiFormLabel>
       <div className="timExpressionInput__editor">
         <div className="timExpressionInput__absolute" data-test-subj="timelionCodeEditor">
-          <CodeEditor // TODO theme is provided in context by src/plugins/vis_types/timelion/public/timelion_vis_renderer.tsx
+          <CodeEditor
             languageId={LANGUAGE_ID}
             value={value}
             onChange={setValue}

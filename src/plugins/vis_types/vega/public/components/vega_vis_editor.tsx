@@ -101,7 +101,7 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
         <VegaHelpMenu />
         <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
       </div>
-      <CodeEditor // TODO theme needs to be provided, need CodeOwner help
+      <CodeEditor
         width="100%"
         height="100%"
         languageId={languageId}

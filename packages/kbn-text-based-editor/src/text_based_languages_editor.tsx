@@ -515,7 +515,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         {errors.length}
                       </EuiBadge>
                     )}
-                    <CodeEditor // TODO Unsure how to proceed, theme would most likely be provided by all callers, need CodeOwners help
+                    <CodeEditor
                       languageId={languageId(language)}
                       value={codeOneLiner || code}
                       options={codeEditorOptions}

@@ -122,7 +122,7 @@ export class MarkdownEditor extends Component {
     return (
       <div className="tvbMarkdownEditor">
         <div className="tvbMarkdownEditor__editor">
-          <CodeEditor // TODO theme is provided in context by src/plugins/vis_types/timeseries/public/application/components/vis_editor.tsx
+          <CodeEditor
             editorDidMount={this.handleOnLoad}
             languageId={MarkdownLang}
             options={{

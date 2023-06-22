@@ -257,7 +257,7 @@ export class MarkdownPanelConfig extends Component<
               </span>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <CodeEditor // TODO theme is provided in context by src/plugins/vis_types/timeseries/public/application/components/vis_editor.tsx
+            <CodeEditor
               height="500px"
               languageId={CssLang}
               options={{ fontSize: 14 }}
