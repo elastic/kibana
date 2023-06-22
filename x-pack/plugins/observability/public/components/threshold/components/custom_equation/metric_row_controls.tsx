@@ -18,6 +18,7 @@ export function MetricRowControls({ onDelete, disableDelete }: MetricRowControlP
     <>
       <EuiFlexItem grow={0}>
         <EuiButtonIcon
+          aria-label={DELETE_LABEL}
           iconType="trash"
           color="danger"
           style={{ marginBottom: '0.2em' }}

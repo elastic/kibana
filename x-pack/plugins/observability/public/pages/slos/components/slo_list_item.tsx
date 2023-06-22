@@ -180,7 +180,9 @@ export function SloListItem({
             anchorPosition="downLeft"
             button={
               <EuiButtonIcon
-                aria-label="Actions"
+                aria-label={i18n.translate('xpack.observability.slo.slo.item.actions.button', {
+                  defaultMessage: 'Actions',
+                })}
                 color="text"
                 disabled={!slo.summary}
                 display="empty"
