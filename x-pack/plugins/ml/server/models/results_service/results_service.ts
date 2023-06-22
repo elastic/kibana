@@ -674,7 +674,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     }
 
     const jobConfig = jobsResponse.jobs[0];
-    const timefield = jobConfig.data_description.time_field!;
+    const { time_field: timefield, time_format: timeformat } = jobConfig.data_description!;
+    const timeFormat = timeformat === 'epoch_ms' ? 'epoch_millis' : timeformat;
     const bucketSpan = jobConfig.analysis_config.bucket_span;
 
     if (datafeedConfig === undefined) {
@@ -683,7 +684,11 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const rangeFilter = {
       range: {
-        [timefield]: { gte: start, lte: end },
+        [timefield!]: {
+          gte: start,
+          lte: end,
+          ...(timeFormat ? { format: timeFormat } : {}),
+        },
       },
     };
 
