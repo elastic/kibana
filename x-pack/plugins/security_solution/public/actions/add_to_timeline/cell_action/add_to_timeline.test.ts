@@ -25,7 +25,12 @@ const store = {
 const value = 'the-value';
 
 const context = {
-  field: { name: 'user.name', value, type: 'text' },
+  data: [
+    {
+      field: { name: 'user.name', type: 'text' },
+      value,
+    },
+  ],
 } as CellActionExecutionContext;
 
 const defaultDataProvider = {
@@ -74,7 +79,12 @@ describe('createAddToTimelineCellAction', () => {
       expect(
         await addToTimelineAction.isCompatible({
           ...context,
-          field: { ...context.field, name: 'signal.reason' },
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, name: 'signal.reason' },
+            },
+          ],
         })
       ).toEqual(false);
     });
@@ -89,7 +99,7 @@ describe('createAddToTimelineCellAction', () => {
 
     it('should execute with number value', async () => {
       await addToTimelineAction.execute({
-        field: { name: 'process.parent.pid', value: 12345, type: 'number' },
+        data: [{ field: { name: 'process.parent.pid', type: 'number' }, value: 12345 }],
       } as unknown as CellActionExecutionContext); // TODO: remove `as unknown` when number value type is supported
       expect(mockDispatch).toHaveBeenCalledWith(
         set(
@@ -112,8 +122,8 @@ describe('createAddToTimelineCellAction', () => {
 
     it('should execute with null value', async () => {
       await addToTimelineAction.execute({
-        field: { name: 'user.name', value: null, type: 'text' },
-      } as CellActionExecutionContext);
+        data: [{ field: { name: 'user.name', type: 'text' }, value: null }],
+      } as unknown as CellActionExecutionContext);
       expect(mockDispatch).toHaveBeenCalledWith(
         set(
           'payload.providers[0]',
@@ -137,8 +147,8 @@ describe('createAddToTimelineCellAction', () => {
       const value2 = 'value2';
       const value3 = 'value3';
       await addToTimelineAction.execute({
-        field: { name: 'user.name', value: [value, value2, value3], type: 'text' },
-      } as CellActionExecutionContext);
+        data: [{ field: { name: 'user.name', type: 'text' }, value: [value, value2, value3] }],
+      } as unknown as CellActionExecutionContext);
       expect(mockDispatch).toHaveBeenCalledWith(
         set(
           'payload.providers[0]',
@@ -166,10 +176,15 @@ describe('createAddToTimelineCellAction', () => {
     it('should show warning if no provider added', async () => {
       await addToTimelineAction.execute({
         ...context,
-        field: {
-          ...context.field,
-          type: GEO_FIELD_TYPE,
-        },
+        data: [
+          {
+            ...context.data[0],
+            field: {
+              ...context.data[0].field,
+              type: GEO_FIELD_TYPE,
+            },
+          },
+        ],
       });
       expect(mockDispatch).not.toHaveBeenCalled();
       expect(mockWarningToast).toHaveBeenCalled();
