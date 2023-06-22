@@ -133,9 +133,10 @@ export const getInferenceProcessor = (
       {
         append: {
           field: '_source._ingest.inference_errors',
+          allow_duplicates: false,
           value: [
             {
-              message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
+              message: `Processor 'inference' in pipeline '${pipelineName}' failed for field '${sourceField}' with message '{{ _ingest.on_failure_message }}'`,
               pipeline: pipelineName,
               timestamp: '{{{ _ingest.timestamp }}}',
             },

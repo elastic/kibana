@@ -310,8 +310,10 @@ export class LensPlugin {
         fieldFormats,
         plugins.fieldFormats.deserialize
       );
-      const visualizationMap = await this.editorFrameService!.loadVisualizations();
-      const datasourceMap = await this.editorFrameService!.loadDatasources();
+      const [visualizationMap, datasourceMap] = await Promise.all([
+        this.editorFrameService!.loadVisualizations(),
+        this.editorFrameService!.loadDatasources(),
+      ]);
       const eventAnnotationService = await plugins.eventAnnotation.getService();
 
       if (plugins.usageCollection) {
