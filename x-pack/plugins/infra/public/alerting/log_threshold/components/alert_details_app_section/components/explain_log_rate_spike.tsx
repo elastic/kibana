@@ -95,8 +95,9 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     }
   }, [rule, alert, dataViews, logViews]);
 
-  // Identify `intervalFactor` to adjust time ranges based on custom user settings.
-  // For example, if a user would have a `5m` lookback, based on the `1m` default this would result in a factor of `5`.
+  // Identify `intervalFactor` to adjust time ranges based on alert settings.
+  // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
+  // If an alert would have a `5m` lookback, this would result in a factor of `5`.
   const lookbackDuration =
     alert.fields['kibana.alert.rule.parameters'] &&
     alert.fields['kibana.alert.rule.parameters'].timeSize &&
@@ -112,14 +113,35 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
 
   const timeRange = {
-    min: alertStart.clone().subtract(20 * intervalFactor, 'minutes'),
-    max: alertEnd ? alertEnd.clone().add(5 * intervalFactor, 'minutes') : moment(new Date()),
+    min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
+    max: alertEnd ? alertEnd.clone().add(1 * intervalFactor, 'minutes') : moment(new Date()),
   };
+
+  function getDeviationMax() {
+    if (alertEnd) {
+      return alertEnd
+        .clone()
+        .subtract(1 * intervalFactor, 'minutes')
+        .valueOf();
+    } else if (
+      alertStart
+        .clone()
+        .add(10 * intervalFactor, 'minutes')
+        .isAfter(moment(new Date()))
+    ) {
+      return moment(new Date()).valueOf();
+    } else {
+      return alertStart
+        .clone()
+        .add(10 * intervalFactor, 'minutes')
+        .valueOf();
+    }
+  }
 
   const initialAnalysisStart = {
     baselineMin: alertStart
       .clone()
-      .subtract(10 * intervalFactor, 'minutes')
+      .subtract(13 * intervalFactor, 'minutes')
       .valueOf(),
     baselineMax: alertStart
       .clone()
@@ -129,15 +151,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
       .clone()
       .subtract(1 * intervalFactor, 'minutes')
       .valueOf(),
-    deviationMax: alertStart
-      .clone()
-      .add(10 * intervalFactor, 'minutes')
-      .isAfter(moment(new Date()))
-      ? moment(new Date()).valueOf()
-      : alertStart
-          .clone()
-          .add(10 * intervalFactor, 'minutes')
-          .valueOf(),
+    deviationMax: getDeviationMax(),
   };
 
   const explainLogSpikeTitle = i18n.translate(
