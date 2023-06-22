@@ -47,7 +47,15 @@ export class TaskValidator {
     );
   }
 
-  public getValidatedTaskInstance<T extends TaskInstance>(task: T, mode: 'read' | 'write'): T {
+  public getValidatedTaskInstance<T extends TaskInstance>(
+    task: T,
+    mode: 'read' | 'write',
+    options: { validate: boolean } = { validate: true }
+  ): T {
+    if (!options.validate) {
+      return task;
+    }
+
     // In the scenario the task is unused / deprecated and Kibana needs to manipulate the task,
     // we'll do a pass-through for those
     if (!this.definitions.has(task.taskType)) {

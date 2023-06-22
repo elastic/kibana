@@ -35,15 +35,13 @@ export class BufferedTaskStore implements Updatable {
     doc: ConcreteTaskInstance,
     options: { validate: boolean }
   ): Promise<ConcreteTaskInstance> {
-    let docToUpdate = doc;
-    if (options.validate) {
-      docToUpdate = this.taskStore.taskValidator.getValidatedTaskInstance(doc, 'write');
-    }
-    let result = await unwrapPromise(this.bufferedUpdate(docToUpdate));
-    if (options.validate) {
-      result = this.taskStore.taskValidator.getValidatedTaskInstance(result, 'read');
-    }
-    return result;
+    const docToUpdate = this.taskStore.taskValidator.getValidatedTaskInstance(doc, 'write', {
+      validate: options.validate,
+    });
+    const result = await unwrapPromise(this.bufferedUpdate(docToUpdate));
+    return this.taskStore.taskValidator.getValidatedTaskInstance(result, 'read', {
+      validate: options.validate,
+    });
   }
 
   public async remove(id: string): Promise<void> {

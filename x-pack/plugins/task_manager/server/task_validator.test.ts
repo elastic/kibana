@@ -39,6 +39,33 @@ describe('TaskValidator', () => {
       expect(result).toEqual(task);
     });
 
+    it(`should return the task as-is whenever the validate:false option is passed-in`, () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          ...fooTaskDefinition,
+          stateSchemaByVersion: {
+            1: {
+              up: (state) => state,
+              schema: schema.object({
+                foo: schema.string(),
+              }),
+            },
+          },
+        },
+      });
+      const taskValidator = new TaskValidator({
+        logger: mockLogger(),
+        definitions,
+        allowReadingInvalidState: false,
+      });
+      const task = taskManagerMock.createTask();
+      const result = taskValidator.getValidatedTaskInstance(task, 'read', { validate: false });
+      expect(result).toEqual(task);
+    });
+
+    // TODO: Remove skip once all task types have defined their state schema.
+    // https://github.com/elastic/kibana/issues/159347
     it.skip(`should fail to validate the state schema when the task type doesn't have stateSchemaByVersion defined`, () => {
       const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({

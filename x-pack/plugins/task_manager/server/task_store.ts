@@ -247,9 +247,9 @@ export class TaskStore {
     doc: ConcreteTaskInstance,
     options: { validate: boolean }
   ): Promise<ConcreteTaskInstance> {
-    const taskInstance = options.validate
-      ? this.taskValidator.getValidatedTaskInstance(doc, 'write')
-      : doc;
+    const taskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write', {
+      validate: options.validate,
+    });
     const attributes = taskInstanceToAttributes(taskInstance);
 
     let updatedSavedObject;
@@ -275,7 +275,9 @@ export class TaskStore {
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
       { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
     );
-    return options.validate ? this.taskValidator.getValidatedTaskInstance(result, 'read') : result;
+    return this.taskValidator.getValidatedTaskInstance(result, 'read', {
+      validate: options.validate,
+    });
   }
 
   /**
@@ -290,9 +292,9 @@ export class TaskStore {
     options: { validate: boolean }
   ): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
-      const taskInstance = options.validate
-        ? this.taskValidator.getValidatedTaskInstance(doc, 'write')
-        : doc;
+      const taskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write', {
+        validate: options.validate,
+      });
       attrsById.set(doc.id, taskInstanceToAttributes(taskInstance));
       return attrsById;
     }, new Map());
@@ -332,9 +334,9 @@ export class TaskStore {
           attributesByDocId.get(updatedSavedObject.id)!
         ),
       });
-      const result = options.validate
-        ? this.taskValidator.getValidatedTaskInstance(taskInstance, 'read')
-        : taskInstance;
+      const result = this.taskValidator.getValidatedTaskInstance(taskInstance, 'read', {
+        validate: options.validate,
+      });
       return asOk(result);
     });
   }
