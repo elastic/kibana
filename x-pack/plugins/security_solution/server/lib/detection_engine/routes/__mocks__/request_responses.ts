@@ -43,11 +43,11 @@ import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detec
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationAlertType } from '../../rule_actions_legacy';
-import type { HapiReadableStream } from '../../rule_management/logic/import/hapi_readable_stream';
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 
 import { requestMock } from './request';
+import type { HapiReadableStream } from '../../../../types';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],

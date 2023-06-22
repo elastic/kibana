@@ -76,7 +76,7 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
   ${({ height }) => (height != null ? `min-height: ${height}px;` : '')}
 `;
 
-const CHART_HEIGHT = '150px';
+const CHART_HEIGHT = 150;
 
 const visualizationResponseHasData = (response: VisualizationResponse): boolean =>
   Object.values<AggregationsTermsAggregateBase<unknown[]>>(response.aggregations ?? {}).some(
@@ -332,7 +332,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 data-test-subj="embeddable-matrix-histogram"
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}
-                height={CHART_HEIGHT}
+                height={chartHeight ?? CHART_HEIGHT}
                 id={visualizationId}
                 inspectTitle={title as string}
                 lensAttributes={lensAttributes}

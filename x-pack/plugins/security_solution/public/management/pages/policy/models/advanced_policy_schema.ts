@@ -1275,4 +1275,15 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.alerts.rollback.self_healing.registry_enabled',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.registry_enabled',
+      {
+        defaultMessage:
+          'Enables self-healing of registry based malware artifacts. Requires rollback.self_healing.enabled to also be enabled. Default: true',
+      }
+    ),
+  },
 ];

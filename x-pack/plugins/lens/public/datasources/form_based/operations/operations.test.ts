@@ -442,10 +442,27 @@ describe('getOperationTypesForField', () => {
               Object {
                 "operationType": "math",
                 "type": "managedReference",
+                "usedInMath": undefined,
               },
               Object {
                 "operationType": "formula",
                 "type": "managedReference",
+                "usedInMath": undefined,
+              },
+              Object {
+                "operationType": "time_range",
+                "type": "managedReference",
+                "usedInMath": true,
+              },
+              Object {
+                "operationType": "now",
+                "type": "managedReference",
+                "usedInMath": true,
+              },
+              Object {
+                "operationType": "interval",
+                "type": "managedReference",
+                "usedInMath": true,
               },
             ],
           },
@@ -498,6 +515,7 @@ describe('getOperationTypesForField', () => {
               Object {
                 "operationType": "static_value",
                 "type": "managedReference",
+                "usedInMath": undefined,
               },
             ],
           },

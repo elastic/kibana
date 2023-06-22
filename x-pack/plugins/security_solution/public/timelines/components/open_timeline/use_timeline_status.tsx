@@ -12,12 +12,12 @@ import type {
   TimelineTypeLiteralWithNull,
   TemplateTimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
 import {
   TimelineStatus,
   TimelineType,
   TemplateTimelineType,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
 
 import * as i18n from './translations';
 import type { TemplateTimelineFilter } from './types';

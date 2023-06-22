@@ -15,8 +15,10 @@ import {
   ApplicationStart,
   ExecutionContextStart,
 } from '@kbn/core/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 import { Router, Switch, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import { Route } from '@kbn/shared-ux-router';
 
@@ -48,6 +50,7 @@ export interface AppDeps {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   executionContext: ExecutionContextStart;
   licenseManagementLocator?: LicenseManagementLocator;
+  settings: SettingsStart;
 }
 
 export const App = (deps: AppDeps) => {
@@ -65,11 +68,13 @@ export const App = (deps: AppDeps) => {
   }
   return (
     <Router history={deps.history}>
-      <ShareRouter>
-        <AppContextProvider value={deps}>
-          <AppWithoutRouter />
-        </AppContextProvider>
-      </ShareRouter>
+      <CompatRouter>
+        <ShareRouter>
+          <AppContextProvider value={deps}>
+            <AppWithoutRouter />
+          </AppContextProvider>
+        </ShareRouter>
+      </CompatRouter>
     </Router>
   );
 };

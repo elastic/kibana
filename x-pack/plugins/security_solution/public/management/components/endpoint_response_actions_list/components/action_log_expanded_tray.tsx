@@ -8,6 +8,8 @@
 import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
+import { map } from 'lodash';
+import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
 import { getUiCommand } from './hooks';
@@ -16,6 +18,10 @@ import { ResponseActionFileDownloadLink } from '../../response_action_file_downl
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
+import type {
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
+} from '../../../../../common/endpoint/types';
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
 
 const emptyValue = getEmptyValue();
@@ -75,6 +81,12 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
   overflow-y: auto;
 `;
 
+const isUploadAction = (
+  action: MaybeImmutable<ActionDetails>
+): action is ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters> => {
+  return action.command === 'upload';
+};
+
 const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-subj'?: string }>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -87,7 +99,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
 
     const { command, isCompleted, isExpired, wasSuccessful, errors } = action;
 
-    if (errors) {
+    if (errors?.length) {
       return (
         // TODO: temporary solution, waiting for UI
         <>
@@ -145,6 +157,20 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       );
     }
 
+    if (isUploadAction(action)) {
+      return (
+        <EuiFlexGroup direction="column" data-test-subj={getTestId('uploadDetails')}>
+          <p>{OUTPUT_MESSAGES.wasSuccessful(command)}</p>
+
+          <EndpointUploadActionResult
+            action={action}
+            data-test-subj={getTestId('uploadOutput')}
+            textSize="xs"
+          />
+        </EuiFlexGroup>
+      );
+    }
+
     return <>{OUTPUT_MESSAGES.wasSuccessful(command)}</>;
   }
 );
@@ -157,7 +183,7 @@ export const ActionsLogExpandedTray = memo<{
 }>(({ action, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
-  const { startedAt, completedAt, command: _command, comment, parameters } = action;
+  const { hosts, startedAt, completedAt, command: _command, comment, parameters } = action;
 
   const parametersList = useMemo(
     () =>
@@ -198,13 +224,17 @@ export const ActionsLogExpandedTray = memo<{
           title: OUTPUT_MESSAGES.expandSection.comment,
           description: comment ? comment : emptyValue,
         },
+        {
+          title: OUTPUT_MESSAGES.expandSection.hostname,
+          description: map(hosts, (host) => host.name).join(', ') || emptyValue,
+        },
       ].map(({ title, description }) => {
         return {
           title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
           description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
         };
       }),
-    [command, comment, completedAt, parametersList, startedAt]
+    [command, comment, completedAt, hosts, parametersList, startedAt]
   );
 
   const outputList = useMemo(

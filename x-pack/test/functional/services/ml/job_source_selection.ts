@@ -46,5 +46,9 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
     async selectSourceForExplainLogRateSpikes(sourceName: string) {
       await this.selectSource(sourceName, 'aiopsExplainLogRateSpikesPage');
     },
+
+    async selectSourceForChangePointDetection(sourceName: string) {
+      await this.selectSource(sourceName, 'aiopsChangePointDetectionPage');
+    },
   };
 }

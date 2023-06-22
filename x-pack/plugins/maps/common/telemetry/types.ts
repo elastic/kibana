@@ -13,6 +13,7 @@ export enum EMS_BASEMAP_KEYS {
 }
 
 export enum JOIN_KEYS {
+  DISTANCE = 'distance',
   TERM = 'term',
 }
 

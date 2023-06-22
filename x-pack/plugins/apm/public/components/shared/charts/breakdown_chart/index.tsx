@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 import { Annotation } from '../../../../../common/annotations';
 import {
   asAbsoluteDateTime,

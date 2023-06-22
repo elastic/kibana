@@ -49,8 +49,11 @@ export const fillUpNewRule = (name = 'Test', description = 'Test') => {
 };
 export const visitRuleActions = (ruleId: string) => {
   cy.visit(`app/security/rules/id/${ruleId}/edit`);
-  cy.getByTestSubj('edit-rule-actions-tab').wait(500).click();
+  cy.getByTestSubj('edit-rule-actions-tab').should('exist');
+  cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
+  cy.getByTestSubj('stepPanelProgress').should('not.exist');
 };
+
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
     cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(

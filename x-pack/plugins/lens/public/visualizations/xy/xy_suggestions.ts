@@ -55,6 +55,7 @@ export function getSuggestions({
   subVisualizationId,
   mainPalette,
   isFromContext,
+  allowMixed,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   const incompleteTable =
     !table.isMultiRow ||
@@ -79,10 +80,11 @@ export function getSuggestions({
     keptLayerIds,
     state,
     subVisualizationId as SeriesType | undefined,
-    mainPalette
+    mainPalette,
+    allowMixed
   );
 
-  if (suggestions && suggestions instanceof Array) {
+  if (Array.isArray(suggestions)) {
     return suggestions;
   }
 
@@ -94,7 +96,8 @@ function getSuggestionForColumns(
   keptLayerIds: string[],
   currentState?: State,
   seriesType?: SeriesType,
-  mainPalette?: PaletteOutput
+  mainPalette?: PaletteOutput,
+  allowMixed?: boolean
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
 
@@ -111,6 +114,7 @@ function getSuggestionForColumns(
       keptLayerIds,
       requestedSeriesType: seriesType,
       mainPalette,
+      allowMixed,
     });
   } else if (buckets.length === 0) {
     const [yValues, [xValue, splitBy]] = partition(
@@ -128,6 +132,7 @@ function getSuggestionForColumns(
       keptLayerIds,
       requestedSeriesType: seriesType,
       mainPalette,
+      allowMixed,
     });
   }
 }
@@ -214,6 +219,7 @@ function getSuggestionsForLayer({
   keptLayerIds,
   requestedSeriesType,
   mainPalette,
+  allowMixed,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -225,6 +231,7 @@ function getSuggestionsForLayer({
   keptLayerIds: string[];
   requestedSeriesType?: SeriesType;
   mainPalette?: PaletteOutput;
+  allowMixed?: boolean;
 }): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
@@ -242,6 +249,7 @@ function getSuggestionsForLayer({
     keptLayerIds,
     // only use palette if there is a breakdown by dimension
     mainPalette: splitBy ? mainPalette : undefined,
+    allowMixed,
   };
 
   // handles the simplest cases, acting as a chart switcher
@@ -473,6 +481,7 @@ function buildSuggestion({
   keptLayerIds,
   hide,
   mainPalette,
+  allowMixed,
 }: {
   currentState: XYState | undefined;
   seriesType: SeriesType;
@@ -485,6 +494,7 @@ function buildSuggestion({
   keptLayerIds: string[];
   hide?: boolean;
   mainPalette?: PaletteOutput;
+  allowMixed?: boolean;
 }) {
   if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
     splitBy = xValue;
@@ -526,10 +536,14 @@ function buildSuggestion({
         // Update in place
         .map((layer) => (layer.layerId === layerId ? newLayer : layer))
         // Replace the seriesType on all previous layers
-        .map((layer) => ({
-          ...layer,
-          seriesType,
-        }))
+        .map((layer) =>
+          allowMixed
+            ? layer
+            : {
+                ...layer,
+                seriesType,
+              }
+        )
     : [];
 
   const state: State = {

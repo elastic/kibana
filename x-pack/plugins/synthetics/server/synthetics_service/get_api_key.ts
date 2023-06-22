@@ -79,11 +79,11 @@ export const getAPIKeyForSyntheticsService = async ({
 export const generateAPIKey = async ({
   server,
   request,
-  uptimePrivileges = false,
+  projectAPIKey = false,
 }: {
   server: UptimeServerSetup;
   request: KibanaRequest;
-  uptimePrivileges?: boolean;
+  projectAPIKey?: boolean;
 }) => {
   const { security } = server;
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
@@ -92,7 +92,7 @@ export const generateAPIKey = async ({
     throw new Error('Please enable API keys in kibana to use synthetics service.');
   }
 
-  if (uptimePrivileges) {
+  if (projectAPIKey) {
     /* Exposed to the user. Must create directly with the user */
     return security.authc.apiKeys?.create(request, {
       name: 'synthetics-api-key (required for project monitors)',
@@ -105,8 +105,6 @@ export const generateAPIKey = async ({
               spaces: [ALL_SPACES_ID],
               feature: {
                 uptime: ['all'],
-                fleet: ['all'],
-                fleetv2: ['all'],
               },
             },
           ],

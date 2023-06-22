@@ -10,7 +10,7 @@
   position: relative;
   transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
 
-  .euiButtonIcon:not(.euiButtonIcon--fill) {
+  .mapToolbarOverlay__buttonIcon-empty {
     color: $euiTextColor !important;
   }
 
@@ -26,7 +26,7 @@
 
   // Removes the focus background state because it can induce users to think these buttons are "enabled".
   // The buttons functionality are just applied once, so they shouldn't stay highlighted.
-  .euiButtonIcon:focus:not(:hover) {
+  .mapToolbarOverlay__buttonIcon-empty:focus:not(:hover) {
     background: none;
   }
 }

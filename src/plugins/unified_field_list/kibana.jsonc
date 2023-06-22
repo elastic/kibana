@@ -5,7 +5,7 @@
   "description": "Contains functionality for the field list which can be integrated into apps",
   "plugin": {
     "id": "unifiedFieldList",
-    "server": true,
+    "server": false,
     "browser": true,
     "requiredPlugins": [
       "dataViews",

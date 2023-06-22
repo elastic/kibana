@@ -70,6 +70,7 @@ export class ShareMenuManager {
     menuItems,
     shareableUrl,
     shareableUrlForSavedObject,
+    shareableUrlLocatorParams,
     embedUrlParamExtensions,
     theme,
     showPublicUrlSwitch,
@@ -115,6 +116,7 @@ export class ShareMenuManager {
               sharingData={sharingData}
               shareableUrl={shareableUrl}
               shareableUrlForSavedObject={shareableUrlForSavedObject}
+              shareableUrlLocatorParams={shareableUrlLocatorParams}
               onClose={onClose}
               embedUrlParamExtensions={embedUrlParamExtensions}
               anonymousAccess={anonymousAccess}

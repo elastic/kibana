@@ -97,3 +97,10 @@ export const ANOMALY_DETECTION_DOCS = i18n.translate(
     defaultMessage: 'Anomaly Detection with Machine Learning',
   }
 );
+
+export const ANOMALIES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.anomalies.anomaliesTooltip',
+  {
+    defaultMessage: 'The anomalies table is not filterable via the SIEM global KQL search.',
+  }
+);

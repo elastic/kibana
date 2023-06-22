@@ -38,26 +38,22 @@ export function handleResponse(response?: BeatsElasticsearchResponse) {
 
   const latestVersions = (aggs?.versions?.buckets ?? []).reduce(
     (accum: BucketCount<{ version: string }>, current) => {
-      return [
-        ...accum,
-        {
-          version: current.key,
-          count: current.uuids.buckets.length,
-        },
-      ];
+      accum.push({
+        version: current.key,
+        count: current.uuids.buckets.length,
+      });
+      return accum;
     },
     []
   );
 
   const latestTypes = (aggs?.types?.buckets ?? []).reduce(
     (accum: BucketCount<{ type: string }>, current) => {
-      return [
-        ...accum,
-        {
-          type: upperFirst(current.key),
-          count: current.uuids.buckets.length,
-        },
-      ];
+      accum.push({
+        type: upperFirst(current.key),
+        count: current.uuids.buckets.length,
+      });
+      return accum;
     },
     []
   );

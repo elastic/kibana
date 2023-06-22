@@ -19,11 +19,13 @@ import { addIntegrationToAgentPolicy } from './utils';
 export class AgentManager extends Manager {
   private log: ToolingLog;
   private kbnClient: KbnClient;
+  private fleetServerPort: string;
   private agentContainerId?: string;
 
-  constructor(kbnClient: KbnClient, log: ToolingLog) {
+  constructor(kbnClient: KbnClient, fleetServerPort: string, log: ToolingLog) {
     super();
     this.log = log;
+    this.fleetServerPort = fleetServerPort;
     this.kbnClient = kbnClient;
   }
 
@@ -71,7 +73,7 @@ export class AgentManager extends Manager {
       '--env',
       'FLEET_ENROLL=1',
       '--env',
-      `FLEET_URL=https://host.docker.internal:8220`,
+      `FLEET_URL=https://host.docker.internal:${this.fleetServerPort}`,
       '--env',
       `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
       '--env',

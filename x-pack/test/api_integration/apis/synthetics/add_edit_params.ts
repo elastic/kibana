@@ -9,6 +9,7 @@ import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddEditParams', function () {
@@ -19,14 +20,10 @@ export default function ({ getService }: FtrProviderContext) {
       key: 'test',
       value: 'test',
     };
+    const testPrivateLocations = new PrivateLocationTestService(getService);
 
     before(async () => {
-      await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-      await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.12.0')
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
+      await testPrivateLocations.installSyntheticsPackage();
 
       await kServer.savedObjects.clean({ types: [syntheticsParamType] });
     });

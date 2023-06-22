@@ -50,15 +50,14 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
           </EuiBadge>
         )}
       </EuiFlexItem>
+
       {slo.summary.errorBudget.isEstimated && (
         <EuiFlexItem grow={false}>
-          <div>
-            <EuiBadge color="default">
-              {i18n.translate('xpack.observability.slo.sloStatusBadge.forecasted', {
-                defaultMessage: 'Forecasted',
-              })}
-            </EuiBadge>
-          </div>
+          <EuiBadge color="default">
+            {i18n.translate('xpack.observability.slo.sloStatusBadge.forecasted', {
+              defaultMessage: 'Forecasted',
+            })}
+          </EuiBadge>
         </EuiFlexItem>
       )}
     </>

@@ -202,6 +202,66 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.inRangeFromStringRt",
+        "type": "Function",
+        "tags": [],
+        "label": "inRangeFromStringRt",
+        "description": [],
+        "signature": [
+          "(start: number, end: number) => ",
+          "Type",
+          "<",
+          "Branded",
+          "<number, ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.InRangeBrand",
+            "text": "InRangeBrand"
+          },
+          ">, unknown, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.inRangeFromStringRt.$1",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.inRangeFromStringRt.$2",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.inRangeRt",
         "type": "Function",
         "tags": [],
@@ -678,6 +738,22 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.datemathStringRt",
+        "type": "Object",
+        "tags": [],
+        "label": "datemathStringRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/datemath_string_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.dateRt",

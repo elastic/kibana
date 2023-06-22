@@ -27,7 +27,12 @@ const AppWithRouter = ({ history }: AppWithRouterProps) => (
 
 export const renderApp = (elem: Element, dependencies: AppDependencies) => {
   render(
-    <KibanaContextProvider services={{ uiSettings: dependencies.services.uiSettings }}>
+    <KibanaContextProvider
+      services={{
+        uiSettings: dependencies.services.uiSettings,
+        settings: dependencies.services.settings,
+      }}
+    >
       <AppProviders appDependencies={dependencies}>
         <AppWithRouter history={dependencies.services.history} />
       </AppProviders>

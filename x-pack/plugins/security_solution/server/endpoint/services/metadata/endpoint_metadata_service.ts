@@ -401,21 +401,21 @@ export class EndpointMetadataService {
         .getByIds(this.DANGEROUS_INTERNAL_SO_CLIENT, agentPolicyIds)
         .catch(catchAndWrapError)) ?? [];
 
-    const agentPoliciesMap: Record<string, AgentPolicy> = agentPolicies.reduce(
-      (acc, agentPolicy) => ({
-        ...acc,
-        [agentPolicy.id]: {
+    const agentPoliciesMap = agentPolicies.reduce<Record<string, AgentPolicy>>(
+      (acc, agentPolicy) => {
+        acc[agentPolicy.id] = {
           ...agentPolicy,
-        },
-      }),
+        };
+        return acc;
+      },
       {}
     );
 
-    const endpointPoliciesMap: Record<string, PackagePolicy> = endpointPolicies.reduce(
-      (acc, packagePolicy) => ({
-        ...acc,
-        [packagePolicy.policy_id]: packagePolicy,
-      }),
+    const endpointPoliciesMap = endpointPolicies.reduce<Record<string, PackagePolicy>>(
+      (acc, packagePolicy) => {
+        acc[packagePolicy.policy_id] = packagePolicy;
+        return acc;
+      },
       {}
     );
 

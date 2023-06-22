@@ -34,7 +34,8 @@ import {
   useUrlParams,
   useBreadcrumbs,
 } from '../../../hooks';
-import { AgentPolicySummaryLine, SearchBar } from '../../../components';
+import { SearchBar } from '../../../components';
+import { AgentPolicySummaryLine } from '../../../../../components';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
 import { CreateAgentPolicyFlyout } from './components';

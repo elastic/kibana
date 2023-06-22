@@ -8,7 +8,7 @@
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { shouldHandleLinkEvent } from '@kbn/observability-plugin/public';
+import { shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const AnalyzeInMlButton: React.FunctionComponent<{

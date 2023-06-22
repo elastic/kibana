@@ -27,9 +27,11 @@ import { splitPkgKey } from '../../services/epm/registry';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
+  GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   GetInfoRequestSchemaDeprecated,
+  GetBulkAssetsRequestSchema,
   InstallPackageFromRegistryRequestSchema,
   InstallPackageFromRegistryRequestSchemaDeprecated,
   InstallPackageByUploadRequestSchema,
@@ -40,14 +42,17 @@ import {
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
   ReauthorizeTransformRequestSchema,
+  GetDataStreamsRequestSchema,
 } from '../../types';
 
 import {
   getCategoriesHandler,
   getListHandler,
+  getInstalledListHandler,
   getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
+  getBulkAssetsHandler,
   installPackageFromRegistryHandler,
   installPackageByUploadHandler,
   deletePackageHandler,
@@ -56,6 +61,7 @@ import {
   updatePackageHandler,
   getVerificationKeyIdHandler,
   reauthorizeTransformsHandler,
+  getDataStreamsHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -81,6 +87,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getListHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.INSTALLED_LIST_PATTERN,
+      validate: GetInstalledPackagesRequestSchema,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getInstalledListHandler
   );
 
   router.get(
@@ -199,6 +216,28 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getVerificationKeyIdHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.DATA_STREAMS_PATTERN,
+      validate: GetDataStreamsRequestSchema,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getDataStreamsHandler
+  );
+
+  router.post(
+    {
+      path: EPM_API_ROUTES.BULK_ASSETS_PATTERN,
+      validate: GetBulkAssetsRequestSchema,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getBulkAssetsHandler
   );
 
   // deprecated since 8.0

@@ -23,13 +23,11 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { LicenseService } from '../../../../common/license';
 import {
   ISOLATE_HOST_ROUTE_V2,
@@ -54,10 +52,10 @@ import type {
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -123,20 +121,14 @@ describe('Response actions', () => {
       licenseService.start(licenseEmitter);
 
       const endpointContext = {
-        logFactory: loggingSystemMock.create(),
+        ...createMockEndpointAppContext(),
         service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       };
 
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
-        actionCreateService: actionCreateService(
-          mockScopedClient.asInternalUser,
-          endpointContext,
-          licenseService
-        ),
+        actionCreateService: actionCreateService(mockScopedClient.asInternalUser, endpointContext),
         licenseService,
       });
 
@@ -778,7 +770,7 @@ describe('Response actions', () => {
       let casesClient: CasesClientMock;
 
       const getCaseIdsFromAttachmentAddService = () => {
-        return casesClient.attachments.add.mock.calls.map(([addArgs]) => addArgs.caseId);
+        return casesClient.attachments.bulkCreate.mock.calls.map(([addArgs]) => addArgs.caseId);
       };
 
       beforeEach(async () => {
@@ -786,7 +778,7 @@ describe('Response actions', () => {
           {} as KibanaRequest
         )) as CasesClientMock;
 
-        casesClient.attachments.add.mockClear();
+        casesClient.attachments.bulkCreate.mockClear();
 
         let counter = 1;
         casesClient.cases.getCasesByAlertID.mockImplementation(async () => {
@@ -811,7 +803,7 @@ describe('Response actions', () => {
           body: { endpoint_ids: ['XYZ'], case_ids: ['one', 'two'] },
         });
 
-        expect(casesClient.attachments.add).toHaveBeenCalledTimes(2);
+        expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(2);
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
           expect.arrayContaining(['one', 'two'])
         );
@@ -837,7 +829,7 @@ describe('Response actions', () => {
           },
         });
 
-        expect(casesClient.attachments.add).toHaveBeenCalledTimes(4);
+        expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(4);
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
           expect.arrayContaining(['ONE', 'TWO', 'case-1', 'case-2'])
         );

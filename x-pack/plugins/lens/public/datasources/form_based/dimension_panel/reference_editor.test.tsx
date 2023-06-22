@@ -13,7 +13,7 @@ import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { OperationMetadata } from '../../../types';
@@ -73,7 +73,6 @@ describe('reference editor', () => {
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
       storage: {} as IStorageWrapper,
       uiSettings: {} as IUiSettingsClient,
-      savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
       data: {} as DataPublicPluginStart,
       fieldFormats: fieldFormatsServiceMock.createStartContract(),

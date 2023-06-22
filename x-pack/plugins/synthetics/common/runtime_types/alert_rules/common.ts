@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const SyntheticsCommonStateType = t.intersection([
+export const SyntheticsCommonStateCodec = t.intersection([
   t.partial({
     firstTriggeredAt: t.string,
     lastTriggeredAt: t.string,
@@ -22,4 +22,17 @@ export const SyntheticsCommonStateType = t.intersection([
   }),
 ]);
 
-export type SyntheticsCommonState = t.TypeOf<typeof SyntheticsCommonStateType>;
+export type SyntheticsCommonState = t.TypeOf<typeof SyntheticsCommonStateCodec>;
+
+export const SyntheticsMonitorStatusAlertStateCodec = t.type({
+  configId: t.string,
+  locationId: t.string,
+  locationName: t.string,
+  errorStartedAt: t.string,
+  lastErrorMessage: t.string,
+  stateId: t.string,
+});
+
+export type SyntheticsMonitorStatusAlertState = t.TypeOf<
+  typeof SyntheticsMonitorStatusAlertStateCodec
+>;

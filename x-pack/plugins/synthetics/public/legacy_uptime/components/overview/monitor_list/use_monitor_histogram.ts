@@ -8,7 +8,7 @@
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import {
   Histogram,
   HistogramPoint,

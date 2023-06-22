@@ -52,10 +52,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await switchToTextBasedLanguage('SQL');
       expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
       expect(await testSubjects.exists('addFilter')).to.be(false);
-      await testSubjects.click('unifiedTextLangEditor-expand');
+      await testSubjects.click('TextBasedLangEditor-expand');
       const textBasedQuery = await monacoEditor.getCodeEditorValue();
       expect(textBasedQuery).to.be('SELECT * FROM "log*"');
-      await testSubjects.click('unifiedTextLangEditor-minimize');
+      await testSubjects.click('TextBasedLangEditor-minimize');
     });
 
     it('should allow adding and using a field', async () => {
@@ -130,12 +130,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.removeDimension('lnsMetric_breakdownByDimensionPanel');
       await PageObjects.lens.waitForVisualization('mtrVis');
       const metricData = await PageObjects.lens.getMetricVisualizationData();
-      expect(metricData[0].value).to.eql('5.7K');
+      expect(metricData[0].value).to.eql('5,699.406');
       expect(metricData[0].title).to.eql('average');
       await PageObjects.lens.save('New text based languages viz', false, false, false, 'new');
 
       await PageObjects.dashboard.waitForRenderComplete();
-      expect(metricData[0].value).to.eql('5.7K');
+      expect(metricData[0].value).to.eql('5,699.406');
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow using an index pattern that is not translated to a dataview', async () => {
       await switchToTextBasedLanguage('SQL');
-      await testSubjects.click('unifiedTextLangEditor-expand');
+      await testSubjects.click('TextBasedLangEditor-expand');
       await monacoEditor.setCodeEditorValue(
         'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
       );

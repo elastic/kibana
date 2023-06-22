@@ -8,7 +8,7 @@ import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 import { CLIENT_GEO_COUNTRY_NAME } from '../../../../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';

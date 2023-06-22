@@ -28,17 +28,21 @@ import { getRequestsAndResponses } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
+const HOVER_ACTIONS_PADDING = 24;
+
 const LensComponentWrapper = styled.div<{
-  height?: string;
-  width?: string;
+  $height?: number;
+  width?: string | number;
   $addHoverActionsPadding?: boolean;
 }>`
-  height: ${({ height }) => height ?? 'auto'};
+  height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
-  > div {
-    background-color: transparent;
-    ${({ $addHoverActionsPadding }) => ($addHoverActionsPadding ? `padding: 20px 0 0 0;` : ``)}
-  }
+
+  ${({ $addHoverActionsPadding }) =>
+    $addHoverActionsPadding
+      ? `.embPanel__header--floater { top: ${HOVER_ACTIONS_PADDING * -1}px; }`
+      : ''}
+
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
   }
@@ -254,7 +258,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     <>
       {attributes && searchSessionId && (
         <LensComponentWrapper
-          height={wrapperHeight}
+          $height={wrapperHeight}
           width={wrapperWidth}
           $addHoverActionsPadding={addHoverActionsPadding}
         >

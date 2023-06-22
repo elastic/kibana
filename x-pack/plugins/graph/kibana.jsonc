@@ -19,6 +19,7 @@
       "inspector",
       "savedObjectsManagement",
       "savedObjectsFinder",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "home",

@@ -8,7 +8,7 @@
 import { merge } from 'lodash';
 import type { PublicContract } from '@kbn/utility-types';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import type { GetSummarizedAlertsFnOpts } from '@kbn/alerting-plugin/server';
+import type { SummarizedAlertsChunk, GetSummarizedAlertsFnOpts } from '@kbn/alerting-plugin/server';
 import {
   ALERT_END,
   ALERT_RULE_EXECUTION_UUID,
@@ -23,12 +23,14 @@ import {
   QueryDslQueryContainer,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertsFilter } from '@kbn/alerting-plugin/common';
+import { AlertsFilter, ISO_WEEKDAYS } from '@kbn/alerting-plugin/common';
+import { AlertHit, SummarizedAlerts } from '@kbn/alerting-plugin/server/types';
 import { ParsedTechnicalFields } from '../../common';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
 
 const MAX_ALERT_DOCS_TO_RETURN = 100;
+
 export type AlertDocument = Partial<ParsedTechnicalFields & ParsedExperimentalFields>;
 
 interface CreateGetSummarizedAlertsFnOpts {
@@ -49,7 +51,7 @@ export const createGetSummarizedAlertsFn =
     spaceId,
     excludedAlertInstanceIds,
     alertsFilter,
-  }: GetSummarizedAlertsFnOpts) => {
+  }: GetSummarizedAlertsFnOpts): Promise<SummarizedAlerts> => {
     if (!ruleId || !spaceId) {
       throw new Error(`Must specify both rule ID and space ID for summarized alert query.`);
     }
@@ -112,7 +114,7 @@ const getAlertsByExecutionUuid = async ({
   excludedAlertInstanceIds,
   formatAlert,
   alertsFilter,
-}: GetAlertsByExecutionUuidOpts) => {
+}: GetAlertsByExecutionUuidOpts): Promise<SummarizedAlerts> => {
   if (isLifecycleAlert) {
     return getLifecycleAlertsByExecutionUuid({
       executionUuid,
@@ -150,7 +152,7 @@ const getPersistentAlertsByExecutionUuid = async <TSearchRequest extends ESSearc
   excludedAlertInstanceIds,
   formatAlert,
   alertsFilter,
-}: GetAlertsByExecutionUuidHelperOpts) => {
+}: GetAlertsByExecutionUuidHelperOpts): Promise<SummarizedAlerts> => {
   // persistent alerts only create new alerts so query by execution UUID to
   // get all alerts created during an execution
   const request = getQueryByExecutionUuid({
@@ -181,7 +183,7 @@ const getLifecycleAlertsByExecutionUuid = async ({
   excludedAlertInstanceIds,
   formatAlert,
   alertsFilter,
-}: GetAlertsByExecutionUuidHelperOpts) => {
+}: GetAlertsByExecutionUuidHelperOpts): Promise<SummarizedAlerts> => {
   // lifecycle alerts assign a different action to an alert depending
   // on whether it is new/ongoing/recovered. query for each action in order
   // to get the count of each action type as well as up to the maximum number
@@ -238,9 +240,9 @@ const expandFlattenedAlert = (alert: object) => {
 };
 
 const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
-  response: ESSearchResponse<AlertDocument, TSearchRequest>,
+  response: ESSearchResponse<AlertHit, TSearchRequest>,
   formatAlert?: (alert: AlertDocument) => AlertDocument
-) => {
+): SummarizedAlertsChunk => {
   return {
     count: (response.hits.total as SearchTotalHits).value,
     data: response.hits.hits.map((hit) => {
@@ -253,7 +255,7 @@ const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
         _id,
         _index,
         ...expandedSource,
-      };
+      } as AlertHit;
     }),
   };
 };
@@ -262,9 +264,9 @@ const doSearch = async (
   ruleDataClientReader: IRuleDataReader,
   request: ESSearchRequest,
   formatAlert?: (alert: AlertDocument) => AlertDocument
-) => {
+): Promise<SummarizedAlertsChunk> => {
   const response = await ruleDataClientReader.search(request);
-  return getHitsWithCount(response, formatAlert);
+  return getHitsWithCount(response as ESSearchResponse<AlertHit>, formatAlert);
 };
 
 interface GetQueryByExecutionUuidParams {
@@ -359,7 +361,7 @@ const getAlertsByTimeRange = async ({
   excludedAlertInstanceIds,
   formatAlert,
   alertsFilter,
-}: GetAlertsByTimeRangeOpts) => {
+}: GetAlertsByTimeRangeOpts): Promise<SummarizedAlerts> => {
   if (isLifecycleAlert) {
     return getLifecycleAlertsByTimeRange({
       start,
@@ -440,7 +442,7 @@ const getLifecycleAlertsByTimeRange = async ({
   formatAlert,
   excludedAlertInstanceIds,
   alertsFilter,
-}: GetAlertsByTimeRangeHelperOpts) => {
+}: GetAlertsByTimeRangeHelperOpts): Promise<SummarizedAlerts> => {
   const requests = [
     getQueryByTimeRange(start, end, ruleId, excludedAlertInstanceIds, AlertTypes.NEW, alertsFilter),
     getQueryByTimeRange(
@@ -585,7 +587,10 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
             source:
               'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
             params: {
-              days: alertsFilter.timeframe.days,
+              days:
+                alertsFilter.timeframe.days.length === 0
+                  ? ISO_WEEKDAYS
+                  : alertsFilter.timeframe.days,
               timezone: alertsFilter.timeframe.timezone,
               datetimeField: TIMESTAMP,
             },

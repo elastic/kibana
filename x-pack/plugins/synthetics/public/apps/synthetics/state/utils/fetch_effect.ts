@@ -61,21 +61,33 @@ export function fetchEffectFactory<T, R, S, F>(
   onSuccess?: ((response: R) => void) | string,
   onFailure?: ((error: Error) => void) | string
 ) {
+  const showErrorToast = (error: Error, action: PayloadAction<T>) => {
+    const serializedError = serializeHttpFetchError(error as IHttpFetchError, action.payload);
+
+    if (typeof onFailure === 'function') {
+      onFailure?.(error);
+    } else if (typeof onFailure === 'string') {
+      kibanaService.core.notifications.toasts.addError(
+        { ...error, message: serializedError.body?.message ?? error.message },
+        {
+          title: onFailure,
+        }
+      );
+    }
+  };
+
   return function* (action: PayloadAction<T>): Generator {
     try {
       const response = yield call(fetch, action.payload);
       if (response instanceof Error) {
+        const error = response as Error;
         // eslint-disable-next-line no-console
-        console.error(response);
+        console.error(error);
 
-        yield put(fail(serializeHttpFetchError(response as IHttpFetchError, action.payload)));
-        if (typeof onFailure === 'function') {
-          onFailure?.(response);
-        } else if (typeof onFailure === 'string') {
-          kibanaService.core.notifications.toasts.addError(response, {
-            title: onFailure,
-          });
-        }
+        const serializedError = serializeHttpFetchError(error as IHttpFetchError, action.payload);
+
+        yield put(fail(serializedError));
+        showErrorToast(error, action);
       } else {
         yield put(success(response as R));
         const successMessage = (action.payload as unknown as ActionMessages)?.success;
@@ -108,13 +120,7 @@ export function fetchEffectFactory<T, R, S, F>(
       }
 
       yield put(fail(serializeHttpFetchError(error, action.payload)));
-      if (typeof onFailure === 'function') {
-        onFailure?.(error);
-      } else if (typeof onFailure === 'string') {
-        kibanaService.core.notifications.toasts.addError(error, {
-          title: onFailure,
-        });
-      }
+      showErrorToast(error, action);
     }
   };
 }

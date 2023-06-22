@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
 import { wrapError } from '../client/error_wrapper';
@@ -40,7 +41,7 @@ export function annotationRoutes(
   /**
    * @apiGroup Annotations
    *
-   * @api {post} /api/ml/annotations Gets annotations
+   * @api {post} /internal/ml/annotations Gets annotations
    * @apiName GetAnnotations
    * @apiDescription Gets annotations.
    *
@@ -49,109 +50,124 @@ export function annotationRoutes(
    * @apiSuccess {Boolean} success
    * @apiSuccess {Object} annotations
    */
-  router.post(
-    {
-      path: '/api/ml/annotations',
-      validate: {
-        body: getAnnotationsSchema,
-      },
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/annotations`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetAnnotations'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        const { getAnnotations } = annotationServiceProvider(client);
-        const resp = await getAnnotations(request.body);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { body: getAnnotationsSchema },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+        try {
+          const { getAnnotations } = annotationServiceProvider(client);
+          const resp = await getAnnotations(request.body);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup Annotations
    *
-   * @api {put} /api/ml/annotations/index Index annotation
+   * @api {put} /internal/ml/annotations/index Index annotation
    * @apiName IndexAnnotations
    * @apiDescription Index the annotation.
    *
    * @apiSchema (body) indexAnnotationSchema
    */
-  router.put(
-    {
-      path: '/api/ml/annotations/index',
-      validate: {
-        body: indexAnnotationSchema,
-      },
+  router.versioned
+    .put({
+      path: `${ML_INTERNAL_BASE_PATH}/annotations/index`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateAnnotation'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
-        if (annotationsFeatureAvailable === false) {
-          throw getAnnotationsFeatureUnavailableErrorMessage();
-        }
-
-        const { indexAnnotation } = annotationServiceProvider(client);
-
-        const currentUser =
-          securityPlugin !== undefined ? securityPlugin.authc.getCurrentUser(request) : {};
-        // @ts-expect-error username doesn't exist on {}
-        const username = currentUser?.username ?? ANNOTATION_USER_UNKNOWN;
-        const resp = await indexAnnotation(request.body, username);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { body: indexAnnotationSchema },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+        try {
+          const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
+          if (annotationsFeatureAvailable === false) {
+            throw getAnnotationsFeatureUnavailableErrorMessage();
+          }
+
+          const { indexAnnotation } = annotationServiceProvider(client);
+
+          const currentUser =
+            securityPlugin !== undefined ? securityPlugin.authc.getCurrentUser(request) : {};
+          // @ts-expect-error username doesn't exist on {}
+          const username = currentUser?.username ?? ANNOTATION_USER_UNKNOWN;
+          const resp = await indexAnnotation(request.body, username);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 
   /**
    * @apiGroup Annotations
    *
-   * @api {delete} /api/ml/annotations/delete/:annotationId Deletes annotation
+   * @api {delete} /internal/ml/annotations/delete/:annotationId Deletes annotation
    * @apiName DeleteAnnotation
    * @apiDescription Deletes specified annotation
    *
    * @apiSchema (params) deleteAnnotationSchema
    */
-  router.delete(
-    {
-      path: '/api/ml/annotations/delete/{annotationId}',
-      validate: {
-        params: deleteAnnotationSchema,
-      },
+  router.versioned
+    .delete({
+      path: `${ML_INTERNAL_BASE_PATH}/annotations/delete/{annotationId}`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canDeleteAnnotation'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
-        if (annotationsFeatureAvailable === false) {
-          throw getAnnotationsFeatureUnavailableErrorMessage();
-        }
-
-        const annotationId = request.params.annotationId;
-        const { deleteAnnotation } = annotationServiceProvider(client);
-        const resp = await deleteAnnotation(annotationId);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { params: deleteAnnotationSchema },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+        try {
+          const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
+          if (annotationsFeatureAvailable === false) {
+            throw getAnnotationsFeatureUnavailableErrorMessage();
+          }
+
+          const annotationId = request.params.annotationId;
+          const { deleteAnnotation } = annotationServiceProvider(client);
+          const resp = await deleteAnnotation(annotationId);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 }

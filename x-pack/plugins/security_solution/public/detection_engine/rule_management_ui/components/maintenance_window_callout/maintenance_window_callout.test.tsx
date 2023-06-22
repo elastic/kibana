@@ -107,7 +107,7 @@ describe('MaintenanceWindowCallout', () => {
 
     const { findAllByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
-    expect(await findAllByText('A maintenance window is currently running')).toHaveLength(1);
+    expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -119,7 +119,7 @@ describe('MaintenanceWindowCallout', () => {
 
     const { findAllByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
-    expect(await findAllByText('A maintenance window is currently running')).toHaveLength(1);
+    expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -128,7 +128,7 @@ describe('MaintenanceWindowCallout', () => {
 
     const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
-    expect(await findByText('A maintenance window is currently running')).toBeInTheDocument();
+    expect(await findByText('Maintenance window is running')).toBeInTheDocument();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -184,8 +184,8 @@ describe('MaintenanceWindowCallout', () => {
     await waitFor(() => {
       expect(appToastsMock.addError).toHaveBeenCalledTimes(1);
       expect(appToastsMock.addError).toHaveBeenCalledWith(mockError, {
-        title: 'Failed to check if any maintenance window is currently running',
-        toastMessage: "Notification actions won't run while a maintenance window is running.",
+        title: 'Failed to check if maintenance windows are active',
+        toastMessage: 'Rule notifications are stopped while the maintenance window is running.',
       });
     });
   });
@@ -227,6 +227,6 @@ describe('MaintenanceWindowCallout', () => {
 
     const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
-    expect(await findByText('A maintenance window is currently running')).toBeInTheDocument();
+    expect(await findByText('Maintenance window is running')).toBeInTheDocument();
   });
 });

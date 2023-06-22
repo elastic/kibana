@@ -15,7 +15,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiDataGridStyle,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -86,6 +86,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   } = alertsData;
   const queryClient = useQueryClient();
   const { data: cases, isLoading: isLoadingCases } = props.cases;
+  const { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows } =
+    props.maintenanceWindows;
 
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
@@ -112,6 +114,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const refreshData = useCallback(() => {
     alertsRefresh();
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.cases());
+    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.maintenanceWindows());
   }, [alertsRefresh, queryClient]);
 
   const refresh = useCallback(() => {
@@ -346,8 +349,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             <SystemCellFactory
               alert={alert}
               columnId={_props.columnId}
-              isLoading={isLoading || isLoadingCases}
+              isLoading={isLoading || isLoadingCases || isLoadingMaintenanceWindows}
               cases={cases}
+              maintenanceWindows={maintenanceWindows}
               showAlertStatusWithFlapping={showAlertStatusWithFlapping}
             />
           );
@@ -359,7 +363,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           ecsData: ecsAlert,
         });
       } else if (isLoading) {
-        return <EuiLoadingContent lines={1} />;
+        return <EuiSkeletonText lines={1} />;
       }
       return null;
     },
@@ -367,8 +371,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       alerts,
       ecsAlertsData,
       cases,
+      maintenanceWindows,
       isLoading,
       isLoadingCases,
+      isLoadingMaintenanceWindows,
       pagination.pageIndex,
       pagination.pageSize,
       renderCellValue,

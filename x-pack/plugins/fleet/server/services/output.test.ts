@@ -82,10 +82,23 @@ function getMockedSoClient(
           type: 'elasticsearch',
         });
       }
+      case outputIdToUuid('existing-default-and-default-monitoring-output'): {
+        return mockOutputSO('existing-default-and-default-monitoring-output', {
+          is_default: true,
+          is_default_monitoring: true,
+        });
+      }
       case outputIdToUuid('existing-preconfigured-default-output'): {
         return mockOutputSO('existing-preconfigured-default-output', {
           is_default: true,
           is_preconfigured: true,
+        });
+      }
+
+      case outputIdToUuid('existing-preconfigured-default-output-allow-edit-name'): {
+        return mockOutputSO('existing-preconfigured-default-output-allow-edit-name', {
+          name: 'test',
+          allow_edit: ['name'],
         });
       }
 
@@ -321,7 +334,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         )
       ).rejects.toThrow(
-        `Preconfigured output existing-preconfigured-default-output cannot be updated outside of kibana config file.`
+        `Preconfigured output existing-preconfigured-default-output is_default cannot be updated outside of kibana config file.`
       );
     });
 
@@ -562,6 +575,46 @@ describe('Output Service', () => {
       );
     });
 
+    it('should not set default output to false when the output is already the default one', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-and-default-monitoring-output',
+      });
+
+      await expect(
+        outputService.update(
+          soClient,
+          esClientMock,
+          'existing-default-and-default-monitoring-output',
+          {
+            is_default: false,
+            name: 'Test',
+          }
+        )
+      ).rejects.toThrow(
+        `Default output existing-default-and-default-monitoring-output cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
+      );
+    });
+
+    it('should not set default monitoring output to false when the output is already the default one', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-and-default-monitoring-output',
+      });
+
+      await expect(
+        outputService.update(
+          soClient,
+          esClientMock,
+          'existing-default-and-default-monitoring-output',
+          {
+            is_default_monitoring: false,
+            name: 'Test',
+          }
+        )
+      ).rejects.toThrow(
+        `Default output existing-default-and-default-monitoring-output cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
+      );
+    });
+
     it('should update existing default monitoring output when updating an output to become the default monitoring output', async () => {
       const soClient = getMockedSoClient({
         defaultOutputMonitoringId: 'existing-default-monitoring-output',
@@ -587,10 +640,10 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient();
       await expect(
         outputService.update(soClient, esClientMock, 'existing-preconfigured-default-output', {
-          config_yaml: '',
+          config_yaml: 'test: 123',
         })
       ).rejects.toThrow(
-        'Preconfigured output existing-preconfigured-default-output cannot be updated outside of kibana config file.'
+        'Preconfigured output existing-preconfigured-default-output config_yaml cannot be updated outside of kibana config file.'
       );
     });
 
@@ -611,6 +664,23 @@ describe('Output Service', () => {
       expect(soClient.update).toBeCalled();
     });
 
+    it('Allow to update preconfigured output allowed to edit field from preconfiguration', async () => {
+      const soClient = getMockedSoClient();
+      await outputService.update(
+        soClient,
+        esClientMock,
+        'existing-preconfigured-default-output-allow-edit-name',
+        {
+          name: 'test 123',
+        },
+        {
+          fromPreconfiguration: false,
+        }
+      );
+
+      expect(soClient.update).toBeCalled();
+    });
+
     it('Should throw when an existing preconfigured default output and updating an output to become the default one outside of preconfiguration', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'existing-preconfigured-default-output',
@@ -624,7 +694,7 @@ describe('Output Service', () => {
           type: 'elasticsearch',
         })
       ).rejects.toThrow(
-        `Preconfigured output existing-preconfigured-default-output cannot be updated outside of kibana config file.`
+        `Preconfigured output existing-preconfigured-default-output is_default cannot be updated outside of kibana config file.`
       );
     });
 
@@ -1026,11 +1096,12 @@ describe('Output Service', () => {
       mockedAppContextService.getConfig.mockReset();
       mockedAppContextService.getConfig.mockReset();
     });
-    it('Should use cloud ID as the source of truth for ES hosts', () => {
+    it('Should use cloud plugin as the source of truth for ES hosts', () => {
       // @ts-expect-error
       mockedAppContextService.getCloud.mockReturnValue({
         isCloudEnabled: true,
         cloudId: CLOUD_ID,
+        elasticsearchUrl: 'https://cec6f261a74bf24ce33bb8811b84294f.us-east-1.aws.found.io:443',
       });
 
       mockedAppContextService.getConfig.mockReturnValue(CONFIG_WITH_ES_HOSTS);

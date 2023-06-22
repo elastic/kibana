@@ -34,12 +34,38 @@ endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
+.. Create a new Docker network for {es} and {kib}:
++
 [source,sh,subs="attributes"]
 ----
 docker network create elastic
+----
+
+.. Pull the {es} Docker image:
++
+[source,sh,subs="attributes"]
+----
 docker pull {es-docker-image}
+----
+
+.. Optional: Verify the {es} Docker image signature::
++
+[source,sh,subs="attributes"]
+----
+wget https://artifacts.elastic.co/cosign.pub
+cosign verify --key cosign.pub {docker-repo}:{version}
+----
++
+For details about this step, refer to {ref}/docker.html#docker-verify-signature[Verify the {es} Docker image signature] in the {es} documentation.
+
+.. Start {es} in Docker:
++
+[source,sh,subs="attributes"]
+----
 docker run --name es-node01 --net elastic -p 9200:9200 -p 9300:9300 -t {es-docker-image}
 ----
+
+
 
 endif::[]
 
@@ -78,6 +104,34 @@ ifeval::["{release-state}"!="unreleased"]
 docker pull {docker-image}
 docker run --name kib-01 --net elastic -p 5601:5601 {docker-image}
 ----
+
+.. Pull the {kib} Docker image:
++
+[source,sh,subs="attributes"]
+----
+docker pull {docker-image}
+----
+
+.. Optional: Verify the {kib} Docker image signature::
++
+[source,sh,subs="attributes"]
+----
+wget https://artifacts.elastic.co/cosign.pub
+cosign verify --key cosign.pub {docker-repo}:{version}
+----
++
+For details about this step, refer to {ref}/docker.html#docker-verify-signature[Verify the {es} Docker image signature] in the {es} documentation.
+
+.. Start {kib} in Docker:
++
+[source,sh,subs="attributes"]
+----
+docker run --name kib-01 --net elastic -p 5601:5601 {docker-image}
+----
+
+
+
+
 
 endif::[]
 --

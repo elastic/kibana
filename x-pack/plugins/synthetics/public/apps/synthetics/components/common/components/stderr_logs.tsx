@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable } from '@elastic/eui';
 import moment from 'moment';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useStdErrorLogs } from './use_std_error_logs';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { Ping } from '../../../../../../common/runtime_types';

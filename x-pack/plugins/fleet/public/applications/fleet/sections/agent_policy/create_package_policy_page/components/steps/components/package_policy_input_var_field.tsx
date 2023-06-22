@@ -60,7 +60,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   }) => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const { multi, required, type, title, name, description, options } = varDef;
-    const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
+    const isInvalid = (isDirty || forceShowErrors) && !!varErrors?.length;
     const errors = isInvalid ? varErrors : null;
     const fieldLabel = title || name;
     const fieldTestSelector = fieldLabel.replace(/\s/g, '-').toLowerCase();

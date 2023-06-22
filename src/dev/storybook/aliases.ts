@@ -45,6 +45,7 @@ export const storybookAliases = {
   observability: 'x-pack/plugins/observability/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
+  text_based_editor: 'packages/kbn-text-based-editor/.storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   security_solution_packages: 'x-pack/packages/security-solution/storybook/config',
   serverless: 'packages/serverless/storybook/config',

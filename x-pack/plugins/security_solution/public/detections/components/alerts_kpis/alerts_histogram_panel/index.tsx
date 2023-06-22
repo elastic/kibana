@@ -73,7 +73,7 @@ const OptionsFlexItem = styled(EuiFlexItem)`
 
 export const LEGEND_WITH_COUNTS_WIDTH = 300; // px
 
-const ChartHeight = '100%';
+const CHART_HEIGHT = 155; // px
 
 interface AlertsHistogramPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
@@ -118,7 +118,7 @@ const NO_LEGEND_DATA: LegendItem[] = [];
 export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
   ({
     alignHeader,
-    chartHeight,
+    chartHeight = CHART_HEIGHT,
     chartOptionsContextMenu,
     combinedQueries,
     comboboxRef,
@@ -442,7 +442,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                   filters,
                 }}
                 getLensAttributes={getLensAttributes}
-                height={ChartHeight}
+                height={chartHeight ?? CHART_HEIGHT}
                 id={visualizationId}
                 inspectTitle={inspectTitle ?? title}
                 scopeId={SourcererScopeName.detections}

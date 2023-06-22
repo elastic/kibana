@@ -20,10 +20,7 @@ import type {
   GetSettingsResponse,
   GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
-import type {
-  DetailViewPanelName,
-  KibanaAssetType,
-} from '../../../../../../../common/types/models';
+import type { KibanaAssetType } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
   appRoutesService,
@@ -36,9 +33,11 @@ import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
+import type { DetailViewPanelName } from '.';
+import { Detail } from '.';
+
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
-import { Detail } from '.';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
@@ -784,6 +783,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.840Z',
         updated_by: 'elastic',
         agents: 0,
+        is_protected: false,
       },
       {
         id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
@@ -798,6 +798,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.840Z',
         updated_by: 'elastic',
         agents: 100,
+        is_protected: false,
       },
     ],
     total: 2,

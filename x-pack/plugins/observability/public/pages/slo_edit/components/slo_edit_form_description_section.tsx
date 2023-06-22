@@ -154,7 +154,7 @@ export function SloEditFormDescriptionSection() {
                     }
                   }}
                   isClearable
-                  data-test-subj="sloEditApmAvailabilityGoodStatusCodesSelector"
+                  data-test-subj="sloEditTagsSelector"
                 />
               )}
             />

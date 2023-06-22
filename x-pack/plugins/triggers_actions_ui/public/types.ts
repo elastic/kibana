@@ -53,6 +53,7 @@ import {
   ActionVariable,
   RuleType as CommonRuleType,
   RuleLastRun,
+  MaintenanceWindow,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -89,7 +90,7 @@ import type {
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
-import { Case } from './application/sections/alerts_table/hooks/api';
+import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -343,6 +344,11 @@ export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
 export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
 
+export type RuleSnoozeSettings = Pick<
+  Rule,
+  'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule'
+>;
+
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
   index: number;
@@ -350,7 +356,6 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
-  activeSnoozes?: string[];
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -507,6 +512,10 @@ export type AlertsTableProps = {
     data: Map<string, Case>;
     isLoading: boolean;
   };
+  maintenanceWindows: {
+    data: Map<string, MaintenanceWindow>;
+    isLoading: boolean;
+  };
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
@@ -562,18 +571,46 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (
+  onClick?: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,
     setIsBulkActionsLoading: (isLoading: boolean) => void,
     clearSelection: () => void,
     refresh: () => void
   ) => void;
+  panel?: number;
 }
+
+interface PanelConfig {
+  id: number;
+  title?: string;
+  'data-test-subj'?: string;
+}
+
+export interface RenderContentPanelProps {
+  alertItems: TimelineItem[];
+  setIsBulkActionsLoading: (isLoading: boolean) => void;
+  isAllSelected?: boolean;
+  clearSelection?: () => void;
+  refresh?: () => void;
+  closePopoverMenu: () => void;
+}
+
+interface ContentPanelConfig extends PanelConfig {
+  renderContent: (args: RenderContentPanelProps) => JSX.Element;
+  items?: never;
+}
+
+interface ItemsPanelConfig extends PanelConfig {
+  content?: never;
+  items: BulkActionsConfig[];
+}
+
+export type BulkActionsPanelConfig = ItemsPanelConfig | ContentPanelConfig;
 
 export type UseBulkActionsRegistry = (
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>
-) => BulkActionsConfig[];
+) => BulkActionsPanelConfig[];
 
 export type UseCellActions = (props: {
   columns: EuiDataGridColumn[];

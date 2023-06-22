@@ -29,7 +29,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';

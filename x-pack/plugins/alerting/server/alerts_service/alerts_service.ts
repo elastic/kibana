@@ -19,7 +19,7 @@ import {
   getComponentTemplateName,
   getIndexTemplateAndPattern,
 } from './resource_installer_utils';
-import { IRuleTypeAlerts } from '../types';
+import { AlertInstanceContext, AlertInstanceState, IRuleTypeAlerts, RuleAlertData } from '../types';
 import {
   createResourceInstallationHelper,
   errorResult,
@@ -35,6 +35,8 @@ import {
   createConcreteWriteIndex,
   installWithTimeout,
 } from './lib';
+import { type LegacyAlertsClientParams, type AlertRuleData, AlertsClient } from '../alerts_client';
+import { IAlertsClient } from '../alerts_client/types';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -48,6 +50,10 @@ interface AlertsServiceParams {
   timeoutMs?: number;
 }
 
+export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
+  namespace: string;
+  rule: AlertRuleData;
+}
 interface IAlertsService {
   /**
    * Register solution specific resources. If common resource initialization is
@@ -73,6 +79,27 @@ interface IAlertsService {
     context: string,
     namespace: string
   ): Promise<InitializationPromise>;
+
+  /**
+   * If the rule type has registered an alert context, initialize and return an AlertsClient,
+   * otherwise return null. Currently registering an alert context is optional but in the future
+   * we will make it a requirement for all rule types and this function should not return null.
+   */
+  createAlertsClient<
+    AlertData extends RuleAlertData,
+    LegacyState extends AlertInstanceState,
+    LegacyContext extends AlertInstanceContext,
+    ActionGroupIds extends string,
+    RecoveryActionGroupId extends string
+  >(
+    opts: CreateAlertsClientParams
+  ): Promise<IAlertsClient<
+    AlertData,
+    LegacyState,
+    LegacyContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  > | null>;
 }
 
 export type PublicAlertsService = Pick<IAlertsService, 'getContextInitializationPromise'>;
@@ -102,6 +129,61 @@ export class AlertsService implements IAlertsService {
 
   public isInitialized() {
     return this.initialized;
+  }
+
+  public async createAlertsClient<
+    AlertData extends RuleAlertData,
+    LegacyState extends AlertInstanceState,
+    LegacyContext extends AlertInstanceContext,
+    ActionGroupIds extends string,
+    RecoveryActionGroupId extends string
+  >(
+    opts: CreateAlertsClientParams
+  ): Promise<IAlertsClient<
+    AlertData,
+    LegacyState,
+    LegacyContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  > | null> {
+    if (!opts.ruleType.alerts) {
+      return null;
+    }
+
+    // Check if context specific installation has succeeded
+    const { result: initialized, error } = await this.getContextInitializationPromise(
+      opts.ruleType.alerts.context,
+      opts.namespace
+    );
+
+    if (!initialized) {
+      // TODO - retry initialization here
+      this.options.logger.warn(
+        `There was an error in the framework installing namespace-level resources and creating concrete indices for - ${error}`
+      );
+      return null;
+    }
+
+    if (!opts.ruleType.alerts.shouldWrite) {
+      this.options.logger.debug(
+        `Resources registered and installed for ${opts.ruleType.alerts.context} context but "shouldWrite" is set to false.`
+      );
+      return null;
+    }
+
+    return new AlertsClient<
+      AlertData,
+      LegacyState,
+      LegacyContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      ruleType: opts.ruleType,
+      namespace: opts.namespace,
+      rule: opts.rule,
+    });
   }
 
   public async getContextInitializationPromise(

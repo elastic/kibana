@@ -92,7 +92,7 @@ describe('createBatches', () => {
       expect(
         createBatches({
           documents,
-          maxBatchSizeBytes: (DOCUMENT_SIZE_BYTES + 43) * 2, // add extra length for 'index' property
+          maxBatchSizeBytes: (DOCUMENT_SIZE_BYTES + 49) * 2, // add extra length for 'index' property
           typeIndexMap: buildTempIndexMap(
             {
               '.kibana': ['dashboard'],
@@ -108,7 +108,7 @@ describe('createBatches', () => {
               {
                 index: {
                   _id: '',
-                  _index: '.kibana_8.8.0_reindex_temp',
+                  _index: '.kibana_8.8.0_reindex_temp_alias',
                 },
               },
               { type: 'dashboard', title: 'my saved object title ¹' },
@@ -117,7 +117,7 @@ describe('createBatches', () => {
               {
                 index: {
                   _id: '',
-                  _index: '.kibana_8.8.0_reindex_temp',
+                  _index: '.kibana_8.8.0_reindex_temp_alias',
                 },
               },
               { type: 'dashboard', title: 'my saved object title ²' },
@@ -128,7 +128,7 @@ describe('createBatches', () => {
               {
                 index: {
                   _id: '',
-                  _index: '.kibana_cases_8.8.0_reindex_temp',
+                  _index: '.kibana_cases_8.8.0_reindex_temp_alias',
                 },
               },
               { type: 'cases', title: 'a case' },
@@ -137,7 +137,7 @@ describe('createBatches', () => {
               {
                 index: {
                   _id: '',
-                  _index: '.kibana_cases_8.8.0_reindex_temp',
+                  _index: '.kibana_cases_8.8.0_reindex_temp_alias',
                 },
               },
               { type: 'cases-comments', title: 'a case comment #1' },
@@ -148,7 +148,7 @@ describe('createBatches', () => {
               {
                 index: {
                   _id: '',
-                  _index: '.kibana_cases_8.8.0_reindex_temp',
+                  _index: '.kibana_cases_8.8.0_reindex_temp_alias',
                 },
               },
               { type: 'cases-user-actions', title: 'a case user action' },

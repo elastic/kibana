@@ -17,11 +17,10 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from 'styled-components';
-import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
+import { useTheme, useKibanaSpace } from '@kbn/observability-shared-plugin/public';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 import { AllSeries, ReportTypes } from '../../../..';
-import { useTheme } from '../../../../hooks/use_theme';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
@@ -34,7 +33,6 @@ import { AddToCaseAction } from '../header/add_to_case_action';
 
 export interface ExploratoryEmbeddableProps {
   id?: string;
-  appId?: 'securitySolutionUI' | 'observability';
   appendTitle?: JSX.Element;
   attributes?: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
@@ -72,7 +70,6 @@ export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddab
 
 // eslint-disable-next-line import/no-default-export
 export default function Embeddable({
-  appId,
   appendTitle,
   attributes = [],
   axisTitlesVisibility,
@@ -150,7 +147,6 @@ export default function Embeddable({
     withActions,
     attributes,
     reportType,
-    appId,
     setIsSaveOpen,
     setAddToCaseOpen,
     lensAttributes: attributesJSON,
@@ -255,7 +251,6 @@ export default function Embeddable({
         timeRange={customTimeRange ?? series?.time}
         autoOpen={isAddToCaseOpen}
         setAutoOpen={setAddToCaseOpen}
-        appId={appId}
         owner={caseOwner}
       />
     </Wrapper>

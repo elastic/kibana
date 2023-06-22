@@ -255,7 +255,7 @@ export const ControlGeneralViewResponse = ({
       id={'response_' + index}
       forceState={accordionState}
       onToggle={onToggleAccordion}
-      data-test-subj="cloud-defend-response"
+      data-test-subj={`cloud-defend-${response.type}-response`}
       paddingSize="m"
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s">

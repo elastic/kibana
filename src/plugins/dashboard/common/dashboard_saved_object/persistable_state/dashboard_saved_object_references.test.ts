@@ -9,8 +9,7 @@
 import {
   extractReferences,
   injectReferences,
-  InjectDeps,
-  ExtractDeps,
+  InjectExtractDeps,
 } from './dashboard_saved_object_references';
 
 import {
@@ -18,6 +17,7 @@ import {
   createInject,
 } from '../../dashboard_container/persistable_state/dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
+import { DashboardAttributes } from '../../content_management';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
 const dashboardInject = createInject(embeddablePersistableStateServiceMock);
@@ -38,8 +38,17 @@ embeddablePersistableStateServiceMock.inject.mockImplementation((state, referenc
 
   return state;
 });
-const deps: InjectDeps & ExtractDeps = {
+const deps: InjectExtractDeps = {
   embeddablePersistableStateService: embeddablePersistableStateServiceMock,
+};
+
+const commonAttributes: DashboardAttributes = {
+  kibanaSavedObjectMeta: { searchSourceJSON: '' },
+  timeRestore: false,
+  panelsJSON: '',
+  version: 1,
+  description: '',
+  title: '',
 };
 
 describe('legacy extract references', () => {
@@ -47,6 +56,7 @@ describe('legacy extract references', () => {
     const doc = {
       id: '1',
       attributes: {
+        ...commonAttributes,
         foo: true,
         panelsJSON: JSON.stringify([
           {
@@ -70,8 +80,15 @@ describe('legacy extract references', () => {
     expect(updatedDoc).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
+          "description": "",
           "foo": true,
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "",
+          },
           "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"version\\":\\"7.0.0\\",\\"panelRefName\\":\\"panel_0\\"},{\\"title\\":\\"Title 2\\",\\"version\\":\\"7.0.0\\",\\"panelRefName\\":\\"panel_1\\"}]",
+          "timeRestore": false,
+          "title": "",
+          "version": 1,
         },
         "references": Array [
           Object {
@@ -93,6 +110,7 @@ describe('legacy extract references', () => {
     const doc = {
       id: '1',
       attributes: {
+        ...commonAttributes,
         foo: true,
         panelsJSON: JSON.stringify([
           {
@@ -113,6 +131,7 @@ describe('legacy extract references', () => {
     const doc = {
       id: '1',
       attributes: {
+        ...commonAttributes,
         foo: true,
         panelsJSON: JSON.stringify([
           {
@@ -127,8 +146,15 @@ describe('legacy extract references', () => {
     expect(extractReferences(doc, deps)).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
+          "description": "",
           "foo": true,
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "",
+          },
           "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
+          "timeRestore": false,
+          "title": "",
+          "version": 1,
         },
         "references": Array [],
       }
@@ -214,6 +240,7 @@ describe('extractReferences', () => {
     const doc = {
       id: '1',
       attributes: {
+        ...commonAttributes,
         foo: true,
         panelsJSON: JSON.stringify([
           {
@@ -239,8 +266,15 @@ describe('extractReferences', () => {
     expect(updatedDoc).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
+          "description": "",
           "foo": true,
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "",
+          },
           "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-1\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_panel-1\\"},{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-2\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_panel-2\\"}]",
+          "timeRestore": false,
+          "title": "",
+          "version": 1,
         },
         "references": Array [
           Object {
@@ -262,6 +296,7 @@ describe('extractReferences', () => {
     const doc = {
       id: '1',
       attributes: {
+        ...commonAttributes,
         foo: true,
         panelsJSON: JSON.stringify([
           {
@@ -274,7 +309,7 @@ describe('extractReferences', () => {
       references: [],
     };
     expect(() => extractReferences(doc, deps)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"type\\" attribute is missing from panel \\"0\\""`
+      `"\\"type\\" attribute is missing from panel \\"undefined\\""`
     );
   });
 
@@ -282,6 +317,7 @@ describe('extractReferences', () => {
     const doc = {
       id: '1',
       attributes: {
+        ...commonAttributes,
         foo: true,
         panelsJSON: JSON.stringify([
           {
@@ -296,8 +332,15 @@ describe('extractReferences', () => {
     expect(extractReferences(doc, deps)).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
+          "description": "",
           "foo": true,
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "",
+          },
           "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
+          "timeRestore": false,
+          "title": "",
+          "version": 1,
         },
         "references": Array [],
       }
@@ -308,6 +351,7 @@ describe('extractReferences', () => {
 describe('injectReferences', () => {
   test('returns injected attributes', () => {
     const attributes = {
+      ...commonAttributes,
       id: '1',
       title: 'test',
       panelsJSON: JSON.stringify([
@@ -339,9 +383,15 @@ describe('injectReferences', () => {
 
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
+        "description": "",
         "id": "1",
+        "kibanaSavedObjectMeta": Object {
+          "searchSourceJSON": "",
+        },
         "panelsJSON": "[{\\"version\\":\\"7.9.0\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"version\\":\\"7.9.0\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\"}]",
+        "timeRestore": false,
         "title": "test",
+        "version": 1,
       }
     `);
   });
@@ -350,11 +400,12 @@ describe('injectReferences', () => {
     const attributes = {
       id: '1',
       title: 'test',
-    };
+    } as unknown as DashboardAttributes;
     const newAttributes = injectReferences({ attributes, references: [] }, deps);
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
         "id": "1",
+        "panelsJSON": "[]",
         "title": "test",
       }
     `);
@@ -362,6 +413,7 @@ describe('injectReferences', () => {
 
   test('skips when panelsJSON is not an array', () => {
     const attributes = {
+      ...commonAttributes,
       id: '1',
       panelsJSON: '{}',
       title: 'test',
@@ -369,15 +421,22 @@ describe('injectReferences', () => {
     const newAttributes = injectReferences({ attributes, references: [] }, deps);
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
+        "description": "",
         "id": "1",
-        "panelsJSON": "{}",
+        "kibanaSavedObjectMeta": Object {
+          "searchSourceJSON": "",
+        },
+        "panelsJSON": "[]",
+        "timeRestore": false,
         "title": "test",
+        "version": 1,
       }
     `);
   });
 
   test('skips a panel when panelRefName is missing', () => {
     const attributes = {
+      ...commonAttributes,
       id: '1',
       title: 'test',
       panelsJSON: JSON.stringify([
@@ -400,15 +459,22 @@ describe('injectReferences', () => {
     const newAttributes = injectReferences({ attributes, references }, deps);
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
+        "description": "",
         "id": "1",
-        "panelsJSON": "[{\\"version\\":\\"\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"version\\":\\"\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\"}]",
+        "kibanaSavedObjectMeta": Object {
+          "searchSourceJSON": "",
+        },
+        "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\"}]",
+        "timeRestore": false,
         "title": "test",
+        "version": 1,
       }
     `);
   });
 
   test(`fails when it can't find the reference in the array`, () => {
     const attributes = {
+      ...commonAttributes,
       id: '1',
       title: 'test',
       panelsJSON: JSON.stringify([

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { mergeSavedObjectMigrationMaps } from './src/merge_migration_maps';
+export { mergeSavedObjectMigrations, mergeSavedObjectMigrationMaps } from './src/merge_migrations';
 export {
   SavedObjectsUtils,
   ALL_NAMESPACES_STRING,

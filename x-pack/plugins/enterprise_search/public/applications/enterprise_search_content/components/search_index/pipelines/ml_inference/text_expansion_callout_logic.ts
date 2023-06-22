@@ -56,6 +56,7 @@ export interface TextExpansionCalloutValues {
   isCreateButtonDisabled: boolean;
   isModelDownloadInProgress: boolean;
   isModelDownloaded: boolean;
+  isModelRunningSingleThreaded: boolean;
   isModelStarted: boolean;
   isPollingTextExpansionModelActive: boolean;
   isStartButtonDisabled: boolean;
@@ -259,6 +260,12 @@ export const TextExpansionCalloutLogic = kea<
     isStartButtonDisabled: [
       () => [selectors.startTextExpansionModelStatus],
       (status: Status) => status !== Status.IDLE && status !== Status.ERROR,
+    ],
+    isModelRunningSingleThreaded: [
+      () => [selectors.textExpansionModel],
+      (data: FetchTextExpansionModelResponse) =>
+        // Running single threaded if model has max 1 deployment on 1 node with 1 thread
+        data?.targetAllocationCount * data?.threadsPerAllocation <= 1,
     ],
   }),
 });

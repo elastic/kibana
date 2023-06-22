@@ -5,18 +5,44 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { FAILED_TO_SCHEDULE } from './browser_test_results';
+import { kibanaService } from '../../../../../utils/kibana_service';
 import { useSimpleRunOnceMonitors } from '../hooks/use_simple_run_once_monitors';
 
 interface Props {
+  name: string;
   testRunId: string;
   expectPings: number;
   onDone: (testRunId: string) => void;
 }
-export function SimpleTestResults({ testRunId, expectPings, onDone }: Props) {
-  const { summaryDocs } = useSimpleRunOnceMonitors({
+export function SimpleTestResults({ name, testRunId, expectPings, onDone }: Props) {
+  const { summaryDocs, retriesExceeded } = useSimpleRunOnceMonitors({
     testRunId,
     expectSummaryDocs: expectPings,
   });
+
+  useEffect(() => {
+    if (retriesExceeded) {
+      kibanaService.toasts.addDanger(
+        {
+          text: FAILED_TO_SCHEDULE,
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.synthetics.manualTestRun.failedTest.name"
+              defaultMessage="Manual test run failed for {name}"
+              values={{ name }}
+            />
+          ),
+        },
+        {
+          toastLifeTimeMs: 10000,
+        }
+      );
+      onDone(testRunId);
+    }
+  }, [name, onDone, retriesExceeded, testRunId]);
 
   useEffect(() => {
     if (summaryDocs) {

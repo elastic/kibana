@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockedSearchService, TestProvidersComponent } from '../../../common/mocks/test_providers';
+import { mockedSearchService, TestProvidersComponent } from '../../../mocks/test_providers';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject } from 'rxjs';
-import { useIndicatorsTotalCount } from '.';
+import { useIndicatorsTotalCount } from './use_total_count';
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 

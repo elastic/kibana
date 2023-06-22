@@ -7,9 +7,10 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { findTagsByName } from '../../../tags/saved_objects';
 import * as savedObjectsToCreate from '../saved_object';
 import type { SavedObjectTemplate } from '../types';
-import { findRiskScoreTag, findSavedObjectsWithTagReference } from './find_or_create_tag';
+import { findSavedObjectsWithTagReference } from './create_risk_score_tag';
 import { RISK_SCORE_REPLACE_ID_MAPPINGS, getRiskScoreTagName } from './utils';
 
 const deleteSavedObject = async ({
@@ -103,7 +104,7 @@ export const bulkDeleteSavedObjects = async ({
   }
 
   const tagName = getRiskScoreTagName(riskScoreEntity, spaceId);
-  const tag = await findRiskScoreTag({ savedObjectsClient, search: tagName });
+  const [tag] = await findTagsByName({ savedObjectsClient, tagName });
 
   /**
    * This is to delete the saved objects installed before 8.5

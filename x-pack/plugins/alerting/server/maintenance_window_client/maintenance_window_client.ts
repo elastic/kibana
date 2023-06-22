@@ -12,11 +12,9 @@ import { update, UpdateParams } from './methods/update';
 import { find, FindResult } from './methods/find';
 import { deleteMaintenanceWindow, DeleteParams } from './methods/delete';
 import { archive, ArchiveParams } from './methods/archive';
-import {
-  getActiveMaintenanceWindows,
-  ActiveParams,
-} from './methods/get_active_maintenance_windows';
+import { getActiveMaintenanceWindows } from './methods/get_active_maintenance_windows';
 import { finish, FinishParams } from './methods/finish';
+import { bulkGet, BulkGetParams, BulkGetResult } from './methods/bulk_get';
 
 import {
   MaintenanceWindow,
@@ -71,6 +69,7 @@ export class MaintenanceWindowClient {
     archive(this.context, params);
   public finish = (params: FinishParams): Promise<MaintenanceWindow> =>
     finish(this.context, params);
-  public getActiveMaintenanceWindows = (params?: ActiveParams): Promise<MaintenanceWindow[]> =>
-    getActiveMaintenanceWindows(this.context, params);
+  public bulkGet = (params: BulkGetParams): Promise<BulkGetResult> => bulkGet(this.context, params);
+  public getActiveMaintenanceWindows = (): Promise<MaintenanceWindow[]> =>
+    getActiveMaintenanceWindows(this.context);
 }

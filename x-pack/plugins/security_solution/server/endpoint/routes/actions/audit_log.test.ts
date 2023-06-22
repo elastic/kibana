@@ -13,7 +13,6 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type {
@@ -22,10 +21,9 @@ import type {
 } from '../../../../common/endpoint/schema/actions';
 import { EndpointActionLogRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ENDPOINT_ACTION_LOG_ROUTE } from '../../../../common/endpoint/constants';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -136,12 +134,7 @@ describe('Action Log API', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
-      registerActionAuditLogRoutes(routerMock, {
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-      });
+      registerActionAuditLogRoutes(routerMock, createMockEndpointAppContext());
 
       getActivityLog = async (
         params: { agent_id: string },

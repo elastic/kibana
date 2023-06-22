@@ -97,6 +97,12 @@ node x-pack/plugins/apm/scripts/test/e2e --server
 node x-pack/plugins/apm/scripts/test/e2e --runner --open
 ```
 
+### Rum tests multiple times to check for flakiness
+
+```
+node x-pack/plugins/apm/scripts/test/e2e --runner --times <NUMBER> [--spec <FILE_NAME>]
+```
+
 ### A11y checks
 
 Accessibility tests are added on the e2e with `checkA11y()`, they will run together with cypress.

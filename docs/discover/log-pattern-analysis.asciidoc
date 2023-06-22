@@ -1,0 +1,38 @@
+[[run-pattern-analysis-discover]]
+== Run a pattern analysis on your log data
+
+preview::[]
+
+include::../user/ml/index.asciidoc[tag=log-pattern-analysis-intro]
+Log pattern analysis works on every text field.
+
+This example uses the <<gs-get-data-into-kibana, sample web logs data>>, or you 
+can use your own data.
+
+. Open the main menu, and click *Discover*.
+
+. Expand the {data-source} dropdown, and select *Kibana Sample Data Logs*.
+
+. If you don't see any results, expand the time range, for example, to 
+*Last 15 days*.
+
+. Click the `message` field in the **Available fields** list sidebar and click 
+**Run pattern analysis**.
++
+--
+[role="screenshot"]
+image::images/log-pattern-analysis-available-fields.png["Available fields view in Discover showing the message field selected."]
+
+The pattern analysis starts. The results are displayed in a flyout when the 
+analysis is complete.
+
+[role="screenshot"]
+image::images/log-pattern-analysis-results.png["Log pattern analysis results in Discover."]
+--
+
+. (optional) Apply filters to one or more patterns. *Discover* only displays 
+documents that match the selected patterns. Additionally, you can remove 
+selected patterns from *Discover*, resulting in the display of only those 
+documents that don't match the selected pattern. These options enable you to 
+remove unimportant messages and focus on the more important, actionable data 
+during troubleshooting.

@@ -11,7 +11,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiDescriptionList,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TagsBadges } from './tag_badges';
-import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
@@ -31,6 +30,7 @@ import {
   Ping,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 
 const TitleLabel = euiStyled(EuiDescriptionListTitle)`
   width: 40%;
@@ -62,7 +62,7 @@ export const MonitorDetailsPanel = ({
   const dispatch = useDispatch();
 
   if (!monitor) {
-    return <EuiLoadingContent lines={8} />;
+    return <EuiSkeletonText lines={8} />;
   }
 
   const url = latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS];
@@ -207,7 +207,8 @@ function translateUnitMessage(unitMsg: string) {
 }
 
 const Time = ({ timestamp }: { timestamp?: string }) => {
-  const dateTimeFormatted = useFormatTestRunAt(timestamp);
+  const formatter = useDateFormat();
+  const dateTimeFormatted = formatter(timestamp);
 
   return timestamp ? <time dateTime={timestamp}>{dateTimeFormatted}</time> : null;
 };

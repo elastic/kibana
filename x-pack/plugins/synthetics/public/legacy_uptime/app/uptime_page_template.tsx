@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../../common/constants';
 import { ClientPluginsStart } from '../../plugin';
 import { useNoDataConfig } from './use_no_data_config';

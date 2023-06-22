@@ -229,6 +229,10 @@ describe('getNormalizedDataStreams', () => {
       {
         type: 'foo',
         dataset: 'nginx.bar',
+        elasticsearch: {
+          dynamic_dataset: true,
+          dynamic_namespace: true,
+        },
         title: expect.any(String),
         release: 'ga',
         package: 'nginx',

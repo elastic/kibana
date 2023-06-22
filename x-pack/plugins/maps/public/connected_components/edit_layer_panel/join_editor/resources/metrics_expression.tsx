@@ -116,18 +116,19 @@ export class MetricsExpression extends Component<Props, State> {
             value={metricExpressions.length > 0 ? metricExpressions.join(', ') : AGG_TYPE.COUNT}
           />
         }
+        repositionOnScroll={true}
       >
         <div style={{ width: 400 }}>
           <EuiPopoverTitle>
             <FormattedMessage
               id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
-              defaultMessage="Metrics"
+              defaultMessage="Configure join metrics"
             />
           </EuiPopoverTitle>
           <EuiFormHelpText className="mapJoinExpressionHelpText">
             <FormattedMessage
               id="xpack.maps.layerPanel.metricsExpression.helpText"
-              defaultMessage="Configure the metrics for the right source. These values are added to the layer features."
+              defaultMessage="Metrics are added to layer features and used for data driven styling and tooltip content."
             />
           </EuiFormHelpText>
           {this._renderMetricsEditor()}

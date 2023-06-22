@@ -138,9 +138,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     return (
       <EuiPanel>
         <GeoIndexPatternSelect
-          value={
-            this.state.indexPattern && this.state.indexPattern.id ? this.state.indexPattern.id : ''
-          }
+          dataView={this.state.indexPattern}
           onChange={this._onIndexPatternSelect}
           isGeoPointsOnly={true}
         />

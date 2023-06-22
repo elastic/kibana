@@ -843,7 +843,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 </div>
               ) : null}
               {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--right">
                   <button
                     type="button"
                     className="euiFormControlLayoutClearButton"

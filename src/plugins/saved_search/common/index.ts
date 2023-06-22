@@ -20,3 +20,6 @@ export enum VIEW_MODE {
   DOCUMENT_LEVEL = 'documents',
   AGGREGATED_LEVEL = 'aggregated',
 }
+
+export { SavedSearchType } from './constants';
+export { LATEST_VERSION } from './constants';

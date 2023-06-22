@@ -12,6 +12,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import type {
   CaseAggregationResult,
@@ -29,7 +30,6 @@ import type {
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
@@ -208,14 +208,11 @@ export const getAggregationsBuckets = ({
 }: {
   keys: string[];
   aggs?: Record<string, unknown>;
-}): Record<string, Buckets['buckets']> =>
-  keys.reduce(
-    (acc, key) => ({
-      ...acc,
-      [key]: getBucketFromAggregation({ aggs, key }),
-    }),
-    {}
-  );
+}) =>
+  keys.reduce<Record<string, Buckets['buckets']>>((acc, key) => {
+    acc[key] = getBucketFromAggregation({ aggs, key });
+    return acc;
+  }, {});
 
 export const getAttachmentsFrameworkStats = ({
   attachmentAggregations,

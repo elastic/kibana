@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../../../../../hooks/use_kibana';
@@ -13,7 +13,7 @@ import { TabContent, TabProps } from '../shared';
 import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../../../common/inventory_models/types';
-import { useMetadata } from '../../../../../metric_detail/hooks/use_metadata';
+import { useMetadata } from '../../../../../../../components/asset_details/hooks/use_metadata';
 import { useWaffleTimeContext } from '../../../../hooks/use_waffle_time';
 
 const TabComponent = (props: TabProps) => {
@@ -32,6 +32,7 @@ const TabComponent = (props: TabProps) => {
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
+
   // @ts-expect-error
   const OsqueryAction = osquery?.OsqueryAction;
 
@@ -41,14 +42,14 @@ const TabComponent = (props: TabProps) => {
     if (loading || !OsqueryAction) {
       return (
         <TabContent>
-          <EuiLoadingContent lines={10} />
+          <EuiSkeletonText lines={10} />
         </TabContent>
       );
     }
 
     return (
       <TabContent>
-        <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField />
+        <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField formType="simple" />
       </TabContent>
     );
   }, [OsqueryAction, loading, metadata]);

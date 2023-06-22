@@ -26,6 +26,7 @@ import {
 } from '../../../../../components/effected_policy_select/test_utils';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../../common/endpoint/service/artifacts';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import { testIdPrefix } from '../form';
 
 jest.mock('../../../../../../common/components/user_privileges');
 
@@ -139,33 +140,35 @@ describe('When on the host isolation exceptions entry form', () => {
     it('should select the "global" policy by default', () => {
       expect(
         renderResult
-          .getByTestId('effectedPolicies-select-global')
+          .getByTestId(`${testIdPrefix}-effectedPolicies-global`)
           .classList.contains('euiButtonGroupButton-isSelected')
       ).toBe(true);
     });
 
     it('should show policy as selected when user clicks on it', async () => {
       userEvent.click(renderResult.getByTestId('perPolicy'));
-      await clickOnEffectedPolicy(renderResult);
+      await clickOnEffectedPolicy(renderResult, testIdPrefix);
 
-      await expect(isEffectedPolicySelected(renderResult)).resolves.toBe(true);
+      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
     });
 
     it('should retain the previous policy selection when switching from per-policy to global', async () => {
       // move to per-policy and select the first
       userEvent.click(renderResult.getByTestId('perPolicy'));
-      await clickOnEffectedPolicy(renderResult);
+      await clickOnEffectedPolicy(renderResult, testIdPrefix);
 
-      await expect(isEffectedPolicySelected(renderResult)).resolves.toBe(true);
+      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
 
       // move back to global
       userEvent.click(renderResult.getByTestId('globalPolicy'));
 
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
+      expect(
+        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
+      ).toBeFalsy();
 
       // move back to per-policy
       userEvent.click(renderResult.getByTestId('perPolicy'));
-      await expect(isEffectedPolicySelected(renderResult)).resolves.toBe(true);
+      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
     });
   });
 
@@ -240,7 +243,7 @@ describe('When on the host isolation exceptions entry form', () => {
 
       expect(
         renderResult
-          .getByTestId('effectedPolicies-select-global')
+          .getByTestId(`${testIdPrefix}-effectedPolicies-global`)
           .classList.contains('euiButtonGroupButton-isSelected')
       ).toBe(true);
     });
@@ -257,22 +260,26 @@ describe('When on the host isolation exceptions entry form', () => {
 
       await render();
 
-      await expect(isEffectedPolicySelected(renderResult, 0)).resolves.toBe(true);
-      await expect(isEffectedPolicySelected(renderResult, 3)).resolves.toBe(true);
+      await expect(isEffectedPolicySelected(renderResult, testIdPrefix, 0)).resolves.toBe(true);
+      await expect(isEffectedPolicySelected(renderResult, testIdPrefix, 3)).resolves.toBe(true);
     });
 
     it('should show the policies selector when no policy is selected', async () => {
       existingException.tags = [];
       await render();
 
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+      expect(
+        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
+      ).toBeTruthy();
     });
 
     it('should show the policies selector when no policy is selected and there are previous tags', async () => {
       existingException.tags = ['non-a-policy-tag'];
       await render();
 
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+      expect(
+        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
+      ).toBeTruthy();
     });
   });
 });

@@ -11,7 +11,7 @@ import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-plugin/public';
+import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import {

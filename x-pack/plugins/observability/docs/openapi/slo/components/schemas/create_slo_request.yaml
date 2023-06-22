@@ -10,6 +10,10 @@ required:
   - budgetingMethod
   - objective
 properties:
+  id:
+    description: A unique identifier for the SLO. Must be between 8 and 36 chars
+    type: string
+    example: my-super-slo-id
   name:
     description: A name for the SLO.
     type: string
@@ -21,6 +25,7 @@ properties:
       - $ref: 'indicator_properties_custom_kql.yaml'
       - $ref: 'indicator_properties_apm_availability.yaml'
       - $ref: 'indicator_properties_apm_latency.yaml'
+      - $ref: 'indicator_properties_custom_metric.yaml'
   timeWindow:
     oneOf:
       - $ref: 'time_window_rolling.yaml'

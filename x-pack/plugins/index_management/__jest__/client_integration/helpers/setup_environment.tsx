@@ -19,6 +19,7 @@ import {
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
@@ -60,6 +61,7 @@ export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
+  settings: settingsServiceMock.createStartContract(),
   kibanaVersion: {
     get: () => kibanaVersion,
   },

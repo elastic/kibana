@@ -10,13 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import {
-  getExperimentalAllowedValues,
-  isValidExperimentalValue,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
-
-const allowedExperimentalValues = getExperimentalAllowedValues();
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -94,15 +88,6 @@ export const configSchema = schema.object({
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
-    validate(list) {
-      for (const key of list) {
-        if (!isValidExperimentalValue(key)) {
-          return `[${key}] is not allowed. Allowed values are: ${allowedExperimentalValues.join(
-            ', '
-          )}`;
-        }
-      }
-    },
   }),
 
   /**
@@ -123,6 +108,14 @@ export const configSchema = schema.object({
    */
   prebuiltRulesPackageVersion: schema.maybe(schema.string()),
   enabled: schema.boolean({ defaultValue: true }),
+
+  /**
+   * The Max number of Bytes allowed for the `upload` endpoint response action
+   */
+  maxUploadResponseActionFileBytes: schema.number({
+    defaultValue: 26214400, // 25MB,
+    max: 104857600, // 100MB,
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
@@ -133,7 +126,20 @@ export type ConfigType = ConfigSchema & {
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
   const pluginConfig = context.config.get<TypeOf<typeof configSchema>>();
-  const experimentalFeatures = parseExperimentalConfigValue(pluginConfig.enableExperimental);
+  const logger = context.logger.get('config');
+
+  const { invalid, features: experimentalFeatures } = parseExperimentalConfigValue(
+    pluginConfig.enableExperimental
+  );
+
+  if (invalid.length) {
+    logger.warn(`Unsupported "xpack.securitySolution.enableExperimental" values detected.
+The following configuration values are no longer supported and should be removed from the kibana configuration file:
+
+    xpack.securitySolution.enableExperimental:
+${invalid.map((key) => `      - ${key}`).join('\n')}
+`);
+  }
 
   return {
     ...pluginConfig,

@@ -1,7 +1,7 @@
-title: Objective definition
+title: Objective
 required:
   - target
-description: Defines properties for objective
+description: Defines properties for the SLO objective
 type: object
 properties:
   target:

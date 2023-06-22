@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  CommentType,
-  ExternalReferenceStorageType,
-  FILE_ATTACHMENT_TYPE,
-} from '../../../common/api';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { CommentType, ExternalReferenceStorageType } from '../../../common/api';
 import type {
   CommentRequestUserType,
   CommentRequestAlertType,

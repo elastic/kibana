@@ -50,7 +50,7 @@ export const usePushToService = ({
   isValidConnector,
 }: UsePushToService): ReturnUsePushToService => {
   const { permissions } = useCasesContext();
-  const { isLoading, pushCaseToExternalService } = usePostPushToService();
+  const { isLoading, mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const { isLoading: isLoadingLicense, data: actionLicense = null } = useGetActionLicense();

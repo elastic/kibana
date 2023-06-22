@@ -61,10 +61,10 @@ export const useFormIsModified = ({
       return;
     }
 
-    return fieldPathsToDiscard.reduce(
-      (acc, path) => ({ ...acc, [path]: true }),
-      {} as { [key: string]: {} }
-    );
+    return fieldPathsToDiscard.reduce((acc, path) => {
+      acc[path] = true;
+      return acc;
+    }, {} as { [key: string]: {} });
 
     // discardArrayToString === discard, we don't want to add it to the dependencies so
     // the consumer does not need to memoize the "discard" array they provide.

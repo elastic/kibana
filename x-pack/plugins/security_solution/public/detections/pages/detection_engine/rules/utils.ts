@@ -20,6 +20,7 @@ import { DEFAULT_THREAT_MATCH_QUERY, RULES_PATH } from '../../../../../common/co
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
 import { DataSourceType, GroupByOptions, RuleStep } from './types';
 import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
 import {
   RuleDetailTabs,
   RULE_DETAILS_TAB_NAME,
@@ -154,6 +155,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
     value: 5,
     unit: 'm',
   },
+  suppressionMissingFields: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {
@@ -180,6 +182,16 @@ const DEFAULT_INTERVAL = '5m';
 const DEFAULT_FROM = '1m';
 const THREAT_MATCH_INTERVAL = '1h';
 const THREAT_MATCH_FROM = '5m';
+
+export const defaultSchedule = {
+  interval: DEFAULT_INTERVAL,
+  from: DEFAULT_FROM,
+};
+
+export const defaultThreatMatchSchedule = {
+  interval: THREAT_MATCH_INTERVAL,
+  from: THREAT_MATCH_FROM,
+};
 
 export const getStepScheduleDefaultValue = (ruleType: Type | undefined): ScheduleStepRule => {
   return {

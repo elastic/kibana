@@ -8,20 +8,10 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
 
-import { useHasData } from '../../../../../hooks/use_has_data';
+import { useQuickTimeRanges } from '@kbn/observability-shared-plugin/public';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { useQuickTimeRanges } from '../../../../../hooks/use_quick_time_ranges';
 import { SeriesUrl } from '../../types';
 import { ReportTypes } from '../../configurations/constants';
-
-export interface TimePickerTime {
-  from: string;
-  to: string;
-}
-
-export interface TimePickerQuickRange extends TimePickerTime {
-  display: string;
-}
 
 interface Props {
   seriesId: number;
@@ -29,14 +19,11 @@ interface Props {
 }
 
 export function SeriesDatePicker({ series, seriesId }: Props) {
-  const { onRefreshTimeRange } = useHasData();
-
   const commonlyUsedRanges = useQuickTimeRanges();
 
   const { setSeries, reportType, allSeries } = useSeriesStorage();
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
-    onRefreshTimeRange?.();
     if (reportType === ReportTypes.KPI) {
       allSeries.forEach((currSeries, seriesIndex) => {
         setSeries(seriesIndex, { ...currSeries, time: { from: start, to: end } });
@@ -48,6 +35,7 @@ export function SeriesDatePicker({ series, seriesId }: Props) {
 
   return (
     <EuiSuperDatePicker
+      width="full"
       start={series?.time?.from}
       end={series?.time?.to}
       onTimeChange={onTimeChange}

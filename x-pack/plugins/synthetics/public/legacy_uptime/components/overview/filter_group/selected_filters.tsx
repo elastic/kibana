@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FilterValueLabel } from '@kbn/observability-plugin/public';
+import { FilterValueLabel } from '@kbn/exploratory-view-plugin/public';
 import { useUptimeDataView } from '../../../contexts/uptime_data_view_context';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 

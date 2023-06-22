@@ -13,7 +13,10 @@ import {
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   ExecuteActionRequestSchema,
+  UploadActionRequestSchema,
 } from './actions';
+import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
+import type { HapiReadableStream } from '../../../server/types';
 
 describe('actions schemas', () => {
   describe('Endpoint action list API Schema', () => {
@@ -23,66 +26,30 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it.each([true, false])('should accept withAutomatedActions param', (value) => {
+    it.each(['manual', 'automated'])('should accept types param', (value) => {
       expect(() => {
-        EndpointActionListRequestSchema.query.validate({ withAutomatedActions: value });
+        EndpointActionListRequestSchema.query.validate({ types: value });
+      }).not.toThrow();
+    });
+    it.each([['manual'], ['automated']])('should accept types param in array', (value) => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ types: value });
       }).not.toThrow();
     });
 
-    it('should require at least 1 alert ID', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({ alertId: [] });
-      }).toThrow();
-    });
-
-    it('should accept an alert ID if not in an array', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({ alertId: uuidv4() });
-      }).not.toThrow();
-    });
-
-    it('should not accept an alert ID if empty string', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({ alertId: '' });
-      }).toThrow();
-    });
-
-    it('should accept an alert ID in an array', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({ alertId: [uuidv4()] });
-      }).not.toThrow();
-    });
-
-    it('should not accept an alert ID if empty string in an array', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({ alertId: [''] });
-      }).toThrow();
-    });
-
-    it('should accept multiple alert IDs in an array', () => {
+    it('should accept multiple types in an array', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
-          alertId: [uuidv4(), uuidv4(), uuidv4()],
+          types: ['manual', 'automated'],
         });
       }).not.toThrow();
     });
-
-    it('should not accept multiple alert IDs in an array if one is an empty string', () => {
+    it('should not accept empty types in an array', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
-          alertId: [uuidv4(), '', uuidv4()],
+          types: [],
         });
       }).toThrow();
-    });
-
-    it('should not limit multiple alert IDs', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({
-          agentIds: Array(255)
-            .fill(1)
-            .map(() => uuidv4()),
-        });
-      }).not.toThrow();
     });
 
     it('should require at least 1 agent ID', () => {
@@ -637,6 +604,58 @@ describe('actions schemas', () => {
           comment: 'a user comment',
         });
       }).not.toThrow();
+    });
+  });
+
+  describe(`UploadActionRequestSchema`, () => {
+    let fileStream: HapiReadableStream;
+
+    beforeEach(() => {
+      fileStream = createHapiReadableStreamMock();
+    });
+
+    it('should not error if `override` parameter is not defined', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          file: fileStream,
+        });
+      }).not.toThrow();
+    });
+
+    it('should allow `overwrite` parameter', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            overwrite: true,
+          },
+          file: fileStream,
+        });
+      }).not.toThrow();
+    });
+
+    it('should error if `file` is not defined', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            overwrite: true,
+          },
+        });
+      }).toThrow('[file]: expected value of type [Stream] but got [undefined]');
+    });
+
+    it('should error if `file` is not a Stream', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            overwrite: true,
+          },
+          file: {},
+        });
+      }).toThrow('[file]: expected value of type [Stream] but got [Object]');
     });
   });
 });

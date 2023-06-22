@@ -12,3 +12,4 @@ export {
 } from './saved_object_type';
 export * from './sources';
 export * from '../../../common/source_configuration/source_configuration';
+export { SourceConfigurationSavedObjectRT } from './types';

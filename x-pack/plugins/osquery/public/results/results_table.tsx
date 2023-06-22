@@ -20,7 +20,7 @@ import {
   EuiDataGrid,
   EuiPanel,
   EuiLink,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiProgress,
   EuiIconTip,
 } from '@elastic/eui';
@@ -393,7 +393,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   if (isLoading) {
-    return <EuiLoadingContent lines={5} />;
+    return <EuiSkeletonText lines={5} />;
   }
 
   if (!hasActionResultsPrivileges) {
@@ -436,7 +436,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       )}
 
       {!allResultsData?.edges.length ? (
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} data-test-subj={'osqueryResultsPanel'}>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
         </EuiPanel>
       ) : (

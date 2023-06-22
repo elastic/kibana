@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
 import { IntegrationDeprecation } from '../components/overview/integration_deprecation';

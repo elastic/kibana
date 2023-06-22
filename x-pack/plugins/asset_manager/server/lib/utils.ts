@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment';
+
 export function toArray<T>(maybeArray: T | T[] | undefined): T[] {
   if (!maybeArray) {
     return [];
@@ -14,3 +16,10 @@ export function toArray<T>(maybeArray: T | T[] | undefined): T[] {
   }
   return [maybeArray];
 }
+
+export const isValidRange = (from: string, to: string): boolean => {
+  if (moment(from).isAfter(to)) {
+    return false;
+  }
+  return true;
+};

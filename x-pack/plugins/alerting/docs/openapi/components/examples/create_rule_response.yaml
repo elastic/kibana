@@ -3,6 +3,7 @@ value:
   actions:
     - group: threshold met
       id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+      uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
       frequency:
         notify_when: onActionGroupChange
         summary: false
@@ -10,6 +11,7 @@ value:
       params:
         level: info
         message: "alert {{alertName}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+  api_key_created_by_user: false
   api_key_owner: elastic
   consumer: alerts
   created_at: '2022-06-08T17:20:31.632Z'
@@ -37,6 +39,7 @@ value:
     timeField: "@timestamp"
     aggField: sheet.version
     termField: name.keyword
+  revision: 0
   rule_type_id: .index-threshold
   running: false
   schedule:

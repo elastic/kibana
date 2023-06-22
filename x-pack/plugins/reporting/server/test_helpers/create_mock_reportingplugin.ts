@@ -8,8 +8,6 @@
 jest.mock('../routes');
 jest.mock('../usage');
 
-import _ from 'lodash';
-import { BehaviorSubject } from 'rxjs';
 import {
   coreMock,
   docLinksServiceMock,
@@ -19,16 +17,17 @@ import {
 } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { DeepPartial } from 'utility-types';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ReportingConfig, ReportingCore } from '..';
-import { buildConfig, ReportingConfigType } from '../config';
+import { BehaviorSubject } from 'rxjs';
+import { DeepPartial } from 'utility-types';
+import { ReportingCore } from '..';
+import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 import { setFieldFormats } from '../services';
@@ -54,8 +53,7 @@ const logger = loggingSystemMock.createLogger();
 const createMockReportingStore = async (config: ReportingConfigType) => {
   const mockConfigSchema = createMockConfigSchema(config);
   const mockContext = coreMock.createPluginInitializerContext(mockConfigSchema);
-  const mockCore = new ReportingCore(logger, mockContext);
-  mockCore.setConfig(await buildConfig(mockContext, coreMock.createSetup(), logger));
+  const mockCore = new ReportingCore(coreMock.createSetup(), logger, mockContext);
   return new ReportingStore(mockCore, logger);
 };
 
@@ -85,15 +83,6 @@ export const createMockPluginStart = async (
   };
 };
 
-interface ReportingConfigTestType {
-  index: string;
-  encryptionKey: string;
-  queue: Partial<ReportingConfigType['queue']>;
-  kibanaServer: Partial<ReportingConfigType['kibanaServer']>;
-  csv: Partial<ReportingConfigType['csv']>;
-  roles?: Partial<ReportingConfigType['roles']>;
-}
-
 export const createMockConfigSchema = (
   overrides: DeepPartial<ReportingConfigType> = {}
 ): ReportingConfigType => {
@@ -104,7 +93,6 @@ export const createMockConfigSchema = (
     ...overrides,
     kibanaServer: {
       hostname: 'localhost',
-      port: 80,
       ...overrides.kibanaServer,
     },
     queue: {
@@ -126,18 +114,6 @@ export const createMockConfigSchema = (
   } as ReportingConfigType;
 };
 
-export const createMockConfig = (
-  reportingConfig: Partial<ReportingConfigTestType>
-): ReportingConfig => {
-  const mockConfigGet = jest.fn().mockImplementation((...keys: string[]) => {
-    return _.get(reportingConfig, keys.join('.'));
-  });
-  return {
-    get: mockConfigGet,
-    kbnConfig: { get: mockConfigGet },
-  };
-};
-
 export const createMockReportingCore = async (
   config: ReportingConfigType,
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
@@ -150,8 +126,7 @@ export const createMockReportingCore = async (
   const context = coreMock.createPluginInitializerContext(createMockConfigSchema());
   context.config = { get: () => config } as any;
 
-  const core = new ReportingCore(logger, context);
-  core.setConfig(createMockConfig(config));
+  const core = new ReportingCore(coreMock.createSetup(), logger, context);
 
   core.pluginSetup(setupDepsMock);
   await core.pluginSetsUp();

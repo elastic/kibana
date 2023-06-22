@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs } from '@kbn/observability-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { ComponentType, useRef, useState } from 'react';
 import { breadcrumbsApp } from '../../../application/app';
 import {

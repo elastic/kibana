@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 import { getServiceLocations, selectServiceLocationsState } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
