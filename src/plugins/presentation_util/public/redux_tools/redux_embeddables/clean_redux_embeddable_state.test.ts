@@ -58,8 +58,8 @@ describe('cleanFiltersForSerialize', () => {
 
     const cleanedFilters = cleanFiltersForSerialize(filters as unknown as Filter[]);
 
-    expect(cleanedFilters[0]).toEqual({ name: 'filter1' });
-    expect(cleanedFilters[1]).toEqual({ name: 'filter2' });
+    expect(cleanedFilters[0]).toEqual({ query: { a: 'a' } });
+    expect(cleanedFilters[1]).toEqual({ query: { b: 'b' } });
   });
 });
 
@@ -75,8 +75,8 @@ describe('cleanInputForRedux', () => {
 
     const cleanedInput = cleanInputForRedux(explicitInput) as InputWithFilters;
 
-    expect(cleanedInput.filters[0]).toEqual({ name: 'filter1', meta: {} });
-    expect(cleanedInput.filters[1]).toEqual({ name: 'filter2', meta: {} });
+    expect(cleanedInput.filters[0]).toEqual({ query: { a: 'a' }, meta: {} });
+    expect(cleanedInput.filters[1]).toEqual({ query: { b: 'b' }, meta: {} });
   });
 
   test('should not modify input if filters are not present', () => {
@@ -107,8 +107,8 @@ describe('cleanStateForRedux', () => {
 
     const cleanedState = cleanStateForRedux(state) as { explicitInput: InputWithFilters };
 
-    expect(cleanedState.explicitInput.filters[0]).toEqual({ name: 'filter1', meta: {} });
-    expect(cleanedState.explicitInput.filters[1]).toEqual({ name: 'filter2', meta: {} });
+    expect(cleanedState.explicitInput.filters[0]).toEqual({ query: { a: 'a' }, meta: {} });
+    expect(cleanedState.explicitInput.filters[1]).toEqual({ query: { b: 'b' }, meta: {} });
   });
 
   test('should not modify state if explicitInput filters are not present', () => {
