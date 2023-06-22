@@ -39,7 +39,7 @@ import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_proper
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { mergeExecutionContext } from '../execution_context_utils';
-import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_strings';
+import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './geo_line_form';
 import {
   DEFAULT_LINE_SIMPLIFICATION_SIZE,
   MAX_TERMS_TRACKS,

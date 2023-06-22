@@ -7,12 +7,14 @@
 
 import React, { useMemo } from 'react';
 import { DataView } from '@kbn/data-plugin/common';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { indexPatterns } from '@kbn/data-plugin/public';
-import { SingleFieldSelect } from '../../../components/single_field_select';
-import { getTermsFields, getIsTimeseries } from '../../../index_pattern_util';
-import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_strings';
+import { SingleFieldSelect } from '../../../../components/single_field_select';
+import { getTermsFields, getIsTimeseries } from '../../../../index_pattern_util';
+import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_constants';
+import { GroupByButtonGroup } from './group_by_button_group';
+import { GroupByLabel } from './group_by_label';
 import { SizeSlider } from './size_slider';
 
 interface Props {
@@ -29,20 +31,8 @@ interface Props {
 }
 
 export function GeoLineForm(props: Props) {
-  const { isTimeseries, dimensionLabels } = useMemo(() => {
-    const isTimeseriesInsideMemo = getIsTimeseries(props.indexPattern);
-    return {
-      isTimeseries: isTimeseriesInsideMemo,
-      dimensionLabels: isTimeseriesInsideMemo
-        ? props.indexPattern.fields
-            .filter((field) => {
-              return field.timeSeriesDimension;
-            })
-            .map((field) => {
-              return field.displayName;
-            })
-        : [],
-    };
+  const isTimeseries = useMemo(() => {
+    return getIsTimeseries(props.indexPattern);
   }, [props.indexPattern]);
 
   function onSortFieldChange(fieldName: string | undefined) {
@@ -59,26 +49,14 @@ export function GeoLineForm(props: Props) {
   return (
     <>
       {isTimeseries && (
-        <EuiFormRow display={props.isColumnCompressed ? 'columnCompressed' : 'row'}>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.maps.source.esGeoLine.groupByTimeseriesTooltip', {
-              defaultMessage:
-                'When enabled, create a track for each unique time series. Dimensions: {dimensionLabels}',
-              values: { dimensionLabels: dimensionLabels.join(',') },
-            })}
-          >
-            <EuiSwitch
-              label={i18n.translate('xpack.maps.source.esGeoLine.groupByTimeseriesLabel', {
-                defaultMessage: 'Group by time series',
-              })}
-              checked={props.groupByTimeseries}
-              onChange={(event: EuiSwitchEvent) => {
-                props.onGroupByTimeseriesChange(event.target.checked);
-              }}
-              compressed={props.isColumnCompressed}
-            />
-          </EuiToolTip>
+        <EuiFormRow
+          label={<GroupByLabel />}
+          display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
+        >
+          <GroupByButtonGroup
+            groupByTimeseries={props.groupByTimeseries}
+            onGroupByTimeseriesChange={props.onGroupByTimeseriesChange}
+          />
         </EuiFormRow>
       )}
       {props.groupByTimeseries ? (
@@ -88,7 +66,7 @@ export function GeoLineForm(props: Props) {
           })}
           helpText={i18n.translate('xpack.maps.esGeoLine.lineSImplificationSizeHelpText', {
             defaultMessage:
-              'The maximum number of points for each track. Track is simplifed when threshold is exceeded.',
+              'The maximum number of points for each track. Track is simplifed when threshold is exceeded. Use smaller values for better performance.',
           })}
           display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
         >
