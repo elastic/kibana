@@ -50,6 +50,7 @@ export const useAllLiveQueries = ({
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
         '/api/osquery/live_queries',
         {
+          version: '2023-10-31',
           query: {
             filterQuery: createFilter(filterQuery),
             page: activePage,
