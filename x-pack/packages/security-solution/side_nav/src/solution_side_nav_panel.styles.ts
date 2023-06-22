@@ -67,6 +67,7 @@ export const SolutionSideNavCategoryTitleStyles = (euiTheme: EuiThemeComputed<{}
   padding-left: ${euiTheme.size.s};
   padding-bottom: ${euiTheme.size.s};
   ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xxs')}
+  font-weight: ${euiTheme.font.weight.medium};
 `;
 
 export const SolutionSideNavPanelLinksGroupStyles = (euiTheme: EuiThemeComputed<{}>) => css`

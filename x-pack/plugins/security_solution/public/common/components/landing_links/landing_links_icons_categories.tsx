@@ -10,27 +10,9 @@ import { EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eu
 import type { SecurityPageName } from '../../../../common';
 import type { NavigationLink } from '../../links';
 import { useRootNavLink } from '../../links/nav_links';
-import { SpyRoute } from '../../utils/route/spy_routes';
-import { HeaderPage } from '../header_page';
-import { SecuritySolutionPageWrapper } from '../page_wrapper';
 import { LandingLinksIcons } from './landing_links_icons';
 
-export interface LandingLinksIconsCategoriesPageProps {
-  title: string;
-  pageName: SecurityPageName;
-}
 type CategoriesLinks = Array<{ label?: string; links: NavigationLink[] }>;
-
-export const LandingLinksIconsCategoriesPage: React.FC<LandingLinksIconsCategoriesPageProps> =
-  React.memo(function LandingLinksIconsCategoriesPage({ title, pageName }) {
-    return (
-      <SecuritySolutionPageWrapper>
-        <HeaderPage title={title} />
-        <LandingLinksIconsCategories pageName={pageName} />
-        <SpyRoute pageName={pageName} />
-      </SecuritySolutionPageWrapper>
-    );
-  });
 
 const useCategories = ({ pageName }: { pageName: SecurityPageName }): CategoriesLinks => {
   const { links = [], categories = [] } = useRootNavLink(pageName) ?? {};

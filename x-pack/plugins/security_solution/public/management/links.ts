@@ -43,7 +43,7 @@ import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
 import { IconEndpoints } from '../common/icons/endpoints';
 import { IconTool } from '../common/icons/tool';
-import { IconFilter } from '../common/icons/filter';
+import { IconPipeline } from '../common/icons/pipeline';
 import { IconSavedObject } from '../common/icons/saved_object';
 import { IconDashboards } from '../common/icons/dashboards';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
@@ -130,7 +130,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.eventFiltersDescription', {
         defaultMessage: 'Exclude high volume or unwanted events being written into Elasticsearch.',
       }),
-      landingIcon: IconFilter,
+      landingIcon: IconPipeline,
       path: EVENT_FILTERS_PATH,
       skipUrlState: true,
       hideTimeline: true,

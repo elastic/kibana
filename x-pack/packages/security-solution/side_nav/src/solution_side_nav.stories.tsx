@@ -13,6 +13,7 @@ import {
   type SolutionSideNavProps,
   type SolutionSideNavItem,
   SolutionSideNavItemPosition,
+  LinkCategoryType,
 } from '..';
 
 const items: SolutionSideNavItem[] = [
@@ -96,34 +97,34 @@ const items: SolutionSideNavItem[] = [
   },
   { id: 'linkWrapped', href: '#', label: 'I have wrapped text because I am too long' },
   {
-    id: 'footerLink',
+    id: 'bottomLink',
     href: '#',
-    label: 'I am a footer link',
+    label: 'I am a bottom link',
     position: SolutionSideNavItemPosition.bottom,
   },
   {
-    id: 'footerLinkPanel',
+    id: 'bottomLinkPanel',
     href: '#',
     label: 'I also have panel',
     position: SolutionSideNavItemPosition.bottom,
     items: [
       {
-        id: 'footerLinkPanel1',
-        label: 'I am a footer nested link',
+        id: 'bottomLinkPanel1',
+        label: 'I am a bottom nested link',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
     ],
   },
   {
-    id: 'footerLinkSeparator',
+    id: 'bottomLinkSeparator',
     href: '#',
     label: 'I have a separator',
     appendSeparator: true,
     position: SolutionSideNavItemPosition.bottom,
   },
   {
-    id: 'footerLinkIcon',
+    id: 'bottomLinkIcon',
     href: '#',
     label: 'I have an icon',
     iconType: 'heart',
@@ -165,6 +166,7 @@ export const SolutionSideNav = (params: SolutionSideNavProps) => (
         <SolutionSideNavComponent
           items={params.items}
           selectedId={params.selectedId}
+          categories={params.categories}
           panelBottomOffset={params.panelBottomOffset || undefined}
           panelTopOffset={params.panelTopOffset || undefined}
         />
@@ -188,6 +190,23 @@ SolutionSideNav.argTypes = {
   items: {
     control: 'object',
     defaultValue: items,
+  },
+  categories: {
+    control: 'object',
+    defaultValue: [
+      {
+        type: LinkCategoryType.separator,
+        linkIds: ['simpleLink', 'panelLink', 'categoriesPanelLink'],
+      },
+      {
+        type: LinkCategoryType.separator,
+        linkIds: ['linkWrapped'],
+      },
+      {
+        type: LinkCategoryType.separator,
+        linkIds: ['bottomLink', 'bottomLinkPanel', 'bottomLinkSeparator', 'bottomLinkIcon'],
+      },
+    ],
   },
   panelTopOffset: {
     control: 'text',

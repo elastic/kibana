@@ -305,7 +305,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        {appendSeparator && <EuiHorizontalRule margin="xs" />}
+        {appendSeparator ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="xs" />}
       </>
     );
   }
