@@ -6,19 +6,18 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { DashboardTopNav, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 
 import { pick } from 'lodash/fp';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { ViewMode } from '@kbn/embeddable-plugin/common';
-import { css } from '@emotion/react';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
+import { useCapabilities } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
 import { DashboardRenderer } from '../../components/dashboard_renderer';
 import { StatusPrompt } from '../../components/status_prompt';
@@ -31,8 +30,7 @@ import { HeaderPage } from '../../../common/components/header_page';
 import { DASHBOARD_NOT_FOUND_TITLE } from './translations';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useDashboardActions } from '../../hooks/use_dashboard_actions';
-import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
+import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 
 type DashboardDetails = Record<string, string>;
 
@@ -45,7 +43,6 @@ const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   initialViewMode,
 }: DashboardViewProps) => {
-  const { euiTheme } = useEuiTheme();
   const { fromStr, toStr, from, to } = useDeepEqualSelector((state) =>
     pick(['fromStr', 'toStr', 'from', 'to'], inputsSelectors.globalTimeRangeSelector(state))
   );
@@ -57,7 +54,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { indexPattern, indicesExist } = useSourcererDataView();
+  const { indexPattern } = useSourcererDataView();
   const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
 
   const { show: canReadDashboard, showWriteControls } =
@@ -67,10 +64,11 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
     [canReadDashboard]
   );
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
-  const { viewMode } = useDashboardActions({
-    dashboardContainer,
-    initialViewMode,
-  });
+  const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
+
+  const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+  }, []);
   const onDashboardContainerLoaded = useCallback((dashboard: DashboardAPI) => {
     if (dashboard) {
       const title = dashboard.getTitle().trim();
@@ -92,31 +90,12 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
 
   const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
-  const { navigateTo } = useNavigateTo();
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const dashboardListingUrl = useMemo(
-    () =>
-      `${getSecuritySolutionUrl({
-        deepLinkId: SecurityPageName.dashboards,
-      })}`,
-    [getSecuritySolutionUrl]
-  );
-  const getEditDashboardUrl = useCallback(
-    (id: string) =>
-      `${getSecuritySolutionUrl({
-        deepLinkId: SecurityPageName.dashboards,
-        path: `${id}/edit`,
-      })}`,
-    [getSecuritySolutionUrl]
-  );
 
   return (
     <>
-      {indicesExist && (
-        <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
-        </FiltersGlobal>
-      )}
+      <FiltersGlobal>
+        <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+      </FiltersGlobal>
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup
           direction="column"
@@ -126,30 +105,10 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
         >
           <EuiFlexItem grow={false}>
             <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
-              {showWriteControls && dashboardExists && (
-                <DashboardTopNav
-                  redirectTo={(props) => {
-                    if (props.destination === 'listing') {
-                      navigateTo({ url: dashboardListingUrl });
-                    }
-                    if (props.destination === 'dashboard' && props.id) {
-                      navigateTo({ url: getEditDashboardUrl(props.id) });
-                    }
-                  }}
+              {showWriteControls && dashboardExists && dashboardContainer && (
+                <DashboardToolBar
                   dashboardContainer={dashboardContainer}
-                  embedSettings={{
-                    forceHideFilterBar: true,
-                    forceShowTopNavMenu: true,
-                    forceShowQueryInput: false,
-                    forceShowDatePicker: false,
-                    showBorderBottom: false,
-                    showFullScreenButton: false,
-                    showBackgroundColor: false,
-                    editingToolBarCss: css`
-                      padding: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
-                    `,
-                    topNavMenuAlignRight: true,
-                  }}
+                  onLoad={onDashboardToolBarLoad}
                 />
               )}
             </HeaderPage>
