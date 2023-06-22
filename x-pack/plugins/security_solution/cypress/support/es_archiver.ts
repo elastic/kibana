@@ -12,7 +12,10 @@ import { KbnClient } from '@kbn/test';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 
-export const esArchiver = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions): void => {
+export const esArchiver = (
+  on: Cypress.PluginEvents,
+  config: Cypress.PluginConfigOptions
+): EsArchiver => {
   const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
 
   const client = new Client({

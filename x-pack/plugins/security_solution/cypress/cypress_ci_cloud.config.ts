@@ -9,8 +9,7 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { cloudPlugin } from 'cypress-cloud/plugin';
 import path from 'path';
 import { fork } from 'child_process';
-import execa from 'execa';
-import type { ChildProcess } from 'child_process';
+import type { ChildProcess, IOType } from 'child_process';
 import { esArchiver } from './support/es_archiver';
 import { isSkipped } from '../scripts/run_cypress/utils';
 
@@ -19,7 +18,7 @@ export default defineCypressConfig({
   defaultCommandTimeout: 150000,
   execTimeout: 150000,
   pageLoadTimeout: 150000,
-  numTestsKeptInMemory: 5,
+  numTestsKeptInMemory: 0,
   retries: {
     runMode: 1,
   },
@@ -30,10 +29,11 @@ export default defineCypressConfig({
   viewportHeight: 946,
   viewportWidth: 1680,
   e2e: {
-    baseUrl: 'http://localhost:5622',
+    baseUrl: 'http://google.com',
     experimentalMemoryManagement: true,
     experimentalInteractiveRunEvents: true,
     specPattern: ['./cypress/e2e', '!./cypress/e2e/investigations', '!./cypress/e2e/explore'],
+    supportFile: './cypress/support/e2e_cloud.js',
     env: {
       FORCE_COLOR: '1',
       CYPRESS_BASE_URL: 'http://elastic:changeme@localhost:5622',
@@ -48,35 +48,15 @@ export default defineCypressConfig({
     },
     async setupNodeEvents(on, config) {
       await cloudPlugin(on, config);
-      let processes: ChildProcess[] = [];
+      let processes: Record<string, ChildProcess> = {};
 
       const esArchiverInstance = esArchiver(on, config);
 
       on('before:spec', (spec) => {
-        console.error('before:spec', spec, processes);
-
         const isSkippedSpec = isSkipped(spec.absolute);
 
-        console.error('isSkippedSpec', isSkippedSpec);
-
         if (!isSkippedSpec) {
-          try {
-            execa.commandSync('kill $(lsof -t -i:5622)', { shell: true });
-            // eslint-disable-next-line no-empty
-          } catch (e) {}
-          try {
-            execa.commandSync('kill $(lsof -t -i:9222)', { shell: true });
-            // eslint-disable-next-line no-empty
-          } catch (e) {}
-
-          if (processes.length) {
-            processes.forEach((child) => {
-              child.kill();
-            });
-            processes = [];
-          }
-
-          if (!processes.length) {
+          if (!processes[spec.relative]) {
             const program = path.resolve('../scripts/start_cypress_setup_env.js');
             const parameters = [
               `run --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
@@ -88,21 +68,34 @@ export default defineCypressConfig({
                 KIBANA_INSTALL_DIR: process.env.KIBANA_INSTALL_DIR,
                 CI: process.env.CI,
               },
-              stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+              stdio: [
+                'inherit' as IOType,
+                'inherit' as IOType,
+                'inherit' as IOType,
+                'ipc' as const,
+              ],
             };
 
             const child = fork(program, parameters, options);
 
-            processes.push(child);
+            processes[spec.relative] = child;
 
             return new Promise((resolve) => {
-              child.on('message', (message) => {
-                console.log('message from child:', message);
-                esArchiverInstance.load('auditbeat').then(() => resolve(message));
+              child.on('message', () => {
+                esArchiverInstance.load('auditbeat').then(() => {
+                  resolve();
+                });
               });
             });
           }
         }
+
+        on('after:spec', () => {
+          Object.values(processes).forEach((child) => {
+            child.kill();
+          });
+          processes = {};
+        });
       });
 
       return config;

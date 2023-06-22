@@ -9,35 +9,13 @@ import path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import { run as cypressRun } from 'cypress-cloud';
-import { fork } from 'child_process';
-import type { IOType } from 'child_process';
+// import { fork } from 'child_process';
+// import type { IOType } from 'child_process';
 
 export const cli = () => {
   run(
     async () => {
       const { argv } = yargs(process.argv.slice(2));
-
-      await new Promise((resolve) => {
-        const program = path.resolve(__dirname, '../start_cypress_setup_env.js');
-        const parameters = [
-          `run --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
-        ];
-        const options = {
-          env: {
-            NODE_OPTIONS: '--no-warnings',
-            PATH: process.env.PATH,
-            KIBANA_INSTALL_DIR: process.env.KIBANA_INSTALL_DIR,
-            CI: process.env.CI,
-          },
-          stdio: ['inherit' as IOType, 'inherit' as IOType, 'inherit' as IOType, 'ipc' as const],
-        };
-
-        const child = fork(program, parameters, options);
-
-        child.on('message', (message) => {
-          resolve(message);
-        });
-      });
 
       await cypressRun({
         reporter: argv.reporter as string,
