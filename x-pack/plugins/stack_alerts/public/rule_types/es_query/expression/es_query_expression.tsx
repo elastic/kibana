@@ -6,6 +6,7 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import { get } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -90,13 +91,15 @@ export const EsQueryExpression: React.FC<
 
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
+  const [indices, setIndices] = useState<string[]>([]);
 
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentRuleParams);
     setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
 
     if (index && index.length > 0) {
-      await refreshEsFields(index);
+      setIndices(index);
+      await refreshEsFields();
     }
   };
 
@@ -105,8 +108,14 @@ export const EsQueryExpression: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const refreshEsFields = async (indices: string[]) => {
-    const currentEsFields = await getFields(http, indices);
+  const refreshEsFields = async () => {
+    let runtimeMappings;
+    try {
+      runtimeMappings = get(JSON.parse(xJson), 'runtime_mappings');
+    } catch (e) {
+      // ignore error
+    }
+    const currentEsFields = await getFields(http, indices, runtimeMappings);
     setEsFields(currentEsFields);
   };
 
@@ -192,14 +201,15 @@ export const EsQueryExpression: React.FC<
         esFields={esFields}
         timeField={timeField}
         errors={errors}
-        onIndexChange={async (indices: string[]) => {
-          setParam('index', indices);
+        onIndexChange={async (newIndices: string[]) => {
+          setParam('index', newIndices);
+          setIndices(newIndices);
 
           // reset expression fields if indices are deleted
-          if (indices.length === 0) {
+          if (newIndices.length === 0) {
             setRuleProperty('params', {
               timeField: ruleParams.timeField,
-              index: indices,
+              index: newIndices,
               esQuery: DEFAULT_VALUES.QUERY,
               size: DEFAULT_VALUES.SIZE,
               thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
@@ -213,7 +223,7 @@ export const EsQueryExpression: React.FC<
               excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
             });
           } else {
-            await refreshEsFields(indices);
+            await refreshEsFields();
           }
         }}
         onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
@@ -249,9 +259,10 @@ export const EsQueryExpression: React.FC<
           width="100%"
           height="200px"
           value={xJson}
-          onChange={(xjson: string) => {
+          onChange={async (xjson: string) => {
             setXJson(xjson);
             setParam('esQuery', convertToJson(xjson));
+            await refreshEsFields();
           }}
           options={{
             ariaLabel: i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
