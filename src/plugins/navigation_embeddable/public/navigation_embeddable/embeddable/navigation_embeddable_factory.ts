@@ -7,9 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import type { EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
 import { EmbeddableFactory, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
-import { NavigationEmbeddable, NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
+
+import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -25,7 +27,10 @@ export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryD
   }
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
-    return new NavigationEmbeddable(initialInput, parent);
+    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
+    const { NavigationEmbeddable } = await import('./navigation_embeddable');
+
+    return new NavigationEmbeddable(reduxEmbeddablePackage, initialInput, parent);
   }
 
   public getDisplayName() {

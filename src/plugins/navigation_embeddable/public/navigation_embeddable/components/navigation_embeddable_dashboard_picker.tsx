@@ -6,56 +6,81 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { EuiLoadingSpinner, EuiPanel, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiListGroup,
+  EuiListGroupItemProps,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
-import { NavigationEmbeddable } from '../embeddable/navigation_embeddable';
+import { SelectedDashboard } from '../types';
+import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
+import { NavigationEmbeddableDashboardList } from './navigation_embeddable_dashboard_list';
 
-interface Props {
-  embeddable: NavigationEmbeddable;
-}
+export const NavigationEmbeddableDashboardPicker = () => {
+  const navigationEmbeddable = useNavigationEmbeddable();
 
-export const NavigationEmbeddableDashboardPicker = ({ embeddable }: Props) => {
-  const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [selectedDashboard, setSelectedDashboard] = useState<SelectedDashboard | undefined>();
 
-  const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
-    return await embeddable.getDashboardList();
-  }, []);
+  const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
 
-  useEffect(() => {
-    const currentDashboardOption = dashboardList?.currentDashboard
-      ? [
-          {
-            data: { id: dashboardList.currentDashboard.id },
-            label: dashboardList.currentDashboard.attributes.title,
-            css: {
-              fontWeight: 'bold',
-            },
-          },
-        ]
-      : [];
-    const otherDashboardOptions =
-      dashboardList?.otherDashboards.map((dashboard) => ({
-        data: { id: dashboard.id },
-        label: dashboard.attributes.title,
-      })) ?? [];
-    setDashboardListOptions([...currentDashboardOption, ...otherDashboardOptions]);
-  }, [dashboardList]);
+  const button = (
+    <EuiButtonEmpty onClick={onButtonClick} iconType="plusInCircle">
+      Add link
+    </EuiButtonEmpty>
+  );
 
-  return loadingDashboardList ? (
-    <EuiLoadingSpinner />
-  ) : (
-    <EuiPanel>
-      <EuiSelectable
-        singleSelection={true}
-        options={dashboardListOptions}
-        listProps={{ onFocusBadge: false }}
-        onChange={(newOptions) => setDashboardListOptions(newOptions)}
-      >
-        {(list) => list}
-      </EuiSelectable>
-    </EuiPanel>
+  return (
+    <EuiPopover
+      button={button}
+      panelStyle={{ width: 300 }}
+      isOpen={isPopoverOpen}
+      panelPaddingSize="s"
+      closePopover={() => setIsPopoverOpen(false)}
+    >
+      <EuiForm component="form">
+        <EuiFormRow label="Dashboard">
+          <NavigationEmbeddableDashboardList
+            // embeddable={embeddable}
+            onDashboardSelected={setSelectedDashboard}
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Text">
+          <EuiFieldText
+            placeholder={selectedDashboard ? selectedDashboard.title : 'Select a dashboard'}
+            // value={value}
+            // onChange={(e) => onChange(e)}
+            aria-label="Use aria labels when no actual label is in use"
+          />
+        </EuiFormRow>
+      </EuiForm>
+      <EuiPopoverFooter>
+        <EuiButton
+          size="s"
+          fullWidth
+          onClick={() => {
+            console.log('confirm', selectedDashboard);
+            if (selectedDashboard) {
+              navigationEmbeddable.dispatch.addLink(selectedDashboard);
+              // const currentLinks = embeddable.getExplicitInput().dashboardLinks ?? [];
+              // embeddable?.updateInput({ dashboardLinks: [...currentLinks, selectedDashboard] });
+            }
+            setIsPopoverOpen(false);
+          }}
+        >
+          Confirm
+        </EuiButton>
+      </EuiPopoverFooter>
+    </EuiPopover>
   );
 };

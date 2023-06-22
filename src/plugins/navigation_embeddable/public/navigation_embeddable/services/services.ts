@@ -13,7 +13,7 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { NavigationEmbeddableStartDependencies } from '../../plugin';
 
-export let core: CoreStart;
+export let coreServices: CoreStart;
 export let dashboardServices: DashboardStart;
 
 const servicesReady$ = new BehaviorSubject(false);
@@ -34,7 +34,7 @@ export const setKibanaServices = (
   kibanaCore: CoreStart,
   deps: NavigationEmbeddableStartDependencies
 ) => {
-  core = kibanaCore;
+  coreServices = kibanaCore;
   dashboardServices = deps.dashboard;
 
   servicesReady$.next(true);

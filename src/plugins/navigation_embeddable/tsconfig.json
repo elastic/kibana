@@ -4,6 +4,13 @@
     "outDir": "target/types"
   },
   "include": ["public/**/*", "common/**/*", "server/**/*", "public/**/*.json"],
-  "kbn_references": ["@kbn/core", "@kbn/embeddable-plugin", "@kbn/i18n", "@kbn/dashboard-plugin"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/dashboard-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/presentation-util-plugin"
+  ],
   "exclude": ["target/**/*"]
 }

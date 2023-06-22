@@ -7,7 +7,7 @@
     "id": "navigationEmbeddable",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["embeddable", "dashboard"],
+    "requiredPlugins": ["embeddable", "dashboard", "presentationUtil", "kibanaReact"],
     "optionalPlugins": [],
     "requiredBundles": []
   }
