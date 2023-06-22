@@ -70,7 +70,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     // syncMeta short circuits join loading when there are no source features
     // because there is no reason to fetch join results when there is nothing to join with
     const featureCollection = this._getSourceFeatureCollection();
-    if (!featureCollection || featureCollection.features.length === 0) {
+    if (!featureCollection || featureCollection?.features?.length === 0) {
       return false;
     }
 
