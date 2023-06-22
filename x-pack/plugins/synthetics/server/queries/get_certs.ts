@@ -11,7 +11,7 @@ import {
   getCertsRequestBody,
   processCertsResult,
 } from '../../common/requests/get_certs_request_body';
-import { UptimeEsClient } from '../lib';
+import type { UptimeEsClient } from '../lib';
 
 export const getSyntheticsCerts = async (
   requestParams: GetCertsParams & { uptimeEsClient: UptimeEsClient }
