@@ -74,8 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/159283
-    describe.skip('for ML power user', () => {
+    describe('for ML power user', () => {
       before(async () => {
         await ml.securityUI.loginAsMlPowerUser();
         await ml.navigation.navigateToTrainedModels();
