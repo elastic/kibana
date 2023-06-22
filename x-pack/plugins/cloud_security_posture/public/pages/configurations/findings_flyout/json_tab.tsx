@@ -14,7 +14,7 @@ const offsetHeight = 120;
 
 export const JsonTab = ({ data }: { data: CspFinding }) => (
   <div style={{ position: 'absolute', inset: 0, top: offsetHeight }}>
-    <CodeEditor // TODO theme provided in context by x-pack/plugins/cloud_security_posture/public/plugin.tsx
+    <CodeEditor
       isCopyable
       allowFullScreen
       languageId={XJsonLang.ID}
