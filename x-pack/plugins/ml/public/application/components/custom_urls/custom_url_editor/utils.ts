@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import url from 'url';
@@ -33,6 +33,7 @@ import {
   getFiltersForDSLQuery,
 } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
+import { replaceStringTokens } from '../../../util/string_utils';
 import {
   replaceTokensInUrlValue,
   replaceTokensInDFAUrlValue,
@@ -221,6 +222,7 @@ export function buildCustomUrlFromSettings(
     const urlToAdd = {
       url_name: settings.label,
       url_value: settings.otherUrlSettings?.urlValue ?? '',
+      ...(settings.customTimeRange ? { is_custom_time_range: true } : {}),
     };
 
     return Promise.resolve(urlToAdd);
@@ -314,7 +316,7 @@ async function buildDashboardUrlFromSettings(
     location?.path
   );
 
-  const urlToAdd = {
+  const urlToAdd: MlUrlConfig = {
     url_name: settings.label,
     url_value: decodeURIComponent(`dashboards${url.parse(resultPath).hash}`),
     time_range: TIME_RANGE_TYPE.AUTO as string,
@@ -322,6 +324,10 @@ async function buildDashboardUrlFromSettings(
 
   if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
     urlToAdd.time_range = settings.timeRange.interval;
+  }
+
+  if (settings.customTimeRange) {
+    urlToAdd.is_custom_time_range = true;
   }
 
   return urlToAdd;
@@ -376,6 +382,10 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
 
   if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
     urlToAdd.time_range = settings.timeRange.interval;
+  }
+
+  if (settings.customTimeRange) {
+    urlToAdd.is_custom_time_range = true;
   }
 
   return urlToAdd;
@@ -496,7 +506,8 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
 
 async function getDataFrameAnalyticsTestUrl(
   job: DataFrameAnalyticsConfig,
-  customUrl: MlUrlConfig,
+  customUrl: MlKibanaUrlConfig,
+  timeFieldName: string | null,
   currentTimeFilter?: EsQueryTimeRange
 ): Promise<string> {
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -515,8 +526,6 @@ async function getDataFrameAnalyticsTestUrl(
 
     if (resp && resp.hits.total.value > 0) {
       record = resp.hits.hits[0]._source;
-      testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
-      return testUrl;
     } else {
       // No results for this job yet so use source index for example doc.
       resp = await ml.esSearch({
@@ -527,8 +536,34 @@ async function getDataFrameAnalyticsTestUrl(
       });
 
       record = resp?.hits?.hits[0]._source;
-      testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
     }
+
+    if (record) {
+      const timeRangeInterval =
+        customUrl.time_range !== undefined ? parseInterval(customUrl.time_range) : null;
+
+      if (timeRangeInterval !== null && timeFieldName !== null) {
+        const timestamp = record[timeFieldName];
+        const configuredUrlValue = customUrl.url_value;
+
+        if (configuredUrlValue.includes('$earliest$')) {
+          const earliestMoment = moment(timestamp);
+          earliestMoment.subtract(timeRangeInterval);
+          record.earliest = earliestMoment.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
+        }
+
+        if (configuredUrlValue.includes('$latest$')) {
+          const latestMoment = moment(timestamp);
+          latestMoment.add(timeRangeInterval);
+          record.latest = latestMoment.toISOString();
+        }
+
+        testUrl = replaceStringTokens(customUrl.url_value, record, true);
+      } else {
+        testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
+      }
+    }
+    return testUrl;
   } catch (error) {
     // search may fail if the job doesn't already exist
     // ignore this error as the outer function call will raise a toast
@@ -540,10 +575,11 @@ async function getDataFrameAnalyticsTestUrl(
 export function getTestUrl(
   job: Job | DataFrameAnalyticsConfig,
   customUrl: MlUrlConfig,
+  timeFieldName: string | null,
   currentTimeFilter?: EsQueryTimeRange
 ) {
   if (isDataFrameAnalyticsConfigs(job)) {
-    return getDataFrameAnalyticsTestUrl(job, customUrl, currentTimeFilter);
+    return getDataFrameAnalyticsTestUrl(job, customUrl, timeFieldName, currentTimeFilter);
   }
 
   return getAnomalyDetectionJobTestUrl(job, customUrl);
