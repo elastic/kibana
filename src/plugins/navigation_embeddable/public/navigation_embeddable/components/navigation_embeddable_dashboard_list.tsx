@@ -11,7 +11,7 @@ import useAsync from 'react-use/lib/useAsync';
 import React, { useEffect, useState } from 'react';
 
 import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
-import { EuiLoadingSpinner, EuiSelectable, EuiSelectableOption, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiSelectable, EuiLoadingSpinner, EuiSelectableOption } from '@elastic/eui';
 
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 
@@ -25,7 +25,9 @@ export const NavigationEmbeddableDashboardList = ({ onDashboardSelected, ...othe
     (state) => state.componentState.currentDashboardId
   );
 
-  const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
+  const [dashboardListOptions, setDashboardListOptions] = useState<
+    Array<EuiSelectableOption<DashboardItem>>
+  >([]);
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
     return await navEmbeddable.fetchDashboardList();
@@ -34,15 +36,20 @@ export const NavigationEmbeddableDashboardList = ({ onDashboardSelected, ...othe
   useEffect(() => {
     const dashboardOptions =
       dashboardList?.map((dashboard: DashboardItem) => {
+        const isCurrentDashboard = dashboard.id === currentDashboardId;
+        if (isCurrentDashboard) {
+          onDashboardSelected(dashboard);
+        }
         return {
           data: dashboard,
           className: classNames({
-            'navEmbeddable-currentDashboard': dashboard.id === currentDashboardId,
+            'navEmbeddable-currentDashboard': isCurrentDashboard,
           }),
+          checked: isCurrentDashboard ? 'on' : undefined,
           label: dashboard.attributes.title,
         };
       }) ?? [];
-    setDashboardListOptions(dashboardOptions);
+    setDashboardListOptions(dashboardOptions as Array<EuiSelectableOption<DashboardItem>>);
   }, [dashboardList, currentDashboardId, onDashboardSelected]);
 
   return loadingDashboardList ? (

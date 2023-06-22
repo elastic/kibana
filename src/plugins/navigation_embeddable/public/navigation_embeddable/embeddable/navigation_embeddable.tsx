@@ -113,8 +113,13 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
       size,
     });
 
+    const { currentDashboardId } = this.getState().componentState;
+    const sortedDashboards = responses.hits.sort((hit) => {
+      return hit.id === currentDashboardId ? -1 : 1; // force the current dashboard to the top of the list
+    });
+
     batch(() => {
-      this.dispatch.setDashboardList(responses.hits);
+      this.dispatch.setDashboardList(sortedDashboards);
       this.dispatch.setDashboardCount(responses.total);
     });
 
