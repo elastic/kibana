@@ -11,7 +11,7 @@ import type { FleetStartServices } from '@kbn/fleet-plugin/public';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useEditMonitorLocator } from '@kbn/synthetics-plugin/public';
+import { useEditMonitorLocator } from './use_edit_monitor_locator';
 import { ConfigKey, DataStream } from '../../../../common/runtime_types';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
 

@@ -30,7 +30,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/ml-anomaly-utils",
     "@kbn/exploratory-view-plugin",
-    "@kbn/synthetics-plugin",
     "@kbn/ml-plugin",
     "@kbn/rison",
     "@kbn/shared-ux-router",
