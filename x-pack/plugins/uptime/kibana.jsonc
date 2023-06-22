@@ -7,7 +7,7 @@
     "id": "uptime",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "uptime"],
+    "configPath": ["xpack", "legacy_uptime"],
     "requiredPlugins": [
       "actions",
       "alerting",

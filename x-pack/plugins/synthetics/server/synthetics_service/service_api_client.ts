@@ -276,7 +276,7 @@ export class ServiceAPIClient {
   ) {
     if ('status' in result || 'request' in result) {
       this.logger.debug(result.data);
-      this.logger.debug(
+      this.logger.info(
         `Successfully called service location ${url}${result.request?.path} with method ${method} with ${numMonitors} monitors`
       );
     }

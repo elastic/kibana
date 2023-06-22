@@ -7,7 +7,7 @@
     "id": "synthetics",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "synthetics"],
+    "configPath": ["xpack", "uptime"],
     "requiredPlugins": [
       "actions",
       "alerting",
