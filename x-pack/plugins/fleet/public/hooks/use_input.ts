@@ -82,6 +82,22 @@ export function useInput(
   };
 }
 
+export function useRadioInput(defaultValue: string, disabled = false) {
+  const [value, setValue] = useState<string>(defaultValue);
+
+  const onChange = useCallback(setValue, [setValue]);
+
+  return {
+    props: {
+      idSelected: value,
+      onChange,
+      disabled,
+    },
+    setValue,
+    value,
+  };
+}
+
 export function useSwitchInput(defaultValue = false, disabled = false) {
   const [value, setValue] = useState<boolean>(defaultValue);
   const [hasChanged, setHasChanged] = useState(false);

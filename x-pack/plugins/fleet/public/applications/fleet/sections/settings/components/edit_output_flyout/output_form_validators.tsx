@@ -150,6 +150,26 @@ export function validateName(value: string) {
   }
 }
 
+export function validateKafkaUsername(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaUsernameIsRequired', {
+        defaultMessage: 'Username is required',
+      }),
+    ];
+  }
+}
+
+export function validateKafkaPassword(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaPasswordIsRequired', {
+        defaultMessage: 'Password is required',
+      }),
+    ];
+  }
+}
+
 export function validateCATrustedFingerPrint(value: string) {
   if (value !== '' && !value.match(/^[a-zA-Z0-9]+$/)) {
     return [
