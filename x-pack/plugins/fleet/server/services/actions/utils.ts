@@ -40,11 +40,12 @@ export const hasFieldKeyError = (
         ? ALLOWED_FLEET_ACTIONS_FIELD_TYPES.includes(type)
         : ALLOWED_FLEET_ACTIONS_RESULTS_FIELD_TYPES.includes(type)
     );
+    const indexName = indexType === 'actions' ? '.fleet-actions' : '.fleet-actions-results';
     if (!isFieldDefined(indexMapping, key)) {
-      return `This key '${key}' does NOT exist in [${allowedKeys}] .fleet-actions* index patterns`;
+      return `This key '${key}' does not exist in ${indexName} index mappings`;
     }
     if (!allowedFieldTypes) {
-      return `This key '${key}' does NOT match field types [${ALLOWED_FLEET_ACTIONS_FIELD_TYPES.join()}] in .fleet-actions* index patterns`;
+      return `This key '${key}' does not match allowed field types in ${indexName} index mappings`;
     }
   }
   return null;

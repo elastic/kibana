@@ -79,8 +79,7 @@ describe('utils', () => {
         },
         {
           astPath: 'arguments.1',
-          error:
-            "This key 'expiration' does NOT exist in [action_id,agents,input_type,@timestamp,type,user_id] .fleet-actions* index patterns",
+          error: "This key 'expiration' does not exist in .fleet-actions index mappings",
           key: 'expiration',
           type: undefined,
         },
@@ -110,7 +109,7 @@ describe('utils', () => {
     describe.each([
       ['.fleet-actions', 'actions', ['keyword', 'date']],
       ['.fleet-actions-results', 'results', ['keyword']],
-    ])('%s', (index, indexType, fieldTypes) => {
+    ])('%s', (indexName, indexType, fieldTypes) => {
       it('Return no error if filter key is valid', () => {
         const hasError = hasFieldKeyError(
           'action_id',
@@ -127,11 +126,11 @@ describe('utils', () => {
           'action_id',
           ['text', 'integer'],
           indexType === 'actions' ? allowedFleetActionsFields : allowedFleetActionsResultsFields,
-          'actions'
+          indexType as IndexType
         );
 
         expect(hasError).toEqual(
-          "This key 'action_id' does NOT match field types [keyword,date] in .fleet-actions* index patterns"
+          `This key 'action_id' does not match allowed field types in ${indexName} index mappings`
         );
       });
 
@@ -140,7 +139,7 @@ describe('utils', () => {
           undefined,
           ['integer'],
           indexType === 'actions' ? allowedFleetActionsFields : allowedFleetActionsResultsFields,
-          'actions'
+          indexType as IndexType
         );
 
         const errorMessage =
@@ -155,7 +154,7 @@ describe('utils', () => {
           null,
           ['text'],
           indexType === 'actions' ? allowedFleetActionsFields : allowedFleetActionsResultsFields,
-          'actions'
+          indexType as IndexType
         );
 
         const errorMessage =
