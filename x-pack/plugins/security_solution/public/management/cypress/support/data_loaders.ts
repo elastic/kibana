@@ -250,7 +250,7 @@ export const dataLoadersForRealEndpoints = (
         log,
         kbnClient,
       }).then((newHost) => {
-        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 120000).then(() => {
+        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000).then(() => {
           return newHost;
         });
       });

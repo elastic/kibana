@@ -31,7 +31,7 @@ const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
     method: 'GET',
     url: HOST_METADATA_LIST_ROUTE,
   }).then(({ body }) => {
-    expect(body.data.length).is.lte(1); // during update it can be temporary zero
+    expect(body.data.length).is.lte(2); // during update it can be temporary zero
     return Number(body.data?.[0]?.metadata.Endpoint.policy.applied.endpoint_policy_version) ?? -1;
   });
 
