@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const end = '2023-06-21T06:59:15.910Z';
       const startTime = new Date(start).getTime() + 1000;
       const OVERFLOW_SERVICE_NAME = '_other';
-      let serviceGroupId;
+      let serviceGroupId: string;
 
       after(async () => {
         await deleteAllServiceGroups(apmApiClient);
@@ -55,7 +55,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
           [] as Array<
             | {
-                index: {
+                create: {
                   _index: string;
                 };
               }
@@ -97,7 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const overflowBucket = response.body.items.find(
           (service) => service.serviceName === OVERFLOW_SERVICE_NAME
         );
-        expect(overflowBucket.serviceName).to.equal(OVERFLOW_SERVICE_NAME);
+        expect(overflowBucket?.serviceName).to.equal(OVERFLOW_SERVICE_NAME);
       });
     }
   );

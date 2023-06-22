@@ -13,8 +13,8 @@ export async function generateData({
   end,
 }: {
   synthtraceEsClient: ApmSynthtraceEsClient;
-  start: number;
-  end: number;
+  start: string;
+  end: string;
 }) {
   const synthServices = [
     apm
