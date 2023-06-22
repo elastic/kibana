@@ -17,13 +17,11 @@ import {
   MetricsExplorerTimestampsRT,
 } from './use_metrics_explorer_options';
 import { DataViewBase } from '@kbn/es-query';
-import { MetricsSourceConfigurationProperties } from '../../../../common/threshold_rule/types';
 import {
   createSeries,
   derivedIndexPattern,
   options,
   resp,
-  source,
   timestamps,
 } from '../../../utils/metrics_explorer';
 
@@ -54,20 +52,12 @@ const renderUseMetricsExplorerDataHook = () => {
   return renderHook(
     (props: {
       options: MetricsExplorerOptions;
-      source: MetricsSourceConfigurationProperties | undefined;
       derivedIndexPattern: DataViewBase;
       timestamps: MetricsExplorerTimestampsRT;
-    }) =>
-      useMetricsExplorerData(
-        props.options,
-        props.source,
-        props.derivedIndexPattern,
-        props.timestamps
-      ),
+    }) => useMetricsExplorerData(props.options, props.derivedIndexPattern, props.timestamps),
     {
       initialProps: {
         options,
-        source,
         derivedIndexPattern,
         timestamps,
       },
@@ -163,7 +153,6 @@ describe('useMetricsExplorerData Hook', () => {
         aggregation: 'count',
         metrics: [{ aggregation: 'count' }],
       },
-      source,
       derivedIndexPattern,
       timestamps,
     });
@@ -187,7 +176,6 @@ describe('useMetricsExplorerData Hook', () => {
     mockedFetch.mockResolvedValue(resp as any);
     rerender({
       options,
-      source,
       derivedIndexPattern,
       timestamps: { fromTimestamp: 1678378092225, toTimestamp: 1678381693477, interval: '>=10s' },
     });

@@ -9,7 +9,6 @@ import { DataViewBase } from '@kbn/es-query';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MetricsSourceConfigurationProperties } from '../../../../common/threshold_rule/types';
 import {
   MetricsExplorerResponse,
   metricsExplorerResponseRT,
@@ -24,7 +23,6 @@ import { decodeOrThrow } from '../helpers/runtime_types';
 
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
-  source: MetricsSourceConfigurationProperties | undefined,
   derivedIndexPattern: DataViewBase,
   { fromTimestamp, toTimestamp, interval }: MetricsExplorerTimestampsRT,
   enabled = true
@@ -35,7 +33,7 @@ export function useMetricsExplorerData(
     MetricsExplorerResponse,
     Error
   >({
-    queryKey: ['metricExplorer', options, fromTimestamp, toTimestamp],
+    queryKey: ['metricExplorer', options, fromTimestamp, toTimestamp, derivedIndexPattern.title],
     queryFn: async ({ signal, pageParam = { afterKey: null } }) => {
       if (!fromTimestamp || !toTimestamp) {
         throw new Error('Unable to parse timerange');
@@ -43,8 +41,8 @@ export function useMetricsExplorerData(
       if (!http) {
         throw new Error('HTTP service is unavailable');
       }
-      if (!source) {
-        throw new Error('Source is unavailable');
+      if (!derivedIndexPattern.title) {
+        throw new Error('Data view is unavailable');
       }
 
       const { afterKey } = pageParam;
@@ -57,7 +55,7 @@ export function useMetricsExplorerData(
           groupBy: options.groupBy,
           afterKey,
           limit: options.limit,
-          indexPattern: source.metricAlias,
+          indexPattern: derivedIndexPattern.title,
           filterQuery:
             (options.filterQuery &&
               convertKueryToElasticSearchQuery(options.filterQuery, derivedIndexPattern)) ||
@@ -74,7 +72,7 @@ export function useMetricsExplorerData(
       return decodeOrThrow(metricsExplorerResponseRT)(response);
     },
     getNextPageParam: (lastPage) => lastPage.pageInfo,
-    enabled: enabled && !!fromTimestamp && !!toTimestamp && !!http && !!source,
+    enabled: enabled && !!fromTimestamp && !!toTimestamp && !!http && !!derivedIndexPattern.title,
     refetchOnWindowFocus: false,
   });
 
