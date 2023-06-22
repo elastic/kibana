@@ -65,6 +65,10 @@ const appDependencies = {
 const kibanaContextDependencies = {
   uiSettings: core.uiSettings,
   settings: core.settings,
+  theme: core.theme,
+};
+  uiSettings: core.uiSettings,
+  settings: core.settings,
 };
 
 export const setupEnvironment = () => {
