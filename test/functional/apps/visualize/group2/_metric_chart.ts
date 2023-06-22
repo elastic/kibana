@@ -130,15 +130,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const percentileMachineRam = [
         '2,147,483,648',
         '1st percentile of machine.ram',
-        '3,246,695,254.211',
+        '3,221,225,472',
         '5th percentile of machine.ram',
-        '7,319,909,152.316',
+        '7,516,192,768',
         '25th percentile of machine.ram',
-        '12,523,681,456.404',
+        '12,884,901,888',
         '50th percentile of machine.ram',
-        '17,849,899,201.384',
+        '18,253,611,008',
         '75th percentile of machine.ram',
-        '28,578,746,648.34',
+        '32,212,254,720',
         '95th percentile of machine.ram',
         '32,212,254,720',
         '99th percentile of machine.ram',
@@ -148,6 +148,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Percentiles', 'metrics');
       log.debug('Field =  machine.ram');
       await PageObjects.visEditor.selectField('machine.ram', 'metrics');
+      await PageObjects.visEditor.toggleAdvancedParams('1');
+      await PageObjects.visEditor.inputValueInCodeEditor('{ "tdigest": { "compression": 1000 } }');
       await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();
