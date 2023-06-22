@@ -52,13 +52,13 @@ export const SearchApplicationAPI = () => {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step1.setUpSearchtemplate.description"
+                id="xpack.enterpriseSearch.content.searchApplication.searchApi.step1.setUpSearchtemplate.description"
                 defaultMessage="Your search application uses a {searchTemplateDocLink} to control the types of queries it accepts. Run the following command to view your current search template:"
                 values={{
                   searchTemplateDocLink: (
                     <EuiLink href={docLinks.searchTemplates}>
                       <FormattedMessage
-                        id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step1.setUpSearchtemplate.searchTemplateDocLink"
+                        id="xpack.enterpriseSearch.content.searchApplication.searchApi.step1.setUpSearchtemplate.searchTemplateDocLink"
                         defaultMessage="search template"
                       />
                     </EuiLink>
@@ -80,13 +80,13 @@ export const SearchApplicationAPI = () => {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step1.setUpSearchtemplate.warning"
+                id="xpack.enterpriseSearch.content.searchApplication.searchApi.step1.setUpSearchtemplate.warning"
                 defaultMessage="We provide a basic, default search template to get started, but you'll probably want to update it for your use case. Use the examples in our {searchTemplateExampleDoc} for inspiration."
                 values={{
                   searchTemplateExampleDoc: (
                     <EuiLink href={docLinks.searchApplicationsTemplates}>
                       <FormattedMessage
-                        id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step1.setUpSearchtemplate.warning.searchTemplateExampleDocLink"
+                        id="xpack.enterpriseSearch.content.searchApplication.searchApi.step1.setUpSearchtemplate.warning.searchTemplateExampleDocLink"
                         defaultMessage="documentation"
                       />
                     </EuiLink>
@@ -98,7 +98,7 @@ export const SearchApplicationAPI = () => {
         </>
       ),
       title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step1.setUpSearchtemplate.title',
+        'xpack.enterpriseSearch.content.searchApplication.searchApi.step1.setUpSearchtemplate.title',
         {
           defaultMessage: 'Set up your search template',
         }
@@ -110,13 +110,13 @@ export const SearchApplicationAPI = () => {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.apiKeyWarning"
-                defaultMessage="This {apiKeyDocumentation} will only be able to access your Safe Search endpoint."
+                id="xpack.enterpriseSearch.content.searchApplication.searchApi.step2.apiKeyWarning"
+                defaultMessage="This {apiKeyDocumentation} will only be able to access your Search endpoint."
                 values={{
                   apiKeyDocumentation: (
                     <EuiLink href={docLinks.apiKeys}>
                       <FormattedMessage
-                        id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.apiKeyWarning.documentationLink"
+                        id="xpack.enterpriseSearch.content.searchApplication.searchApi.step2.apiKeyWarning.documentationLink"
                         defaultMessage="API key"
                       />
                     </EuiLink>
@@ -132,10 +132,10 @@ export const SearchApplicationAPI = () => {
                 iconSide="left"
                 iconType="plusInCircleFilled"
                 onClick={openGenerateModal}
-                data-telemetry-id="entSearchApplications-safeSearchApi-step2-createApiKeyButton"
+                data-telemetry-id="entSearchApplications-searchApi-step2-createApiKeyButton"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.createAPIKeyButton',
+                  'xpack.enterpriseSearch.content.searchApplication.searchApi.step2.createAPIKeyButton',
                   {
                     defaultMessage: 'Create API Key',
                   }
@@ -146,7 +146,7 @@ export const SearchApplicationAPI = () => {
               <EuiButton
                 iconSide="left"
                 iconType="popout"
-                data-telemetry-id="entSearchApplications-safeSearchApi-step2-viewKeysButton"
+                data-telemetry-id="entSearchApplications-searchApi-step2-viewKeysButton"
                 onClick={() =>
                   KibanaLogic.values.navigateToUrl('/app/management/security/api_keys', {
                     shouldNotCreateHref: true,
@@ -154,7 +154,7 @@ export const SearchApplicationAPI = () => {
                 }
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.viewKeysButton',
+                  'xpack.enterpriseSearch.content.searchApplication.searchApi.step2.viewKeysButton',
                   {
                     defaultMessage: 'View Keys',
                   }
@@ -165,7 +165,7 @@ export const SearchApplicationAPI = () => {
         </>
       ),
       title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step2.title',
+        'xpack.enterpriseSearch.content.searchApplication.searchApi.step2.title',
         {
           defaultMessage: 'Generate and save API key',
         }
@@ -177,7 +177,7 @@ export const SearchApplicationAPI = () => {
           <EuiText>
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step3.copyEndpointDescription',
+                'xpack.enterpriseSearch.content.searchApplication.searchApi.step3.copyEndpointDescription',
                 {
                   defaultMessage: "Here's the URL for your endpoint:",
                 }
@@ -197,16 +197,16 @@ export const SearchApplicationAPI = () => {
         </>
       ),
       title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step3.title',
+        'xpack.enterpriseSearch.content.searchApplication.searchApi.step3.title',
         {
-          defaultMessage: 'Copy your Safe Search endpoint',
+          defaultMessage: 'Copy your Search endpoint',
         }
       ),
     },
     {
       children: <EngineApiIntegrationStage />,
       title: i18n.translate(
-        'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.step4.title',
+        'xpack.enterpriseSearch.content.searchApplication.searchApi.step4.title',
         {
           defaultMessage: 'Learn how to call your endpoint',
         }
@@ -226,25 +226,25 @@ export const SearchApplicationAPI = () => {
         iconType="iInCircle"
         title={
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.title"
-            defaultMessage="What is Safe Search API?"
+            id="xpack.enterpriseSearch.content.searchApplication.searchApi.searchApiCallout.title"
+            defaultMessage="What is Search API?"
           />
         }
       >
         <FormattedMessage
-          id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body"
-          defaultMessage="The {safeSearchDocumentation} allows you to create a secure, public-facing search endpoint for your search application. This endpoint only accepts queries that match the parameters defined in your {searchTemplateDocumenation}."
+          id="xpack.enterpriseSearch.content.searchApplication.searchApi.searchApiCallout.body"
+          defaultMessage="The {searchApiDocumentation} allows you to create a secure, public-facing search endpoint for your search application. This endpoint only accepts queries that match the parameters defined in your {searchTemplateDocumenation}."
           values={{
-            safeSearchDocumentation: (
+            searchApiDocumentation: (
               <EuiLink
-                data-test-subj="safe-search-documentation-link"
-                href="#" // replace with safe search api doc link
-                data-telemetry-id="entSearchApplications-safeSearchApi-documentation-viewDocumentaion"
+                data-test-subj="search-documentation-link"
+                href="#" // replace with search api doc link
+                data-telemetry-id="entSearchApplications-searchApi-documentation-viewDocumentaion"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.safeSearchDocLink',
+                  'xpack.enterpriseSearch.content.searchApplication.searchApi.searchApiCallout.body.searchApiDocLink',
                   {
-                    defaultMessage: 'Safe Search API',
+                    defaultMessage: 'Search API',
                   }
                 )}
               </EuiLink>
@@ -256,7 +256,7 @@ export const SearchApplicationAPI = () => {
                 data-telemetry-id="entSearchApplications-searchTemplate-documentation-viewDocumentaion"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.searchTemplateDocLink',
+                  'xpack.enterpriseSearch.content.searchApplication.searchApi.searchApiCallout.body.searchTemplateDocLink',
                   {
                     defaultMessage: 'search template',
                   }
@@ -267,20 +267,20 @@ export const SearchApplicationAPI = () => {
         />
         <EuiSpacer size="l" />
         <FormattedMessage
-          id="xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.safeSearchLearnMore"
-          defaultMessage="{safeSearchDocumentation}"
+          id="xpack.enterpriseSearch.content.searchApplication.searchApi.searchApiCallout.searchApiLearnMore"
+          defaultMessage="{searchApiDocumentation}"
           values={{
-            safeSearchDocumentation: (
+            searchApiDocumentation: (
               <EuiLink
-                data-test-subj="safe-search-documentation-link"
-                href="#" // replace with safe search api doc link
+                data-test-subj="search-documentation-link"
+                href="#" // replace with search api doc link
                 target="_blank"
-                data-telemetry-id="entSearchApplications-safeSearchApi-learnMoreDocumentation-viewDocumentaion"
+                data-telemetry-id="entSearchApplications-searchApi-learnMoreDocumentation-viewDocumentaion"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.safeSearchApi.safeSearchCallout.body.safeSearchDocumentationLink',
+                  'xpack.enterpriseSearch.content.searchApplication.searchApi.searchApiCallout.body.searchApiDocumentationLink',
                   {
-                    defaultMessage: 'Learn more about the Safe Search API',
+                    defaultMessage: 'Learn more about the Search API',
                   }
                 )}
               </EuiLink>

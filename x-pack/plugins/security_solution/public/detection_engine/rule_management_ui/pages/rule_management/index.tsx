@@ -43,6 +43,7 @@ import { MiniCallout } from '../../components/mini_callout/mini_callout';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
 import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
+import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
 import { SuperHeader } from './super_header';
 import {
   NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE,
@@ -168,15 +169,17 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <SecuritySolutionLinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  iconType="plusInCircle"
-                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                  deepLinkId={SecurityPageName.rulesCreate}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </SecuritySolutionLinkButton>
+                <RulesPageTourComponent>
+                  <SecuritySolutionLinkButton
+                    data-test-subj="create-new-rule"
+                    fill
+                    iconType="plusInCircle"
+                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                    deepLinkId={SecurityPageName.rulesCreate}
+                  >
+                    {i18n.ADD_NEW_RULE}
+                  </SecuritySolutionLinkButton>
+                </RulesPageTourComponent>
               </EuiFlexItem>
             </EuiFlexGroup>
           </SuperHeader>

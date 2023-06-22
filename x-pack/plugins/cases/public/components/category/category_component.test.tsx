@@ -87,4 +87,20 @@ describe('Category ', () => {
       expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('hi');
     });
   });
+
+  it('should add case sensitive text', async () => {
+    render(<CategoryComponent {...defaultProps} />);
+
+    userEvent.type(screen.getByRole('combobox'), 'hi{enter}');
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith('hi');
+    });
+
+    userEvent.type(screen.getByRole('combobox'), 'Hi{enter}');
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith('Hi');
+    });
+  });
 });
