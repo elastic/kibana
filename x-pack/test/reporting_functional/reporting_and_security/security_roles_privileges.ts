@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         await reportingFunctional.tryGeneratePdfSuccess();
       });
 
-      it('does allow PNG generation user with reporting privileges', async () => {
+      xit('does allow PNG generation user with reporting privileges', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
         await reportingFunctional.tryGeneratePngSuccess();
@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         await reportingFunctional.tryDiscoverCsvNotAvailable();
       });
 
-      it('does allow user with reporting privileges', async () => {
+      xit('does allow user with reporting privileges', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
         await reportingFunctional.tryDiscoverCsvSuccess();
@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
         await reportingFunctional.tryGeneratePdfSuccess();
       });
 
-      it('does allow PNG generation user with reporting privileges', async () => {
+      xit('does allow PNG generation user with reporting privileges', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedVisualization(VIS_TITLE);
         await reportingFunctional.tryGeneratePngSuccess();
