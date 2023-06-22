@@ -10,15 +10,9 @@ import { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-p
 import { Writable } from 'stream';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 import { Headers } from '@kbn/core/server';
 import {
-  LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_ENTERPRISE,
-  LICENSE_TYPE_GOLD,
-  LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
   PDF_JOB_TYPE_V2,
@@ -50,13 +44,6 @@ export class PdfExportType
 {
   id = PDF_REPORT_TYPE_V2;
   name = 'PDF';
-  validLicenses: LicenseType[] = [
-    LICENSE_TYPE_TRIAL,
-    LICENSE_TYPE_CLOUD_STANDARD,
-    LICENSE_TYPE_GOLD,
-    LICENSE_TYPE_PLATINUM,
-    LICENSE_TYPE_ENTERPRISE,
-  ];
   jobType = PDF_JOB_TYPE_V2;
   jobContentEncoding = 'base64' as const;
   jobContentExtension = 'pdf' as const;

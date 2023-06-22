@@ -22,6 +22,13 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import {
+  LICENSE_TYPE_TRIAL,
+  LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_ENTERPRISE,
+} from '../../../common/constants';
 import { CreateJobFn, RunTaskFn } from '../../types';
 import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
@@ -57,6 +64,7 @@ export interface ExportTypesType<
 
   createJob: CreateJobFn<JobParamsType>;
   runTask: RunTaskFn<TaskPayloadType>;
+  getSpaceId: (request: KibanaRequest, logger: Logger) => string | undefined;
 }
 
 /**
@@ -77,6 +85,13 @@ export abstract class ExportType {
   public setupDeps!: ExportTypeSetupDeps;
   public startDeps!: ExportTypeStartDeps;
   public http!: HttpServiceSetup;
+  public validLicenses: LicenseType[] = [
+    LICENSE_TYPE_TRIAL,
+    LICENSE_TYPE_CLOUD_STANDARD,
+    LICENSE_TYPE_GOLD,
+    LICENSE_TYPE_PLATINUM,
+    LICENSE_TYPE_ENTERPRISE,
+  ];
 
   constructor(
     core: CoreSetup,
