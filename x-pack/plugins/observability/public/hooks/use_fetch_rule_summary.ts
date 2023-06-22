@@ -7,8 +7,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { loadRuleSummary } from '@kbn/triggers-actions-ui-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FetchRuleSummaryProps, FetchRuleSummary } from '../pages/rule_details/types';
-import { RULE_LOAD_ERROR } from '../pages/rule_details/translations';
 
 export function useFetchRuleSummary({ ruleId, http }: FetchRuleSummaryProps) {
   const [ruleSummary, setRuleSummary] = useState<FetchRuleSummary>({
@@ -34,9 +34,13 @@ export function useFetchRuleSummary({ ruleId, http }: FetchRuleSummaryProps) {
       setRuleSummary((oldState: FetchRuleSummary) => ({
         ...oldState,
         isLoading: false,
-        errorRuleSummary: RULE_LOAD_ERROR(
-          error instanceof Error ? error.message : typeof error === 'string' ? error : ''
-        ),
+        errorRuleSummary: i18n.translate('xpack.observability.ruleDetails.ruleLoadError', {
+          defaultMessage: 'Unable to load rule. Reason: {message}',
+          values: {
+            message:
+              error instanceof Error ? error.message : typeof error === 'string' ? error : '',
+          },
+        }),
       }));
     }
   }, [ruleId, http]);

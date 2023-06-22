@@ -6,13 +6,17 @@
  */
 import React from 'react';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiSpacer } from '@elastic/eui';
-import { PageHeaderProps } from '../types';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
-import { LAST_UPDATED_MESSAGE, CREATED_WORD, BY_WORD, ON_WORD } from '../translations';
-import { getHealthColor } from '../config';
+import { getHealthColor } from '../helpers/get_health_color';
 
-export function PageTitle({ rule }: PageHeaderProps) {
+interface PageTitleProps {
+  rule: Rule;
+}
+
+export function PageTitle({ rule }: PageTitleProps) {
   const { triggersActionsUi } = useKibana().services;
 
   return (
@@ -35,9 +39,19 @@ export function PageTitle({ rule }: PageHeaderProps) {
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem component="span" grow={false}>
           <EuiText color="subdued" size="xs">
-            <b>{LAST_UPDATED_MESSAGE}</b> {BY_WORD} {rule.updatedBy} {ON_WORD}&nbsp;
+            <b>
+              {i18n.translate('xpack.observability.ruleDetails.lastUpdatedMessage', {
+                defaultMessage: 'Last updated',
+              })}
+            </b>
+            {BY_WORD} {rule.updatedBy} {ON_WORD}&nbsp;
             {moment(rule.updatedAt).format('ll')} &emsp;
-            <b>{CREATED_WORD}</b> {BY_WORD} {rule.createdBy} {ON_WORD}&nbsp;
+            <b>
+              {i18n.translate('xpack.observability.ruleDetails.createdWord', {
+                defaultMessage: 'Created',
+              })}
+            </b>
+            {BY_WORD} {rule.createdBy} {ON_WORD}&nbsp;
             {moment(rule.createdAt).format('ll')}
           </EuiText>
         </EuiFlexItem>
@@ -52,3 +66,11 @@ export function PageTitle({ rule }: PageHeaderProps) {
     </>
   );
 }
+
+const BY_WORD = i18n.translate('xpack.observability.ruleDetails.byWord', {
+  defaultMessage: 'by',
+});
+
+const ON_WORD = i18n.translate('xpack.observability.ruleDetails.onWord', {
+  defaultMessage: 'on',
+});
