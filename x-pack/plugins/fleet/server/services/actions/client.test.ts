@@ -41,6 +41,9 @@ describe('actions', () => {
   });
 
   describe('create()', () => {
+    afterEach(() => {
+      mockedAuditLoggingService.writeCustomAuditLog.mockReset();
+    });
     it('should create an action', async () => {
       const action = generateFleetAction({ action_id: '1', input_type: 'foo' });
       expect(await fleetActionsClient.create(action)).toEqual(action);
@@ -53,10 +56,15 @@ describe('actions', () => {
       await expect(async () => await fleetActionsClient.create(action)).rejects.toBeInstanceOf(
         FleetActionsClientError
       );
+      expect(mockedAuditLoggingService.writeCustomAuditLog).not.toHaveBeenCalled();
     });
   });
 
   describe('bulkCreate()', () => {
+    afterEach(() => {
+      mockedAuditLoggingService.writeCustomAuditLog.mockReset();
+    });
+
     it('should bulk create actions', async () => {
       const actions = [
         {
@@ -78,6 +86,7 @@ describe('actions', () => {
         })),
       });
 
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toBeCalledTimes(2);
       expect(mockedAuditLoggingService.writeCustomAuditLog).lastCalledWith({
         message: `User created Fleet action [id=${actions[1].action_id}, user_id=${actions[1].user_id}, input_type=foo]`,
       });
@@ -128,9 +137,13 @@ describe('actions', () => {
           ),
       });
 
-      // expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
-      //   message: `User created Fleet action [id=${expect.any(String)}]`,
-      // });
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toBeCalledTimes(2);
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenNthCalledWith(1, {
+        message: `User created Fleet action [id=${successActions[0].action_id}, user_id=elastic, input_type=foo]`,
+      });
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenNthCalledWith(2, {
+        message: `User created Fleet action [id=${successActions[1].action_id}, user_id=elastic, input_type=foo]`,
+      });
     });
     it('should throw error for bulk creation on package mismatch on any given set of actions', async () => {
       const actions = [
@@ -147,6 +160,7 @@ describe('actions', () => {
       await expect(async () => await fleetActionsClient.bulkCreate(actions)).rejects.toBeInstanceOf(
         FleetActionsClientError
       );
+      expect(mockedAuditLoggingService.writeCustomAuditLog).not.toHaveBeenCalled();
     });
   });
 
