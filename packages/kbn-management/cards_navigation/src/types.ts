@@ -11,4 +11,3 @@ export interface ManagementLandingPageProps {
   appBasePath: string;
   onCardClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
-

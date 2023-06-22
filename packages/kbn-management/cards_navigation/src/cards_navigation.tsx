@@ -84,7 +84,11 @@ const getEnabledAppsByCategory = (sections: any[]) => {
   ].filter((category) => category.apps.length > 0);
 };
 
-export const CardsNavigation = ({ sections, appBasePath, onCardClick }: ManagementLandingPageProps) => {
+export const CardsNavigation = ({
+  sections,
+  appBasePath,
+  onCardClick,
+}: ManagementLandingPageProps) => {
   const appsByCategory = getEnabledAppsByCategory(sections);
 
   return (
