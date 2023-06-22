@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -17,25 +17,26 @@ interface LandingLinksImagesProps {
   items: NavigationLink[];
 }
 
+const LandingItem = styled(EuiFlexItem)`
+  min-width: 22em;
+`;
+const Title = styled(EuiTitle)`
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
+`;
+const Description = styled(EuiFlexItem)`
+  max-width: 22em;
+`;
 const Link = styled.a`
   color: inherit;
 `;
 
 const SecuritySolutionLink = withSecuritySolutionLink(Link);
 
-const Description = styled(EuiFlexItem)`
-  max-width: 22em;
-`;
-
-const StyledEuiTitle = styled(EuiTitle)`
-  margin-top: ${({ theme }) => theme.eui.euiSizeM};
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
 export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) => (
-  <EuiFlexGrid columns={3} gutterSize="xl">
+  <EuiFlexGroup gutterSize="xl" wrap>
     {items.map(({ title, description, id, landingIcon, isBeta, betaOptions }) => (
-      <EuiFlexItem key={id} data-test-subj="LandingItem">
+      <LandingItem key={id} data-test-subj="LandingItem" grow={false}>
         <EuiFlexGroup
           direction="column"
           alignItems="flexStart"
@@ -48,7 +49,7 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
             </SecuritySolutionLink>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <StyledEuiTitle size="xxs">
+            <Title size="xxs">
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <SecuritySolutionLinkAnchor
@@ -66,7 +67,7 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-            </StyledEuiTitle>
+            </Title>
           </EuiFlexItem>
           <Description>
             <EuiText size="s" color="text">
@@ -74,7 +75,7 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
             </EuiText>
           </Description>
         </EuiFlexGroup>
-      </EuiFlexItem>
+      </LandingItem>
     ))}
-  </EuiFlexGrid>
+  </EuiFlexGroup>
 );
