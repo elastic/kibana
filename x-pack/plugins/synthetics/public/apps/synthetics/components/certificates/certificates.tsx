@@ -26,8 +26,8 @@ const getPageSizeValue = () => {
 };
 
 export const CertificatesPage: React.FC = () => {
-  useTrackPageview({ app: 'uptime', path: 'certificates' });
-  useTrackPageview({ app: 'uptime', path: 'certificates', delay: 15000 });
+  useTrackPageview({ app: 'synthetics', path: 'certificates' });
+  useTrackPageview({ app: 'synthetics', path: 'certificates', delay: 15000 });
 
   useBreadcrumbs([{ text: 'Certificates' }]);
 
