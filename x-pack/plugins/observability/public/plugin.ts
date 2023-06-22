@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   AppDeepLink,
@@ -82,7 +83,7 @@ export interface ConfigSchema {
     };
   };
   compositeSlo: { enabled: boolean };
-  coPilot?: {
+  aiAssistant?: {
     enabled?: boolean;
   };
 }
@@ -103,6 +104,7 @@ export interface ObservabilityPublicPluginsStart {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
@@ -328,7 +330,7 @@ export class Plugin
     );
 
     this.coPilotService = createCoPilotService({
-      enabled: !!config.coPilot?.enabled,
+      enabled: !!config.aiAssistant?.enabled,
       http: coreSetup.http,
     });
 
