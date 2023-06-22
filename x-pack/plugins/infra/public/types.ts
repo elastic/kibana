@@ -43,6 +43,7 @@ import {
   LogsSharedClientStartExports,
 } from '@kbn/logs-shared-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -87,6 +88,7 @@ export interface InfraClientSetupDeps {
   share: SharePluginSetup;
   lens: LensPublicStart;
   fieldFormats: FieldFormatsSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -112,6 +114,7 @@ export interface InfraClientStartDeps {
   usageCollection: UsageCollectionStart;
   telemetry: ITelemetryClient;
   fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;
