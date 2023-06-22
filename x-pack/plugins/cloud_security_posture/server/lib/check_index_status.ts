@@ -69,4 +69,3 @@ export const checkIndexStatus = async (
     return 'empty';
   }
 };
-
