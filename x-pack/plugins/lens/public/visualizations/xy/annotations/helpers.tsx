@@ -18,7 +18,7 @@ import {
 } from '@kbn/event-annotation-plugin/common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { isDraggedDataViewField } from '../../../utils';
+import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../../utils';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
 import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
@@ -454,29 +454,15 @@ export const getAnnotationsConfiguration = ({
 export const getUniqueLabels = (layers: XYLayerConfig[]) => {
   const annotationLayers = getAnnotationsLayers(layers);
   const columnLabelMap = {} as Record<string, string>;
-  const counts = {} as Record<string, number>;
 
-  const makeUnique = (label: string) => {
-    let uniqueLabel = label;
-
-    while (counts[uniqueLabel] >= 0) {
-      const num = ++counts[uniqueLabel];
-      uniqueLabel = i18n.translate('xpack.lens.uniqueLabel', {
-        defaultMessage: '{label} [{num}]',
-        values: { label, num },
-      });
-    }
-
-    counts[uniqueLabel] = 0;
-    return uniqueLabel;
-  };
+  const uniqueLabelGenerator = getUniqueLabelGenerator();
 
   annotationLayers.forEach((layer) => {
     if (!layer.annotations) {
       return;
     }
     layer.annotations.forEach((l) => {
-      columnLabelMap[l.id] = makeUnique(l.label);
+      columnLabelMap[l.id] = uniqueLabelGenerator(l.label);
     });
   });
   return columnLabelMap;

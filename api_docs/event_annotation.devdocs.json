@@ -874,7 +874,7 @@
             "section": "def-common.AvailableAnnotationIcon",
             "text": "AvailableAnnotationIcon"
           },
-          "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; canFill?: boolean | undefined; }[]"
+          "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/plugins/event_annotation/public/components/annotation_editor_controls/icon_set.ts",
         "deprecated": false,
@@ -975,6 +975,27 @@
             {
               "parentPluginId": "eventAnnotation",
               "id": "def-public.EventAnnotationService.Unnamed.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "contentManagement",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "contentManagement",
+                  "scope": "public",
+                  "docId": "kibContentManagementPluginApi",
+                  "section": "def-public.ContentManagementPublicStart",
+                  "text": "ContentManagementPublicStart"
+                }
+              ],
+              "path": "src/plugins/event_annotation/public/event_annotation_service/index.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "eventAnnotation",
+              "id": "def-public.EventAnnotationService.Unnamed.$3",
               "type": "Object",
               "tags": [],
               "label": "savedObjectsManagement",
@@ -1570,6 +1591,95 @@
               " | undefined"
             ],
             "path": "src/plugins/event_annotation/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
+        "id": "def-common.EventAnnotationGroupSavedObjectAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventAnnotationGroupSavedObjectAttributes",
+        "description": [],
+        "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.EventAnnotationGroupSavedObjectAttributes.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.EventAnnotationGroupSavedObjectAttributes.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.EventAnnotationGroupSavedObjectAttributes.ignoreGlobalFilters",
+            "type": "boolean",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.EventAnnotationGroupSavedObjectAttributes.annotations",
+            "type": "Array",
+            "tags": [],
+            "label": "annotations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "eventAnnotation",
+                "scope": "common",
+                "docId": "kibEventAnnotationPluginApi",
+                "section": "def-common.EventAnnotationConfig",
+                "text": "EventAnnotationConfig"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.EventAnnotationGroupSavedObjectAttributes.dataViewSpec",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewSpec",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

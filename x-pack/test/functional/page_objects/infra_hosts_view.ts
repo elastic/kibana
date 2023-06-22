@@ -32,6 +32,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-tabs-processes');
     },
 
+    async clickLogsFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-logs');
+    },
+
     async clickProcessesTableExpandButton() {
       return testSubjects.click('infraProcessRowButton');
     },
@@ -50,6 +54,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async clickRemoveMetadataFilter() {
       return testSubjects.click('hostsView-flyout-metadata-remove-filter');
+    },
+
+    async getBetaBadgeExists() {
+      return testSubjects.exists('infra-beta-badge');
     },
 
     async getHostsLandingPageDisabled() {
@@ -208,6 +216,13 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const container = await testSubjects.find('hostsView-logs');
 
       return container.findAllByCssSelector('[data-test-subj*=streamEntry]');
+    },
+
+    async getLogsTableColumnHeaders() {
+      const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
+        '~logColumnHeader'
+      );
+      return await Promise.all(columnHeaderElements.map((element) => element.getVisibleText()));
     },
 
     // Alerts Tab

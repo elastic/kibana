@@ -7,6 +7,8 @@
 
 import {
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiProgress,
   EuiSkeletonLoading,
@@ -19,6 +21,7 @@ import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logi
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
+import { UpgradePrebuiltRulesTableFilters } from './upgrade_prebuilt_rules_table_filters';
 import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
 
 const NO_ITEMS_MESSAGE = (
@@ -38,7 +41,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
   const upgradeRulesTableContext = useUpgradePrebuiltRulesTableContext();
 
   const {
-    state: { rules, tags, isFetched, isLoading, isRefetching, selectedRules },
+    state: { rules, filteredRules, isFetched, isLoading, isRefetching, selectedRules },
     actions: { selectRules },
   } = upgradeRulesTableContext;
   const rulesColumns = useUpgradePrebuiltRulesTableColumns();
@@ -70,43 +73,34 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
           isTableEmpty ? (
             NO_ITEMS_MESSAGE
           ) : (
-            <EuiInMemoryTable
-              items={rules}
-              sorting
-              search={{
-                box: {
-                  incremental: true,
-                  isClearable: true,
-                },
-                toolsRight: [<UpgradePrebuiltRulesTableButtons />],
-                filters: [
-                  {
-                    type: 'field_value_selection',
-                    field: 'rule.tags',
-                    name: 'Tags',
-                    multiSelect: true,
-                    options: tags.map((tag) => ({
-                      value: tag,
-                      name: tag,
-                      field: 'rule.tags',
-                    })),
-                  },
-                ],
-              }}
-              pagination={{
-                initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
-                pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-              }}
-              isSelectable
-              selection={{
-                selectable: () => true,
-                onSelectionChange: selectRules,
-                initialSelected: selectedRules,
-              }}
-              itemId="rule_id"
-              data-test-subj="rules-upgrades-table"
-              columns={rulesColumns}
-            />
+            <>
+              <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false} wrap={true}>
+                <EuiFlexItem grow={true}>
+                  <UpgradePrebuiltRulesTableFilters />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <UpgradePrebuiltRulesTableButtons />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiInMemoryTable
+                items={filteredRules}
+                sorting
+                pagination={{
+                  initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
+                  pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+                }}
+                isSelectable
+                selection={{
+                  selectable: () => true,
+                  onSelectionChange: selectRules,
+                  initialSelected: selectedRules,
+                }}
+                itemId="rule_id"
+                data-test-subj="rules-upgrades-table"
+                columns={rulesColumns}
+              />
+            </>
           )
         }
       />

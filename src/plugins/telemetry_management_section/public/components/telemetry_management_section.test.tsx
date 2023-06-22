@@ -25,6 +25,7 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         sendUsageTo: 'staging',
         banner: true,
         allowChangingOptInStatus: true,
@@ -57,6 +58,7 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -109,6 +111,7 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -155,6 +158,7 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: true,
@@ -192,6 +196,7 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -233,6 +238,7 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -281,6 +287,7 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: false,
