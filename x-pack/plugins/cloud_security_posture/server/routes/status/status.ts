@@ -418,4 +418,3 @@ const getStatusResponse = (statusResponseInfo: StatusResponseInfo) => {
     latestPackageVersion: latestCspPackageVersion,
   };
 };
-
