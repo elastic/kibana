@@ -13,6 +13,9 @@
     width: 100%;
     position: sticky;
     z-index: $euiZLevel2;
+
+
+
     @include getBackgroundColor($showBackgroundColor: true);
 
     &-right {
@@ -21,7 +24,11 @@
 
     &.dashboardTopNav-noBackgroundColor {
       @include getBackgroundColor($showBackgroundColor: false);
-      }
+    }
+
+    &.dashboardTopNav-noSticky {
+      position: static;
+    }
   }
 
   &.kbnBody--noHeaderBanner {

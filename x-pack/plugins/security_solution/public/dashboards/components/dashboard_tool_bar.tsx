@@ -71,6 +71,7 @@ const DashboardToolBarComponent = ({
         showBorderBottom: false,
         showFullScreenButton: false,
         showBackgroundColor: false,
+        showStickyTopNav: false,
         editingToolBarCss: css`
           padding: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
         `,

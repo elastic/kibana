@@ -202,6 +202,7 @@ export function InternalDashboardTopNav({
       showFullScreenButton: embedSettings?.showFullScreenButton ?? true,
       editingToolBarCss: embedSettings?.editingToolBarCss ?? ({} as SerializedStyles),
       topNavMenuAlignRight: embedSettings?.topNavMenuAlignRight ?? false,
+      showStickyTopNav: embedSettings?.showStickyTopNav ?? true,
     };
   }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
 
@@ -221,6 +222,7 @@ export function InternalDashboardTopNav({
       className={classNames('dashboardTopNav', {
         'dashboardTopNav-noBackgroundColor': !visibilityProps.showBackgroundColor,
         'dashboardTopNav-right': visibilityProps.topNavMenuAlignRight,
+        'dashboardTopNav-noSticky': !visibilityProps.showStickyTopNav,
       })}
     >
       <h1

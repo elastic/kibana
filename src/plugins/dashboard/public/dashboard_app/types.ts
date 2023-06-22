@@ -24,6 +24,7 @@ export interface DashboardEmbedSettings {
   showFullScreenButton?: boolean;
   editingToolBarCss?: SerializedStyles;
   topNavMenuAlignRight?: boolean;
+  showStickyTopNav?: boolean;
 }
 
 export interface DashboardMountContextProps {
