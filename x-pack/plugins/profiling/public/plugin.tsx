@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
-import { Location } from 'history';
+import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
 import { FlamegraphLocatorDefinition } from './locators/flamegraph_locator';
 import { StacktracesLocatorDefinition } from './locators/stacktraces_locator';

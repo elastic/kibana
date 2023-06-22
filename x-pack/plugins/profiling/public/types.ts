@@ -19,7 +19,7 @@ import {
 } from '@kbn/observability-shared-plugin/public/plugin';
 import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;

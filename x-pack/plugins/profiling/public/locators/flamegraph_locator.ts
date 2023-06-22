@@ -6,7 +6,7 @@
  */
 import qs from 'query-string';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 
 export interface FlamegraphLocatorParams extends SerializableRecord {
   kuery?: string;
