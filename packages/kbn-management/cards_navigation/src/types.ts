@@ -5,9 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { CoreStart } from '@kbn/core/public';
 
-export interface ManagementLandingPageProps {
+export interface CardsNavigationComponentProps {
   sections: any[];
   appBasePath: string;
   onCardClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+}
+
+export interface CardsNavigationProps extends CardsNavigationComponentProps {
+  coreStart: CoreStart;
 }
