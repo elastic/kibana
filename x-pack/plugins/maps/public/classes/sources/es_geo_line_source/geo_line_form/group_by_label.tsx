@@ -15,7 +15,7 @@ export function GroupByLabel() {
   return (
     <EuiToolTip
       content={
-        <EuiText>
+        <EuiText size="s">
           <dl>
             <dt>{TIME_SERIES_LABEL}</dt>
             <dd>
