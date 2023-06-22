@@ -50,10 +50,10 @@ export const ExpandRowColumn = ({ item, expandedRows, setExpandedRows }: Props) 
       isDisabled={!rowShouldExpand(item)}
       aria-label={
         expandedRows[item.docId]
-          ? i18n.translate('xpack.synthetics.pingList.collapseRow', {
+          ? i18n.translate('xpack.uptime.pingList.collapseRow', {
               defaultMessage: 'Collapse',
             })
-          : i18n.translate('xpack.synthetics.pingList.expandRow', { defaultMessage: 'Expand' })
+          : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
       }
       iconType={expandedRows[item.docId] ? 'arrowUp' : 'arrowDown'}
     />

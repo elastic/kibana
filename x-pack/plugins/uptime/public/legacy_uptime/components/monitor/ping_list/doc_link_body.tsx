@@ -16,7 +16,7 @@ const bodyDocsLink =
 export const DocLinkForBody = () => {
   const docsLink = (
     <EuiLink data-test-subj="syntheticsDocLinkForBodyDocsLink" href={bodyDocsLink} target="_blank">
-      {i18n.translate('xpack.synthetics.pingList.drawer.body.docsLink', {
+      {i18n.translate('xpack.uptime.pingList.drawer.body.docsLink', {
         defaultMessage: 'docs',
         description: 'Docs link to set response body',
       })}

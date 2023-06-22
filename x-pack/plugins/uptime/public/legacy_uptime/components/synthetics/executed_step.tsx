@@ -53,7 +53,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ loading, step, index, brow
           {step.synthetics?.error?.message && (
             <EuiText>
               <Label>
-                {i18n.translate('xpack.synthetics.synthetics.executedStep.errorHeading', {
+                {i18n.translate('xpack.uptime.synthetics.executedStep.errorHeading', {
                   defaultMessage: 'Error message',
                 })}
               </Label>
@@ -95,7 +95,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ loading, step, index, brow
           <EuiSpacer />
           <CodeBlockAccordion
             id={`${step.synthetics?.step?.name}_stack`}
-            buttonContent={i18n.translate('xpack.synthetics.synthetics.executedStep.stackTrace', {
+            buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.stackTrace', {
               defaultMessage: 'Stack trace',
             })}
             language="html"

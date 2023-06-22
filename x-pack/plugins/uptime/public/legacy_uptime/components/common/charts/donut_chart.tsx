@@ -52,7 +52,7 @@ export const DonutChart = ({ height, down, up }: DonutChartProps) => {
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         <Chart
           size={height}
-          aria-label={i18n.translate('xpack.synthetics.snapshot.donutChart.ariaLabel', {
+          aria-label={i18n.translate('xpack.uptime.snapshot.donutChart.ariaLabel', {
             defaultMessage:
               'Pie chart showing the current status. {down} of {total} monitors are down.',
             values: { down, total: up + down },

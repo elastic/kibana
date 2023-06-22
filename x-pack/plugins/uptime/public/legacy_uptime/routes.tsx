@@ -51,11 +51,11 @@ type RouteProps = LazyObservabilityPageTemplateProps & {
   title: string;
 };
 
-const baseTitle = i18n.translate('xpack.synthetics.routes.legacyBaseTitle', {
+const baseTitle = i18n.translate('xpack.uptime.routes.legacyBaseTitle', {
   defaultMessage: 'Uptime - Kibana',
 });
 
-export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.synthetics.overview.heading', {
+export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.heading', {
   defaultMessage: 'Monitors',
 });
 
@@ -76,7 +76,7 @@ const getRoutes = (): RouteProps[] => {
       },
     },
     {
-      title: i18n.translate('xpack.synthetics.settingsRoute.title', {
+      title: i18n.translate('xpack.uptime.settingsRoute.title', {
         defaultMessage: `Settings | {baseTitle}`,
         values: { baseTitle },
       }),
@@ -95,7 +95,7 @@ const getRoutes = (): RouteProps[] => {
       bottomBarProps: { paddingSize: 'm' as const },
     },
     {
-      title: i18n.translate('xpack.synthetics.certificatesRoute.title', {
+      title: i18n.translate('xpack.uptime.certificatesRoute.title', {
         defaultMessage: `Certificates | {baseTitle}`,
         values: { baseTitle },
       }),
@@ -108,7 +108,7 @@ const getRoutes = (): RouteProps[] => {
       },
     },
     {
-      title: i18n.translate('xpack.synthetics.stepDetailRoute.title', {
+      title: i18n.translate('xpack.uptime.stepDetailRoute.title', {
         defaultMessage: 'Synthetics detail | {baseTitle}',
         values: { baseTitle },
       }),
@@ -142,7 +142,7 @@ const getRoutes = (): RouteProps[] => {
       },
     },
     {
-      title: i18n.translate('xpack.synthetics.mappingErrorRoute.title', {
+      title: i18n.translate('xpack.uptime.mappingErrorRoute.title', {
         defaultMessage: 'Synthetics | mapping error',
       }),
       path: MAPPING_ERROR_ROUTE,

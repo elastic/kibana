@@ -128,7 +128,7 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
             align: 'right',
             dataType: 'number',
             field: 'monitor.ip',
-            name: i18n.translate('xpack.synthetics.pingList.ipAddressColumnLabel', {
+            name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
               defaultMessage: 'IP',
             }),
           },
@@ -137,7 +137,7 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
     {
       align: 'center',
       field: 'monitor.duration.us',
-      name: i18n.translate('xpack.synthetics.pingList.durationMsColumnLabel', {
+      name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
       render: (duration: number | null) =>
@@ -164,7 +164,7 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
           {
             field: 'monitor.status',
             align: 'left',
-            name: i18n.translate('xpack.synthetics.pingList.columns.failedStep', {
+            name: i18n.translate('xpack.uptime.pingList.columns.failedStep', {
               defaultMessage: 'Failed step',
             }),
             render: (_timestamp: string, item: Ping) => (
@@ -234,10 +234,10 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
       pagination={pagination}
       noItemsMessage={
         loading
-          ? i18n.translate('xpack.synthetics.pingList.pingsLoadingMesssage', {
+          ? i18n.translate('xpack.uptime.pingList.pingsLoadingMesssage', {
               defaultMessage: 'Loading history...',
             })
-          : i18n.translate('xpack.synthetics.pingList.pingsUnavailableMessage', {
+          : i18n.translate('xpack.uptime.pingList.pingsUnavailableMessage', {
               defaultMessage: 'No history found',
             })
       }

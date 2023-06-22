@@ -12,8 +12,8 @@ import React from 'react';
 export const SnapshotHeading = ({ total }: { total: number }) => {
   const monitorsText =
     total === 1
-      ? i18n.translate('xpack.synthetics.snapshot.monitor', { defaultMessage: 'Monitor' })
-      : i18n.translate('xpack.synthetics.snapshot.monitors', { defaultMessage: 'Monitors' });
+      ? i18n.translate('xpack.uptime.snapshot.monitor', { defaultMessage: 'Monitor' })
+      : i18n.translate('xpack.uptime.snapshot.monitors', { defaultMessage: 'Monitors' });
 
   return (
     <EuiTitle size="s">

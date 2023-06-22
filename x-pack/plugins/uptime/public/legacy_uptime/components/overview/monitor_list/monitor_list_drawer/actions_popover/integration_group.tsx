@@ -60,14 +60,14 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
       {isApmAvailable ? (
         <EuiFlexItem>
           <IntegrationLink
-            ariaLabel={i18n.translate('xpack.synthetics.apmIntegrationAction.description', {
+            ariaLabel={i18n.translate('xpack.uptime.apmIntegrationAction.description', {
               defaultMessage: 'Search APM for this monitor',
               description:
                 'This value is shown to users when they hover over an icon that will take them to the APM app.',
             })}
             href={getLegacyApmHref(summary, basePath, dateRangeStart, dateRangeEnd)}
             iconType="apmApp"
-            message={i18n.translate('xpack.synthetics.apmIntegrationAction.text', {
+            message={i18n.translate('xpack.uptime.apmIntegrationAction.text', {
               defaultMessage: 'Show APM Data',
               description:
                 'A message explaining that when the user clicks the associated link, it will navigate to the APM app',

@@ -33,14 +33,14 @@ const BodyDescription = ({ body }: { body: HttpResponseBody }) => {
 
   const truncatedText =
     contentBytes > 0 && contentBytes < bodyBytes
-      ? i18n.translate('xpack.synthetics.pingList.expandedRow.truncated', {
+      ? i18n.translate('xpack.uptime.pingList.expandedRow.truncated', {
           defaultMessage: 'Showing first {contentBytes} bytes.',
           values: { contentBytes },
         })
       : null;
   const bodySizeText =
     bodyBytes > 0
-      ? i18n.translate('xpack.synthetics.pingList.expandedRow.bodySize', {
+      ? i18n.translate('xpack.uptime.pingList.expandedRow.bodySize', {
           defaultMessage: 'Body size is {bodyBytes}.',
           values: { bodyBytes: formatNumber(bodyBytes, '0b') },
         })
@@ -59,7 +59,7 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
   // Show the error block
   if (ping.error) {
     listItems.push({
-      title: i18n.translate('xpack.synthetics.pingList.expandedRow.error', {
+      title: i18n.translate('xpack.uptime.pingList.expandedRow.error', {
         defaultMessage: 'Error',
       }),
       description: <EuiText>{ping.error.message}</EuiText>,
@@ -71,7 +71,7 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
     const body = ping.http.response.body;
 
     listItems.push({
-      title: i18n.translate('xpack.synthetics.pingList.expandedRow.response_body', {
+      title: i18n.translate('xpack.uptime.pingList.expandedRow.response_body', {
         defaultMessage: 'Response Body',
       }),
       description: (

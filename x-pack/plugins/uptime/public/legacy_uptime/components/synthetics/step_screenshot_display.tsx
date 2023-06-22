@@ -59,13 +59,13 @@ const BaseStepImage = ({
       allowFullScreen={true}
       alt={
         stepName
-          ? i18n.translate('xpack.synthetics.synthetics.screenshotDisplay.altText', {
+          ? i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altText', {
               defaultMessage: 'Screenshot for step with name "{stepName}"',
               values: {
                 stepName,
               },
             })
-          : i18n.translate('xpack.synthetics.synthetics.screenshotDisplay.altTextWithoutName', {
+          : i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altTextWithoutName', {
               defaultMessage: 'Screenshot',
             })
       }

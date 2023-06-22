@@ -82,10 +82,10 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   if (!data?.histogram?.length && !loading) {
     content = (
       <ChartEmptyState
-        title={i18n.translate('xpack.synthetics.snapshot.noDataTitle', {
+        title={i18n.translate('xpack.uptime.snapshot.noDataTitle', {
           defaultMessage: 'No ping data available',
         })}
-        body={i18n.translate('xpack.synthetics.snapshot.noDataDescription', {
+        body={i18n.translate('xpack.uptime.snapshot.noDataDescription', {
           defaultMessage: 'There are no pings in the selected time range.',
         })}
       />
@@ -123,7 +123,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       <ChartWrapper
         height={height}
         loading={loading}
-        aria-label={i18n.translate('xpack.synthetics.snapshotHistogram.description', {
+        aria-label={i18n.translate('xpack.uptime.snapshotHistogram.description', {
           defaultMessage:
             'Bar Chart showing uptime status over time from {startTime} to {endTime}.',
           values: {
@@ -145,7 +145,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             {...chartTheme}
           />
           <Axis
-            id={i18n.translate('xpack.synthetics.snapshotHistogram.xAxisId', {
+            id={i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
               defaultMessage: 'Ping X Axis',
             })}
             position={Position.Bottom}
@@ -153,13 +153,13 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
           />
           <Axis
-            id={i18n.translate('xpack.synthetics.snapshotHistogram.yAxisId', {
+            id={i18n.translate('xpack.uptime.snapshotHistogram.yAxisId', {
               defaultMessage: 'Ping Y Axis',
             })}
             position="left"
             tickFormat={(d) => numeral(d).format('0')}
             labelFormat={(d) => numeral(d).format('0a')}
-            title={i18n.translate('xpack.synthetics.snapshotHistogram.yAxis.title', {
+            title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
               defaultMessage: 'Pings',
               description:
                 'The label on the y-axis of a chart that displays the number of times Heartbeat has pinged a set of services/websites.',
@@ -170,7 +170,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             color={[danger, gray]}
             data={barData}
             id={STATUS_DOWN_LABEL}
-            name={i18n.translate('xpack.synthetics.snapshotHistogram.series.pings', {
+            name={i18n.translate('xpack.uptime.snapshotHistogram.series.pings', {
               defaultMessage: 'Monitor Pings',
             })}
             stackAccessors={['x']}

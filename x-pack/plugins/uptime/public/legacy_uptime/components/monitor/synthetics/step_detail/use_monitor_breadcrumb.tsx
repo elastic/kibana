@@ -54,7 +54,7 @@ export const useMonitorBreadcrumb = ({
     ...(performanceBreakDownView
       ? [
           {
-            text: i18n.translate('xpack.synthetics.synthetics.performanceBreakDown.label', {
+            text: i18n.translate('xpack.uptime.synthetics.performanceBreakDown.label', {
               defaultMessage: 'Performance breakdown',
             }),
           },

@@ -55,7 +55,7 @@ export function renderApp(
     isLogsAvailable: logs,
     renderGlobalHelpControls: () =>
       setHelpExtension({
-        appName: i18nFormatter.translate('xpack.synthetics.legacyHeader.appName', {
+        appName: i18nFormatter.translate('xpack.uptime.legacyHeader.appName', {
           defaultMessage: 'Uptime',
         }),
         links: [

@@ -21,7 +21,7 @@ export const LocationName = ({ location }: LocationNameProps) =>
       href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html"
       target="_blank"
     >
-      {i18n.translate('xpack.synthetics.locationName.helpLinkAnnotation', {
+      {i18n.translate('xpack.uptime.locationName.helpLinkAnnotation', {
         defaultMessage: 'Add location',
         description:
           'Text that instructs the user to navigate to our docs to add a geographic location to their data',

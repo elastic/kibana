@@ -17,7 +17,7 @@ export const EmptyStateLoading = () => (
         <EuiSpacer />
         <EuiTitle size="l">
           <h2>
-            {i18n.translate('xpack.synthetics.emptyState.loadingMessage', {
+            {i18n.translate('xpack.uptime.emptyState.loadingMessage', {
               defaultMessage: 'Loading…',
             })}
           </h2>

@@ -56,7 +56,7 @@ export const PingStatusColumn = ({ pingStatus, item }: Props) => {
       </EuiBadge>
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.synthetics.pingList.recencyMessage', {
+        {i18n.translate('xpack.uptime.pingList.recencyMessage', {
           values: { fromNow: checkedTime },
           defaultMessage: 'Checked {fromNow}',
           description:

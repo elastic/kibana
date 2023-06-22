@@ -12,16 +12,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { getSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 
-const warningLabel = i18n.translate('xpack.synthetics.controls.selectSeverity.warningLabel', {
+const warningLabel = i18n.translate('xpack.uptime.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',
 });
-const minorLabel = i18n.translate('xpack.synthetics.controls.selectSeverity.minorLabel', {
+const minorLabel = i18n.translate('xpack.uptime.controls.selectSeverity.minorLabel', {
   defaultMessage: 'minor',
 });
-const majorLabel = i18n.translate('xpack.synthetics.controls.selectSeverity.majorLabel', {
+const majorLabel = i18n.translate('xpack.uptime.controls.selectSeverity.majorLabel', {
   defaultMessage: 'major',
 });
-const criticalLabel = i18n.translate('xpack.synthetics.controls.selectSeverity.criticalLabel', {
+const criticalLabel = i18n.translate('xpack.uptime.controls.selectSeverity.criticalLabel', {
   defaultMessage: 'critical',
 });
 

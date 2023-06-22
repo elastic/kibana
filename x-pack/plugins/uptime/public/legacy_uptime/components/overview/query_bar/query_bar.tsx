@@ -83,7 +83,7 @@ export const QueryBar = () => {
           submitImmediately();
         }}
         query={{ ...query, query: inputVal }}
-        aria-label={i18n.translate('xpack.synthetics.filterBar.ariaLabel', {
+        aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
           defaultMessage: 'Input filter criteria for the overview page',
         })}
         data-test-subj="uptimeSearchBarInput"

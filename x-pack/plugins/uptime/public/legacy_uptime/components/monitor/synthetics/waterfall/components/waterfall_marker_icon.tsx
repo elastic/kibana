@@ -16,7 +16,7 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
   if (!field) {
     return (
       <EuiIcon
-        aria-label={i18n.translate('xpack.synthetics.synthetics.markers.noFieldIcon.label', {
+        aria-label={i18n.translate('xpack.uptime.synthetics.markers.noFieldIcon.label', {
           defaultMessage: 'An icon indicating that this marker has no field associated with it',
         })}
         type="dot"

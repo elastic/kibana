@@ -24,7 +24,7 @@ export const StatusFilter: React.FC = () => {
   return (
     <EuiFilterGroup>
       <FilterStatusButton
-        content={i18n.translate('xpack.synthetics.filterBar.filterAllLabel', {
+        content={i18n.translate('xpack.uptime.filterBar.filterAllLabel', {
           defaultMessage: 'All',
         })}
         dataTestSubj="xpack.synthetics.filterBar.filterStatusAll"

@@ -28,7 +28,7 @@ export const IntegrationLink = ({
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiToolTip
-          content={i18n.translate('xpack.synthetics.integrationLink.missingDataMessage', {
+          content={i18n.translate('xpack.uptime.integrationLink.missingDataMessage', {
             defaultMessage: 'Required data for this integration was not found.',
           })}
         >

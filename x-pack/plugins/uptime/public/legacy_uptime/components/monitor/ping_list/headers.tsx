@@ -30,7 +30,7 @@ export const PingHeaders = ({ headers }: Props) => {
         buttonContent={
           <EuiText size="s">
             <h3>
-              {i18n.translate('xpack.synthetics.pingList.headers.title', {
+              {i18n.translate('xpack.uptime.pingList.headers.title', {
                 defaultMessage: 'Response headers',
               })}
             </h3>

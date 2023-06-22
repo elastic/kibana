@@ -27,7 +27,7 @@ export const ManageMonitorsBtn = () => {
   );
 };
 
-const NAVIGATE_LABEL = i18n.translate('xpack.synthetics.page_header.manageLink.not', {
+const NAVIGATE_LABEL = i18n.translate('xpack.uptime.page_header.manageLink.not', {
   defaultMessage:
     'Monitor Management is no longer available in Uptime, use the Synthetics app instead.',
 });

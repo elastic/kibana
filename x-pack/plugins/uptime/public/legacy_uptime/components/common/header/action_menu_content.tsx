@@ -22,15 +22,15 @@ import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
 import { ManageMonitorsBtn } from './manage_monitors_btn';
 
-const ADD_DATA_LABEL = i18n.translate('xpack.synthetics.addDataButtonLabel', {
+const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
   defaultMessage: 'Add data',
 });
 
-const ANALYZE_DATA = i18n.translate('xpack.synthetics.analyzeDataButtonLabel', {
+const ANALYZE_DATA = i18n.translate('xpack.uptime.analyzeDataButtonLabel', {
   defaultMessage: 'Explore data',
 });
 
-const ANALYZE_MESSAGE = i18n.translate('xpack.synthetics.analyzeDataButtonLabel.message', {
+const ANALYZE_MESSAGE = i18n.translate('xpack.uptime.analyzeDataButtonLabel.message', {
   defaultMessage:
     'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
@@ -76,7 +76,7 @@ export function ActionMenuContent(): React.ReactElement {
       <ManageMonitorsBtn />
 
       <EuiHeaderLink
-        aria-label={i18n.translate('xpack.synthetics.page_header.settingsLink.label', {
+        aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {
           defaultMessage: 'Navigate to the Uptime settings page',
         })}
         color="text"
@@ -96,7 +96,7 @@ export function ActionMenuContent(): React.ReactElement {
 
       <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
         <EuiHeaderLink
-          aria-label={i18n.translate('xpack.synthetics.page_header.analyzeData.label', {
+          aria-label={i18n.translate('xpack.uptime.page_header.analyzeData.label', {
             defaultMessage: 'Navigate to the "Explore Data" view to visualize Synthetics/User data',
           })}
           href={syntheticExploratoryViewLink}
@@ -109,7 +109,7 @@ export function ActionMenuContent(): React.ReactElement {
       </EuiToolTip>
 
       <EuiHeaderLink
-        aria-label={i18n.translate('xpack.synthetics.page_header.addDataLink.label', {
+        aria-label={i18n.translate('xpack.uptime.page_header.addDataLink.label', {
           defaultMessage: 'Navigate to a tutorial about adding Uptime data',
         })}
         href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}

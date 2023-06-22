@@ -29,7 +29,7 @@ const MILLIS_LIMIT = ONE_SECOND_AS_MICROS * 1;
 
 export const formatDuration = (durationMicros: number) => {
   if (durationMicros < MILLIS_LIMIT) {
-    return i18n.translate('xpack.synthetics.pingList.durationMsColumnFormatting', {
+    return i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
       values: { millis: microsToMillis(durationMicros) },
       defaultMessage: '{millis} ms',
     });
@@ -39,12 +39,12 @@ export const formatDuration = (durationMicros: number) => {
   // we format seconds with correct pluralization here and not for `ms` because it is much more likely users
   // will encounter times of exactly '1' second.
   if (seconds === '1') {
-    return i18n.translate('xpack.synthetics.pingist.durationSecondsColumnFormatting.singular', {
+    return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting.singular', {
       values: { seconds },
       defaultMessage: '{seconds} second',
     });
   }
-  return i18n.translate('xpack.synthetics.pingist.durationSecondsColumnFormatting', {
+  return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting', {
     values: { seconds },
     defaultMessage: '{seconds} seconds',
   });

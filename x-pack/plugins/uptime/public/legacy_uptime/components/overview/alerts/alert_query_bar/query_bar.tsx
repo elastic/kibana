@@ -66,7 +66,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
         autoSubmit={true}
         disableLanguageSwitcher={true}
         isInvalid={!!(inputVal && !query)}
-        placeholder={i18n.translate('xpack.synthetics.alerts.searchPlaceholder.kql', {
+        placeholder={i18n.translate('xpack.uptime.alerts.searchPlaceholder.kql', {
           defaultMessage: 'Filter using kql syntax',
         })}
         appName={appName}

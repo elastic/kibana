@@ -24,7 +24,7 @@ import { MiddleTruncatedText } from '../../waterfall';
 import { WaterfallMetadataEntry } from '../../waterfall/types';
 import { OnFlyoutClose } from '../../waterfall/components/use_flyout';
 
-export const DETAILS = i18n.translate('xpack.synthetics.synthetics.waterfall.flyout.details', {
+export const DETAILS = i18n.translate('xpack.uptime.synthetics.waterfall.flyout.details', {
   defaultMessage: 'Details',
 });
 

@@ -48,23 +48,23 @@ export function isStepEnd(step: JourneyStep) {
 
 function statusMessage(count: StepStatusCount, loading?: boolean) {
   if (loading) {
-    return i18n.translate('xpack.synthetics.synthetics.journey.loadingSteps', {
+    return i18n.translate('xpack.uptime.synthetics.journey.loadingSteps', {
       defaultMessage: 'Loading steps ...',
     });
   }
   const total = count.succeeded + count.failed + count.skipped;
   if (count.failed + count.skipped === total) {
-    return i18n.translate('xpack.synthetics.synthetics.journey.allFailedMessage', {
+    return i18n.translate('xpack.uptime.synthetics.journey.allFailedMessage', {
       defaultMessage: '{total} Steps - all failed or skipped',
       values: { total },
     });
   } else if (count.succeeded === total) {
-    return i18n.translate('xpack.synthetics.synthetics.journey.allSucceededMessage', {
+    return i18n.translate('xpack.uptime.synthetics.journey.allSucceededMessage', {
       defaultMessage: '{total} Steps - all succeeded',
       values: { total },
     });
   }
-  return i18n.translate('xpack.synthetics.synthetics.journey.partialSuccessMessage', {
+  return i18n.translate('xpack.uptime.synthetics.journey.partialSuccessMessage', {
     defaultMessage: '{total} Steps - {succeeded} succeeded',
     values: { succeeded: count.succeeded, total },
   });
@@ -152,7 +152,7 @@ export const StepsList = ({
         );
       },
       mobileOptions: {
-        header: i18n.translate('xpack.synthetics.pingList.stepDurationHeader', {
+        header: i18n.translate('xpack.uptime.pingList.stepDurationHeader', {
           defaultMessage: 'Step duration',
         }),
         show: true,
@@ -241,10 +241,10 @@ export const StepsList = ({
         itemIdToExpandedRowMap={expandedRows}
         noItemsMessage={
           loading
-            ? i18n.translate('xpack.synthetics.pingList.pingsLoadingMesssage', {
+            ? i18n.translate('xpack.uptime.pingList.pingsLoadingMesssage', {
                 defaultMessage: 'Loading history...',
               })
-            : i18n.translate('xpack.synthetics.pingList.pingsUnavailableMessage', {
+            : i18n.translate('xpack.uptime.pingList.pingsUnavailableMessage', {
                 defaultMessage: 'No history found',
               })
         }

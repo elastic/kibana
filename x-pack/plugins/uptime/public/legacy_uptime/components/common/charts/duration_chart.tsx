@@ -146,7 +146,7 @@ export const DurationChartComponent = ({
               values={{ emphasizedText: <strong>up</strong> }}
             />
           }
-          title={i18n.translate('xpack.synthetics.durationChart.emptyPrompt.title', {
+          title={i18n.translate('xpack.uptime.durationChart.emptyPrompt.title', {
             defaultMessage: 'No duration data available',
           })}
         />

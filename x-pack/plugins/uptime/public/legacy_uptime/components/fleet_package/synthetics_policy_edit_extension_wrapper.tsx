@@ -61,7 +61,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
 );
 SyntheticsPolicyEditExtensionWrapper.displayName = 'SyntheticsPolicyEditExtensionWrapper';
 
-const EDIT_IN_SYNTHETICS_LABEL = i18n.translate('xpack.synthetics.editPackagePolicy.inSynthetics', {
+const EDIT_IN_SYNTHETICS_LABEL = i18n.translate('xpack.uptime.editPackagePolicy.inSynthetics', {
   defaultMessage: 'Edit in Synthetics',
 });
 

@@ -84,10 +84,10 @@ const Application = (props: UptimeAppProps) => {
     setBadge(
       !canSave
         ? {
-            text: i18n.translate('xpack.synthetics.badge.readOnly.text', {
+            text: i18n.translate('xpack.uptime.badge.readOnly.text', {
               defaultMessage: 'Read only',
             }),
-            tooltip: i18n.translate('xpack.synthetics.badge.readOnly.tooltip', {
+            tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
               defaultMessage: 'Unable to save',
             }),
             iconType: 'glasses',

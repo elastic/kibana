@@ -82,18 +82,18 @@ export const DeprecateNoticeModal = ({ onCancel }: { onCancel: () => void }) => 
   );
 };
 
-const HEADER_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.headerText', {
+const HEADER_TEXT = i18n.translate('xpack.uptime.deprecateNoticeModal.headerText', {
   defaultMessage: 'Synthetic Monitoring is now available out of the box in Synthetics',
 });
 
-const GO_BACK_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.goBack', {
+const GO_BACK_TEXT = i18n.translate('xpack.uptime.deprecateNoticeModal.goBack', {
   defaultMessage: 'Go back',
 });
 
-const READ_DOCS_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.readDocs', {
+const READ_DOCS_TEXT = i18n.translate('xpack.uptime.deprecateNoticeModal.readDocs', {
   defaultMessage: 'read docs.',
 });
 
-const GO_SYNTHETICS_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.goToSynthetics', {
+const GO_SYNTHETICS_TEXT = i18n.translate('xpack.uptime.deprecateNoticeModal.goToSynthetics', {
   defaultMessage: 'Go to Synthetics',
 });

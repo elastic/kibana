@@ -12,7 +12,7 @@ import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 import { WaterfallChartContainer } from './waterfall/waterfall_chart_container';
 import { useStepDetailPage } from '../../../../pages/synthetics/step_detail_page';
 
-export const NO_STEP_DATA = i18n.translate('xpack.synthetics.synthetics.stepDetail.noData', {
+export const NO_STEP_DATA = i18n.translate('xpack.uptime.synthetics.stepDetail.noData', {
   defaultMessage: 'No data could be found for this step',
 });
 

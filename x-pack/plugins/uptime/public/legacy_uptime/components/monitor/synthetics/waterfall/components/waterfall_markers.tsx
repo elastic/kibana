@@ -78,7 +78,7 @@ export function WaterfallChartMarkers() {
               {
                 dataValue: offset,
                 details: label,
-                header: i18n.translate('xpack.synthetics.synthetics.waterfall.offsetUnit', {
+                header: i18n.translate('xpack.uptime.synthetics.waterfall.offsetUnit', {
                   defaultMessage: '{offset} ms',
                   values: { offset },
                 }),
@@ -149,11 +149,11 @@ const Wrapper = euiStyled.span`
   }
 `;
 
-export const FCP_LABEL = i18n.translate('xpack.synthetics.synthetics.waterfall.fcpLabel', {
+export const FCP_LABEL = i18n.translate('xpack.uptime.synthetics.waterfall.fcpLabel', {
   defaultMessage: 'First contentful paint',
 });
 
-export const LCP_LABEL = i18n.translate('xpack.synthetics.synthetics.waterfall.lcpLabel', {
+export const LCP_LABEL = i18n.translate('xpack.uptime.synthetics.waterfall.lcpLabel', {
   defaultMessage: 'Largest contentful paint',
 });
 

@@ -23,7 +23,7 @@ export const MappingErrorPage = () => {
 
   useBreadcrumbs([
     {
-      text: i18n.translate('xpack.synthetics.mappingErrorRoute.breadcrumb', {
+      text: i18n.translate('xpack.uptime.mappingErrorRoute.breadcrumb', {
         defaultMessage: 'Mapping error',
       }),
     },

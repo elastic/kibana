@@ -31,14 +31,14 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
 
   const ariaLabel =
     direction === 'next'
-      ? i18n.translate('xpack.synthetics.overviewPageLink.next.ariaLabel', {
+      ? i18n.translate('xpack.uptime.overviewPageLink.next.ariaLabel', {
           defaultMessage: 'Next page of results',
         })
-      : i18n.translate('xpack.synthetics.overviewPageLink.prev.ariaLabel', {
+      : i18n.translate('xpack.uptime.overviewPageLink.prev.ariaLabel', {
           defaultMessage: 'Prev page of results',
         });
 
-  const disableLinkLabel = i18n.translate('xpack.synthetics.overviewPageLink.disabled.ariaLabel', {
+  const disableLinkLabel = i18n.translate('xpack.uptime.overviewPageLink.disabled.ariaLabel', {
     defaultMessage:
       'A disabled pagination button indicating that there cannot be any further navigation in the monitors list.',
   });

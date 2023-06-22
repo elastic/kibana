@@ -31,15 +31,15 @@ export function colorFromStatus(color: UptimeAppColors, status?: string) {
 export function textFromStatus(status?: string) {
   switch (status) {
     case 'succeeded':
-      return i18n.translate('xpack.synthetics.synthetics.statusBadge.succeededMessage', {
+      return i18n.translate('xpack.uptime.synthetics.statusBadge.succeededMessage', {
         defaultMessage: 'Succeeded',
       });
     case 'failed':
-      return i18n.translate('xpack.synthetics.synthetics.statusBadge.failedMessage', {
+      return i18n.translate('xpack.uptime.synthetics.statusBadge.failedMessage', {
         defaultMessage: 'Failed',
       });
     case 'skipped':
-      return i18n.translate('xpack.synthetics.synthetics.statusBadge.skippedMessage', {
+      return i18n.translate('xpack.uptime.synthetics.statusBadge.skippedMessage', {
         defaultMessage: 'Skipped',
       });
     default:

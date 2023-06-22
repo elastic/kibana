@@ -25,7 +25,7 @@ export const simpleAlertEnabled = (
   const alertUrl = getUrlForAlert(rule.id, kibanaService.core.http.basePath.get());
 
   return {
-    title: i18n.translate('xpack.synthetics.overview.alerts.enabled.success', {
+    title: i18n.translate('xpack.uptime.overview.alerts.enabled.success', {
       defaultMessage: 'Rule successfully enabled ',
     }),
     text: toMountPoint(
@@ -43,7 +43,7 @@ export const simpleAlertEnabled = (
         </EuiText>
         <EuiSpacer size="xs" />
         <EuiLink data-test-subj="syntheticsSimpleAlertEnabledEditAlertLink" href={alertUrl}>
-          {i18n.translate('xpack.synthetics.enableAlert.editAlert', {
+          {i18n.translate('xpack.uptime.enableAlert.editAlert', {
             defaultMessage: 'Edit alert',
           })}
         </EuiLink>
