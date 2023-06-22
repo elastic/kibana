@@ -35,7 +35,7 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onFilterItemClick = useCallback(
-    (newOption: RuleStatus) => () => {
+    (newOption: RuleStatus) => {
       if (selectedStatuses.includes(newOption)) {
         onChange(selectedStatuses.filter((option) => option !== newOption));
         return;
@@ -101,7 +101,7 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
               <EuiSelectableListItem
                 key={status}
                 data-test-subj={optionDataTestSubj(status)}
-                onClick={onFilterItemClick(status)}
+                onClick={onFilterItemClick.bind(this, status)}
                 checked={selectedStatuses.includes(status) ? 'on' : undefined}
               >
                 {renderRuleStateOptions(status)}

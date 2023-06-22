@@ -37,7 +37,7 @@ const CasesCellComponent: React.FC<CellComponentProps> = (props) => {
     .filter((theCase): theCase is Case => theCase != null);
 
   const onClick = useCallback(
-    (caseId: string) => () => navigateToCaseView({ caseId }),
+    (caseId: string) => navigateToCaseView({ caseId }),
     [navigateToCaseView]
   );
 
@@ -47,7 +47,7 @@ const CasesCellComponent: React.FC<CellComponentProps> = (props) => {
         ? validCases.map((theCase, index) => [
             index > 0 && index < validCases.length && ', ',
             <CaseTooltip loading={false} content={formatCase(theCase)} key={theCase.id}>
-              <EuiLink onClick={onClick(theCase.id)} data-test-subj="cases-cell-link">
+              <EuiLink onClick={onClick.bind(this, theCase.id)} data-test-subj="cases-cell-link">
                 {theCase.title}
               </EuiLink>
             </CaseTooltip>,

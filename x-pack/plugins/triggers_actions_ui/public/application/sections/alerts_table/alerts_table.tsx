@@ -207,7 +207,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   ])();
 
   const openFlyoutAlertIndex = useCallback(
-    (visibleRowIndex: number) => () => setFlyoutAlertIndex(visibleRowIndex),
+    (visibleRowIndex: number) => setFlyoutAlertIndex(visibleRowIndex),
     [setFlyoutAlertIndex]
   );
 
@@ -243,7 +243,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                         size="s"
                         iconType="expand"
                         color="primary"
-                        onClick={openFlyoutAlertIndex(visibleRowIndex)}
+                        onClick={openFlyoutAlertIndex.bind(this, visibleRowIndex)}
                         data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
                         aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
                       />
