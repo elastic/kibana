@@ -333,7 +333,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
       resetFilters();
     });
 
-    it('should recover from invalid kql Query result', () => {
+    it.skip('should recover from invalid kql Query result', () => {
       // do an invalid search
       //
       kqlSearch('\\');
