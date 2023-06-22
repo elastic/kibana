@@ -10,7 +10,7 @@ import { Stream } from 'stream';
 import { ReportingCore } from '../..';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
 import { ReportApiJSON } from '../../../common/types';
-import { ExportTypesType } from '../../export_types/common';
+import { ExportType } from '../../export_types/common';
 import { getContentStream, statuses } from '../../lib';
 import { jobsQueryFactory } from './jobs_query';
 
@@ -33,10 +33,10 @@ type TaskRunResult = Required<ReportApiJSON>['output'];
 
 const DEFAULT_TITLE = 'report';
 
-const getTitle = (exportType: ExportTypesType, title?: string): string =>
+const getTitle = (exportType: ExportType, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
 
-const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypesType) => {
+const getReportingHeaders = (output: TaskRunResult, exportType: ExportType) => {
   const metaDataHeaders: Record<string, boolean> = {};
 
   if (exportType.jobType === CSV_JOB_TYPE || exportType.jobType === CSV_JOB_TYPE_DEPRECATED) {
@@ -60,7 +60,7 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     jobtype: jobType,
     payload: { title },
   }: Required<ReportApiJSON>): Promise<Payload> {
-    const exportType = exportTypesRegistry.get((item: ExportTypesType) => item.jobType === jobType);
+    const exportType = exportTypesRegistry.get((item: ExportType) => item.jobType === jobType);
     const encoding = exportType.jobContentEncoding === 'base64' ? 'base64' : 'raw';
     const content = await getContentStream(reporting, { id, index }, { encoding });
     const filename = getTitle(exportType, title);

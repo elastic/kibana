@@ -12,6 +12,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecuteReportTask } from '.';
 import type { ReportingCore } from '../..';
 import type { ReportingConfigType } from '../../config';
+import { ExportType } from '../../export_types/common';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import type { SavedReport } from '../store';
 
@@ -94,7 +95,7 @@ describe('Execute Report Task', () => {
       jobContentExtension: 'pdf',
       jobType: 'noop',
       validLicenses: [],
-    });
+    } as unknown as ExportType);
     const store = await mockReporting.getStore();
     store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
     const task = new ExecuteReportTask(mockReporting, configType, logger);
