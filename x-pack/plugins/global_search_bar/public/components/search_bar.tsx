@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
@@ -23,6 +24,7 @@ import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
+import useObservable from 'react-use/lib/useObservable';
 import { Subscription } from 'rxjs';
 import { blurEvent, CLICK_METRIC, COUNT_METRIC, getClickMetric, isMac, sort } from '.';
 import { resultToOption, suggestionToOption } from '../lib';
@@ -51,10 +53,18 @@ export const SearchBar: FC<SearchBarProps> = ({
   taggingApi,
   navigateToUrl,
   trackUiMetric,
+  chromeStyle$,
   ...props
 }) => {
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
+  const chromeStyle = useObservable(chromeStyle$);
+
+  // These hooks are used when on chromeStyle set to 'project'
+  const [isVisible, setIsVisible] = useState(false);
+  const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  // General hooks
   const [initialLoad, setInitialLoad] = useState(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -178,14 +188,16 @@ export const SearchBar: FC<SearchBarProps> = ({
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
         trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SHORTCUT_USED);
-        if (searchRef) {
+        if (chromeStyle === 'project' && !isVisible) {
+          visibilityButtonRef.current?.click();
+        } else if (searchRef) {
           searchRef.focus();
         } else if (buttonRef) {
           (buttonRef.children[0] as HTMLButtonElement).click();
         }
       }
     },
-    [buttonRef, searchRef, trackUiMetric]
+    [chromeStyle, isVisible, buttonRef, searchRef, trackUiMetric]
   );
 
   const onChange = useCallback(
@@ -244,6 +256,49 @@ export const SearchBar: FC<SearchBarProps> = ({
 
   useEvent('keydown', onKeyDown);
 
+  if (chromeStyle === 'project' && !isVisible) {
+    const onShowSearch = () => {
+      setIsVisible(true);
+    };
+    return (
+      <EuiButtonIcon
+        aria-label={i18nStrings.showSearchAriaText}
+        buttonRef={visibilityButtonRef}
+        color="text"
+        data-test-subj="nav-search-reveal"
+        iconType="search"
+        onClick={onShowSearch}
+      />
+    );
+  }
+
+  const getAppendForChromeStyle = () => {
+    if (chromeStyle === 'project') {
+      return (
+        <EuiButtonIcon
+          aria-label={i18nStrings.closeSearchAriaText}
+          color="text"
+          data-test-subj="nav-search-conceal"
+          iconType="cross"
+          onClick={() => {
+            setIsVisible(false);
+          }}
+        />
+      );
+    }
+
+    if (showAppend) {
+      return (
+        <EuiFormLabel
+          title={keyboardShortcutTooltip}
+          css={{ fontFamily: euiTheme.font.familyCode }}
+        >
+          {isMac ? '⌘/' : '^/'}
+        </EuiFormLabel>
+      );
+    }
+  };
+
   return (
     <EuiSelectableTemplateSitewide
       isPreFiltered
@@ -254,6 +309,7 @@ export const SearchBar: FC<SearchBarProps> = ({
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
       searchProps={{
+        autoFocus: chromeStyle === 'project',
         value: searchValue,
         onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
         'data-test-subj': 'nav-search-input',
@@ -270,14 +326,7 @@ export const SearchBar: FC<SearchBarProps> = ({
           setShowAppend(!searchValue.length);
         },
         fullWidth: true,
-        append: showAppend ? (
-          <EuiFormLabel
-            title={keyboardShortcutTooltip}
-            css={{ fontFamily: euiTheme.font.familyCode }}
-          >
-            {isMac ? '⌘/' : '^/'}
-          </EuiFormLabel>
-        ) : undefined,
+        append: getAppendForChromeStyle(),
       }}
       emptyMessage={<EmptyMessage />}
       noMatchesMessage={<NoMatchesMessage {...props} />}
