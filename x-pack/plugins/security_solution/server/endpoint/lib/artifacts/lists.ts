@@ -24,6 +24,7 @@ import type {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -42,6 +43,7 @@ import {
   translatedEntryMatchMatcher,
   translatedEntryMatchWildcardMatcher,
   translatedEntryNestedEntry,
+  wrappedTranslatedExceptionList,
 } from '../../schemas';
 
 export async function buildArtifact(
@@ -72,6 +74,21 @@ export type ArtifactListId =
   | typeof ENDPOINT_EVENT_FILTERS_LIST_ID
   | typeof ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
   | typeof ENDPOINT_BLOCKLISTS_LIST_ID;
+
+export function convertExceptionsToEndpointFormat(
+  exceptions: ExceptionListItemSchema[],
+  schemaVersion: string
+) {
+  const translatedExceptions = {
+    entries: translateToEndpointExceptions(exceptions, schemaVersion),
+  };
+  const [validated, errors] = validate(translatedExceptions, wrappedTranslatedExceptionList);
+  if (errors != null) {
+    throw new Error(errors);
+  }
+
+  return validated as WrappedTranslatedExceptionList;
+}
 
 export async function getFilteredEndpointExceptionListRaw({
   elClient,

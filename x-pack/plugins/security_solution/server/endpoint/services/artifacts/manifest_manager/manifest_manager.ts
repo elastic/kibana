@@ -20,7 +20,6 @@ import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import type { ManifestSchema } from '../../../../../common/endpoint/schema/manifest';
 import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
@@ -32,16 +31,10 @@ import {
   getAllItemsFromEndpointExceptionList,
   getArtifactId,
   Manifest,
-  translateToEndpointExceptions,
+  convertExceptionsToEndpointFormat,
 } from '../../../lib/artifacts';
-import type {
-  InternalArtifactCompleteSchema,
-  WrappedTranslatedExceptionList,
-} from '../../../schemas/artifacts';
-import {
-  internalArtifactCompleteSchema,
-  wrappedTranslatedExceptionList,
-} from '../../../schemas/artifacts';
+import type { InternalArtifactCompleteSchema } from '../../../schemas/artifacts';
+import { internalArtifactCompleteSchema } from '../../../schemas/artifacts';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
@@ -178,15 +171,7 @@ export class ManifestManager {
     const exceptions: ExceptionListItemSchema[] =
       listId === ENDPOINT_LIST_ID ? allExceptionsByListId : allExceptionsByListId.filter(filter);
 
-    const translatedExceptions = {
-      entries: translateToEndpointExceptions(exceptions, schemaVersion),
-    };
-    const [validated, errors] = validate(translatedExceptions, wrappedTranslatedExceptionList);
-    if (errors != null) {
-      throw new InvalidInternalManifestError(errors);
-    }
-
-    return validated as WrappedTranslatedExceptionList;
+    return convertExceptionsToEndpointFormat(exceptions, schemaVersion);
   }
 
   /**
