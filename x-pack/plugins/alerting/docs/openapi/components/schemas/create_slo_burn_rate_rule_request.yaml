@@ -21,7 +21,7 @@ properties:
   name:
     $ref: 'name_rule.yaml'
   notify_when:
-    $ref: 'notify_when_rule.yaml'
+    $ref: 'notify_when.yaml'
   params:
     $ref:  '../../../../../observability/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
   rule_type_id:

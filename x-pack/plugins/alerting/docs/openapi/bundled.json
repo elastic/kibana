@@ -2530,9 +2530,9 @@
       }
     },
     "schemas": {
-      "notify_when_action": {
+      "notify_when": {
         "type": "string",
-        "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.\n",
+        "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "enum": [
           "onActionGroupChange",
           "onActiveAlert",
@@ -2542,7 +2542,7 @@
       },
       "throttle": {
         "type": "string",
-        "description": "The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if `notify_when` is set to `onThrottleInterval`. It is specified in seconds, minutes, hours, or days.",
+        "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "nullable": true,
         "default": null,
         "example": "10m"
@@ -2688,7 +2688,7 @@
               ],
               "properties": {
                 "notify_when": {
-                  "$ref": "#/components/schemas/notify_when_action"
+                  "$ref": "#/components/schemas/notify_when"
                 },
                 "summary": {
                   "type": "boolean",
@@ -2734,16 +2734,6 @@
         "type": "string",
         "description": "The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.\n"
       },
-      "notify_when_rule": {
-        "type": "string",
-        "description": "Indicates how often alerts generate actions. NOTE: If `notify_when` is set at the rule level, you cannot specify `frequency` properties for its actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.\n",
-        "enum": [
-          "onActionGroupChange",
-          "onActiveAlert",
-          "onThrottleInterval"
-        ],
-        "example": "onActiveAlert"
-      },
       "schedule": {
         "type": "object",
         "description": "The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.",
@@ -2787,7 +2777,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -2837,7 +2827,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -2933,7 +2923,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "$ref": "#/components/schemas/params_property_apm_anomaly"
@@ -3037,7 +3027,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "$ref": "#/components/schemas/params_property_apm_error_count"
@@ -3155,7 +3145,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "$ref": "#/components/schemas/params_property_apm_transaction_duration"
@@ -3265,7 +3255,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "$ref": "#/components/schemas/params_property_apm_transaction_error_rate"
@@ -3313,7 +3303,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -3363,7 +3353,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -3413,7 +3403,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -3608,7 +3598,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "$ref": "#/components/schemas/params_property_infra_inventory"
@@ -3655,7 +3645,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -3960,7 +3950,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "$ref": "#/components/schemas/params_property_infra_metric_threshold"
@@ -4008,7 +3998,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4285,7 +4275,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "$ref": "#/components/schemas/params_property_log_threshold"
@@ -4333,7 +4323,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4383,7 +4373,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4433,7 +4423,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4483,7 +4473,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4533,7 +4523,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4583,7 +4573,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4633,7 +4623,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4683,7 +4673,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4733,7 +4723,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4783,7 +4773,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4833,7 +4823,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4883,7 +4873,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4933,7 +4923,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -4983,7 +4973,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5033,7 +5023,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5083,7 +5073,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5133,7 +5123,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5182,7 +5172,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5232,7 +5222,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5282,7 +5272,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5332,7 +5322,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5433,7 +5423,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "$ref": "#/components/schemas/params_property_slo_burn_rate"
@@ -5481,7 +5471,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5531,7 +5521,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5593,7 +5583,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "$ref": "#/components/schemas/params_property_synthetics_uptime_tls"
@@ -5641,7 +5631,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5691,7 +5681,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",
@@ -5844,7 +5834,7 @@
             "$ref": "#/components/schemas/name_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "$ref": "#/components/schemas/params_property_synthetics_monitor_status"
@@ -6262,7 +6252,7 @@
             "example": "cluster_health_rule"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when_rule"
+            "$ref": "#/components/schemas/notify_when"
           },
           "params": {
             "type": "object",

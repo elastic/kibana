@@ -1593,10 +1593,10 @@ components:
         type: string
         example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   schemas:
-    notify_when_action:
+    notify_when:
       type: string
       description: |
-        Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.
+        Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
       enum:
         - onActionGroupChange
         - onActiveAlert
@@ -1604,7 +1604,8 @@ components:
       example: onActiveAlert
     throttle:
       type: string
-      description: The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if `notify_when` is set to `onThrottleInterval`. It is specified in seconds, minutes, hours, or days.
+      description: |
+        The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
       nullable: true
       default: null
       example: 10m
@@ -1716,7 +1717,7 @@ components:
               - summary
             properties:
               notify_when:
-                $ref: '#/components/schemas/notify_when_action'
+                $ref: '#/components/schemas/notify_when'
               summary:
                 type: boolean
                 description: Indicates whether the action is a summary.
@@ -1749,15 +1750,6 @@ components:
       type: string
       description: |
         The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
-    notify_when_rule:
-      type: string
-      description: |
-        Indicates how often alerts generate actions. NOTE: If `notify_when` is set at the rule level, you cannot specify `frequency` properties for its actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.
-      enum:
-        - onActionGroupChange
-        - onActiveAlert
-        - onThrottleInterval
-      example: onActiveAlert
     schedule:
       type: object
       description: The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.
@@ -1792,7 +1784,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for an anomaly detection rule.
@@ -1829,7 +1821,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for an anomaly detection jobs health rule.
@@ -1900,7 +1892,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           $ref: '#/components/schemas/params_property_apm_anomaly'
         rule_type_id:
@@ -1976,7 +1968,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           $ref: '#/components/schemas/params_property_apm_error_count'
         rule_type_id:
@@ -2063,7 +2055,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           $ref: '#/components/schemas/params_property_apm_transaction_duration'
         rule_type_id:
@@ -2144,7 +2136,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           $ref: '#/components/schemas/params_property_apm_transaction_error_rate'
         rule_type_id:
@@ -2179,7 +2171,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for an Elasticsearch query rule.
@@ -2216,7 +2208,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for an tracking containment rule.
@@ -2252,7 +2244,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for an index threshold rule.
@@ -2400,7 +2392,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           $ref: '#/components/schemas/params_property_infra_inventory'
         rule_type_id:
@@ -2433,7 +2425,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for an infrastructure anomaly rule.
@@ -2644,7 +2636,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           $ref: '#/components/schemas/params_property_infra_metric_threshold'
         rule_type_id:
@@ -2678,7 +2670,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a JVM memory usage rule.
@@ -2876,7 +2868,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           $ref: '#/components/schemas/params_property_log_threshold'
         rule_type_id:
@@ -2910,7 +2902,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a CCR read exceptions rule.
@@ -2946,7 +2938,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a cluster health rule.
@@ -2982,7 +2974,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a CPU usage rule.
@@ -3018,7 +3010,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a disk usage rule.
@@ -3054,7 +3046,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a Elasticsearch version mismatch rule.
@@ -3090,7 +3082,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a license expiration rule.
@@ -3126,7 +3118,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a Kibana version mismatch rule.
@@ -3162,7 +3154,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a Logstash version mismatch rule.
@@ -3198,7 +3190,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a missing monitoring data rule.
@@ -3234,7 +3226,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a nodes changed rule.
@@ -3270,7 +3262,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a shard size rule.
@@ -3306,7 +3298,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a thread pool search rejections rule.
@@ -3342,7 +3334,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a thread pool write rejections rule.
@@ -3379,7 +3371,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for an event correlation rule.
@@ -3416,7 +3408,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for an indicator match rule.
@@ -3453,7 +3445,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a machine learning rule.
@@ -3489,7 +3481,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a new terms rule.
@@ -3524,7 +3516,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a notification rule.
@@ -3561,7 +3553,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a custom query rule.
@@ -3598,7 +3590,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a saved query rule.
@@ -3635,7 +3627,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a threshold rule.
@@ -3710,7 +3702,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           $ref: '#/components/schemas/params_property_slo_burn_rate'
         rule_type_id:
@@ -3744,7 +3736,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for the synthetics monitor status rule.
@@ -3781,7 +3773,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for the uptime duration anomaly rule.
@@ -3824,7 +3816,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           $ref: '#/components/schemas/params_property_synthetics_uptime_tls'
         rule_type_id:
@@ -3859,7 +3851,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a TLS certificate rule.
@@ -3896,7 +3888,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for a transform health rule.
@@ -3998,7 +3990,7 @@ components:
         name:
           $ref: '#/components/schemas/name_rule'
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           $ref: '#/components/schemas/params_property_synthetics_monitor_status'
         rule_type_id:
@@ -4261,7 +4253,7 @@ components:
           description: The name of the rule.
           example: cluster_health_rule
         notify_when:
-          $ref: '#/components/schemas/notify_when_rule'
+          $ref: '#/components/schemas/notify_when'
         params:
           type: object
           description: The parameters for the rule.

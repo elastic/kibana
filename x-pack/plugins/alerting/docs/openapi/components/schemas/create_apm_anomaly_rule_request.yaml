@@ -17,7 +17,7 @@ properties:
   name:
     $ref: 'name_rule.yaml'
   notify_when:
-    $ref: 'notify_when_rule.yaml'
+    $ref: 'notify_when.yaml'
   params:
     $ref: '../../../../../apm/server/routes/alerts/rule_types/docs/params_property_apm_anomaly.yaml'
   rule_type_id:

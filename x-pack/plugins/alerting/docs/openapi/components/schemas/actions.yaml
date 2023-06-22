@@ -105,7 +105,7 @@ items:
         - summary
       properties:
         notify_when:
-          $ref: 'notify_when_action.yaml'
+          $ref: 'notify_when.yaml'
         summary:
           type: boolean
           description: Indicates whether the action is a summary.

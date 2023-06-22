@@ -14,7 +14,7 @@ properties:
     description: The name of the rule.
     example: cluster_health_rule
   notify_when:
-    $ref: 'notify_when_rule.yaml'
+    $ref: 'notify_when.yaml'
   params:
     type: object
     description: The parameters for the rule.
