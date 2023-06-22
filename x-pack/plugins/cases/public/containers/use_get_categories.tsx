@@ -16,6 +16,7 @@ import * as i18n from './translations';
 export const useGetCategories = () => {
   const { showErrorToast } = useCasesToast();
   const { owner } = useCasesContext();
+
   return useQuery(
     casesQueriesKeys.categories(),
     () => {
@@ -24,11 +25,7 @@ export const useGetCategories = () => {
     },
     {
       onError: (error: ServerError) => {
-        if (error.name !== 'AbortError') {
-          showErrorToast(error.body && error.body.message ? new Error(error.body.message) : error, {
-            title: i18n.CATEGORIES_ERROR_TITLE,
-          });
-        }
+        showErrorToast(error, { title: i18n.CATEGORIES_ERROR_TITLE });
       },
       staleTime: 60 * 1000, // one minute
     }
