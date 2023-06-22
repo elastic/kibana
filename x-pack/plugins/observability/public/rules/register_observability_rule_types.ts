@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
@@ -16,8 +17,8 @@ import {
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
-import { validateMetricThreshold } from '../pages/threshold/components/validation';
-import { formatReason } from '../pages/threshold/rule_data_formatters';
+import { validateMetricThreshold } from '../components/threshold/components/validation';
+import { formatReason } from '../components/threshold/rule_data_formatters';
 
 const sloBurnRateDefaultActionMessage = i18n.translate(
   'xpack.observability.slo.rules.burnRate.defaultActionMessage',
@@ -89,9 +90,9 @@ export const registerObservabilityRuleTypes = (
       ),
       iconClass: 'bell',
       documentationUrl(docLinks) {
-        return `${docLinks.links.observability.metricsThreshold}`;
+        return `${docLinks.links.observability.threshold}`;
       },
-      ruleParamsExpression: lazy(() => import('../pages/threshold/components/expression')),
+      ruleParamsExpression: lazy(() => import('../components/threshold/components/expression')),
       validate: validateMetricThreshold,
       defaultActionMessage: i18n.translate(
         'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
@@ -106,7 +107,7 @@ export const registerObservabilityRuleTypes = (
       requiresAppContext: false,
       format: formatReason,
       alertDetailsAppSection: lazy(
-        () => import('../pages/threshold/components/alert_details_app_section')
+        () => import('../components/threshold/components/alert_details_app_section')
       ),
     });
   }

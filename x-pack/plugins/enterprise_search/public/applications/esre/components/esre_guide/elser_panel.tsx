@@ -37,7 +37,10 @@ const steps: EuiContainedStepProps[] = [
         to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
         shouldNotCreateHref
       >
-        <EuiButton iconType="plusInCircle">
+        <EuiButton
+          data-telemetry-id="entSearch-esre-semanticSearch-elserPanel-createIndexButton"
+          iconType="plusInCircle"
+        >
           {i18n.translate('xpack.enterpriseSearch.esre.elserPanel.step1.buttonLabel', {
             defaultMessage: 'Create an index',
           })}

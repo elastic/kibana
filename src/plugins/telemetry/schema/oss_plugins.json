@@ -8945,6 +8945,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:alertTags": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Default value of the setting was changed."
+          }
+        },
         "search:includeFrozen": {
           "type": "boolean",
           "_meta": {

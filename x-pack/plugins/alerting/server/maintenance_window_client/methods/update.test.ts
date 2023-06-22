@@ -106,7 +106,11 @@ describe('MaintenanceWindowClient - update', () => {
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
       },
-      { id: 'test-id' }
+      {
+        id: 'test-id',
+        overwrite: true,
+        version: '123',
+      }
     );
     // Only these 3 properties are worth asserting since the rest come from mocks
     expect(result).toEqual(
@@ -160,7 +164,11 @@ describe('MaintenanceWindowClient - update', () => {
       expect.objectContaining({
         events: [...modifiedEvents, expect.any(Object), expect.any(Object), expect.any(Object)],
       }),
-      { id: 'test-id' }
+      {
+        id: 'test-id',
+        overwrite: true,
+        version: '123',
+      }
     );
 
     // Update with changing rrule
@@ -182,7 +190,11 @@ describe('MaintenanceWindowClient - update', () => {
           { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-02T00:00:00.000Z' },
         ],
       }),
-      { id: 'test-id' }
+      {
+        id: 'test-id',
+        overwrite: true,
+        version: '123',
+      }
     );
   });
 
