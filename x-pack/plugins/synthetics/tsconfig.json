@@ -83,6 +83,7 @@
     "@kbn/core-http-server",
     "@kbn/core-application-browser",
     "@kbn/std",
+    "@kbn/core-saved-objects-server-mocks",
   ],
   "exclude": [
     "target/**/*",

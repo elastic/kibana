@@ -23,6 +23,7 @@ import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { HistoryLocationState } from '../../build_services';
+import { createSearchSessionMock } from '../../__mocks__/search_session';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = {
@@ -30,6 +31,7 @@ const mockNavigationPlugin = {
 };
 
 describe('ContextApp test', () => {
+  const { history } = createSearchSessionMock();
   const services = {
     data: {
       ...dataPluginMock.createStartContract(),
@@ -57,7 +59,7 @@ describe('ContextApp test', () => {
       notifications: { toasts: [] },
       theme: { theme$: themeServiceMock.createStartContract().theme$ },
     },
-    history: () => {},
+    history: () => history,
     fieldFormats: {
       getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
       getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { HelpCommands } from './help_commands';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { fetchServiceAPIKey } from '../../../state/monitor_management/api';
+import { fetchProjectAPIKey } from '../../../state/monitor_management/api';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { ApiKeyBtn } from './api_key_btn';
 import { useEnablement } from '../../../hooks';
@@ -33,7 +33,7 @@ export const ProjectAPIKeys = () => {
 
   const { data, loading } = useFetcher(async () => {
     if (loadAPIKey) {
-      return fetchServiceAPIKey();
+      return fetchProjectAPIKey();
     }
     return null;
   }, [loadAPIKey]);

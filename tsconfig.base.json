@@ -644,6 +644,8 @@
       "@kbn/dev-utils/*": ["packages/kbn-dev-utils/*"],
       "@kbn/developer-examples-plugin": ["examples/developer_examples"],
       "@kbn/developer-examples-plugin/*": ["examples/developer_examples/*"],
+      "@kbn/discover-customization-examples-plugin": ["examples/discover_customization_examples"],
+      "@kbn/discover-customization-examples-plugin/*": ["examples/discover_customization_examples/*"],
       "@kbn/discover-enhanced-plugin": ["x-pack/plugins/discover_enhanced"],
       "@kbn/discover-enhanced-plugin/*": ["x-pack/plugins/discover_enhanced/*"],
       "@kbn/discover-plugin": ["src/plugins/discover"],

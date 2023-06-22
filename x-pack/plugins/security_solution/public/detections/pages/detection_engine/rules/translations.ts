@@ -672,6 +672,13 @@ export const NO_TAGS_AVAILABLE = i18n.translate(
   }
 );
 
+export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
+  {
+    defaultMessage: 'Select rule execution status to filter by',
+  }
+);
+
 export const NO_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.noRulesTitle',
   {
@@ -1209,5 +1216,12 @@ export const UPDATE_RULE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.upgradeRuleButton',
   {
     defaultMessage: 'Update rule',
+  }
+);
+
+export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.goBackToRulesTableButton',
+  {
+    defaultMessage: 'Go back to installed Elastic rules',
   }
 );

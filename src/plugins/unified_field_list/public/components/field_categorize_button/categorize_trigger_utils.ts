@@ -46,7 +46,12 @@ export async function canCategorize(
   field: DataViewField,
   dataView: DataView | undefined
 ): Promise<boolean> {
-  if (field.name === '_id' || !dataView?.id || !field.esTypes?.includes('text')) {
+  if (
+    field.name === '_id' ||
+    !dataView?.id ||
+    !dataView.isTimeBased() ||
+    !field.esTypes?.includes('text')
+  ) {
     return false;
   }
 

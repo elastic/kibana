@@ -23,6 +23,7 @@ export const FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreValue';
 export const FLYOUT_HEADER_SHARE_BUTTON_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderShareButton';
+export const FLYOUT_HEADER_CHAT_BUTTON_TEST_ID = 'newChatById';
 
 /* Description section */
 
@@ -35,6 +36,7 @@ export const DESCRIPTION_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutDescriptionDetails';
 export const DESCRIPTION_EXPAND_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutDescriptionExpandButton';
+export const DESCRIPTION_NAVIGATE_TO_RULE_TEST_ID = 'goToRuleDetails';
 export const REASON_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonTitle';
 export const REASON_DETAILS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonDetails';
 export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';
@@ -127,5 +129,10 @@ export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsVisualizationsTitleHeader';
 export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerPreview';
 export const ANALYZER_TREE_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTree';
+export const ANALYZER_TREE_VIEW_DETAILS_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsAnalayzerTreeViewDetailsButton';
 export const ANALYZER_TREE_LOADING_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTreeLoading';
 export const ANALYZER_TREE_ERROR_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTreeError';
+export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
+export const SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsSessionPreviewViewDetailsButton';

@@ -33,6 +33,7 @@ import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
 import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import {
   AlertSuppression,
   AlertsIndex,
@@ -250,6 +251,7 @@ export interface FilterOptions {
   tags: string[];
   excludeRuleTypes?: Type[];
   enabled?: boolean; // undefined is to display all the rules
+  ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
 }
 
 export interface FetchRulesResponse {

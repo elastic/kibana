@@ -71,7 +71,7 @@ import {
   cloneLayer,
   getNotifiableFeatures,
 } from './utils';
-import { isDraggedDataViewField } from '../../utils';
+import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
@@ -171,10 +171,12 @@ export function getFormBasedDatasource({
   const { uiSettings, settings } = core;
 
   const DATASOURCE_ID = 'formBased';
+  const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
   const formBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState> = {
     id: DATASOURCE_ID,
+    alias: ALIAS_IDS,
 
     initialize(
       persistedState?: FormBasedPersistedState,
@@ -499,28 +501,15 @@ export function getFormBasedDatasource({
     uniqueLabels(state: FormBasedPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
-      const counts = {} as Record<string, number>;
 
-      const makeUnique = (label: string) => {
-        let uniqueLabel = label;
+      const uniqueLabelGenerator = getUniqueLabelGenerator();
 
-        while (counts[uniqueLabel] >= 0) {
-          const num = ++counts[uniqueLabel];
-          uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
-            defaultMessage: '{label} [{num}]',
-            values: { label, num },
-          });
-        }
-
-        counts[uniqueLabel] = 0;
-        return uniqueLabel;
-      };
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
-          columnLabelMap[columnId] = makeUnique(column.label);
+          columnLabelMap[columnId] = uniqueLabelGenerator(column.label);
         });
       });
 
@@ -763,6 +752,7 @@ export function getFormBasedDatasource({
 
       return {
         datasourceId: DATASOURCE_ID,
+        datasourceAliasIds: ALIAS_IDS,
         getTableSpec: () => {
           // consider also referenced columns in this case
           // but map fields to the top referencing column
