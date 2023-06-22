@@ -6,7 +6,7 @@
  */
 
 import type { CoverageOverviewMitreTactic } from './mitre_tactic';
-import type { CoverageOverviewRuleData } from './rule_data';
+import type { CoverageOverviewRule } from './rule';
 
 /**
  * Coverage overview dashboard domain model
@@ -20,9 +20,9 @@ export interface CoverageOverviewDashboard {
    * Unmapped rules
    */
   unmappedRules: {
-    enabledRules: CoverageOverviewRuleData[];
-    disabledRules: CoverageOverviewRuleData[];
-    availableRules: CoverageOverviewRuleData[];
+    enabledRules: CoverageOverviewRule[];
+    disabledRules: CoverageOverviewRule[];
+    availableRules: CoverageOverviewRule[];
   };
   /**
    * Total metrics

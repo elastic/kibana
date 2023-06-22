@@ -9,8 +9,8 @@ import * as t from 'io-ts';
 import { NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
 import { CoverageOverviewRuleActivitySchema } from './request_schema';
 
-export type CoverageOverviewRuleData = t.TypeOf<typeof CoverageOverviewRuleData>;
-export const CoverageOverviewRuleData = t.type({
+export type CoverageOverviewRuleAttributes = t.TypeOf<typeof CoverageOverviewRuleAttributes>;
+export const CoverageOverviewRuleAttributes = t.type({
   name: t.string,
   activity: CoverageOverviewRuleActivitySchema,
 });
@@ -29,6 +29,6 @@ export const CoverageOverviewResponse = t.exact(
     /**
      * Map having ruleId as the key and coverage overview rule data as the value
      */
-    rules_data: t.record(t.string, CoverageOverviewRuleData),
+    rules_data: t.record(t.string, CoverageOverviewRuleAttributes),
   })
 );

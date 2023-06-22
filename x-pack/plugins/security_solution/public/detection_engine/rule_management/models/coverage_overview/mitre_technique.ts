@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoverageOverviewRuleData } from './rule_data';
+import type { CoverageOverviewRule } from './rule';
 
 export interface CoverageOverviewMitreTechnique {
   name: string;
@@ -21,7 +21,7 @@ export interface CoverageOverviewMitreTechnique {
    * A total number of subtechniques related to this technique
    */
   numOfSubtechniques: number;
-  enabledRules: CoverageOverviewRuleData[];
-  disabledRules: CoverageOverviewRuleData[];
-  availableRules: CoverageOverviewRuleData[];
+  enabledRules: CoverageOverviewRule[];
+  disabledRules: CoverageOverviewRule[];
+  availableRules: CoverageOverviewRule[];
 }

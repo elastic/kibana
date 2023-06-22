@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoverageOverviewRuleData } from './rule_data';
+import type { CoverageOverviewRule } from './rule';
 import type { CoverageOverviewMitreTechnique } from './mitre_technique';
 
 export interface CoverageOverviewMitreTactic {
@@ -18,7 +18,7 @@ export interface CoverageOverviewMitreTactic {
    * A list if techniques related to this tactic
    */
   techniques: CoverageOverviewMitreTechnique[];
-  enabledRules: CoverageOverviewRuleData[];
-  disabledRules: CoverageOverviewRuleData[];
-  availableRules: CoverageOverviewRuleData[];
+  enabledRules: CoverageOverviewRule[];
+  disabledRules: CoverageOverviewRule[];
+  availableRules: CoverageOverviewRule[];
 }
