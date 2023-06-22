@@ -10,14 +10,28 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { fields } from '@kbn/data-plugin/common/mocks';
-
 import { useKibana } from '../../lib/kibana';
 
 import { ThreatMatchComponent } from '.';
 import type { ThreatMapEntries } from './types';
-import type { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields } from '@kbn/data-views-plugin/common/mocks';
+
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 
 const mockTheme = getMockTheme({
   eui: {
@@ -60,20 +74,8 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPatterns={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -89,20 +91,8 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={getPayLoad()}
-          indexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPatterns={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -118,20 +108,8 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPatterns={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -146,20 +124,8 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPatterns={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -183,20 +149,8 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPatterns={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -220,20 +174,8 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={getDoublePayLoad()}
-          indexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPatterns={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -250,20 +192,8 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPatterns={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -281,20 +211,8 @@ describe('ThreatMatchComponent', () => {
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
           listItems={[]}
-          indexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPatterns={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           onChange={jest.fn()}
         />
       </ThemeProvider>

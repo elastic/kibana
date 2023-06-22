@@ -23,6 +23,23 @@ import {
 import type { FormHook } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields } from '@kbn/data-views-plugin/common/mocks';
+
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
+
 jest.mock('../../../../common/components/query_bar', () => {
   return {
     QueryBar: jest.fn(({ filterQuery }) => {
@@ -230,8 +247,8 @@ jest.mock('../../../containers/detection_engine/rules/use_rule_from_timeline');
 
 test('aggregatableFields', function () {
   expect(
-    aggregatableFields([
-      {
+    aggregatableFields({
+      'error.message': {
         name: 'error.message',
         type: 'string',
         esTypes: ['text'],
@@ -239,14 +256,14 @@ test('aggregatableFields', function () {
         aggregatable: false,
         readFromDocValues: false,
       },
-    ])
+    })
   ).toEqual([]);
 });
 
 test('aggregatableFields with aggregatable: true', function () {
   expect(
-    aggregatableFields([
-      {
+    aggregatableFields({
+      'error.message': {
         name: 'error.message',
         type: 'string',
         esTypes: ['text'],
@@ -254,7 +271,7 @@ test('aggregatableFields with aggregatable: true', function () {
         aggregatable: false,
         readFromDocValues: false,
       },
-      {
+      'file.path': {
         name: 'file.path',
         type: 'string',
         esTypes: ['keyword'],
@@ -262,7 +279,7 @@ test('aggregatableFields with aggregatable: true', function () {
         aggregatable: true,
         readFromDocValues: false,
       },
-    ])
+    })
   ).toEqual([
     {
       name: 'file.path',
@@ -300,7 +317,7 @@ describe('StepDefineRule', () => {
         threatIndicesConfig={[]}
         optionsSelected={eqlOptionsSelected}
         setOptionsSelected={setEqlOptionsSelected}
-        indexPattern={{ fields: [], title: '' }}
+        indexPattern={getMockIndexPattern()}
         isIndexPatternLoading={false}
         browserFields={{}}
       />

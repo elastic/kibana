@@ -11,10 +11,25 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
 import { EntryItem } from './entry_item';
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import type { DataViewBase } from '@kbn/es-query';
 
 jest.mock('../../lib/kibana');
+
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields, getField } from '@kbn/data-views-plugin/common/mocks';
+
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 
 describe('EntryItem', () => {
   test('it renders field labels if "showLabel" is "true"', () => {
@@ -27,22 +42,10 @@ describe('EntryItem', () => {
           type: 'mapping',
           entryIndex: 0,
         }}
-        indexPattern={
-          {
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          } as DataViewBase
-        }
+        indexPattern={getMockIndexPattern()}
         showLabel={true}
         onChange={jest.fn()}
-        threatIndexPatterns={
-          {
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          } as DataViewBase
-        }
+        threatIndexPatterns={getMockIndexPattern()}
       />
     );
 
@@ -60,20 +63,8 @@ describe('EntryItem', () => {
           value: getField('ip'),
           entryIndex: 0,
         }}
-        indexPattern={
-          {
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          } as DataViewBase
-        }
-        threatIndexPatterns={
-          {
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          } as DataViewBase
-        }
+        indexPattern={getMockIndexPattern()}
+        threatIndexPatterns={getMockIndexPattern()}
         showLabel={false}
         onChange={mockOnChange}
       />
@@ -107,20 +98,8 @@ describe('EntryItem', () => {
           value: getField('ip'),
           entryIndex: 0,
         }}
-        indexPattern={
-          {
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          } as DataViewBase
-        }
-        threatIndexPatterns={
-          {
-            id: '1234',
-            title: 'logstash-*',
-            fields,
-          } as DataViewBase
-        }
+        indexPattern={getMockIndexPattern()}
+        threatIndexPatterns={getMockIndexPattern()}
         showLabel={false}
         onChange={mockOnChange}
       />

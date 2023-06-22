@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment-timezone';
 
 import {
@@ -20,17 +18,26 @@ import {
   customValidators,
 } from './helpers';
 import type { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields, getField } from '@kbn/data-views-plugin/common/mocks';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
 
-const getMockIndexPattern = (): DataViewBase =>
-  ({
-    id: '1234',
-    title: 'logstash-*',
-    fields,
-  } as DataViewBase);
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of [...fields]) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 
 const getMockEntry = (): FormattedEntry => ({
   id: '123',
@@ -52,28 +59,42 @@ describe('Helpers', () => {
 
   describe('#getFormattedEntry', () => {
     test('it returns entry with a value when "item.field" is of type "text" and matching keyword field exists', () => {
-      const payloadIndexPattern: DataViewBase = {
-        ...getMockIndexPattern(),
-        fields: [
-          ...fields,
-          {
-            name: 'machine.os.raw.text',
-            type: 'string',
-            esTypes: ['text'],
-            count: 0,
-            scripted: false,
-            searchable: false,
-            aggregatable: false,
-            readFromDocValues: true,
-          },
-        ],
-      } as DataViewBase;
+      const getPayloadMockIndexPattern = (): DataViewSpec => ({
+        ...createStubDataView({
+          spec: { id: '1234', title: 'logstash-*' },
+        }),
+        fields: ((): DataViewFieldMap => {
+          const fieldMap: DataViewFieldMap = Object.create(null);
+          for (const field of [
+            ...fields,
+            {
+              name: 'machine.os.raw.text',
+              type: 'string',
+              esTypes: ['text'],
+              count: 0,
+              scripted: false,
+              searchable: false,
+              aggregatable: false,
+              readFromDocValues: true,
+            },
+          ]) {
+            fieldMap[field.name] = { ...field };
+          }
+          return fieldMap;
+        })(),
+      });
+
       const payloadItem: Entry = {
         field: 'machine.os.raw.text',
         type: 'mapping',
         value: 'some os',
       };
-      const output = getFormattedEntry(payloadIndexPattern, payloadIndexPattern, payloadItem, 0);
+      const output = getFormattedEntry(
+        getPayloadMockIndexPattern(),
+        getPayloadMockIndexPattern(),
+        payloadItem,
+        0
+      );
       const expected: FormattedEntry = {
         entryIndex: 0,
         id: '123',
@@ -172,7 +193,7 @@ describe('Helpers', () => {
     });
 
     test('it returns formatted entries', () => {
-      const payloadIndexPattern: DataViewBase = getMockIndexPattern();
+      const payloadIndexPattern = getMockIndexPattern();
       const payloadItems: Entry[] = [
         { field: 'machine.os', type: 'mapping', value: 'machine.os' },
         { field: 'ip', type: 'mapping', value: 'ip' },

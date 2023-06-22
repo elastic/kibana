@@ -18,7 +18,22 @@ import { mockHistory, Router } from '../../../../common/mock/router';
 import { render, act, fireEvent } from '@testing-library/react';
 import { resolveTimeline } from '../../../../timelines/containers/api';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields } from '@kbn/data-views-plugin/common/mocks';
 
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 jest.mock('../../../../timelines/containers/api');
 jest.mock('../../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../../common/lib/kibana');
@@ -75,7 +90,7 @@ describe('QueryBarDefineRule', () => {
           <QueryBarDefineRule
             browserFields={{}}
             isLoading={false}
-            indexPattern={{ fields: [], title: 'title' }}
+            indexPattern={getMockIndexPattern()}
             onCloseTimelineSearch={jest.fn()}
             openTimelineSearch={true}
             dataTestSubj="query-bar-define-rule"
@@ -98,7 +113,7 @@ describe('QueryBarDefineRule', () => {
             <QueryBarDefineRule
               browserFields={{}}
               isLoading={false}
-              indexPattern={{ fields: [], title: 'title' }}
+              indexPattern={getMockIndexPattern()}
               onCloseTimelineSearch={jest.fn()}
               openTimelineSearch={true}
               dataTestSubj="query-bar-define-rule"
@@ -124,7 +139,7 @@ describe('QueryBarDefineRule', () => {
           <QueryBarDefineRule
             browserFields={{}}
             isLoading={false}
-            indexPattern={{ fields: [], title: 'title' }}
+            indexPattern={getMockIndexPattern()}
             onCloseTimelineSearch={jest.fn()}
             openTimelineSearch={true}
             dataTestSubj="query-bar-define-rule"

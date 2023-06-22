@@ -10,13 +10,26 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
 import { useKibana } from '../../lib/kibana';
-import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { ListItemComponent } from './list_item';
 import type { ThreatMapEntries } from './types';
-import type { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields } from '@kbn/data-views-plugin/common/mocks';
 
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'logstash-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 const mockTheme = getMockTheme({
   eui: {
     euiColorLightShade: '#ece',
@@ -76,20 +89,8 @@ describe('ListItemComponent', () => {
           <ListItemComponent
             listItem={doublePayload()}
             listItemIndex={0}
-            indexPattern={
-              {
-                id: '1234',
-                title: 'logstash-*',
-                fields,
-              } as DataViewBase
-            }
-            threatIndexPatterns={
-              {
-                id: '1234',
-                title: 'logstash-*',
-                fields,
-              } as DataViewBase
-            }
+            indexPattern={getMockIndexPattern()}
+            threatIndexPatterns={getMockIndexPattern()}
             andLogicIncluded={true}
             isOnlyItem={false}
             onDeleteEntryItem={jest.fn()}
@@ -109,24 +110,12 @@ describe('ListItemComponent', () => {
           <ListItemComponent
             listItem={doublePayload()}
             listItemIndex={1}
-            indexPattern={
-              {
-                id: '1234',
-                title: 'logstash-*',
-                fields,
-              } as DataViewBase
-            }
+            indexPattern={getMockIndexPattern()}
             andLogicIncluded={true}
             isOnlyItem={false}
             onDeleteEntryItem={jest.fn()}
             onChangeEntryItem={jest.fn()}
-            threatIndexPatterns={
-              {
-                id: '1234',
-                title: 'logstash-*',
-                fields,
-              } as DataViewBase
-            }
+            threatIndexPatterns={getMockIndexPattern()}
           />
         </ThemeProvider>
       );
@@ -140,20 +129,8 @@ describe('ListItemComponent', () => {
           <ListItemComponent
             listItem={singlePayload()}
             listItemIndex={1}
-            indexPattern={
-              {
-                id: '1234',
-                title: 'logstash-*',
-                fields,
-              } as DataViewBase
-            }
-            threatIndexPatterns={
-              {
-                id: '1234',
-                title: 'logstash-*',
-                fields,
-              } as DataViewBase
-            }
+            indexPattern={getMockIndexPattern()}
+            threatIndexPatterns={getMockIndexPattern()}
             andLogicIncluded={true}
             isOnlyItem={false}
             onDeleteEntryItem={jest.fn()}
@@ -173,20 +150,8 @@ describe('ListItemComponent', () => {
           <ListItemComponent
             listItem={singlePayload()}
             listItemIndex={1}
-            indexPattern={
-              {
-                id: '1234',
-                title: 'logstash-*',
-                fields,
-              } as DataViewBase
-            }
-            threatIndexPatterns={
-              {
-                id: '1234',
-                title: 'logstash-*',
-                fields,
-              } as DataViewBase
-            }
+            indexPattern={getMockIndexPattern()}
+            threatIndexPatterns={getMockIndexPattern()}
             andLogicIncluded={false}
             isOnlyItem={false}
             onDeleteEntryItem={jest.fn()}
@@ -214,20 +179,8 @@ describe('ListItemComponent', () => {
         <ListItemComponent
           listItem={item}
           listItemIndex={0}
-          indexPattern={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPattern={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           andLogicIncluded={false}
           isOnlyItem={true}
           onDeleteEntryItem={jest.fn()}
@@ -245,20 +198,8 @@ describe('ListItemComponent', () => {
         <ListItemComponent
           listItem={singlePayload()}
           listItemIndex={0}
-          indexPattern={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPattern={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           andLogicIncluded={false}
           isOnlyItem={false}
           onDeleteEntryItem={jest.fn()}
@@ -276,20 +217,8 @@ describe('ListItemComponent', () => {
         <ListItemComponent
           listItem={singlePayload()}
           listItemIndex={1}
-          indexPattern={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPattern={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           andLogicIncluded={false}
           // if entryItemIndex is not 0, wouldn't make sense for
           // this to be true, but done for testing purposes
@@ -309,20 +238,8 @@ describe('ListItemComponent', () => {
         <ListItemComponent
           listItem={doublePayload()}
           listItemIndex={0}
-          indexPattern={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPattern={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           andLogicIncluded={false}
           isOnlyItem={true}
           onDeleteEntryItem={jest.fn()}
@@ -341,20 +258,8 @@ describe('ListItemComponent', () => {
         <ListItemComponent
           listItem={doublePayload()}
           listItemIndex={0}
-          indexPattern={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
+          indexPattern={getMockIndexPattern()}
+          threatIndexPatterns={getMockIndexPattern()}
           andLogicIncluded={false}
           isOnlyItem={true}
           onDeleteEntryItem={mockOnDeleteEntryItem}

@@ -10,11 +10,28 @@ import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
-import { TestProviders, mockIndexPattern } from '../../mock';
+import { TestProviders } from '../../mock';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import type { QueryBarComponentProps } from '.';
 import { QueryBar } from '.';
+
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields } from '@kbn/data-views-plugin/common/mocks';
+
+const getMockIndexPattern = (): DataViewSpec => ({
+  ...createStubDataView({
+    spec: { id: '1234', title: 'filebeat-*,auditbeat-*,packetbeat-*' },
+  }),
+  fields: ((): DataViewFieldMap => {
+    const fieldMap: DataViewFieldMap = Object.create(null);
+    for (const field of fields) {
+      fieldMap[field.name] = { ...field };
+    }
+    return fieldMap;
+  })(),
+});
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -59,7 +76,7 @@ describe('QueryBar ', () => {
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
           hideSavedQuery={false}
-          indexPattern={mockIndexPattern}
+          indexPattern={getMockIndexPattern()}
           isRefreshPaused={true}
           filterQuery={{ query: 'here: query', language: 'kuery' }}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -217,7 +234,7 @@ describe('QueryBar ', () => {
             dateRangeFrom={DEFAULT_FROM}
             dateRangeTo={DEFAULT_TO}
             hideSavedQuery={false}
-            indexPattern={mockIndexPattern}
+            indexPattern={getMockIndexPattern()}
             isRefreshPaused={true}
             filterQuery={{ query: 'here: query', language: 'kuery' }}
             filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -247,7 +264,7 @@ describe('QueryBar ', () => {
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
           hideSavedQuery={false}
-          indexPattern={mockIndexPattern}
+          indexPattern={getMockIndexPattern()}
           isRefreshPaused={true}
           filterQuery={{ query: 'here: query', language: 'kuery' }}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -279,7 +296,7 @@ describe('QueryBar ', () => {
             dateRangeFrom={DEFAULT_FROM}
             dateRangeTo={DEFAULT_TO}
             hideSavedQuery={false}
-            indexPattern={mockIndexPattern}
+            indexPattern={getMockIndexPattern()}
             isRefreshPaused={true}
             filterQuery={{ query: 'here: query', language: 'kuery' }}
             filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -311,7 +328,7 @@ describe('QueryBar ', () => {
             dateRangeFrom={DEFAULT_FROM}
             dateRangeTo={DEFAULT_TO}
             hideSavedQuery={false}
-            indexPattern={mockIndexPattern}
+            indexPattern={getMockIndexPattern()}
             isRefreshPaused={true}
             filterQuery={{
               query: 'here: query',
