@@ -145,7 +145,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
           duration: fetchDuration,
           meta: { fetchType },
         });
-        window.console.log(`discoverSurroundingDocsFetch: ${fetchType}, took: ${fetchDuration}`);
       }
     };
 
