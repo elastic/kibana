@@ -11,9 +11,14 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react';
 import { IndexPatternType } from '@kbn/io-ts-utils';
+import { DatasetPlain } from '../../../common/datasets/models/dataset';
 import { Dataset, Integration } from '../../../common/datasets';
 import { DatasetSelector } from './dataset_selector';
-import { DatasetSelectorProps, DatasetsSelectorSearchParams } from './types';
+import {
+  DatasetSelectionHandler,
+  DatasetSelectorProps,
+  DatasetsSelectorSearchParams,
+} from './types';
 
 const meta: Meta<typeof DatasetSelector> = {
   component: DatasetSelector,
@@ -33,7 +38,13 @@ const meta: Meta<typeof DatasetSelector> = {
 export default meta;
 
 const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
-  const [title, setTitle] = useState(mockIntegrations[0].dataStreams[0].title as string);
+  const [selected, setSelected] = useState<DatasetPlain>({
+    dataset: mockIntegrations[0].dataStreams[0],
+    integration: {
+      name: mockIntegrations[0].name,
+      version: mockIntegrations[0].version,
+    },
+  });
   const [search, setSearch] = useState<DatasetsSelectorSearchParams>({
     sortOrder: 'asc',
     name: '',
@@ -46,8 +57,8 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
     }
   };
 
-  const onStreamSelected = (stream: Dataset) => {
-    setTitle(stream.title || stream.name);
+  const onDatasetSelected: DatasetSelectionHandler = (dataset) => {
+    setSelected(dataset.toPlain());
   };
 
   const filteredIntegrations = integrations.filter((integration) =>
@@ -67,16 +78,16 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
     <DatasetSelector
       {...args}
       datasets={sortedDatasets}
+      initialSelected={selected}
       integrations={sortedIntegrations}
       onIntegrationsLoadMore={onIntegrationsLoadMore}
       onIntegrationsSearch={setSearch}
       onIntegrationsSort={setSearch}
       onIntegrationsStreamsSearch={setSearch}
       onIntegrationsStreamsSort={setSearch}
-      onStreamSelected={onStreamSelected}
+      onDatasetSelected={onDatasetSelected}
       onUnmanagedStreamsSearch={setSearch}
       onUnmanagedStreamsSort={setSearch}
-      title={title}
     />
   );
 };
@@ -96,7 +107,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'system',
     version: '1.25.2',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'System metrics stream',
@@ -111,7 +122,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'kubernetes',
     version: '1.35.0',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'Kubernetes metrics stream',
@@ -126,7 +137,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'mysql',
     version: '1.11.0',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'MySQL metrics stream',
@@ -145,7 +156,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'apache',
     version: '1.12.0',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'Apache metrics stream',
@@ -164,7 +175,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'nginx',
     version: '1.11.1',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'Nginx metrics stream',
@@ -179,7 +190,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'postgresql',
     version: '1.13.0',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'PostgreSQL metrics stream',
@@ -198,7 +209,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'rabbitmq',
     version: '1.8.8',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'RabbitMQ metrics stream',
@@ -217,7 +228,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'redis',
     version: '1.9.2',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'Redis metrics stream',
@@ -232,7 +243,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'elasticsearch',
     version: '1.5.0',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'Elasticsearch metrics stream',
@@ -247,7 +258,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'mongodb',
     version: '1.9.3',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'MongoDB metrics stream',
@@ -262,7 +273,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'prometheus',
     version: '1.3.2',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'Prometheus metrics stream',
@@ -273,7 +284,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'haproxy',
     version: '1.5.1',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       {
         title: 'HAProxy metrics stream',
@@ -288,7 +299,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'atlassian_jira',
     version: '1.10.0',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       { title: 'Atlassian metrics stream', name: 'metrics-*' as IndexPatternType },
       { title: 'Atlassian secondary', name: 'metrics-*' as IndexPatternType },
@@ -297,7 +308,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'atlassian_confluence',
     version: '1.10.0',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       { title: 'Atlassian metrics stream', name: 'metrics-*' as IndexPatternType },
       { title: 'Atlassian secondary', name: 'metrics-*' as IndexPatternType },
@@ -306,7 +317,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'atlassian_bitbucket',
     version: '1.9.0',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       { title: 'Atlassian metrics stream', name: 'metrics-*' as IndexPatternType },
       { title: 'Atlassian secondary', name: 'metrics-*' as IndexPatternType },
@@ -315,7 +326,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'docker',
     version: '2.4.3',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       { title: 'Docker container logs', name: 'docker-*' as IndexPatternType },
       { title: 'Docker daemon logs', name: 'docker-daemon-*' as IndexPatternType },
@@ -324,7 +335,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'aws',
     version: '1.36.3',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       { title: 'AWS S3 object access logs', name: 'aws-s3-access-' as IndexPatternType },
       { title: 'AWS S3 bucket access logs', name: 'aws-s3-bucket-access-' as IndexPatternType },
@@ -333,7 +344,7 @@ const mockIntegrations: Integration[] = [
   {
     name: 'cassandra',
     version: '1.6.0',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [
       { title: 'Cassandra server logs', name: 'cassandra-' as IndexPatternType },
       { title: 'Cassandra slow queries', name: 'cassandra-slow-' as IndexPatternType },
@@ -343,28 +354,28 @@ const mockIntegrations: Integration[] = [
   {
     name: 'nginx_ingress_controller',
     version: '1.7.1',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [{ title: 'Nginx ingress logs', name: 'nginx-ingress-' as IndexPatternType }],
   },
   {
     name: 'gcp',
     version: '2.20.1',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [{ title: 'GCP Stackdriver logs', name: 'gcp-stackdriver-*' as IndexPatternType }],
   },
   {
     name: 'kafka',
     version: '1.5.6',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [{ title: 'Kafka server logs', name: 'kafka-*' as IndexPatternType }],
   },
   {
     name: 'kibana',
     version: '2.3.4',
-    status: 'installed',
+    status: 'installed' as Integration['status'],
     dataStreams: [{ title: 'Kibana server logs', name: 'kibana-*' as IndexPatternType }],
   },
-];
+].map(Integration.create);
 
 const mockDatasets: Dataset[] = [
   { name: 'logs-*' as IndexPatternType },
@@ -468,4 +479,4 @@ const mockDatasets: Dataset[] = [
   { name: 'data-migration-logs-*' as IndexPatternType },
   { name: 'data-load-balancing-logs-*' as IndexPatternType },
   { name: 'data-scaling-logs-*' as IndexPatternType },
-];
+].map((dataset) => Dataset.create({ dataset }));

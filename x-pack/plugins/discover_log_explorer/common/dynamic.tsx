@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { ComponentType, lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 
-type LoadableComponent = () => Promise<{ default: ComponentType<any> }>;
+type LoadableComponent = () => any;
 
 interface DynamicOptions {
   fallback?: React.ReactNode;

@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Dataset, DatasetPlain } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
 import {
   LoadMoreIntegrations,
   ReloadIntegrations,
   SearchIntegrations,
 } from '../../../hooks/use_integrations';
-import { Dataset } from '../../../../common/datasets';
 import type { IImmutableCache } from '../../../../common/immutable_cache';
 import { DatasetSelectionHandler, DatasetsSelectorSearchParams, PanelId } from '../types';
 
 export interface DefaultDatasetsSelectorContext {
+  selected?: DatasetPlain;
   panelId: PanelId;
   searchCache: IImmutableCache<PanelId, DatasetsSelectorSearchParams>;
   search: DatasetsSelectorSearchParams;
@@ -57,7 +58,7 @@ export type DatasetsSelectorEvent =
       panelId: PanelId;
     }
   | {
-      type: 'SELECT_STREAM';
+      type: 'SELECT_DATASET';
       dataset: Dataset;
     }
   | {
@@ -73,14 +74,14 @@ export type DatasetsSelectorEvent =
     };
 
 export interface DatasetsSelectorStateMachineDependencies {
-  initialContext?: DefaultDatasetsSelectorContext;
+  initialContext?: Partial<DefaultDatasetsSelectorContext>;
   onIntegrationsLoadMore: LoadMoreIntegrations;
   onIntegrationsReload: ReloadIntegrations;
   onIntegrationsSearch: SearchIntegrations;
   onIntegrationsSort: SearchIntegrations;
   onIntegrationsStreamsSearch: SearchIntegrations;
   onIntegrationsStreamsSort: SearchIntegrations;
-  onStreamSelected: DatasetSelectionHandler;
+  onDatasetSelected: DatasetSelectionHandler;
   onUnmanagedStreamsReload: ReloadDatasets;
   onUnmanagedStreamsSearch: SearchDatasets;
   onUnmanagedStreamsSort: SearchDatasets;

@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import { IndexPatternType } from '@kbn/io-ts-utils';
+import { Dataset, DatasetPlain } from '../../common/datasets/models/dataset';
 import { DatasetSelectionHandler, DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
 import { InternalStateProvider, useDataView } from '../hooks/use_data_view';
@@ -20,6 +22,13 @@ interface CustomDatasetSelectorProps {
 export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
   // Container component, here goes all the state management and custom logic usage to keep the DatasetSelector presentational.
   const dataView = useDataView();
+
+  const initialSelected: DatasetPlain = Dataset.create({
+    dataset: {
+      name: dataView.getIndexPattern() as IndexPatternType,
+      title: dataView.getName(),
+    },
+  }).toPlain();
 
   const {
     error: integrationsError,
@@ -48,18 +57,14 @@ export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
    * since we'll need to handle more actions from the stateContainer
    */
   const handleStreamSelection: DatasetSelectionHandler = (dataset) => {
-    return stateContainer.actions.onCreateDefaultAdHocDataView({
-      // Invert the property because the API returns the index pattern as `name`
-      // and a readable name as `title`
-      name: dataset.title,
-      title: dataset.name,
-    });
+    return stateContainer.actions.onCreateDefaultAdHocDataView(dataset.toSpec());
   };
 
   return (
     <DatasetSelector
       datasets={datasets}
       datasetsError={datasetsError}
+      initialSelected={initialSelected}
       integrations={integrations}
       integrationsError={integrationsError}
       isLoadingIntegrations={isLoadingIntegrations}
@@ -70,12 +75,11 @@ export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
       onIntegrationsSort={sortIntegrations}
       onIntegrationsStreamsSearch={searchIntegrationsStreams}
       onIntegrationsStreamsSort={sortIntegrationsStreams}
-      onStreamSelected={handleStreamSelection}
+      onDatasetSelected={handleStreamSelection}
       onStreamsEntryClick={loadDatasets}
       onUnmanagedStreamsReload={reloadDatasets}
       onUnmanagedStreamsSearch={searchDatasets}
       onUnmanagedStreamsSort={sortDatasets}
-      title={dataView.getName()}
     />
   );
 });

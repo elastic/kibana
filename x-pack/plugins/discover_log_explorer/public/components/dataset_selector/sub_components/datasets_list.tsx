@@ -24,7 +24,7 @@ interface DatasetListProps {
   error: Error | null;
   isLoading: boolean;
   onRetry: ReloadDatasets;
-  onStreamClick: DatasetSelectionHandler;
+  onDatasetClick: DatasetSelectionHandler;
 }
 
 export const DatasetsList = ({
@@ -32,7 +32,7 @@ export const DatasetsList = ({
   error,
   isLoading,
   onRetry,
-  onStreamClick,
+  onDatasetClick,
 }: DatasetListProps) => {
   const isEmpty = datasets == null || datasets.length <= 0;
   const hasError = error !== null;
@@ -79,15 +79,11 @@ export const DatasetsList = ({
     );
   }
 
-  return (
-    <>
-      {datasets.map((stream) => (
-        <EuiContextMenuItem key={stream.name} onClick={() => onStreamClick(stream)}>
-          {stream.name}
-        </EuiContextMenuItem>
-      ))}
-    </>
-  );
+  return datasets.map((dataset) => (
+    <EuiContextMenuItem key={dataset.name} onClick={() => onDatasetClick(dataset)}>
+      {dataset.name}
+    </EuiContextMenuItem>
+  ));
 };
 
 // eslint-disable-next-line import/no-default-export

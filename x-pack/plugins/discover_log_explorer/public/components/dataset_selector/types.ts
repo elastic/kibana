@@ -6,8 +6,9 @@
  */
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
-import { IntegrationId, SortOrder } from '../../../common/latest';
-import { Dataset, Integration } from '../../../common/datasets';
+import { DatasetPlain } from '../../../common/datasets/models/dataset';
+import { SortOrder } from '../../../common/latest';
+import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
 import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
 import {
   LoadMoreIntegrations,
@@ -21,6 +22,8 @@ export interface DatasetSelectorProps {
   datasets: Dataset[] | null;
   /* Any error occurred to show when the user preview the generic data streams */
   datasetsError?: Error | null;
+  /* The integrations list, each integration includes its data streams */
+  initialSelected: DatasetPlain;
   /* The integrations list, each integration includes its data streams */
   integrations: Integration[] | null;
   /* Any error occurred to show when the user preview the integrations */
@@ -44,9 +47,7 @@ export interface DatasetSelectorProps {
   /* Triggered when the uncategorized streams entry is selected */
   onStreamsEntryClick: LoadDatasets;
   /* Triggered when a data stream entry is selected */
-  onStreamSelected: DatasetSelectionHandler;
-  /* The human-readable name of the currently selected view */
-  title: string;
+  onDatasetSelected: DatasetSelectionHandler;
 }
 
 export type PanelId =
@@ -66,4 +67,4 @@ export type DatasetsSelectorSearchHandler = (params: DatasetsSelectorSearchParam
 
 export type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId }) => void;
 
-export type DatasetSelectionHandler = (stream: Dataset) => void;
+export type DatasetSelectionHandler = (dataset: Dataset) => void;

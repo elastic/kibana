@@ -35,6 +35,7 @@ const IntegrationsListStatus = dynamic(() => import('./sub_components/integratio
 export function DatasetSelector({
   datasets,
   datasetsError,
+  initialSelected,
   integrations,
   integrationsError,
   isLoadingIntegrations,
@@ -45,17 +46,17 @@ export function DatasetSelector({
   onIntegrationsSort,
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
-  onStreamSelected,
+  onDatasetSelected,
   onStreamsEntryClick,
   onUnmanagedStreamsReload,
   onUnmanagedStreamsSearch,
   onUnmanagedStreamsSort,
-  title,
 }: DatasetSelectorProps) {
   const {
     isOpen,
     panelId,
     search,
+    selected,
     changePanel,
     scrollToIntegrationsBottom,
     searchByName,
@@ -63,6 +64,7 @@ export function DatasetSelector({
     sortByOrder,
     togglePopover,
   } = useDatasetSelector({
+    initialContext: { selected: initialSelected },
     onIntegrationsLoadMore,
     onIntegrationsReload,
     onIntegrationsSearch,
@@ -72,7 +74,7 @@ export function DatasetSelector({
     onUnmanagedStreamsSearch,
     onUnmanagedStreamsSort,
     onUnmanagedStreamsReload,
-    onStreamSelected,
+    onDatasetSelected,
   });
 
   const [setSpyRef] = useIntersectionRef({ onIntersecting: scrollToIntegrationsBottom });
@@ -104,7 +106,7 @@ export function DatasetSelector({
 
     const { items, panels } = buildIntegrationsTree({
       integrations,
-      onStreamSelected: selectDataset,
+      onDatasetSelected: selectDataset,
     });
 
     // Set the last item to be a spy for infinite scroll loading
@@ -142,7 +144,7 @@ export function DatasetSelector({
           error={datasetsError}
           isLoading={isLoadingStreams}
           onRetry={onUnmanagedStreamsReload}
-          onStreamClick={selectDataset}
+          onDatasetClick={selectDataset}
         />
       ),
     },
@@ -151,7 +153,7 @@ export function DatasetSelector({
 
   return (
     <DatasetsPopover
-      title={title}
+      selected={selected}
       isOpen={isOpen}
       closePopover={togglePopover}
       onClick={togglePopover}

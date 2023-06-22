@@ -17,12 +17,12 @@ import {
 } from './types';
 
 export const createPureDatasetsSelectorStateMachine = (
-  initialContext: DefaultDatasetsSelectorContext = DEFAULT_CONTEXT
+  initialContext: Partial<DefaultDatasetsSelectorContext> = DEFAULT_CONTEXT
 ) =>
   /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrFmADZgDG6A9rgHSVk2yQDEAKgPIDiPAMgFEA2gAYAuolAAHFgEt0cmgDspIAB6IAjAGYA7AA56AFgOjjANgN6ArABoQAT0Smd9AJzmrtgL4+HaJg4+EQk5FS0DDTSYMqcvAIiEmqysApKqkga2qJ6WvQWpsb69k4u7gBMHlrulVrWNn4BGNh4BMSkFNR09NGx9GRysIrKUACSyuhgULgYGbBsAMIAEgCCAHI8ggD6AAobgvxiklmp6SpqmghaesYFNhYVpc4INgZuFe7ejf4gga0hDrhbpRGLKAZDEbjSbTWaKFQLFYbLZ7A5HLQnGTyeGZUBXCpaO7GG5fBoOF7E-LuYx1BpNP4tYLtMJdSK9MEQ4ZyUYTKYzOYIthYRYAJS4-H42242zG6w4gh4ItWHDGXHWWG2ACEuBxuABZY4pbEZS6IAC0T3yelEOi0T3JiAqBncHi+oncJXp-yZoU6ER6fXBgy5PJh-JxCywglWIpWWoAmtt1qs9UlMSAzjjTQgzTcqmZcgY7c9EDYbHp6DZC8WvYy2r7gWzA5yobzYQLlJGuCKOAntt3kIIRYbTsaLlkrmbbRZ6LZDMWHQhjMZRJXiSvHj9mkF60DWQGOcHW2G4RkfcQlmtNjt9utDiOsWksxPHRU3BY8mSyggKqZ6GZLDpX5vV3Fl-VBfoj25aE+VPFRz0jQ5BEWXssA4EVowNZJRyfE0X2uUQnnoGobFte1vwqCpRFrHdATAkF2UgyFoLbcMz1AoVo1jZY+2TVMHwzMdcWyBBrRsDwaQJL8XjMYigO3AFmT9Bjmyg0NYI7BChW7XtNUTAchwEzM8LxFwbhMAwDCdBdv1k+pfGAus6OUptD2Y0YAFVlEIVBlFQGAIC0pFr1RO8jmwx9zmE-E3wKT9bEXPQLHErRClETcaMUht9wgoN3KgLyfL8gKtKjIQUO2NCMJTIyhOzLRCJS9xSJsl5bjcHRRAMGwPQchSEJcg8mJDArvN8-zIFKri4z0pMUzTI1cPHUzROMfM8ndEpF2sKpfwsTa+oZWilMbIa8pGwrxpKjisB0vsDOHCLBKW6KXF-ExjBa8iZL0XbLAOn5fmUGgIDgNQQOc07cEWqLszNYkqjnItvvNVKqhuctka3I6sr3cDGGYVgIBh58VuLd94pLJd3g8Lx5JxgaocY4TjOWkSp0KWdMda81bji7mnkyxmcuZ+gAAtIRJkz2ZuCstBsN9igS787X-X8pMOiGTpF1T8tYuDOyltnJy0GoCiKLbvx0ZriLSjLHOO7L8d1kb9c00Cjde15OsrCw7ZR65anoTrAM1pztedtyLrG4rJo9nDYfwstxOMJKHgD36qgsXRrMFvwfCAA */
   createMachine<DatasetsSelectorContext, DatasetsSelectorEvent, DatasetsSelectorTypestate>(
     {
-      context: initialContext,
+      context: { ...DEFAULT_CONTEXT, ...initialContext },
       preserveActionOrder: true,
       predictableActionArguments: true,
       id: 'DatasetsSelector',
@@ -70,8 +70,8 @@ export const createPureDatasetsSelectorStateMachine = (
               entry: ['storePanelId', 'retrieveSearchFromCache', maybeRestoreSearchResult],
               on: {
                 CHANGE_PANEL: 'listingIntegrations',
-                SELECT_STREAM: {
-                  actions: 'selectStream',
+                SELECT_DATASET: {
+                  actions: ['storeSelected', 'selectStream'],
                   target: '#closed',
                 },
                 SEARCH_BY_NAME: {
@@ -86,8 +86,8 @@ export const createPureDatasetsSelectorStateMachine = (
               entry: ['storePanelId', 'retrieveSearchFromCache', maybeRestoreSearchResult],
               on: {
                 CHANGE_PANEL: 'listingIntegrations',
-                SELECT_STREAM: {
-                  actions: 'selectStream',
+                SELECT_DATASET: {
+                  actions: ['storeSelected', 'selectStream'],
                   target: '#closed',
                 },
                 SEARCH_BY_NAME: {
@@ -116,6 +116,9 @@ export const createPureDatasetsSelectorStateMachine = (
           }
           return {};
         }),
+        storeSelected: assign((_context, event) =>
+          'dataset' in event ? { selected: event.dataset.toPlain() } : {}
+        ),
         retrieveSearchFromCache: assign((context, event) =>
           'panelId' in event
             ? { search: context.searchCache.get(event.panelId) ?? defaultSearch }
@@ -155,14 +158,14 @@ export const createDatasetsSelectorStateMachine = ({
   onIntegrationsStreamsSort,
   onUnmanagedStreamsSearch,
   onUnmanagedStreamsSort,
-  onStreamSelected,
+  onDatasetSelected,
   onUnmanagedStreamsReload,
 }: DatasetsSelectorStateMachineDependencies) =>
   createPureDatasetsSelectorStateMachine(initialContext).withConfig({
     actions: {
       selectStream: (_context, event) => {
         if ('dataset' in event) {
-          return onStreamSelected(event.dataset);
+          return onDatasetSelected(event.dataset);
         }
       },
       loadMoreIntegrations: onIntegrationsLoadMore,

@@ -32,5 +32,8 @@ export const integrationRT = rt.type({
   dataStreams: rt.array(datasetRT),
 });
 
-export type Dataset = rt.TypeOf<typeof datasetRT>;
-export type Integration = rt.TypeOf<typeof integrationRT>;
+export type DatasetId = `dataset-${string}`;
+export type IntegrationId = `integration-${string}-${string}`;
+
+export type DatasetType = rt.TypeOf<typeof datasetRT>;
+export type IntegrationType = rt.TypeOf<typeof integrationRT>;

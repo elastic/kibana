@@ -8,10 +8,9 @@
 import React, { RefCallback } from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { getIntegrationId } from '../../../common/latest';
 import { Integration } from '../../../common/datasets';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH } from './constants';
-import { DatasetSelectionHandler, PanelId } from './types';
+import { DatasetSelectionHandler } from './types';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,
@@ -19,7 +18,7 @@ export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) =
 
 interface IntegrationsTreeParams {
   integrations: Integration[];
-  onStreamSelected: DatasetSelectionHandler;
+  onDatasetSelected: DatasetSelectionHandler;
 }
 
 interface IntegrationsTree {
@@ -37,27 +36,25 @@ interface IntegrationsTree {
  */
 export const buildIntegrationsTree = ({
   integrations,
-  onStreamSelected,
+  onDatasetSelected,
 }: IntegrationsTreeParams) => {
   return integrations.reduce(
     (res: IntegrationsTree, integration) => {
-      const entryId: PanelId = getIntegrationId(integration);
       const { name, version, dataStreams } = integration;
 
       res.items.push({
         name,
         icon: <PackageIcon packageName={name} version={version} size="m" tryApi />,
-        panel: entryId,
+        panel: integration.id,
       });
 
       res.panels.push({
-        id: entryId,
+        id: integration.id,
         title: name,
         width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-        items: dataStreams.map((stream) => ({
-          name: stream.title,
-          onClick: () =>
-            onStreamSelected({ title: `[${name}] ${stream.title}`, name: stream.name }),
+        items: dataStreams.map((dataset) => ({
+          name: dataset.title,
+          onClick: () => onDatasetSelected(dataset),
         })),
       });
 

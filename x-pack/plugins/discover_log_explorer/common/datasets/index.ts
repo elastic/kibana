@@ -6,3 +6,5 @@
  */
 
 export * from './types';
+export { Dataset } from './models/dataset';
+export { Integration } from './models/integration';

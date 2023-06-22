@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATASETS_URL,
   FindDatasetsRequestQuery,
@@ -58,7 +59,7 @@ export class DatasetsClient implements IDatasetsClient {
         new FindIntegrationsError(`Failed to decode integrations response: ${message}"`)
     )(response);
 
-    return data;
+    return { ...data, items: data.items.map(Integration.create) };
   }
 
   public async findDatasets(params: FindDatasetsRequestQuery = {}): Promise<FindDatasetsResponse> {
@@ -82,6 +83,6 @@ export class DatasetsClient implements IDatasetsClient {
         new FindDatasetsError(`Failed to decode data streams response: ${message}"`)
     )(response);
 
-    return data;
+    return { items: data.items.map((dataset) => Dataset.create({ dataset })) };
   }
 }

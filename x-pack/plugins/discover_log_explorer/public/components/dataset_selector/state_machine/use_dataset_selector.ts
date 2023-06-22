@@ -17,6 +17,7 @@ import { createDatasetsSelectorStateMachine } from './state_machine';
 import { DatasetsSelectorStateMachineDependencies } from './types';
 
 export const useDatasetSelector = ({
+  initialContext,
   onIntegrationsLoadMore,
   onIntegrationsReload,
   onIntegrationsSearch,
@@ -25,11 +26,12 @@ export const useDatasetSelector = ({
   onIntegrationsStreamsSort,
   onUnmanagedStreamsSearch,
   onUnmanagedStreamsSort,
-  onStreamSelected,
+  onDatasetSelected,
   onUnmanagedStreamsReload,
 }: DatasetsSelectorStateMachineDependencies) => {
   const datasetsSelectorStateService = useInterpret(() =>
     createDatasetsSelectorStateMachine({
+      initialContext,
       onIntegrationsLoadMore,
       onIntegrationsReload,
       onIntegrationsSearch,
@@ -38,7 +40,7 @@ export const useDatasetSelector = ({
       onIntegrationsStreamsSort,
       onUnmanagedStreamsSearch,
       onUnmanagedStreamsSort,
-      onStreamSelected,
+      onDatasetSelected,
       onUnmanagedStreamsReload,
     })
   );
@@ -47,6 +49,7 @@ export const useDatasetSelector = ({
 
   const panelId = useSelector(datasetsSelectorStateService, (state) => state.context.panelId);
   const search = useSelector(datasetsSelectorStateService, (state) => state.context.search);
+  const selected = useSelector(datasetsSelectorStateService, (state) => state.context.selected);
 
   const changePanel = useCallback<ChangePanelHandler>(
     (panelDetails) =>
@@ -68,7 +71,7 @@ export const useDatasetSelector = ({
   );
 
   const selectDataset = useCallback<DatasetSelectionHandler>(
-    (dataset) => datasetsSelectorStateService.send({ type: 'SELECT_STREAM', dataset }),
+    (dataset) => datasetsSelectorStateService.send({ type: 'SELECT_DATASET', dataset }),
     [datasetsSelectorStateService]
   );
 
@@ -87,6 +90,7 @@ export const useDatasetSelector = ({
     isOpen,
     panelId,
     search,
+    selected,
     // Actions
     changePanel,
     scrollToIntegrationsBottom,

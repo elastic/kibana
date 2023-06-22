@@ -16,6 +16,8 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
+import { PackageIcon } from '@kbn/fleet-plugin/public';
+import { DatasetPlain } from '../../../../common/datasets/models/dataset';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID, selectDatasetLabel } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 
@@ -23,13 +25,20 @@ const panelStyle = { width: DATA_VIEW_POPOVER_CONTENT_WIDTH };
 interface DatasetsPopoverProps extends Omit<EuiPopoverProps, 'button'> {
   children: React.ReactNode;
   onClick: () => void;
-  title: string;
+  selected?: DatasetPlain;
 }
 
-export const DatasetsPopover = ({ children, onClick, title, ...props }: DatasetsPopoverProps) => {
+export const DatasetsPopover = ({
+  children,
+  onClick,
+  selected,
+  ...props
+}: DatasetsPopoverProps) => {
+  const { dataset, integration } = selected ?? {};
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const buttonStyles = getPopoverButtonStyles({ fullWidth: isMobile });
+  const hasIntegration = typeof integration === 'object';
 
   return (
     <EuiPopover
@@ -42,7 +51,15 @@ export const DatasetsPopover = ({ children, onClick, title, ...props }: Datasets
           onClick={onClick}
           fullWidth={isMobile}
         >
-          {title}
+          {hasIntegration && (
+            <PackageIcon
+              packageName={integration.name}
+              version={integration.version}
+              size="m"
+              tryApi
+            />
+          )}
+          <span className="eui-textTruncate">{dataset?.title || dataset?.name}</span>
         </EuiButton>
       }
       panelPaddingSize="none"

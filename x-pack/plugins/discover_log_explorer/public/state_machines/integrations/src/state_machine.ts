@@ -8,7 +8,7 @@
 import { assign, createMachine } from 'xstate';
 import { EntityList } from '../../../../common/entity_list';
 import { Dataset, Integration } from '../../../../common/datasets';
-import { FindIntegrationsResponse, getIntegrationId } from '../../../../common/latest';
+import { FindIntegrationsResponse } from '../../../../common/latest';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
@@ -192,9 +192,7 @@ const searchIntegrationStreams = (
   const { nameQuery, sortOrder, integrationId } = search;
 
   return integrations.map((integration) => {
-    const id = getIntegrationId(integration);
-
-    if (id !== integrationId) {
+    if (integration.id !== integrationId) {
       return integration;
     }
 

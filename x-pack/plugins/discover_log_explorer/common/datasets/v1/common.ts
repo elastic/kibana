@@ -7,7 +7,6 @@
 import { EPM_API_ROUTES, EPM_PACKAGES_INSTALLED } from '@kbn/fleet-plugin/common';
 import * as rt from 'io-ts';
 import { isEmpty, mapValues, omitBy } from 'lodash';
-import { Integration } from '../types';
 import { FindDatasetsRequestQuery } from './find_datasets';
 import { FindIntegrationsRequestQuery } from './find_integrations';
 
@@ -22,13 +21,6 @@ export const INTEGRATIONS_URL = EPM_PACKAGES_INSTALLED;
  */
 export const sortOrderRT = rt.union([rt.literal('asc'), rt.literal('desc')]);
 export type SortOrder = rt.TypeOf<typeof sortOrderRT>;
-export type IntegrationId = `integration-${string}-${string}`;
-
-/**
- * Getters
- */
-export const getIntegrationId = (integration: Integration): IntegrationId =>
-  `integration-${integration.name}-${integration.version}`;
 
 /**
  * Utils
