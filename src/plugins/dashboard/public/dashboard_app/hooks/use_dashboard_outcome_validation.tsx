@@ -8,17 +8,12 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { DashboardRedirect } from '../types';
 import { pluginServices } from '../../services/plugin_services';
 import { createDashboardEditUrl } from '../../dashboard_constants';
 import { useDashboardMountContext } from './dashboard_mount_context';
 import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
 
-export const useDashboardOutcomeValidation = ({
-  redirectTo,
-}: {
-  redirectTo: DashboardRedirect;
-}) => {
+export const useDashboardOutcomeValidation = () => {
   const [aliasId, setAliasId] = useState<string>();
   const [outcome, setOutcome] = useState<string>();
   const [savedObjectId, setSavedObjectId] = useState<string>();
@@ -29,11 +24,7 @@ export const useDashboardOutcomeValidation = ({
   /**
    * Unpack dashboard services
    */
-  const {
-    notifications: { toasts },
-    screenshotMode,
-    spaces,
-  } = pluginServices.getServices();
+  const { screenshotMode, spaces } = pluginServices.getServices();
 
   const validateOutcome = useCallback(
     ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardReturn) => {

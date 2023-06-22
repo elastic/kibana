@@ -113,9 +113,7 @@ export function DashboardApp({
   /**
    * Validate saved object load outcome
    */
-  const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation({
-    redirectTo,
-  });
+  const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation();
 
   /**
    * Create options to pass into the dashboard renderer
