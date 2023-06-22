@@ -8,20 +8,18 @@
 
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { DashboardList, NavigationEmbeddableInput, NavigationEmbeddableReduxState } from '../types';
-import {
-  coreServices,
-  dashboardServices,
-  untilPluginStartServicesReady,
-} from '../services/services';
+import { coreServices, dashboardServices } from '../services/services';
 import { navigationEmbeddableReducers } from '../navigation_embeddable_reducers';
+import { NavigationEmbeddableInput, NavigationEmbeddableReduxState } from '../types';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
 
 export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
@@ -75,6 +73,12 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
+
+    const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
+      .componentState.lastSavedId;
+    if (parentDashboardId) {
+      this.dispatch.setCurrentDashboardId(parentDashboardId);
+    }
   }
 
   public destroy() {
@@ -89,44 +93,32 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     }
     this.node = node;
 
-    untilPluginStartServicesReady().then(() =>
-      ReactDOM.render(
-        <KibanaThemeProvider theme$={coreServices.theme.theme$}>
-          <NavigationEmbeddableContext.Provider value={this}>
-            <NavigationEmbeddableComponent />
-          </NavigationEmbeddableContext.Provider>
-        </KibanaThemeProvider>,
-        node
-      )
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={coreServices.theme.theme$}>
+        <NavigationEmbeddableContext.Provider value={this}>
+          <NavigationEmbeddableComponent />
+        </NavigationEmbeddableContext.Provider>
+      </KibanaThemeProvider>,
+      node
     );
   }
 
-  public async getDashboardList(search: string = '', size: number = 10): Promise<DashboardList> {
-    await untilPluginStartServicesReady();
+  public async fetchDashboardList(
+    search: string = '',
+    size: number = 10
+  ): Promise<DashboardItem[]> {
     const findDashboardsService = await dashboardServices.findDashboardsService();
     const responses = await findDashboardsService.search({
       search,
       size,
     });
 
-    const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
-      .componentState.lastSavedId;
-
-    let currentDashboard: DashboardList['currentDashboard'];
-    const otherDashboards: DashboardList['otherDashboards'] = [];
-    responses.hits.forEach((hit) => {
-      if (hit.id === parentDashboardId) {
-        currentDashboard = hit;
-      } else {
-        otherDashboards.push(hit);
-      }
+    batch(() => {
+      this.dispatch.setDashboardList(responses.hits);
+      this.dispatch.setDashboardCount(responses.total);
     });
 
-    return {
-      otherDashboards,
-      currentDashboard,
-      total: responses.total,
-    };
+    return responses.hits;
   }
 
   public reload() {}

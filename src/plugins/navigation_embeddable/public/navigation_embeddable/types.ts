@@ -11,11 +11,13 @@ import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
 export interface NavigationEmbeddableInput extends EmbeddableInput {
-  dashboardLinks?: SelectedDashboard[];
+  dashboardLinks?: DashboardItem[];
 }
 
 export interface NavigationEmbeddableComponentState {
-  test?: boolean;
+  totalDashboards?: number;
+  currentDashboardId?: string;
+  dashboardList?: DashboardItem[];
 }
 
 // public only - redux embeddable state type
@@ -25,13 +27,13 @@ export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
   NavigationEmbeddableComponentState
 >;
 
-export interface DashboardList {
-  total: number;
-  currentDashboard?: DashboardItem;
-  otherDashboards: DashboardItem[];
-}
+// export interface DashboardList {
+//   total: number;
+//   currentDashboard?: DashboardItem;
+//   otherDashboards: DashboardItem[];
+// }
 
-export interface SelectedDashboard {
-  title: string;
-  id: string;
-}
+// export interface SelectedDashboard {
+//   title: string;
+//   id: string;
+// }

@@ -6,31 +6,27 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
   EuiForm,
-  EuiFormRow,
-  EuiListGroup,
-  EuiListGroupItemProps,
+  EuiButton,
   EuiPopover,
+  EuiFormRow,
+  EuiFieldText,
+  EuiButtonEmpty,
   EuiPopoverFooter,
-  EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
+import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 
-import { SelectedDashboard } from '../types';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { NavigationEmbeddableDashboardList } from './navigation_embeddable_dashboard_list';
 
 export const NavigationEmbeddableDashboardPicker = () => {
-  const navigationEmbeddable = useNavigationEmbeddable();
+  const navEmbeddable = useNavigationEmbeddable();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectedDashboard, setSelectedDashboard] = useState<SelectedDashboard | undefined>();
+  const [selectedDashboard, setSelectedDashboard] = useState<DashboardItem | undefined>();
 
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
 
@@ -50,14 +46,13 @@ export const NavigationEmbeddableDashboardPicker = () => {
     >
       <EuiForm component="form">
         <EuiFormRow label="Dashboard">
-          <NavigationEmbeddableDashboardList
-            // embeddable={embeddable}
-            onDashboardSelected={setSelectedDashboard}
-          />
+          <NavigationEmbeddableDashboardList onDashboardSelected={setSelectedDashboard} />
         </EuiFormRow>
         <EuiFormRow label="Text">
           <EuiFieldText
-            placeholder={selectedDashboard ? selectedDashboard.title : 'Select a dashboard'}
+            placeholder={
+              selectedDashboard ? selectedDashboard.attributes.title : 'Select a dashboard'
+            }
             // value={value}
             // onChange={(e) => onChange(e)}
             aria-label="Use aria labels when no actual label is in use"
@@ -69,11 +64,8 @@ export const NavigationEmbeddableDashboardPicker = () => {
           size="s"
           fullWidth
           onClick={() => {
-            console.log('confirm', selectedDashboard);
             if (selectedDashboard) {
-              navigationEmbeddable.dispatch.addLink(selectedDashboard);
-              // const currentLinks = embeddable.getExplicitInput().dashboardLinks ?? [];
-              // embeddable?.updateInput({ dashboardLinks: [...currentLinks, selectedDashboard] });
+              navEmbeddable.dispatch.addLink(selectedDashboard);
             }
             setIsPopoverOpen(false);
           }}

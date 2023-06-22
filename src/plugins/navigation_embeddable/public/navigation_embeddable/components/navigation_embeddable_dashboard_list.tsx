@@ -6,60 +6,44 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import classNames from 'classnames';
 import useAsync from 'react-use/lib/useAsync';
+import React, { useEffect, useState } from 'react';
 
+import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { EuiLoadingSpinner, EuiSelectable, EuiSelectableOption, EuiSpacer } from '@elastic/eui';
 
-import { SelectedDashboard } from '../types';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 
 interface Props {
-  // embeddable: NavigationEmbeddable;
-  onDashboardSelected: (selectedDashboard: { title: string; id: string }) => void;
+  onDashboardSelected: (selectedDashboard: DashboardItem) => void;
 }
 
-export const NavigationEmbeddableDashboardList = ({
-  // embeddable,
-  onDashboardSelected,
-  ...other
-}: Props) => {
-  const navigationEmbeddable = useNavigationEmbeddable();
+export const NavigationEmbeddableDashboardList = ({ onDashboardSelected, ...other }: Props) => {
+  const navEmbeddable = useNavigationEmbeddable();
+  const currentDashboardId = navEmbeddable.select(
+    (state) => state.componentState.currentDashboardId
+  );
 
   const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
-    return await navigationEmbeddable.getDashboardList();
+    return await navEmbeddable.fetchDashboardList();
   }, []);
 
   useEffect(() => {
-    let currentDashboardOption: EuiSelectableOption | undefined;
-    if (dashboardList?.currentDashboard) {
-      currentDashboardOption = {
-        checked: 'on',
-        data: {
-          id: dashboardList.currentDashboard.id,
-          title: dashboardList.currentDashboard.attributes.title,
-        },
-        label: dashboardList.currentDashboard.attributes.title,
-        css: {
-          fontWeight: 'bold',
-        },
-      };
-      onDashboardSelected(currentDashboardOption.data as SelectedDashboard);
-    }
-
-    const otherDashboardOptions =
-      dashboardList?.otherDashboards.map((dashboard) => ({
-        data: { id: dashboard.id, title: dashboard.attributes.title },
-        label: dashboard.attributes.title,
-      })) ?? [];
-    setDashboardListOptions(
-      currentDashboardOption
-        ? [currentDashboardOption, ...otherDashboardOptions]
-        : otherDashboardOptions
-    );
-  }, [dashboardList, onDashboardSelected]);
+    const dashboardOptions =
+      dashboardList?.map((dashboard: DashboardItem) => {
+        return {
+          data: dashboard,
+          className: classNames({
+            'navEmbeddable-currentDashboard': dashboard.id === currentDashboardId,
+          }),
+          label: dashboard.attributes.title,
+        };
+      }) ?? [];
+    setDashboardListOptions(dashboardOptions);
+  }, [dashboardList, currentDashboardId, onDashboardSelected]);
 
   return loadingDashboardList ? (
     <EuiLoadingSpinner />
@@ -70,7 +54,7 @@ export const NavigationEmbeddableDashboardList = ({
       singleSelection={'always'}
       options={dashboardListOptions}
       onChange={(newOptions, _, selected) => {
-        onDashboardSelected(selected.data as SelectedDashboard);
+        onDashboardSelected(selected.data as DashboardItem);
         setDashboardListOptions(newOptions);
       }}
       listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}

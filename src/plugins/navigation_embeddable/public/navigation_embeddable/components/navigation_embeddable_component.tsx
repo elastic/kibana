@@ -13,11 +13,14 @@ import { EuiListGroup, EuiListGroupItemProps, EuiPanel } from '@elastic/eui';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { NavigationEmbeddableDashboardPicker } from './navigation_embeddable_dashboard_picker';
 
-export const NavigationEmbeddableComponent = () => {
-  const navigationEmbeddable = useNavigationEmbeddable();
+import './navigation_embeddable.scss';
 
-  const selectedDashboards = navigationEmbeddable.select(
-    (state) => state.explicitInput.dashboardLinks
+export const NavigationEmbeddableComponent = () => {
+  const navEmbeddable = useNavigationEmbeddable();
+
+  const selectedDashboards = navEmbeddable.select((state) => state.explicitInput.dashboardLinks);
+  const currentDashboardId = navEmbeddable.select(
+    (state) => state.componentState.currentDashboardId
   );
 
   const [dashboardListGroupItems, setDashboardListGroupItems] = useState<EuiListGroupItemProps[]>(
@@ -25,20 +28,20 @@ export const NavigationEmbeddableComponent = () => {
   );
 
   useEffect(() => {
-    console.log('selectedDashboards', selectedDashboards);
     setDashboardListGroupItems(
-      (selectedDashboards ?? []).map((link) => {
+      (selectedDashboards ?? []).map((dashboard) => {
         return {
-          label: link.title,
+          label: dashboard.attributes.title,
           iconType: 'dashboardApp',
+          color: dashboard.id === currentDashboardId ? 'text' : 'primary',
         };
       })
     );
-  }, [selectedDashboards]);
+  }, [selectedDashboards, currentDashboardId]);
 
   return (
     <EuiPanel>
-      <EuiListGroup flush listItems={dashboardListGroupItems} color="text" size="s" />
+      <EuiListGroup flush listItems={dashboardListGroupItems} size="s" />
       <NavigationEmbeddableDashboardPicker />
     </EuiPanel>
   );

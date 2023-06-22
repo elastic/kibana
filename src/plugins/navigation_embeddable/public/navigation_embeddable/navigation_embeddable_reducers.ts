@@ -6,11 +6,30 @@
  * Side Public License, v 1.
  */
 
+import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { NavigationEmbeddableReduxState, SelectedDashboard } from './types';
+import { NavigationEmbeddableReduxState } from './types';
 
 export const navigationEmbeddableReducers = {
+  setDashboardList: (
+    state: WritableDraft<NavigationEmbeddableReduxState>,
+    action: PayloadAction<DashboardItem[]>
+  ) => {
+    state.componentState.dashboardList = action.payload;
+  },
+  setCurrentDashboardId: (
+    state: WritableDraft<NavigationEmbeddableReduxState>,
+    action: PayloadAction<string>
+  ) => {
+    state.componentState.currentDashboardId = action.payload;
+  },
+  setDashboardCount: (
+    state: WritableDraft<NavigationEmbeddableReduxState>,
+    action: PayloadAction<number>
+  ) => {
+    state.componentState.totalDashboards = action.payload;
+  },
   addLink: (
     state: WritableDraft<NavigationEmbeddableReduxState>,
     action: PayloadAction<SelectedDashboard>

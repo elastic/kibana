@@ -12,6 +12,7 @@ import type { EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public'
 import { EmbeddableFactory, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 
 import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
+import { untilPluginStartServicesReady } from '../services/services';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -27,6 +28,7 @@ export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryD
   }
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+    await untilPluginStartServicesReady();
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { NavigationEmbeddable } = await import('./navigation_embeddable');
 
