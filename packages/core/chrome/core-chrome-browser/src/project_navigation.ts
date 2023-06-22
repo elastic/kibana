@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { ComponentType } from 'react';
+import type { Location } from 'history';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -58,11 +59,17 @@ export interface ChromeProjectNavigationNode {
   /** Optional children of the navigation node */
   children?: ChromeProjectNavigationNode[];
   /**
-   * Temporarilly we allow href to be passed.
-   * Once all the deeplinks will be exposed in packages we will not allow href anymore
-   * and force deeplink id to be passed
+   * href for absolute links only. Internal links should use "link".
    */
   href?: string;
+  /**
+   * Flag to indicate if the node is currently active.
+   */
+  isActive?: boolean;
+  /**
+   * Optional function to get the active state. This function is called whenever the location changes.
+   */
+  getIsActive?: (location: Location) => boolean;
 }
 
 /** @public */
@@ -74,10 +81,8 @@ export interface ChromeProjectNavigation {
 }
 
 /** @public */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SideNavCompProps {
-  // TODO: provide the Chrome state to the component through props
-  // e.g. "navTree", "activeRoute", "recentItems"...
+  activeNodes: ChromeProjectNavigationNode[][];
 }
 
 /** @public */
@@ -120,6 +125,10 @@ export interface NodeDefinition<
    * Use href for absolute links only. Internal links should use "link".
    */
   href?: string;
+  /**
+   * Optional function to get the active state. This function is called whenever the location changes.
+   */
+  getIsActive?: (location: Location) => boolean;
 }
 
 /**
