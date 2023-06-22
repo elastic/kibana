@@ -43,7 +43,7 @@ export class Dataset implements IDataset {
   private constructor({ integration, dataset }: DatasetDeps) {
     this.id = `dataset-${dataset.name}` as DatasetId;
     this.name = dataset.name;
-    this.title = dataset.title;
+    this.title = dataset.title ?? dataset.name;
     this.integration = integration;
   }
 
@@ -52,7 +52,7 @@ export class Dataset implements IDataset {
       dataset: {
         id: this.id,
         name: this.name,
-        title: buildReadableName(this.title || this.name, this.integration?.name),
+        title: this.title,
       },
       integration: this.integration,
     };
@@ -62,7 +62,7 @@ export class Dataset implements IDataset {
     // Invert the property because the API returns the index pattern as `name` and a readable name as `title`
     return {
       id: this.id,
-      name: buildReadableName(this.title || this.name, this.integration?.name),
+      name: this.title,
       title: this.name,
     };
   }
@@ -71,9 +71,3 @@ export class Dataset implements IDataset {
     return new Dataset({ integration, dataset });
   }
 }
-
-const buildReadableName = (datasetName: string, integrationName?: string) => {
-  if (integrationName) return `[${integrationName}] ${datasetName}`;
-
-  return datasetName;
-};
