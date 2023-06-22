@@ -17,6 +17,6 @@ export const createEndpointHost = (
     {
       agentPolicyId,
     },
-    { timeout: timeout ?? 300000 }
+    { timeout: timeout ?? 600000 }
   );
 };
