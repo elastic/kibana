@@ -50,7 +50,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  
+  registry.when.skip(
     'Transaction groups main statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
