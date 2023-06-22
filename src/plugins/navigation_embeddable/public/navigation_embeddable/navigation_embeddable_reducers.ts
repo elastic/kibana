@@ -9,7 +9,7 @@
 import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { NavigationEmbeddableReduxState } from './types';
+import { DashboardLink, NavigationEmbeddableReduxState } from './types';
 
 export const navigationEmbeddableReducers = {
   setDashboardList: (
@@ -32,7 +32,7 @@ export const navigationEmbeddableReducers = {
   },
   addLink: (
     state: WritableDraft<NavigationEmbeddableReduxState>,
-    action: PayloadAction<SelectedDashboard>
+    action: PayloadAction<DashboardLink>
   ) => {
     if (!state.explicitInput.dashboardLinks) {
       state.explicitInput.dashboardLinks = [];

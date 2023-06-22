@@ -31,7 +31,7 @@ export const NavigationEmbeddableComponent = () => {
     setDashboardListGroupItems(
       (selectedDashboards ?? []).map((dashboard) => {
         return {
-          label: dashboard.attributes.title,
+          label: dashboard.label ?? dashboard.attributes.title,
           iconType: 'dashboardApp',
           color: dashboard.id === currentDashboardId ? 'text' : 'primary',
         };

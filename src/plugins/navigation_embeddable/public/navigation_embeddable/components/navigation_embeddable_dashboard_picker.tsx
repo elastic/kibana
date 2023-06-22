@@ -27,6 +27,7 @@ export const NavigationEmbeddableDashboardPicker = () => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedDashboard, setSelectedDashboard] = useState<DashboardItem | undefined>();
+  const [dashboardLabel, setDashboardLabel] = useState<string>('');
 
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
 
@@ -53,8 +54,10 @@ export const NavigationEmbeddableDashboardPicker = () => {
             placeholder={
               selectedDashboard ? selectedDashboard.attributes.title : 'Select a dashboard'
             }
-            // value={value}
-            // onChange={(e) => onChange(e)}
+            value={dashboardLabel}
+            onChange={(e) => {
+              setDashboardLabel(e.target.value);
+            }}
             aria-label="Use aria labels when no actual label is in use"
           />
         </EuiFormRow>
@@ -65,8 +68,12 @@ export const NavigationEmbeddableDashboardPicker = () => {
           fullWidth
           onClick={() => {
             if (selectedDashboard) {
-              navEmbeddable.dispatch.addLink(selectedDashboard);
+              navEmbeddable.dispatch.addLink({
+                ...selectedDashboard,
+                label: dashboardLabel === '' ? selectedDashboard.attributes.title : dashboardLabel,
+              });
             }
+            setDashboardLabel('');
             setIsPopoverOpen(false);
           }}
         >

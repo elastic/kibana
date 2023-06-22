@@ -10,8 +10,10 @@ import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public
 import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
+export type DashboardLink = DashboardItem & { label?: string };
+
 export interface NavigationEmbeddableInput extends EmbeddableInput {
-  dashboardLinks?: DashboardItem[];
+  dashboardLinks?: DashboardLink[]; // probably want to simplify this so we are only storing what is absolutely necessary
 }
 
 export interface NavigationEmbeddableComponentState {
@@ -26,14 +28,3 @@ export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
   EmbeddableOutput,
   NavigationEmbeddableComponentState
 >;
-
-// export interface DashboardList {
-//   total: number;
-//   currentDashboard?: DashboardItem;
-//   otherDashboards: DashboardItem[];
-// }
-
-// export interface SelectedDashboard {
-//   title: string;
-//   id: string;
-// }
