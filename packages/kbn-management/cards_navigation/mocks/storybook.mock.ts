@@ -7,45 +7,95 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 
-import type { ProjectSwitcherProps, Services } from '../src/types';
+const APP_BASE_PATH = 'http://localhost:9001';
 
-type PropArguments = Pick<ProjectSwitcherProps, 'currentProjectType'>;
+const sectionsMock = [
+  {
+    apps: [
+      {
+        id: 'ingest_pipelines',
+        title: 'Ingest pipelines',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines',
+      },
+      {
+        id: 'pipelines',
+        title: 'Pipelines',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines_logstash',
+      },
+      {
+        id: 'index_management',
+        title: 'Index Management',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines_logstash',
+      },
+      {
+        id: 'transform',
+        title: 'Transforms',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines_logstash',
+      },
+      {
+        id: 'jobsListLink',
+        title: 'Machine Learning',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines_logstash',
+      },
+      {
+        id: 'data_view',
+        title: 'Data View',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines_logstash',
+      },
+    ],
+  },
+  {
+    apps: [
+      {
+        id: 'objects',
+        title: 'Saved Objects',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines_logstash',
+      },
+      {
+        id: 'tags',
+        title: 'Tags',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines_logstash',
+      },
+      {
+        id: 'filesManagement',
+        title: 'Files Management',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines_logstash',
+      },
+      {
+        id: 'api_keys',
+        title: 'API Keys',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines_logstash',
+      },
+    ],
+  },
+  {
+    apps: [
+      {
+        id: 'settings',
+        title: 'Advanced Settings',
+        enabled: true,
+        basePath: '/app/management/ingest/pipelines_logstash',
+      },
+    ],
+  },
+];
 
-/**
- * Storybook parameters provided from the controls addon.
- */
-export type ProjectSwitcherStorybookParams = Record<keyof PropArguments, any>;
-
-/**
- * Storybook mocks for the `NoDataCard` component.
- */
-export class ProjectSwitcherStorybookMock extends AbstractStorybookMock<
-  ProjectSwitcherProps,
-  Services,
-  PropArguments,
-  {}
-> {
-  propArguments = {
-    currentProjectType: {
-      control: { type: 'radio' },
-      options: ['observability', 'security', 'search'],
-      defaultValue: 'observability',
-    },
-  };
-  serviceArguments = {};
-  dependencies = [];
-
-  getProps(params?: ProjectSwitcherStorybookParams): ProjectSwitcherProps {
-    return {
-      currentProjectType: this.getArgumentValue('currentProjectType', params),
-    };
-  }
-
-  getServices(_params: ProjectSwitcherStorybookParams): Services {
-    return {
-      setProjectType: action('setProjectType'),
-    };
-  }
-}
+export const mockProps = {
+  appBasePath: APP_BASE_PATH,
+  sections: sectionsMock,
+  onCardClick: (e: any) => {
+    e.preventDefault();
+    action('Navigate to: ', e.target.href);
+  },
+};

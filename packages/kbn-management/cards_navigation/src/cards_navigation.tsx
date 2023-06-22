@@ -20,12 +20,8 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { ManagementLandingPageProps } from './types';
 import { appCategories, appDefinitions, getAppIdsByCategory } from './consts';
-
-interface ManagementLandingPageProps {
-  sections: any[];
-  appBasePath: string;
-}
 
 // Retrieve the data we need from a given app from the management app registry
 const getDataFromManagementApp = (app: any) => {
@@ -88,7 +84,7 @@ const getEnabledAppsByCategory = (sections: any[]) => {
   ].filter((category) => category.apps.length > 0);
 };
 
-export const CardsNavigation = ({ sections, appBasePath }: ManagementLandingPageProps) => {
+export const CardsNavigation = ({ sections, appBasePath, onCardClick }: ManagementLandingPageProps) => {
   const appsByCategory = getEnabledAppsByCategory(sections);
 
   return (
@@ -128,6 +124,7 @@ export const CardsNavigation = ({ sections, appBasePath }: ManagementLandingPage
                     title={app!.title}
                     description={app!.description}
                     href={appBasePath + app!.href}
+                    onClick={onCardClick}
                   />
                 </EuiFlexItem>
               ))}

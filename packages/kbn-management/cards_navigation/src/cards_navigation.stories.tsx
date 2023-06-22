@@ -9,6 +9,7 @@
 import React from 'react';
 
 import { CardsNavigation as Component } from './cards_navigation';
+import { mockProps } from '../mocks/storybook.mock';
 
 import mdx from '../README.mdx';
 
@@ -22,91 +23,10 @@ export default {
   },
 };
 
-const sectionsMock = [
-  {
-    apps: [
-      {
-        id: 'ingest_pipelines',
-        title: 'Ingest pipelines',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines',
-      },
-      {
-        id: 'pipelines',
-        title: 'Pipelines',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
-      {
-        id: 'index_management',
-        title: 'Index Management',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
-      {
-        id: 'transform',
-        title: 'Transforms',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
-      {
-        id: 'jobsListLink',
-        title: 'Machine Learning',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
-      {
-        id: 'data_view',
-        title: 'Data View',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
-    ],
-  },
-  {
-    apps: [
-      {
-        id: 'objects',
-        title: 'Saved Objects',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
-      {
-        id: 'tags',
-        title: 'Tags',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
-      {
-        id: 'filesManagement',
-        title: 'Files Management',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
-      {
-        id: 'api_keys',
-        title: 'API Keys',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
-    ],
-  },
-  {
-    apps: [
-      {
-        id: 'settings',
-        title: 'Advanced Settings',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
-    ],
-  },
-];
-
 export const CardsNavigationWillAllLinks = () => {
-  return <Component sections={sectionsMock} appBasePath="localhost:9001" />;
+  return <Component {...mockProps} />;
 };
 
 export const CardsNavigationWithSomeLinks = () => {
-  return <Component sections={[{ apps: sectionsMock[1].apps }]} appBasePath="localhost:9001" />;
+  return <Component {...mockProps} sections={[{ apps: mockProps.sections[1].apps }]} />;
 };

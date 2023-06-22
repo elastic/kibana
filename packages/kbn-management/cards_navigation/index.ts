@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { ProjectSwitcherProps, KibanaDependencies } from './src';
+export type { ManagementLandingPageProps } from './src';
 
 export { CardsNavigation } from './src';

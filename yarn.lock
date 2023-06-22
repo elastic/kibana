@@ -4655,10 +4655,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-types@link:packages/kbn-management/types":
-  version "0.0.0"
-  uid ""
-
 "@kbn/mapbox-gl@link:packages/kbn-mapbox-gl":
   version "0.0.0"
   uid ""
