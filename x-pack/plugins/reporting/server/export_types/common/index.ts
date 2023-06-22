@@ -44,29 +44,6 @@ export interface TimeRangeParams {
   max?: Date | string | number | null;
 }
 
-export interface ExportTypesType<
-  SetupDeps = any,
-  StartDeps = any,
-  JobParamsType extends object = any,
-  TaskPayloadType extends object = any
-> {
-  id: string; // ID for exportTypesRegistry.get()
-  name: string; // user-facing string
-  jobType: string; // for job params
-
-  jobContentEncoding?: 'base64' | 'csv';
-  jobContentExtension: 'pdf' | 'png' | 'csv';
-
-  validLicenses: LicenseType[];
-
-  setup: (setupDeps: SetupDeps) => void;
-  start: (startDeps: StartDeps) => void;
-
-  createJob: CreateJobFn<JobParamsType>;
-  runTask: RunTaskFn<TaskPayloadType>;
-  getSpaceId: (request: KibanaRequest, logger: Logger) => string | undefined;
-}
-
 /**
  * @TODO move to be within @kbn-reporting-export-types
  */
@@ -81,10 +58,20 @@ export interface ExportTypeStartDeps {
   screenshotting: ScreenshottingStart;
 }
 
-export abstract class ExportType {
-  public setupDeps!: ExportTypeSetupDeps;
-  public startDeps!: ExportTypeStartDeps;
-  public http!: HttpServiceSetup;
+export abstract class ExportType<
+  JobParamsType extends object = any,
+  TaskPayloadType extends object = any
+> {
+  abstract id: string; // ID for exportTypesRegistry.get()
+  abstract name: string; // user-facing string
+  abstract jobType: string; // for job params
+
+  abstract jobContentEncoding?: 'base64' | 'csv';
+  abstract jobContentExtension: 'pdf' | 'png' | 'csv';
+
+  abstract createJob: CreateJobFn<JobParamsType>;
+  abstract runTask: RunTaskFn<TaskPayloadType>;
+
   public validLicenses: LicenseType[] = [
     LICENSE_TYPE_TRIAL,
     LICENSE_TYPE_CLOUD_STANDARD,
@@ -92,6 +79,9 @@ export abstract class ExportType {
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
   ];
+  public setupDeps!: ExportTypeSetupDeps;
+  public startDeps!: ExportTypeStartDeps;
+  public http!: HttpServiceSetup;
 
   constructor(
     core: CoreSetup,
@@ -104,6 +94,9 @@ export abstract class ExportType {
 
   setup(setupDeps: ExportTypeSetupDeps) {
     this.setupDeps = setupDeps;
+  }
+  start(startDeps: ExportTypeStartDeps) {
+    this.startDeps = startDeps;
   }
 
   public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {

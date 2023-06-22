@@ -23,7 +23,6 @@ import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_p
 import {
   decryptJobHeaders,
   ExportType,
-  ExportTypesType,
   ExportTypeSetupDeps,
   ExportTypeStartDeps,
   getCustomLogo,
@@ -37,11 +36,7 @@ export type {
 /**
  * @TODO move to be within @kbn-reporting-export-types
  */
-export class PdfExportType
-  extends ExportType
-  implements
-    ExportTypesType<ExportTypeSetupDeps, ExportTypeStartDeps, JobParamsPDFV2, TaskPayloadPDFV2>
-{
+export class PdfExportType extends ExportType {
   id = PDF_REPORT_TYPE_V2;
   name = 'PDF';
   jobType = PDF_JOB_TYPE_V2;

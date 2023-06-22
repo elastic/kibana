@@ -26,7 +26,7 @@ import {
 } from '../../../test_helpers';
 import { ReportingRequestHandlerContext } from '../../../types';
 import { registerJobInfoRoutes } from '../jobs';
-import { ExportTypesType } from '../../../export_types/common';
+import { ExportType } from '../../../export_types/common';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -89,14 +89,14 @@ describe('GET /api/reporting/jobs/download', () => {
       jobType: 'unencodedJobType',
       jobContentExtension: 'csv',
       validLicenses: ['basic', 'gold'],
-    } as ExportTypesType);
+    } as ExportType);
     exportTypesRegistry.register({
       id: 'base64Encoded',
       jobType: 'base64EncodedJobType',
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-    } as ExportTypesType);
+    } as ExportType);
     core.getExportTypesRegistry = () => exportTypesRegistry;
 
     mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;
