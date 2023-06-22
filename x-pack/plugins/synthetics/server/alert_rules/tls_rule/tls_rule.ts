@@ -15,6 +15,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { schema } from '@kbn/config-schema';
+import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { TlsTranslations } from '../../../common/rules/synthetics/translations';
 import {
   CERT_COMMON_NAME,
@@ -23,31 +24,22 @@ import {
   CERT_VALID_NOT_AFTER,
   CERT_VALID_NOT_BEFORE,
 } from '../../../common/field_names';
-import { getCertSummary } from './message_utils';
+import { getCertSummary, setRecoveredAlertsContext } from './message_utils';
 import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
-import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { TLSRuleExecutor } from './tls_rule_executor';
 import {
   SYNTHETICS_ALERT_RULE_TYPES,
   TLS_CERTIFICATE,
 } from '../../../common/constants/synthetics_alerts';
-import { updateState } from '../common';
-import { getActionVariables } from '../action_variables';
-import { ALERT_DETAILS_URL } from '../../legacy_uptime/lib/alerts/action_variables';
-import { UMServerLibs } from '../../legacy_uptime/uptime_server';
+import { generateAlertMessage, updateState, UptimeRuleTypeAlertDefinition } from '../common';
+import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import {
-  generateAlertMessage,
-  setRecoveredAlertsContext,
-  UptimeRuleTypeAlertDefinition,
-} from '../../legacy_uptime/lib/alerts/common';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_CERTIFICATE>;
 
 export const registerSyntheticsTLSCheckRule = (
-  server: UptimeServerSetup,
-  libs: UMServerLibs,
-  plugins: UptimeCorePluginsSetup,
+  server: SyntheticsServerSetup,
+  plugins: SyntheticsPluginsSetupDependencies,
   syntheticsMonitorClient: SyntheticsMonitorClient,
   ruleDataClient: IRuleDataClient
 ) => {

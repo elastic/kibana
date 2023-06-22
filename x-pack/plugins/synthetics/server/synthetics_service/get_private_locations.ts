@@ -7,7 +7,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
-import { getSyntheticsPrivateLocations } from '../legacy_uptime/lib/saved_objects/private_locations';
+import { getSyntheticsPrivateLocations } from '../saved_objects/private_locations';
 
 export async function getPrivateLocations(
   syntheticsMonitorClient: SyntheticsMonitorClient,

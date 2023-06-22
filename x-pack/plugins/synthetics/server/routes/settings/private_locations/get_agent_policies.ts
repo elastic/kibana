@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 
 export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.AGENT_POLICIES,
   validate: {},
-  handler: async ({ server, context, uptimeEsClient }): Promise<any> => {
+  handler: async ({ server }): Promise<any> => {
     const soClient = server.coreStart.savedObjects.createInternalRepository();
     const esClient = server.coreStart.elasticsearch.client.asInternalUser;
 

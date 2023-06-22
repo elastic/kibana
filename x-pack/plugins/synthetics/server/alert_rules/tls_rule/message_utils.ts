@@ -6,8 +6,13 @@
  */
 
 import moment from 'moment/moment';
-import { tlsTranslations } from '../translations';
+import { IBasePath } from '@kbn/core-http-server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { ALERT_DETAILS_URL } from '../action_variables';
 import { Cert } from '../../../common/runtime_types';
+import { tlsTranslations } from '../translations';
 interface TLSContent {
   summary: string;
   status?: string;
@@ -67,4 +72,44 @@ export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThres
     locationName: cert.locationName,
     monitorUrl: cert.monitorUrl,
   };
+};
+
+export const setRecoveredAlertsContext = async ({
+  alertFactory,
+  basePath,
+  defaultStartedAt,
+  getAlertStartedDate,
+  spaceId,
+  alertsLocator,
+  getAlertUuid,
+}: {
+  alertFactory: RuleExecutorServices['alertFactory'];
+  defaultStartedAt: string;
+  getAlertStartedDate: (alertInstanceId: string) => string | null;
+  basePath: IBasePath;
+  spaceId: string;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
+  getAlertUuid?: (alertId: string) => string | null;
+}) => {
+  const { getRecoveredAlerts } = alertFactory.done();
+
+  for await (const alert of getRecoveredAlerts()) {
+    const recoveredAlertId = alert.getId();
+    const alertUuid = getAlertUuid?.(recoveredAlertId) || null;
+    const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? defaultStartedAt;
+
+    const state = alert.getState();
+    const alertUrl = await getAlertUrl(
+      alertUuid,
+      spaceId,
+      indexedStartedAt,
+      alertsLocator,
+      basePath.publicBaseUrl
+    );
+
+    alert.setContext({
+      ...state,
+      [ALERT_DETAILS_URL]: alertUrl,
+    });
+  }
 };

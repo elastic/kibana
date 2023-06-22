@@ -10,7 +10,6 @@ import DateMath from '@kbn/datemath';
 import { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
-import type { CertificatesResults } from '../../server/legacy_uptime/lib/requests/get_certs';
 import { asMutableArray } from '../utils/as_mutable_array';
 
 enum SortFields {
@@ -169,8 +168,8 @@ export const getCertsRequestBody = ({
   return searchRequest.body;
 };
 
-export const processCertsResult = (result: CertificatesResults): CertResult => {
-  const certs = result.hits?.hits?.map((hit) => {
+export const processCertsResult = (result: any): CertResult => {
+  const certs = result.hits?.hits?.map((hit: any) => {
     const ping = hit._source;
     const server = ping.tls?.server!;
 
@@ -181,7 +180,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
     const sha1 = server?.hash?.sha1;
     const sha256 = server?.hash?.sha256;
 
-    const monitors = hit.inner_hits!.monitors.hits.hits.map((monitor) => {
+    const monitors = hit.inner_hits!.monitors.hits.hits.map((monitor: any) => {
       const monitorPing = monitor._source as Ping;
 
       return {

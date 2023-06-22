@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UptimeCorePluginsSetup } from '../legacy_uptime/lib/adapters';
+import { SyntheticsPluginsSetupDependencies } from '../types';
 import { commonMonitorStateI18, commonStateTranslations } from './translations';
 
 export const MESSAGE = 'message';
@@ -15,7 +15,11 @@ export const ALERT_DETAILS_URL = 'alertDetailsUrl';
 export const VIEW_IN_APP_URL = 'viewInAppUrl';
 export const RECOVERY_REASON = 'recoveryReason';
 
-export const getActionVariables = ({ plugins }: { plugins: UptimeCorePluginsSetup }) => {
+export const getActionVariables = ({
+  plugins,
+}: {
+  plugins: SyntheticsPluginsSetupDependencies;
+}) => {
   return {
     context: [
       ACTION_VARIABLES[MESSAGE],

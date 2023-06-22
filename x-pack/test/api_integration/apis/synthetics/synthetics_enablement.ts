@@ -9,7 +9,7 @@ import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   syntheticsApiKeyID,
   syntheticsApiKeyObjectType,
-} from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/service_api_key';
+} from '@kbn/synthetics-plugin/server/saved_objects/service_api_key';
 import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';

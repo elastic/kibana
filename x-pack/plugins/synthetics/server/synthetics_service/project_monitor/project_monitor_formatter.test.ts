@@ -17,7 +17,6 @@ import {
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
 import { SyntheticsService } from '../synthetics_service';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -27,6 +26,7 @@ import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
 import { formatLocation } from '../../../common/utils/location_formatter';
 import * as locationsUtil from '../get_all_locations';
 import { mockEncryptedSO } from '../utils/mocks';
+import { SyntheticsServerSetup } from '../../types';
 
 const testMonitors = [
   {
@@ -103,7 +103,7 @@ describe('ProjectMonitorFormatter', () => {
 
   const soClient = savedObjectsClientMock.create();
 
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     logger,
     uptimeEsClient: mockEsClient,
     authSavedObjectsClient: soClient,
@@ -123,7 +123,7 @@ describe('ProjectMonitorFormatter', () => {
     coreStart: {
       savedObjects: savedObjectsServiceMock.createStartContract(),
     },
-  } as unknown as UptimeServerSetup;
+  } as unknown as SyntheticsServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
 

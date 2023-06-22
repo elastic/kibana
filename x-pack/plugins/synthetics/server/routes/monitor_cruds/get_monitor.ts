@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
@@ -14,14 +15,13 @@ import {
   EncryptedSyntheticsMonitor,
   MonitorOverviewItem,
 } from '../../../common/runtime_types';
-import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { getMonitorFilters, MonitorsQuery, QuerySchema, SEARCH_FIELDS } from '../common';
 import { mapSavedObjectToMonitor } from './helper';
+import { getSyntheticsMonitor } from '../../legacy_uptime/lib/requests/get_monitor';
 
-export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR,
   validate: {
@@ -56,7 +56,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: U
 
         const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
 
-        return libs.requests.getSyntheticsMonitor({
+        return getSyntheticsMonitor({
           monitorId,
           encryptedSavedObjectsClient,
           savedObjectsClient,

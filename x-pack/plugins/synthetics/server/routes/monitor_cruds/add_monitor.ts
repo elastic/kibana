@@ -14,9 +14,11 @@ import {
 } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SyntheticsServerSetup } from '../../types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
-import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
+import { getSyntheticsPrivateLocations } from '../../saved_objects/private_locations';
 import {
   ConfigKey,
   MonitorFields,
@@ -24,7 +26,6 @@ import {
   EncryptedSyntheticsMonitor,
   PrivateLocation,
 } from '../../../common/runtime_types';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   DEFAULT_FIELDS,
@@ -33,7 +34,6 @@ import {
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
-import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 import { deleteMonitor } from './delete_monitor';
 import { StatusAlertService } from '../default_alerts/status_alert_service';
 
@@ -290,7 +290,7 @@ export const getPrivateLocations = async (
 };
 
 export const getMonitorNamespace = (
-  server: UptimeServerSetup,
+  server: SyntheticsServerSetup,
   request: KibanaRequest,
   configuredNamespace: string
 ) => {

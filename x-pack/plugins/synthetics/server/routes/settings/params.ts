@@ -7,8 +7,8 @@
 
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({

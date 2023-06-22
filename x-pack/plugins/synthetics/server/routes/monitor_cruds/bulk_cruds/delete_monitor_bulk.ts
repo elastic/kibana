@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
 import { SavedObject } from '@kbn/core-saved-objects-server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SyntheticsServerSetup } from '../../../types';
 import {
   formatTelemetryDeleteEvent,
   sendTelemetryEvents,
@@ -18,7 +19,6 @@ import {
   EncryptedSyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../common/runtime_types';
-import { UptimeServerSetup } from '../../../legacy_uptime/lib/adapters';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 
@@ -30,7 +30,7 @@ export const deleteMonitorBulk = async ({
   request,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
   monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitor>>;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   request: KibanaRequest;
