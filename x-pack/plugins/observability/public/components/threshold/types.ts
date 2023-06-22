@@ -7,8 +7,8 @@
 import * as rt from 'io-ts';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -38,6 +38,7 @@ import { ObservabilityPublicStart } from '../../plugin';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
 
 export interface AlertContextMeta {
+  adHocDataViewList: DataView[];
   currentOptions?: Partial<MetricsExplorerOptions>;
   series?: MetricsExplorerSeries;
 }
@@ -94,6 +95,7 @@ export interface AlertParams {
   filterQueryText?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
+  searchConfiguration: SerializedSearchSourceFields;
   shouldDropPartialBuckets?: boolean;
 }
 
