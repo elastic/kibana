@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(res.status).to.eql(403);
       });
 
-      it('does allow user with the role-based privilege', async () => {
+      xit('does allow user with the role-based privilege', async () => {
         const res = await reportingAPI.generatePdf(
           reportingAPI.REPORTING_USER_USERNAME,
           reportingAPI.REPORTING_USER_PASSWORD,

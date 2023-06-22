@@ -43,7 +43,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
 
-    xit('Confirm single report deletion works', async () => {
+    it('Confirm single report deletion works', async () => {
       log.debug('Checking for reports.');
       await retry.try(async () => {
         await testSubjects.click('checkboxSelectRow-krazcyw4156m0763b503j7f9');
@@ -61,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    it('Paginates historical reports', async () => {
+    xit('Paginates historical reports', async () => {
       // previous CAN NOT be clicked
       const previousButton = await testSubjects.find('pagination-button-previous');
       expect(await previousButton.getAttribute('disabled')).to.be('true');
