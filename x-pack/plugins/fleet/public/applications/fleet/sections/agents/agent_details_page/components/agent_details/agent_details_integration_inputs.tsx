@@ -94,11 +94,11 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
 
   const getInputStatusIcon = (inputType: string) => {
     const inputStatus = inputStatusMap.get(inputType)!;
-    if (inputStatus.status === undefined) {
+    if (inputStatus?.status === undefined) {
       return (
         <EuiHealth
           color="default"
-          data-test-subj="xpack.fleet.agentDetailsIntegrations.inputStatusSuccessHealth"
+          data-test-subj="agentDetailsIntegrationsInputStatusHealthDefault"
           className="inputStatusHealth"
         />
       );
@@ -106,19 +106,27 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
     return inputStatus.status === 'HEALTHY' ? (
       <EuiHealth
         color="success"
-        data-test-subj="xpack.fleet.agentDetailsIntegrations.inputStatusSuccessHealth"
+        data-test-subj="agentDetailsIntegrationsInputStatusHealthSuccess"
         className="inputStatusHealth"
       />
     ) : (
-      <EuiNotificationBadge data-test-subj="xpack.fleet.agentDetailsIntegrations.inputStatusAttentionHealth">
+      <EuiNotificationBadge data-test-subj="agentDetailsIntegrationsInputStatusAttentionHealth">
         {1}
       </EuiNotificationBadge>
     );
   };
 
-  const generateInputReponse = () => {
+  const generateInputResponse = () => {
     return packagePolicy.inputs.reduce(
-      (acc: Array<{ label: JSX.Element; id: string }>, current) => {
+      (
+        acc: Array<{
+          label: JSX.Element;
+          id: string;
+          icon: JSX.Element;
+          children: Array<{ label: JSX.Element; id: string }>;
+        }>,
+        current
+      ) => {
         if (current.enabled) {
           return [
             ...acc,
@@ -196,7 +204,7 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
             {inputsTotalErrors}
           </EuiNotificationBadge>
         ) : undefined,
-        children: generateInputReponse(),
+        children: generateInputResponse(),
       },
     ];
   };
