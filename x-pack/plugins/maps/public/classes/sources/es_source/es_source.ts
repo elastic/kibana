@@ -17,12 +17,7 @@ import { lastValueFrom } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import type { IESAggSource } from '../es_agg_source';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
-import {
-  getAutocompleteService,
-  getIndexPatternService,
-  getTimeFilter,
-  getSearchService,
-} from '../../../kibana_services';
+import { getIndexPatternService, getTimeFilter, getSearchService } from '../../../kibana_services';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
@@ -540,7 +535,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         query,
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.warn(
         `Unable to fetch suggestions for field: ${field.getRootName()}, query: ${query}, error: ${
           error.message

@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
 import { RasterTileSource } from 'maplibre-gl';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
-import { SOURCE_TYPES } from '../../../../common/constants';
 import {
   XYZTMSSourceDescriptor,
   DataRequestMeta,

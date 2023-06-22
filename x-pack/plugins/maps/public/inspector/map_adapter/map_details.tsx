@@ -6,17 +6,8 @@
  */
 
 import React, { Component } from 'react';
-import {
-  EuiTab,
-  EuiTabs,
-  EuiCodeBlock,
-  EuiTable,
-  EuiTableBody,
-  EuiTableRow,
-  EuiTableRowCell,
-} from '@elastic/eui';
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 const DETAILS_TAB_ID = 'details';
 const STYLE_TAB_ID = 'mapStyle';

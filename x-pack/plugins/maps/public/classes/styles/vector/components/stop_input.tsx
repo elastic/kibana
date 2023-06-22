@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import React, { ChangeEvent, Component } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFieldText } from '@elastic/eui';
+import React, { Component } from 'react';
+import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 import { IField } from '../../../fields/field';
 
 interface Props {

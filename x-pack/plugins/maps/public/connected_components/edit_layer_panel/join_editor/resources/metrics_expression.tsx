@@ -7,17 +7,10 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiExpression,
-  EuiFormErrorText,
-  EuiFormHelpText,
-} from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MetricsEditor } from '../../../../components/metrics_editor';
 import { AGG_TYPE } from '../../../../../common/constants';
 import { AggDescriptor, FieldedAggDescriptor } from '../../../../../common/descriptor_types';
 

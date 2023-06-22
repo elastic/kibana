@@ -6,13 +6,6 @@
  */
 
 import type { MapAttributes } from '../../../common/content_management';
-import {
-  EMS_BASEMAP_KEYS,
-  JOIN_KEYS,
-  LAYER_KEYS,
-  RESOLUTION_KEYS,
-  SCALING_KEYS,
-} from '../../../common/telemetry/types';
 import { LayerStatsCollector } from '../../../common/telemetry/layer_stats_collector';
 import { MapSettingsCollector } from '../../../common/telemetry/map_settings_collector';
 

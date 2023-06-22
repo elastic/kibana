@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import { EuiFormRow, EuiSelect, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SortDirection, indexPatterns } from '@kbn/data-plugin/public';

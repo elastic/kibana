@@ -7,11 +7,10 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React, { Fragment, Component, ChangeEvent } from 'react';
+import React, { Fragment, Component } from 'react';
 import { EuiFieldText, EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
-import { ValidatedDualRange, Value } from '@kbn/kibana-react-plugin/public';
+import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { MVTFieldConfigEditor } from './mvt_field_config_editor';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';

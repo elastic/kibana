@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { Component, RefObject } from 'react';
+import React, { Component } from 'react';
 import { first } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
-import type { MapEmbeddableType } from './types';
 import { MapEmbeddable } from './map_embeddable';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 

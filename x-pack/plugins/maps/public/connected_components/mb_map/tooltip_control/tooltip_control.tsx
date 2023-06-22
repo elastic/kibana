@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
-import {
-  LngLat,
-  Map as MbMap,
-  MapGeoJSONFeature,
-  MapMouseEvent,
-  MapSourceDataEvent,
-  Point2D,
-  PointLike,
-} from '@kbn/mapbox-gl';
-import { v4 as uuidv4 } from 'uuid';
-import { Geometry } from 'geojson';
+import { LngLat, Map as MbMap, MapGeoJSONFeature, Point2D, PointLike } from '@kbn/mapbox-gl';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { LON_INDEX, RawValue, SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
+import { LON_INDEX, RawValue } from '../../../../common/constants';
 import { TooltipFeature, TooltipState } from '../../../../common/descriptor_types';
 import { TooltipPopover } from './tooltip_popover';
 import { ILayer } from '../../../classes/layers/layer';

@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
-import { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  type ControlGroupInput,
-  type ControlGroupInputBuilder,
-  type AwaitingControlGroupAPI,
-  ControlGroupRenderer,
-} from '@kbn/controls-plugin/public';
-import { first } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { Timeslice } from '../../../common/descriptor_types';
 

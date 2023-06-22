@@ -9,7 +9,7 @@ import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
@@ -24,7 +24,6 @@ import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
 
 import {
   LABEL_BORDER_SIZES,
-  STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
@@ -33,14 +32,12 @@ import {
   ColorDynamicOptions,
   ColorStaticOptions,
   CustomIcon,
-  DynamicStylePropertyOptions,
   IconDynamicOptions,
   IconStaticOptions,
   LabelDynamicOptions,
   LabelStaticOptions,
   SizeDynamicOptions,
   SizeStaticOptions,
-  StaticStylePropertyOptions,
   StylePropertyOptions,
   VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';

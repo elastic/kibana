@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import React, { Component, CSSProperties, RefObject, ReactNode } from 'react';
+import React, { Component, CSSProperties, ReactNode } from 'react';
 import {
   EuiCallOut,
   EuiLoadingSpinner,

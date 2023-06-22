@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiFormRow, EuiTitle, EuiPanel, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiTitle, EuiPanel, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewField } from '@kbn/data-views-plugin/public';

@@ -17,7 +17,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
-import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
 import {
   getPreserveDrawingBuffer,
@@ -41,9 +40,7 @@ import {
   ZOOM_PRECISION,
 } from '../../../common/constants';
 import { getCanAccessEmsFonts, getGlyphs, getKibanaFontsGlyphUrl } from './glyphs';
-import { syncLayerOrder } from './sort_layers';
 
-import { removeOrphanedSourcesAndLayers } from './remove_orphaned';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';

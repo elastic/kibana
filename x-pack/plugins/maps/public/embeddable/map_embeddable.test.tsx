@@ -11,7 +11,6 @@ import { getControlledBy, MapEmbeddable } from './map_embeddable';
 import { buildExistsFilter, disableFilter, pinFilter, toggleFilterNegated } from '@kbn/es-query';
 import type { DataViewFieldBase, DataViewBase } from '@kbn/es-query';
 import { MapEmbeddableConfig, MapEmbeddableInput } from './types';
-import type { MapAttributes } from '../../common/content_management';
 
 jest.mock('../kibana_services', () => {
   return {
@@ -71,7 +70,6 @@ jest.mock('../connected_components/map_container', () => {
 
 jest.mock('../routes/map_page', () => {
   class MockSavedMap {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     private _store = require('../reducers/store').createMapStore();
     private _attributes: MapAttributes = {
       title: 'myMap',

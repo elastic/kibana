@@ -13,7 +13,7 @@ import { HeatmapStyleEditor } from './components/heatmap_style_editor';
 import { HeatmapLegend } from './components/legend/heatmap_legend';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME, getOrdinalMbColorRampStops } from '../color_palettes';
 import { LAYER_STYLE_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
-import { HeatmapStyleDescriptor, StyleDescriptor } from '../../../../common/descriptor_types';
+import { StyleDescriptor } from '../../../../common/descriptor_types';
 import { IField } from '../../fields/field';
 
 // The heatmap range chosen hear runs from 0 to 1. It is arbitrary.

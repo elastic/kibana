@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment, Component } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';

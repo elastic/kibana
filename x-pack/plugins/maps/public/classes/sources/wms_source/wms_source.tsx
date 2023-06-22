@@ -12,7 +12,6 @@ import { AbstractSource } from '../source';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 // @ts-ignore
 import { WmsClient } from './wms_client';
-import { SOURCE_TYPES } from '../../../../common/constants';
 import { IRasterSource, RasterTileSourceData } from '../raster_source';
 import { WMSSourceDescriptor } from '../../../../common/descriptor_types';
 export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {

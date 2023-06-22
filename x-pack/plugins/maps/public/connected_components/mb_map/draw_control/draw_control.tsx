@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-// @ts-expect-error
-import mapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 // @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { MapMouseEvent } from '@kbn/mapbox-gl';
 import { DRAW_SHAPE } from '../../../../common/constants';
-import { DrawCircle, DRAW_CIRCLE_RADIUS_LABEL_STYLE } from './draw_circle';
+import { DrawCircle } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';
 
 const DRAW_RECTANGLE = 'draw_rectangle';

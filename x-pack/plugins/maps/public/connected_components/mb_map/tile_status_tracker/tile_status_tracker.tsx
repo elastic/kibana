@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Component } from 'react';
-import type { Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
-import { i18n } from '@kbn/i18n';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { TileMetaFeature } from '../../../../common/descriptor_types';
-import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import { ILayer } from '../../../classes/layers/layer';
-import { IVectorSource } from '../../../classes/sources/vector_source';
-import { getTileKey } from '../../../classes/util/geo_tile_utils';
-import { ES_MVT_META_LAYER_NAME } from '../../../classes/util/tile_meta_feature_utils';
 
 interface MbTile {
   // references internal object from mapbox

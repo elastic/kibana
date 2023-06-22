@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
-import { DropResult, EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
+import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { TOCEntry } from './toc_entry';
-import { isLayerGroup } from '../../../../classes/layers/layer_group';
 import { ILayer } from '../../../../classes/layers/layer';
 
 export interface Props {

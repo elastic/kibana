@@ -16,22 +16,15 @@ import {
   ScopedHistory,
 } from '@kbn/core/public';
 import { Adapters } from '@kbn/embeddable-plugin/public';
-import { Subscription } from 'rxjs';
-import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import { type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import {
   GlobalQueryStateFromUrl,
-  QueryState,
-  QueryStateChange,
   SavedQuery,
   syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
-import {
-  createKbnUrlStateStorage,
-  withNotifyOnErrors,
-  IKbnUrlStateStorage,
-} from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import {
   getData,
   getExecutionContextService,
@@ -43,7 +36,7 @@ import {
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
-import { AppStateManager, startAppStateSyncing } from '../url_state';
+import { startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';

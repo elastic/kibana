@@ -22,7 +22,6 @@ import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers';
 import {
   type LayerWizardStep,
-  type RenderSecondaryActionButtonProps,
   getWizardById,
 } from '../../classes/layers/wizards/layer_wizard_registry';
 

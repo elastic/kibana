@@ -13,7 +13,7 @@ import { ScopedHistory } from '@kbn/core/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { MapAttributes } from '../../../../common/content_management';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
+import { createMapStore, MapStoreState } from '../../../reducers/store';
 import { MapSettings } from '../../../../common/descriptor_types';
 import {
   getTimeFilters,
@@ -24,7 +24,6 @@ import {
   getQuery,
   getFilters,
   getMapSettings,
-  getLayerListConfigOnly,
 } from '../../../selectors/map_selectors';
 import {
   setGotoWithCenter,

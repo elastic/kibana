@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import React, { ChangeEvent, Component } from 'react';
+import React, { Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,

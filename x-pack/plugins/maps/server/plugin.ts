@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
   CoreStart,
-  Logger,
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,

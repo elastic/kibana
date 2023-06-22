@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component } from 'react';
+import React, { Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -17,7 +17,6 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 import { getEsSpatialRelationLabel } from '../../../../common/i18n_getters';

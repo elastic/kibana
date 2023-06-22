@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Adapters } from '@kbn/inspector-plugin/public';

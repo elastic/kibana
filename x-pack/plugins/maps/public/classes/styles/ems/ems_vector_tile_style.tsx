@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { IStyle } from '../style';
-import { EMSVectorTileStyleDescriptor, StyleDescriptor } from '../../../../common/descriptor_types';
+import { StyleDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { EMSVectorTileStyleEditor } from './components/ems_vector_tile_style_editor';
 

@@ -9,8 +9,6 @@ import React, { Component } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FileLayer } from '@elastic/ems-client';
-import { getEmsFileLayers } from '../util';
 import { getEmsUnavailableMessage } from './ems_unavailable_message';
 
 interface Props {

@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
 import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Subscription } from 'rxjs';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -20,11 +18,9 @@ import {
   skip,
   startWith,
 } from 'rxjs/operators';
-import { Unsubscribe } from 'redux';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { type Filter } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
@@ -36,17 +32,14 @@ import {
   FilterableEmbeddable,
   shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
-import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
   setMapSettings,
   setQuery,
   setReadOnly,
   updateLayerById,
-  setGotoWithCenter,
   setEmbeddableSearchContext,
   setExecutionContext,
 } from '../actions';
@@ -54,9 +47,7 @@ import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors'
 import {
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,
-  setEventHandlers,
   setOnMapMove,
-  EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
   isMapLoading,
@@ -68,7 +59,6 @@ import {
   getMapBuffer,
   getMapExtent,
   getMapReady,
-  getMapSettings,
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
@@ -78,10 +68,8 @@ import {
   getEditPath,
   getFullPath,
   MAP_SAVED_OBJECT_TYPE,
-  RawValue,
   RENDER_TIMEOUT,
 } from '../../common/constants';
-import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
   getCharts,
   getCoreI18n,
@@ -92,15 +80,13 @@ import {
   getTheme,
   getUiActions,
 } from '../kibana_services';
-import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
+import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
-import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
-import { getGeoFieldsLabel } from './get_geo_fields_label';
 
 import {
   MapByValueInput,

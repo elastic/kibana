@@ -6,7 +6,6 @@
  */
 
 import { AbstractStyleProperty } from './style_property';
-import { SYMBOLIZE_AS_TYPES } from '../../../../../common/constants';
 import { SymbolizeAsOptions } from '../../../../../common/descriptor_types';
 
 export class SymbolizeAsProperty extends AbstractStyleProperty<SymbolizeAsOptions> {

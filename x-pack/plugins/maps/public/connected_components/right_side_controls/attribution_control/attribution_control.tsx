@@ -6,7 +6,6 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import _ from 'lodash';
 import { EuiText, EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
 import { Attribution } from '../../../../common/descriptor_types';

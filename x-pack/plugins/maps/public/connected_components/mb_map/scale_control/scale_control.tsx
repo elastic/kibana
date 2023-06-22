@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import type { Map as MapboxMap } from '@kbn/mapbox-gl';

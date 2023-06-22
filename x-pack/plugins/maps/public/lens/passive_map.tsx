@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, RefObject } from 'react';
-import { Subscription } from 'rxjs';
+import React, { Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';

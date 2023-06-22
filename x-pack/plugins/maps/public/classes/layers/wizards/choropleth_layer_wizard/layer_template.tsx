@@ -8,7 +8,6 @@
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FileLayer } from '@elastic/ems-client';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -24,12 +23,7 @@ import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
-import { getGeoFields, getSourceFields, getTermsFields } from '../../../../index_pattern_util';
-import { getEmsFileLayers } from '../../../../util';
-import {
-  getIndexPatternSelectComponent,
-  getIndexPatternService,
-} from '../../../../kibana_services';
+import { getIndexPatternSelectComponent } from '../../../../kibana_services';
 import {
   createEmsChoroplethLayerDescriptor,
   createEsChoroplethLayerDescriptor,

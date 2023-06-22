@@ -9,18 +9,12 @@ import React, { CSSProperties, ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
-import {
-  getDefaultStaticProperties,
-  LABEL_STYLES,
-  LINE_STYLES,
-  POLYGON_STYLES,
-} from './vector_style_defaults';
+import { getDefaultStaticProperties } from './vector_style_defaults';
 import {
   DEFAULT_ICON,
   FIELD_ORIGIN,
   ICON_SOURCE,
   LAYER_STYLE_TYPE,
-  SOURCE_FORMATTERS_DATA_REQUEST_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';

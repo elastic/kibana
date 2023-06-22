@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component } from 'react';
+import React, { Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,

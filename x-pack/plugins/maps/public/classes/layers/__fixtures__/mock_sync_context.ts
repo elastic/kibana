@@ -6,9 +6,8 @@
  */
 
 import sinon from 'sinon';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { DataRequestContext } from '../../../actions';
-import { DataRequestMeta, DataFilters } from '../../../../common/descriptor_types';
+import { DataFilters } from '../../../../common/descriptor_types';
 
 export class MockSyncContext implements DataRequestContext {
   dataFilters: DataFilters;
