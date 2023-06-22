@@ -30,7 +30,7 @@ export const useCommonChartProps = ({
   annotation: ChangePointAnnotation;
   previewMode?: boolean;
 }): Partial<TypedLensByValueInput> => {
-  const timeRange = useTimeRangeUpdates();
+  const timeRange = useTimeRangeUpdates(true);
   const { dataView } = useDataSource();
   const { bucketInterval, resultQuery, resultFilters } = useChangePointDetectionContext();
 
