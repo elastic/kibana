@@ -35,6 +35,8 @@ const configSchema = schema.object({
   serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
+  serviceMapTerminateAfter: schema.number({ defaultValue: 100_000 }),
+  serviceMapMaxTraces: schema.number({ defaultValue: 1000 }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     maxTraceItems: schema.number({ defaultValue: 5000 }),

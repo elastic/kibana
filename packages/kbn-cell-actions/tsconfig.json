@@ -20,6 +20,7 @@
     "@kbn/es-query",
     "@kbn/ui-actions-plugin",
     "@kbn/field-types",
+    "@kbn/data-views-plugin",
   ],
   "exclude": ["target/**/*"]
 }

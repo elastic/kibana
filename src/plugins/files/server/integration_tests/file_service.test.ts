@@ -27,7 +27,8 @@ import { BlobStorageService } from '../blob_storage_service';
 import { FileServiceStart, FileServiceFactory } from '../file_service';
 import type { CreateFileArgs } from '../file_service/file_action_types';
 
-describe('FileService', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/158537
+describe.skip('FileService', () => {
   const fileKind: string = 'test';
   const fileKindNonDefault: string = 'test-non-default';
   const fileKindTinyFiles: string = 'tiny-files';

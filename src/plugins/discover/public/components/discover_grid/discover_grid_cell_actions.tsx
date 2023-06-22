@@ -10,7 +10,7 @@ import React, { useContext } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import type { CellActionValue } from '@kbn/cell-actions';
+import type { CellActionFieldValue } from '@kbn/cell-actions';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { DiscoverGridContext, GridContext } from './discover_grid_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -123,8 +123,8 @@ export function buildCellActions(field: DataViewField, onFilter?: DocViewFilterF
 }
 
 // Converts the cell action value to the type expected by CellActions component
-export const convertCellActionValue = (rawValue: unknown): CellActionValue => {
-  const value = rawValue as CellActionValue | number | number[];
+export const convertCellActionValue = (rawValue: unknown): CellActionFieldValue => {
+  const value = rawValue as CellActionFieldValue | number | number[];
   if (Array.isArray(value)) {
     return value.map((val) => (val != null ? val.toString() : val));
   }

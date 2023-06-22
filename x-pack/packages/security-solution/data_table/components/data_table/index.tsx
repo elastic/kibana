@@ -335,10 +335,14 @@ export const DataTableComponent = React.memo<DataTableProps>(
     const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
       () =>
         cellActionsTriggerId
-          ? columnHeaders.map((column) => ({
+          ? // TODO use FieldSpec object instead of column
+            columnHeaders.map((column) => ({
               name: column.id,
               type: column.type ?? 'keyword',
-              aggregatable: column.aggregatable,
+              aggregatable: column.aggregatable ?? false,
+              searchable: column.searchable ?? false,
+              esTypes: column.esTypes ?? [],
+              subType: column.subType,
             }))
           : undefined,
       [cellActionsTriggerId, columnHeaders]
@@ -471,5 +475,3 @@ export const DataTableComponent = React.memo<DataTableProps>(
     );
   }
 );
-
-DataTableComponent.displayName = 'DataTableComponent';

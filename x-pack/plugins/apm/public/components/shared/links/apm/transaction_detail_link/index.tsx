@@ -28,7 +28,7 @@ interface Props extends APMLinkExtendProps {
   traceId?: string;
   transactionId?: string;
   transactionName: string;
-  transactionType: string;
+  transactionType?: string;
   latencyAggregationType?: string;
   environment?: string;
   comparisonEnabled?: boolean;

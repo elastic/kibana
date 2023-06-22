@@ -53,6 +53,7 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -127,6 +128,18 @@ export const getTags = async (signal: AbortSignal, owner: string[]): Promise<str
     signal,
     query: { ...(owner.length > 0 ? { owner } : {}) },
   });
+  return response ?? [];
+};
+
+export const getCategories = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {
+  const response = await KibanaServices.get().http.fetch<string[]>(
+    INTERNAL_GET_CASE_CATEGORIES_URL,
+    {
+      method: 'GET',
+      signal,
+      query: { ...(owner.length > 0 ? { owner } : {}) },
+    }
+  );
   return response ?? [];
 };
 
@@ -216,6 +229,7 @@ export const getCases = async ({
     status: StatusAll,
     tags: [],
     owner: [],
+    category: [],
   },
   queryParams = {
     page: 1,
@@ -234,6 +248,7 @@ export const getCases = async ({
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
+    ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...queryParams,
   };
 
@@ -247,9 +262,13 @@ export const getCases = async ({
 };
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<CaseUI> => {
+  const theCase = {
+    ...newCase,
+    ...(newCase.category != null ? { category: newCase.category } : { category: null }),
+  };
   const response = await KibanaServices.get().http.fetch<Case>(CASES_URL, {
     method: 'POST',
-    body: JSON.stringify(newCase),
+    body: JSON.stringify(theCase),
     signal,
   });
   return convertCaseToCamelCase(decodeCaseResponse(response));

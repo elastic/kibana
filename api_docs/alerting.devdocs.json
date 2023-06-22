@@ -109,12 +109,12 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/alerting/register_ml_alerts.ts"
-            },
-            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/index.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/public/alerting/register_ml_alerts.ts"
             }
           ],
           "children": [
@@ -2857,6 +2857,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/server/alert_rules/common.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/alert_rules/tls_rule/tls_rule.ts"
               },
               {
                 "plugin": "synthetics",
@@ -9827,6 +9831,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.MAINTENANCE_WINDOW_DATE_FORMAT",
+        "type": "string",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_DATE_FORMAT",
+        "description": [],
+        "signature": [
+          "\"MM/DD/YY hh:mm A\""
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.MAINTENANCE_WINDOW_FEATURE_ID",
         "type": "string",
         "tags": [],
@@ -9849,6 +9868,21 @@
         "description": [],
         "signature": [
           "\"maintenance-window\""
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MAINTENANCE_WINDOWS_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOWS_APP_ID",
+        "description": [],
+        "signature": [
+          "\"maintenanceWindows\""
         ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
@@ -9918,6 +9952,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.MaintenanceWindowDeepLinkIds",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindowDeepLinkIds",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.MaintenanceWindowSOAttributes",
         "type": "Type",
         "tags": [],
@@ -9939,6 +9988,21 @@
             "section": "def-common.MaintenanceWindowModificationMetadata",
             "text": "MaintenanceWindowModificationMetadata"
           }
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MANAGEMENT_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MANAGEMENT_APP_ID",
+        "description": [],
+        "signature": [
+          "\"management\""
         ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
@@ -11007,6 +11071,113 @@
             "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MAINTENANCE_WINDOW_DEEP_LINK_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_DEEP_LINK_IDS",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows",
+            "type": "string",
+            "tags": [],
+            "label": "maintenanceWindows",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate",
+            "type": "string",
+            "tags": [],
+            "label": "maintenanceWindowsCreate",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit",
+            "type": "string",
+            "tags": [],
+            "label": "maintenanceWindowsEdit",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MAINTENANCE_WINDOW_PATHS",
+        "type": "Object",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_PATHS",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.MAINTENANCE_WINDOW_PATHS.alerting",
+            "type": "Object",
+            "tags": [],
+            "label": "alerting",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindows",
+                "type": "string",
+                "tags": [],
+                "label": "maintenanceWindows",
+                "description": [],
+                "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsCreate",
+                "type": "string",
+                "tags": [],
+                "label": "maintenanceWindowsCreate",
+                "description": [],
+                "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsEdit",
+                "type": "string",
+                "tags": [],
+                "label": "maintenanceWindowsEdit",
+                "description": [],
+                "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

@@ -38,8 +38,8 @@ const fieldValues: Record<string, string[]> = {
 const mockGetCellValue = jest.fn(
   (field: string, rowIndex: number) => fieldValues[field]?.[rowIndex % fieldValues[field].length]
 );
-const field1 = { name: 'column1', type: 'text' };
-const field2 = { name: 'column2', type: 'keyword' };
+const field1 = { name: 'column1', type: 'text', searchable: true, aggregatable: true };
+const field2 = { name: 'column2', type: 'keyword', searchable: true, aggregatable: true };
 const columns = [{ id: field1.name }, { id: field2.name }];
 
 const mockCloseCellPopover = jest.fn();
@@ -163,7 +163,17 @@ describe('useDataGridColumnsCellActions', () => {
     await waitFor(() => {
       expect(action1.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          field: { name: field1.name, type: field1.type, value: fieldValues[field1.name][1] },
+          data: [
+            {
+              value: fieldValues[field1.name][1],
+              field: {
+                name: field1.name,
+                type: field1.type,
+                aggregatable: true,
+                searchable: true,
+              },
+            },
+          ],
           trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
         })
       );
@@ -176,7 +186,17 @@ describe('useDataGridColumnsCellActions', () => {
     await waitFor(() => {
       expect(action2.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          field: { name: field2.name, type: field2.type, value: fieldValues[field2.name][2] },
+          data: [
+            {
+              value: fieldValues[field2.name][2],
+              field: {
+                name: field2.name,
+                type: field2.type,
+                aggregatable: true,
+                searchable: true,
+              },
+            },
+          ],
           trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
         })
       );
@@ -198,7 +218,17 @@ describe('useDataGridColumnsCellActions', () => {
     await waitFor(() => {
       expect(action1.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          field: { name: field1.name, type: field1.type, value: fieldValues[field1.name][1] },
+          data: [
+            {
+              value: fieldValues[field1.name][1],
+              field: {
+                name: field1.name,
+                type: field1.type,
+                aggregatable: true,
+                searchable: true,
+              },
+            },
+          ],
         })
       );
     });

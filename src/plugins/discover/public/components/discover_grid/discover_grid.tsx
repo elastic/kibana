@@ -28,7 +28,7 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
-  type CellActionValue,
+  type CellActionFieldValue,
 } from '@kbn/cell-actions';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -451,7 +451,7 @@ export const DiscoverGrid = ({
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
-    (fieldName, rowIndex): CellActionValue =>
+    (fieldName, rowIndex): CellActionFieldValue =>
       convertCellActionValue(displayedRows[rowIndex % displayedRows.length].flattened[fieldName]),
     [displayedRows]
   );

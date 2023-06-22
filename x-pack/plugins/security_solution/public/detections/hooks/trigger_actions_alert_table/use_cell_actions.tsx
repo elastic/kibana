@@ -68,11 +68,15 @@ export const getUseCellActionsHook = (tableId: TableId) => {
         return undefined;
       }
       return columns.map((column) => {
+        // TODO use FieldSpec object instead of browserField
         const browserField: Partial<BrowserField> | undefined = browserFieldsByName[column.id];
         return {
           name: column.id,
           type: browserField?.type ?? 'keyword',
-          aggregatable: browserField?.aggregatable,
+          esTypes: browserField?.esTypes ?? [],
+          aggregatable: browserField?.aggregatable ?? false,
+          searchable: browserField?.searchable ?? false,
+          subType: browserField?.subType,
         };
       });
     }, [browserFieldsByName, columns, viewMode]);
