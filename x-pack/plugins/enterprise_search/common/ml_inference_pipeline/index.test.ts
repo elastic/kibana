@@ -157,7 +157,7 @@ describe('generateMlInferencePipelineBody lib function', () => {
                 value: [
                   {
                     message:
-                      "Processor 'inference' in pipeline 'my-pipeline' failed with message '{{ _ingest.on_failure_message }}'",
+                      "Processor 'inference' in pipeline 'my-pipeline' failed for field 'my-source-field' with message '{{ _ingest.on_failure_message }}'",
                     pipeline: 'my-pipeline',
                     timestamp: '{{{ _ingest.timestamp }}}',
                   },
