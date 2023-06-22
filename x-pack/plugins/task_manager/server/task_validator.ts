@@ -55,7 +55,7 @@ export class TaskValidator {
     }
 
     const taskTypeDef = this.definitions.get(task.taskType);
-    const lastestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
+    const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
     // TODO: Remove once all task types have defined their state schema.
     // https://github.com/elastic/kibana/issues/159347
