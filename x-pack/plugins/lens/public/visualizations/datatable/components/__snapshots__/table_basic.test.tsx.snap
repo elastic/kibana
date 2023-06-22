@@ -252,6 +252,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
           "header": "underline",
         }
       }
+      inMemory={
+        Object {
+          "level": "sorting",
+        }
+      }
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
@@ -530,6 +535,11 @@ exports[`DatatableComponent it renders custom row height if set to another value
           "header": "underline",
         }
       }
+      inMemory={
+        Object {
+          "level": "sorting",
+        }
+      }
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
@@ -799,6 +809,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
         Object {
           "border": "horizontal",
           "header": "underline",
+        }
+      }
+      inMemory={
+        Object {
+          "level": "sorting",
         }
       }
       onColumnResize={[Function]}
@@ -1072,6 +1087,11 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
         Object {
           "border": "horizontal",
           "header": "underline",
+        }
+      }
+      inMemory={
+        Object {
+          "level": "sorting",
         }
       }
       onColumnResize={[Function]}

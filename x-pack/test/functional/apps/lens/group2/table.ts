@@ -49,13 +49,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'geo.dest',
       });
 
-      await PageObjects.lens.changeTableSortingBy(3, 'ascending');
-      await PageObjects.lens.waitForVisualization();
-      expect(await PageObjects.lens.getDatatableCellText(0, 3)).to.eql('CN');
+      await retry.try(async () => {
+        await PageObjects.lens.changeTableSortingBy(3, 'ascending');
+        await PageObjects.lens.waitForVisualization();
+        expect(await PageObjects.lens.getDatatableCellText(0, 3)).to.eql('CN');
+      });
 
-      await PageObjects.lens.changeTableSortingBy(3, 'descending');
-      await PageObjects.lens.waitForVisualization();
-      expect(await PageObjects.lens.getDatatableCellText(0, 3)).to.eql('PH');
+      await retry.try(async () => {
+        await PageObjects.lens.changeTableSortingBy(3, 'descending');
+        await PageObjects.lens.waitForVisualization();
+        expect(await PageObjects.lens.getDatatableCellText(0, 3)).to.eql('PH');
+      });
 
       await retry.try(async () => {
         await PageObjects.lens.changeTableSortingBy(3, 'none');
