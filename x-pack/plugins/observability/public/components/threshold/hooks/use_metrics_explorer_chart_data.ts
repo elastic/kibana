@@ -9,10 +9,7 @@ import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { MetricExplorerCustomMetricAggregations } from '../../../../common/threshold_rule/metrics_explorer';
-import {
-  MetricExpressionCustomMetric,
-  MetricsSourceConfiguration,
-} from '../../../../common/threshold_rule/types';
+import { MetricExpressionCustomMetric } from '../../../../common/threshold_rule/types';
 import { MetricExpression, TimeRange } from '../types';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
@@ -26,7 +23,6 @@ const DEFAULT_TIME_RANGE = {};
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,
   derivedIndexPattern: DataViewBase,
-  source?: MetricsSourceConfiguration,
   filterQuery?: string,
   groupBy?: string | string[],
   timeRange: TimeRange = DEFAULT_TIME_RANGE
@@ -53,11 +49,13 @@ export const useMetricsExplorerChartData = (
       ],
       aggregation: expression.aggType || 'avg',
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       expression.aggType,
       expression.equation,
       expression.metric,
-      expression.customMetrics,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(expression.customMetrics),
       filterQuery,
       groupBy,
     ]
@@ -74,7 +72,7 @@ export const useMetricsExplorerChartData = (
     };
   }, [timeRange, timeSize, timeUnit]);
 
-  return useMetricsExplorerData(options, source?.configuration, derivedIndexPattern, timestamps);
+  return useMetricsExplorerData(options, derivedIndexPattern, timestamps);
 };
 
 const mapMetricThresholdMetricToMetricsExplorerMetric = (metric: MetricExpressionCustomMetric) => {
