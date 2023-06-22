@@ -153,10 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.createAnomalyDetectionJobES(
         ml.commonConfig.getADFqSingleMetricJobConfig(adJobId1)
       );
-
-      // datafeed should be added with the request
-      const datafeedConfig1 = ml.commonConfig.getADFqDatafeedConfig(adJobId1);
-      await ml.api.createDatafeedES(datafeedConfig1);
+      await ml.api.createDatafeedES(ml.commonConfig.getADFqDatafeedConfig(adJobId1));
 
       // check to see if a sync is needed
       const syncNeeded2 = await runSyncCheckRequest(
@@ -216,9 +213,7 @@ export default ({ getService }: FtrProviderContext) => {
         ml.commonConfig.getADFqSingleMetricJobConfig(adJobId1),
         idSpace2
       );
-
-      const datafeedConfig1 = ml.commonConfig.getADFqDatafeedConfig(adJobId1);
-      await ml.api.createDatafeed(datafeedConfig1, idSpace2);
+      await ml.api.createDatafeed(ml.commonConfig.getADFqDatafeedConfig(adJobId1), idSpace2);
 
       // check to see if a sync is needed
       const syncNeeded2 = await runSyncCheckRequest(
