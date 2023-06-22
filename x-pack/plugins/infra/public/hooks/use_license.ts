@@ -26,7 +26,7 @@ export const useLicense = (): UseLicenseReturnValue => {
       (level: LicenseType) => {
         if (!license) return;
 
-        return !!license && license.isAvailable && license.isActive && license.hasAtLeast(level);
+        return license.isAvailable && license.isActive && license.hasAtLeast(level);
       },
       [license]
     ),
