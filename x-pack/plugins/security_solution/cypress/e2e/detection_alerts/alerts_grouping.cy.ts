@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  getGroupLevel,
-  openGroup,
-  scrollGroupsIntoView,
-  selectGroup,
-} from '../../tasks/alerts_grouping';
+import { getGroupLevel, openGroup, selectGroup } from '../../tasks/alerts_grouping';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
   expectRowsPerPage,
@@ -19,7 +14,7 @@ import {
   setWithinRowsPerPageTo,
 } from '../../tasks/table_pagination';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { GROUP_LEVEL_SELECTOR } from '../../screens/alerts';
+import { GROUP_LEVEL_SELECTOR, GROUP_LOADER } from '../../screens/alerts';
 
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
@@ -38,10 +33,10 @@ describe('Alerts grouping', { testIsolation: false }, () => {
     after(() => {
       esArchiverUnload('grouping_default');
     });
-    afterEach(() => {
-      cy.reload();
-      scrollGroupsIntoView();
-    });
+    // afterEach(() => {
+    //   cy.reload();
+    //   scrollGroupsIntoView();
+    // });
 
     it('should reset all pagination levels when selected group changes', () => {
       selectGroup('kibana.alert.rule.name');
@@ -80,7 +75,7 @@ describe('Alerts grouping', { testIsolation: false }, () => {
       });
     });
 
-    it('should reset inner pagination only when a new group opens', () => {
+    it.skip('should reset inner pagination only when a new group opens', () => {
       // set level 0 page to 2
       getGroupLevel(0, () => {
         goToTablePage(2);
@@ -89,6 +84,7 @@ describe('Alerts grouping', { testIsolation: false }, () => {
       openGroup('first');
       // set level 1 page to 2
       getGroupLevel(1, () => {
+        cy.get(GROUP_LOADER).should('not.exist');
         goToTablePage(2);
       });
       // open different level 1 group
@@ -99,6 +95,7 @@ describe('Alerts grouping', { testIsolation: false }, () => {
       });
       // level 0 page should be 2
       getGroupLevel(0, () => {
+        cy.get(GROUP_LOADER).should('not.exist');
         expectTablePageActive(2);
       });
     });

@@ -16,16 +16,14 @@ import {
 } from '../screens/alerts';
 
 export const selectGroup = (groupName: string) => {
-  cy.log('Selecting group');
   cy.get(GROUP_SELECTOR).click();
-  cy.log('GROUP_SELECTOR', cy.get(GROUP_SELECTOR));
-  console.log('GROUP_SELECTOR', cy.get(GROUP_SELECTOR));
   cy.get(GROUP_OPTION_SELECTOR(groupName)).click();
 };
 
 // TODO: @Glo please help here, these clicks are flakey
 export const openGroup = (groupName?: 'first' | 'last') => {
   cy.get(GROUP_LOADER).should('not.exist');
+  scrollGroupsIntoView();
   if (groupName === 'last') {
     cy.get(GROUP_SELECTOR_OPTION)
       .last()
@@ -34,7 +32,6 @@ export const openGroup = (groupName?: 'first' | 'last') => {
       });
     return;
   }
-  scrollGroupsIntoView();
   cy.get(GROUP_SELECTOR_OPTION)
     .first()
     .within(() => {
