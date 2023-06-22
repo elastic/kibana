@@ -76,9 +76,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
   isLayerLoading(zoom: number) {
     const isSourceLoading = super.isLayerLoading(zoom);
-    return isSourceLoading
-      ? true 
-      : this._isLoadingJoins();
+    return isSourceLoading ? true : this._isLoadingJoins();
   }
 
   _isTiled(): boolean {
