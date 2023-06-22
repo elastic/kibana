@@ -6,14 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
-import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
+import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
+import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 
-export type DashboardLink = DashboardItem & { label?: string };
+export interface DashboardLink {
+  id: string;
+  title: string;
+  label?: string;
+  description?: string;
+}
 
 export interface NavigationEmbeddableInput extends EmbeddableInput {
-  dashboardLinks?: DashboardLink[]; // probably want to simplify this so we are only storing what is absolutely necessary
+  dashboardLinks?: DashboardLink[];
 }
 
 export interface NavigationEmbeddableComponentState {

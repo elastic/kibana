@@ -25,9 +25,7 @@ export const NavigationEmbeddableDashboardList = ({ onDashboardSelected, ...othe
     (state) => state.componentState.currentDashboardId
   );
 
-  const [dashboardListOptions, setDashboardListOptions] = useState<
-    Array<EuiSelectableOption<DashboardItem>>
-  >([]);
+  const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
     return await navEmbeddable.fetchDashboardList();
@@ -47,9 +45,9 @@ export const NavigationEmbeddableDashboardList = ({ onDashboardSelected, ...othe
           }),
           checked: isCurrentDashboard ? 'on' : undefined,
           label: dashboard.attributes.title,
-        };
+        } as EuiSelectableOption;
       }) ?? [];
-    setDashboardListOptions(dashboardOptions as Array<EuiSelectableOption<DashboardItem>>);
+    setDashboardListOptions(dashboardOptions);
   }, [dashboardList, currentDashboardId, onDashboardSelected]);
 
   return loadingDashboardList ? (

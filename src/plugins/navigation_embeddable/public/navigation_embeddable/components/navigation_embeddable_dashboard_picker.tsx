@@ -69,8 +69,10 @@ export const NavigationEmbeddableDashboardPicker = () => {
           onClick={() => {
             if (selectedDashboard) {
               navEmbeddable.dispatch.addLink({
-                ...selectedDashboard,
-                label: dashboardLabel === '' ? selectedDashboard.attributes.title : dashboardLabel,
+                label: dashboardLabel,
+                id: selectedDashboard.id,
+                title: selectedDashboard.attributes.title,
+                description: selectedDashboard.attributes.description,
               });
             }
             setDashboardLabel('');
