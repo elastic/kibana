@@ -5,25 +5,38 @@
  * 2.0.
  */
 
-import { DataViewBase, Filter, isCombinedFilter } from '@kbn/es-query';
+import {
+  BooleanRelation,
+  buildCombinedFilter,
+  buildPhraseFilter,
+  Filter,
+  isCombinedFilter,
+} from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-export const createHostsFilter = (hostNames: string[], dataView?: DataViewBase): Filter => {
-  return {
-    query: {
-      terms: {
-        'host.name': hostNames,
+export const buildCombinedHostsFilter = ({
+  field,
+  values,
+  dataView,
+}: {
+  values: string[];
+  field: string;
+  dataView?: DataView;
+}) => {
+  if (!dataView) {
+    return {
+      query: {
+        terms: {
+          'host.name': values,
+        },
       },
-    },
-    meta: dataView
-      ? {
-          value: hostNames.join(),
-          type: 'phrases',
-          params: hostNames,
-          index: dataView.id,
-          key: 'host.name',
-        }
-      : {},
-  };
+      meta: {},
+    };
+  }
+  const indexField = dataView.getFieldByName(field)!;
+  const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
+
+  return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
 };
 
 export const retrieveFieldsFromFilter = (filters: Filter[], fields: string[] = []) => {
