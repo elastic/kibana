@@ -74,10 +74,10 @@ const getLoggingInfo = ({
   input_type: string;
   user_id: string;
 } => {
-  const action = actions.filter((item) => item.action_id === id)[0];
+  const action = actions.find((item) => item.action_id === id);
   return {
-    input_type: action.input_type,
-    user_id: action.user_id,
+    input_type: action?.input_type || '',
+    user_id: action?.user_id || '',
   };
 };
 
