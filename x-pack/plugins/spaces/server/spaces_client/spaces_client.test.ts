@@ -27,7 +27,7 @@ describe('#getAll', () => {
       attributes: {
         name: 'foo-name',
         description: 'foo-description',
-        bar: 'foo-bar',
+        // bar: 'foo-bar', // what is this for?
       },
     },
     {
@@ -35,7 +35,7 @@ describe('#getAll', () => {
       attributes: {
         name: 'bar-name',
         description: 'bar-description',
-        bar: 'bar-bar',
+        // bar: 'bar-bar', // what is this for?
       },
     },
     {
@@ -43,7 +43,7 @@ describe('#getAll', () => {
       attributes: {
         name: 'baz-name',
         description: 'baz-description',
-        bar: 'baz-bar',
+        // bar: 'baz-bar', // what is this for?
       },
     },
   ];
@@ -53,19 +53,34 @@ describe('#getAll', () => {
       id: 'foo',
       name: 'foo-name',
       description: 'foo-description',
-      bar: 'foo-bar',
+      // color: undefined,
+      // initials: undefined,
+      // imageUrl: undefined,
+      // disabledFeatures: undefined,
+      // _reserved: undefined,
+      // bar: 'foo-bar',
     },
     {
       id: 'bar',
       name: 'bar-name',
       description: 'bar-description',
-      bar: 'bar-bar',
+      // color: undefined,
+      // initials: undefined,
+      // imageUrl: undefined,
+      // disabledFeatures: undefined,
+      // _reserved: undefined,
+      // bar: 'bar-bar',
     },
     {
       id: 'baz',
       name: 'baz-name',
       description: 'baz-description',
-      bar: 'baz-bar',
+      // color: undefined,
+      // initials: undefined,
+      // imageUrl: undefined,
+      // disabledFeatures: undefined,
+      // _reserved: undefined,
+      // bar: 'baz-bar',
     },
   ];
 
@@ -108,7 +123,7 @@ describe('#get', () => {
     attributes: {
       name: 'foo-name',
       description: 'foo-description',
-      bar: 'foo-bar',
+      // bar: 'foo-bar', // what is this for?
     },
   };
 
@@ -116,7 +131,7 @@ describe('#get', () => {
     id: 'foo',
     name: 'foo-name',
     description: 'foo-description',
-    bar: 'foo-bar',
+    // bar: 'foo-bar',
   };
 
   test(`gets space using callWithRequestRepository`, async () => {
@@ -160,7 +175,7 @@ describe('#create', () => {
     attributes: {
       name: 'foo-name',
       description: 'foo-description',
-      bar: 'foo-bar',
+      // bar: 'foo-bar', // what is this for?
       disabledFeatures: [],
     },
   };
@@ -169,7 +184,7 @@ describe('#create', () => {
     id,
     name: 'foo-name',
     description: 'foo-description',
-    bar: 'foo-bar',
+    // bar: 'foo-bar',
     disabledFeatures: [],
   };
 
@@ -249,7 +264,7 @@ describe('#update', () => {
     attributes: {
       name: 'foo-name',
       description: 'foo-description',
-      bar: 'foo-bar',
+      // bar: 'foo-bar',
       _reserved: true,
       disabledFeatures: [],
     },
@@ -259,7 +274,7 @@ describe('#update', () => {
     id: 'foo',
     name: 'foo-name',
     description: 'foo-description',
-    bar: 'foo-bar',
+    // bar: 'foo-bar',
     _reserved: true,
     disabledFeatures: [],
   };
