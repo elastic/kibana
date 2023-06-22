@@ -24,6 +24,7 @@ import {
 import { DefaultFieldRenderer } from '../../../../../../timelines/components/field_renderers/field_renderers';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../../../common/components/links';
 import type { SelectedDataView } from '../../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
 import { getEnrichedFieldInfo } from '../../../../../../common/components/event_details/helpers';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import {
@@ -170,6 +171,7 @@ export const HostPanel = React.memo(
                   attrName={'host.ip'}
                   idPrefix="alert-details-page-user"
                   render={renderHostIp}
+                  sourcererScopeId={SourcererScopeName.detections}
                 />
               </HostPanelSection>
             </EuiFlexGroup>
