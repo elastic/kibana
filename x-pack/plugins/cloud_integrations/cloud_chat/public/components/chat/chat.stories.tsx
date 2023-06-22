@@ -60,9 +60,11 @@ interface Params {
   email: string;
   chatURL: string;
   jwt: string;
+  trialEndDate: string;
+  kbnVersion: string;
 }
 
-export const Component = ({ id, email, chatURL, jwt }: Params) => {
+export const Component = ({ id, email, chatURL, jwt, kbnVersion, trialEndDate }: Params) => {
   const [isHidden, setIsHidden] = useState(false);
 
   return (
@@ -73,6 +75,8 @@ export const Component = ({ id, email, chatURL, jwt }: Params) => {
           jwt,
           id,
           email,
+          trialEndDate: new Date(trialEndDate),
+          kbnVersion,
         },
       }}
     >
@@ -102,4 +106,6 @@ Component.args = {
   email: 'email.address@elastic.co',
   chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
   jwt: 'abcdefghijklmnopqrstuvwxyz',
+  trialEndDate: new Date().toISOString(),
+  kbnVersion: '8.9.0',
 };
