@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { kqlQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { SERVICE_NAME } from '../../common/es_fields/apm';
 import { ServiceGroup } from '../../common/service_groups';
 
@@ -15,12 +15,23 @@ export function serviceGroupWithOverflowQuery(
 ): QueryDslQueryContainer[] {
   if (serviceGroup) {
     const serviceGroupQuery = kqlQuery(serviceGroup?.kuery);
-    const otherBucketQuery = kqlQuery(`${SERVICE_NAME} : "_other"`);
+    const otherBucketQuery = termQuery(SERVICE_NAME, '_other');
 
     return [
       {
         bool: {
-          should: [...serviceGroupQuery, ...otherBucketQuery],
+          should: [
+            {
+              bool: {
+                filter: serviceGroupQuery,
+              },
+            },
+            {
+              bool: {
+                filter: otherBucketQuery,
+              },
+            },
+          ],
         },
       },
     ];
