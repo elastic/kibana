@@ -10,6 +10,7 @@
 import { difference, union } from 'lodash';
 import { Elasticsearch, Kibana } from '..';
 import { callKibana, isAxiosError } from './call_kibana';
+import { SecurityService } from '../../../../../../test/common/services/security/security';
 
 interface User {
   username: string;
@@ -23,10 +24,12 @@ export async function createOrUpdateUser({
   elasticsearch,
   kibana,
   user,
+  securityService,
 }: {
   elasticsearch: Elasticsearch;
   kibana: Kibana;
   user: User;
+  securityService: SecurityService;
 }) {
   const existingUser = await getUser({
     elasticsearch,
@@ -34,54 +37,42 @@ export async function createOrUpdateUser({
     username: user.username,
   });
   if (!existingUser) {
-    return createUser({ elasticsearch, kibana, newUser: user });
+    createUser({ elasticsearch, newUser: user, securityService });
+    return;
   }
 
-  return updateUser({
-    elasticsearch,
-    kibana,
+  updateUser({
     existingUser,
     newUser: user,
+    securityService,
   });
 }
 
 async function createUser({
   elasticsearch,
-  kibana,
   newUser,
+  securityService,
 }: {
   elasticsearch: Elasticsearch;
-  kibana: Kibana;
   newUser: User;
+  securityService: SecurityService;
 }) {
-  const user = await callKibana<User>({
-    elasticsearch,
-    kibana,
-    options: {
-      method: 'POST',
-      url: `/internal/security/users/${newUser.username}`,
-      data: {
-        ...newUser,
-        enabled: true,
-        password: elasticsearch.password,
-      },
-    },
+  const { username, ...options } = newUser;
+  await securityService.user.create(username, {
+    ...options,
+    enabled: true,
+    password: elasticsearch.password,
   });
-
-  console.log(`User "${newUser.username}" was created`);
-  return user;
 }
 
 async function updateUser({
-  elasticsearch,
-  kibana,
   existingUser,
   newUser,
+  securityService,
 }: {
-  elasticsearch: Elasticsearch;
-  kibana: Kibana;
   existingUser: User;
   newUser: User;
+  securityService: SecurityService;
 }) {
   const { username } = newUser;
   const allRoles = union(existingUser.roles, newUser.roles);
@@ -91,18 +82,8 @@ async function updateUser({
     return;
   }
 
-  // assign role to user
-  await callKibana({
-    elasticsearch,
-    kibana,
-    options: {
-      method: 'POST',
-      url: `/internal/security/users/${username}`,
-      data: { ...existingUser, roles: allRoles },
-    },
-  });
-
-  console.log(`User "${username}" was updated`);
+  const { username: _, ...options } = existingUser;
+  await securityService.user.create(username, { ...options, roles: allRoles });
 }
 
 async function getUser({

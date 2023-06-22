@@ -93,10 +93,14 @@ export function createTestConfig(
         profilingFtrConfig: () => config,
         registry: RegistryProvider,
         profilingApiClient: async (context: InheritedFtrProviderContext) => {
+          const security = context.getService('security');
+          const securityService = await security.init();
+
           const { username, password } = servers.kibana;
           const esUrl = format(esServer);
 
           await createProfilingUsers({
+            securityService,
             elasticsearch: { node: esUrl, username, password },
             kibana: { hostname: kibanaServerUrl },
           });

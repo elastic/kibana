@@ -8,6 +8,7 @@ import { asyncForEach } from '@kbn/std';
 import { ProfilingUsername, profilingUsers } from './authentication';
 import { AbortError, callKibana } from './helpers/call_kibana';
 import { createOrUpdateUser } from './helpers/create_or_update_user';
+import { SecurityService } from '../../../../../test/common/services/security/security';
 
 export interface Elasticsearch {
   node: string;
@@ -22,9 +23,11 @@ export interface Kibana {
 export async function createProfilingUsers({
   kibana,
   elasticsearch,
+  securityService,
 }: {
   kibana: Kibana;
   elasticsearch: Elasticsearch;
+  securityService: SecurityService;
 }) {
   const isCredentialsValid = await getIsCredentialsValid({
     elasticsearch,
@@ -51,6 +54,7 @@ export async function createProfilingUsers({
 
     // create user
     await createOrUpdateUser({
+      securityService,
       elasticsearch,
       kibana,
       user: { username, roles: builtInRoleNames },
