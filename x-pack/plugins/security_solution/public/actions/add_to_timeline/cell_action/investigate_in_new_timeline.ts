@@ -38,14 +38,24 @@ export const createInvestigateInNewTimelineCellActionFactory = createCellActionF
       getIconType: () => ADD_TO_TIMELINE_ICON,
       getDisplayName: () => INVESTIGATE_IN_TIMELINE,
       getDisplayNameTooltip: () => INVESTIGATE_IN_TIMELINE,
-      isCompatible: async ({ field }) =>
-        fieldHasCellActions(field.name) && isValidDataProviderField(field.name, field.type),
-      execute: async ({ field, metadata }) => {
+      isCompatible: async ({ data }) => {
+        const field = data[0]?.field;
+
+        return (
+          data.length === 1 && // TODO Add support for multiple values
+          fieldHasCellActions(field.name) &&
+          isValidDataProviderField(field.name, field.type)
+        );
+      },
+      execute: async ({ data, metadata }) => {
+        const field = data[0]?.field;
+        const value = data[0]?.value;
+
         const dataProviders =
           createDataProviders({
             contextId: TimelineId.active,
             fieldType: field.type,
-            values: field.value,
+            values: value,
             field: field.name,
             negate: metadata?.negateFilters === true,
           }) ?? [];

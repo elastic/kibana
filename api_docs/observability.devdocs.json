@@ -2502,6 +2502,26 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.dataViewEditor",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewEditor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViewEditor",
+                "scope": "public",
+                "docId": "kibDataViewEditorPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.discover",
             "type": "Object",
             "tags": [],
@@ -9188,7 +9208,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly coPilot?: Readonly<{} & { enabled: boolean; provider: Readonly<{} & { openAI: Readonly<{} & { apiKey: string; model: string; }>; }> | Readonly<{} & { azureOpenAI: Readonly<{} & { apiKey: string; resourceName: string; deploymentId: string; }>; }>; }> | undefined; readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
+          "{ readonly aiAssistant?: Readonly<{} & { enabled: boolean; provider: Readonly<{} & { openAI: Readonly<{} & { apiKey: string; model: string; }>; }> | Readonly<{} & { azureOpenAI: Readonly<{} & { apiKey: string; resourceName: string; deploymentId: string; }>; }>; }> | undefined; readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
