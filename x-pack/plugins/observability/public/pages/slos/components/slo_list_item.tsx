@@ -180,7 +180,9 @@ export function SloListItem({
             anchorPosition="downLeft"
             button={
               <EuiButtonIcon
-                aria-label="Actions"
+                aria-label={i18n.translate('xpack.observability.slo.item.actions.button', {
+                  defaultMessage: 'Actions',
+                })}
                 color="text"
                 disabled={!slo.summary}
                 display="empty"
@@ -202,7 +204,7 @@ export function SloListItem({
                   onClick={handleViewDetails}
                   data-test-subj="sloActionsView"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.details', {
+                  {i18n.translate('xpack.observability.slo.item.actions.details', {
                     defaultMessage: 'Details',
                   })}
                 </EuiContextMenuItem>,
@@ -213,7 +215,7 @@ export function SloListItem({
                   onClick={handleEdit}
                   data-test-subj="sloActionsEdit"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.edit', {
+                  {i18n.translate('xpack.observability.slo.item.actions.edit', {
                     defaultMessage: 'Edit',
                   })}
                 </EuiContextMenuItem>,
@@ -224,7 +226,7 @@ export function SloListItem({
                   onClick={handleCreateRule}
                   data-test-subj="sloActionsCreateRule"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.createRule', {
+                  {i18n.translate('xpack.observability.slo.item.actions.createRule', {
                     defaultMessage: 'Create new alert rule',
                   })}
                 </EuiContextMenuItem>,
@@ -235,7 +237,7 @@ export function SloListItem({
                   onClick={handleNavigateToRules}
                   data-test-subj="sloActionsManageRules"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.manageRules', {
+                  {i18n.translate('xpack.observability.slo.item.actions.manageRules', {
                     defaultMessage: 'Manage rules',
                   })}
                 </EuiContextMenuItem>,
@@ -246,7 +248,7 @@ export function SloListItem({
                   onClick={handleClone}
                   data-test-subj="sloActionsClone"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.clone', {
+                  {i18n.translate('xpack.observability.slo.item.actions.clone', {
                     defaultMessage: 'Clone',
                   })}
                 </EuiContextMenuItem>,
@@ -257,7 +259,7 @@ export function SloListItem({
                   onClick={handleDelete}
                   data-test-subj="sloActionsDelete"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.delete', {
+                  {i18n.translate('xpack.observability.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
                   })}
                 </EuiContextMenuItem>,
