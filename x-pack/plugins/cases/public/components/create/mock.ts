@@ -11,6 +11,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { choices } from '../connectors/mock';
 
 export const sampleTags = ['coke', 'pepsi'];
+
 export const sampleData: CasePostRequest = {
   description: 'what a great description',
   tags: sampleTags,
@@ -27,6 +28,7 @@ export const sampleData: CasePostRequest = {
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
+  category: null,
 };
 
 export const sampleConnectorData = { isLoading: false, data: [] };
