@@ -36,6 +36,7 @@ import { LogThresholdCountChart, LogThresholdRatioChart } from './components/thr
 import { useLogView } from '../../../../hooks/use_log_view';
 import { LogViewsClient } from '../../../../services/log_views';
 import { defaultLogViewsStaticConfig } from '../../../../../common/log_views';
+import { useLicense } from '../../../../hooks/use_license';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 const formatThreshold = (threshold: number) => String(threshold);
@@ -74,6 +75,9 @@ const AlertDetailsAppSection = ({
     initialLogViewReference: rule.params.logView,
     logViews,
   });
+
+  const { hasAtLeast } = useLicense();
+  const hasLicenseForExplainLogSpike = hasAtLeast('platinum');
 
   useEffect(() => {
     /**
@@ -241,7 +245,7 @@ const AlertDetailsAppSection = ({
   };
 
   const getExplainLogRateSpikesSection = () => {
-    return <ExplainLogRateSpikes rule={rule} alert={alert} />;
+    return hasLicenseForExplainLogSpike ? <ExplainLogRateSpikes rule={rule} alert={alert} /> : null;
   };
 
   return (

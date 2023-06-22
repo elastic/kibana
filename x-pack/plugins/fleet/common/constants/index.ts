@@ -49,3 +49,7 @@ export const FLEET_SERVER_INDICES = [
   '.fleet-policies-leader',
   FLEET_SERVER_SERVERS_INDEX,
 ];
+
+// Nodes that can be queried by datastreams API
+// Warm and cold nodes have been excluded because of performance issues
+export const DATA_TIERS = ['data_hot'];
