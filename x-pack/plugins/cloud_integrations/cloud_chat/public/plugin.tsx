@@ -49,9 +49,11 @@ export class CloudChatPlugin
   private chatConfig$ = new ReplaySubject<ChatConfig>(1);
   private Chat: React.ComponentType | undefined;
   private kbnVersion: string;
+  private kbnBuildNum: number;
 
   constructor(initializerContext: PluginInitializerContext<CloudChatConfig>) {
     this.kbnVersion = initializerContext.env.packageInfo.version;
+    this.kbnBuildNum = initializerContext.env.packageInfo.buildNum;
     this.config = initializerContext.config.get();
   }
 
@@ -117,6 +119,7 @@ export class CloudChatPlugin
           jwt,
           trialEndDate: trialEndDate!,
           kbnVersion: this.kbnVersion,
+          kbnBuildNum: this.kbnBuildNum,
         },
       });
     } catch (e) {

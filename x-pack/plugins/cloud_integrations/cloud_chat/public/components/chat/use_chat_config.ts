@@ -52,7 +52,7 @@ export const useChatConfig = ({
       const context = getChatContext();
       const { data: message } = event;
       const { user: userConfig } = chat;
-      const { id, email, jwt, trialEndDate, kbnVersion } = userConfig;
+      const { id, email, jwt, trialEndDate, kbnVersion, kbnBuildNum } = userConfig;
 
       switch (message.type) {
         // The IFRAME is ready to receive messages.
@@ -63,6 +63,7 @@ export const useChatConfig = ({
               email,
               trial_end_date: trialEndDate,
               kbn_version: kbnVersion,
+              kbn_build_num: kbnBuildNum,
             },
             jwt,
           };

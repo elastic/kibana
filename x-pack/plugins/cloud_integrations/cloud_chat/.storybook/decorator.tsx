@@ -21,6 +21,7 @@ const services: CloudChatServices = {
       jwt: 'identity-jwt',
       trialEndDate: new Date(),
       kbnVersion: '8.9.0',
+      kbnBuildNum: 12345,
     },
   },
 };

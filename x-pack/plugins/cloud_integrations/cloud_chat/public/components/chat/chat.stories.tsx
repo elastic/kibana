@@ -62,9 +62,18 @@ interface Params {
   jwt: string;
   trialEndDate: string;
   kbnVersion: string;
+  kbnBuildNum: number;
 }
 
-export const Component = ({ id, email, chatURL, jwt, kbnVersion, trialEndDate }: Params) => {
+export const Component = ({
+  id,
+  email,
+  chatURL,
+  jwt,
+  kbnVersion,
+  trialEndDate,
+  kbnBuildNum,
+}: Params) => {
   const [isHidden, setIsHidden] = useState(false);
 
   return (
@@ -77,6 +86,7 @@ export const Component = ({ id, email, chatURL, jwt, kbnVersion, trialEndDate }:
           email,
           trialEndDate: new Date(trialEndDate),
           kbnVersion,
+          kbnBuildNum,
         },
       }}
     >
@@ -108,4 +118,5 @@ Component.args = {
   jwt: 'abcdefghijklmnopqrstuvwxyz',
   trialEndDate: new Date().toISOString(),
   kbnVersion: '8.9.0',
+  kbnBuildNum: 12345,
 };

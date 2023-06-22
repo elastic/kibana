@@ -15,6 +15,7 @@ export interface ChatConfig {
     email: string;
     trialEndDate: Date;
     kbnVersion: string;
+    kbnBuildNum: number;
   };
 }
 
