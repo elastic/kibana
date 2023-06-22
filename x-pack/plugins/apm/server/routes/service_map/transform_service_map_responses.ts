@@ -35,7 +35,7 @@ function getConnectionNodeId(node: ConnectionNode): string {
   return node[SERVICE_NAME];
 }
 
-export function getConnectionId(connection: Connection) {
+function getConnectionId(connection: Connection) {
   return `${getConnectionNodeId(connection.source)}~${getConnectionNodeId(
     connection.destination
   )}`;

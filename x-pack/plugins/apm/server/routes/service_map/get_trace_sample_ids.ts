@@ -26,6 +26,8 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMConfig } from '../..';
 
+const MAX_TRACES_TO_INSPECT = 1000;
+
 export async function getTraceSampleIds({
   serviceName,
   environment,
@@ -161,7 +163,7 @@ export async function getTraceSampleIds({
       uniq(
         sortBy(traceIdsWithPriority, 'priority').map(({ traceId }) => traceId)
       ),
-      config.serviceMapMaxTraces
+      MAX_TRACES_TO_INSPECT
     );
 
     return { traceIds };
