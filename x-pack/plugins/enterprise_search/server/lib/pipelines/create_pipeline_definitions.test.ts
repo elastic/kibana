@@ -62,6 +62,7 @@ describe('formatMlPipelineBody util function', () => {
             {
               append: {
                 field: '_source._ingest.inference_errors',
+                allow_duplicates: false,
                 value: [
                   {
                     pipeline: pipelineName,
