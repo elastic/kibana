@@ -7,21 +7,11 @@
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { registerSyntheticsTLSCheckRule } from './alert_rules/tls_rule/tls_rule';
 import { registerSyntheticsStatusCheckRule } from './alert_rules/status_rule/monitor_status_rule';
-<<<<<<< HEAD
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from './types';
 import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { syntheticsRouteWrapper } from './synthetics_route_wrapper';
 import { syntheticsAppRestApiRoutes } from './routes';
-=======
-import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
-import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { syntheticsRouteWrapper } from './synthetics_route_wrapper';
-import { uptimeRequests } from './legacy_uptime/lib/requests';
-import { syntheticsAppRestApiRoutes } from './routes';
-import { UptimeServerSetup, UptimeCorePluginsSetup } from './legacy_uptime/lib/adapters';
-import { licenseCheck } from './legacy_uptime/lib/domains';
->>>>>>> 811e1b73ef3ee2f16ecfed61af30f4a7857c7853
 
 export const initSyntheticsServer = (
   server: SyntheticsServerSetup,
