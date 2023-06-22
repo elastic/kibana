@@ -28,13 +28,13 @@ export const NetworkRequestsTotal = ({
     <NetworkRequestsTotalStyle size="xs" color="subdued">
       <strong>
         <FormattedMessage
-          id="xpack.synthetics.synthetics.waterfall.requestsTotalMessage"
+          id="xpack.uptime.synthetics.waterfall.requestsTotalMessage"
           defaultMessage="{numNetworkRequests} network requests"
           values={{
             numNetworkRequests:
               totalNetworkRequests > fetchedNetworkRequests ? (
                 <FormattedMessage
-                  id="xpack.synthetics.synthetics.waterfall.requestsTotalMessage.first"
+                  id="xpack.uptime.synthetics.waterfall.requestsTotalMessage.first"
                   defaultMessage="First {count}"
                   values={{ count: `${fetchedNetworkRequests}/${totalNetworkRequests}` }}
                 />
@@ -45,7 +45,7 @@ export const NetworkRequestsTotal = ({
         />{' '}
         {showHighlightedNetworkRequests && highlightedNetworkRequests >= 0 && (
           <FormattedMessage
-            id="xpack.synthetics.synthetics.waterfall.requestsHighlightedMessage"
+            id="xpack.uptime.synthetics.waterfall.requestsHighlightedMessage"
             defaultMessage="({numHighlightedRequests} match the filter)"
             values={{
               numHighlightedRequests: highlightedNetworkRequests,

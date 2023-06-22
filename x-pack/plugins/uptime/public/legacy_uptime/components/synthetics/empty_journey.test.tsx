@@ -18,14 +18,14 @@ describe('EmptyJourney component', () => {
             <p>
               <FormattedMessage
                 defaultMessage="This journey did not contain any steps."
-                id="xpack.synthetics.synthetics.emptyJourney.message.heading"
+                id="xpack.uptime.synthetics.emptyJourney.message.heading"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
                 defaultMessage="There is no further information to display."
-                id="xpack.synthetics.synthetics.emptyJourney.message.footer"
+                id="xpack.uptime.synthetics.emptyJourney.message.footer"
                 values={Object {}}
               />
             </p>
@@ -36,7 +36,7 @@ describe('EmptyJourney component', () => {
           <h2>
             <FormattedMessage
               defaultMessage="There are no steps for this journey"
-              id="xpack.synthetics.synthetics.emptyJourney.title"
+              id="xpack.uptime.synthetics.emptyJourney.title"
               values={Object {}}
             />
           </h2>
@@ -53,14 +53,14 @@ describe('EmptyJourney component', () => {
             <p>
               <FormattedMessage
                 defaultMessage="This journey did not contain any steps."
-                id="xpack.synthetics.synthetics.emptyJourney.message.heading"
+                id="xpack.uptime.synthetics.emptyJourney.message.heading"
                 values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
                 defaultMessage="The journey's check group is {codeBlock}."
-                id="xpack.synthetics.synthetics.emptyJourney.message.checkGroupField"
+                id="xpack.uptime.synthetics.emptyJourney.message.checkGroupField"
                 values={
                   Object {
                     "codeBlock": <code>
@@ -73,7 +73,7 @@ describe('EmptyJourney component', () => {
             <p>
               <FormattedMessage
                 defaultMessage="There is no further information to display."
-                id="xpack.synthetics.synthetics.emptyJourney.message.footer"
+                id="xpack.uptime.synthetics.emptyJourney.message.footer"
                 values={Object {}}
               />
             </p>
@@ -84,7 +84,7 @@ describe('EmptyJourney component', () => {
           <h2>
             <FormattedMessage
               defaultMessage="There are no steps for this journey"
-              id="xpack.synthetics.synthetics.emptyJourney.title"
+              id="xpack.uptime.synthetics.emptyJourney.title"
               values={Object {}}
             />
           </h2>

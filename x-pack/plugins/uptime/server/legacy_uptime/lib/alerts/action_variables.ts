@@ -25,7 +25,7 @@ export const ACTION_VARIABLES = {
   [ALERT_REASON_MSG]: {
     name: ALERT_REASON_MSG,
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertReasonMessage.description',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.context.alertReasonMessage.description',
       {
         defaultMessage: 'A concise description of the reason for the alert',
       }
@@ -34,7 +34,7 @@ export const ACTION_VARIABLES = {
   [ALERT_DETAILS_URL]: {
     name: ALERT_DETAILS_URL,
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertDetailUrl.description',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.context.alertDetailUrl.description',
       {
         defaultMessage:
           'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
@@ -45,7 +45,7 @@ export const ACTION_VARIABLES = {
   [VIEW_IN_APP_URL]: {
     name: VIEW_IN_APP_URL,
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.viewInAppUrl.description',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.context.viewInAppUrl.description',
       {
         defaultMessage: 'Link to the alert source',
       }

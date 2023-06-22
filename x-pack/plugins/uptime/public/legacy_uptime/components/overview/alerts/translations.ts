@@ -63,21 +63,18 @@ export const WEEKS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerange
 });
 
 export const MONTHS_TIME_RANGE = i18n.translate(
-  'xpack.synthetics.alerts.timerangeUnitSelectable.monthsOption.ariaLabel',
+  'xpack.uptime.alerts.timerangeUnitSelectable.monthsOption.ariaLabel',
   {
     defaultMessage: '"Months" time range select item',
   }
 );
 
-export const MONTHS = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.timerangeOption.months',
-  {
-    defaultMessage: 'months',
-  }
-);
+export const MONTHS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.months', {
+  defaultMessage: 'months',
+});
 
 export const YEARS_TIME_RANGE = i18n.translate(
-  'xpack.synthetics.alerts.timerangeUnitSelectable.yearsOption.ariaLabel',
+  'xpack.uptime.alerts.timerangeUnitSelectable.yearsOption.ariaLabel',
   {
     defaultMessage: '"Years" time range select item',
   }
@@ -88,56 +85,56 @@ export const YEARS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerange
 });
 
 export const ALERT_KUERY_BAR_ARIA = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.filterBar.ariaLabel',
+  'xpack.uptime.alerts.monitorStatus.filterBar.ariaLabel',
   {
     defaultMessage: 'Input that allows filtering criteria for the monitor status alert',
   }
 );
 
 export const OPEN_THE_POPOVER_DOWN_COUNT = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.numTimesExpression.ariaLabel',
+  'xpack.uptime.alerts.monitorStatus.numTimesExpression.ariaLabel',
   {
     defaultMessage: 'Open the popover for down count input',
   }
 );
 
 export const ENTER_NUMBER_OF_DOWN_COUNTS = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.numTimesField.ariaLabel',
+  'xpack.uptime.alerts.monitorStatus.numTimesField.ariaLabel',
   {
     defaultMessage: 'Enter number of down counts required to trigger the alert',
   }
 );
 
 export const MATCHING_MONITORS_DOWN = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.numTimesExpression.matchingMonitors.description',
+  'xpack.uptime.alerts.monitorStatus.numTimesExpression.matchingMonitors.description',
   {
     defaultMessage: 'matching monitors are down >=',
   }
 );
 
 export const ANY_MONITOR_DOWN = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.numTimesExpression.anyMonitors.description',
+  'xpack.uptime.alerts.monitorStatus.numTimesExpression.anyMonitors.description',
   {
     defaultMessage: 'any monitor is down >=',
   }
 );
 
 export const OPEN_THE_POPOVER_TIME_RANGE_VALUE = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.timerangeValueExpression.ariaLabel',
+  'xpack.uptime.alerts.monitorStatus.timerangeValueExpression.ariaLabel',
   {
     defaultMessage: 'Open the popover for time range value field',
   }
 );
 
 export const ENTER_NUMBER_OF_TIME_UNITS = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.timerangeValueField.ariaLabel',
+  'xpack.uptime.alerts.monitorStatus.timerangeValueField.ariaLabel',
   {
     defaultMessage: `Enter the number of time units for the alert's range`,
   }
 );
 
 export const ENTER_NUMBER_OF_TIME_UNITS_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.timerangeValueField.expression',
+  'xpack.uptime.alerts.monitorStatus.timerangeValueField.expression',
   {
     defaultMessage: 'within',
   }
@@ -150,49 +147,49 @@ export const ENTER_NUMBER_OF_TIME_UNITS_VALUE = (value: number) =>
   });
 
 export const ENTER_AVAILABILITY_RANGE_ENABLED = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.availability.isEnabledCheckbox.label',
+  'xpack.uptime.alerts.monitorStatus.availability.isEnabledCheckbox.label',
   {
     defaultMessage: 'Availability',
   }
 );
 
 export const ENTER_AVAILABILITY_RANGE_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.availability.timerangeValueField.popover.ariaLabel',
+  'xpack.uptime.alerts.monitorStatus.availability.timerangeValueField.popover.ariaLabel',
   {
     defaultMessage: 'Specify availability tracking time range',
   }
 );
 
 export const ENTER_AVAILABILITY_RANGE_UNITS_ARIA_LABEL = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.availability.timerangeValueField.ariaLabel',
+  'xpack.uptime.alerts.monitorStatus.availability.timerangeValueField.ariaLabel',
   {
     defaultMessage: `Enter the number of units for the alert's availability check.`,
   }
 );
 
 export const ENTER_AVAILABILITY_RANGE_UNITS_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.availability.timerangeValueField.expression',
+  'xpack.uptime.alerts.monitorStatus.availability.timerangeValueField.expression',
   {
     defaultMessage: 'within the last',
   }
 );
 
 export const ENTER_AVAILABILITY_THRESHOLD_ARIA_LABEL = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.availability.threshold.ariaLabel',
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.ariaLabel',
   {
     defaultMessage: 'Specify availability thresholds for this alert',
   }
 );
 
 export const ENTER_AVAILABILITY_THRESHOLD_INPUT_ARIA_LABEL = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.availability.threshold.input.ariaLabel',
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.input.ariaLabel',
   {
     defaultMessage: 'Input an availability threshold to check for this alert',
   }
 );
 
 export const ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.availability.threshold.description',
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.description',
   {
     defaultMessage: 'matching monitors are up in',
     description:
@@ -201,7 +198,7 @@ export const ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION = i18n.translate(
 );
 
 export const ENTER_ANY_AVAILABILITY_THRESHOLD_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.availability.threshold.anyMonitorDescription',
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.anyMonitorDescription',
   {
     defaultMessage: 'any monitor is up in',
     description:
@@ -218,14 +215,14 @@ export const ENTER_AVAILABILITY_THRESHOLD_VALUE = (value: string) =>
   });
 
 export const ENTER_AVAILABILITY_RANGE_SELECT_ARIA = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.availability.unit.selectable',
+  'xpack.uptime.alerts.monitorStatus.availability.unit.selectable',
   {
     defaultMessage: 'Use this select to set the availability range units for this alert',
   }
 );
 
 export const ENTER_AVAILABILITY_RANGE_SELECT_HEADLINE = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.availability.unit.headline',
+  'xpack.uptime.alerts.monitorStatus.availability.unit.headline',
   {
     defaultMessage: 'Select time range unit',
   }
@@ -256,14 +253,11 @@ export const TlsTranslations = {
     defaultMessage:
       'An expression displaying the criteria for monitor that are watched by this alert',
   }),
-  criteriaDescription: i18n.translate(
-    'xpack.synthetics.alerts.tls.criteriaExpression.description',
-    {
-      defaultMessage: 'when',
-      description:
-        'The context of this `when` is in the conditional sense, like "when there are three cookies, eat them all".',
-    }
-  ),
+  criteriaDescription: i18n.translate('xpack.uptime.alerts.tls.criteriaExpression.description', {
+    defaultMessage: 'when',
+    description:
+      'The context of this `when` is in the conditional sense, like "when there are three cookies, eat them all".',
+  }),
   criteriaValue: i18n.translate('xpack.uptime.tls.criteriaExpression.value', {
     defaultMessage: 'matching monitor',
   }),
@@ -279,12 +273,9 @@ export const ToggleFlyoutTranslations = {
   toggleButtonAriaLabel: i18n.translate('xpack.uptime.alertsPopover.toggleButton.ariaLabel', {
     defaultMessage: 'Open alerts and rules context menu',
   }),
-  openAlertContextPanelAriaLabel: i18n.translate(
-    'xpack.synthetics.openAlertContextPanel.ariaLabel',
-    {
-      defaultMessage: 'Open the rule context panel so you can choose a rule type',
-    }
-  ),
+  openAlertContextPanelAriaLabel: i18n.translate('xpack.uptime..openAlertContextPanel.ariaLabel', {
+    defaultMessage: 'Open the rule context panel so you can choose a rule type',
+  }),
   openAlertContextPanelLabel: i18n.translate('xpack.uptime.openAlertContextPanel.label', {
     defaultMessage: 'Create rule',
   }),
@@ -304,7 +295,7 @@ export const ToggleFlyoutTranslations = {
     defaultMessage: 'Leave Uptime and go to Alerting Management page',
   }),
   navigateToAlertingButtonContent: i18n.translate(
-    'xpack.synthetics.navigateToAlertingButton.content',
+    'xpack.uptime..navigateToAlertingButton.content',
     {
       defaultMessage: 'Manage rules',
     }

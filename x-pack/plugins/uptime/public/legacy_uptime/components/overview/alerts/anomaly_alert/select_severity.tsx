@@ -95,7 +95,7 @@ const getSeverityOptions = () =>
         <EuiText size="xs" color="subdued">
           <p>
             <FormattedMessage
-              id="xpack.synthetics.controls.selectSeverity.scoreDetailsDescription"
+              id="xpack.uptime.controls.selectSeverity.scoreDetailsDescription"
               defaultMessage="score {value} and above"
               values={{ value: val }}
             />

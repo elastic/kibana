@@ -52,7 +52,7 @@ export const SettingsActions = ({
           }}
         >
           <FormattedMessage
-            id="xpack.synthetics.sourceConfiguration.discardSettingsButtonLabel"
+            id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -67,7 +67,7 @@ export const SettingsActions = ({
           fill
         >
           <FormattedMessage
-            id="xpack.synthetics.sourceConfiguration.applySettingsButtonLabel"
+            id="xpack.uptime.sourceConfiguration.applySettingsButtonLabel"
             defaultMessage="Apply changes"
           />
         </EuiButton>

@@ -46,7 +46,7 @@ export const DefineAlertConnectors = ({
                         target="_blank"
                       >
                         <FormattedMessage
-                          id="xpack.synthetics.page_header.defineConnector.settingsLink"
+                          id="xpack.uptime.page_header.defineConnector.settingsLink"
                           defaultMessage="Settings"
                         />
                       </ReactRouterEuiLink>
@@ -80,7 +80,7 @@ export const DefineAlertConnectors = ({
           data-test-subj={'uptimeSettingsLink'}
         >
           <FormattedMessage
-            id="xpack.synthetics.page_header.defineConnector.popover.defaultLink"
+            id="xpack.uptime.page_header.defineConnector.popover.defaultLink"
             defaultMessage="Define a default connector"
           />
         </ReactRouterEuiLink>{' '}

@@ -86,10 +86,7 @@ export function ActionMenuContent(): React.ReactElement {
           search: stringifyUrlParams(params, true),
         })}
       >
-        <FormattedMessage
-          id="xpack.synthetics.page_header.settingsLink"
-          defaultMessage="Settings"
-        />
+        <FormattedMessage id="xpack.uptime.page_header.settingsLink" defaultMessage="Settings" />
       </EuiHeaderLink>
 
       <ToggleAlertFlyoutButton />

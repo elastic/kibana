@@ -7,21 +7,18 @@
 import { i18n } from '@kbn/i18n';
 
 export const MonitorStatusTranslations = {
-  defaultActionMessage: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.defaultActionMessage',
-    {
-      defaultMessage:
-        'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}, checked at {checkedAt}',
-      values: {
-        monitorName: '{{context.monitorName}}',
-        monitorUrl: '{{{context.monitorUrl}}}',
-        statusMessage: '{{{context.statusMessage}}}',
-        latestErrorMessage: '{{{context.latestErrorMessage}}}',
-        observerLocation: '{{context.observerLocation}}',
-        checkedAt: '{{context.checkedAt}}',
-      },
-    }
-  ),
+  defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
+    defaultMessage:
+      'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}, checked at {checkedAt}',
+    values: {
+      monitorName: '{{context.monitorName}}',
+      monitorUrl: '{{{context.monitorUrl}}}',
+      statusMessage: '{{{context.statusMessage}}}',
+      latestErrorMessage: '{{{context.latestErrorMessage}}}',
+      observerLocation: '{{context.observerLocation}}',
+      checkedAt: '{{context.checkedAt}}',
+    },
+  }),
   defaultSubjectMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultSubjectMessage', {
     defaultMessage: 'Monitor {monitorName} with url {monitorUrl} is down',
     values: {
@@ -118,25 +115,22 @@ Aging Certificates: {agingCommonNameAndDate}
 };
 
 export const DurationAnomalyTranslations = {
-  defaultActionMessage: i18n.translate(
-    'xpack.synthetics.alerts.durationAnomaly.defaultActionMessage',
-    {
-      defaultMessage: `Abnormal ({severity} level) response time detected on {monitor} with url {monitorUrl} at {anomalyStartTimestamp}. Anomaly severity score is {severityScore}.
+  defaultActionMessage: i18n.translate('xpack.uptime.alerts.durationAnomaly.defaultActionMessage', {
+    defaultMessage: `Abnormal ({severity} level) response time detected on {monitor} with url {monitorUrl} at {anomalyStartTimestamp}. Anomaly severity score is {severityScore}.
 Response times as high as {slowestAnomalyResponse} have been detected from location {observerLocation}. Expected response time is {expectedResponseTime}.`,
-      values: {
-        severity: '{{context.severity}}',
-        anomalyStartTimestamp: '{{context.anomalyStartTimestamp}}',
-        monitor: '{{context.monitor}}',
-        monitorUrl: '{{{context.monitorUrl}}}',
-        slowestAnomalyResponse: '{{context.slowestAnomalyResponse}}',
-        expectedResponseTime: '{{context.expectedResponseTime}}',
-        severityScore: '{{context.severityScore}}',
-        observerLocation: '{{context.observerLocation}}',
-      },
-    }
-  ),
+    values: {
+      severity: '{{context.severity}}',
+      anomalyStartTimestamp: '{{context.anomalyStartTimestamp}}',
+      monitor: '{{context.monitor}}',
+      monitorUrl: '{{{context.monitorUrl}}}',
+      slowestAnomalyResponse: '{{context.slowestAnomalyResponse}}',
+      expectedResponseTime: '{{context.expectedResponseTime}}',
+      severityScore: '{{context.severityScore}}',
+      observerLocation: '{{context.observerLocation}}',
+    },
+  }),
   defaultRecoveryMessage: i18n.translate(
-    'xpack.synthetics.alerts.durationAnomaly.defaultRecoveryMessage',
+    'xpack.uptime.alerts.durationAnomaly.defaultRecoveryMessage',
     {
       defaultMessage: `Alert for abnormal ({severity} level) response time detected on monitor {monitor} with url {monitorUrl} from location {observerLocation} at {anomalyStartTimestamp} has recovered`,
       values: {

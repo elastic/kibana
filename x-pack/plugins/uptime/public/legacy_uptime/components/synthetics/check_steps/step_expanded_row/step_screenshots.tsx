@@ -50,13 +50,13 @@ export const StepScreenshots = ({ step }: Props) => {
         <Label>
           {step.synthetics?.payload?.status !== 'succeeded' ? (
             <FormattedMessage
-              id="xpack.synthetics.synthetics.executedStep.screenshot.notSucceeded"
+              id="xpack.uptime.synthetics.executedStep.screenshot.notSucceeded"
               defaultMessage="Screenshot for {status} check"
               values={{ status: step.synthetics?.payload?.status }}
             />
           ) : (
             <FormattedMessage
-              id="xpack.synthetics.synthetics.executedStep.screenshot.not"
+              id="xpack.uptime.synthetics.executedStep.screenshot.not"
               defaultMessage="Screenshot"
             />
           )}

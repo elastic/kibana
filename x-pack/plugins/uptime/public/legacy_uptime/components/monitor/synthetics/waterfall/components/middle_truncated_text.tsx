@@ -175,7 +175,7 @@ export const MiddleTruncatedText = ({
           <EuiScreenReaderOnly>
             <span>
               <FormattedMessage
-                id="xpack.synthetics.synthetics.waterfall.resource.externalLink"
+                id="xpack.uptime.synthetics.waterfall.resource.externalLink"
                 defaultMessage="Open resource in new tab"
               />
             </span>

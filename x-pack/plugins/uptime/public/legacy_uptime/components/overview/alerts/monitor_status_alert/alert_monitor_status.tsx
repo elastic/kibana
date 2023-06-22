@@ -123,7 +123,7 @@ export const AlertMonitorCount = ({ count, loading }: { count: number; loading?:
       title={
         <span data-test-subj="alertSnapShotCount">
           <FormattedMessage
-            id="xpack.synthetics.alerts.monitorStatus.monitorCallOut.title"
+            id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
             defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
             values={{ snapshotCount: loading ? '...' : count }}
           />{' '}

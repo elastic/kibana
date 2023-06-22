@@ -26,7 +26,7 @@ export const NoImageAvailable = () => {
     <BorderedText data-test-subj="pingTimestampNoImageAvailable">
       <strong>
         <FormattedMessage
-          id="xpack.synthetics.synthetics.screenshot.noImageMessage"
+          id="xpack.uptime.synthetics.screenshot.noImageMessage"
           defaultMessage="No image available"
         />
       </strong>
@@ -54,7 +54,7 @@ export const LoadingImageState = () => {
       >
         <strong>
           <FormattedMessage
-            id="xpack.synthetics.synthetics.screenshot.loadingImageMessage"
+            id="xpack.uptime.synthetics.screenshot.loadingImageMessage"
             defaultMessage="Loading"
           />
         </strong>

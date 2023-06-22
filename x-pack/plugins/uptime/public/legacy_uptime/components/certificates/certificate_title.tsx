@@ -15,7 +15,7 @@ export const CertificateTitle = () => {
 
   return (
     <FormattedMessage
-      id="xpack.synthetics.certificates.heading"
+      id="xpack.uptime.certificates.heading"
       defaultMessage="TLS Certificates ({total})"
       values={{
         total: <span data-test-subj="uptimeCertTotal">{total ?? 0}</span>,

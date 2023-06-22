@@ -40,7 +40,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
     <EuiTitle size="s">
       <h3>
         <FormattedMessage
-          id="xpack.synthetics.sourceConfiguration.certificationSectionTitle"
+          id="xpack.uptime.sourceConfiguration.certificationSectionTitle"
           defaultMessage="Certificate Expiration"
         />
       </h3>
@@ -50,14 +50,14 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
       title={
         <h4>
           <FormattedMessage
-            id="xpack.synthetics.sourceConfiguration.expirationThreshold"
+            id="xpack.uptime.sourceConfiguration.expirationThreshold"
             defaultMessage="Expiration/Age Thresholds"
           />
         </h4>
       }
       description={
         <FormattedMessage
-          id="xpack.synthetics.sourceConfiguration.certificateThresholdDescription"
+          id="xpack.uptime.sourceConfiguration.certificateThresholdDescription"
           defaultMessage="Change the threshold for displaying and alerting on certificate errors. Note: this will affect any configured alerts."
         />
       }
@@ -68,7 +68,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         fullWidth
         helpText={
           <FormattedMessage
-            id="xpack.synthetics.sourceConfiguration.expirationThresholdDefaultValue"
+            id="xpack.uptime.sourceConfiguration.expirationThresholdDefaultValue"
             defaultMessage="The default value is {defaultValue}"
             values={{
               defaultValue: <EuiCode>{DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}</EuiCode>,
@@ -78,7 +78,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         isInvalid={!!fieldErrors?.expirationThresholdError}
         label={
           <FormattedMessage
-            id="xpack.synthetics.sourceConfiguration.errorStateLabel"
+            id="xpack.uptime.sourceConfiguration.errorStateLabel"
             defaultMessage="Expiration threshold"
           />
         }
@@ -103,7 +103,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
           <EuiFlexItem grow={1}>
             <EuiText>
               <FormattedMessage
-                id="xpack.synthetics.sourceConfiguration.ageLimit.units.days"
+                id="xpack.uptime.sourceConfiguration.ageLimit.units.days"
                 defaultMessage="Days"
               />
             </EuiText>
@@ -116,7 +116,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         fullWidth
         helpText={
           <FormattedMessage
-            id="xpack.synthetics.sourceConfiguration.ageThresholdDefaultValue"
+            id="xpack.uptime.sourceConfiguration.ageThresholdDefaultValue"
             defaultMessage="The default value is {defaultValue}"
             values={{
               defaultValue: <EuiCode>{DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold}</EuiCode>,
@@ -126,7 +126,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         isInvalid={!!fieldErrors?.ageThresholdError}
         label={
           <FormattedMessage
-            id="xpack.synthetics.sourceConfiguration.warningStateLabel"
+            id="xpack.uptime.sourceConfiguration.warningStateLabel"
             defaultMessage="Age limit"
           />
         }
@@ -151,7 +151,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
           <EuiFlexItem grow={1}>
             <EuiText>
               <FormattedMessage
-                id="xpack.synthetics.sourceConfiguration.ageLimit.units.days"
+                id="xpack.uptime.sourceConfiguration.ageLimit.units.days"
                 defaultMessage="Days"
               />
             </EuiText>

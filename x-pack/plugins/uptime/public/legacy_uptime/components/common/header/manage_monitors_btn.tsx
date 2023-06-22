@@ -19,7 +19,7 @@ export const ManageMonitorsBtn = () => {
         data-test-subj="syntheticsManagementPageLink"
       >
         <FormattedMessage
-          id="xpack.synthetics.page_header.manageMonitors"
+          id="xpack.uptime.page_header.manageMonitors"
           defaultMessage="Monitor Management"
         />
       </EuiHeaderLink>

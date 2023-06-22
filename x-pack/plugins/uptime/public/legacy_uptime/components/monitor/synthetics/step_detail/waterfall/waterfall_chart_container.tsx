@@ -88,7 +88,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
         <EuiCallOut
           title={
             <FormattedMessage
-              id="xpack.synthetics.synthetics.stepDetail.waterfallUnsupported.title"
+              id="xpack.uptime.synthetics.stepDetail.waterfallUnsupported.title"
               defaultMessage="Waterfall chart unavailable"
             />
           }
@@ -96,7 +96,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
           iconType="help"
         >
           <FormattedMessage
-            id="xpack.synthetics.synthetics.stepDetail.waterfallUnsupported.description"
+            id="xpack.uptime.synthetics.stepDetail.waterfallUnsupported.description"
             defaultMessage="The waterfall chart cannot be shown. You may be using an older version of the Synthetic Agent. Please check the version and consider upgrading."
           />
         </EuiCallOut>

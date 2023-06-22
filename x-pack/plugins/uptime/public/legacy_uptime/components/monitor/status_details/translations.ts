@@ -94,7 +94,7 @@ export const AvailabilityLabel = i18n.translate(
 );
 
 export const LastCheckLabel = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.monitor.availabilityReport.lastCheck',
+  'xpack.uptime..monitorStatusBar.monitor.availabilityReport.lastCheck',
   {
     defaultMessage: 'Last check',
   }

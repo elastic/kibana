@@ -19,7 +19,7 @@ export const EmptyJourney: FC<Props> = ({ checkGroup }) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.synthetics.synthetics.emptyJourney.title"
+          id="xpack.uptime.synthetics.emptyJourney.title"
           defaultMessage="There are no steps for this journey"
         />
       </h2>
@@ -28,14 +28,14 @@ export const EmptyJourney: FC<Props> = ({ checkGroup }) => (
       <>
         <p>
           <FormattedMessage
-            id="xpack.synthetics.synthetics.emptyJourney.message.heading"
+            id="xpack.uptime.synthetics.emptyJourney.message.heading"
             defaultMessage="This journey did not contain any steps."
           />
         </p>
         {!!checkGroup && (
           <p>
             <FormattedMessage
-              id="xpack.synthetics.synthetics.emptyJourney.message.checkGroupField"
+              id="xpack.uptime.synthetics.emptyJourney.message.checkGroupField"
               defaultMessage="The journey's check group is {codeBlock}."
               values={{ codeBlock: <code>{checkGroup}</code> }}
             />
@@ -43,7 +43,7 @@ export const EmptyJourney: FC<Props> = ({ checkGroup }) => (
         )}
         <p>
           <FormattedMessage
-            id="xpack.synthetics.synthetics.emptyJourney.message.footer"
+            id="xpack.uptime.synthetics.emptyJourney.message.footer"
             defaultMessage="There is no further information to display."
           />
         </p>

@@ -81,7 +81,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
         href={manageRulesUrl.href}
       >
         <FormattedMessage
-          id="xpack.synthetics.navigateToAlertingButton.content"
+          id="xpack.uptime.navigateToAlertingButton.content"
           defaultMessage="Manage rules"
         />
       </EuiLink>
@@ -149,7 +149,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
           onClick={() => setIsOpen(!isOpen)}
         >
           <FormattedMessage
-            id="xpack.synthetics.alerts.toggleAlertFlyoutButtonText"
+            id="xpack.uptime.alerts.toggleAlertFlyoutButtonText"
             defaultMessage="Alerts and rules"
           />
         </EuiHeaderLink>

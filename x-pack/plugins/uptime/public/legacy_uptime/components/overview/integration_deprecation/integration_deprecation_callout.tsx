@@ -21,7 +21,7 @@ export function IntegrationDeprecationCallout({
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.synthetics.integration.deprecation.title"
+          id="xpack.uptime.integration.deprecation.title"
           defaultMessage="Migrate your Elastic Synthetics integration monitors"
         />
       }
@@ -31,7 +31,7 @@ export function IntegrationDeprecationCallout({
         <EuiFlexItem>
           <span>
             <FormattedMessage
-              id="xpack.synthetics.integration.deprecation.content"
+              id="xpack.uptime.integration.deprecation.content"
               defaultMessage="You have at least one monitor configured using the Elastic Synthetics integration. From Elastic 8.8, the integration is deprecated and you can no longer edit these monitors. Please migrate them to Project monitors or add them to the new Synthetics app directly available in Observability. Check our {link} for more details."
               values={{
                 link: (
@@ -42,7 +42,7 @@ export function IntegrationDeprecationCallout({
                     external
                   >
                     <FormattedMessage
-                      id="xpack.synthetics.integration.deprecation.link"
+                      id="xpack.uptime.integration.deprecation.link"
                       defaultMessage="Synthetics migration docs"
                     />
                   </EuiLink>
@@ -59,7 +59,7 @@ export function IntegrationDeprecationCallout({
               color="warning"
             >
               <FormattedMessage
-                id="xpack.synthetics.integration.deprecation.dismiss"
+                id="xpack.uptime.integration.deprecation.dismiss"
                 defaultMessage="Dismiss"
               />
             </EuiButton>

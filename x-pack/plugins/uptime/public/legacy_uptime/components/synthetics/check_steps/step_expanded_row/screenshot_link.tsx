@@ -24,7 +24,7 @@ export const ScreenshotLink = ({ lastSuccessfulCheck }: Props) => {
   return (
     <span>
       <FormattedMessage
-        id="xpack.synthetics.synthetics.executedStep.screenshot.successfulLink"
+        id="xpack.uptime.synthetics.executedStep.screenshot.successfulLink"
         defaultMessage="Screenshot from {link}"
         values={{
           link: (
@@ -34,7 +34,7 @@ export const ScreenshotLink = ({ lastSuccessfulCheck }: Props) => {
             >
               <LabelLink>
                 <FormattedMessage
-                  id="xpack.synthetics.synthetics.executedStep.screenshot.success"
+                  id="xpack.uptime.synthetics.executedStep.screenshot.success"
                   defaultMessage="last successful check"
                 />
               </LabelLink>

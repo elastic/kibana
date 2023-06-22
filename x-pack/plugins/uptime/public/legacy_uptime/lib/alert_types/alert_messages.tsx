@@ -32,7 +32,7 @@ export const simpleAlertEnabled = (
       <RedirectAppLinks application={kibanaService.core.application}>
         <EuiText>
           <FormattedMessage
-            id="xpack.synthetics.overview.alerts.enabled.success.description"
+            id="xpack.uptime.overview.alerts.enabled.success.description"
             defaultMessage="A message will be sent to {actionConnectors} when this monitor is down."
             values={{
               actionConnectors: (

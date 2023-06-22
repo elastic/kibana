@@ -39,14 +39,14 @@ export const AnnotationTooltip = ({ details }: { details: string }) => {
       <TimeDiv>{moment(data.time).format('lll')}</TimeDiv>
       <Header>
         <FormattedMessage
-          id="xpack.synthetics.charts.mlAnnotation.header"
+          id="xpack.uptime.charts.mlAnnotation.header"
           defaultMessage="Score: {score}"
           values={{ score: data.score.toFixed(2) }}
         />
       </Header>
       <RecordSeverity color={data.color}>
         <FormattedMessage
-          id="xpack.synthetics.charts.mlAnnotation.severity"
+          id="xpack.uptime.charts.mlAnnotation.severity"
           defaultMessage="Severity: {severity}"
           values={{ severity: capitalizeFirstLetter(data.severity) }}
         />

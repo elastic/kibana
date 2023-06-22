@@ -86,7 +86,7 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
         {'  '}
         <DateText color="subdued" size="xs">
           <FormattedMessage
-            id="xpack.synthetics.certs.status.ok.label"
+            id="xpack.uptime.certs.status.ok.label"
             defaultMessage=" for {okRelativeDate}"
             description='Denotes an amount of time for which a cert is valid. Example: "OK for 2 days"'
             values={{

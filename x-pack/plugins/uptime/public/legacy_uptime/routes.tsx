@@ -85,10 +85,7 @@ const getRoutes = (): RouteProps[] => {
       dataTestSubj: 'uptimeSettingsPage',
       pageHeader: {
         pageTitle: (
-          <FormattedMessage
-            id="xpack.synthetics.settings.heading"
-            defaultMessage="Uptime settings"
-          />
+          <FormattedMessage id="xpack.uptime.settings.heading" defaultMessage="Uptime settings" />
         ),
       },
       bottomBar: <SettingsBottomBar />,
@@ -152,7 +149,7 @@ const getRoutes = (): RouteProps[] => {
         pageTitle: (
           <div>
             <FormattedMessage
-              id="xpack.synthetics.mappingErrorRoute.pageHeader.title"
+              id="xpack.uptime.mappingErrorRoute.pageHeader.title"
               defaultMessage="Mapping error"
             />
           </div>

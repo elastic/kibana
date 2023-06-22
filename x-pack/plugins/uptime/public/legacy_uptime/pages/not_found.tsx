@@ -31,7 +31,7 @@ export const NotFoundPage = () => {
                 <h3>
                   <FormattedMessage
                     defaultMessage="Page not found"
-                    id="xpack.synthetics.emptyStateError.notFoundPage"
+                    id="xpack.uptime.emptyStateError.notFoundPage"
                   />
                 </h3>
               </EuiTitle>
@@ -43,7 +43,7 @@ export const NotFoundPage = () => {
               >
                 <FormattedMessage
                   defaultMessage="Back to home"
-                  id="xpack.synthetics.notFountPage.homeLinkText"
+                  id="xpack.uptime.notFountPage.homeLinkText"
                 />
               </EuiButton>
             }

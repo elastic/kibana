@@ -26,7 +26,7 @@ export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
     <EuiTitle>
       <h4>
         <FormattedMessage
-          id="xpack.synthetics.synthetics.consoleStepList.title"
+          id="xpack.uptime.synthetics.consoleStepList.title"
           defaultMessage="No steps ran"
         />
       </h4>
@@ -34,7 +34,7 @@ export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
     <EuiSpacer />
     <p>
       <FormattedMessage
-        id="xpack.synthetics.synthetics.consoleStepList.message"
+        id="xpack.uptime.synthetics.consoleStepList.message"
         defaultMessage="This journey failed to run, recorded console output is shown below:"
       />
     </p>

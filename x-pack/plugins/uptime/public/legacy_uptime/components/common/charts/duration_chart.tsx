@@ -141,7 +141,7 @@ export const DurationChartComponent = ({
         <ChartEmptyState
           body={
             <FormattedMessage
-              id="xpack.synthetics.durationChart.emptyPrompt.description"
+              id="xpack.uptime.durationChart.emptyPrompt.description"
               defaultMessage="This monitor has never been {emphasizedText} during the selected time range."
               values={{ emphasizedText: <strong>up</strong> }}
             />

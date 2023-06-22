@@ -193,7 +193,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
-                id="xpack.synthetics.snapshot.pingsOverTimeTitle"
+                id="xpack.uptime.snapshot.pingsOverTimeTitle"
                 defaultMessage="Pings over time"
               />
             </h2>

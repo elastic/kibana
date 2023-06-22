@@ -180,7 +180,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
             <EuiText>
               <strong>
                 <FormattedMessage
-                  id="xpack.synthetics.synthetics.screenshot.noImageMessage"
+                  id="xpack.uptime.synthetics.screenshot.noImageMessage"
                   defaultMessage="No image available"
                 />
               </strong>

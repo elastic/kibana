@@ -38,7 +38,7 @@ export const MappingErrorPage = () => {
         <EuiTitle>
           <h3>
             <FormattedMessage
-              id="xpack.synthetics.public.pages.mappingError.title"
+              id="xpack.uptime.public.pages.mappingError.title"
               defaultMessage="Heartbeat mappings missing"
             />
           </h3>
@@ -48,7 +48,7 @@ export const MappingErrorPage = () => {
         <div>
           <p>
             <FormattedMessage
-              id="xpack.synthetics.public.pages.mappingError.bodyMessage"
+              id="xpack.uptime.public.pages.mappingError.bodyMessage"
               defaultMessage="Incorrect mappings detected! Perhaps you forgot to run the heartbeat {setup} command?"
               values={{ setup: <EuiCode>setup</EuiCode> }}
             />
@@ -56,7 +56,7 @@ export const MappingErrorPage = () => {
           {docLinks && (
             <p>
               <FormattedMessage
-                id="xpack.synthetics.public.pages.mappingError.bodyDocsLink"
+                id="xpack.uptime.public.pages.mappingError.bodyDocsLink"
                 defaultMessage="You can learn how to troubleshoot this issue in the {docsLink}."
                 values={{
                   docsLink: (

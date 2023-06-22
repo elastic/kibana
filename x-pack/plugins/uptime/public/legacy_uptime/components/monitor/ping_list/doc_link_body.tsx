@@ -26,7 +26,7 @@ export const DocLinkForBody = () => {
   return (
     <EuiText>
       <FormattedMessage
-        id="xpack.synthetics.pingList.expandedRow.response_body.notRecorded"
+        id="xpack.uptime.pingList.expandedRow.response_body.notRecorded"
         defaultMessage="Body not recorded. Read our {docsLink} for more information on recording response bodies."
         values={{ docsLink }}
       />

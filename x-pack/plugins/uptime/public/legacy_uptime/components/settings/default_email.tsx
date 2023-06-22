@@ -60,14 +60,14 @@ export function DefaultEmail({
       title={
         <h4>
           <FormattedMessage
-            id="xpack.synthetics.sourceConfiguration.alertConnectors.defaultEmail"
+            id="xpack.uptime.sourceConfiguration.alertConnectors.defaultEmail"
             defaultMessage="Default email"
           />
         </h4>
       }
       description={
         <FormattedMessage
-          id="xpack.synthetics.sourceConfiguration.defaultConnectors.description.defaultEmail"
+          id="xpack.uptime.sourceConfiguration.defaultConnectors.description.defaultEmail"
           defaultMessage="Email settings required for selected email alert connectors."
         />
       }

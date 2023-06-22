@@ -87,7 +87,7 @@ export const MonitorStatusBar: React.FC = () => {
         <MonListTitle>{OverallAvailability}</MonListTitle>
         <MonListDescription data-test-subj="uptimeOverallAvailability">
           <FormattedMessage
-            id="xpack.synthetics.availabilityLabelText"
+            id="xpack.uptime.availabilityLabelText"
             defaultMessage="{value} %"
             values={{ value: formatAvailabilityValue(availability) }}
             description="A percentage value, like 23.5 %"

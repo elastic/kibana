@@ -63,7 +63,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'observerLocation',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.observerLocation',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.observerLocation',
       {
         defaultMessage: 'Observer location from which heartbeat check is performed.',
       }
@@ -72,7 +72,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'observerHostname',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.observerHostname',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.observerHostname',
       {
         defaultMessage: 'Observer hostname from which heartbeat check is performed.',
       }
@@ -81,7 +81,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'checkedAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.checkedAt',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.checkedAt',
       {
         defaultMessage: 'Timestamp of the monitor check.',
       }
@@ -93,7 +93,7 @@ export const commonStateTranslations = [
   {
     name: 'firstCheckedAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.firstCheckedAt',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.firstCheckedAt',
       {
         defaultMessage: 'Timestamp indicating when this alert first checked',
       }
@@ -102,7 +102,7 @@ export const commonStateTranslations = [
   {
     name: 'firstTriggeredAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.firstTriggeredAt',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.firstTriggeredAt',
       {
         defaultMessage: 'Timestamp indicating when the alert first triggered',
       }
@@ -111,7 +111,7 @@ export const commonStateTranslations = [
   {
     name: 'currentTriggerStarted',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.currentTriggerStarted',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.currentTriggerStarted',
       {
         defaultMessage:
           'Timestamp indicating when the current trigger state began, if alert is triggered',
@@ -121,7 +121,7 @@ export const commonStateTranslations = [
   {
     name: 'isTriggered',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.isTriggered',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.isTriggered',
       {
         defaultMessage: `Flag indicating if the alert is currently triggering`,
       }
@@ -130,7 +130,7 @@ export const commonStateTranslations = [
   {
     name: 'lastCheckedAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastCheckedAt',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastCheckedAt',
       {
         defaultMessage: `Timestamp indicating the alert's most recent check time`,
       }
@@ -139,7 +139,7 @@ export const commonStateTranslations = [
   {
     name: 'lastResolvedAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastResolvedAt',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastResolvedAt',
       {
         defaultMessage: `Timestamp indicating the most recent resolution time for this alert`,
       }
@@ -148,7 +148,7 @@ export const commonStateTranslations = [
   {
     name: 'lastTriggeredAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastTriggeredAt',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastTriggeredAt',
       {
         defaultMessage: `Timestamp indicating the alert's most recent trigger time`,
       }
@@ -172,17 +172,14 @@ export const tlsTranslations = {
     },
     {
       name: 'expiringCount',
-      description: i18n.translate(
-        'xpack.synthetics.alerts.tls.actionVariables.state.expiringCount',
-        {
-          defaultMessage: 'The number of expiring certs detected by the alert.',
-        }
-      ),
+      description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.expiringCount', {
+        defaultMessage: 'The number of expiring certs detected by the alert.',
+      }),
     },
     {
       name: 'expiringCommonNameAndDate',
       description: i18n.translate(
-        'xpack.synthetics.alerts.tls.actionVariables.state.expiringCommonNameAndDate',
+        'xpack.uptime.alerts.tls.actionVariables.state.expiringCommonNameAndDate',
         {
           defaultMessage: 'The common names and expiration date/time of the detected certs',
         }
@@ -197,7 +194,7 @@ export const tlsTranslations = {
     {
       name: 'agingCommonNameAndDate',
       description: i18n.translate(
-        'xpack.synthetics.alerts.tls.actionVariables.state.agingCommonNameAndDate',
+        'xpack.uptime.alerts.tls.actionVariables.state.agingCommonNameAndDate',
         {
           defaultMessage: 'The common names and expiration date/time of the detected certs.',
         }
@@ -258,7 +255,7 @@ export const durationAnomalyTranslations = {
     {
       name: 'severity',
       description: i18n.translate(
-        'xpack.synthetics.alerts.durationAnomaly.actionVariables.state.severity',
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.severity',
         {
           defaultMessage: 'The severity of the anomaly.',
         }
@@ -267,7 +264,7 @@ export const durationAnomalyTranslations = {
     {
       name: 'anomalyStartTimestamp',
       description: i18n.translate(
-        'xpack.synthetics.alerts.durationAnomaly.actionVariables.state.anomalyStartTimestamp',
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.anomalyStartTimestamp',
         {
           defaultMessage: 'ISO8601 timestamp of the start of the anomaly.',
         }
@@ -276,7 +273,7 @@ export const durationAnomalyTranslations = {
     {
       name: 'monitor',
       description: i18n.translate(
-        'xpack.synthetics.alerts.durationAnomaly.actionVariables.state.monitor',
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.monitor',
         {
           defaultMessage:
             'A human friendly rendering of name or ID, preferring name (e.g. My Monitor)',
@@ -286,7 +283,7 @@ export const durationAnomalyTranslations = {
     {
       name: 'monitorId',
       description: i18n.translate(
-        'xpack.synthetics.alerts.durationAnomaly.actionVariables.state.monitorId',
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.monitorId',
         {
           defaultMessage: 'ID of the monitor.',
         }
@@ -295,7 +292,7 @@ export const durationAnomalyTranslations = {
     {
       name: 'monitorUrl',
       description: i18n.translate(
-        'xpack.synthetics.alerts.durationAnomaly.actionVariables.state.monitorUrl',
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.monitorUrl',
         {
           defaultMessage: 'URL of the monitor.',
         }
@@ -304,7 +301,7 @@ export const durationAnomalyTranslations = {
     {
       name: 'slowestAnomalyResponse',
       description: i18n.translate(
-        'xpack.synthetics.alerts.durationAnomaly.actionVariables.state.slowestAnomalyResponse',
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.slowestAnomalyResponse',
         {
           defaultMessage: 'Slowest response time during anomaly bucket with unit (ms, s) attached.',
         }
@@ -313,7 +310,7 @@ export const durationAnomalyTranslations = {
     {
       name: 'expectedResponseTime',
       description: i18n.translate(
-        'xpack.synthetics.alerts.durationAnomaly.actionVariables.state.expectedResponseTime',
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.expectedResponseTime',
         {
           defaultMessage: 'Expected response time',
         }
@@ -322,7 +319,7 @@ export const durationAnomalyTranslations = {
     {
       name: 'severityScore',
       description: i18n.translate(
-        'xpack.synthetics.alerts.durationAnomaly.actionVariables.state.severityScore',
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.severityScore',
         {
           defaultMessage: 'Anomaly severity score',
         }
@@ -331,7 +328,7 @@ export const durationAnomalyTranslations = {
     {
       name: 'observerLocation',
       description: i18n.translate(
-        'xpack.synthetics.alerts.durationAnomaly.actionVariables.state.observerLocation',
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.observerLocation',
         {
           defaultMessage: 'Observer location from which heartbeat check is performed.',
         }
@@ -368,14 +365,11 @@ export const statusCheckTranslations = {
     downMonitorsMessage: string,
     availabilityBreachMessage: string
   ) =>
-    i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage',
-      {
-        defaultMessage: '{downMonitorsMessage} The {availabilityBreachMessage}',
-        values: {
-          downMonitorsMessage,
-          availabilityBreachMessage,
-        },
-      }
-    ),
+    i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage', {
+      defaultMessage: '{downMonitorsMessage} The {availabilityBreachMessage}',
+      values: {
+        downMonitorsMessage,
+        availabilityBreachMessage,
+      },
+    }),
 };

@@ -41,7 +41,7 @@ export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
         return (
           <span>
             <FormattedMessage
-              id="xpack.synthetics.availabilityLabelText"
+              id="xpack.uptime.availabilityLabelText"
               defaultMessage="{value} %"
               values={{ value: formatAvailabilityValue(val) }}
               description="A percentage value, like 23.5%"

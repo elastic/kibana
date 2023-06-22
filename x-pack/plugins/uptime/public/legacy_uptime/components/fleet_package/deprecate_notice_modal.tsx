@@ -30,7 +30,7 @@ export const DeprecateNoticeModal = ({ onCancel }: { onCancel: () => void }) => 
     >
       <p>
         <FormattedMessage
-          id="xpack.synthetics.deprecateNoticeModal.description"
+          id="xpack.uptime.deprecateNoticeModal.description"
           defaultMessage="The Elastic Synthetics integration is deprecated. Instead, you can now monitor endpoints,
         pages, and user journeys directly in the Synthetics app much more efficiently:"
         />
@@ -38,32 +38,32 @@ export const DeprecateNoticeModal = ({ onCancel }: { onCancel: () => void }) => 
       <p>
         <li>
           <FormattedMessage
-            id="xpack.synthetics.deprecateNoticeModal.addPrivateLocations"
+            id="xpack.uptime.deprecateNoticeModal.addPrivateLocations"
             defaultMessage="Add private locations against your fleet policies"
           />
         </li>
         <li>
           <FormattedMessage
-            id="xpack.synthetics.deprecateNoticeModal.manageMonitors"
+            id="xpack.uptime.deprecateNoticeModal.manageMonitors"
             defaultMessage="Manage lightweight and browser monitors from a single place"
           />
         </li>
         <li>
           <FormattedMessage
-            id="xpack.synthetics.deprecateNoticeModal.elasticManagedLocations"
+            id="xpack.uptime.deprecateNoticeModal.elasticManagedLocations"
             defaultMessage="Run monitors in multiple locations managed by Elastic, or from your own private locations"
           />
         </li>
         <li>
           <FormattedMessage
-            id="xpack.synthetics.deprecateNoticeModal.automateMonitors"
+            id="xpack.uptime.deprecateNoticeModal.automateMonitors"
             defaultMessage="Automate the creation of your monitors using project monitors"
           />
         </li>
       </p>
       <p>
         <FormattedMessage
-          id="xpack.synthetics.deprecateNoticeModal.forMoreInformation"
+          id="xpack.uptime.deprecateNoticeModal.forMoreInformation"
           defaultMessage="For more information, {docsLink}"
           values={{
             docsLink: (
