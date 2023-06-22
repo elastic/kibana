@@ -13,6 +13,8 @@ export interface ChatConfig {
     jwt: string;
     id: string;
     email: string;
+    trialEndDate: Date;
+    kbnVersion: string;
   };
 }
 
