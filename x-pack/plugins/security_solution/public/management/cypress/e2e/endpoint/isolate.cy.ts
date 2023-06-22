@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Agent } from '@kbn/fleet-plugin/common';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_CASES_PATH, APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
@@ -26,12 +25,7 @@ import {
 import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import {
-  createAgentPolicyTask,
-  getAgentByHostName,
-  getEndpointIntegrationVersion,
-  reassignAgentPolicy,
-} from '../../tasks/fleet';
+import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
@@ -44,7 +38,7 @@ describe('Isolate command', () => {
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
 
-  before(() => {
+  beforeEach(() => {
     getEndpointIntegrationVersion().then((version) => {
       createAgentPolicyTask(version, 'alerts test').then((data) => {
         indexedPolicy = data;
@@ -81,33 +75,10 @@ describe('Isolate command', () => {
   });
 
   describe('From manage', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
-
-    before(() => {
-      getAgentByHostName(createdHost.hostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
-
-      getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version).then((data) => {
-          response = data;
-        })
-      );
-    });
-
-    after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
-      }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
-      }
-    });
-
     it('should allow filtering endpoint by Isolated status', () => {
       cy.visit(APP_ENDPOINTS_PATH);
       closeAllToasts();
+      cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
       checkEndpointListForOnlyUnIsolatedHosts();
 
       filterOutIsolatedHosts();
@@ -140,21 +111,10 @@ describe('Isolate command', () => {
   });
 
   describe('From alerts', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
     let ruleId: string;
     let ruleName: string;
 
     before(() => {
-      getAgentByHostName(createdHost.hostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
-
-      getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version).then((data) => {
-          response = data;
-        })
-      );
       loadRule(false).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
@@ -162,12 +122,6 @@ describe('Isolate command', () => {
     });
 
     after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
-      }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
-      }
       if (ruleId) {
         cleanupRule(ruleId);
       }
@@ -211,8 +165,6 @@ describe('Isolate command', () => {
   });
 
   describe('From cases', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
     let ruleId: string;
     let ruleName: string;
     let caseId: string;
@@ -220,15 +172,6 @@ describe('Isolate command', () => {
     const caseOwner = 'securitySolution';
 
     before(() => {
-      getAgentByHostName(createdHost.hostname).then((agentData) => {
-        initialAgentData = agentData;
-      });
-      getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version).then((data) => {
-          response = data;
-        })
-      );
-
       loadRule(false).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
@@ -243,12 +186,6 @@ describe('Isolate command', () => {
     });
 
     after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
-      }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
-      }
       if (ruleId) {
         cleanupRule(ruleId);
       }

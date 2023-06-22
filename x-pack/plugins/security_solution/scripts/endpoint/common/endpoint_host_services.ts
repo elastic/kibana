@@ -179,6 +179,7 @@ const createMultipassVm = async ({
     try {
       await execa.command(`vagrant up`, {
         env: {
+          VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
           VAGRANT_CWD,
           VMNAME: vmName,
           CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
