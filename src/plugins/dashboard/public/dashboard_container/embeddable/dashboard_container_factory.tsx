@@ -56,6 +56,8 @@ export interface DashboardCreationOptions {
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
   validateLoadedSavedObject?: (result: LoadDashboardReturn) => boolean;
+
+  isEmbeddedExternally?: boolean;
 }
 
 export class DashboardContainerFactoryDefinition

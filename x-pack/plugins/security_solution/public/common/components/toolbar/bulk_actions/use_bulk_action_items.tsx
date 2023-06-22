@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
+import { useMemo, useCallback } from 'react';
+import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
   CustomBulkActionProp,
@@ -151,57 +151,45 @@ export const useBulkActionItems = ({
   );
 
   const items = useMemo(() => {
-    const actionItems: JSX.Element[] = [];
+    const actionItems: AlertTableContextMenuItem[] = [];
     if (showAlertStatusActions) {
       if (currentStatus !== FILTER_OPEN) {
-        actionItems.push(
-          <EuiContextMenuItem
-            key="open"
-            data-test-subj="open-alert-status"
-            onClick={() => onClickUpdate(FILTER_OPEN as AlertWorkflowStatus)}
-          >
-            {i18n.BULK_ACTION_OPEN_SELECTED}
-          </EuiContextMenuItem>
-        );
+        actionItems.push({
+          key: 'open',
+          'data-test-subj': 'open-alert-status',
+          onClick: () => onClickUpdate(FILTER_OPEN as AlertWorkflowStatus),
+          name: i18n.BULK_ACTION_OPEN_SELECTED,
+        });
       }
       if (currentStatus !== FILTER_ACKNOWLEDGED) {
-        actionItems.push(
-          <EuiContextMenuItem
-            key="acknowledge"
-            data-test-subj="acknowledged-alert-status"
-            onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus)}
-          >
-            {i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED}
-          </EuiContextMenuItem>
-        );
+        actionItems.push({
+          key: 'acknowledge',
+          'data-test-subj': 'acknowledged-alert-status',
+          onClick: () => onClickUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus),
+          name: i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED,
+        });
       }
       if (currentStatus !== FILTER_CLOSED) {
-        actionItems.push(
-          <EuiContextMenuItem
-            key="close"
-            data-test-subj="close-alert-status"
-            onClick={() => onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus)}
-          >
-            {i18n.BULK_ACTION_CLOSE_SELECTED}
-          </EuiContextMenuItem>
-        );
+        actionItems.push({
+          key: 'close',
+          'data-test-subj': 'close-alert-status',
+          onClick: () => onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus),
+          name: i18n.BULK_ACTION_CLOSE_SELECTED,
+        });
       }
     }
 
     const additionalItems = customBulkActions
-      ? customBulkActions.reduce<JSX.Element[]>((acc, action) => {
+      ? customBulkActions.reduce<AlertTableContextMenuItem[]>((acc, action) => {
           const isDisabled = !!(query && action.disableOnQuery);
-          acc.push(
-            <EuiContextMenuItem
-              key={action.key}
-              disabled={isDisabled}
-              data-test-subj={action['data-test-subj']}
-              toolTipContent={isDisabled ? action.disabledLabel : null}
-              onClick={() => action.onClick(eventIds)}
-            >
-              {action.label}
-            </EuiContextMenuItem>
-          );
+          acc.push({
+            key: action.key,
+            disabled: isDisabled,
+            'data-test-subj': action['data-test-subj'],
+            toolTipContent: isDisabled ? action.disabledLabel : null,
+            onClick: () => action.onClick(eventIds),
+            name: action.label,
+          });
           return acc;
         }, [])
       : [];

@@ -21,6 +21,7 @@ import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+import { getNormalizedSeverity } from '../helpers';
 
 export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;
 
@@ -130,7 +131,7 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         field: 'severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: true,
+        sortable: ({ severity }: RuleInstallationInfoForReview) => getNormalizedSeverity(severity),
         truncateText: true,
         width: '12%',
       },
