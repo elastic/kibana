@@ -153,6 +153,7 @@ export class CreateSourceEditor extends Component<Props, State> {
 
     return (
       <GeoLineForm
+        isColumnCompressed={false}
         indexPattern={this.state.indexPattern}
         onGroupByTimeseriesChange={this._onGroupByTimeseriesChange}
         onLineSimplificationSizeChange={this._onLineSimplificationSizeChange}

@@ -126,6 +126,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           </EuiTitle>
           <EuiSpacer size="m" />
           <GeoLineForm
+            isColumnCompressed={true}
             indexPattern={this.state.indexPattern}
             onGroupByTimeseriesChange={this._onGroupByTimeseriesChange}
             onLineSimplificationSizeChange={this._onLineSimplificationSizeChange}

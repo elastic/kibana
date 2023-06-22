@@ -16,6 +16,7 @@ import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_strings';
 import { SizeSlider } from './size_slider';
 
 interface Props {
+  isColumnCompressed: boolean;
   indexPattern: DataView;
   groupByTimeseries: boolean;
   lineSimplificationSize: number;
@@ -58,7 +59,7 @@ export function GeoLineForm(props: Props) {
   return (
     <>
       {isTimeseries && (
-        <EuiFormRow>
+        <EuiFormRow display={props.isColumnCompressed ? 'columnCompressed' : 'row'}>
           <EuiToolTip
             position="top"
             content={i18n.translate('xpack.maps.source.esGeoLine.groupByTimeseriesTooltip', {
@@ -75,6 +76,7 @@ export function GeoLineForm(props: Props) {
               onChange={(event: EuiSwitchEvent) => {
                 props.onGroupByTimeseriesChange(event.target.checked);
               }}
+              compressed={props.isColumnCompressed}
             />
           </EuiToolTip>
         </EuiFormRow>
@@ -82,12 +84,13 @@ export function GeoLineForm(props: Props) {
       {props.groupByTimeseries ? (
         <EuiFormRow
           label={i18n.translate('xpack.maps.esGeoLine.lineSImplificationSizeLabel', {
-            defaultMessage: 'Line simplification threshold',
+            defaultMessage: 'Simplification threshold',
           })}
           helpText={i18n.translate('xpack.maps.esGeoLine.lineSImplificationSizeHelpText', {
             defaultMessage:
               'The maximum number of points for each track. Track is simplifed when threshold is exceeded.',
           })}
+          display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
         >
           <SizeSlider
             value={props.lineSimplificationSize}
@@ -96,7 +99,10 @@ export function GeoLineForm(props: Props) {
         </EuiFormRow>
       ) : (
         <>
-          <EuiFormRow label={ENTITY_INPUT_LABEL}>
+          <EuiFormRow
+            label={ENTITY_INPUT_LABEL}
+            display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
+          >
             <SingleFieldSelect
               placeholder={i18n.translate('xpack.maps.source.esGeoLine.splitFieldPlaceholder', {
                 defaultMessage: 'Select entity field',
@@ -105,10 +111,14 @@ export function GeoLineForm(props: Props) {
               onChange={onSplitFieldChange}
               fields={getTermsFields(props.indexPattern.fields)}
               isClearable={false}
+              compressed={props.isColumnCompressed}
             />
           </EuiFormRow>
 
-          <EuiFormRow label={SORT_INPUT_LABEL}>
+          <EuiFormRow
+            label={SORT_INPUT_LABEL}
+            display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
+          >
             <SingleFieldSelect
               placeholder={i18n.translate('xpack.maps.source.esGeoLine.sortFieldPlaceholder', {
                 defaultMessage: 'Select sort field',
@@ -125,6 +135,7 @@ export function GeoLineForm(props: Props) {
                 );
               })}
               isClearable={false}
+              compressed={props.isColumnCompressed}
             />
           </EuiFormRow>
         </>
