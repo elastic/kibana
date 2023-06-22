@@ -6,8 +6,10 @@
  */
 
 import { SOURCE_DATA_REQUEST_ID } from '../../../../../common/constants';
+import { VectorLayerDescriptor } from '../../../../../common/descriptor_types';
 import { InnerJoin } from '../../../joins/inner_join';
 import { IJoinSource } from '../../../sources/join_sources';
+import { IVectorSource } from '../../../sources/vector_source';
 import { GeoJsonVectorLayer } from './geojson_vector_layer';
 
 const joinDataRequestId = 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
@@ -28,7 +30,7 @@ describe('isLayerLoading', () => {
     const layer = new GeoJsonVectorLayer({
       customIcons: [],
       layerDescriptor: {},
-      source: {} as unknown as ISource,
+      source: {} as unknown as IVectorSource,
     });
     expect(layer.isLayerLoading(1)).toBe(true);
   });
@@ -46,7 +48,7 @@ describe('isLayerLoading', () => {
           },
         ],
       },
-      source: {} as unknown as ISource,
+      source: {} as unknown as IVectorSource,
     });
     expect(layer.isLayerLoading(1)).toBe(true);
   });
@@ -66,7 +68,7 @@ describe('isLayerLoading', () => {
             },
           ],
         },
-        source: {} as unknown as ISource,
+        source: {} as unknown as IVectorSource,
       });
       expect(layer.isLayerLoading(1)).toBe(false);
     });
@@ -91,7 +93,7 @@ describe('isLayerLoading', () => {
               },
             ],
           } as unknown as VectorLayerDescriptor,
-          source: {} as unknown as ISource,
+          source: {} as unknown as IVectorSource,
         });
         expect(layer.isLayerLoading(1)).toBe(false);
       });
@@ -115,7 +117,7 @@ describe('isLayerLoading', () => {
           layerDescriptor: {
             __dataRequests: [sourceDataRequestDescriptorWithFeatures],
           } as unknown as VectorLayerDescriptor,
-          source: {} as unknown as ISource,
+          source: {} as unknown as IVectorSource,
         });
         expect(layer.isLayerLoading(1)).toBe(true);
       });
@@ -134,7 +136,7 @@ describe('isLayerLoading', () => {
               },
             ],
           } as unknown as VectorLayerDescriptor,
-          source: {} as unknown as ISource,
+          source: {} as unknown as IVectorSource,
         });
         expect(layer.isLayerLoading(1)).toBe(true);
       });
@@ -155,7 +157,7 @@ describe('isLayerLoading', () => {
               },
             ],
           } as unknown as VectorLayerDescriptor,
-          source: {} as unknown as ISource,
+          source: {} as unknown as IVectorSource,
         });
         expect(layer.isLayerLoading(1)).toBe(false);
       });

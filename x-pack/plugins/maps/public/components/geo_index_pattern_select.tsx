@@ -106,7 +106,9 @@ export function GeoIndexPatternSelect(props: Props) {
   }
 
   const IndexPatternSelect = getIndexPatternSelectComponent();
-  const isDataViewInvalid = props.dataView && !hasGeoFields;
+  const isDataViewInvalid = !props.dataView
+    ? false
+    : !hasGeoFields;
   const error = isDataViewInvalid
     ? i18n.translate('xpack.maps.noGeoFieldInIndexPattern.message', {
         defaultMessage: 'Data view does not contain any geospatial fields',
