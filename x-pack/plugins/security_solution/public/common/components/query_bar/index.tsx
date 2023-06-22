@@ -8,20 +8,22 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { TimeHistory } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useKibana } from '../../lib/kibana';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  indexPattern: DataViewBase;
+  indexPattern: DataViewSpec | undefined;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
@@ -56,6 +58,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     displayStyle,
     isDisabled,
   }) => {
+    const { fieldFormats } = useKibana().services;
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
@@ -102,7 +105,13 @@ export const QueryBar = memo<QueryBarComponentProps>(
       [filterManager]
     );
 
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const dataViewInstances = useMemo(() => {
+      if (indexPattern != null) {
+        const dv = new DataView({ spec: indexPattern, fieldFormats });
+        return [dv];
+      }
+      return [];
+    }, [indexPattern, fieldFormats]);
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
     return (
@@ -111,7 +120,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         filters={filters}
-        indexPatterns={indexPatterns as DataView[]}
+        indexPatterns={dataViewInstances}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
         query={filterQuery}

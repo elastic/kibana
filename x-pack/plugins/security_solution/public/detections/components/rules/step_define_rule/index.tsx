@@ -23,12 +23,10 @@ import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual, isEmpty, omit } from 'lodash';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewFieldMap, DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
@@ -75,7 +73,6 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
 import { ThreatMatchInput } from '../threatmatch_input';
-import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
@@ -103,16 +100,16 @@ interface StepDefineRuleProps extends RuleStepProps {
   form: FormHook<DefineStepRule>;
   optionsSelected: EqlOptionsSelected;
   setOptionsSelected: React.Dispatch<React.SetStateAction<EqlOptionsSelected>>;
-  indexPattern: DataViewBase;
+  indexPattern: DataViewSpec | undefined;
   isIndexPatternLoading: boolean;
-  browserFields: BrowserFields;
+  browserFields: DataViewFieldMap;
 }
 
 interface StepDefineRuleReadOnlyProps {
   addPadding: boolean;
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: DefineStepRule;
-  indexPattern: DataViewBase;
+  indexPattern: DataViewSpec | undefined;
 }
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -272,10 +269,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const [aggFields, setAggregatableFields] = useState<BrowserField[]>([]);
+  const [aggFields, setAggregatableFields] = useState<FieldSpec[]>([]);
 
   useEffect(() => {
-    const { fields } = indexPattern;
     /**
      * Typecasting to BrowserField because fields is
      * typed as DataViewFieldBase[] which does not have
@@ -285,17 +281,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
      * We will need to determine where these types are defined and
      * figure out where the discrepency is.
      */
-    setAggregatableFields(aggregatableFields(fields as BrowserField[]));
+    setAggregatableFields(aggregatableFields(indexPattern?.fields ?? {}));
   }, [indexPattern]);
 
-  const termsAggregationFields: BrowserField[] = useMemo(
+  const termsAggregationFields: FieldSpec[] = useMemo(
     () => getTermsAggregationFields(aggFields),
     [aggFields]
   );
 
   const [
     threatIndexPatternsLoading,
-    { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
+    { browserFields: threatBrowserFields, dataViewSpec: threatIndexDataViewSpec },
   ] = useFetchIndex(threatIndex);
 
   // reset form when rule type changes
@@ -408,7 +404,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         indexPatterns={indexPattern}
         threatBrowserFields={threatBrowserFields}
         threatIndexModified={threatIndexModified}
-        threatIndexPatterns={threatIndexPatterns}
+        threatIndexPatterns={threatIndexDataViewSpec}
         threatIndexPatternsLoading={threatIndexPatternsLoading}
         threatMapping={threatMapping}
         onValidityChange={setIsThreatQueryBarValid}
@@ -419,7 +415,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       indexPattern,
       threatBrowserFields,
       threatIndexModified,
-      threatIndexPatterns,
+      threatIndexDataViewSpec,
       threatIndexPatternsLoading,
     ]
   );
@@ -682,24 +678,33 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [setOptionsSelected]
   );
 
+  const assertFieldsExists = (obj: unknown): obj is DataViewFieldMap =>
+    !isEmpty(obj) && obj != null;
+
   const optionsData = useMemo(
     () =>
-      isEmpty(indexPattern.fields)
-        ? {
+      assertFieldsExists(indexPattern?.fields)
+        ? Object.values(indexPattern?.fields ?? {}).reduce(
+            (acc, field) => {
+              if (field?.esTypes?.includes('keyword')) {
+                return { ...acc, keywordFields: [...acc.keywordFields, { label: field.name }] };
+              } else if (field.type === 'date') {
+                return { ...acc, dateFields: [...acc.dateFields, { label: field.name }] };
+              } else if (field.type !== 'date') {
+                return { ...acc, nonDateFields: [...acc.nonDateFields, { label: field.name }] };
+              }
+              return acc;
+            },
+            { keywordFields: [], dateFields: [], nonDateFields: [] } as {
+              keywordFields: Array<{ label: string }>;
+              dateFields: Array<{ label: string }>;
+              nonDateFields: Array<{ label: string }>;
+            }
+          )
+        : {
             keywordFields: [],
             dateFields: [],
             nonDateFields: [],
-          }
-        : {
-            keywordFields: (indexPattern.fields as FieldSpec[])
-              .filter((f) => f.esTypes?.includes('keyword'))
-              .map((f) => ({ label: f.name })),
-            dateFields: indexPattern.fields
-              .filter((f) => f.type === 'date')
-              .map((f) => ({ label: f.name })),
-            nonDateFields: indexPattern.fields
-              .filter((f) => f.type !== 'date')
-              .map((f) => ({ label: f.name })),
           },
     [indexPattern]
   );
@@ -968,6 +973,6 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
 };
 export const StepDefineRuleReadOnly = memo(StepDefineRuleReadOnlyComponent);
 
-export function aggregatableFields<T extends { aggregatable: boolean }>(browserFields: T[]): T[] {
-  return browserFields.filter((field) => field.aggregatable === true);
+export function aggregatableFields(browserFields: DataViewFieldMap): FieldSpec[] {
+  return Object.values(browserFields).filter((field) => field.aggregatable === true);
 }

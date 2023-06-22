@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { useState, useMemo, useEffect } from 'react';
-import type { DataViewBase } from '@kbn/es-query';
+import { useState, useMemo } from 'react';
+// import type { DataViewBase } from '@kbn/es-query';
+// import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
+
 import { isThreatMatchRule } from '../../../../common/detection_engine/utils';
 import type {
   AboutStepRule,
@@ -14,7 +17,7 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
 } from '../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../detections/pages/detection_engine/rules/types';
+// import { DataSourceType } from '../../../detections/pages/detection_engine/rules/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useForm, useFormData } from '../../../shared_imports';
 import { schema as defineRuleSchema } from '../../../detections/components/rules/step_define_rule/schema';
@@ -117,40 +120,25 @@ export const useRuleForms = ({
 };
 
 interface UseRuleIndexPatternProps {
-  dataSourceType: DataSourceType;
   index: string[];
   dataViewId: string | undefined;
 }
 
+interface UseRuleIndexPatternReturn {
+  indexPattern: DataViewSpec | undefined;
+  isIndexPatternLoading: boolean;
+  browserFields: DataViewFieldMap;
+}
+
 export const useRuleIndexPattern = ({
-  dataSourceType,
   index,
   dataViewId,
-}: UseRuleIndexPatternProps) => {
-  const { data } = useKibana().services;
-  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] = useFetchIndex(
-    dataViewId ?? index
-  );
-  const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
-  // Why do we need this? to ensure the query bar auto-suggest gets the latest updates
-  // when the index pattern changes
-  // when we select new dataView
-  // when we choose some other dataSourceType
-  useEffect(() => {
-    if (dataSourceType === DataSourceType.IndexPatterns && !isIndexPatternLoading) {
-      setIndexPattern(initIndexPattern);
-    }
+}: UseRuleIndexPatternProps): UseRuleIndexPatternReturn => {
+  const [isIndexPatternLoading, { dataViewSpec }] = useFetchIndex(dataViewId ?? index);
 
-    if (dataSourceType === DataSourceType.DataView) {
-      const fetchDataView = async () => {
-        if (dataViewId != null) {
-          const dv = await data.dataViews.get(dataViewId);
-          setIndexPattern(dv);
-        }
-      };
-
-      fetchDataView();
-    }
-  }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern]);
-  return { indexPattern, isIndexPatternLoading, browserFields };
+  return {
+    indexPattern: dataViewSpec,
+    isIndexPatternLoading,
+    browserFields: dataViewSpec?.fields ?? {},
+  };
 };

@@ -11,14 +11,17 @@ import styled from 'styled-components';
 
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
 import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
+import { useKibana } from '../../lib/kibana';
 
 interface EntryItemProps {
   entry: FormattedEntry;
-  indexPattern: DataViewBase;
-  threatIndexPatterns: DataViewBase;
+  indexPattern: DataViewSpec | undefined;
+  threatIndexPatterns: DataViewSpec | undefined;
   showLabel: boolean;
   onChange: (arg: Entry, i: number) => void;
 }
@@ -39,6 +42,8 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   showLabel,
   onChange,
 }): JSX.Element => {
+  const { fieldFormats } = useKibana().services;
+
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
@@ -55,11 +60,27 @@ export const EntryItem: React.FC<EntryItemProps> = ({
     [onChange, entry]
   );
 
+  const dataViewInstance = useMemo(() => {
+    if (indexPattern != null) {
+      const dv = new DataView({ spec: indexPattern, fieldFormats });
+      return { ...dv, fields: Object.values(indexPattern.fields ?? {}) } as DataView;
+    }
+    return [];
+  }, [indexPattern, fieldFormats]);
+
+  const threatDataViewInstance = useMemo(() => {
+    if (threatIndexPatterns != null) {
+      const dv = new DataView({ spec: threatIndexPatterns, fieldFormats });
+      return { ...dv, fields: Object.values(threatIndexPatterns.fields ?? {}) } as DataView;
+    }
+    return [];
+  }, [threatIndexPatterns, fieldFormats]);
+
   const renderFieldInput = useMemo(() => {
     const comboBox = (
       <FieldComponent
         placeholder={i18n.FIELD_PLACEHOLDER}
-        indexPattern={indexPattern}
+        indexPattern={dataViewInstance as DataViewBase}
         selectedField={entry.field}
         isClearable={false}
         isLoading={false}
@@ -83,13 +104,13 @@ export const EntryItem: React.FC<EntryItemProps> = ({
         </EuiFormRow>
       );
     }
-  }, [handleFieldChange, indexPattern, entry, showLabel]);
+  }, [dataViewInstance, entry.field, indexPattern, handleFieldChange, showLabel]);
 
   const renderThreatFieldInput = useMemo(() => {
     const comboBox = (
       <FieldComponent
         placeholder={i18n.FIELD_PLACEHOLDER}
-        indexPattern={threatIndexPatterns}
+        indexPattern={threatDataViewInstance as DataViewBase}
         selectedField={entry.value}
         isClearable={false}
         isLoading={false}
@@ -113,7 +134,13 @@ export const EntryItem: React.FC<EntryItemProps> = ({
         </EuiFormRow>
       );
     }
-  }, [handleThreatFieldChange, threatIndexPatterns, entry, showLabel]);
+  }, [
+    threatDataViewInstance,
+    entry.value,
+    threatIndexPatterns,
+    handleThreatFieldChange,
+    showLabel,
+  ]);
 
   return (
     <EuiFlexGroup

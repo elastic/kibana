@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ListItemComponent } from './list_item';
 import { AndOrBadge } from '../and_or_badge';
@@ -45,8 +45,8 @@ interface OnChangeProps {
 
 interface ThreatMatchComponentProps {
   listItems: ThreatMapEntries[];
-  indexPatterns: DataViewBase;
-  threatIndexPatterns: DataViewBase;
+  indexPatterns: DataViewSpec | undefined;
+  threatIndexPatterns: DataViewSpec | undefined;
   onChange: (arg: OnChangeProps) => void;
 }
 

@@ -78,7 +78,9 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
+    const { browserFields, indexPattern, sourcererDataView } = useSourcererDataView(
+      SourcererScopeName.timeline
+    );
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
       query: filterQuery != null ? filterQuery.expression : '',
@@ -267,7 +269,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         hideSavedQuery={kqlMode === 'search'}
-        indexPattern={indexPattern}
+        indexPattern={sourcererDataView}
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
         filterManager={filterManager}

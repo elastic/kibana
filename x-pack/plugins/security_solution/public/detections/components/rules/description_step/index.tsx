@@ -7,13 +7,16 @@
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
-import React, { memo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+
 import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import type {
   RelatedIntegrationArray,
@@ -70,7 +73,7 @@ const DescriptionListContainer = styled(EuiDescriptionList)`
 interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
-  indexPatterns?: DataViewBase;
+  indexPatterns?: DataViewSpec;
   schema: FormSchema<T>;
 }
 
@@ -80,9 +83,17 @@ export const StepRuleDescriptionComponent = <T,>({
   indexPatterns,
   schema,
 }: StepRuleDescriptionProps<T>) => {
-  const kibana = useKibana();
+  const { uiSettings, fieldFormats } = useKibana().services;
   const license = useLicense();
-  const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
+  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
+
+  const dataViewInstance = useMemo(() => {
+    if (indexPatterns != null) {
+      const dv = new DataView({ spec: indexPatterns, fieldFormats });
+      return dv;
+    }
+    return undefined;
+  }, [indexPatterns, fieldFormats]);
 
   const keys = Object.keys(schema);
   const listItems = keys.reduce((acc: ListItems[], key: string) => {
@@ -106,7 +117,13 @@ export const StepRuleDescriptionComponent = <T,>({
 
     return [
       ...acc,
-      ...buildListItems(data, pick(key, schema), filterManager, license, indexPatterns),
+      ...buildListItems(
+        data,
+        pick(key, schema),
+        filterManager,
+        license,
+        dataViewInstance as DataViewBase
+      ),
     ];
   }, []);
 

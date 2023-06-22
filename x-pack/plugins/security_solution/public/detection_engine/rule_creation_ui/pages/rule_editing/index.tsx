@@ -173,7 +173,6 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
 
   const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
-    dataSourceType: defineStepData.dataSourceType,
     index: defineStepData.index,
     dataViewId: defineStepData.dataViewId,
   });

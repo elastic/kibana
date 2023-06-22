@@ -8,8 +8,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
-import type { DataViewBase } from '@kbn/es-query';
 import { getFormattedEntries, getUpdatedEntriesOnDelete } from './helpers';
 import type { FormattedEntry, ThreatMapEntries, Entry } from './types';
 import { EntryItem } from './entry_item';
@@ -24,8 +24,8 @@ const MyOverflowContainer = styled(EuiFlexItem)`
 interface ListItemProps {
   listItem: ThreatMapEntries;
   listItemIndex: number;
-  indexPattern: DataViewBase;
-  threatIndexPatterns: DataViewBase;
+  indexPattern: DataViewSpec | undefined;
+  threatIndexPatterns: DataViewSpec | undefined;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   onDeleteEntryItem: (item: ThreatMapEntries, index: number) => void;
@@ -70,7 +70,7 @@ export const ListItemComponent = React.memo<ListItemProps>(
 
     const entries = useMemo(
       (): FormattedEntry[] =>
-        indexPattern != null && listItem.entries.length > 0
+        indexPattern != null && threatIndexPatterns != null && listItem.entries.length > 0
           ? getFormattedEntries(indexPattern, threatIndexPatterns, listItem.entries)
           : [],
       [listItem.entries, indexPattern, threatIndexPatterns]

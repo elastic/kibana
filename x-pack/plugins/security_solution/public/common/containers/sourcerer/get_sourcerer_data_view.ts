@@ -16,6 +16,7 @@ export const getSourcererDataView = async (
   refreshFields = false
 ): Promise<SourcererDataView> => {
   const dataView = await dataViewsService.get(dataViewId, true, refreshFields);
+  // console.error(dataView.fields.map((field) => console.log(field.type)));
   const dataViewData = dataView.toSpec();
   const defaultPatternsList = ensurePatternFormat(dataView.getIndexPattern().split(','));
 

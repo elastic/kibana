@@ -87,7 +87,7 @@ interface FetchIndexReturn {
    * updated upstream but we will save that for some other time
    */
   dataView: DataViewSpec | undefined;
-  dataViewSpec: DataViewSpec;
+  dataViewSpec: DataViewSpec | undefined;
 }
 
 /**
@@ -118,7 +118,7 @@ export const useFetchIndex = (
      */
     indexPatterns: DEFAULT_INDEX_PATTERNS,
     dataView: undefined,
-    dataViewSpec: {},
+    dataViewSpec: undefined,
     loading: false,
   });
   const { addError } = useAppToasts();
@@ -136,6 +136,7 @@ export const useFetchIndex = (
             previousIndexesNameOrId.current = dataView?.id;
           } else {
             const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
+            // console.error(dv.fields);
             dataView = dv.toSpec();
           }
 
@@ -158,7 +159,7 @@ export const useFetchIndex = (
             indexExists: true,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             dataView: undefined,
-            dataViewSpec: {},
+            dataViewSpec: undefined,
             loading: false,
           });
           addError(exc?.message, { title: i18n.ERROR_INDEX_FIELDS_SEARCH });

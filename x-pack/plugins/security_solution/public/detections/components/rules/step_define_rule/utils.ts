@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BrowserField } from '../../../../common/containers/source';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
 /**
  * Filters out fields, that are not supported in terms aggregation.
@@ -13,7 +13,7 @@ import type { BrowserField } from '../../../../common/containers/source';
  * Keyword, Numeric, ip, boolean, or binary.
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html
  */
-export const getTermsAggregationFields = (fields: BrowserField[]): BrowserField[] => {
+export const getTermsAggregationFields = (fields: FieldSpec[]): FieldSpec[] => {
   // binary types is excluded, as binary field has property aggregatable === false
   const allowedTypesSet = new Set(['string', 'number', 'ip', 'boolean']);
 
