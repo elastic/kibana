@@ -146,12 +146,9 @@ export const MiddleTruncatedText = ({
                     type="lock"
                     size="s"
                     color="success"
-                    aria-label={i18n.translate(
-                      'xpack.synthetics.waterfallChart.sidebar.url.https',
-                      {
-                        defaultMessage: 'https',
-                      }
-                    )}
+                    aria-label={i18n.translate('xpack.uptime.waterfallChart.sidebar.url.https', {
+                      defaultMessage: 'https',
+                    })}
                   />
                 )}
                 <FirstChunk>{chunks.first}</FirstChunk>

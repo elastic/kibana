@@ -11,14 +11,14 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 export const PREVIOUS_CHECK_BUTTON_TEXT = i18n.translate(
-  'xpack.synthetics.synthetics.stepDetail.previousCheckButtonText',
+  'xpack.uptime.synthetics.stepDetail.previousCheckButtonText',
   {
     defaultMessage: 'Previous check',
   }
 );
 
 export const NEXT_CHECK_BUTTON_TEXT = i18n.translate(
-  'xpack.synthetics.synthetics.stepDetail.nextCheckButtonText',
+  'xpack.uptime.synthetics.stepDetail.nextCheckButtonText',
   {
     defaultMessage: 'Next check',
   }

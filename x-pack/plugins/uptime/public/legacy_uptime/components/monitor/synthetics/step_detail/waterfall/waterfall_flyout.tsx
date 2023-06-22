@@ -29,21 +29,21 @@ export const DETAILS = i18n.translate('xpack.uptime.synthetics.waterfall.flyout.
 });
 
 export const CERTIFICATES = i18n.translate(
-  'xpack.synthetics.synthetics.waterfall.flyout.certificates',
+  'xpack.uptime.synthetics.waterfall.flyout.certificates',
   {
     defaultMessage: 'Certificate headers',
   }
 );
 
 export const REQUEST_HEADERS = i18n.translate(
-  'xpack.synthetics.synthetics.waterfall.flyout.requestHeaders',
+  'xpack.uptime.synthetics.waterfall.flyout.requestHeaders',
   {
     defaultMessage: 'Request headers',
   }
 );
 
 export const RESPONSE_HEADERS = i18n.translate(
-  'xpack.synthetics.synthetics.waterfall.flyout.responseHeaders',
+  'xpack.uptime.synthetics.waterfall.flyout.responseHeaders',
   {
     defaultMessage: 'Response headers',
   }

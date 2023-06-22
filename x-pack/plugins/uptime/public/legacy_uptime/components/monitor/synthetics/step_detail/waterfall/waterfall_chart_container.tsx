@@ -17,12 +17,9 @@ import { extractItems } from './data_formatting';
 import { useStepWaterfallMetrics } from '../use_step_waterfall_metrics';
 import { JourneyStep } from '../../../../../../../common/runtime_types';
 
-export const NO_DATA_TEXT = i18n.translate(
-  'xpack.synthetics.synthetics.stepDetail.waterfallNoData',
-  {
-    defaultMessage: 'No waterfall data could be found for this step',
-  }
-);
+export const NO_DATA_TEXT = i18n.translate('xpack.uptime.synthetics.stepDetail.waterfallNoData', {
+  defaultMessage: 'No waterfall data could be found for this step',
+});
 
 interface Props {
   checkGroup: string;
@@ -63,12 +60,9 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
           <EuiFlexItem grow={false}>
             <EuiLoadingChart
               size="xl"
-              aria-label={i18n.translate(
-                'xpack.synthetics.synthetics.stepDetail.waterfall.loading',
-                {
-                  defaultMessage: 'Waterfall chart loading',
-                }
-              )}
+              aria-label={i18n.translate('xpack.uptime.synthetics.stepDetail.waterfall.loading', {
+                defaultMessage: 'Waterfall chart loading',
+              })}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

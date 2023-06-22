@@ -65,9 +65,6 @@ const EDIT_IN_SYNTHETICS_LABEL = i18n.translate('xpack.uptime.editPackagePolicy.
   defaultMessage: 'Edit in Synthetics',
 });
 
-const EDIT_IN_SYNTHETICS_DESC = i18n.translate(
-  'xpack.synthetics.editPackagePolicy.inSyntheticsDesc',
-  {
-    defaultMessage: 'This package policy is managed by the Synthetics app.',
-  }
-);
+const EDIT_IN_SYNTHETICS_DESC = i18n.translate('xpack.uptime.editPackagePolicy.inSyntheticsDesc', {
+  defaultMessage: 'This package policy is managed by the Synthetics app.',
+});

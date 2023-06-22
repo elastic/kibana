@@ -64,7 +64,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ loading, step, index, brow
           <CodeBlockAccordion
             id={step.synthetics?.step?.name + String(index)}
             buttonContent={i18n.translate(
-              'xpack.synthetics.synthetics.executedStep.scriptHeading.label',
+              'xpack.uptime.synthetics.executedStep.scriptHeading.label',
               {
                 defaultMessage: 'Script executed at this step',
               }
@@ -79,7 +79,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ loading, step, index, brow
           <CodeBlockAccordion
             id={step.synthetics?.step?.name + String(index)}
             buttonContent={i18n.translate(
-              'xpack.synthetics.synthetics.executedStep.consoleOutput.label',
+              'xpack.uptime.synthetics.executedStep.consoleOutput.label',
               {
                 defaultMessage: 'Console output',
               }

@@ -158,21 +158,18 @@ export const LCP_LABEL = i18n.translate('xpack.uptime.synthetics.waterfall.lcpLa
 });
 
 export const LAYOUT_SHIFT_LABEL = i18n.translate(
-  'xpack.synthetics.synthetics.waterfall.layoutShiftLabel',
+  'xpack.uptime.synthetics.waterfall.layoutShiftLabel',
   {
     defaultMessage: 'Layout shift',
   }
 );
 
-export const LOAD_EVENT_LABEL = i18n.translate(
-  'xpack.synthetics.synthetics.waterfall.loadEventLabel',
-  {
-    defaultMessage: 'Load event',
-  }
-);
+export const LOAD_EVENT_LABEL = i18n.translate('xpack.uptime.synthetics.waterfall.loadEventLabel', {
+  defaultMessage: 'Load event',
+});
 
 export const DOCUMENT_CONTENT_LOADED_LABEL = i18n.translate(
-  'xpack.synthetics.synthetics.waterfall.domContentLabel',
+  'xpack.uptime.synthetics.waterfall.domContentLabel',
   {
     defaultMessage: 'DOM Content Loaded',
   }
