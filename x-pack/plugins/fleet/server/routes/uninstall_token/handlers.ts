@@ -11,7 +11,6 @@ import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core-http-se
 
 import { appContextService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
-import type { GetUninstallTokensMetadataResponse } from '../../../common/types/rest_spec/uninstall_token';
 import type {
   GetUninstallTokensByPolicyIdRequestSchema,
   GetUninstallTokensMetadataRequestSchema,
@@ -35,12 +34,7 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   try {
     const { page = 1, perPage = 20, policyId } = request.query;
 
-    let body: GetUninstallTokensMetadataResponse;
-    if (policyId) {
-      body = await uninstallTokenService.searchTokenMetadata(policyId, page, perPage);
-    } else {
-      body = await uninstallTokenService.getTokenMetadataForAllPolicies(page, perPage);
-    }
+    const body = await uninstallTokenService.getTokenMetadata(policyId?.trim(), page, perPage);
 
     return response.ok({ body });
   } catch (error) {

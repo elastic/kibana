@@ -256,12 +256,12 @@ describe('UninstallTokenService', () => {
         });
       });
 
-      describe('getTokenMetadataForAllPolicies', () => {
+      describe('getTokenMetadata', () => {
         it('can correctly get token metadata', async () => {
           const so = getDefaultSO(canEncrypt);
           const so2 = getDefaultSO2(canEncrypt);
 
-          const actualItems = (await uninstallTokenService.getTokenMetadataForAllPolicies()).items;
+          const actualItems = (await uninstallTokenService.getTokenMetadata()).items;
           const expectedItems: UninstallTokenMetadata[] = [
             {
               policy_id: so.attributes.policy_id,
@@ -280,7 +280,7 @@ describe('UninstallTokenService', () => {
           defaultBuckets[0].latest.hits.hits[0]._source.created_at = '';
           mockCreatePointInTimeFinder(canEncrypt, defaultBuckets);
 
-          await expect(uninstallTokenService.getTokenMetadataForAllPolicies()).rejects.toThrowError(
+          await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrowError(
             'Uninstall Token is missing creation date.'
           );
         });
@@ -292,7 +292,7 @@ describe('UninstallTokenService', () => {
           ].policy_id = '';
           mockCreatePointInTimeFinder(canEncrypt, defaultBuckets);
 
-          await expect(uninstallTokenService.getTokenMetadataForAllPolicies()).rejects.toThrowError(
+          await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrowError(
             'Uninstall Token is missing policy ID.'
           );
         });

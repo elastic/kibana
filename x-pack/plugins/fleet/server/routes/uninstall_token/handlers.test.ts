@@ -35,7 +35,7 @@ describe('uninstall token handlers', () => {
   let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let appContextStartContractMock: MockedFleetAppContext;
-  let getAllTokensMock: jest.Mock;
+  let getTokenMetadataMock: jest.Mock;
   let getTokensForOnePolicyMock: jest.Mock;
 
   const uninstallTokensResponseFixture: GetUninstallTokensMetadataResponse = {
@@ -57,7 +57,7 @@ describe('uninstall token handlers', () => {
     appContextService.start(appContextStartContractMock);
 
     const uninstallTokenService = appContextService.getUninstallTokenService()!;
-    getAllTokensMock = uninstallTokenService.getTokenMetadataForAllPolicies as jest.Mock;
+    getTokenMetadataMock = uninstallTokenService.getTokenMetadata as jest.Mock;
     getTokensForOnePolicyMock = uninstallTokenService.getTokenHistoryForPolicy as jest.Mock;
   });
 
@@ -77,7 +77,7 @@ describe('uninstall token handlers', () => {
     });
 
     it('should return uninstall tokens for all policies', async () => {
-      getAllTokensMock.mockResolvedValue(uninstallTokensResponseFixture);
+      getTokenMetadataMock.mockResolvedValue(uninstallTokensResponseFixture);
 
       await getUninstallTokensMetadataHandler(context, request, response);
 
@@ -103,7 +103,7 @@ describe('uninstall token handlers', () => {
     });
 
     it('should return internal error when uninstallTokenService throws error', async () => {
-      getAllTokensMock.mockRejectedValue(Error('something happened'));
+      getTokenMetadataMock.mockRejectedValue(Error('something happened'));
 
       await getUninstallTokensMetadataHandler(context, request, response);
 

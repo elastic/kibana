@@ -68,27 +68,15 @@ export interface UninstallTokenServiceInterface {
   getTokenHistoryForPolicy(policyId: string): Promise<GetUninstallTokensByPolicyIdResponse>;
 
   /**
-   * Search for uninstall token metadata using partial policyID, paginated
+   * Get uninstall token metadata, optionally filtering by partial policyID, paginated
    *
-   * @param searchString a string for partial matching the policyId
+   * @param policyIdFilter a string for partial matching the policyId
    * @param page
    * @param perPage
    * @returns Uninstall Tokens Metadata Response
    */
-  searchTokenMetadata(
-    searchString: string,
-    page?: number,
-    perPage?: number
-  ): Promise<GetUninstallTokensMetadataResponse>;
-
-  /**
-   * Get uninstall token metadata for all policies, optionally paginated, returns all by default
-   *
-   * @param page
-   * @param perPage
-   * @returns Uninstall Tokens Metadata Response
-   */
-  getTokenMetadataForAllPolicies(
+  getTokenMetadata(
+    policyIdFilter?: string,
     page?: number,
     perPage?: number
   ): Promise<GetUninstallTokensMetadataResponse>;
@@ -194,35 +182,14 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     };
   }
 
-  public async searchTokenMetadata(
-    searchString: string,
-    page: number = 1,
-    perPage: number = 20
-  ): Promise<GetUninstallTokensMetadataResponse> {
-    return await this.getTokenMetadataByIncludeFilter({
-      include: `.*${searchString}.*`,
-      page,
-      perPage,
-    });
-  }
-
-  public async getTokenMetadataForAllPolicies(
-    page?: number,
-    perPage?: number
-  ): Promise<GetUninstallTokensMetadataResponse> {
-    return this.getTokenMetadataByIncludeFilter({ perPage, page });
-  }
-
-  private async getTokenMetadataByIncludeFilter({
+  public async getTokenMetadata(
+    policyIdFilter?: string,
     page = 1,
-    perPage = SO_SEARCH_LIMIT,
-    include,
-  }: {
-    include?: AggregationsTermsInclude;
-    perPage?: number;
-    page?: number;
-  }): Promise<GetUninstallTokensMetadataResponse> {
-    const tokenObjects = await this.getTokenObjectsByIncludeFilter(include);
+    perPage = 20
+  ): Promise<GetUninstallTokensMetadataResponse> {
+    const includeFilter = policyIdFilter ? `.*${policyIdFilter}.*` : undefined;
+
+    const tokenObjects = await this.getTokenObjectsByIncludeFilter(includeFilter);
 
     const items: UninstallTokenMetadata[] = tokenObjects
       .slice((page - 1) * perPage, page * perPage)
