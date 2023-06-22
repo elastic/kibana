@@ -25,7 +25,7 @@ const findTableParentElement = (element: HTMLElement | null): HTMLElement | null
   let currentElement = element;
 
   while (currentElement && currentElement.className !== APP_WRAPPER_CLASS) {
-    currentElement = currentElement.parentElement as HTMLElement;
+    currentElement = currentElement.parentElement;
   }
   return currentElement;
 };
