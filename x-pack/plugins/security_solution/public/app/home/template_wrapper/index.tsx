@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import classnames from 'classnames';
 import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -71,6 +72,17 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     const showEmptyState = useShowPagesWithEmptyView() || rest.isEmptyState;
 
     const [flyoutRef, handleFlyoutChangedOrClosed] = useSyncFlyoutStateWithUrl();
+    const propsWithClassname = useMemo(() => {
+      const id = rest.mainProps?.id ?? null;
+      return {
+        ...rest,
+        className: classnames(rest.className, 'securitySolutionTemplateWrapper'),
+        mainProps: {
+          ...rest.mainProps,
+          id: id ? `${id} securitySolutionWrapperInner` : `securitySolutionWrapperInner`,
+        },
+      };
+    }, [rest]);
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -89,7 +101,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           paddingSize="none"
           solutionNav={solutionNavProps}
           restrictWidth={showEmptyState ? NO_DATA_PAGE_MAX_WIDTH : false}
-          {...rest}
+          {...propsWithClassname}
         >
           <GlobalKQLHeader />
           <KibanaPageTemplate.Section
