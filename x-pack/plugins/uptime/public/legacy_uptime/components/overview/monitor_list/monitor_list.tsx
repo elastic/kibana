@@ -207,7 +207,7 @@ export const MonitorListComponent: ({
               return (
                 <EuiButtonIcon
                   aria-label={labels.getExpandDrawerLabel(id)}
-                  data-test-subj={`xpack.uptime.monitorList.${id}.expandMonitorDetail`}
+                  data-test-subj={`xpack.synthetics.monitorList.${id}.expandMonitorDetail`}
                   iconType={expandedDrawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
                   onClick={() => toggleDrawer(id)}
                 />
