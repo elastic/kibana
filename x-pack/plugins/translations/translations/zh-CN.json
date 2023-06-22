@@ -18220,7 +18220,7 @@
     "xpack.infra.linkTo.hostWithIp.loading": "正在加载 IP 地址为“{hostIp}”的主机。",
     "xpack.infra.logFlyout.flyoutSubTitle": "从索引 {indexName}",
     "xpack.infra.logFlyout.flyoutTitle": "日志条目 {logEntryId} 的详细信息",
-    "xpack.infra.logs.alertDetails.chart.chartTitle": "{field} {comparator} {value} 的日志",
+    "xpack.infra.logs.alertDetails.chart.chartTitle": "{criteria} 的日志",
     "xpack.infra.logs.alertFlyout.groupByOptimizationWarning": "设置“分组依据”时，强烈建议将“{comparator}”比较符用于阈值。这会使性能有较大提升。",
     "xpack.infra.logs.alerting.threshold.groupedCountAlertReasonDescription": "对于 {groupName}，过去 {duration}中有 {actualCount, plural, other {{actualCount} 个日志条目}}。{comparator} {expectedCount} 时告警。",
     "xpack.infra.logs.alerting.threshold.groupedRatioAlertReasonDescription": "对于 {groupName}，过去 {duration}选定日志的比率为 {actualRatio}。{comparator} {expectedRatio} 时告警。",
