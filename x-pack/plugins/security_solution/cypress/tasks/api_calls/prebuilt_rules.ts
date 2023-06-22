@@ -18,6 +18,13 @@ export const getPrebuiltRulesStatus = () => {
   });
 };
 
+export const SAMPLE_PREBUILT_RULE = createRuleAssetSavedObject({
+  ...getPrebuiltRuleWithExceptionsMock(),
+  rule_id: ELASTIC_SECURITY_RULE_ID,
+  tags: ['test-tag-1'],
+  enabled: true,
+});
+
 export const installAllPrebuiltRulesRequest = () => {
   return cy.request({
     method: 'POST',
@@ -117,5 +124,5 @@ export const installAvailableRules = () => {
 /* Used primarily to prevent the unwanted installation of "real" prebuilt rules
 /* during e2e tests, and allow for manual installation of mock rules instead. */
 export const preventPrebuiltRulesPackageInstallation = () => {
-  cy.intercept('POST', '/api/fleet/epm/packages/_bulk*', {}).as('getPrebuiltRules');
+  cy.intercept('POST', '/api/fleet/epm/packages/_bulk*', {});
 };
