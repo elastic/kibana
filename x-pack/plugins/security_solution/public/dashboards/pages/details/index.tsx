@@ -67,7 +67,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
     [canReadDashboard]
   );
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
-  const { actions: dashboardActions, viewMode } = useDashboardActions({
+  const { viewMode } = useDashboardActions({
     dashboardContainer,
     initialViewMode,
   });
@@ -132,7 +132,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
                     if (props.destination === 'listing') {
                       navigateTo({ url: dashboardListingUrl });
                     }
-                    if (props.destination === 'dashboard') {
+                    if (props.destination === 'dashboard' && props.id) {
                       navigateTo({ url: getEditDashboardUrl(props.id) });
                     }
                   }}
@@ -145,11 +145,11 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
                     showBorderBottom: false,
                     showFullScreenButton: false,
                     showBackgroundColor: false,
+                    editingToolBarCss: css`
+                      padding: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
+                    `,
+                    topNavMenuAlignRight: true,
                   }}
-                  editingToolBarCss={css`
-                    padding: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
-                  `}
-                  topNavMenuAlignRight={true}
                 />
               )}
             </HeaderPage>

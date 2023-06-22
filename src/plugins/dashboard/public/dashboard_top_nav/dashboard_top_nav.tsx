@@ -19,6 +19,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { EuiHorizontalRule, EuiToolTipProps } from '@elastic/eui';
 import { SerializedStyles } from '@emotion/react';
+import classNames from 'classnames';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -34,13 +35,10 @@ import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_edit
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
-import classNames from 'classnames';
 
 export interface InternalDashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
-  editingToolBarCss?: SerializedStyles;
-  topNavMenuAlignRight?: boolean;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
@@ -48,8 +46,6 @@ const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 export function InternalDashboardTopNav({
   embedSettings,
   redirectTo,
-  editingToolBarCss,
-  topNavMenuAlignRight,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
@@ -204,6 +200,8 @@ export function InternalDashboardTopNav({
       showBorderBottom: embedSettings?.showBorderBottom ?? true,
       showBackgroundColor: embedSettings?.showBackgroundColor ?? true,
       showFullScreenButton: embedSettings?.showFullScreenButton ?? true,
+      editingToolBarCss: embedSettings?.editingToolBarCss ?? ({} as SerializedStyles),
+      topNavMenuAlignRight: embedSettings?.topNavMenuAlignRight ?? false,
     };
   }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
 
@@ -222,7 +220,7 @@ export function InternalDashboardTopNav({
     <div
       className={classNames('dashboardTopNav', {
         'dashboardTopNav-noBackgroundColor': !visibilityProps.showBackgroundColor,
-        'dashboardTopNav-right': topNavMenuAlignRight,
+        'dashboardTopNav-right': visibilityProps.topNavMenuAlignRight,
       })}
     >
       <h1
@@ -241,7 +239,7 @@ export function InternalDashboardTopNav({
         showSaveQuery={showSaveQuery}
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}
-        alignRight={topNavMenuAlignRight}
+        alignRight={visibilityProps.topNavMenuAlignRight}
         setMenuMountPoint={embedSettings || fullScreenMode ? undefined : setHeaderActionMenu}
         className={classNames({
           'kbnTopNavMenu-isFullScreen': fullScreenMode,
@@ -284,7 +282,7 @@ export function InternalDashboardTopNav({
         </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? (
-        <DashboardEditingToolbar wrapperCss={editingToolBarCss} />
+        <DashboardEditingToolbar wrapperCss={visibilityProps.editingToolBarCss} />
       ) : null}
       {visibilityProps.showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>

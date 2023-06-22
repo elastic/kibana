@@ -33,6 +33,7 @@ type Badge = EuiBadgeProps & {
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> =
   StatefulSearchBarProps<QT> &
     Omit<SearchBarProps<QT>, 'kibana' | 'intl' | 'timeHistory'> & {
+      alignRight?: boolean;
       config?: TopNavMenuData[];
       badges?: Badge[];
       showSearchBar?: boolean;

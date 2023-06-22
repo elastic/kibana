@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SerializedStyles } from '@emotion/react';
 import { AppMountParameters, ScopedHistory } from '@kbn/core-application-browser';
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
@@ -18,6 +19,11 @@ export interface DashboardEmbedSettings {
   forceShowTopNavMenu?: boolean;
   forceShowQueryInput?: boolean;
   forceShowDatePicker?: boolean;
+  showBorderBottom?: boolean;
+  showBackgroundColor?: boolean;
+  showFullScreenButton?: boolean;
+  editingToolBarCss?: SerializedStyles;
+  topNavMenuAlignRight?: boolean;
 }
 
 export interface DashboardMountContextProps {
