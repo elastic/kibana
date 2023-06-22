@@ -35,7 +35,6 @@
     ],
     "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "spaces", "telemetry"],
     "requiredBundles": [
-      "synthetics",
       "unifiedSearch",
       "fleet",
       "kibanaReact",
