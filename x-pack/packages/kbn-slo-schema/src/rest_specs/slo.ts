@@ -22,6 +22,9 @@ import {
   summarySchema,
   tagsSchema,
   timeWindowSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  apmTransactionDurationIndicatorSchema,
+  durationType,
   timeWindowTypeSchema,
 } from '../schema';
 
@@ -141,6 +144,28 @@ const getSLODiagnosisParamsSchema = t.type({
   path: t.type({ id: t.string }),
 });
 
+const getSLOBurnRatesResponseSchema = t.type({
+  burnRates: t.array(
+    t.type({
+      name: t.string,
+      burnRate: t.number,
+      sli: t.number,
+    })
+  ),
+});
+
+const getSLOBurnRatesParamsSchema = t.type({
+  path: t.type({ id: t.string }),
+  body: t.type({
+    windows: t.array(
+      t.type({
+        name: t.string,
+        duration: durationType,
+      })
+    ),
+  }),
+});
+
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -166,6 +191,11 @@ type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.TypeOf<typeof getPreviewDataResponseSchema>;
 
+type APMTransactionErrorRateIndicatorSchema = t.TypeOf<
+  typeof apmTransactionErrorRateIndicatorSchema
+>;
+type APMTransactionDurationIndicatorSchema = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
+type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
 type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
 type TimeWindow = t.TypeOf<typeof timeWindowTypeSchema>;
 
@@ -190,6 +220,8 @@ export {
   sloWithSummaryResponseSchema,
   updateSLOParamsSchema,
   updateSLOResponseSchema,
+  getSLOBurnRatesParamsSchema,
+  getSLOBurnRatesResponseSchema,
 };
 export type {
   BudgetingMethod,
@@ -210,6 +242,9 @@ export type {
   UpdateSLOInput,
   UpdateSLOParams,
   UpdateSLOResponse,
+  APMTransactionDurationIndicatorSchema,
+  APMTransactionErrorRateIndicatorSchema,
+  GetSLOBurnRatesResponse,
   Indicator,
   MetricCustomIndicator,
   KQLCustomIndicator,

@@ -137,7 +137,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint.name', {
       defaultMessage: 'Sharepoint Server',
     }),
-    serviceType: 'sharepoint',
+    serviceType: 'sharepoint_server',
   },
   {
     iconPath: 'sharepoint_online.svg',

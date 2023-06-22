@@ -17,7 +17,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AlertingPluginStart } from '../plugin';
-import { paths } from '../config';
+import { MAINTENANCE_WINDOW_PATHS } from '../../common';
 import { useLicense } from '../hooks/use_license';
 
 const MaintenanceWindowsLazy: React.FC = React.lazy(() => import('../pages/maintenance_windows'));
@@ -36,8 +36,8 @@ const App = React.memo(() => {
     <Switch>
       {hasLicense ? (
         <Route
-          key={paths.alerting.maintenanceWindowsCreate}
-          path={paths.alerting.maintenanceWindowsCreate}
+          key={MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsCreate}
+          path={MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsCreate}
           exact
         >
           <Suspense fallback={<EuiLoadingSpinner />}>
@@ -47,8 +47,8 @@ const App = React.memo(() => {
       ) : null}
       {hasLicense ? (
         <Route
-          key={paths.alerting.maintenanceWindowsEdit}
-          path={paths.alerting.maintenanceWindowsEdit}
+          key={MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsEdit}
+          path={MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsEdit}
           exact
         >
           <Suspense fallback={<EuiLoadingSpinner />}>
