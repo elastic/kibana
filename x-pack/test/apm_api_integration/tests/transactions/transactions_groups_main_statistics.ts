@@ -50,7 +50,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  // FAILING FORWARD ES COMPATIBILITY: https://github.com/elastic/kibana/issues/160281
+  registry.when.skip(
     'Transaction groups main statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
