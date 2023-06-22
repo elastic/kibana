@@ -176,15 +176,20 @@ const createMultipassVm = async ({
 }: CreateMultipassVmOptions): Promise<CreateMultipassVmResponse> => {
   if (process.env.CI) {
     console.log('VAGRANT_CWD', VAGRANT_CWD, __dirname);
-    await execa.command(`vagrant up`, {
-      env: {
-        VAGRANT_CWD,
-        VMNAME: vmName,
-        CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
-        CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
-      },
-      stdio: ['inherit', 'inherit', 'inherit'],
-    });
+    try {
+      await execa.command(`vagrant up`, {
+        env: {
+          VAGRANT_CWD,
+          VMNAME: vmName,
+          CACHED_AGENT_SOURCE: cachedAgentDownload.fullFilePath,
+          CACHED_AGENT_FILENAME: cachedAgentDownload.filename,
+        },
+        stdio: ['inherit', 'inherit', 'inherit'],
+      });
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
   } else {
     await execa.command(
       `multipass launch --name ${vmName} --disk ${disk} --cpus ${cpus} --memory ${memory}`
