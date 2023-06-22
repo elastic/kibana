@@ -48,7 +48,12 @@ describe('createFilterOutCellActionFactory', () => {
   });
 
   const context = {
-    field: { name: 'user.name', value: 'the value', type: 'text' },
+    data: [
+      {
+        field: { name: 'user.name', type: 'text' },
+        value: 'the value',
+      },
+    ],
   } as SecurityCellActionExecutionContext;
 
   it('should return display name', () => {
@@ -67,7 +72,11 @@ describe('createFilterOutCellActionFactory', () => {
       expect(
         await filterOutAction.isCompatible({
           ...context,
-          field: { ...context.field, name: 'signal.reason' },
+          data: [
+            {
+              field: { ...context.data[0].field, name: 'signal.reason' },
+            },
+          ],
         })
       ).toEqual(false);
     });
