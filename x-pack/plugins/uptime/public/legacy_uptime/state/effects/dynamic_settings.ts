@@ -32,7 +32,7 @@ export function* fetchDynamicSettingsEffect() {
 }
 
 export function* setDynamicSettingsEffect() {
-  const couldNotSaveSettingsText = i18n.translate('xpack.synthetics.settings.error.couldNotSave', {
+  const couldNotSaveSettingsText = i18n.translate('xpack.uptime.settings.error.couldNotSave', {
     defaultMessage: 'Could not save settings!',
   });
   yield takeLatest(String(setDynamicSettings), function* (action: Action<DynamicSettings>) {
@@ -49,7 +49,7 @@ export function* setDynamicSettingsEffect() {
       yield call(setDynamicSettingsAPI, { settings: action.payload });
       yield put(setDynamicSettingsSuccess(action.payload));
       kibanaService.core.notifications.toasts.addSuccess(
-        i18n.translate('xpack.synthetics.settings.saveSuccess', {
+        i18n.translate('xpack.uptime.settings.saveSuccess', {
           defaultMessage: 'Settings saved!',
         })
       );

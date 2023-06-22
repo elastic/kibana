@@ -36,7 +36,7 @@ export const fullSizeImageAlt = i18n.translate(
 );
 
 export const formatCaptionContent = (stepNumber: number, totalSteps?: number) =>
-  i18n.translate('xpack.synthetics.synthetics.pingTimestamp.captionContent', {
+  i18n.translate('xpack.uptime.synthetics.pingTimestamp.captionContent', {
     defaultMessage: 'Step: {stepNumber} of {totalSteps}',
     values: {
       stepNumber,

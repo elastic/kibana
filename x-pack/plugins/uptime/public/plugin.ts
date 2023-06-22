@@ -246,7 +246,7 @@ function registerUptimeRoutesWithNavigation(coreStart: CoreStart, plugins: Clien
           sortKey: 500,
           entries: [
             {
-              label: i18n.translate('xpack.synthetics.overview.uptimeHeading', {
+              label: i18n.translate('xpack.uptime.overview.uptimeHeading', {
                 defaultMessage: 'Uptime Monitors',
               }),
               app: 'uptime',
@@ -255,7 +255,7 @@ function registerUptimeRoutesWithNavigation(coreStart: CoreStart, plugins: Clien
               ignoreTrailingSlash: true,
             },
             {
-              label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
+              label: i18n.translate('xpack.uptime.certificatesPage.heading', {
                 defaultMessage: 'TLS Certificates',
               }),
               app: 'uptime',

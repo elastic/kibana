@@ -14,11 +14,11 @@ export const healthStatusMessageAriaLabel = i18n.translate(
   }
 );
 
-export const typeLabel = i18n.translate('xpack.synthetics.monitorStatusBar.type.label', {
+export const typeLabel = i18n.translate('xpack.uptime.monitorStatusBar.type.label', {
   defaultMessage: 'Type',
 });
 
-export const typeAriaLabel = i18n.translate('xpack.synthetics.monitorStatusBar.type.ariaLabel', {
+export const typeAriaLabel = i18n.translate('xpack.uptime.monitorStatusBar.type.ariaLabel', {
   defaultMessage: 'Monitor type',
 });
 
@@ -43,11 +43,11 @@ export const timestampFromNowTextAriaLabel = i18n.translate(
   }
 );
 
-export const loadingMessage = i18n.translate('xpack.synthetics.monitorStatusBar.loadingMessage', {
+export const loadingMessage = i18n.translate('xpack.uptime.monitorStatusBar.loadingMessage', {
   defaultMessage: 'Loading…',
 });
 
-export const MonitorIDLabel = i18n.translate('xpack.synthetics.monitorStatusBar.monitor.id', {
+export const MonitorIDLabel = i18n.translate('xpack.uptime.monitorStatusBar.monitor.id', {
   defaultMessage: 'Monitor ID',
 });
 

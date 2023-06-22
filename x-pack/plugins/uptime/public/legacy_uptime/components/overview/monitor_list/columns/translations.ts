@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ENABLE_STATUS_ALERT = i18n.translate('xpack.synthetics.monitorList.enableDownAlert', {
+export const ENABLE_STATUS_ALERT = i18n.translate('xpack.uptime.monitorList.enableDownAlert', {
   defaultMessage: 'Enable status alerts',
 });
 
@@ -18,7 +18,7 @@ export const DISABLE_STATUS_ALERT = i18n.translate(
   }
 );
 
-export const EXPAND_TAGS_LABEL = i18n.translate('xpack.synthetics.monitorList.tags.expand', {
+export const EXPAND_TAGS_LABEL = i18n.translate('xpack.uptime.monitorList.tags.expand', {
   defaultMessage: 'Click to view remaining tags',
 });
 

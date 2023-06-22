@@ -119,7 +119,7 @@ const getInvalidEmailError = (value?: string[]) => {
     return;
   }
 
-  return i18n.translate('xpack.synthetics.sourceConfiguration.alertDefaultForm.invalidEmail', {
+  return i18n.translate('xpack.uptime.sourceConfiguration.alertDefaultForm.invalidEmail', {
     defaultMessage: '{val} is not a valid email.',
     values: { val: inValidEmail },
   });

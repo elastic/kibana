@@ -41,7 +41,7 @@ export const umDynamicSettings: SavedObjectsType = {
     importableAndExportable: true,
     icon: 'uptimeApp',
     getTitle: () =>
-      i18n.translate('xpack.synthetics.uptimeSettings.index', {
+      i18n.translate('xpack.uptime.uptimeSettings.index', {
         defaultMessage: 'Uptime Settings - Index',
       }),
   },

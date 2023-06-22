@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const KQL_PLACE_HOLDER = i18n.translate('xpack.synthetics.kueryBar.searchPlaceholder.kql', {
+export const KQL_PLACE_HOLDER = i18n.translate('xpack.uptime.kueryBar.searchPlaceholder.kql', {
   defaultMessage:
     'Search using kql syntax for monitor IDs, names and type etc (E.g monitor.type: "http" AND tags: "dev")',
 });

@@ -14,14 +14,14 @@ export type MonitorStatusActionGroup =
 
 export const MONITOR_STATUS: MonitorStatusActionGroup = {
   id: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
-  name: i18n.translate('xpack.synthetics.alertRules.actionGroups.monitorStatus', {
+  name: i18n.translate('xpack.uptime.alertRules.actionGroups.monitorStatus', {
     defaultMessage: 'Synthetics monitor status',
   }),
 };
 
 export const TLS_CERTIFICATE: MonitorStatusActionGroup = {
   id: 'xpack.synthetics.alerts.actionGroups.tls',
-  name: i18n.translate('xpack.synthetics.alertRules.actionGroups.tls', {
+  name: i18n.translate('xpack.uptime.alertRules.actionGroups.tls', {
     defaultMessage: 'Synthetics TLS certificate',
   }),
 };

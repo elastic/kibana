@@ -42,7 +42,7 @@ export const HOURS_TIME_RANGE = i18n.translate(
   }
 );
 
-export const HOURS = i18n.translate('xpack.synthetics.alerts.monitorStatus.timerangeOption.hours', {
+export const HOURS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.hours', {
   defaultMessage: 'hours',
 });
 
@@ -53,7 +53,7 @@ export const DAYS_TIME_RANGE = i18n.translate(
   }
 );
 
-export const DAYS = i18n.translate('xpack.synthetics.alerts.monitorStatus.timerangeOption.days', {
+export const DAYS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.days', {
   defaultMessage: 'days',
 });
 
@@ -64,7 +64,7 @@ export const WEEKS_TIME_RANGE = i18n.translate(
   }
 );
 
-export const WEEKS = i18n.translate('xpack.synthetics.alerts.monitorStatus.timerangeOption.weeks', {
+export const WEEKS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.weeks', {
   defaultMessage: 'weeks',
 });
 
@@ -89,7 +89,7 @@ export const YEARS_TIME_RANGE = i18n.translate(
   }
 );
 
-export const YEARS = i18n.translate('xpack.synthetics.alerts.monitorStatus.timerangeOption.years', {
+export const YEARS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.years', {
   defaultMessage: 'years',
 });
 
@@ -150,7 +150,7 @@ export const ENTER_NUMBER_OF_TIME_UNITS_DESCRIPTION = i18n.translate(
 );
 
 export const ENTER_NUMBER_OF_TIME_UNITS_VALUE = (value: number) =>
-  i18n.translate('xpack.synthetics.alerts.monitorStatus.timerangeValueField.value', {
+  i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeValueField.value', {
     defaultMessage: 'last {value}',
     values: { value },
   });
@@ -216,7 +216,7 @@ export const ENTER_ANY_AVAILABILITY_THRESHOLD_DESCRIPTION = i18n.translate(
 );
 
 export const ENTER_AVAILABILITY_THRESHOLD_VALUE = (value: string) =>
-  i18n.translate('xpack.synthetics.alerts.monitorStatus.availability.threshold.value', {
+  i18n.translate('xpack.uptime.alerts.monitorStatus.availability.threshold.value', {
     defaultMessage: '< {value}% of checks',
     description:
       'This fragment specifies criteria that will cause an alert to fire for uptime monitors',
@@ -237,28 +237,28 @@ export const ENTER_AVAILABILITY_RANGE_SELECT_HEADLINE = i18n.translate(
   }
 );
 
-export const ADD_FILTER = i18n.translate('xpack.synthetics.alerts.monitorStatus.addFilter', {
+export const ADD_FILTER = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter', {
   defaultMessage: `Add filter`,
 });
 
-export const LOCATION = i18n.translate('xpack.synthetics.alerts.monitorStatus.addFilter.location', {
+export const LOCATION = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.location', {
   defaultMessage: `Location`,
 });
 
-export const TAG = i18n.translate('xpack.synthetics.alerts.monitorStatus.addFilter.tag', {
+export const TAG = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.tag', {
   defaultMessage: `Tag`,
 });
 
-export const PORT = i18n.translate('xpack.synthetics.alerts.monitorStatus.addFilter.port', {
+export const PORT = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.port', {
   defaultMessage: `Port`,
 });
 
-export const TYPE = i18n.translate('xpack.synthetics.alerts.monitorStatus.addFilter.type', {
+export const TYPE = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.type', {
   defaultMessage: `Type`,
 });
 
 export const TlsTranslations = {
-  criteriaAriaLabel: i18n.translate('xpack.synthetics.alerts.tls.criteriaExpression.ariaLabel', {
+  criteriaAriaLabel: i18n.translate('xpack.uptime.alerts.tls.criteriaExpression.ariaLabel', {
     defaultMessage:
       'An expression displaying the criteria for monitor that are watched by this alert',
   }),
@@ -270,19 +270,19 @@ export const TlsTranslations = {
         'The context of this `when` is in the conditional sense, like "when there are three cookies, eat them all".',
     }
   ),
-  criteriaValue: i18n.translate('xpack.synthetics.tls.criteriaExpression.value', {
+  criteriaValue: i18n.translate('xpack.uptime.tls.criteriaExpression.value', {
     defaultMessage: 'matching monitor',
   }),
-  expirationDescription: i18n.translate('xpack.synthetics.tls.expirationExpression.description', {
+  expirationDescription: i18n.translate('xpack.uptime.tls.expirationExpression.description', {
     defaultMessage: 'has a certificate expiring within days: ',
   }),
-  ageDescription: i18n.translate('xpack.synthetics.tls.ageExpression.description', {
+  ageDescription: i18n.translate('xpack.uptime.tls.ageExpression.description', {
     defaultMessage: 'or older than days: ',
   }),
 };
 
 export const ToggleFlyoutTranslations = {
-  toggleButtonAriaLabel: i18n.translate('xpack.synthetics.alertsPopover.toggleButton.ariaLabel', {
+  toggleButtonAriaLabel: i18n.translate('xpack.uptime.alertsPopover.toggleButton.ariaLabel', {
     defaultMessage: 'Open alerts and rules context menu',
   }),
   openAlertContextPanelAriaLabel: i18n.translate(
@@ -291,22 +291,22 @@ export const ToggleFlyoutTranslations = {
       defaultMessage: 'Open the rule context panel so you can choose a rule type',
     }
   ),
-  openAlertContextPanelLabel: i18n.translate('xpack.synthetics.openAlertContextPanel.label', {
+  openAlertContextPanelLabel: i18n.translate('xpack.uptime.openAlertContextPanel.label', {
     defaultMessage: 'Create rule',
   }),
-  toggleTlsAriaLabel: i18n.translate('xpack.synthetics.toggleTlsAlertButton.ariaLabel', {
+  toggleTlsAriaLabel: i18n.translate('xpack.uptime.toggleTlsAlertButton.ariaLabel', {
     defaultMessage: 'Open TLS rule flyout',
   }),
-  toggleTlsContent: i18n.translate('xpack.synthetics.toggleTlsAlertButton.content', {
+  toggleTlsContent: i18n.translate('xpack.uptime.toggleTlsAlertButton.content', {
     defaultMessage: 'TLS rule',
   }),
-  toggleMonitorStatusAriaLabel: i18n.translate('xpack.synthetics.toggleAlertFlyout.ariaLabel', {
+  toggleMonitorStatusAriaLabel: i18n.translate('xpack.uptime.toggleAlertFlyout.ariaLabel', {
     defaultMessage: 'Open add rule flyout',
   }),
-  toggleMonitorStatusContent: i18n.translate('xpack.synthetics.toggleAlertButton.content', {
+  toggleMonitorStatusContent: i18n.translate('xpack.uptime.toggleAlertButton.content', {
     defaultMessage: 'Monitor status rule',
   }),
-  navigateToAlertingUIAriaLabel: i18n.translate('xpack.synthetics.navigateToAlertingUi', {
+  navigateToAlertingUIAriaLabel: i18n.translate('xpack.uptime.navigateToAlertingUi', {
     defaultMessage: 'Leave Uptime and go to Alerting Management page',
   }),
   navigateToAlertingButtonContent: i18n.translate(
@@ -315,7 +315,7 @@ export const ToggleFlyoutTranslations = {
       defaultMessage: 'Manage rules',
     }
   ),
-  toggleAlertFlyoutButtonLabel: i18n.translate('xpack.synthetics.alerts.createRulesPanel.title', {
+  toggleAlertFlyoutButtonLabel: i18n.translate('xpack.uptime.alerts.createRulesPanel.title', {
     defaultMessage: 'Create rules',
   }),
 };

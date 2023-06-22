@@ -51,13 +51,13 @@ export const makeBaseBreadcrumb = (
 
   return [
     {
-      text: i18n.translate('xpack.synthetics.breadcrumbs.observabilityText', {
+      text: i18n.translate('xpack.uptime.breadcrumbs.observabilityText', {
         defaultMessage: 'Observability',
       }),
       href: observabilityPath,
     },
     {
-      text: i18n.translate('xpack.synthetics.breadcrumbs.legacyOverviewBreadcrumbText', {
+      text: i18n.translate('xpack.uptime.breadcrumbs.legacyOverviewBreadcrumbText', {
         defaultMessage: 'Uptime',
       }),
       href: uptimePath,

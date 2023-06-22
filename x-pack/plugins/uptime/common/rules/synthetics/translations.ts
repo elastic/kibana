@@ -65,16 +65,16 @@ export const SyntheticsMonitorStatusTranslations = {
       },
     }
   ),
-  name: i18n.translate('xpack.synthetics.alerts.syntheticsMonitorStatus.clientName', {
+  name: i18n.translate('xpack.uptime.alerts.syntheticsMonitorStatus.clientName', {
     defaultMessage: 'Monitor status',
   }),
-  description: i18n.translate('xpack.synthetics.alerts.syntheticsMonitorStatus.description', {
+  description: i18n.translate('xpack.uptime.alerts.syntheticsMonitorStatus.description', {
     defaultMessage: 'Alert when a monitor is down.',
   }),
 };
 
 export const TlsTranslations = {
-  defaultActionMessage: i18n.translate('xpack.synthetics.rules.tls.defaultActionMessage', {
+  defaultActionMessage: i18n.translate('xpack.uptime.rules.tls.defaultActionMessage', {
     defaultMessage: `Detected TLS certificate {commonName} is {status} - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- Common name: {commonName}\n- Issuer: {issuer}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
     values: {
       commonName: '{{context.commonName}}',
@@ -87,7 +87,7 @@ export const TlsTranslations = {
       locationName: '{{context.locationName}}',
     },
   }),
-  defaultRecoveryMessage: i18n.translate('xpack.synthetics.rules.tls.defaultRecoveryMessage', {
+  defaultRecoveryMessage: i18n.translate('xpack.uptime.rules.tls.defaultRecoveryMessage', {
     defaultMessage: `Alert for TLS certificate {commonName} from issuer {issuer} has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- Common name: {commonName}\n- Issuer: {issuer}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
     values: {
       commonName: '{{context.commonName}}',
@@ -99,10 +99,10 @@ export const TlsTranslations = {
       locationName: '{{context.locationName}}',
     },
   }),
-  name: i18n.translate('xpack.synthetics.rules.tls.clientName', {
+  name: i18n.translate('xpack.uptime.rules.tls.clientName', {
     defaultMessage: 'Synthetics TLS',
   }),
-  description: i18n.translate('xpack.synthetics.rules.tls.description', {
+  description: i18n.translate('xpack.uptime.rules.tls.description', {
     defaultMessage: 'Alert when the TLS certificate of a Synthetics monitor is about to expire.',
   }),
   defaultSubjectMessage: i18n.translate(

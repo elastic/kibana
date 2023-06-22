@@ -14,10 +14,10 @@ export const AnomalyTranslations = {
       defaultMessage: 'An expression displaying the criteria for a selected monitor.',
     }
   ),
-  whenMonitor: i18n.translate('xpack.synthetics.alerts.anomaly.criteriaExpression.description', {
+  whenMonitor: i18n.translate('xpack.uptime.alerts.anomaly.criteriaExpression.description', {
     defaultMessage: 'When monitor',
   }),
-  scoreAriaLabel: i18n.translate('xpack.synthetics.alerts.anomaly.scoreExpression.ariaLabel', {
+  scoreAriaLabel: i18n.translate('xpack.uptime.alerts.anomaly.scoreExpression.ariaLabel', {
     defaultMessage: 'An expression displaying the criteria for an anomaly alert threshold.',
   }),
   hasAnomalyWithSeverity: i18n.translate(

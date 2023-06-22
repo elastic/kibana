@@ -54,16 +54,16 @@ export const MonitorStatusTranslations = {
       },
     }
   ),
-  name: i18n.translate('xpack.synthetics.alerts.monitorStatus.clientName', {
+  name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
     defaultMessage: 'Uptime monitor status',
   }),
-  description: i18n.translate('xpack.synthetics.alerts.monitorStatus.description', {
+  description: i18n.translate('xpack.uptime.alerts.monitorStatus.description', {
     defaultMessage: 'Alert when a monitor is down or an availability threshold is breached.',
   }),
 };
 
 export const TlsTranslations = {
-  defaultActionMessage: i18n.translate('xpack.synthetics.alerts.tls.defaultActionMessage', {
+  defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.defaultActionMessage', {
     defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is {status}. Certificate {summary}`,
     values: {
       commonName: '{{context.commonName}}',
@@ -72,23 +72,23 @@ export const TlsTranslations = {
       status: '{{context.status}}',
     },
   }),
-  defaultRecoveryMessage: i18n.translate('xpack.synthetics.alerts.tls.defaultRecoveryMessage', {
+  defaultRecoveryMessage: i18n.translate('xpack.uptime.alerts.tls.defaultRecoveryMessage', {
     defaultMessage: `Alert for TLS certificate {commonName} from issuer {issuer} has recovered`,
     values: {
       commonName: '{{context.commonName}}',
       issuer: '{{context.issuer}}',
     },
   }),
-  name: i18n.translate('xpack.synthetics.alerts.tls.clientName', {
+  name: i18n.translate('xpack.uptime.alerts.tls.clientName', {
     defaultMessage: 'Uptime TLS',
   }),
-  description: i18n.translate('xpack.synthetics.alerts.tls.description', {
+  description: i18n.translate('xpack.uptime.alerts.tls.description', {
     defaultMessage: 'Alert when the TLS certificate of an Uptime monitor is about to expire.',
   }),
 };
 
 export const TlsTranslationsLegacy = {
-  defaultActionMessage: i18n.translate('xpack.synthetics.alerts.tls.legacy.defaultActionMessage', {
+  defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.legacy.defaultActionMessage', {
     defaultMessage: `Detected {count} TLS certificates expiring or becoming too old.
 {expiringConditionalOpen}
 Expiring cert count: {expiringCount}
@@ -111,10 +111,10 @@ Aging Certificates: {agingCommonNameAndDate}
       agingConditionalClose: '{{/state.hasAging}}',
     },
   }),
-  name: i18n.translate('xpack.synthetics.alerts.tls.legacy.clientName', {
+  name: i18n.translate('xpack.uptime.alerts.tls.legacy.clientName', {
     defaultMessage: 'Uptime TLS (Legacy)',
   }),
-  description: i18n.translate('xpack.synthetics.alerts.tls.legacy.description', {
+  description: i18n.translate('xpack.uptime.alerts.tls.legacy.description', {
     defaultMessage:
       'Alert when the TLS certificate of an Uptime monitor is about to expire. This alert will be deprecated in a future version.',
   }),
@@ -151,10 +151,10 @@ Response times as high as {slowestAnomalyResponse} have been detected from locat
       },
     }
   ),
-  name: i18n.translate('xpack.synthetics.alerts.durationAnomaly.clientName', {
+  name: i18n.translate('xpack.uptime.alerts.durationAnomaly.clientName', {
     defaultMessage: 'Uptime Duration Anomaly',
   }),
-  description: i18n.translate('xpack.synthetics.alerts.durationAnomaly.description', {
+  description: i18n.translate('xpack.uptime.alerts.durationAnomaly.description', {
     defaultMessage: 'Alert when the Uptime monitor duration is anomalous.',
   }),
 };

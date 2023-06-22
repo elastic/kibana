@@ -38,7 +38,7 @@ export const FriendlyTimingLabels = {
       defaultMessage: 'Queued / Blocked',
     }
   ),
-  [Timings.Dns]: i18n.translate('xpack.synthetics.synthetics.waterfallChart.labels.timings.dns', {
+  [Timings.Dns]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.dns', {
     defaultMessage: 'DNS',
   }),
   [Timings.Connect]: i18n.translate(
@@ -47,13 +47,13 @@ export const FriendlyTimingLabels = {
       defaultMessage: 'Connecting',
     }
   ),
-  [Timings.Ssl]: i18n.translate('xpack.synthetics.synthetics.waterfallChart.labels.timings.ssl', {
+  [Timings.Ssl]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.ssl', {
     defaultMessage: 'TLS',
   }),
-  [Timings.Send]: i18n.translate('xpack.synthetics.synthetics.waterfallChart.labels.timings.send', {
+  [Timings.Send]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.send', {
     defaultMessage: 'Sending request',
   }),
-  [Timings.Wait]: i18n.translate('xpack.synthetics.synthetics.waterfallChart.labels.timings.wait', {
+  [Timings.Wait]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.wait', {
     defaultMessage: 'Waiting (TTFB)',
   }),
   [Timings.Receive]: i18n.translate(
@@ -119,7 +119,7 @@ export const FriendlyFlyoutLabels = {
       defaultMessage: 'Common name',
     }
   ),
-  [Metadata.IP]: i18n.translate('xpack.synthetics.synthetics.waterfallChart.labels.metadata.ip', {
+  [Metadata.IP]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.metadata.ip', {
     defaultMessage: 'IP',
   }),
 };

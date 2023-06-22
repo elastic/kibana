@@ -189,7 +189,7 @@ export const getReasonMessage = ({
 }) => {
   const checkedAt = moment(timestamp).format('LLL');
 
-  return i18n.translate('xpack.synthetics.alerts.monitorStatus.reasonMessage', {
+  return i18n.translate('xpack.uptime.alerts.monitorStatus.reasonMessage', {
     defaultMessage: `Monitor "{name}" from {location} {status} Checked at {checkedAt}.`,
     values: {
       name,
@@ -280,7 +280,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 ) => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   producer: 'uptime',
-  name: i18n.translate('xpack.synthetics.alerts.monitorStatus', {
+  name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
     defaultMessage: 'Uptime monitor status',
   }),
   validate: {

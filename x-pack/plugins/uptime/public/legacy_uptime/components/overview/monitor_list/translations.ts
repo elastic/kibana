@@ -14,7 +14,7 @@ export const STATUS_COLUMN_LABEL = i18n.translate(
   }
 );
 
-export const NAME_COLUMN_LABEL = i18n.translate('xpack.synthetics.monitorList.nameColumnLabel', {
+export const NAME_COLUMN_LABEL = i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
   defaultMessage: 'Name',
 });
 
@@ -25,12 +25,12 @@ export const HISTORY_COLUMN_LABEL = i18n.translate(
   }
 );
 
-export const TLS_COLUMN_LABEL = i18n.translate('xpack.synthetics.monitorList.tlsColumnLabel', {
+export const TLS_COLUMN_LABEL = i18n.translate('xpack.uptime.monitorList.tlsColumnLabel', {
   defaultMessage: 'TLS Certificate',
 });
 
 export const getExpandDrawerLabel = (id: string) => {
-  return i18n.translate('xpack.synthetics.monitorList.expandDrawerButton.ariaLabel', {
+  return i18n.translate('xpack.uptime.monitorList.expandDrawerButton.ariaLabel', {
     defaultMessage: 'Expand row for monitor with ID {id}',
     description: 'The user can click a button on this table and expand further details.',
     values: {
@@ -40,7 +40,7 @@ export const getExpandDrawerLabel = (id: string) => {
 };
 
 export const getDescriptionLabel = (itemsLength: number) => {
-  return i18n.translate('xpack.synthetics.monitorList.table.description', {
+  return i18n.translate('xpack.uptime.monitorList.table.description', {
     defaultMessage:
       'Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying {length} items.',
     values: { length: itemsLength },
@@ -56,12 +56,12 @@ export const NO_MONITOR_ITEM_SELECTED = i18n.translate(
   }
 );
 
-export const LOADING = i18n.translate('xpack.synthetics.monitorList.loading', {
+export const LOADING = i18n.translate('xpack.uptime.monitorList.loading', {
   defaultMessage: 'Loading...',
   description: 'Shown when the monitor list is waiting for a server response',
 });
 
-export const NO_DATA_MESSAGE = i18n.translate('xpack.synthetics.monitorList.noItemMessage', {
+export const NO_DATA_MESSAGE = i18n.translate('xpack.uptime.monitorList.noItemMessage', {
   defaultMessage: 'No uptime monitors found',
   description: 'This message is shown if the monitors table is rendered but has no items.',
 });

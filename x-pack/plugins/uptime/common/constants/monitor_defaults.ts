@@ -45,7 +45,7 @@ export enum PROFILE_VALUES_ENUM {
   CUSTOM = 'custom',
 }
 
-export const CUSTOM_LABEL = i18n.translate('xpack.synthetics.connectionProfile.custom', {
+export const CUSTOM_LABEL = i18n.translate('xpack.uptime.connectionProfile.custom', {
   defaultMessage: 'Custom',
 });
 
@@ -55,56 +55,56 @@ export const PROFILE_VALUES: ThrottlingConfig[] = [
   {
     value: DEFAULT_THROTTLING_VALUE,
     id: PROFILE_VALUES_ENUM.DEFAULT,
-    label: i18n.translate('xpack.synthetics.connectionProfile.default', {
+    label: i18n.translate('xpack.uptime.connectionProfile.default', {
       defaultMessage: 'Default',
     }),
   },
   {
     value: { download: '5', upload: '1', latency: '28' },
     id: PROFILE_VALUES_ENUM.CABLE,
-    label: i18n.translate('xpack.synthetics.connectionProfile.cable', {
+    label: i18n.translate('xpack.uptime.connectionProfile.cable', {
       defaultMessage: 'Cable',
     }),
   },
   {
     value: { download: '1.5', upload: '0.384', latency: '50' },
     id: PROFILE_VALUES_ENUM.DSL,
-    label: i18n.translate('xpack.synthetics.connectionProfile.dsl', {
+    label: i18n.translate('xpack.uptime.connectionProfile.dsl', {
       defaultMessage: 'DSL',
     }),
   },
   {
     value: { download: '1.6', upload: '0.768', latency: '300' },
     id: PROFILE_VALUES_ENUM.THREE_G,
-    label: i18n.translate('xpack.synthetics.connectionProfile.threeG', {
+    label: i18n.translate('xpack.uptime.connectionProfile.threeG', {
       defaultMessage: '3G',
     }),
   },
   {
     value: { download: '9', upload: '0.75', latency: '170' },
     id: PROFILE_VALUES_ENUM.FOUR_G,
-    label: i18n.translate('xpack.synthetics.connectionProfile.fourG', {
+    label: i18n.translate('xpack.uptime.connectionProfile.fourG', {
       defaultMessage: '4G',
     }),
   },
   {
     value: { download: '12', upload: '0.75', latency: '70' },
     id: PROFILE_VALUES_ENUM.LTE,
-    label: i18n.translate('xpack.synthetics.connectionProfile.lte', {
+    label: i18n.translate('xpack.uptime.connectionProfile.lte', {
       defaultMessage: 'LTE',
     }),
   },
   {
     value: { download: '20', upload: '5', latency: '4' },
     id: PROFILE_VALUES_ENUM.FIBRE,
-    label: i18n.translate('xpack.synthetics.connectionProfile.fibre', {
+    label: i18n.translate('xpack.uptime.connectionProfile.fibre', {
       defaultMessage: 'Fibre',
     }),
   },
   {
     value: null,
     id: PROFILE_VALUES_ENUM.NO_THROTTLING,
-    label: i18n.translate('xpack.synthetics.connectionProfile.noThrottling', {
+    label: i18n.translate('xpack.uptime.connectionProfile.noThrottling', {
       defaultMessage: 'No throttling',
     }),
   },

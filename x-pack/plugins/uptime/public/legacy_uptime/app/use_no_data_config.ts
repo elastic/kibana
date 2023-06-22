@@ -26,15 +26,15 @@ export function useNoDataConfig(): NoDataConfig | undefined {
   // Returns no data config when there is no historical data
   if (data && !data.indexExists) {
     return {
-      solution: i18n.translate('xpack.synthetics.noDataConfig.solutionName', {
+      solution: i18n.translate('xpack.uptime.noDataConfig.solutionName', {
         defaultMessage: 'Observability',
       }),
       action: {
         beats: {
-          title: i18n.translate('xpack.synthetics.noDataConfig.beatsCard.title', {
+          title: i18n.translate('xpack.uptime.noDataConfig.beatsCard.title', {
             defaultMessage: 'Add monitors with Heartbeat',
           }),
-          description: i18n.translate('xpack.synthetics.noDataConfig.beatsCard.description', {
+          description: i18n.translate('xpack.uptime.noDataConfig.beatsCard.description', {
             defaultMessage:
               'Proactively monitor the availability of your sites and services. Receive alerts and resolve issues faster to optimize your users experience.',
           }),

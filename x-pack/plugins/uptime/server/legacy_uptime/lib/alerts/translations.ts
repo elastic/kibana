@@ -161,16 +161,16 @@ export const commonStateTranslations = [
 ];
 
 export const tlsTranslations = {
-  alertFactoryName: i18n.translate('xpack.synthetics.alerts.tls', {
+  alertFactoryName: i18n.translate('xpack.uptime.alerts.tls', {
     defaultMessage: 'Uptime TLS',
   }),
-  legacyAlertFactoryName: i18n.translate('xpack.synthetics.alerts.tlsLegacy', {
+  legacyAlertFactoryName: i18n.translate('xpack.uptime.alerts.tlsLegacy', {
     defaultMessage: 'Uptime TLS (Legacy)',
   }),
   actionVariables: [
     {
       name: 'count',
-      description: i18n.translate('xpack.synthetics.alerts.tls.actionVariables.state.count', {
+      description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.count', {
         defaultMessage: 'The number of certs detected by the alert executor',
       }),
     },
@@ -194,7 +194,7 @@ export const tlsTranslations = {
     },
     {
       name: 'agingCount',
-      description: i18n.translate('xpack.synthetics.alerts.tls.actionVariables.state.agingCount', {
+      description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.agingCount', {
         defaultMessage: 'The number of detected certs that are becoming too old.',
       }),
     },
@@ -209,7 +209,7 @@ export const tlsTranslations = {
     },
   ],
   validAfterExpiredString: (date: string, relativeDate: number) =>
-    i18n.translate('xpack.synthetics.alerts.tls.validAfterExpiredString', {
+    i18n.translate('xpack.uptime.alerts.tls.validAfterExpiredString', {
       defaultMessage: `expired on {date}, {relativeDate} days ago.`,
       values: {
         date,
@@ -217,7 +217,7 @@ export const tlsTranslations = {
       },
     }),
   validAfterExpiringString: (date: string, relativeDate: number) =>
-    i18n.translate('xpack.synthetics.alerts.tls.validAfterExpiringString', {
+    i18n.translate('xpack.uptime.alerts.tls.validAfterExpiringString', {
       defaultMessage: `expires on {date} in {relativeDate} days.`,
       values: {
         date,
@@ -225,7 +225,7 @@ export const tlsTranslations = {
       },
     }),
   validBeforeExpiredString: (date: string, relativeDate: number) =>
-    i18n.translate('xpack.synthetics.alerts.tls.validBeforeExpiredString', {
+    i18n.translate('xpack.uptime.alerts.tls.validBeforeExpiredString', {
       defaultMessage: 'valid since {date}, {relativeDate} days ago.',
       values: {
         date,
@@ -233,29 +233,29 @@ export const tlsTranslations = {
       },
     }),
   validBeforeExpiringString: (date: string, relativeDate: number) =>
-    i18n.translate('xpack.synthetics.alerts.tls.validBeforeExpiringString', {
+    i18n.translate('xpack.uptime.alerts.tls.validBeforeExpiringString', {
       defaultMessage: 'invalid until {date}, {relativeDate} days from now.',
       values: {
         date,
         relativeDate,
       },
     }),
-  expiredLabel: i18n.translate('xpack.synthetics.alerts.tls.expiredLabel', {
+  expiredLabel: i18n.translate('xpack.uptime.alerts.tls.expiredLabel', {
     defaultMessage: 'expired',
   }),
-  expiringLabel: i18n.translate('xpack.synthetics.alerts.tls.expiringLabel', {
+  expiringLabel: i18n.translate('xpack.uptime.alerts.tls.expiringLabel', {
     defaultMessage: 'expiring',
   }),
-  agingLabel: i18n.translate('xpack.synthetics.alerts.tls.agingLabel', {
+  agingLabel: i18n.translate('xpack.uptime.alerts.tls.agingLabel', {
     defaultMessage: 'becoming too old',
   }),
-  invalidLabel: i18n.translate('xpack.synthetics.alerts.tls.invalidLabel', {
+  invalidLabel: i18n.translate('xpack.uptime.alerts.tls.invalidLabel', {
     defaultMessage: 'invalid',
   }),
 };
 
 export const durationAnomalyTranslations = {
-  alertFactoryName: i18n.translate('xpack.synthetics.alerts.durationAnomaly', {
+  alertFactoryName: i18n.translate('xpack.uptime.alerts.durationAnomaly', {
     defaultMessage: 'Uptime Duration Anomaly',
   }),
   actionVariables: [
@@ -346,7 +346,7 @@ export const durationAnomalyTranslations = {
 
 export const statusCheckTranslations = {
   downMonitorsLabel: (count: number, interval: string, numTimes: number) =>
-    i18n.translate('xpack.synthetics.alerts.monitorStatus.actionVariables.down', {
+    i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.down', {
       defaultMessage: `failed {count} times in the last {interval}. Alert when > {numTimes}.`,
       values: {
         count,
@@ -359,7 +359,7 @@ export const statusCheckTranslations = {
     expectedAvailability: string,
     interval: string
   ) =>
-    i18n.translate('xpack.synthetics.alerts.monitorStatus.actionVariables.availabilityMessage', {
+    i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.availabilityMessage', {
       defaultMessage:
         '{interval} availability is {availabilityRatio}%. Alert when < {expectedAvailability}%.',
       values: {

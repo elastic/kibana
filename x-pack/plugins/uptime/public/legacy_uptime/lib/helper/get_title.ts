@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const getTitle = (name?: string) => {
-  const appName = i18n.translate('xpack.synthetics.title', {
+  const appName = i18n.translate('xpack.uptime.title', {
     defaultMessage: 'Uptime',
   });
   return `${appName} ${name ? '| ' + name : ''} - Kibana`;
