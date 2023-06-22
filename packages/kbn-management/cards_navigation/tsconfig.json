@@ -17,8 +17,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/shared-ux-storybook-mock",
     "@kbn/i18n",
-    "@kbn/serverless-types"
   ]
 }
