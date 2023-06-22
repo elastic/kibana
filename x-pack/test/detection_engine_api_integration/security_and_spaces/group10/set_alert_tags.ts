@@ -25,6 +25,7 @@ import {
   getSignalsByIds,
   waitForRuleSuccess,
   getRuleForSignalTesting,
+  refreshIndex,
 } from '../../utils';
 import { buildAlertTagsQuery, setAlertTags } from '../../utils/set_alert_tags';
 
@@ -66,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('tests with auditbeat data', () => {
+    describe('tests with auditbeat data', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
@@ -106,6 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
           )
           .expect(200);
+        await refreshIndex(es, '.alerts-security.alerts-*');
 
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -140,6 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
           )
           .expect(200);
+        await refreshIndex(es, '.alerts-security.alerts-*');
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -152,6 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
           )
           .expect(200);
+        await refreshIndex(es, '.alerts-security.alerts-*');
 
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -186,6 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
           )
           .expect(200);
+        await refreshIndex(es, '.alerts-security.alerts-*');
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -198,6 +203,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
           )
           .expect(200);
+        await refreshIndex(es, '.alerts-security.alerts-*');
 
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -232,6 +238,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
           )
           .expect(200);
+        await refreshIndex(es, '.alerts-security.alerts-*');
 
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)

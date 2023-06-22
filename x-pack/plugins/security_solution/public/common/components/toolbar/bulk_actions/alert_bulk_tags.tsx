@@ -8,7 +8,7 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiPopoverTitle, EuiSelectable, EuiButton } from '@elastic/eui';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useReducer } from 'react';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { DEFAULT_ALERT_TAGS_KEY } from '../../../../../common/constants';
@@ -16,6 +16,7 @@ import { useUiSetting$ } from '../../../lib/kibana';
 import { useSetAlertTags } from './use_set_alert_tags';
 import * as i18n from './translations';
 import { createInitialTagsState } from './helpers';
+import { createAlertTagsReducer, initialState } from './reducer';
 
 interface BulkAlertTagsPanelComponentProps {
   alertItems: TimelineItem[];
@@ -35,7 +36,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
 }) => {
   const [defaultAlertTagOptions] = useUiSetting$<string[]>(DEFAULT_ALERT_TAGS_KEY);
 
-  const [, setAlertTags] = useSetAlertTags();
+  const [setAlertTags] = useSetAlertTags();
   const existingTags = useMemo(
     () =>
       alertItems.map(
@@ -43,16 +44,34 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
       ),
     [alertItems]
   );
-  const initialTagsState = useMemo(
-    () => createInitialTagsState(existingTags, defaultAlertTagOptions),
-    [existingTags, defaultAlertTagOptions]
+  const [{ selectableAlertTags, tagsToAdd, tagsToRemove }, dispatch] = useReducer(
+    createAlertTagsReducer(),
+    {
+      ...initialState,
+      selectableAlertTags: createInitialTagsState(existingTags, defaultAlertTagOptions),
+    }
   );
 
-  const tagsToAdd: Set<string> = useMemo(() => new Set(), []);
-  const tagsToRemove: Set<string> = useMemo(() => new Set(), []);
+  const addAlertTag = useCallback(
+    (value: string) => {
+      dispatch({ type: 'addAlertTag', value });
+    },
+    [dispatch]
+  );
 
-  const [selectableAlertTags, setSelectableAlertTags] =
-    useState<EuiSelectableOption[]>(initialTagsState);
+  const removeAlertTag = useCallback(
+    (value: string) => {
+      dispatch({ type: 'removeAlertTag', value });
+    },
+    [dispatch]
+  );
+
+  const setSelectableAlertTags = useCallback(
+    (value: EuiSelectableOption[]) => {
+      dispatch({ type: 'setSelectableAlertTags', value });
+    },
+    [dispatch]
+  );
 
   const onTagsUpdate = useCallback(() => {
     closePopoverMenu();
@@ -83,20 +102,21 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
     setIsLoading,
   ]);
 
-  const handleTagsOnChange = (
-    newOptions: EuiSelectableOption[],
-    event: EuiSelectableOnChangeEvent,
-    changedOption: EuiSelectableOption
-  ) => {
-    if (changedOption.checked === 'on') {
-      tagsToAdd.add(changedOption.label);
-      tagsToRemove.delete(changedOption.label);
-    } else if (!changedOption.checked) {
-      tagsToRemove.add(changedOption.label);
-      tagsToAdd.delete(changedOption.label);
-    }
-    setSelectableAlertTags(newOptions);
-  };
+  const handleTagsOnChange = useCallback(
+    (
+      newOptions: EuiSelectableOption[],
+      event: EuiSelectableOnChangeEvent,
+      changedOption: EuiSelectableOption
+    ) => {
+      if (changedOption.checked === 'on') {
+        addAlertTag(changedOption.label);
+      } else if (!changedOption.checked) {
+        removeAlertTag(changedOption.label);
+      }
+      setSelectableAlertTags(newOptions);
+    },
+    [addAlertTag, removeAlertTag, setSelectableAlertTags]
+  );
 
   return (
     <>

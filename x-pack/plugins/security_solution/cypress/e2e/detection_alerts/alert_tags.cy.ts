@@ -24,8 +24,9 @@ import {
   UNSELECTED_ALERT_TAG,
 } from '../../screens/alerts';
 import { esArchiverLoad, esArchiverResetKibana, esArchiverUnload } from '../../tasks/es_archiver';
+import { refreshIndex } from '../../tasks/api_calls/elasticsearch';
 
-describe.skip('Alert tagging', () => {
+describe('Alert tagging', () => {
   before(() => {
     cleanKibana();
     esArchiverResetKibana();
@@ -51,6 +52,7 @@ describe.skip('Alert tagging', () => {
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+    refreshIndex('.alerts-security.alerts-default*');
     waitForAlertsToPopulate();
     selectNumberOfAlerts(1);
     openAlertTaggingBulkActionMenu();
@@ -59,6 +61,7 @@ describe.skip('Alert tagging', () => {
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+    refreshIndex('.alerts-security.alerts-default*');
     waitForAlertsToPopulate();
     selectNumberOfAlerts(1);
     openAlertTaggingBulkActionMenu();
@@ -72,6 +75,7 @@ describe.skip('Alert tagging', () => {
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+    refreshIndex('.alerts-security.alerts-default*');
     waitForAlertsToPopulate();
     // Then add tags to both alerts
     selectNumberOfAlerts(2);
@@ -80,6 +84,7 @@ describe.skip('Alert tagging', () => {
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+    refreshIndex('.alerts-security.alerts-default*');
     waitForAlertsToPopulate();
     selectNumberOfAlerts(2);
     openAlertTaggingBulkActionMenu();
@@ -93,6 +98,7 @@ describe.skip('Alert tagging', () => {
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+    refreshIndex('.alerts-security.alerts-default*');
     waitForAlertsToPopulate();
     // Then remove tags from both alerts
     selectNumberOfAlerts(2);
@@ -102,6 +108,7 @@ describe.skip('Alert tagging', () => {
     clickAlertTag('Duplicate'); // Clicking twice will return to unselected state
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
+    refreshIndex('.alerts-security.alerts-default*');
     waitForAlertsToPopulate();
     selectNumberOfAlerts(2);
     openAlertTaggingBulkActionMenu();
