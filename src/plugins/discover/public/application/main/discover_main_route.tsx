@@ -96,7 +96,6 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   const checkData = useCallback(async () => {
     try {
-      const checkDataStartTime = window.performance.now();
       const hasUserDataViewValue = await data.dataViews.hasData
         .hasUserDataView()
         .catch(() => false);
@@ -116,12 +115,6 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
         //
       }
 
-      const checkDataDuration = window.performance.now() - checkDataStartTime;
-      reportPerformanceMetricEvent(services.analytics, {
-        eventName: 'discoverCheckData',
-        duration: checkDataDuration,
-      });
-
       if (!defaultDataView) {
         setShowNoDataPage(true);
         return false;
@@ -131,7 +124,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       setError(e);
       return false;
     }
-  }, [data.dataViews, isDev, services.analytics]);
+  }, [data.dataViews, isDev]);
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
@@ -168,11 +161,13 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
         );
 
         setLoading(false);
-        const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
-        reportPerformanceMetricEvent(services.analytics!, {
-          eventName: 'discoverLoadSavedSearch',
-          duration: loadSavedSearchDuration,
-        });
+        if (services.analytics) {
+          const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
+          reportPerformanceMetricEvent(services.analytics, {
+            eventName: 'discoverLoadSavedSearch',
+            duration: loadSavedSearchDuration,
+          });
+        }
       } catch (e) {
         if (e instanceof SavedObjectNotFound) {
           redirectWhenMissing({
