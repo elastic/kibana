@@ -16,22 +16,23 @@ const baseConfig = {
 };
 
 describe('Cloud Plugin', () => {
+  const setupPlugin = () => {
+    const initContext = coreMock.createPluginInitializerContext({
+      ...baseConfig,
+      id: 'cloudId',
+      cname: 'cloud.elastic.co',
+    });
+    const plugin = new CloudPlugin(initContext);
+
+    const coreSetup = coreMock.createSetup();
+    const setup = plugin.setup(coreSetup, {});
+    const start = plugin.start();
+
+    return { setup, start };
+  };
+
   describe('#setup', () => {
     describe('interface', () => {
-      const setupPlugin = () => {
-        const initContext = coreMock.createPluginInitializerContext({
-          ...baseConfig,
-          id: 'cloudId',
-          cname: 'cloud.elastic.co',
-        });
-        const plugin = new CloudPlugin(initContext);
-
-        const coreSetup = coreMock.createSetup();
-        const setup = plugin.setup(coreSetup, {});
-
-        return { setup };
-      };
-
       it('exposes isCloudEnabled', () => {
         const { setup } = setupPlugin();
         expect(setup.isCloudEnabled).toBe(true);
@@ -55,6 +56,15 @@ describe('Cloud Plugin', () => {
       it('exposes apm', () => {
         const { setup } = setupPlugin();
         expect(setup.apm).toStrictEqual({ url: undefined, secretToken: undefined });
+      });
+    });
+  });
+
+  describe('#start', () => {
+    describe('interface', () => {
+      it('exposes isCloudEnabled', () => {
+        const { start } = setupPlugin();
+        expect(start.isCloudEnabled).toBe(true);
       });
     });
   });

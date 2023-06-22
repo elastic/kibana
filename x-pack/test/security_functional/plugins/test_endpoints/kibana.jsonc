@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/security-test-endpoints-plugin",
+  "owner": "@elastic/kibana-security",
+  "plugin": {
+    "id": "securityTestEndpoints",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "security",
+      "taskManager"
+    ]
+  }
+}

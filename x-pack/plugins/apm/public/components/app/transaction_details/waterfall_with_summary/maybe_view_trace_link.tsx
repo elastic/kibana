@@ -25,6 +25,7 @@ function FullTraceButton({
 }) {
   return (
     <EuiButton
+      data-test-subj="apmFullTraceButtonViewFullTraceButton"
       fill
       iconType="apmTrace"
       isLoading={isLoading}
@@ -53,6 +54,7 @@ export function MaybeViewTraceLink({
     query: { comparisonEnabled, offset },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer',
     '/dependencies/operation'
   );

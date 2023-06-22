@@ -113,13 +113,15 @@ export function SelectServices({
   return (
     <Container>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>
+        <div>
+          <EuiModalHeaderTitle>
             {i18n.translate(
               'xpack.apm.serviceGroups.selectServicesForm.title',
-              { defaultMessage: 'Select services' }
+              {
+                defaultMessage: 'Select services',
+              }
             )}
-          </h1>
+          </EuiModalHeaderTitle>
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
             {i18n.translate(
@@ -135,6 +137,7 @@ export function SelectServices({
               {kueryValidationMessage}
             </EuiText>
           )}
+          <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
               <KueryBar
@@ -165,6 +168,7 @@ export function SelectServices({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="apmSelectServicesButton"
                 onClick={() => {
                   setKuery(stagedKuery);
                 }}
@@ -195,7 +199,7 @@ export function SelectServices({
               )}
             </EuiText>
           )}
-        </EuiModalHeaderTitle>
+        </div>
       </EuiModalHeader>
       <EuiModalBody
         style={{
@@ -241,6 +245,7 @@ export function SelectServices({
           <EuiFlexItem>
             <div>
               <EuiButton
+                data-test-subj="apmSelectServicesEditGroupDetailsButton"
                 color="text"
                 onClick={onEditGroupDetailsClick}
                 iconType="sortLeft"
@@ -254,7 +259,11 @@ export function SelectServices({
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCloseModal} isDisabled={isLoading}>
+            <EuiButtonEmpty
+              data-test-subj="apmSelectServicesCancelButton"
+              onClick={onCloseModal}
+              isDisabled={isLoading}
+            >
               {i18n.translate(
                 'xpack.apm.serviceGroups.selectServicesForm.cancel',
                 {
@@ -265,6 +274,7 @@ export function SelectServices({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="apmSelectServicesSaveGroupButton"
               fill
               onClick={() => {
                 onSaveClick({ ...serviceGroup, kuery });

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-export interface NativeConnector {
-  docsUrl: string;
+import { ConnectorServerSideDefinition } from '../../../../../../common/connectors/connectors';
+
+export interface ConnectorClientSideDefinition {
+  docsUrl?: string;
   externalAuthDocsUrl?: string;
   externalDocsUrl: string;
-  name: string;
-  serviceType: string;
+  icon: string;
 }
+
+export type ConnectorDefinition = ConnectorClientSideDefinition & ConnectorServerSideDefinition;

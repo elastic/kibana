@@ -11,12 +11,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBadge, EuiButtonIcon, EuiPanel, EuiTextColor, EuiTitle } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiTextColor, EuiTitle } from '@elastic/eui';
 
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
 import { TrainedModelHealth } from './ml_model_health';
+import { MLModelTypeBadge } from './ml_model_type_badge';
 
 export const DEFAULT_VALUES: InferencePipeline = {
   modelId: 'sample-bert-ner-model',
@@ -64,8 +65,8 @@ describe('InferencePipelineCard', () => {
   });
   it('renders model type as badge', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
-    expect(wrapper.find(EuiBadge)).toHaveLength(1);
-    const badge = wrapper.find(EuiBadge).render();
+    expect(wrapper.find(MLModelTypeBadge)).toHaveLength(1);
+    const badge = wrapper.find(MLModelTypeBadge).render();
     expect(badge.text()).toBe('ner');
   });
   it('renders fix button when model not deployed', () => {

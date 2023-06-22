@@ -15,10 +15,8 @@ import { API_BASE_PATH } from '../../common/constants';
 
 export const addBasePath = (uri: string): string => `${API_BASE_PATH}${uri}`;
 
-export class ApiRoutes {
-  setup(dependencies: RouteDependencies) {
-    registerFieldHistogramsRoutes(dependencies);
-    registerPrivilegesRoute(dependencies);
-    registerTransformsRoutes(dependencies);
-  }
+export function registerRoutes(dependencies: RouteDependencies) {
+  registerFieldHistogramsRoutes(dependencies);
+  registerPrivilegesRoute(dependencies);
+  registerTransformsRoutes(dependencies);
 }

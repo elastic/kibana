@@ -7,18 +7,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerDeleteRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
+  const { allowHttpApiAccess } = config;
   router.delete(
     {
       path: '/{type}/{id}',
@@ -33,13 +42,21 @@ export const registerDeleteRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logWarnOnExternalRequest({
+        method: 'delete',
+        path: '/api/saved_objects/{type}/{id}',
+        req,
+        logger,
+      });
       const { type, id } = req.params;
       const { force } = req.query;
-      const { getClient } = (await context.core).savedObjects;
+      const { getClient, typeRegistry } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsDelete({ request: req }).catch(() => {});
-
+      if (!allowHttpApiAccess) {
+        throwIfTypeNotVisibleByAPI(type, typeRegistry);
+      }
       const client = getClient();
       const result = await client.delete(type, id, { force });
       return res.ok({ body: result });

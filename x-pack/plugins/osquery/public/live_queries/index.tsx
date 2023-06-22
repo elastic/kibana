@@ -7,10 +7,12 @@
 
 import { castArray, isEmpty, pickBy } from 'lodash';
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { replaceParamsQuery } from '../../common/utils/replace_params_query';
+import { AlertAttachmentContext } from '../common/contexts';
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
@@ -72,19 +74,30 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
 
     return null;
   }, [agentId, agentIds, agentPolicyIds, agentSelection]);
+  const ecsData = useContext(AlertAttachmentContext);
+
+  const initialQuery = useMemo(() => {
+    if (ecsData && query) {
+      const { result } = replaceParamsQuery(query, ecsData);
+
+      return result;
+    }
+
+    return query;
+  }, [ecsData, query]);
 
   const defaultValue = useMemo(() => {
     const initialValue = {
       ...(initialAgentSelection ? { agentSelection: initialAgentSelection } : {}),
       alertIds,
-      query,
+      query: initialQuery,
       savedQueryId,
       ecs_mapping,
       packId,
     };
 
     return !isEmpty(pickBy(initialValue, (value) => !isEmpty(value))) ? initialValue : undefined;
-  }, [alertIds, ecs_mapping, initialAgentSelection, packId, query, savedQueryId]);
+  }, [alertIds, ecs_mapping, initialAgentSelection, initialQuery, packId, savedQueryId]);
 
   if (isLoading) {
     return <EuiLoadingContent lines={10} />;

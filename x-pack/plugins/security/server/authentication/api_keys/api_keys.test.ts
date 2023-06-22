@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line import/order
-import { mockValidateKibanaPrivileges } from './api_keys.test.mock';
+import { mockGetFakeKibanaRequest, mockValidateKibanaPrivileges } from './api_keys.test.mock';
 
 import {
   elasticsearchServiceMock,
@@ -19,7 +19,6 @@ import { ALL_SPACES_ID } from '../../../common/constants';
 import type { SecurityLicense } from '../../../common/licensing';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { APIKeys } from './api_keys';
-import { getFakeKibanaRequest } from './fake_kibana_request';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 
@@ -34,6 +33,7 @@ describe('API Keys', () => {
 
   beforeEach(() => {
     mockValidateKibanaPrivileges.mockReset().mockReturnValue({ validationErrors: [] });
+    mockGetFakeKibanaRequest.mockReset().mockReturnValue(httpServerMock.createKibanaRequest());
 
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -519,6 +519,8 @@ describe('API Keys', () => {
     });
 
     it('calls callCluster with proper parameters', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockGetFakeKibanaRequest.mockReturnValue(request);
       mockLicense.isEnabled.mockReturnValue(true);
       const params = {
         id: '123',
@@ -527,25 +529,22 @@ describe('API Keys', () => {
       const result = await apiKeys.validate(params);
       expect(result).toEqual(true);
 
-      const fakeRequest = getFakeKibanaRequest(params);
-
-      const { id, uuid, ...restFake } = fakeRequest;
-
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(expect.objectContaining(restFake));
+      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
       expect(
         mockClusterClient.asScoped().asCurrentUser.security.authenticate
       ).toHaveBeenCalledWith();
     });
 
     it('returns false if cannot authenticate with the API key', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockGetFakeKibanaRequest.mockReturnValue(request);
       mockLicense.isEnabled.mockReturnValue(true);
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(new Error());
       const params = { id: '123', api_key: 'abc123' };
 
       await expect(apiKeys.validate(params)).resolves.toEqual(false);
 
-      const { id, uuid, ...restFake } = getFakeKibanaRequest(params);
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(expect.objectContaining(restFake));
+      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
       expect(
         mockClusterClient.asScoped().asCurrentUser.security.authenticate
       ).toHaveBeenCalledTimes(1);

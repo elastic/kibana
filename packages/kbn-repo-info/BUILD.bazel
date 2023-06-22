@@ -1,0 +1,36 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "pkg_npm", "ts_project")
+
+SRCS = glob(
+  [
+    "**/*.js",
+    "**/*.ts",
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+filegroup(
+  name = 'root_pkg_json',
+  srcs = ["//:package.json"]
+)
+
+js_library(
+  name = "kbn-repo-info",
+  package_name = "@kbn/repo-info",
+  srcs = ["package.json"] + SRCS,
+  deps = [":root_pkg_json"],
+  visibility = ["//visibility:public"],
+)

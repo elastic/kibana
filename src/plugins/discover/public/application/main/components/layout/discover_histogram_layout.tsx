@@ -7,81 +7,72 @@
  */
 
 import React, { RefObject } from 'react';
-import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverHistogram } from './use_discover_histogram';
-import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { ResetSearchButton } from './reset_search_button';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resetSavedSearch: () => void;
-  isTimeBased: boolean;
   resizeRef: RefObject<HTMLDivElement>;
   inspectorAdapters: InspectorAdapters;
-  searchSessionManager: DiscoverSearchSessionManager;
 }
+
+const histogramLayoutCss = css`
+  height: 100%;
+`;
 
 export const DiscoverHistogramLayout = ({
   isPlainRecord,
   dataView,
   resetSavedSearch,
   savedSearch,
-  savedSearchData$,
-  state,
   stateContainer,
-  isTimeBased,
   resizeRef,
   inspectorAdapters,
-  searchSessionManager,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
-  const services = useDiscoverServices();
-
-  const commonProps = {
-    dataView,
-    isPlainRecord,
+  const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
+  const hideChart = useAppStateSelector((state) => state.hideChart);
+  const unifiedHistogramProps = useDiscoverHistogram({
     stateContainer,
-    savedSearch,
-    state,
-    savedSearchData$,
-  };
-
-  const histogramProps = useDiscoverHistogram({
-    isTimeBased,
     inspectorAdapters,
-    searchSessionManager,
-    ...commonProps,
+    hideChart,
+    isPlainRecord,
   });
 
-  if (!histogramProps) {
+  // Initialized when the first search has been requested or
+  // when in text-based mode since search sessions are not supported
+  if (!searchSessionId && !isPlainRecord) {
     return null;
   }
 
-  const histogramLayoutCss = css`
-    height: 100%;
-  `;
-
   return (
-    <UnifiedHistogramLayout
-      resizeRef={resizeRef}
-      services={services}
+    <UnifiedHistogramContainer
+      {...unifiedHistogramProps}
       dataView={dataView}
+      searchSessionId={searchSessionId}
+      requestAdapter={inspectorAdapters.requests}
+      resizeRef={resizeRef}
       appendHitsCounter={
         savedSearch?.id ? <ResetSearchButton resetSavedSearch={resetSavedSearch} /> : undefined
       }
       css={histogramLayoutCss}
-      {...histogramProps}
     >
       <DiscoverMainContent
-        {...commonProps}
         {...mainContentProps}
+        stateContainer={stateContainer}
+        dataView={dataView}
+        savedSearch={savedSearch}
+        isPlainRecord={isPlainRecord}
         // The documents grid doesn't rerender when the chart visibility changes
         // which causes it to render blank space, so we need to force a rerender
-        key={`docKey${histogramProps.chart?.hidden}`}
+        key={`docKey${hideChart}`}
       />
-    </UnifiedHistogramLayout>
+    </UnifiedHistogramContainer>
   );
 };

@@ -11,6 +11,41 @@ import { FILTERS } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
+export const strings = {
+  getIsOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isOperatorOptionLabel', {
+      defaultMessage: 'is',
+    }),
+  getIsNotOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isNotOperatorOptionLabel', {
+      defaultMessage: 'is not',
+    }),
+  getIsOneOfOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isOneOfOperatorOptionLabel', {
+      defaultMessage: 'is one of',
+    }),
+  getIsNotOneOfOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isNotOneOfOperatorOptionLabel', {
+      defaultMessage: 'is not one of',
+    }),
+  getIsBetweenOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel', {
+      defaultMessage: 'is between',
+    }),
+  getIsNotBetweenOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
+      defaultMessage: 'is not between',
+    }),
+  getExistsOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.existsOperatorOptionLabel', {
+      defaultMessage: 'exists',
+    }),
+  getDoesNotExistOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.doesNotExistOperatorOptionLabel', {
+      defaultMessage: 'does not exist',
+    }),
+};
+
 export interface Operator {
   message: string;
   type: FILTERS;
@@ -29,43 +64,33 @@ export interface Operator {
 }
 
 export const isOperator = {
-  message: i18n.translate('unifiedSearch.filter.filterEditor.isOperatorOptionLabel', {
-    defaultMessage: 'is',
-  }),
+  message: strings.getIsOperatorOptionLabel(),
   type: FILTERS.PHRASE,
   negate: false,
 };
 
 export const isNotOperator = {
-  message: i18n.translate('unifiedSearch.filter.filterEditor.isNotOperatorOptionLabel', {
-    defaultMessage: 'is not',
-  }),
+  message: strings.getIsNotOperatorOptionLabel(),
   type: FILTERS.PHRASE,
   negate: true,
 };
 
 export const isOneOfOperator = {
-  message: i18n.translate('unifiedSearch.filter.filterEditor.isOneOfOperatorOptionLabel', {
-    defaultMessage: 'is one of',
-  }),
+  message: strings.getIsOneOfOperatorOptionLabel(),
   type: FILTERS.PHRASES,
   negate: false,
   fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
 };
 
 export const isNotOneOfOperator = {
-  message: i18n.translate('unifiedSearch.filter.filterEditor.isNotOneOfOperatorOptionLabel', {
-    defaultMessage: 'is not one of',
-  }),
+  message: strings.getIsNotOneOfOperatorOptionLabel(),
   type: FILTERS.PHRASES,
   negate: true,
   fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
 };
 
 export const isBetweenOperator = {
-  message: i18n.translate('unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel', {
-    defaultMessage: 'is between',
-  }),
+  message: strings.getIsBetweenOperatorOptionLabel(),
   type: FILTERS.RANGE,
   negate: false,
   field: (field: DataViewField) => {
@@ -79,9 +104,7 @@ export const isBetweenOperator = {
 };
 
 export const isNotBetweenOperator = {
-  message: i18n.translate('unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
-    defaultMessage: 'is not between',
-  }),
+  message: strings.getIsNotBetweenOperatorOptionLabel(),
   type: FILTERS.RANGE,
   negate: true,
   field: (field: DataViewField) => {
@@ -95,17 +118,13 @@ export const isNotBetweenOperator = {
 };
 
 export const existsOperator = {
-  message: i18n.translate('unifiedSearch.filter.filterEditor.existsOperatorOptionLabel', {
-    defaultMessage: 'exists',
-  }),
+  message: strings.getExistsOperatorOptionLabel(),
   type: FILTERS.EXISTS,
   negate: false,
 };
 
 export const doesNotExistOperator = {
-  message: i18n.translate('unifiedSearch.filter.filterEditor.doesNotExistOperatorOptionLabel', {
-    defaultMessage: 'does not exist',
-  }),
+  message: strings.getDoesNotExistOperatorOptionLabel(),
   type: FILTERS.EXISTS,
   negate: true,
 };

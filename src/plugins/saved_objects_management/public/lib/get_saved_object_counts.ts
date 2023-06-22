@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
+import type { v1 } from '../../common';
 
 export async function getSavedObjectCounts({
   http,
@@ -15,12 +16,8 @@ export async function getSavedObjectCounts({
   references,
 }: {
   http: HttpStart;
-  typesToInclude: string[];
-  searchString?: string;
-  references?: SavedObjectsFindOptionsReference[];
-}): Promise<Record<string, number>> {
-  return await http.post<Record<string, number>>(
-    `/api/kibana/management/saved_objects/scroll/counts`,
-    { body: JSON.stringify({ typesToInclude, searchString, references }) }
-  );
+} & v1.ScrollCountBodyHTTP): Promise<v1.ScrollCountResponseHTTP> {
+  return await http.post(`/api/kibana/management/saved_objects/scroll/counts`, {
+    body: JSON.stringify({ typesToInclude, searchString, references }),
+  });
 }

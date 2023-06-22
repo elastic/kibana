@@ -31,7 +31,11 @@ const getRanksPercentages = (ranks?: Record<string, number | null>) => {
 };
 
 export function transformCoreWebVitalsResponse<T>(
-  response?: ESSearchResponse<T, ReturnType<typeof coreWebVitalsQuery>>,
+  response?: ESSearchResponse<
+    T,
+    ReturnType<typeof coreWebVitalsQuery>,
+    { restTotalHitsAsInt: false }
+  >,
   percentile = PERCENTILE_DEFAULT
 ): UXMetrics | undefined {
   if (!response) return response;

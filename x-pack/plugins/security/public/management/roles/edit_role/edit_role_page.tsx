@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
@@ -56,6 +57,7 @@ import {
   prepareRoleClone,
 } from '../../../../common/model';
 import { useCapabilities } from '../../../components/use_capabilities';
+import type { CheckRoleMappingFeaturesResponse } from '../../role_mappings/role_mappings_api_client';
 import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
 import { KibanaPrivileges } from '../model';
@@ -84,6 +86,12 @@ interface Props {
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
   spacesApiUi?: SpacesApiUi;
+}
+
+function useFeatureCheck(http: HttpStart) {
+  return useAsync(() =>
+    http.get<CheckRoleMappingFeaturesResponse>('/internal/security/_check_role_mapping_features')
+  );
 }
 
 function useRunAsUsers(
@@ -180,7 +188,8 @@ function useRole(
           return;
         }
 
-        if (fetchedRole.elasticsearch.indices.length === 0) {
+        const isEditingExistingRole = !!roleName && action === 'edit';
+        if (!isEditingExistingRole && fetchedRole.elasticsearch.indices.length === 0) {
           const emptyOption: RoleIndexPrivilege = {
             names: [],
             privileges: [],
@@ -310,6 +319,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors);
   const features = useFeatures(getFeatures, fatalErrors);
+  const featureCheckState = useFeatureCheck(http);
   const [role, setRole] = useRole(
     rolesAPIClient,
     fatalErrors,
@@ -328,7 +338,15 @@ export const EditRolePage: FunctionComponent<Props> = ({
     }
   }, [hasReadOnlyPrivileges, isEditingExistingRole]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!role || !runAsUsers || !indexPatternsTitles || !privileges || !spaces || !features) {
+  if (
+    !role ||
+    !runAsUsers ||
+    !indexPatternsTitles ||
+    !privileges ||
+    !spaces ||
+    !features ||
+    !featureCheckState.value
+  ) {
     return null;
   }
 
@@ -456,6 +474,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           builtinESPrivileges={builtInESPrivileges}
           license={license}
           docLinks={docLinks}
+          canUseRemoteIndices={featureCheckState.value?.canUseRemoteIndices}
         />
       </div>
     );
@@ -470,6 +489,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         <KibanaPrivilegesRegion
           kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
           spaces={spaces.list}
+          spacesEnabled={spaces.enabled}
           uiCapabilities={uiCapabilities}
           canCustomizeSubFeaturePrivileges={license.getFeatures().allowSubFeaturePrivileges}
           editable={!isRoleReadOnly}
@@ -647,7 +667,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
             <EuiCallOut
               title={getExtendedRoleDeprecationNotice(role)}
               color="warning"
-              iconType="alert"
+              iconType="warning"
             />
           </Fragment>
         )}

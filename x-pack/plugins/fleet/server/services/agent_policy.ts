@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { omit, isEqual, keyBy } from 'lodash';
-import uuidv5 from 'uuid/v5';
+import { omit, isEqual, keyBy, groupBy } from 'lodash';
+import { v5 as uuidv5 } from 'uuid';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
@@ -15,11 +15,14 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -38,12 +41,16 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
-import { packageToPackagePolicy } from '../../common/services';
+import {
+  getAllowedOutputTypeForPolicy,
+  packageToPackagePolicy,
+  policyHasFleetServer,
+  policyHasAPMIntegration,
+} from '../../common/services';
 import {
   agentPolicyStatuses,
   AGENT_POLICY_INDEX,
   UUID_V5_NAMESPACE,
-  FLEET_APM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
 } from '../../common/constants';
 import type {
@@ -51,7 +58,6 @@ import type {
   FleetServerPolicy,
   Installation,
   Output,
-  DeletePackagePoliciesResponse,
   PackageInfo,
 } from '../../common/types';
 import {
@@ -80,6 +86,7 @@ import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
+import { auditLoggingService } from './audit_logging';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -103,6 +110,12 @@ class AgentPolicyService {
     user?: AuthenticatedUser,
     options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentPolicy> {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     const existingAgentPolicy = await this.get(soClient, id, true);
 
     if (!existingAgentPolicy) {
@@ -122,7 +135,7 @@ class AgentPolicyService {
       soClient,
       agentPolicy,
       existingAgentPolicy,
-      this.hasAPMIntegration(existingAgentPolicy)
+      getAllowedOutputTypeForPolicy(existingAgentPolicy)
     );
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
@@ -187,18 +200,34 @@ class AgentPolicyService {
   }
 
   public hasAPMIntegration(agentPolicy: AgentPolicy) {
-    return (
-      agentPolicy.package_policies &&
-      agentPolicy.package_policies.some((p) => p.package?.name === FLEET_APM_PACKAGE)
-    );
+    return policyHasAPMIntegration(agentPolicy);
+  }
+
+  public hasFleetServerIntegration(agentPolicy: AgentPolicy) {
+    return policyHasFleetServer(agentPolicy);
   }
 
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     agentPolicy: NewAgentPolicy,
-    options?: { id?: string; user?: AuthenticatedUser }
+    options: {
+      id?: string;
+      user?: AuthenticatedUser;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
+    } = {}
   ): Promise<AgentPolicy> {
+    // Ensure an ID is provided, so we can include it in the audit logs below
+    if (!options.id) {
+      options.id = SavedObjectsUtils.generateId();
+    }
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'create',
+      id: options.id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     await this.requireUniqueName(soClient, agentPolicy);
 
     await validateOutputForPolicy(soClient, agentPolicy);
@@ -266,6 +295,12 @@ class AgentPolicyService {
         (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
     }
 
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     return agentPolicy;
   }
 
@@ -309,15 +344,33 @@ class AgentPolicyService {
       { concurrency: 50 }
     );
 
-    return agentPolicies.filter((agentPolicy): agentPolicy is AgentPolicy => agentPolicy !== null);
+    const result = agentPolicies.filter(
+      (agentPolicy): agentPolicy is AgentPolicy => agentPolicy !== null
+    );
+
+    for (const agentPolicy of result) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: agentPolicy.id,
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return result;
   }
 
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery & {
       withPackagePolicies?: boolean;
+      fields?: string[];
     }
-  ): Promise<{ items: AgentPolicy[]; total: number; page: number; perPage: number }> {
+  ): Promise<{
+    items: AgentPolicy[];
+    total: number;
+    page: number;
+    perPage: number;
+  }> {
     const {
       page = 1,
       perPage = 20,
@@ -325,6 +378,7 @@ class AgentPolicyService {
       sortOrder = 'desc',
       kuery,
       withPackagePolicies = false,
+      fields,
     } = options;
 
     const baseFindParams = {
@@ -333,6 +387,7 @@ class AgentPolicyService {
       sortOrder,
       page,
       perPage,
+      ...(fields ? { fields } : {}),
     };
     const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
     let agentPoliciesSO;
@@ -374,6 +429,14 @@ class AgentPolicyService {
       { concurrency: 50 }
     );
 
+    for (const agentPolicy of agentPolicies) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: agentPolicy.id,
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
     return {
       items: agentPolicies,
       total: agentPoliciesSO.total,
@@ -387,7 +450,12 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicy>,
-    options?: { user?: AuthenticatedUser; force?: boolean; spaceId?: string }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      spaceId?: string;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
+    }
   ): Promise<AgentPolicy> {
     if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
@@ -422,6 +490,7 @@ class AgentPolicyService {
         esClient,
         packagesToInstall,
         spaceId: options?.spaceId || DEFAULT_SPACE_ID,
+        authorizationHeader: options?.authorizationHeader,
       });
     }
 
@@ -647,8 +716,14 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { force?: boolean; removeFleetServerDocuments?: boolean }
+    options?: { force?: boolean; removeFleetServerDocuments?: boolean; user?: AuthenticatedUser }
   ): Promise<DeleteAgentPolicyResponse> {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'delete',
+      id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
       throw new Error('Agent policy not found');
@@ -658,7 +733,7 @@ class AgentPolicyService {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
-    const { total } = await getAgentsByKuery(esClient, {
+    const { total } = await getAgentsByKuery(esClient, soClient, {
       showInactive: false,
       perPage: 0,
       page: 1,
@@ -680,23 +755,16 @@ class AgentPolicyService {
           `Cannot delete agent policy ${id} that contains managed package policies`
         );
       }
-      const deletedPackagePolicies: DeletePackagePoliciesResponse =
-        await packagePolicyService.delete(
-          soClient,
-          esClient,
-          packagePolicies.map((p) => p.id),
-          {
-            force: options?.force,
-            skipUnassignFromAgentPolicies: true,
-          }
-        );
-      try {
-        await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
-      } catch (error) {
-        const logger = appContextService.getLogger();
-        logger.error(`An error occurred executing external callback: ${error}`);
-        logger.error(error);
-      }
+
+      await packagePolicyService.delete(
+        soClient,
+        esClient,
+        packagePolicies.map((p) => p.id),
+        {
+          force: options?.force,
+          skipUnassignFromAgentPolicies: true,
+        }
+      );
     }
 
     if (agentPolicy.is_preconfigured && !options?.force) {
@@ -729,6 +797,12 @@ class AgentPolicyService {
 
     if (!defaultOutputId) {
       return;
+    }
+
+    for (const policyId of agentPolicyIds) {
+      auditLoggingService.writeCustomAuditLog({
+        message: `User deploying policy [id=${policyId}]`,
+      });
     }
 
     const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
@@ -830,6 +904,10 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     agentPolicyId: string
   ) {
+    auditLoggingService.writeCustomAuditLog({
+      message: `User deleting policy [id=${agentPolicyId}]`,
+    });
+
     await esClient.deleteByQuery({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
@@ -1031,10 +1109,30 @@ class AgentPolicyService {
 
     return res;
   }
+
+  public async getInactivityTimeouts(
+    soClient: SavedObjectsClientContract
+  ): Promise<Array<{ policyIds: string[]; inactivityTimeout: number }>> {
+    const findRes = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout > 0`,
+      fields: [`inactivity_timeout`],
+    });
+
+    const groupedResults = groupBy(findRes.saved_objects, (so) => so.attributes.inactivity_timeout);
+
+    return Object.entries(groupedResults).map(([inactivityTimeout, policies]) => ({
+      inactivityTimeout: parseInt(inactivityTimeout, 10),
+      policyIds: policies.map((policy) => policy.id),
+    }));
+  }
 }
 
 export const agentPolicyService = new AgentPolicyService();
 
+// TODO: remove unused parameters
 export async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,

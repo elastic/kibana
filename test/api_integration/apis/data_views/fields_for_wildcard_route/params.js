@@ -49,6 +49,15 @@ export default function ({ getService }) {
         })
         .expect(200));
 
+    it('accepts single meta_fields query param', () =>
+      supertest
+        .get('/api/index_patterns/_fields_for_wildcard')
+        .query({
+          pattern: '*',
+          meta_fields: ['_id'],
+        })
+        .expect(200));
+
     it('rejects a comma-separated list of meta_fields', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')

@@ -56,9 +56,56 @@ export interface IndexMapping {
 }
 
 /** @internal */
-export interface IndexMappingMeta {
-  // A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
-  // with each key being a root-level mapping property, and each value being
-  // the md5 hash of that mapping's value when the index was created.
+export type IndexTypesMap = Record<string, string[]>;
+
+/** @internal */
+export interface V2AlgoIndexMappingMeta {
+  /**
+   * A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
+   * with each key being a root-level mapping property, and each value being
+   * the md5 hash of that mapping's value when the index was created.
+   *
+   * @remark: Only defined for indices using the v2 migration algorithm.
+   */
   migrationMappingPropertyHashes?: { [k: string]: string };
+  /**
+   * A map that tells what are the SO types stored in each index
+   *
+   * @remark: Only defined for indices using the v2 migration algorithm.
+   */
+  indexTypesMap?: IndexTypesMap;
+}
+
+/** @internal */
+export interface ZdtAlgoIndexMappingMeta {
+  /**
+   * The current virtual version of the mapping of the index.
+   *
+   * @remark: Only defined for indices using the zdt migration algorithm.
+   */
+  mappingVersions?: { [k: string]: string };
+  /**
+   * The current virtual versions of the documents of the index.
+   *
+   * @remark: Only defined for indices using the zdt migration algorithm.
+   */
+  docVersions?: { [k: string]: string };
+  /**
+   * Info about the current state of the migration.
+   * Should only be present if a migration is in progress or was interrupted.
+   *
+   * @remark: Only defined for indices using the zdt migration algorithm.
+   */
+  migrationState?: IndexMappingMigrationStateMeta;
+}
+
+/** @internal */
+export type IndexMappingMeta = V2AlgoIndexMappingMeta & ZdtAlgoIndexMappingMeta;
+
+/** @internal */
+export interface IndexMappingMigrationStateMeta {
+  /**
+   * Indicates that the algorithm is currently converting the documents.
+   */
+  convertingDocuments: boolean;
 }

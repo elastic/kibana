@@ -18,9 +18,16 @@ import {
   registerBulkCreateRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
+import { loggerMock } from '@kbn/logging-mocks';
+import { setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
+
+const testTypes = [
+  { name: 'index-pattern', hide: false },
+  { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
+];
 
 describe('POST /api/saved_objects/_bulk_create', () => {
   let server: SetupServerReturn['server'];
@@ -28,18 +35,31 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
+  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
 
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
+      return testTypes
+        .map((typeDesc) => createHiddenTypeVariants(typeDesc))
+        .find((fullTest) => fullTest.name === typename);
+    });
+
     const router =
       httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsBulkCreate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerBulkCreateRoute(router, { coreUsageData });
+
+    const logger = loggerMock.create();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+
+    const config = setupConfig();
+
+    registerBulkCreateRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });
@@ -128,7 +148,43 @@ describe('POST /api/saved_objects/_bulk_create', () => {
       .expect(200);
 
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-    const args = savedObjectsClient.bulkCreate.mock.calls[0];
-    expect(args[1]).toEqual({ overwrite: true });
+    const [[, options]] = savedObjectsClient.bulkCreate.mock.calls;
+    expect(options).toEqual({ migrationVersionCompatibility: 'compatible', overwrite: true });
+  });
+
+  it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_create')
+      .send([
+        {
+          id: 'hiddenID',
+          type: 'hidden-from-http',
+          attributes: {
+            title: 'bar',
+          },
+          references: [],
+        },
+      ])
+      .expect(400);
+    expect(result.body.message).toContain(
+      'Unsupported saved object type(s): hidden-from-http: Bad Request'
+    );
+  });
+
+  it('logs a warning message when called', async () => {
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_create')
+      .send([
+        {
+          id: 'abc1234',
+          type: 'index-pattern',
+          attributes: {
+            title: 'foo',
+          },
+          references: [],
+        },
+      ])
+      .expect(200);
+    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
 });

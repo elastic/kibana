@@ -14,7 +14,7 @@ import {
   createComment,
   deleteAllCaseItems,
   getCaseMetrics,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import { arraysToEqual } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export

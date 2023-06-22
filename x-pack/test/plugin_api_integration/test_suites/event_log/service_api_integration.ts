@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { IEvent } from '@kbn/event-log-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -163,6 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
                   execution_gap_duration_s: 3000,
                 },
               },
+              revision: 0,
             },
           },
           alerting: {
@@ -232,8 +233,8 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getTestProviderAction() {
-    const provider = `provider-${uuid.v4()}`;
-    const action = `action-${uuid.v4()}`;
+    const provider = `provider-${uuidv4()}`;
+    const action = `action-${uuidv4()}`;
 
     const response = await isProviderActionRegistered(provider, action);
     if (!response.body.isProviderActionRegistered) {
@@ -244,7 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   function getTestSavedObject() {
-    return { type: 'event_log_test', id: uuid.v4(), rel: 'primary' };
+    return { type: 'event_log_test', id: uuidv4(), rel: 'primary' };
   }
 
   async function logEvent(event: IEvent, savedObjectId: string) {
@@ -259,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
   async function fetchEvents(savedObjectType: string, savedObjectId: string) {
     log.debug(`Fetching events of Saved Object ${savedObjectId}`);
     return await supertest
-      .get(`/internal/event_log/${savedObjectType}/${savedObjectId}/_find`)
+      .get(`/_test/event_log/${savedObjectType}/${savedObjectId}/_find`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
   }

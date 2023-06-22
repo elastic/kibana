@@ -13,11 +13,13 @@ import { getNoDataViewsPromptServicesMock } from '@kbn/shared-ux-prompt-no-data-
 interface Params {
   hasESData: boolean;
   hasUserDataView: boolean;
+  showPlainSpinner: boolean;
 }
 
 const defaultParams = {
   hasESData: true,
   hasUserDataView: true,
+  showPlainSpinner: false,
 };
 
 /**

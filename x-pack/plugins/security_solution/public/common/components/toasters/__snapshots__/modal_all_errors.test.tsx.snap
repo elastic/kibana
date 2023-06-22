@@ -12,7 +12,7 @@ exports[`Modal all errors rendering it renders the default all errors modal when
   <EuiModalBody>
     <EuiCallOut
       color="danger"
-      iconType="alert"
+      iconType="warning"
       size="s"
       title="Test & Test"
     />

@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { lazy } from 'react';
+import { ComponentType, lazy, LazyExoticComponent } from 'react';
+import { Props as LazyOptInExampleFlyoutProps } from './opt_in_example_flyout';
 
-export const LazyOptInExampleFlyout = lazy(() =>
+export type { LazyOptInExampleFlyoutProps };
+/**
+ * Lazy-loaded {@link OptInExampleFlyout}
+ */
+export const LazyOptInExampleFlyout: LazyExoticComponent<
+  ComponentType<LazyOptInExampleFlyoutProps>
+> = lazy(() =>
   import('./opt_in_example_flyout').then(({ OptInExampleFlyout }) => ({
     default: OptInExampleFlyout,
   }))

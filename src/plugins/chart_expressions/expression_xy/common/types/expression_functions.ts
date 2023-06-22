@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
-import { $Values } from '@kbn/utility-types';
+import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
+import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
+import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {
   AxisExtentModes,
   FillStyles,
@@ -72,6 +73,7 @@ export interface AxisExtentConfig {
   lowerBound?: number;
   upperBound?: number;
   enforce?: boolean;
+  niceValues?: boolean;
 }
 
 export interface AxisConfig {
@@ -328,8 +330,7 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
   layerType: typeof LayerTypes.ANNOTATIONS;
 };
 
-export interface ReferenceLineArgs
-  extends Omit<ReferenceLineDecorationConfig, 'forAccessor' | 'fill'> {
+export interface ReferenceLineArgs extends Omit<ReferenceLineDecorationConfig, 'fill'> {
   name?: string;
   value: number;
   fill: FillStyle;
@@ -364,6 +365,7 @@ export interface ReferenceLineConfigResult {
   type: typeof REFERENCE_LINE;
   layerType: typeof LayerTypes.REFERENCELINE;
   lineLength: number;
+  columnToLabel?: string;
   decorations: [ExtendedReferenceLineDecorationConfig];
 }
 
@@ -495,4 +497,12 @@ export type ExtendedAnnotationLayerFn = ExpressionFunctionDefinition<
   null,
   ExtendedAnnotationLayerArgs,
   ExtendedAnnotationLayerConfigResult
+>;
+
+export type AllowedXYOverrides = Partial<
+  Record<
+    'axisX' | 'axisLeft' | 'axisRight',
+    // id and groupId should not be overridden
+    Simplify<Omit<MakeOverridesSerializable<AxisProps>, 'id' | 'groupId'>>
+  >
 >;

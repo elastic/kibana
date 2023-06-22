@@ -14,7 +14,7 @@ import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { DependencyLink } from '../../../shared/dependency_link';
+import { DependencyLink } from '../../../shared/links/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 
 export function DependenciesInventoryTable() {

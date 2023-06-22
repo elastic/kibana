@@ -73,7 +73,10 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              (await context.core).uiSettings.client,
+              {
+                client: (await context.core).uiSettings.client,
+                globalClient: (await context.core).uiSettings.globalClient,
+              },
               {
                 isAnonymousPage: false,
                 vars: {
@@ -95,7 +98,10 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              (await context.core).uiSettings.client,
+              {
+                client: (await context.core).uiSettings.client,
+                globalClient: (await context.core).uiSettings.globalClient,
+              },
               {
                 isAnonymousPage: true,
                 vars: {

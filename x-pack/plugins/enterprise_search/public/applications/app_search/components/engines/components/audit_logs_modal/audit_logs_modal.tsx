@@ -43,9 +43,7 @@ export const AuditLogsModal: React.FC = () => {
   return !isModalVisible ? null : (
     <EuiModal onClose={hideModal} className="auditLogsModal" maxWidth={false}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>{engineName}</h1>
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{engineName}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText size="s">

@@ -8,10 +8,11 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import type { Logger } from '@kbn/logging';
+import { isCustom } from './metric_expression_params';
 import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
-import { DOCUMENT_COUNT_I18N } from '../../common/messages';
+import { CUSTOM_EQUATION_I18N, DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
@@ -101,7 +102,14 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         if (result.trigger || result.warn || result.value === null) {
           evaluations[key] = {
             ...criterion,
-            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
+            metric:
+              criterion.aggType === 'count'
+                ? DOCUMENT_COUNT_I18N
+                : isCustom(criterion) && criterion.label
+                ? criterion.label
+                : criterion.aggType === 'custom'
+                ? CUSTOM_EQUATION_I18N
+                : criterion.metric,
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,

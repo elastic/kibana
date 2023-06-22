@@ -65,6 +65,7 @@ describe('reference editor', () => {
       onChooseField: jest.fn(),
       onChooseFunction: jest.fn(),
       onDeleteColumn: jest.fn(),
+      onResetIncomplete: jest.fn(),
       columnId: 'ref',
       paramEditorUpdater,
       selectionStyle: 'full' as const,

@@ -58,6 +58,8 @@ export interface TraceItems {
   traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
   errorDocs: WaterfallError[];
   spanLinksCountById: Record<string, number>;
+  traceItemCount: number;
+  maxTraceItems: number;
 }
 
 export async function getTraceItems(
@@ -105,7 +107,7 @@ export async function getTraceItems(
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
-      track_total_hits: maxTraceItems + 1,
+      track_total_hits: Math.max(10000, maxTraceItems + 1),
       size: maxTraceItems,
       _source: [
         TIMESTAMP,
@@ -160,7 +162,8 @@ export async function getTraceItems(
     getSpanLinksCountById({ traceId, apmEventClient, start, end }),
   ]);
 
-  const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
+  const traceItemCount = traceResponse.hits.total.value;
+  const exceedsMax = traceItemCount > maxTraceItems;
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
   const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
 
@@ -169,5 +172,7 @@ export async function getTraceItems(
     traceDocs,
     errorDocs,
     spanLinksCountById,
+    traceItemCount,
+    maxTraceItems,
   };
 }

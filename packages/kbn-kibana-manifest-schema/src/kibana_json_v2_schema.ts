@@ -13,7 +13,7 @@ export const PLUGIN_ID_PATTERN = /^[a-z][a-zA-Z_]*$/;
 
 export const MANIFEST_V2: JSONSchema = {
   type: 'object',
-  required: ['id', 'type', 'owner', 'typeDeps', 'runtimeDeps'],
+  required: ['id', 'type', 'owner'],
   // @ts-expect-error VSCode specific JSONSchema extension
   allowTrailingCommas: true,
   properties: {
@@ -47,26 +47,6 @@ export const MANIFEST_V2: JSONSchema = {
         For additional codeowners, the value can be an array of user/team names.
       `,
     },
-    typeDeps: {
-      type: 'array',
-      description: desc`
-        Packages which are required for the source code in the package to be
-        type-checked. This list is updated automatically by the package linter.
-      `,
-      items: {
-        type: 'string',
-      },
-    },
-    runtimeDeps: {
-      type: 'array',
-      description: desc`
-        Packages which are required for the source code in the package to run. This list
-        is updated automatically by the package linter.
-      `,
-      items: {
-        type: 'string',
-      },
-    },
     devOnly: {
       type: 'boolean',
       description: desc`
@@ -75,17 +55,59 @@ export const MANIFEST_V2: JSONSchema = {
       `,
       default: false,
     },
+    build: {
+      type: 'object',
+      properties: {
+        extraExcludes: {
+          type: 'array',
+          description: desc`
+            An array of micromatch patterns which will be used to exclude
+            files/directories in this package from the build.
+          `,
+          items: {
+            type: 'string',
+          },
+        },
+        noParse: {
+          type: 'array',
+          description: desc`
+            An array of micromatch patterns which will be used to exclude
+            files from being transformed automatically. Use this to skip large
+            assets which are already transpiled and do not need babel.
+          `,
+          items: {
+            type: 'string',
+          },
+        },
+      },
+    },
+    serviceFolders: {
+      description: desc`
+        Creates sections in the documentations based on the exports of the folders listed here.
+        If you need this you should probably split up your package, which is why this is deprecated.
+      `,
+      type: 'array',
+      items: { type: 'string' },
+      deprecated: true,
+    },
+    description: {
+      description: desc`
+        A brief description of what this package does and any capabilities it provides.
+      `,
+      type: 'string',
+    },
   },
   oneOf: [
     {
       type: 'object',
+      required: ['type', 'plugin'],
       properties: {
         type: {
-          enum: ['plugin-browser', 'plugin-server'],
+          const: 'plugin',
         },
         plugin: {
           type: 'object',
-          required: ['id'],
+          required: ['id', 'browser', 'server'],
           properties: {
             id: {
               type: 'string',
@@ -94,11 +116,13 @@ export const MANIFEST_V2: JSONSchema = {
             configPath: {
               description:
                 'Root configuration path used by the plugin, defaults to "id" in snake_case format.',
-              type: 'array',
-              items: {
-                type: 'string',
-                pattern: PLUGIN_ID_PATTERN.source,
-              },
+              oneOf: [
+                {
+                  type: 'array',
+                  items: { type: 'string' },
+                },
+                { type: 'string' },
+              ],
             },
             requiredPlugins: {
               type: 'array',
@@ -114,12 +138,6 @@ export const MANIFEST_V2: JSONSchema = {
                 pattern: PLUGIN_ID_PATTERN.source,
               },
             },
-            description: {
-              description: desc`
-                A brief description of what this plugin does and any capabilities it provides.
-              `,
-              type: 'string',
-            },
             enabledOnAnonymousPages: {
               description: desc`
                 Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when
@@ -127,13 +145,25 @@ export const MANIFEST_V2: JSONSchema = {
               `,
               type: 'boolean',
             },
-            serviceFolders: {
+            type: {
               description: desc`
-                Only used for the automatically generated API documentation. Specifying service
-                folders will cause your plugin API reference to be broken up into sub sections.
+                Only used to distinguish "preboot" plugins from standard plugins.
               `,
-              type: 'array',
-              items: { type: 'string' },
+              enum: ['preboot'],
+            },
+            browser: {
+              type: 'boolean',
+              description: desc`
+                Set this to true when your plugin has a browser-side component, causing the "public" directory
+                to be imported in a webpack bundle and the browser plugin to be started by core.
+              `,
+            },
+            server: {
+              type: 'boolean',
+              description: desc`
+                Set this to true when your plugin has a server-side component, causing the "server" directory
+                to be imported by the server and the plugin started by core.
+              `,
             },
           },
         },

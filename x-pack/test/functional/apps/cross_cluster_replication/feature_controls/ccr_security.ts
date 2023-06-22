@@ -71,6 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'transform',
             'cross_cluster_replication',
             'remote_clusters',
+            'migrate_data',
           ],
         });
       });

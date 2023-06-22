@@ -1,0 +1,49 @@
+{
+  "journeyName": "GET /internal/security/me",
+  "scalabilitySetup": {
+    "responseTimeThreshold": {
+      "threshold1": 1000,
+      "threshold2": 3000,
+      "threshold3": 5000
+    },
+    "warmup": [
+      {
+        "action": "constantUsersPerSec",
+        "userCount": 10,
+        "duration": "30s"
+      }
+    ],
+    "test": [
+      {
+        "action": "rampUsersPerSec",
+        "minUsersCount": 10,
+        "maxUsersCount": 750,
+        "duration": "148s"
+      }
+    ],
+    "maxDuration": "5m"
+  },
+  "testData": {
+    "esArchives": [],
+    "kbnArchives": []
+  },
+  "streams": [
+    {
+      "requests": [
+        {
+          "http": {
+            "method": "GET",
+            "path": "/internal/security/me",
+            "headers": {
+              "Cookie": "",
+              "Kbn-Version": "",
+              "Accept-Encoding": "gzip, deflate, br",
+              "Content-Type": "application/json"
+            },
+            "statusCode": 200
+          }
+        }
+      ]
+    }
+  ]
+}

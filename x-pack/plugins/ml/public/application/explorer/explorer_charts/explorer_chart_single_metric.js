@@ -24,7 +24,7 @@ import {
   getFormattedSeverityScore,
   getSeverityColor,
   getSeverityWithLow,
-} from '../../../../common/util/anomaly_utils';
+} from '@kbn/ml-anomaly-utils';
 import {
   LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,
@@ -53,7 +53,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     timeBuckets: PropTypes.object.isRequired,
     onPointerUpdate: PropTypes.func.isRequired,
     chartTheme: PropTypes.object.isRequired,
-    cursor: PropTypes.object.isRequired,
+    cursor: PropTypes.object,
   };
 
   componentDidMount() {

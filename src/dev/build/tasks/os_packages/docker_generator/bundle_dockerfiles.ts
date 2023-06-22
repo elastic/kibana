@@ -11,7 +11,7 @@ import { readFileSync } from 'fs';
 import { copyFile } from 'fs/promises';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import Mustache from 'mustache';
 
 import { compressTar, copyAll, mkdirp, write, Config } from '../../../lib';

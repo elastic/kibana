@@ -122,7 +122,7 @@ area of Core API's and does not apply to internal types.
 
    ```ts
    // -- good --
-   const createMock => {
+   const createMock = () => {
      const mocked: jest.Mocked<IContextService> = {
        start: jest.fn(),
      };

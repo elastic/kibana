@@ -149,6 +149,6 @@ export function registerNavigation(alerting: AlertingSetup) {
       ]),
     ];
 
-    return formatExplorerUrl('', { jobIds });
+    return formatExplorerUrl('/app/ml', { jobIds });
   });
 }

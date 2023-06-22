@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -79,6 +80,14 @@ export default function ({ getService }: FtrProviderContext) {
     ? remoteName + indexPatternName
     : indexPatternName;
 
+  const fieldStatsEntries = [
+    {
+      fieldName: '@version.keyword',
+      type: 'keyword' as FieldStatsType,
+      expectedValues: ['1'],
+    },
+  ];
+
   describe('single metric', function () {
     this.tags(['ml']);
     before(async () => {
@@ -127,8 +136,17 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job creation displays the pick fields step');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
 
-      await ml.testExecution.logTestStep('job creation selects field and aggregation');
+      await ml.testExecution.logTestStep('job creation opens field stats flyout from agg input');
       await ml.jobWizardCommon.assertAggAndFieldInputExists();
+      for (const { fieldName, type: fieldType, expectedValues } of fieldStatsEntries) {
+        await ml.jobWizardCommon.assertFieldStatFlyoutContentFromAggSelectionInputTrigger(
+          fieldName,
+          fieldType,
+          expectedValues
+        );
+      }
+
+      await ml.testExecution.logTestStep('job creation selects field and aggregation');
       await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, true);
       await ml.jobWizardCommon.assertAnomalyChartExists('LINE');
 
@@ -255,7 +273,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.advanceToPickFieldsSection();
 
       await ml.testExecution.logTestStep('job cloning pre-fills field and aggregation');
-      await ml.jobWizardCommon.assertAggAndFieldInputExists();
       await ml.jobWizardCommon.assertAggAndFieldSelection([aggAndFieldIdentifier]);
       await ml.jobWizardCommon.assertAnomalyChartExists('LINE');
 

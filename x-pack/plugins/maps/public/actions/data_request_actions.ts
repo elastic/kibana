@@ -9,7 +9,7 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
@@ -425,7 +425,7 @@ export function autoFitToBounds() {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     // Method can be triggered before async actions complete
     // Use localSetQueryCallId to only continue execution path if method has not been re-triggered.
-    const localSetQueryCallId = uuid();
+    const localSetQueryCallId = uuidv4();
     lastSetQueryCallId = localSetQueryCallId;
 
     // Joins are performed on the client.

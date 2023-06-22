@@ -13,10 +13,11 @@ import {
   Indicator,
   RawIndicatorFieldId,
 } from '../../../../../../common/types/indicator';
-import { IndicatorsFlyoutTable, TABLE_TEST_ID } from '.';
+import { IndicatorsFlyoutTable } from '.';
 import { unwrapValue } from '../../../utils';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
 import { IndicatorsFlyoutContext } from '../context';
+import { FLYOUT_TABLE_TEST_ID } from './test_ids';
 
 const mockIndicator: Indicator = generateMockIndicator();
 
@@ -34,7 +35,7 @@ describe('<IndicatorsFlyoutTable />', () => {
       </TestProvidersComponent>
     );
 
-    expect(getByTestId(TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(FLYOUT_TABLE_TEST_ID)).toBeInTheDocument();
 
     expect(getByText(RawIndicatorFieldId.Feed)).toBeInTheDocument();
 

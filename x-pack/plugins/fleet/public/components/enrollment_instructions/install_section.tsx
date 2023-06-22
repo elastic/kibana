@@ -21,6 +21,7 @@ interface Props {
   fullCopyButton?: boolean;
   isManaged?: boolean;
   onCopy?: () => void;
+  cloudFormationTemplateUrl?: string | null;
 }
 
 export const InstallSection: React.FunctionComponent<Props> = ({
@@ -30,6 +31,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   fullCopyButton = false,
   isManaged = true,
   onCopy,
+  cloudFormationTemplateUrl,
 }) => {
   return (
     <>
@@ -47,6 +49,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
         hasK8sIntegrationMultiPage={isK8s === 'IS_KUBERNETES_MULTIPAGE'}
         isManaged={isManaged}
         enrollToken={enrollToken}
+        cloudFormationTemplateUrl={cloudFormationTemplateUrl}
       />
     </>
   );

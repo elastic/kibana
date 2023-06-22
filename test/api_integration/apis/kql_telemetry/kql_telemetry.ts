@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -27,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should increment the opt *in* counter in the .kibana/kql-telemetry document', async () => {
+    it('should increment the opt *in* counter in the .kibana_analytics/kql-telemetry document', async () => {
       await supertest
         .post('/api/kibana/kql_opt_in_stats')
         .set('content-type', 'application/json')
@@ -36,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       return es
         .search({
-          index: '.kibana',
+          index: ANALYTICS_SAVED_OBJECT_INDEX,
           q: 'type:kql-telemetry',
         })
         .then((response) => {
@@ -45,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should increment the opt *out* counter in the .kibana/kql-telemetry document', async () => {
+    it('should increment the opt *out* counter in the .kibana_analytics/kql-telemetry document', async () => {
       await supertest
         .post('/api/kibana/kql_opt_in_stats')
         .set('content-type', 'application/json')
@@ -54,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       return es
         .search({
-          index: '.kibana',
+          index: ANALYTICS_SAVED_OBJECT_INDEX,
           q: 'type:kql-telemetry',
         })
         .then((response) => {

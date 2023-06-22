@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import { secondsToCronFormatter } from '../formatting_utils';
 import { ICMPFields, ConfigKey } from '../../runtime_types/monitor_management';
 
-import { Formatter, commonFormatters, secondsToCronFormatter } from '../common/formatters';
+import { Formatter, commonFormatters } from '../common/formatters';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 
 export const icmpFormatters: ICMPFormatMap = {
   [ConfigKey.HOSTS]: null,
-  [ConfigKey.WAIT]: (fields) => secondsToCronFormatter(fields[ConfigKey.WAIT]),
+  [ConfigKey.WAIT]: secondsToCronFormatter,
+  [ConfigKey.MODE]: null,
+  [ConfigKey.IPV4]: null,
+  [ConfigKey.IPV6]: null,
   ...commonFormatters,
 };

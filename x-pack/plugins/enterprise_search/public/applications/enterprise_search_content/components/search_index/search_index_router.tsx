@@ -6,32 +6,29 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Switch, useParams } from 'react-router-dom';
+import { Redirect, Switch, useParams } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
+import { Route } from '@kbn/shared-ux-router';
+
 import {
-  SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,
+  OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,
   SEARCH_INDEX_PATH,
-  SEARCH_INDEX_SELECT_CONNECTOR_PATH,
+  SEARCH_INDEX_TAB_DETAIL_PATH,
   SEARCH_INDEX_TAB_PATH,
 } from '../../routes';
 
-import { CrawlerDomainDetail } from '../crawler_domain_detail/crawler_domain_detail';
-
-import { SelectConnector } from './connector/select_connector/select_connector';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 import { SearchIndex } from './search_index';
 
 export const SearchIndexRouter: React.FC = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
-
-  const indexNameLogic = IndexNameLogic({ indexName });
-  const { setIndexName } = useActions(indexNameLogic);
+  const { setIndexName } = useActions(IndexNameLogic);
   const { stopFetchIndexPoll } = useActions(IndexViewLogic);
   useEffect(() => {
-    const unmountName = indexNameLogic.mount();
+    const unmountName = IndexNameLogic.mount();
     const unmountView = IndexViewLogic.mount();
     return () => {
       stopFetchIndexPoll();
@@ -49,15 +46,16 @@ export const SearchIndexRouter: React.FC = () => {
       <Route path={SEARCH_INDEX_PATH} exact>
         <SearchIndex />
       </Route>
-      <Route path={SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH} exact>
-        <CrawlerDomainDetail />
-      </Route>
-      <Route path={SEARCH_INDEX_SELECT_CONNECTOR_PATH} exact>
-        <SelectConnector />
+      <Route path={SEARCH_INDEX_TAB_DETAIL_PATH}>
+        <SearchIndex />
       </Route>
       <Route path={SEARCH_INDEX_TAB_PATH}>
         <SearchIndex />
       </Route>
+      <Redirect
+        from={OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH}
+        to={`${SEARCH_INDEX_PATH}/domain_management/:domainId}`}
+      />
     </Switch>
   );
 };

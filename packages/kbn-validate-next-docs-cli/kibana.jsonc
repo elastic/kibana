@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/validate-next-docs-cli",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

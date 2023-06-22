@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { useValues } from 'kea';
+import { useParams } from 'react-router-dom';
+
+import { useActions, useValues } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
 
+import { DEFAULT_META } from '../../../../../shared/constants';
 import { Loading } from '../../../../../shared/loading';
 
 import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
-import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
+
+import { CrawlerDomainDetail } from '../crawler_domain_detail/crawler_domain_detail';
 
 import { AddDomainFlyout } from './add_domain/add_domain_flyout';
 import { CrawlerStatusBanner } from './crawler_status_banner';
@@ -25,14 +29,24 @@ import { EmptyStatePanel } from './empty_state_panel';
 
 export const SearchIndexDomainManagement: React.FC = () => {
   DeleteCrawlerDomainApiLogic.mount();
-  GetCrawlerDomainsApiLogic.mount();
-  const { domains, isLoading } = useValues(DomainManagementLogic);
+  const { getDomains } = useActions(DomainManagementLogic);
+  const { domains, indexName, isLoading } = useValues(DomainManagementLogic);
+
+  useEffect(() => {
+    getDomains(DEFAULT_META);
+  }, [indexName]);
+
+  const { detailId } = useParams<{
+    detailId?: string;
+  }>();
 
   if (isLoading) {
     return <Loading />;
   }
 
-  return (
+  return detailId ? (
+    <CrawlerDomainDetail domainId={detailId} />
+  ) : (
     <>
       <EuiSpacer />
       <CrawlerStatusBanner />

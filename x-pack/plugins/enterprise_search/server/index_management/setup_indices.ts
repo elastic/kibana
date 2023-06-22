@@ -30,6 +30,7 @@ interface IndexDefinition {
 const connectorMappingsProperties: Record<string, MappingProperty> = {
   api_key_id: { type: 'keyword' },
   configuration: { type: 'object' },
+  custom_scheduling: { type: 'object' },
   description: { type: 'text' },
   error: { type: 'keyword' },
   features: {
@@ -118,6 +119,7 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   last_indexed_document_count: { type: 'long' },
   last_seen: { type: 'date' },
   last_sync_error: { type: 'keyword' },
+  last_sync_scheduled_at: { type: 'date' },
   last_sync_status: { type: 'keyword' },
   last_synced: { type: 'date' },
   name: { type: 'keyword' },
@@ -168,6 +170,7 @@ const indices: IndexDefinition[] = [
         pipeline: defaultConnectorsPipelineMeta,
         version: 1,
       },
+      dynamic: false,
       properties: connectorMappingsProperties,
     },
     name: '.elastic-connectors-v1',
@@ -179,6 +182,7 @@ const indices: IndexDefinition[] = [
       _meta: {
         version: 1,
       },
+      dynamic: false,
       properties: {
         cancelation_requested_at: { type: 'date' },
         canceled_at: { type: 'date' },

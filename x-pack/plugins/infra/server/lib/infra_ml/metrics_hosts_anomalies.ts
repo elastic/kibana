@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
 import { fetchMlJob, MappedAnomalyHit, InfluencerFilter } from './common';
-import { getJobId, metricsHostsJobTypes, ANOMALY_THRESHOLD } from '../../../common/infra_ml';
+import { getJobId, metricsHostsJobTypes } from '../../../common/infra_ml';
 import { Sort, Pagination } from '../../../common/http_api/infra_ml';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { isMlPrivilegesError } from './errors';
@@ -74,7 +75,7 @@ export async function getMetricsHostsAnomalies({
 }: {
   context: Required<InfraRequestHandlerContext>;
   sourceId: string;
-  anomalyThreshold: ANOMALY_THRESHOLD;
+  anomalyThreshold: ML_ANOMALY_THRESHOLD;
   startTime: number;
   endTime: number;
   metric: 'memory_usage' | 'network_in' | 'network_out' | undefined;
@@ -172,7 +173,7 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
 
 async function fetchMetricsHostsAnomalies(
   mlSystem: MlSystem,
-  anomalyThreshold: ANOMALY_THRESHOLD,
+  anomalyThreshold: ML_ANOMALY_THRESHOLD,
   jobIds: string[],
   startTime: number,
   endTime: number,

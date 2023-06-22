@@ -79,13 +79,12 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
         --dependency "beats:$BEATS_MANIFEST_URL" \
         --artifact-set main
 
-  ARTIFACTS_SUBDOMAIN="artifacts-$WORKFLOW"
-  ARTIFACTS_SUMMARY=$(curl -s "https://$ARTIFACTS_SUBDOMAIN.elastic.co/kibana/latest/$FULL_VERSION.json" | jq -re '.summary_url')
+  KIBANA_SUMMARY=$(curl -s "$KIBANA_MANIFEST_LATEST" | jq -re '.summary_url')
 
   cat << EOF | buildkite-agent annotate --style "info" --context artifacts-summary
   ### Artifacts Summary
 
-  $ARTIFACTS_SUMMARY
+  $KIBANA_SUMMARY
 EOF
 
 else

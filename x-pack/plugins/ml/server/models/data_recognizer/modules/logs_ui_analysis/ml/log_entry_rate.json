@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Logs UI: Detects anomalies in the log entry ingestion rate",
   "groups": ["logs-ui"],
   "analysis_config": {

@@ -24,7 +24,7 @@ import {
   HeatmapLegendExpressionFunctionDefinition,
 } from '@kbn/expression-heatmap-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type { OperationMetadata, Suggestion, Visualization } from '../../types';
+import type { OperationMetadata, Suggestion, UserMessage, Visualization } from '../../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
@@ -219,12 +219,12 @@ export const getHeatmapVisualization = ({
                 (frame.activeData || activePalette?.params?.rangeType !== 'number')
                   ? {
                       columnId: state.valueAccessor,
-                      triggerIcon: 'colorBy',
+                      triggerIconType: 'colorBy',
                       palette: displayStops.map(({ color }) => color),
                     }
                   : {
                       columnId: state.valueAccessor,
-                      triggerIcon: 'none',
+                      triggerIconType: 'none',
                     },
               ]
             : [],
@@ -406,11 +406,11 @@ export const getHeatmapVisualization = ({
         // Y-axis
         isYAxisLabelVisible: false,
         isYAxisTitleVisible: false,
-        yTitle: state.gridConfig.yTitle ?? '',
+        yTitle: state.gridConfig.yTitle,
         // X-axis
         isXAxisLabelVisible: false,
         isXAxisTitleVisible: false,
-        xTitle: state.gridConfig.xTitle ?? '',
+        xTitle: state.gridConfig.xTitle,
       }
     );
 
@@ -433,16 +433,19 @@ export const getHeatmapVisualization = ({
     };
   },
 
-  getErrorMessages(state) {
+  getUserMessages(state, { frame }) {
     if (!state.yAccessor && !state.xAccessor && !state.valueAccessor) {
       // nothing configured yet
-      return;
+      return [];
     }
 
-    const errors: ReturnType<Visualization['getErrorMessages']> = [];
+    const errors: UserMessage[] = [];
 
     if (!state.xAccessor) {
       errors.push({
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
         shortMessage: i18n.translate(
           'xpack.lens.heatmapVisualization.missingXAccessorShortMessage',
           {
@@ -455,33 +458,37 @@ export const getHeatmapVisualization = ({
       });
     }
 
-    return errors.length ? errors : undefined;
-  },
+    let warnings: UserMessage[] = [];
 
-  getWarningMessages(state, frame) {
-    if (!state?.layerId || !frame.activeData || !state.valueAccessor) {
-      return;
+    if (state?.layerId && frame.activeData && state.valueAccessor) {
+      const rows = frame.activeData[state.layerId] && frame.activeData[state.layerId].rows;
+      if (rows) {
+        const hasArrayValues = rows.some((row) => Array.isArray(row[state.valueAccessor!]));
+
+        const datasource = frame.datasourceLayers[state.layerId];
+        const operation = datasource?.getOperationForColumnId(state.valueAccessor);
+
+        warnings = hasArrayValues
+          ? [
+              {
+                severity: 'warning',
+                fixableInEditor: true,
+                displayLocations: [{ id: 'toolbar' }],
+                shortMessage: '',
+                longMessage: (
+                  <FormattedMessage
+                    id="xpack.lens.heatmapVisualization.arrayValuesWarningMessage"
+                    defaultMessage="{label} contains array values. Your visualization may not render as expected."
+                    values={{ label: <strong>{operation?.label}</strong> }}
+                  />
+                ),
+              },
+            ]
+          : [];
+      }
     }
 
-    const rows = frame.activeData[state.layerId] && frame.activeData[state.layerId].rows;
-    if (!rows) {
-      return;
-    }
-
-    const hasArrayValues = rows.some((row) => Array.isArray(row[state.valueAccessor!]));
-
-    const datasource = frame.datasourceLayers[state.layerId];
-    const operation = datasource?.getOperationForColumnId(state.valueAccessor);
-
-    return hasArrayValues
-      ? [
-          <FormattedMessage
-            id="xpack.lens.heatmapVisualization.arrayValuesWarningMessage"
-            defaultMessage="{label} contains array values. Your visualization may not render as expected."
-            values={{ label: <strong>{operation?.label}</strong> }}
-          />,
-        ]
-      : undefined;
+    return [...errors, ...warnings];
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
@@ -508,7 +515,7 @@ export const getHeatmapVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: HeatmapVisualizationState) {
+  getVisualizationInfo(state, frame) {
     const dimensions = [];
     if (state.xAccessor) {
       dimensions.push({
@@ -536,6 +543,15 @@ export const getHeatmapVisualization = ({
       });
     }
 
+    const { displayStops } = getSafePaletteParams(
+      paletteService,
+      // When the active data comes from the embeddable side it might not have been indexed by layerId
+      // rather using a "default" key
+      frame?.activeData?.[state.layerId] || frame?.activeData?.default,
+      state.valueAccessor,
+      state?.palette && state.palette.accessor === state.valueAccessor ? state.palette : undefined
+    );
+
     return {
       layers: [
         {
@@ -544,6 +560,7 @@ export const getHeatmapVisualization = ({
           chartType: state.shape,
           ...this.getDescription(state),
           dimensions,
+          palette: displayStops.length ? displayStops.map(({ color }) => color) : undefined,
         },
       ],
     };

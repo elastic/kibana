@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ChartWrapper component renders the component with loading false 1`] = `
-<_EuiErrorBoundary>
+<EuiErrorBoundary>
   <div
     intl={
       Object {
@@ -125,11 +125,11 @@ exports[`ChartWrapper component renders the component with loading false 1`] = `
       up={4}
     />
   </div>
-</_EuiErrorBoundary>
+</EuiErrorBoundary>
 `;
 
 exports[`ChartWrapper component renders the component with loading true 1`] = `
-<_EuiErrorBoundary>
+<EuiErrorBoundary>
   <div
     intl={
       Object {
@@ -272,5 +272,5 @@ exports[`ChartWrapper component renders the component with loading true 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</_EuiErrorBoundary>
+</EuiErrorBoundary>
 `;

@@ -6,8 +6,11 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
+import { recordVideo } from '../../helpers/record_video';
 
 journey('ProjectAPIKeys', async ({ page }) => {
+  recordVideo(page);
+
   let apiKey = '';
 
   page.setDefaultTimeout(3 * 30000);

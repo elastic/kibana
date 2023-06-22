@@ -19,7 +19,7 @@ import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
-  spacesApi: SpacesPluginStart;
+  spacesApi: SpacesPluginStart; // this component is only ever used when spaces is enabled
   spaceIds: string[];
   id: string;
   mlSavedObjectType: MlSavedObjectType;

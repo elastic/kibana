@@ -1,0 +1,24 @@
+title: Create Tines connector request
+description: >
+  The Tines connector uses Tines Webhook actions to send events via POST request.
+type: object
+required:
+  - config
+  - connector_type_id
+  - name
+  - secrets
+properties:
+  config:
+    $ref: 'config_properties_tines.yaml'
+  connector_type_id:
+    type: string
+    description: The type of connector.
+    enum:
+      - .tines
+    example: .tines
+  name:
+    type: string
+    description: The display name for the connector.
+    example: my-connector
+  secrets:
+    $ref: 'secrets_properties_tines.yaml' 

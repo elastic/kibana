@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Action, ActionExecutionMeta, createAction } from '@kbn/ui-actions-plugin/public';
+import { ActionExecutionMeta, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 
 export const UPDATE_FILTER_REFERENCES_ACTION = 'UPDATE_FILTER_REFERENCES_ACTION';
@@ -24,8 +24,10 @@ export interface UpdateFilterReferencesActionContext extends ActionExecutionMeta
   defaultDataView?: string;
 }
 
-export function createUpdateFilterReferencesAction(filterManager: FilterManager): Action {
-  return createAction<UpdateFilterReferencesActionContext>({
+export function createUpdateFilterReferencesAction(
+  filterManager: FilterManager
+): UiActionsActionDefinition<UpdateFilterReferencesActionContext> {
+  return {
     type: UPDATE_FILTER_REFERENCES_ACTION,
     id: UPDATE_FILTER_REFERENCES_ACTION,
     execute: async ({ fromDataView, toDataView, usedDataViews, defaultDataView }) => {
@@ -65,5 +67,5 @@ export function createUpdateFilterReferencesAction(filterManager: FilterManager)
         );
       }
     },
-  });
+  };
 }

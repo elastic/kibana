@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   createExecutionEnqueuerFunction,
@@ -79,6 +79,7 @@ describe('execute()', () => {
         actionId: '123',
         params: { baz: false },
         executionId: '123abc',
+        source: 'HTTP_REQUEST',
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
       {
@@ -151,6 +152,7 @@ describe('execute()', () => {
         params: { baz: false },
         executionId: '123abc',
         consumer: 'test-consumer',
+        source: 'HTTP_REQUEST',
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
       {
@@ -213,6 +215,7 @@ describe('execute()', () => {
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
         executionId: '123abc',
+        source: 'HTTP_REQUEST',
         relatedSavedObjects: [
           {
             id: 'related_some-type_0',
@@ -256,7 +259,7 @@ describe('execute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -303,6 +306,7 @@ describe('execute()', () => {
         actionId: '123',
         params: { baz: false },
         executionId: '123abc',
+        source: 'SAVED_OBJECT',
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
       {
@@ -334,7 +338,7 @@ describe('execute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -390,6 +394,7 @@ describe('execute()', () => {
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
         executionId: '123abc',
+        source: 'SAVED_OBJECT',
         relatedSavedObjects: [
           {
             id: 'related_some-type_0',
@@ -430,6 +435,7 @@ describe('execute()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
@@ -460,6 +466,7 @@ describe('execute()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to execute action because no secrets are defined for the \\"mock-action\\" connector."`
@@ -493,6 +500,7 @@ describe('execute()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
@@ -537,6 +545,7 @@ describe('execute()', () => {
       spaceId: 'default',
       executionId: '123abc',
       apiKey: null,
+      source: asHttpRequestExecutionSource(request),
     });
 
     expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
@@ -613,6 +622,7 @@ describe('bulkExecute()', () => {
             actionId: '123',
             params: { baz: false },
             executionId: '123abc',
+            source: 'HTTP_REQUEST',
             apiKey: Buffer.from('123:abc').toString('base64'),
           },
           references: [
@@ -703,6 +713,7 @@ describe('bulkExecute()', () => {
             params: { baz: false },
             executionId: '123abc',
             consumer: 'test-consumer',
+            source: 'HTTP_REQUEST',
             apiKey: Buffer.from('123:abc').toString('base64'),
           },
           references: [
@@ -778,6 +789,7 @@ describe('bulkExecute()', () => {
             params: { baz: false },
             apiKey: Buffer.from('123:abc').toString('base64'),
             executionId: '123abc',
+            source: 'HTTP_REQUEST',
             relatedSavedObjects: [
               {
                 id: 'related_some-type_0',
@@ -822,7 +834,7 @@ describe('bulkExecute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -885,6 +897,7 @@ describe('bulkExecute()', () => {
             actionId: '123',
             params: { baz: false },
             executionId: '123abc',
+            source: 'SAVED_OBJECT',
             apiKey: Buffer.from('123:abc').toString('base64'),
           },
           references: [
@@ -917,7 +930,7 @@ describe('bulkExecute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -989,6 +1002,7 @@ describe('bulkExecute()', () => {
             params: { baz: false },
             apiKey: Buffer.from('123:abc').toString('base64'),
             executionId: '123abc',
+            source: 'SAVED_OBJECT',
             relatedSavedObjects: [
               {
                 id: 'related_some-type_0',
@@ -1031,6 +1045,7 @@ describe('bulkExecute()', () => {
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1067,6 +1082,7 @@ describe('bulkExecute()', () => {
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1106,6 +1122,7 @@ describe('bulkExecute()', () => {
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
@@ -1162,6 +1179,7 @@ describe('bulkExecute()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       },
     ]);
 

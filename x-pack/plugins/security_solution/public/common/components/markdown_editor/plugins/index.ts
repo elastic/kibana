@@ -23,6 +23,7 @@ export const { uiPlugins, parsingPlugins, processingPlugins } = {
 
 uiPlugins.push(timelineMarkdownPlugin.plugin);
 uiPlugins.push(osqueryMarkdownPlugin.plugin);
+uiPlugins.push(insightMarkdownPlugin.plugin);
 
 parsingPlugins.push(insightMarkdownPlugin.parser);
 parsingPlugins.push(timelineMarkdownPlugin.parser);

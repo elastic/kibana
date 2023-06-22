@@ -42,6 +42,8 @@ export const useStyles = () => {
       marginRight: size.xs,
     };
 
+    const breadcrumbsWrapper: CSSObject = { flexDirection: 'row', alignItems: 'center' };
+
     const breadcrumbIconColor = (color: string): CSSObject => ({
       color,
     });
@@ -51,6 +53,7 @@ export const useStyles = () => {
       breadcrumbButton,
       breadcrumbButtonBold,
       breadcrumbRightIcon,
+      breadcrumbsWrapper,
       breadcrumbIconColor,
     };
   }, [euiTheme]);

@@ -517,9 +517,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<Readonly<{} & {}> | null>"
@@ -538,9 +538,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
+                "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
               "<{}>"
@@ -559,9 +559,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
+                "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
               "<{}>"

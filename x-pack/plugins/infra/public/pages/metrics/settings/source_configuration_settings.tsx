@@ -77,6 +77,8 @@ export const SourceConfigurationSettings = ({
 
   const isWriteable = shouldAllowEdit && (!Boolean(source) || source?.origin !== 'internal');
 
+  const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
+
   const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 
   if ((isLoading || isUninitialized) && !source) {
@@ -113,6 +115,8 @@ export const SourceConfigurationSettings = ({
           isLoading={isLoading}
           metricAliasFieldProps={indicesConfigurationProps.metricAlias}
           readOnly={!isWriteable}
+          metricIndicesExist={metricIndicesExist}
+          remoteClustersExist={remoteClustersExist}
         />
       </EuiPanel>
       <EuiSpacer />
@@ -147,7 +151,12 @@ export const SourceConfigurationSettings = ({
             {isLoading ? (
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButton color="primary" isLoading fill>
+                  <EuiButton
+                    data-test-subj="infraSourceConfigurationSettingsLoadingButton"
+                    color="primary"
+                    isLoading
+                    fill
+                  >
                     Loading
                   </EuiButton>
                 </EuiFlexItem>

@@ -19,8 +19,7 @@ import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { TableId } from '../../../../../common/types';
-import { dataTableSelectors } from '../../../../common/store/data_table';
+import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
@@ -28,7 +27,7 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -58,7 +57,7 @@ import { LastEventIndexKey } from '../../../../../common/search_strategy';
 
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { UserOverview } from '../../../../overview/components/user_overview';
-import { useUserDetails } from '../../containers/users/details';
+import { useObservedUserDetails } from '../../containers/users/observed_details';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
@@ -135,7 +134,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     dispatch(setUsersDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const [loading, { inspect, userDetails, refetch }] = useUserDetails({
+  const [loading, { inspect, userDetails, refetch }] = useObservedUserDetails({
     id: QUERY_ID,
     endDate: to,
     startDate: from,
@@ -197,7 +196,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               endDate={to}
               skip={isInitializing}
             >
-              {({ isLoadingAnomaliesData, anomaliesData }) => (
+              {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                 <UserOverview
                   userName={detailName}
                   id={QUERY_ID}
@@ -210,6 +209,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   endDate={to}
                   narrowDateRange={narrowDateRange}
                   indexPatterns={selectedPatterns}
+                  jobNameById={jobNameById}
                 />
               )}
             </AnomalyTableProvider>
@@ -238,7 +238,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               </>
             )}
 
-            <SecuritySolutionTabNavigation
+            <TabNavigationWithBreadcrumbs
               navTabs={navTabsUsersDetails(
                 detailName,
                 hasMlUserPermissions(capabilities),

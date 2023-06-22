@@ -12,9 +12,19 @@ import { Provider } from 'react-redux';
 import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter as filterOperator,
+  map,
+  skip,
+  startWith,
+} from 'rxjs/operators';
 import { Unsubscribe } from 'redux';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { type Filter, compareFilters, type TimeRange, type Query } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
@@ -24,6 +34,7 @@ import {
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
   FilterableEmbeddable,
+  shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
@@ -37,6 +48,7 @@ import {
   updateLayerById,
   setGotoWithCenter,
   setEmbeddableSearchContext,
+  setExecutionContext,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -47,7 +59,7 @@ import {
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
-  areLayersLoaded,
+  isMapLoading,
   getGeoFieldNames,
   getEmbeddableSearchContext,
   getLayerList,
@@ -67,16 +79,18 @@ import {
   getFullPath,
   MAP_SAVED_OBJECT_TYPE,
   RawValue,
+  RENDER_TIMEOUT,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
-  getUiActions,
+  getCharts,
   getCoreI18n,
+  getExecutionContextService,
   getHttp,
-  getChartsPaletteServiceGetColor,
-  getSpacesApi,
   getSearchService,
+  getSpacesApi,
   getTheme,
+  getUiActions,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
@@ -96,12 +110,34 @@ import {
   MapEmbeddableOutput,
 } from './types';
 
+async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
+  const chartsService = getCharts();
+  const paletteRegistry: PaletteRegistry | null = chartsService
+    ? await chartsService.palettes.getPalettes()
+    : null;
+  if (!paletteRegistry) {
+    return null;
+  }
+
+  const paletteDefinition = paletteRegistry.get('default');
+  const chartConfiguration = { syncColors: true };
+  return (value: string) => {
+    const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
+    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
+    return color ? color : '#3d3d3d';
+  };
+}
+
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {
     return false;
   }
   const searchSessionOptions = getSearchService().session.getSearchOptions(searchSessionId);
   return searchSessionOptions ? searchSessionOptions.isRestore : false;
+}
+
+export function getControlledBy(id: string) {
+  return `mapEmbeddablePanel${id}`;
 }
 
 export class MapEmbeddable
@@ -114,22 +150,16 @@ export class MapEmbeddable
   private _isActive: boolean;
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
-  private _subscription: Subscription;
+  private _subscriptions: Subscription[] = [];
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
-  private _prevTimeRange?: TimeRange;
-  private _prevTimeslice?: [number, number];
-  private _prevQuery?: Query;
-  private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
-  private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
   private _controlledBy: string;
-  private _onInitialRenderComplete?: () => void = undefined;
-  private _hasInitialRenderCompleteFired = false;
   private _isSharable = true;
+  private readonly _onRenderComplete$;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -145,8 +175,26 @@ export class MapEmbeddable
     this._isActive = true;
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
-    this._controlledBy = `mapEmbeddablePanel${this.id}`;
+    this._subscriptions.push(this.getUpdated$().subscribe(() => this.onUpdate()));
+    this._controlledBy = getControlledBy(this.id);
+
+    this._onRenderComplete$ = this.getOutput$().pipe(
+      // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial value.
+      startWith(this.getOutput()),
+      distinctUntilChanged((a, b) => a.loading === b.loading),
+      skip(1),
+      debounceTime(RENDER_TIMEOUT),
+      filterOperator((output) => !output.loading),
+      map(() => {
+        // Observable notifies subscriber when rendering is complete
+        // Return void to not expose internal implemenation details of observabale
+        return;
+      })
+    );
+  }
+
+  public getOnRenderComplete$() {
+    return this._onRenderComplete$;
   }
 
   public reportsEmbeddableLoad() {
@@ -168,6 +216,8 @@ export class MapEmbeddable
       return;
     }
 
+    this._savedMap.getStore().dispatch(setExecutionContext(this.getExecutionContext()));
+
     // deferred loading of this embeddable is complete
     this.setInitializationFinished();
 
@@ -175,6 +225,23 @@ export class MapEmbeddable
     if (this._domNode) {
       this.render(this._domNode);
     }
+  }
+
+  private getExecutionContext() {
+    const parentContext = getExecutionContextService().get();
+    const mapContext: KibanaExecutionContext = {
+      type: APP_ID,
+      name: APP_ID,
+      id: this.id,
+      url: this.output.editPath,
+    };
+
+    return parentContext
+      ? {
+          ...parentContext,
+          child: mapContext,
+        }
+      : mapContext;
   }
 
   private _initializeStore() {
@@ -193,9 +260,20 @@ export class MapEmbeddable
     // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
     store.dispatch(setOnMapMove(this._propogateMapMovement));
 
-    this._dispatchSetQuery({
-      forceRefresh: false,
-    });
+    this._dispatchSetQuery({ forceRefresh: false });
+    this._subscriptions.push(
+      shouldFetch$<MapEmbeddableInput>(this.getUpdated$(), () => {
+        return {
+          ...this.getInput(),
+          filters: this._getInputFilters(),
+          searchSessionId: this._getSearchSessionId(),
+        };
+      }).subscribe(() => {
+        this._dispatchSetQuery({
+          forceRefresh: false,
+        });
+      })
+    );
 
     const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
     if (mapStateJSON) {
@@ -218,15 +296,14 @@ export class MapEmbeddable
   }
 
   private async _initializeOutput() {
-    const savedMapTitle = this._savedMap.getAttributes()?.title
-      ? this._savedMap.getAttributes().title
-      : '';
+    const { title: savedMapTitle, description: savedMapDescription } =
+      this._savedMap.getAttributes();
     const input = this.getInput();
     const title = input.hidePanelTitles ? '' : input.title ?? savedMapTitle;
     const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
-      ...this.getOutput(),
       defaultTitle: savedMapTitle,
+      defaultDescription: savedMapDescription,
       title,
       editPath: getEditPath(savedObjectId),
       editUrl: getHttp().basePath.prepend(getFullPath(savedObjectId)),
@@ -263,8 +340,8 @@ export class MapEmbeddable
     return getMapAttributeService().getInputAsValueType(this.getExplicitInput());
   }
 
-  public getDescription() {
-    return this._isInitialized ? this._savedMap.getAttributes().description : '';
+  public getLayerList() {
+    return getLayerList(this._savedMap.getStore().getState());
   }
 
   public async getFilters() {
@@ -293,10 +370,6 @@ export class MapEmbeddable
     this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
 
-  public setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void {
-    this._onInitialRenderComplete = onInitialRenderComplete;
-  }
-
   /*
    * Set to false to exclude sharing attributes 'data-*'.
    */
@@ -309,18 +382,6 @@ export class MapEmbeddable
   }
 
   onUpdate() {
-    if (
-      !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
-      !_.isEqual(this.input.timeslice, this._prevTimeslice) ||
-      !_.isEqual(this.input.query, this._prevQuery) ||
-      !compareFilters(this._getFilters(), this._prevFilters) ||
-      this._getSearchSessionId() !== this._prevSearchSessionId
-    ) {
-      this._dispatchSetQuery({
-        forceRefresh: false,
-      });
-    }
-
     if (this.input.syncColors !== this._prevSyncColors) {
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
@@ -382,7 +443,7 @@ export class MapEmbeddable
     }
   };
 
-  _getFilters() {
+  _getInputFilters() {
     return this.input.filters
       ? this.input.filters.filter(
           (filter) => !filter.meta.disabled && filter.meta.controlledBy !== this._controlledBy
@@ -401,15 +462,9 @@ export class MapEmbeddable
   }
 
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
-    const filters = this._getFilters();
-    this._prevTimeRange = this.input.timeRange;
-    this._prevTimeslice = this.input.timeslice;
-    this._prevQuery = this.input.query;
-    this._prevFilters = filters;
-    this._prevSearchSessionId = this._getSearchSessionId();
     this._savedMap.getStore().dispatch<any>(
       setQuery({
-        filters,
+        filters: this._getInputFilters(),
         query: this.input.query,
         timeFilters: this.input.timeRange,
         timeslice: this.input.timeslice
@@ -495,7 +550,7 @@ export class MapEmbeddable
       sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
         <div className="mapEmbeddedError">
           <EuiEmptyPrompt
-            iconType="alert"
+            iconType="warning"
             iconColor="danger"
             data-test-subj="embeddable-maps-failure"
             body={spaces.ui.components.getEmbeddableLegacyUrlConflict({
@@ -535,7 +590,6 @@ export class MapEmbeddable
     this._savedMap.getStore().dispatch<any>(replaceLayerList(layerList));
     this._getIndexPatterns().then((indexPatterns) => {
       this.updateOutput({
-        ...this.getOutput(),
         indexPatterns,
       });
     });
@@ -675,9 +729,9 @@ export class MapEmbeddable
       unmountComponentAtNode(this._domNode);
     }
 
-    if (this._subscription) {
-      this._subscription.unsubscribe();
-    }
+    this._subscriptions.forEach((subscription) => {
+      subscription.unsubscribe();
+    });
   }
 
   reload() {
@@ -698,15 +752,6 @@ export class MapEmbeddable
   _handleStoreChanges() {
     if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
-    }
-
-    if (
-      this._onInitialRenderComplete &&
-      !this._hasInitialRenderCompleteFired &&
-      areLayersLoaded(this._savedMap.getStore().getState())
-    ) {
-      this._hasInitialRenderCompleteFired = true;
-      this._onInitialRenderComplete();
     }
 
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());
@@ -749,45 +794,26 @@ export class MapEmbeddable
     }
 
     const hiddenLayerIds = getHiddenLayerIds(this._savedMap.getStore().getState());
-
     if (!_.isEqual(this.input.hiddenLayers, hiddenLayerIds)) {
       this.updateInput({
         hiddenLayers: hiddenLayerIds,
       });
     }
 
-    if (areLayersLoaded(this._savedMap.getStore().getState())) {
-      const layers = getLayerList(this._savedMap.getStore().getState());
-      const isLoading =
-        layers.length === 0 ||
-        layers.some((layer) => {
-          return layer.isLayerLoading();
-        });
-      const firstLayerWithError = layers.find((layer) => {
-        return layer.hasErrors();
+    const isLoading = isMapLoading(this._savedMap.getStore().getState());
+    if (this.getOutput().loading !== isLoading) {
+      /**
+       * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
+       * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
+       * For more details please contact the maps team.
+       */
+      this.updateOutput({
+        loading: isLoading,
+        rendered: !isLoading,
+        // do not surface layer errors as output.error
+        // output.error blocks entire embeddable display and prevents map from displaying
+        // layer errors are better surfaced in legend while still keeping the map usable
       });
-      const output = this.getOutput();
-      if (
-        output.loading !== isLoading ||
-        firstLayerWithError?.getErrors() !== output.error?.message
-      ) {
-        /**
-         * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
-         * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
-         * For more details please contact the maps team.
-         */
-        this.updateOutput({
-          ...output,
-          loading: isLoading,
-          rendered: !isLoading && firstLayerWithError === undefined,
-          error: firstLayerWithError
-            ? {
-                name: 'EmbeddableError',
-                message: firstLayerWithError.getErrors(),
-              }
-            : undefined,
-        });
-      }
     }
   }
 }

@@ -23,12 +23,12 @@ export const ExtraSettings: FC = () => {
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <CategorizationField />
+          {showCategorizationPerPartitionField && <CategorizationPerPartitionField />}
         </EuiFlexItem>
         <EuiFlexItem>
           <SummaryCountField />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {showCategorizationPerPartitionField && <CategorizationPerPartitionField />}
     </Fragment>
   );
 };

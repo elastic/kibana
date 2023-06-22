@@ -12,5 +12,12 @@
       "timedOut": false
     },
     "products": {}
+  },
+  "packageErrors": {
+    "execution": {
+      "errors": [],
+      "timedOut": false
+    },
+    "products": {}
   }
 }

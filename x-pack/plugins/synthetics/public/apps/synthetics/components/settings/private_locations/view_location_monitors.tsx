@@ -23,7 +23,11 @@ export const ViewLocationMonitors = ({
   const onButtonClick = () => setIsPopoverOpen((prevState) => !prevState);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const button = <EuiButtonEmpty onClick={onButtonClick}>{count}</EuiButtonEmpty>;
+  const button = (
+    <EuiButtonEmpty data-test-subj="syntheticsViewLocationMonitorsButton" onClick={onButtonClick}>
+      {count}
+    </EuiButtonEmpty>
+  );
 
   const history = useHistory();
 
@@ -31,12 +35,13 @@ export const ViewLocationMonitors = ({
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <FormattedMessage
         id="xpack.synthetics.monitorManagement.viewMonitors"
-        defaultMessage="Location {name} has {count, number} {count, plural,one {monitor} other {monitors}} running."
+        defaultMessage='Location "{name}" is used in {count, number} {count, plural,one {monitor} other {monitors}}.'
         values={{ count, name: <strong>{locationName}</strong> }}
       />
       <EuiSpacer size="s" />
       {count > 0 ? (
         <EuiButton
+          data-test-subj="syntheticsViewLocationMonitorsButton"
           href={history.createHref({
             pathname: '/monitors',
             search: `?locations=${JSON.stringify([locationName])}`,
@@ -46,6 +51,7 @@ export const ViewLocationMonitors = ({
         </EuiButton>
       ) : (
         <EuiButton
+          data-test-subj="syntheticsViewLocationMonitorsButton"
           href={history.createHref({
             pathname: '/add-monitor',
           })}
@@ -60,7 +66,7 @@ export const ViewLocationMonitors = ({
 const VIEW_LOCATION_MONITORS = i18n.translate(
   'xpack.synthetics.monitorManagement.viewLocationMonitors',
   {
-    defaultMessage: 'View location monitors',
+    defaultMessage: 'View monitors',
   }
 );
 

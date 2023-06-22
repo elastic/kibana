@@ -6,6 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import { PersistedLogViewReference } from '../../../../../common/log_views';
 
 import {
   getLogEntryCategoriesRequestPayloadRT,
@@ -16,7 +17,7 @@ import { CategoriesSort } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   startTime: number;
   endTime: number;
   categoryCount: number;
@@ -28,7 +29,7 @@ export const callGetTopLogEntryCategoriesAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const { sourceId, startTime, endTime, categoryCount, datasets, sort } = requestArgs;
+  const { logViewReference, startTime, endTime, categoryCount, datasets, sort } = requestArgs;
   const intervalDuration = endTime - startTime;
 
   const response = await fetch(LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH, {
@@ -36,7 +37,7 @@ export const callGetTopLogEntryCategoriesAPI = async (
     body: JSON.stringify(
       getLogEntryCategoriesRequestPayloadRT.encode({
         data: {
-          sourceId,
+          logView: logViewReference,
           timeRange: {
             startTime,
             endTime,

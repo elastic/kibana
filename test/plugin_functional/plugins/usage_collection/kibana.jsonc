@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/usage-collection-test-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "usageCollectionTestPlugin",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "usageCollectionTestPlugin"
+    ],
+    "requiredPlugins": [
+      "usageCollection"
+    ]
+  }
+}

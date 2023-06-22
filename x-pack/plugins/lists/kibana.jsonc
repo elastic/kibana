@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/lists-plugin",
+  "owner": "@elastic/security-solution-platform",
+  "plugin": {
+    "id": "lists",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "lists"
+    ],
+    "optionalPlugins": [
+      "spaces",
+      "security"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

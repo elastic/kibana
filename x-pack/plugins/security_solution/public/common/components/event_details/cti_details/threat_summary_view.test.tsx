@@ -24,7 +24,6 @@ jest.mock('../../../lib/kibana', () => ({
   }),
 }));
 
-jest.mock('../table/action_cell', () => ({ ActionCell: () => <></> }));
 jest.mock('../table/field_name_cell');
 
 const RISK_SCORE_DATA_ROWS = 2;

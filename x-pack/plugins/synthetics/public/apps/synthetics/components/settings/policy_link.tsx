@@ -22,14 +22,18 @@ export const PolicyLink = ({ name }: { name: string }) => {
 
   const { data } = useFetcher(async () => {
     return ilmLocator?.getLocation({ page: 'policy_edit', policyName: name });
-  }, []);
+  }, [name]);
 
   if (!data) {
     return <EuiLoadingContent lines={1} />;
   }
 
   return (
-    <EuiLink href={`${basePath}/app/${data.app}${data.path}`} target="_blank">
+    <EuiLink
+      href={`${basePath}/app/${data.app}${data.path}`}
+      target="_blank"
+      data-test-subj={name + 'PolicyLink'}
+    >
       {name}
     </EuiLink>
   );

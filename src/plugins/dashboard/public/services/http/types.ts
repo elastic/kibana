@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 export interface DashboardHTTPService {
-  basePath: CoreSetup['http']['basePath'];
+  basePath: CoreStart['http']['basePath'];
+  get: CoreStart['http']['get'];
 }

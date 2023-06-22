@@ -25,13 +25,8 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       projectName: schema.string(),
     }),
   },
-  handler: async ({
-    request,
-    response,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, response, savedObjectsClient, server, syntheticsMonitorClient } = routeContext;
     const { projectName } = request.params;
     const { monitors: monitorsToDelete } = request.body;
     const decodedProjectName = decodeURI(projectName);
@@ -43,20 +38,20 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       });
     }
 
-    const { saved_objects: monitors } = await getMonitors(
-      {
-        filter: `${syntheticsMonitorType}.attributes.${
-          ConfigKey.PROJECT_ID
-        }: "${decodedProjectName}" AND ${getKqlFilter({
-          field: 'journey_id',
-          values: monitorsToDelete.map((id: string) => `${id}`),
-        })}`,
-        fields: [],
-        perPage: 500,
+    const deleteFilter = `${syntheticsMonitorType}.attributes.${
+      ConfigKey.PROJECT_ID
+    }: "${decodedProjectName}" AND ${getKqlFilter({
+      field: 'journey_id',
+      values: monitorsToDelete.map((id: string) => `${id}`),
+    })}`;
+
+    const { saved_objects: monitors } = await getMonitors({
+      ...routeContext,
+      request: {
+        ...request,
+        query: { ...request.query, filter: deleteFilter, fields: [], perPage: 500 },
       },
-      syntheticsMonitorClient.syntheticsService,
-      savedObjectsClient
-    );
+    });
 
     const {
       integrations: { writeIntegrationPolicies },

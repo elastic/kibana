@@ -1,14 +1,22 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../expressions/tsconfig.json" },
-    { "path": "../embeddable/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/expressions-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/coloring",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/shared-ux-utility",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

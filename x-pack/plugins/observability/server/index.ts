@@ -12,6 +12,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
+import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
 import {
   unwrapEsResponse,
@@ -28,13 +29,7 @@ const configSchema = schema.object({
     index: schema.string({ defaultValue: 'observability-annotations' }),
   }),
   unsafe: schema.object({
-    slo: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-    }),
     alertDetails: schema.object({
-      apm: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
       metrics: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
@@ -46,6 +41,7 @@ const configSchema = schema.object({
       }),
     }),
   }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export const config: PluginConfigDescriptor = {
@@ -61,6 +57,11 @@ export const plugin = (initContext: PluginInitializerContext) =>
   new ObservabilityPlugin(initContext);
 
 export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
-export { createOrUpdateIndex, unwrapEsResponse, WrappedElasticsearchClientError };
+export {
+  createOrUpdateIndex,
+  createOrUpdateIndexTemplate,
+  unwrapEsResponse,
+  WrappedElasticsearchClientError,
+};
 
 export { uiSettings } from './ui_settings';

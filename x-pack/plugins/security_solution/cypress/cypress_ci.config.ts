@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { defineConfig } from 'cypress';
+import { defineCypressConfig } from '@kbn/cypress-config';
 
 // eslint-disable-next-line import/no-default-export
-export default defineConfig({
+export default defineCypressConfig({
   defaultCommandTimeout: 150000,
   execTimeout: 150000,
   pageLoadTimeout: 150000,
@@ -24,11 +24,5 @@ export default defineConfig({
   viewportWidth: 1680,
   e2e: {
     baseUrl: 'http://localhost:5601',
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
-    setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      return require('./plugins')(on, config);
-    },
   },
 });

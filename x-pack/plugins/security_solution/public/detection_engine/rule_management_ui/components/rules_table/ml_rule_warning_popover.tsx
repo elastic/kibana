@@ -57,7 +57,12 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
   }
 
   const button = (
-    <EuiButtonIcon display={'empty'} color={'warning'} iconType={'alert'} onClick={togglePopover} />
+    <EuiButtonIcon
+      display={'empty'}
+      color={'warning'}
+      iconType={'warning'}
+      onClick={togglePopover}
+    />
   );
   const popoverTitle = getCapitalizedStatusText(RuleExecutionStatus['partial failure']);
 
@@ -76,7 +81,7 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
       </div>
       <EuiSpacer size="s" />
       {notRunningJobs.map((job) => (
-        <EuiText>{job.id}</EuiText>
+        <EuiText>{job.customSettings?.security_app_display_name ?? job.id}</EuiText>
       ))}
       <EuiPopoverFooter>
         <SecuritySolutionLinkButton

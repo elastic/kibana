@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { IClusterClient } from '@kbn/core/server';
+import { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
 import { Observable, Subject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
@@ -30,6 +30,7 @@ import { calculateHealthStatus } from '../lib/calculate_health_status';
 
 export type MonitoredHealth = RawMonitoringStats & {
   id: string;
+  reason?: string;
   status: HealthStatus;
   timestamp: string;
 };
@@ -60,6 +61,7 @@ export interface HealthRouteParams {
   shouldRunTasks: boolean;
   getClusterClient: () => Promise<IClusterClient>;
   usageCounter?: UsageCounter;
+  docLinks: DocLinksServiceSetup;
 }
 
 export function healthRoute(params: HealthRouteParams): {
@@ -77,6 +79,7 @@ export function healthRoute(params: HealthRouteParams): {
     getClusterClient,
     usageCounter,
     shouldRunTasks,
+    docLinks,
   } = params;
 
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
@@ -85,10 +88,15 @@ export function healthRoute(params: HealthRouteParams): {
 
   function getHealthStatus(monitoredStats: MonitoringStats) {
     const summarizedStats = summarizeMonitoringStats(logger, monitoredStats, config);
-    const status = calculateHealthStatus(summarizedStats, config, shouldRunTasks, logger);
+    const { status, reason } = calculateHealthStatus(
+      summarizedStats,
+      config,
+      shouldRunTasks,
+      logger
+    );
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
-    return { id: taskManagerId, timestamp, status, ...summarizedStats };
+    return { id: taskManagerId, timestamp, status, reason, ...summarizedStats };
   }
 
   const serviceStatus$: Subject<TaskManagerServiceStatus> = new Subject<TaskManagerServiceStatus>();
@@ -104,14 +112,14 @@ export function healthRoute(params: HealthRouteParams): {
       tap((stats) => {
         lastMonitoredStats = stats;
       }),
-      // Only calculate the summerized stats (calculates all runnign averages and evaluates state)
+      // Only calculate the summarized stats (calculates all running averages and evaluates state)
       // when needed by throttling down to the requiredHotStatsFreshness
       map((stats) => withServiceStatus(getHealthStatus(stats)))
     )
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
       monitoredHealth$.next(monitoredHealth);
-      logHealthMetrics(monitoredHealth, logger, config, shouldRunTasks);
+      logHealthMetrics(monitoredHealth, logger, config, shouldRunTasks, docLinks);
     });
 
   router.get(
@@ -172,15 +180,19 @@ export function healthRoute(params: HealthRouteParams): {
 export function withServiceStatus(
   monitoredHealth: MonitoredHealth
 ): [MonitoredHealth, TaskManagerServiceStatus] {
+  const { reason, status } = monitoredHealth;
+
   const level =
-    monitoredHealth.status === HealthStatus.OK
-      ? ServiceStatusLevels.available
-      : ServiceStatusLevels.degraded;
+    status === HealthStatus.OK ? ServiceStatusLevels.available : ServiceStatusLevels.degraded;
+
+  const defaultMessage = LEVEL_SUMMARY[level.toString()];
+  const summary = reason ? `${defaultMessage} - Reason: ${reason}` : defaultMessage;
+
   return [
     monitoredHealth,
     {
       level,
-      summary: LEVEL_SUMMARY[level.toString()],
+      summary,
     },
   ];
 }

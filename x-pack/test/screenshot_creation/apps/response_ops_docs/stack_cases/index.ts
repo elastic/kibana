@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('stack cases', function () {
     loadTestFile(require.resolve('./list_view'));
     loadTestFile(require.resolve('./details_view'));
+    loadTestFile(require.resolve('./external_connections'));
   });
 }

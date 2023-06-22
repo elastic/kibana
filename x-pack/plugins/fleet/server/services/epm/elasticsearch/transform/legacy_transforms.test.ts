@@ -122,8 +122,8 @@ describe('test transform install with legacy schema', () => {
       ],
     });
 
-    await installTransforms(
-      {
+    await installTransforms({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
         data_streams: [
@@ -157,16 +157,16 @@ describe('test transform install with legacy schema', () => {
           },
         ],
       } as unknown as RegistryPackage,
-      [
+      paths: [
         'endpoint-0.16.0-dev.0/data_stream/policy/elasticsearch/ingest_pipeline/default.json',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata/default.json',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
       ],
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     expect(esClient.transform.getTransform.mock.calls).toEqual([
       [
@@ -320,8 +320,8 @@ describe('test transform install with legacy schema', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    await installTransforms(
-      {
+    await installTransforms({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
         data_streams: [
@@ -341,12 +341,12 @@ describe('test transform install with legacy schema', () => {
           },
         ],
       } as unknown as RegistryPackage,
-      ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
+      paths: ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
@@ -422,8 +422,8 @@ describe('test transform install with legacy schema', () => {
       ],
     });
 
-    await installTransforms(
-      {
+    await installTransforms({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
         data_streams: [
@@ -457,12 +457,12 @@ describe('test transform install with legacy schema', () => {
           },
         ],
       } as unknown as RegistryPackage,
-      [],
+      paths: [],
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     expect(esClient.transform.getTransform.mock.calls).toEqual([
       [
@@ -556,8 +556,8 @@ describe('test transform install with legacy schema', () => {
       )
     );
 
-    await installTransforms(
-      {
+    await installTransforms({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
         data_streams: [
@@ -577,12 +577,12 @@ describe('test transform install with legacy schema', () => {
           },
         ],
       } as unknown as RegistryPackage,
-      ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
+      paths: ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     const meta = getESAssetMetadata({ packageName: 'endpoint' });
 

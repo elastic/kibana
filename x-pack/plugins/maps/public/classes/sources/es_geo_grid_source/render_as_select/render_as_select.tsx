@@ -8,14 +8,13 @@
 import React from 'react';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ES_GEO_FIELD_TYPE, RENDER_AS } from '../../../../../common/constants';
+import { RENDER_AS } from '../../../../../common/constants';
 import { getIsCloud } from '../../../../kibana_services';
 import { getIsGoldPlus } from '../../../../licensed_features';
 import { CLUSTER_LABEL, GRID_LABEL, HEX_LABEL } from './i18n_constants';
 import { ShowAsLabel } from './show_as_label';
 
 interface Props {
-  geoFieldType?: ES_GEO_FIELD_TYPE;
   renderAs: RENDER_AS;
   onChange: (newValue: RENDER_AS) => void;
   isColumnCompressed?: boolean;
@@ -32,12 +31,6 @@ export function RenderAsSelect(props: Props) {
     isHexDisabled = true;
     hexDisabledReason = i18n.translate('xpack.maps.hexbin.license.disabledReason', {
       defaultMessage: '{hexLabel} is a subscription feature.',
-      values: { hexLabel: HEX_LABEL },
-    });
-  } else if (props.geoFieldType !== ES_GEO_FIELD_TYPE.GEO_POINT) {
-    isHexDisabled = true;
-    hexDisabledReason = i18n.translate('xpack.maps.hexbin.geoShape.disabledReason', {
-      defaultMessage: `{hexLabel} requires a 'geo_point' cluster field.`,
       values: { hexLabel: HEX_LABEL },
     });
   }

@@ -115,7 +115,7 @@ export const DebugPage: React.FunctionComponent<{
               iconType="wrench"
             />
             <EuiSpacer size="m" />
-            <EuiCallOut color="danger" iconType="alert" title="Danger zone">
+            <EuiCallOut color="danger" iconType="warning" title="Danger zone">
               <EuiText grow={false}>
                 <FormattedMessage
                   id="xpack.fleet.debug.dangerZone.description"
@@ -144,7 +144,7 @@ export const DebugPage: React.FunctionComponent<{
             {!isInitialized && setupError?.message && (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut color="danger" iconType="alert" title="Setup error">
+                <EuiCallOut color="danger" iconType="warning" title="Setup error">
                   <EuiText grow={false}>
                     <FormattedMessage
                       id="xpack.fleet.debug.initializationError.description"

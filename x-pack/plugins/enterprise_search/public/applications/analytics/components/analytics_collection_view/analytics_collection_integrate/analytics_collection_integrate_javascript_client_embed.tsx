@@ -11,7 +11,9 @@ import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-export const javascriptClientEmbedSteps = (analyticsDNSUrl: string) => [
+import { AnalyticsConfig } from './analytics_collection_integrate_view';
+
+export const javascriptClientEmbedSteps = (analyticsConfig: AnalyticsConfig) => [
   {
     title: i18n.translate(
       'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepOne.title',
@@ -58,10 +60,11 @@ export const javascriptClientEmbedSteps = (analyticsDNSUrl: string) => [
           </p>
           <EuiCodeBlock language="bash" isCopyable>
             {`import {
-createTracker,
-trackPageView,
-trackEvent,
-} from "@elastic/behavioural-analytics-javascript-tracker";`}
+  createTracker,
+  trackPageView,
+  trackSearch,
+  trackSearchClick
+} from "@elastic/behavioral-analytics-javascript-tracker";`}
           </EuiCodeBlock>
         </EuiText>
       </>
@@ -82,7 +85,7 @@ trackEvent,
               'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepThree.description',
               {
                 defaultMessage:
-                  ' Use createTracker method to initialize the tracker with your DSN. You will then be able to use the tracker to send events to Behavioural Analytics.',
+                  'Use createTracker method to initialize the tracker with your Configuration. You will then be able to use the tracker to send events to Behavioral Analytics.',
               }
             )}
           </p>
@@ -91,13 +94,15 @@ trackEvent,
               'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepThree.descriptionTwo',
               {
                 defaultMessage:
-                  'Once you have called createTracker, you can use the tracker methods such as trackPageView to send events to Behavioural Analytics.',
+                  'Once you have called createTracker, you can use the tracker methods such as trackPageView to send events to Behavioral Analytics.',
               }
             )}
           </p>
           <EuiCodeBlock language="javascript" isCopyable>
             {`createTracker({
-dsn: "${analyticsDNSUrl}",
+  endpoint: "${analyticsConfig.endpoint}",
+  collectionName: "${analyticsConfig.collectionName}",
+  apiKey: "${analyticsConfig.apiKey}"
 });`}
           </EuiCodeBlock>
         </EuiText>
@@ -108,7 +113,7 @@ dsn: "${analyticsDNSUrl}",
     title: i18n.translate(
       'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.title',
       {
-        defaultMessage: 'Dispatch Pageview and behavior events',
+        defaultMessage: 'Dispatch Pageview and search behavior events',
       }
     ),
     children: (
@@ -119,7 +124,7 @@ dsn: "${analyticsDNSUrl}",
               'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.description',
               {
                 defaultMessage:
-                  'Once you have called createTracker, you can use the tracker methods such as trackPageView to send events to Behavioural Analytics.',
+                  'Once you have called createTracker, you can use the tracker methods such as trackPageView to send events to Behavioral Analytics.',
               }
             )}
           </p>
@@ -133,19 +138,20 @@ dsn: "${analyticsDNSUrl}",
             )}
           </p>
           <EuiCodeBlock language="javascript" isCopyable>
-            {`// track a page view in React
+            {`import { useEffect } from 'react';
+
+// track a page view in React
 
 const SearchPage = (props) => {
-useEffect(() => {
-trackPageView();
-}, []);
+  useEffect(() => {
+    trackPageView();
+  }, []);
 
-return (
-<div>
-  <h1>Search Page</h1>
-  <
-</div>
-);
+  return (
+    <div>
+      <h1>Search Page</h1>
+    </div>
+  );
 };`}
           </EuiCodeBlock>
           <EuiSpacer size="m" />
@@ -154,30 +160,53 @@ return (
               'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.descriptionThree',
               {
                 defaultMessage:
-                  'You can also dispatch custom events to Behavioural Analytics by calling the trackEvent method.',
+                  'You can also use trackSearch and trackSearchClick to track what your customers are searching and clicking on in your application.',
               }
             )}
           </p>
           <EuiCodeBlock language="javascript" isCopyable>
-            {`// track a custom event in React
-import { trackEvent } from '@elastic/behavioural-analytics-javascript-tracker';
+            {`
+import { trackSearch } from '@elastic/behavioral-analytics-javascript-tracker';
 
-const ProductDetailPage = (props) => {
+const SearchResult = ({ hit }) => {
 
-return (
-<div>
-  <h1>Product detail page</h1>
-  <input type="button" onClick={() => {
-    trackEvent("click", {
-      category: "product",
-      action: "add_to_cart",
-      label: "product_id",
-      value: "123"
+  const clickHandler = () => {
+    trackSearchClick({
+      document: { id: hit.id, index: "products" },
+      page: {
+        url: "http://my-website.com/products/123"
+      },
+      search: {
+        query: "search term",
+        filters: {},
+        page: { current: 1, size: 10 },
+        results: {
+          items: [
+            {
+              document: {
+                id: "123",
+                index: "products",
+              },
+              page: {
+                url: "http://my-website.com/products/123",
+              },
+            },
+          ],
+          total_results: 10
+        },
+        sort: {
+          name: "relevance",
+        },
+        search_application: "website",
+      }
     })
-  }} />
-  }}>Add to Basket</input>
-</div>
-)
+  }
+
+  return (
+    <a onClick={clickHandler}>
+      <h2>{hit.title}</h2>
+    </a>
+  )
 }`}
           </EuiCodeBlock>
         </EuiText>

@@ -34,6 +34,7 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
+import { GenerateApiKeyLogic } from '../../../../api/generate_api_key/generate_api_key_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { GenerateApiKeyModalLogic } from './generate_api_key_modal.logic';
@@ -46,7 +47,8 @@ interface GenerateApiKeyModalProps {
 export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexName, onClose }) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
-  const { setKeyName, makeRequest } = useActions(GenerateApiKeyModalLogic);
+  const { setKeyName } = useActions(GenerateApiKeyModalLogic);
+  const { makeRequest } = useActions(GenerateApiKeyLogic);
 
   return (
     <EuiModal onClose={onClose}>

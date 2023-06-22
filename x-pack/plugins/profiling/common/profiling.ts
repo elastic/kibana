@@ -59,6 +59,7 @@ export enum FrameType {
   Ruby,
   Perl,
   JavaScript,
+  PHPJIT,
 }
 
 const frameTypeDescriptions = {
@@ -71,6 +72,7 @@ const frameTypeDescriptions = {
   [FrameType.Ruby]: 'Ruby',
   [FrameType.Perl]: 'Perl',
   [FrameType.JavaScript]: 'JavaScript',
+  [FrameType.PHPJIT]: 'PHP JIT',
 };
 
 export function describeFrameType(ft: FrameType): string {
@@ -101,7 +103,6 @@ export interface StackFrame {
   FunctionName: string;
   FunctionOffset: number;
   LineNumber: number;
-  SourceType: number;
 }
 
 export const emptyStackFrame: StackFrame = {
@@ -109,7 +110,6 @@ export const emptyStackFrame: StackFrame = {
   FunctionName: '',
   FunctionOffset: 0,
   LineNumber: 0,
-  SourceType: 0,
 };
 
 export interface Executable {
@@ -155,7 +155,6 @@ export interface StackFrameMetadata {
   // unused atm due to lack of symbolization metadata
   SourcePackageURL: string;
   // unused atm due to lack of symbolization metadata
-  SourceType: number;
 }
 
 export function createStackFrameMetadata(
@@ -177,7 +176,6 @@ export function createStackFrameMetadata(
   metadata.SourceFilename = options.SourceFilename ?? '';
   metadata.SourcePackageHash = options.SourcePackageHash ?? '';
   metadata.SourcePackageURL = options.SourcePackageURL ?? '';
-  metadata.SourceType = options.SourceType ?? 0;
 
   // Unknown/invalid offsets are currently set to 0.
   //
@@ -236,23 +234,56 @@ export function getCalleeFunction(frame: StackFrameMetadata): string {
   // When there is no function name, only use the executable name
   return frame.FunctionName ? exeDisplayName + ': ' + frame.FunctionName : exeDisplayName;
 }
+export enum FrameSymbolStatus {
+  PARTIALLY_SYMBOLYZED = 'PARTIALLY_SYMBOLYZED',
+  NOT_SYMBOLIZED = 'NOT_SYMBOLIZED',
+  SYMBOLIZED = 'SYMBOLIZED',
+}
+export function getFrameSymbolStatus({
+  sourceFilename,
+  sourceLine,
+  exeFileName,
+}: {
+  sourceFilename: string;
+  sourceLine: number;
+  exeFileName?: string;
+}) {
+  if (sourceFilename === '' && sourceLine === 0) {
+    if (exeFileName) {
+      return FrameSymbolStatus.PARTIALLY_SYMBOLYZED;
+    }
+
+    return FrameSymbolStatus.NOT_SYMBOLIZED;
+  }
+
+  return FrameSymbolStatus.SYMBOLIZED;
+}
+
+const nativeLanguages = [FrameType.Native, FrameType.Kernel];
+export function getLanguageType({ frameType }: { frameType: FrameType }) {
+  return nativeLanguages.includes(frameType) ? 'NATIVE' : 'INTERPRETED';
+}
 
 export function getCalleeSource(frame: StackFrameMetadata): string {
-  if (frame.SourceFilename === '' && frame.SourceLine === 0) {
-    if (frame.ExeFileName) {
+  const frameSymbolStatus = getFrameSymbolStatus({
+    sourceFilename: frame.SourceFilename,
+    sourceLine: frame.SourceLine,
+    exeFileName: frame.ExeFileName,
+  });
+
+  switch (frameSymbolStatus) {
+    case FrameSymbolStatus.NOT_SYMBOLIZED: {
+      // If we don't have the executable filename, display <unsymbolized>
+      return '<unsymbolized>';
+    }
+    case FrameSymbolStatus.PARTIALLY_SYMBOLYZED: {
       // If no source line or filename available, display the executable offset
       return frame.ExeFileName + '+0x' + frame.AddressOrLine.toString(16);
     }
-
-    // If we don't have the executable filename, display <unsymbolized>
-    return '<unsymbolized>';
+    case FrameSymbolStatus.SYMBOLIZED: {
+      return frame.SourceFilename + (frame.SourceLine !== 0 ? `#${frame.SourceLine}` : '');
+    }
   }
-
-  if (frame.SourceFilename !== '' && frame.SourceLine === 0) {
-    return frame.SourceFilename;
-  }
-
-  return frame.SourceFilename + (frame.SourceLine !== 0 ? `#${frame.SourceLine}` : '');
 }
 
 export function groupStackFrameMetadataByStackTrace(

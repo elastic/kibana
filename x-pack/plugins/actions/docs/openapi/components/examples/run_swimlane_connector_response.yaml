@@ -1,0 +1,12 @@
+summary: Response from creating a Swimlane incident.
+value:
+  connector_id: a4746470-2f94-11ed-b0e0-87533c532698
+  data:
+    id: aKPmBHWzmdRQtx6Mx
+    title: TEST-457
+    url: https://elastic.swimlane.url.us/record/aNcL2xniGHGpa2AHb/aKPmBHWzmdRQtx6Mx
+    pushedDate: 2022-09-08T16:52:27.866Z
+    comments:
+      - commentId: 1
+        pushedDate: 2022-09-08T16:52:27.865Z
+  status: ok

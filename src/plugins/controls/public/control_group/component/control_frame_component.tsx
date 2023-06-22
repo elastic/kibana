@@ -6,30 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import {
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
-  EuiIcon,
-  EuiLink,
   EuiLoadingChart,
   EuiPopover,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupReduxState } from '../types';
-import { pluginServices } from '../../services';
-import { EditControlButton } from '../editor/edit_control';
+import { FloatingActions } from '@kbn/presentation-util-plugin/public';
+
+import {
+  controlGroupSelector,
+  useControlGroupContainer,
+} from '../embeddable/control_group_container';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { TIME_SLIDER_CONTROL } from '../../../common';
 
 interface ControlFrameErrorProps {
   error: Error;
@@ -38,25 +36,26 @@ interface ControlFrameErrorProps {
 const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const popoverButton = (
-    <EuiText className="errorEmbeddableCompact__button" size="xs">
-      <EuiLink
-        className="eui-textTruncate"
-        color="subdued"
-        onClick={() => setPopoverOpen((open) => !open)}
-      >
-        <EuiIcon type="alert" color="danger" />
-        <FormattedMessage
-          id="controls.frame.error.message"
-          defaultMessage="An error has occurred. Read more"
-        />
-      </EuiLink>
-    </EuiText>
+    <EuiButtonEmpty
+      color="danger"
+      iconSize="m"
+      iconType="error"
+      onClick={() => setPopoverOpen((open) => !open)}
+      className={'errorEmbeddableCompact__button'}
+      textProps={{ className: 'errorEmbeddableCompact__text' }}
+    >
+      <FormattedMessage
+        id="controls.frame.error.message"
+        defaultMessage="An error occurred. View more"
+      />
+    </EuiButtonEmpty>
   );
 
   return (
     <EuiPopover
       button={popoverButton}
       isOpen={isPopoverOpen}
+      className="errorEmbeddableCompact__popover"
       anchorClassName="errorEmbeddableCompact__popoverAnchor"
       closePopover={() => setPopoverOpen(false)}
     >
@@ -85,19 +84,17 @@ export const ControlFrame = ({
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const [fatalError, setFatalError] = useState<Error>();
 
-  const {
-    useEmbeddableSelector: select,
-    containerActions: { untilEmbeddableLoaded, removeEmbeddable },
-  } = useReduxContainerContext<ControlGroupReduxState>();
+  const controlGroup = useControlGroupContainer();
 
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
+  const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
+  const disabledActions = controlGroupSelector((state) => state.explicitInput.disabledActions);
 
-  // Controls Services Context
-  const {
-    overlays: { openConfirm },
-  } = pluginServices.getServices();
-
-  const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId, embeddableType });
+  const embeddable = useChildEmbeddable({
+    untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),
+    embeddableType,
+    embeddableId,
+  });
 
   const [title, setTitle] = useState<string>();
 
@@ -118,41 +115,6 @@ export const ControlFrame = ({
       errorSubscription?.unsubscribe();
     };
   }, [embeddable, embeddableRoot]);
-
-  const floatingActions = (
-    <div
-      className={classNames('controlFrameFloatingActions', {
-        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
-        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
-      })}
-    >
-      {!fatalError && embeddableType !== TIME_SLIDER_CONTROL && (
-        <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
-          <EditControlButton embeddableId={embeddableId} />
-        </EuiToolTip>
-      )}
-      <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
-        <EuiButtonIcon
-          data-test-subj={`control-action-${embeddableId}-delete`}
-          aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
-          onClick={() =>
-            openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
-              confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
-              cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
-              title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
-              buttonColor: 'danger',
-            }).then((confirmed) => {
-              if (confirmed) {
-                removeEmbeddable(embeddableId);
-              }
-            })
-          }
-          iconType="cross"
-          color="danger"
-        />
-      </EuiToolTip>
-    </div>
-  );
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
@@ -212,8 +174,16 @@ export const ControlFrame = ({
   );
 
   return (
-    <>
-      {embeddable && enableActions && floatingActions}
+    <FloatingActions
+      className={classNames({
+        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
+      })}
+      viewMode={viewMode}
+      embeddable={embeddable}
+      disabledActions={disabledActions}
+      isEnabled={embeddable && enableActions}
+    >
       <EuiFormRow
         data-test-subj="control-frame-title"
         fullWidth
@@ -225,6 +195,6 @@ export const ControlFrame = ({
       >
         {form}
       </EuiFormRow>
-    </>
+    </FloatingActions>
   );
 };

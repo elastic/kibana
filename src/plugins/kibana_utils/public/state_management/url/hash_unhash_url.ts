@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { replaceUrlHashQuery } from '../../../common/state_management/format';
 import { expandedStateToHashedState, hashedStateToExpandedState } from '../state_encoder';
-import { replaceUrlHashQuery } from './format';
 
 export type IParsedUrlQuery = Record<string, any>;
 

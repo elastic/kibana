@@ -17,6 +17,7 @@ export interface Field {
   description?: string;
   value?: string;
   format?: string;
+  date_format?: string;
   fields?: Fields;
   enabled?: boolean;
   path?: string;
@@ -38,6 +39,10 @@ export interface Field {
   null_value?: string;
   dimension?: boolean;
   default_field?: boolean;
+
+  // Fields specific of the aggregate_metric_double type
+  metrics?: string[];
+  default_metric?: string;
 
   // Meta fields
   metric_type?: string;

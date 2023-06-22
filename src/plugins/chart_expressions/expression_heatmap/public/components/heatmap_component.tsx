@@ -22,6 +22,7 @@ import {
   ESFixedIntervalUnit,
   ESCalendarIntervalUnit,
   PartialTheme,
+  SettingsProps,
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
@@ -36,6 +37,7 @@ import {
 } from '@kbn/visualizations-plugin/common/constants';
 import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -48,6 +50,8 @@ import {
   LegendColorPickerWrapper,
 } from '../utils/get_color_picker';
 import { defaultPaletteParams } from '../constants';
+import { ChartSplit } from './chart_split';
+import { getSplitDimensionAccessor, createSplitPoint } from '../utils/get_split_dimension_utils';
 import './index.scss';
 
 declare global {
@@ -148,6 +152,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     syncTooltips,
     syncCursor,
     renderComplete,
+    overrides,
   }) => {
     const chartRef = useRef<Chart>(null);
     const chartTheme = chartsThemeService.useChartsTheme();
@@ -204,13 +209,18 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       () => findMinMaxByColumnId([valueAccessor!], table),
       [valueAccessor, table]
     );
-
     const paletteParams = args.palette?.params;
     const xAccessor = args.xAccessor
       ? getAccessorByDimension(args.xAccessor, table.columns)
       : undefined;
     const yAccessor = args.yAccessor
       ? getAccessorByDimension(args.yAccessor, table.columns)
+      : undefined;
+    const splitChartRowAccessor = args.splitRowAccessor
+      ? getSplitDimensionAccessor(data.columns, args.splitRowAccessor, formatFactory)
+      : undefined;
+    const splitChartColumnAccessor = args.splitColumnAccessor
+      ? getSplitDimensionAccessor(data.columns, args.splitColumnAccessor, formatFactory)
       : undefined;
 
     const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
@@ -249,7 +259,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
         const cell = e[0][0];
-        const { x, y } = cell.datum;
+        const { x, y, smVerticalAccessorValue, smHorizontalAccessorValue } = cell.datum;
 
         const points = [
           {
@@ -281,6 +291,28 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             : []),
         ];
 
+        if (smHorizontalAccessorValue && args.splitColumnAccessor) {
+          const point = createSplitPoint(
+            args.splitColumnAccessor,
+            smHorizontalAccessorValue,
+            formatFactory,
+            table
+          );
+          if (point) {
+            points.push(point);
+          }
+        }
+        if (smVerticalAccessorValue && args.splitRowAccessor) {
+          const point = createSplitPoint(
+            args.splitRowAccessor,
+            smVerticalAccessorValue,
+            formatFactory,
+            table
+          );
+          if (point) {
+            points.push(point);
+          }
+        }
         const context: FilterEvent['data'] = {
           data: points.map((point) => ({
             row: point.row,
@@ -292,6 +324,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         onClickValue(context);
       },
       [
+        args.splitColumnAccessor,
+        args.splitRowAccessor,
+        formatFactory,
         formattedTable.formattedColumns,
         onClickValue,
         table,
@@ -498,6 +533,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       };
     });
 
+    const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
+      overrides,
+      'settings'
+    ) as Partial<SettingsProps>;
+
     const themeOverrides: PartialTheme = {
       legend: {
         labelOptions: {
@@ -515,10 +555,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               args.gridConfig.strokeColor ??
               chartTheme.axes?.gridLine?.horizontal?.stroke ??
               '#D3DAE6',
-          },
-          cellHeight: {
-            max: 'fill',
-            min: 1,
           },
         },
         cell: {
@@ -575,6 +611,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           }}
         >
           <Chart ref={chartRef}>
+            <ChartSplit
+              splitColumnAccessor={splitChartColumnAccessor}
+              splitRowAccessor={splitChartRowAccessor}
+            />
             <Settings
               onRenderChange={onRenderChange}
               noResults={
@@ -591,7 +631,13 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}
-              theme={[themeOverrides, chartTheme]}
+              theme={[
+                themeOverrides,
+                chartTheme,
+                ...(Array.isArray(settingsThemeOverrides)
+                  ? settingsThemeOverrides
+                  : [settingsThemeOverrides]),
+              ]}
               baseTheme={chartBaseTheme}
               xDomain={{
                 min:
@@ -606,6 +652,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
               ariaLabel={args.ariaLabel}
               ariaUseDefaultSummary={!args.ariaLabel}
+              {...settingsOverrides}
             />
             <Heatmap
               id="heatmap"

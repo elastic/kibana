@@ -27,8 +27,6 @@ export const useSecuritySolutionNavigation = () => {
     application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
 
-  const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
-
   const disabledNavTabs = [
     ...(!useIsExperimentalFeatureEnabled('kubernetesEnabled') ? ['kubernetes'] : []),
   ];
@@ -37,39 +35,15 @@ export const useSecuritySolutionNavigation = () => {
   const setBreadcrumbs = useSetBreadcrumbs();
 
   useEffect(() => {
-    if (pathName || pageName) {
-      setBreadcrumbs(
-        {
-          detailName,
-          flowTarget,
-          navTabs: enabledNavTabs,
-          pageName,
-          pathName,
-          search,
-          state,
-          tabName,
-        },
-        chrome,
-        navigateToUrl
-      );
+    if (!routeProps.pathName && !routeProps.pageName) {
+      return;
     }
-  }, [
-    chrome,
-    pageName,
-    pathName,
-    search,
-    state,
-    detailName,
-    flowTarget,
-    tabName,
-    getUrlForApp,
-    navigateToUrl,
-    enabledNavTabs,
-    setBreadcrumbs,
-  ]);
+
+    setBreadcrumbs({ ...routeProps, navTabs }, chrome, navigateToUrl);
+  }, [routeProps, chrome, getUrlForApp, navigateToUrl, enabledNavTabs, setBreadcrumbs]);
 
   return usePrimaryNavigation({
     navTabs: enabledNavTabs,
-    pageName,
+    pageName: routeProps.pageName,
   });
 };

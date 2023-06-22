@@ -14,9 +14,13 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { Subject } from 'rxjs';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 /**
- * The fetch status of a unified histogram request
+ * The fetch status of a Unified Histogram request
  */
 export enum UnifiedHistogramFetchStatus {
   uninitialized = 'uninitialized',
@@ -27,14 +31,17 @@ export enum UnifiedHistogramFetchStatus {
 }
 
 /**
- * The services required by the unified histogram components
+ * The services required by the Unified Histogram components
  */
 export interface UnifiedHistogramServices {
   data: DataPublicPluginStart;
   theme: Theme;
+  uiActions: UiActionsStart;
   uiSettings: IUiSettingsClient;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
+  storage: Storage;
+  expressions: ExpressionsStart;
 }
 
 /**
@@ -46,6 +53,9 @@ export interface UnifiedHistogramBucketInterval {
   scale?: number;
 }
 
+/**
+ * The adapters passed up from Lens
+ */
 export type UnifiedHistogramAdapters = Partial<DefaultInspectorAdapters>;
 
 /**
@@ -53,17 +63,13 @@ export type UnifiedHistogramAdapters = Partial<DefaultInspectorAdapters>;
  */
 export interface UnifiedHistogramChartLoadEvent {
   /**
-   * True if loading is complete
-   */
-  complete: boolean;
-  /**
    * Inspector adapters for the request
    */
   adapters: UnifiedHistogramAdapters;
 }
 
 /**
- * Context object for requests made by unified histogram components
+ * Context object for requests made by Unified Histogram components
  */
 export interface UnifiedHistogramRequestContext {
   /**
@@ -117,3 +123,20 @@ export interface UnifiedHistogramBreakdownContext {
    */
   field?: DataViewField;
 }
+
+/**
+ * Message to refetch the chart and total hits
+ */
+export interface UnifiedHistogramRefetchMessage {
+  type: 'refetch';
+}
+
+/**
+ * Unified histogram input message
+ */
+export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
+
+/**
+ * Unified histogram input observable
+ */
+export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;

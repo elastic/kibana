@@ -9,12 +9,13 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiModal, EuiModalBody, EuiSpacer } from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { snoozeRule, unsnoozeRule } from '../../../lib/rule_api';
+import { snoozeRule } from '../../../lib/rule_api/snooze';
+import { unsnoozeRule } from '../../../lib/rule_api/unsnooze';
 import {
   SNOOZE_FAILED_MESSAGE,
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
-} from './rules_list_notify_badge';
+} from './notify_badge';
 import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
 import { Rule, RuleTypeParams, SnoozeSchedule } from '../../../../types';
 

@@ -9,7 +9,7 @@
 import Path from 'path';
 
 import { v4 as uuidV4 } from 'uuid';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
@@ -78,12 +78,12 @@ export function parseFlags(flags: FlagsReader) {
     installDir: flags.path('kibana-install-dir'),
     grep: flags.string('grep'),
     suiteTags: {
-      include: flags.arrayOfStrings('include-tag'),
-      exclude: flags.arrayOfStrings('exclude-tag'),
+      include: flags.arrayOfStrings('include-tag') ?? [],
+      exclude: flags.arrayOfStrings('exclude-tag') ?? [],
     },
     suiteFilters: {
-      include: flags.arrayOfPaths('include'),
-      exclude: flags.arrayOfPaths('exclude'),
+      include: flags.arrayOfPaths('include') ?? [],
+      exclude: flags.arrayOfPaths('exclude') ?? [],
     },
   };
 }

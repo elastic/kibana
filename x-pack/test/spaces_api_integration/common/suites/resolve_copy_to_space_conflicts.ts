@@ -108,6 +108,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
               },
               destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
               overwrite: true,
+              managed: false,
             },
             {
               id: `cts_vis_3_${sourceSpaceId}`,
@@ -118,6 +119,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
               },
               destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
               overwrite: true,
+              managed: false,
             },
           ],
         },
@@ -147,6 +149,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
               },
               destinationId: `cts_dashboard_${destinationSpaceId}`, // this conflicted with another dashboard in the destination space because of a shared originId
               overwrite: true,
+              managed: false,
             },
           ],
         },
@@ -380,7 +383,14 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
         })();
         const meta = { title, icon: 'beaker' };
         expect(successResults).to.eql([
-          { type, id, meta, overwrite: true, ...(destinationId && { destinationId }) },
+          {
+            type,
+            id,
+            meta,
+            overwrite: true,
+            ...(destinationId && { destinationId }),
+            managed: false,
+          },
         ]);
       };
 

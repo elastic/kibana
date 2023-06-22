@@ -20,9 +20,7 @@ export {
   KBN_P12_PASSWORD,
 } from './src/certs';
 export * from './src/axios';
-export * from './src/ship_ci_stats_cli';
 export * from './src/plugin_list';
 export * from './src/streams';
-export * from './src/babel';
 export * from './src/extract';
 export * from './src/diff_strings';

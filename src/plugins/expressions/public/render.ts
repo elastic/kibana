@@ -34,6 +34,7 @@ export interface ExpressionRenderHandlerParams {
   syncTooltips?: boolean;
   interactive?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
+  getCompatibleCellValueActions?: (data: object[]) => Promise<unknown[]>;
   executionContext?: KibanaExecutionContext;
 }
 
@@ -63,6 +64,7 @@ export class ExpressionRenderHandler {
       syncCursor,
       interactive,
       hasCompatibleActions = async () => false,
+      getCompatibleCellValueActions = async () => [],
       executionContext,
     }: ExpressionRenderHandlerParams = {}
   ) {
@@ -115,6 +117,7 @@ export class ExpressionRenderHandler {
         return interactive ?? true;
       },
       hasCompatibleActions,
+      getCompatibleCellValueActions,
     };
   }
 

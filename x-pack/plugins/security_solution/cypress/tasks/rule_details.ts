@@ -15,7 +15,6 @@ import {
 } from '../screens/exceptions';
 import {
   ALERTS_TAB,
-  BACK_TO_RULES,
   EXCEPTIONS_TAB,
   FIELDS_BROWSER_BTN,
   REFRESH_BUTTON,
@@ -29,6 +28,9 @@ import {
   EDIT_EXCEPTION_BTN,
   ENDPOINT_EXCEPTIONS_TAB,
   EDIT_RULE_SETTINGS_LINK,
+  BACK_TO_RULES_TABLE,
+  EXCEPTIONS_TAB_EXPIRED_FILTER,
+  EXCEPTIONS_TAB_ACTIVE_FILTER,
 } from '../screens/rule_details';
 import {
   addExceptionConditions,
@@ -105,6 +107,11 @@ export const goToExceptionsTab = () => {
   cy.get(EXCEPTIONS_TAB).click();
 };
 
+export const viewExpiredExceptionItems = () => {
+  cy.get(EXCEPTIONS_TAB_EXPIRED_FILTER).click();
+  cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
+};
+
 export const goToEndpointExceptionsTab = () => {
   cy.get(ENDPOINT_EXCEPTIONS_TAB).should('exist');
   cy.get(ENDPOINT_EXCEPTIONS_TAB).click();
@@ -123,6 +130,7 @@ export const removeException = () => {
 
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
+    cy.log('Wating for the rule to be executed');
     cy.get(REFRESH_BUTTON).click({ force: true });
     return cy
       .get(RULE_STATUS)
@@ -131,8 +139,8 @@ export const waitForTheRuleToBeExecuted = () => {
   });
 };
 
-export const goBackToAllRulesTable = () => {
-  cy.get(BACK_TO_RULES).click();
+export const goBackToRulesTable = () => {
+  cy.get(BACK_TO_RULES_TABLE).click();
 };
 
 export const getDetails = (title: string | RegExp) =>

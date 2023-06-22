@@ -29,3 +29,9 @@ const uiSettings: IUiSettingsClient = {
 };
 
 export const getUiSettings = () => uiSettings;
+export const getSettings = () => {
+  return {
+    client: uiSettings,
+    globalClient: uiSettings,
+  };
+};

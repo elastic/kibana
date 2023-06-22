@@ -6,9 +6,17 @@ Manage {kib} saved objects, including dashboards, visualizations, and more.
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
-NOTE: For managing {data-sources}, use the <<data-views-api, {data-sources} API>>.
-
 The following saved objects APIs are available: 
+
+* <<saved-objects-api-export, Export objects API>> to retrieve sets of saved objects that you want to import into {kib}
+
+* <<saved-objects-api-import, Import objects API>> to create sets of {kib} saved objects from a file created by the export API
+
+* <<saved-objects-api-resolve-import-errors, Resolve import errors API>> to resolve errors from the import API
+
+* <<saved-objects-api-rotate-encryption-key, Rotate encryption key API>> to rotate the encryption key for encrypted saved objects
+
+deprecated::[8.7.0,Use <<data-views-api>> for managing data views]
 
 * <<saved-objects-api-get, Get object API>> to retrieve a single {kib} saved object by ID
 
@@ -32,14 +40,10 @@ The following saved objects APIs are available:
 
 * <<saved-objects-api-bulk-delete, Bulk delete objects API>> to remove multiple {kib} saved objects
 
-* <<saved-objects-api-export, Export objects API>> to retrieve sets of saved objects that you want to import into {kib}
-
-* <<saved-objects-api-import, Import objects API>> to create sets of {kib} saved objects from a file created by the export API
-
-* <<saved-objects-api-resolve-import-errors, Resolve import errors API>> to resolve errors from the import API
-
-* <<saved-objects-api-rotate-encryption-key, Rotate encryption key API>> to rotate the encryption key for encrypted saved objects
-
+include::saved-objects/export.asciidoc[]
+include::saved-objects/import.asciidoc[]
+include::saved-objects/resolve_import_errors.asciidoc[]
+include::saved-objects/rotate_encryption_key.asciidoc[]
 include::saved-objects/get.asciidoc[]
 include::saved-objects/bulk_get.asciidoc[]
 include::saved-objects/find.asciidoc[]
@@ -49,9 +53,6 @@ include::saved-objects/update.asciidoc[]
 include::saved-objects/bulk_update.asciidoc[]
 include::saved-objects/delete.asciidoc[]
 include::saved-objects/bulk_delete.asciidoc[]
-include::saved-objects/export.asciidoc[]
-include::saved-objects/import.asciidoc[]
-include::saved-objects/resolve_import_errors.asciidoc[]
 include::saved-objects/resolve.asciidoc[]
 include::saved-objects/bulk_resolve.asciidoc[]
-include::saved-objects/rotate_encryption_key.asciidoc[]
+

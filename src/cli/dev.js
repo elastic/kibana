@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-require('./apm')(process.env.ELASTIC_APM_SERVICE_NAME || 'kibana-proxy');
 require('../setup_node_env');
-require('../setup_node_env/root');
+require('./apm')(process.env.ELASTIC_APM_SERVICE_NAME || 'kibana-proxy');
 require('./cli');

@@ -24,18 +24,18 @@ describe('FetchSyncJobs', () => {
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
         '/internal/enterprise_search/connectors/connectorId1/sync_jobs',
-        { query: { page: 0, size: 10 } }
+        { query: { from: 0, size: 10 } }
       );
       await expect(result).resolves.toEqual('result');
     });
     it('appends query if specified', async () => {
       const promise = Promise.resolve('result');
       http.get.mockReturnValue(promise);
-      const result = fetchSyncJobs({ connectorId: 'connectorId1', page: 10, size: 20 });
+      const result = fetchSyncJobs({ connectorId: 'connectorId1', from: 10, size: 20 });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
         '/internal/enterprise_search/connectors/connectorId1/sync_jobs',
-        { query: { page: 10, size: 20 } }
+        { query: { from: 10, size: 20 } }
       );
       await expect(result).resolves.toEqual('result');
     });

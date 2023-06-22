@@ -64,6 +64,7 @@ export interface AggregateEventsWithAuthFilter {
   type: string;
   authFilter: KueryNode;
   aggregateOptions: AggregateOptionsType;
+  includeSpaceAgnostic?: boolean;
 }
 
 export type FindEventsOptionsWithAuthFilter = QueryOptionsEventsWithAuthFilter & {
@@ -85,6 +86,7 @@ export interface AggregateEventsBySavedObjectResult {
 type GetQueryBodyWithAuthFilterOpts =
   | (FindEventsOptionsWithAuthFilter & {
       namespaces: AggregateEventsWithAuthFilter['namespaces'];
+      includeSpaceAgnostic?: AggregateEventsWithAuthFilter['includeSpaceAgnostic'];
     })
   | AggregateEventsWithAuthFilter;
 
@@ -527,7 +529,7 @@ export function getQueryBodyWithAuthFilter(
   opts: GetQueryBodyWithAuthFilterOpts,
   queryOptions: QueryOptionsType
 ) {
-  const { namespaces, type, authFilter } = opts;
+  const { namespaces, type, authFilter, includeSpaceAgnostic } = opts;
   const { start, end, filter } = queryOptions ?? {};
   const ids = 'ids' in opts ? opts.ids : [];
 
@@ -568,7 +570,22 @@ export function getQueryBodyWithAuthFilter(
     },
     {
       bool: {
-        should: namespaceQuery,
+        ...(includeSpaceAgnostic
+          ? {
+              should: [
+                {
+                  bool: {
+                    should: namespaceQuery,
+                  },
+                },
+                {
+                  match: {
+                    ['kibana.saved_objects.space_agnostic']: true,
+                  },
+                },
+              ],
+            }
+          : { should: namespaceQuery }),
       },
     },
   ];

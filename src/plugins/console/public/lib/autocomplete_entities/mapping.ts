@@ -7,9 +7,15 @@
  */
 
 import _ from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { type Settings } from '../../services';
+import { API_BASE_PATH } from '../../../common/constants';
+import type { ResultTerm, AutoCompleteContext } from '../autocomplete/types';
 import { expandAliases } from './expand_aliases';
 import type { Field, FieldMapping } from './types';
+import { type AutoCompleteEntitiesApiResponse } from './types';
 
 function getFieldNamesFromProperties(properties: Record<string, FieldMapping> = {}) {
   const fieldList = Object.entries(properties).flatMap(([fieldName, fieldMapping]) => {
@@ -70,22 +76,140 @@ function getFieldNamesFromFieldMapping(
 
 export interface BaseMapping {
   perIndexTypes: Record<string, object>;
-  getMappings(indices: string | string[], types?: string | string[]): Field[];
+  /**
+   * Fetches mappings definition
+   */
+  fetchMappings(index: string): Promise<IndicesGetMappingResponse>;
+
+  /**
+   * Retrieves mappings definition from cache, fetches if necessary.
+   */
+  getMappings(
+    indices: string | string[],
+    types?: string | string[],
+    autoCompleteContext?: AutoCompleteContext
+  ): Field[];
+
+  /**
+   * Stores mappings definition
+   * @param mappings
+   */
   loadMappings(mappings: IndicesGetMappingResponse): void;
   clearMappings(): void;
 }
 
 export class Mapping implements BaseMapping {
+  private http!: HttpSetup;
+
+  private settings!: Settings;
+
+  /**
+   * Map of the mappings of actual ES indices.
+   */
   public perIndexTypes: Record<string, object> = {};
 
-  getMappings = (indices: string | string[], types?: string | string[]) => {
+  /**
+   * Map of the user-input wildcards and actual indices.
+   */
+  public perWildcardIndices: Record<string, string[]> = {};
+
+  private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
+
+  /**
+   * Indicates if mapping fetching is in progress.
+   */
+  public readonly isLoading$ = this._isLoading$.asObservable();
+
+  /**
+   * Map of the currently loading mappings for index patterns specified by a user.
+   * @private
+   */
+  private loadingState: Record<string, boolean> = {};
+
+  public setup(http: HttpSetup, settings: Settings) {
+    this.http = http;
+    this.settings = settings;
+  }
+
+  /**
+   * Fetches mappings of the requested indices.
+   * @param index
+   */
+  async fetchMappings(index: string): Promise<IndicesGetMappingResponse> {
+    const response = await this.http.get<AutoCompleteEntitiesApiResponse>(
+      `${API_BASE_PATH}/autocomplete_entities`,
+      {
+        query: { fields: true, fieldsIndices: index },
+      }
+    );
+
+    return response.mappings;
+  }
+
+  getMappings = (
+    indices: string | string[],
+    types?: string | string[],
+    autoCompleteContext?: AutoCompleteContext
+  ) => {
     // get fields for indices and types. Both can be a list, a string or null (meaning all).
     let ret: Field[] = [];
+
+    if (!this.settings.getAutocomplete().fields) return ret;
+
     indices = expandAliases(indices);
 
     if (typeof indices === 'string') {
       const typeDict = this.perIndexTypes[indices] as Record<string, unknown>;
-      if (!typeDict) {
+
+      if (!typeDict || Object.keys(typeDict).length === 0) {
+        if (!autoCompleteContext) return ret;
+
+        // Mappings fetching for the index is already in progress
+        if (this.loadingState[indices]) return ret;
+
+        this.loadingState[indices] = true;
+
+        if (!autoCompleteContext.asyncResultsState) {
+          autoCompleteContext.asyncResultsState = {} as AutoCompleteContext['asyncResultsState'];
+        }
+
+        autoCompleteContext.asyncResultsState!.isLoading = true;
+
+        autoCompleteContext.asyncResultsState!.results = new Promise<ResultTerm[]>(
+          (resolve, reject) => {
+            this._isLoading$.next(true);
+
+            this.fetchMappings(indices as string)
+              .then((mapping) => {
+                this._isLoading$.next(false);
+
+                autoCompleteContext.asyncResultsState!.isLoading = false;
+                autoCompleteContext.asyncResultsState!.lastFetched = Date.now();
+
+                const mappingsIndices = Object.keys(mapping);
+                if (
+                  mappingsIndices.length > 1 ||
+                  (mappingsIndices[0] && mappingsIndices[0] !== indices)
+                ) {
+                  this.perWildcardIndices[indices as string] = Object.keys(mapping);
+                }
+
+                // cache mappings
+                this.loadMappings(mapping);
+
+                const mappings = this.getMappings(indices, types, autoCompleteContext);
+                delete this.loadingState[indices as string];
+                resolve(mappings);
+              })
+              .catch((error) => {
+                // eslint-disable-next-line no-console
+                console.error(error);
+                this._isLoading$.next(false);
+                delete this.loadingState[indices as string];
+              });
+          }
+        );
+
         return [];
       }
 
@@ -108,7 +232,7 @@ export class Mapping implements BaseMapping {
       // multi index mode.
       Object.keys(this.perIndexTypes).forEach((index) => {
         if (!indices || indices.length === 0 || indices.includes(index)) {
-          ret.push(this.getMappings(index, types) as unknown as Field);
+          ret.push(this.getMappings(index, types, autoCompleteContext) as unknown as Field);
         }
       });
 
@@ -121,8 +245,6 @@ export class Mapping implements BaseMapping {
   };
 
   loadMappings = (mappings: IndicesGetMappingResponse) => {
-    this.perIndexTypes = {};
-
     Object.entries(mappings).forEach(([index, indexMapping]) => {
       const normalizedIndexMappings: Record<string, object[]> = {};
       let transformedMapping: Record<string, any> = indexMapping;

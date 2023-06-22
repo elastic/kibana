@@ -7,15 +7,37 @@
 
 import * as rt from 'io-ts';
 
-export const UserRT = rt.intersection([
-  rt.type({
-    email: rt.union([rt.undefined, rt.null, rt.string]),
-    full_name: rt.union([rt.undefined, rt.null, rt.string]),
-    username: rt.union([rt.undefined, rt.null, rt.string]),
-  }),
+const UserWithoutProfileUidRt = rt.type({
+  email: rt.union([rt.undefined, rt.null, rt.string]),
+  full_name: rt.union([rt.undefined, rt.null, rt.string]),
+  username: rt.union([rt.undefined, rt.null, rt.string]),
+});
+
+export const UserRt = rt.intersection([
+  UserWithoutProfileUidRt,
   rt.partial({ profile_uid: rt.string }),
 ]);
 
-export const UsersRt = rt.array(UserRT);
+export const UserWithProfileInfoRt = rt.intersection([
+  rt.type({
+    user: UserWithoutProfileUidRt,
+  }),
+  rt.partial({ uid: rt.string }),
+  rt.partial({
+    avatar: rt.partial({ initials: rt.string, color: rt.string, imageUrl: rt.string }),
+  }),
+]);
 
-export type User = rt.TypeOf<typeof UserRT>;
+export const UsersRt = rt.array(UserRt);
+
+export type User = rt.TypeOf<typeof UserRt>;
+export type UserWithProfileInfo = rt.TypeOf<typeof UserWithProfileInfoRt>;
+
+export const GetCaseUsersResponseRt = rt.type({
+  assignees: rt.array(UserWithProfileInfoRt),
+  unassignedUsers: rt.array(UserWithProfileInfoRt),
+  participants: rt.array(UserWithProfileInfoRt),
+  reporter: UserWithProfileInfoRt,
+});
+
+export type GetCaseUsersResponse = rt.TypeOf<typeof GetCaseUsersResponseRt>;

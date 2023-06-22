@@ -11,17 +11,12 @@
 const execa = require('execa');
 const Listr = require('listr');
 const { resolve } = require('path');
-const { argv } = require('yargs');
 
 const root = resolve(__dirname, '../../../..');
 
 const execaOpts = { cwd: root, stderr: 'pipe' };
 
-const useOptimizedTsConfig = !!argv.optimizeTs;
-
-const tsconfig = useOptimizedTsConfig
-  ? resolve(root, 'tsconfig.json')
-  : resolve(root, 'x-pack/plugins/apm/tsconfig.json');
+const tsconfig = resolve(root, 'x-pack/plugins/apm/tsconfig.json');
 
 const testTsconfig = resolve(root, 'x-pack/test/tsconfig.json');
 
@@ -33,32 +28,18 @@ const tasks = new Listr(
     },
     {
       title: 'Typescript',
-      task: () =>
-        execa(
-          'node',
-          [
-            resolve(
-              __dirname,
-              useOptimizedTsConfig
-                ? './optimize_tsconfig.js'
-                : './unoptimize_tsconfig.js'
-            ),
-          ],
-          execaOpts
-        ).then(() =>
-          Promise.all([
-            execa(
-              require.resolve('typescript/bin/tsc'),
-              ['--project', tsconfig, '--pretty', '--noEmit'],
-              execaOpts
-            ),
-            execa(
-              require.resolve('typescript/bin/tsc'),
-              ['--project', testTsconfig, '--pretty', '--noEmit'],
-              execaOpts
-            ),
-          ])
-        ),
+      task: async () => {
+        await execa('node', [
+          resolve(__dirname, '../../../../scripts/type_check.js'),
+          '--project',
+          tsconfig,
+        ]);
+        await execa('node', [
+          resolve(__dirname, '../../../../scripts/type_check.js'),
+          '--project',
+          testTsconfig,
+        ]);
+      },
     },
     {
       title: 'Jest',
@@ -69,10 +50,6 @@ const tasks = new Listr(
             resolve(__dirname, '../../../../scripts/jest.js'),
             '--config',
             resolve(__dirname, '../jest.config.js'),
-            '--reporters',
-            resolve(__dirname, '../../../../node_modules/jest-silent-reporter'),
-            '--collect-coverage',
-            'false',
             '--maxWorkers',
             4,
           ],

@@ -47,6 +47,6 @@ export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['message_queue', 'kubernetes'],
+    integrationBrowserCategories: ['observability'],
   };
 }

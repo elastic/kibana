@@ -12,23 +12,23 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { asInteger } from '../../../../../common/utils/formatters';
+import React, { useMemo } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { asInteger } from '../../../../../common/utils/formatters';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';
-import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
-import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
+import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
+import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
+import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
@@ -65,6 +65,7 @@ interface Props {
   initialSortField: string;
   initialSortDirection: 'asc' | 'desc';
   comparisonEnabled?: boolean;
+  isLoading: boolean;
 }
 
 function ErrorGroupList({
@@ -75,6 +76,7 @@ function ErrorGroupList({
   comparisonEnabled,
   initialSortField,
   initialSortDirection,
+  isLoading,
 }: Props) {
   const { query } = useApmParams('/services/{serviceName}/errors');
   const { offset } = query;
@@ -108,7 +110,11 @@ function ErrorGroupList({
         width: `${unit * 6}px`,
         render: (_, { groupId }) => {
           return (
-            <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>
+            <GroupIdLink
+              serviceName={serviceName}
+              errorGroupId={groupId}
+              data-test-subj="errorGroupId"
+            >
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
@@ -212,10 +218,11 @@ function ErrorGroupList({
           const previousPeriodTimeseries =
             detailedStatistics?.previousPeriod?.[groupId]?.timeseries;
           const { currentPeriodColor, previousPeriodColor } =
-            getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+            getTimeSeriesColor(ChartType.ERROR_OCCURRENCES);
 
           return (
             <SparkPlot
+              type="bar"
               color={currentPeriodColor}
               isLoading={detailedStatisticsLoading}
               series={currentPeriodTimeseries}
@@ -250,15 +257,22 @@ function ErrorGroupList({
 
   return (
     <ManagedTable
-      noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-        defaultMessage: 'No errors found',
-      })}
+      noItemsMessage={
+        isLoading
+          ? i18n.translate('xpack.apm.errorsTable.loading', {
+              defaultMessage: 'Loading...',
+            })
+          : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+              defaultMessage: 'No errors found',
+            })
+      }
       items={mainStatistics}
       columns={columns}
       initialSortField={initialSortField}
       initialSortDirection={initialSortDirection}
       sortItems={false}
       initialPageSize={25}
+      isLoading={isLoading}
     />
   );
 }

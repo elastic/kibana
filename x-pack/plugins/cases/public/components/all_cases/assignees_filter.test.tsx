@@ -187,8 +187,10 @@ describe('AssigneesFilterPopover', () => {
 
     const assignees = screen.getAllByRole('option');
     expect(within(assignees[1]).getByText('Wet Dingo')).toBeInTheDocument();
-    expect(within(assignees[2]).getByText('Damaged Raccoon')).toBeInTheDocument();
-    expect(within(assignees[3]).getByText('Physical Dinosaur')).toBeInTheDocument();
+    expect(within(assignees[2]).getByText('Convenient Orca')).toBeInTheDocument();
+    expect(within(assignees[3]).getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(within(assignees[4]).getByText('Physical Dinosaur')).toBeInTheDocument();
+    expect(within(assignees[5]).getByText('Silly Hare')).toBeInTheDocument();
   });
 
   it('does not show the number of filters', async () => {

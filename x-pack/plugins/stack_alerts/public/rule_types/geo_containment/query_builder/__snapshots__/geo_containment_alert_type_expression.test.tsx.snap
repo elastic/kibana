@@ -25,6 +25,7 @@ exports[`should render BoundaryIndexExpression 1`] = `
           indexPatternService={
             Object {
               "clearCache": [MockFunction],
+              "create": [MockFunction],
               "createField": [MockFunction],
               "createFieldList": [MockFunction],
               "ensureDefaultDataView": [MockFunction],
@@ -112,6 +113,7 @@ exports[`should render EntityIndexExpression 1`] = `
           indexPatternService={
             Object {
               "clearCache": [MockFunction],
+              "create": [MockFunction],
               "createField": [MockFunction],
               "createFieldList": [MockFunction],
               "ensureDefaultDataView": [MockFunction],
@@ -205,6 +207,7 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
           indexPatternService={
             Object {
               "clearCache": [MockFunction],
+              "create": [MockFunction],
               "createField": [MockFunction],
               "createFieldList": [MockFunction],
               "ensureDefaultDataView": [MockFunction],

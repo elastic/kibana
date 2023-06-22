@@ -27,6 +27,16 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
+export type ErrorGroupMainStatisticsResponse = Array<{
+  groupId: string;
+  name: string;
+  lastSeen: number;
+  occurrences: number;
+  culprit: string | undefined;
+  handled: boolean | undefined;
+  type: string | undefined;
+}>;
+
 export async function getErrorGroupMainStatistics({
   kuery,
   serviceName,
@@ -51,7 +61,7 @@ export async function getErrorGroupMainStatistics({
   maxNumberOfErrorGroups?: number;
   transactionName?: string;
   transactionType?: string;
-}) {
+}): Promise<ErrorGroupMainStatisticsResponse> {
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'lastSeen';
 

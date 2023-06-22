@@ -143,7 +143,6 @@ const defaultStackFrame = {
   FunctionName: '',
   FunctionOffset: 0,
   LineNumber: 0,
-  SourceType: 0,
 };
 
 export const stackFrames = new Map([
@@ -154,13 +153,9 @@ export const stackFrames = new Map([
       FunctionName: 'java.lang.Runnable java.util.concurrent.ThreadPoolExecutor.getTask()',
       FunctionOffset: 26,
       LineNumber: 1061,
-      SourceType: 5,
     },
   ],
-  [
-    frameID.B,
-    { FileName: '', FunctionName: 'sock_sendmsg', FunctionOffset: 0, LineNumber: 0, SourceType: 0 },
-  ],
+  [frameID.B, { FileName: '', FunctionName: 'sock_sendmsg', FunctionOffset: 0, LineNumber: 0 }],
   [frameID.C, defaultStackFrame],
   [frameID.D, defaultStackFrame],
   [frameID.E, defaultStackFrame],
@@ -170,10 +165,7 @@ export const stackFrames = new Map([
   [frameID.I, defaultStackFrame],
   [frameID.J, defaultStackFrame],
   [frameID.K, defaultStackFrame],
-  [
-    frameID.L,
-    { FileName: '', FunctionName: 'udp_sendmsg', FunctionOffset: 0, LineNumber: 0, SourceType: 0 },
-  ],
+  [frameID.L, { FileName: '', FunctionName: 'udp_sendmsg', FunctionOffset: 0, LineNumber: 0 }],
   [frameID.M, defaultStackFrame],
   [frameID.N, defaultStackFrame],
   [frameID.O, defaultStackFrame],

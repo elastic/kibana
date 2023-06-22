@@ -5,30 +5,27 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import { KibanaServices } from '../../../lib/kibana';
 
 export interface GetJobsSummaryArgs {
-  http: HttpSetup;
   jobIds?: string[];
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 /**
  * Fetches a summary of all ML jobs currently installed
  *
- * @param http HTTP Service
  * @param jobIds Array of job IDs to filter against
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
 export const getJobsSummary = async ({
-  http,
   jobIds,
   signal,
 }: GetJobsSummaryArgs): Promise<MlSummaryJob[]> =>
-  http.fetch<MlSummaryJob[]>('/api/ml/jobs/jobs_summary', {
+  KibanaServices.get().http.fetch<MlSummaryJob[]>('/api/ml/jobs/jobs_summary', {
     method: 'POST',
     body: JSON.stringify({ jobIds: jobIds ?? [] }),
     asSystemRequest: true,

@@ -15,7 +15,7 @@ import {
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { DiscoverAppLocator } from '@kbn/discover-plugin/public';
+import { DiscoverAppLocator } from '@kbn/discover-plugin/common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 const i18nTranslateSpy = i18n.translate as unknown as jest.SpyInstance;

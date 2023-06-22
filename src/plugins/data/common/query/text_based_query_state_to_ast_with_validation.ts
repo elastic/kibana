@@ -5,26 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  isOfAggregateQueryType,
-  getIndexPatternFromSQLQuery,
-  Query,
-  AggregateQuery,
-} from '@kbn/es-query';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryState } from '..';
 import { textBasedQueryStateToExpressionAst } from './text_based_query_state_to_ast';
 
 interface Args extends QueryState {
-  dataViewsService: DataViewsContract;
+  dataView?: DataView;
   inputQuery?: Query;
+  timeFieldName?: string;
 }
-
-const getIndexPatternFromAggregateQuery = (query: AggregateQuery) => {
-  if ('sql' in query) {
-    return getIndexPatternFromSQLQuery(query.sql);
-  }
-};
 
 /**
  * Converts QueryState to expression AST
@@ -37,29 +27,17 @@ export async function textBasedQueryStateToAstWithValidation({
   query,
   inputQuery,
   time,
-  dataViewsService,
+  dataView,
 }: Args) {
   let ast;
   if (query && isOfAggregateQueryType(query)) {
-    // sql query
-    const idxPattern = getIndexPatternFromAggregateQuery(query);
-    const idsTitles = await dataViewsService.getIdsWithTitle();
-    const dataViewIdTitle = idsTitles.find(({ title }) => title === idxPattern);
-
-    if (dataViewIdTitle) {
-      const dataView = await dataViewsService.get(dataViewIdTitle.id);
-      const timeFieldName = dataView.timeFieldName;
-
-      ast = textBasedQueryStateToExpressionAst({
-        filters,
-        query,
-        inputQuery,
-        time,
-        timeFieldName,
-      });
-    } else {
-      throw new Error(`No data view found for index pattern ${idxPattern}`);
-    }
+    ast = textBasedQueryStateToExpressionAst({
+      filters,
+      query,
+      inputQuery,
+      time,
+      timeFieldName: dataView?.timeFieldName,
+    });
   }
   return ast;
 }

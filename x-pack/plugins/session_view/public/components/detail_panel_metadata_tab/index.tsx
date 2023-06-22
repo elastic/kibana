@@ -50,24 +50,11 @@ export const DetailPanelMetadataTab = ({
     <>
       <DetailPanelAccordion
         id="metadataHost"
-        title={i18n.translate('xpack.sessionView.metadataDetailsTab.metadata', {
-          defaultMessage: 'Metadata',
+        title={i18n.translate('xpack.sessionView.metadataDetailsTab.metadataHost', {
+          defaultMessage: 'Host',
         })}
         initialIsOpen={true}
         listItems={[
-          {
-            title: <DetailPanelListItem>hostname</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy
-                textToCopy={`host.hostname: "${hostData.hostname}"`}
-                tooltipContent={hostData.hostname}
-              >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {hostData.hostname}
-                </EuiTextColor>
-              </DetailPanelCopy>
-            ),
-          },
           {
             title: <DetailPanelListItem>id</DetailPanelListItem>,
             description: (
@@ -77,6 +64,19 @@ export const DetailPanelMetadataTab = ({
               >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                   {hostData.id}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>hostname</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`host.hostname: "${hostData.hostname}"`}
+                tooltipContent={hostData.hostname}
+              >
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {hostData.hostname}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -133,7 +133,7 @@ export const DetailPanelMetadataTab = ({
           <DetailPanelAccordion
             id="hostOS"
             title={i18n.translate('xpack.sessionView.metadataDetailsTab.host', {
-              defaultMessage: 'Host OS',
+              defaultMessage: 'OS',
             })}
             listItems={[
               {
@@ -301,6 +301,19 @@ export const DetailPanelMetadataTab = ({
                   >
                     <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                       {cloudData.project.id}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>project.name</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`cloud.project.name: "${cloudData.project.name}"`}
+                    tooltipContent={cloudData.project.name}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {cloudData.project.name}
                     </EuiTextColor>
                   </DetailPanelCopy>
                 ),

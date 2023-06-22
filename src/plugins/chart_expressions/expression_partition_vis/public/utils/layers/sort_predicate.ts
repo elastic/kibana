@@ -30,7 +30,7 @@ export const extractUniqTermsMap = (dataTable: Datatable, columnId: string) =>
     {}
   );
 
-const sortPredicateSaveSourceOrder: SortPredicatePureFn =
+export const sortPredicateSaveSourceOrder: SortPredicatePureFn =
   () =>
   ([, node1], [, node2]) => {
     const [index1] = node1.inputIndex ?? [];

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { lastValueFrom } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { Query } from '@elastic/eui';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import {
@@ -20,7 +22,10 @@ export interface BuildParseSearchQueryOptions {
 export const buildParseSearchQuery = ({
   cache,
 }: BuildParseSearchQueryOptions): SavedObjectsTaggingApiUi['parseSearchQuery'] => {
-  return (query: string, { tagField = 'tag', useName = true }: ParseSearchQueryOptions = {}) => {
+  return async (
+    query: string,
+    { tagField = 'tag', useName = true }: ParseSearchQueryOptions = {}
+  ) => {
     let parsed: Query;
 
     try {
@@ -73,11 +78,15 @@ export const buildParseSearchQuery = ({
         { selectedTags: [], excludedTags: [] } as { selectedTags: string[]; excludedTags: string[] }
       );
 
+      const tagsInCache = await lastValueFrom(
+        cache.getState$({ waitForInitialization: true }).pipe(first())
+      );
+
       const tagsToReferences = (tagNames: string[]) => {
         if (useName) {
           const references: SavedObjectsFindOptionsReference[] = [];
           tagNames.forEach((tagName) => {
-            const found = cache.getState().find((tag) => tag.name === tagName);
+            const found = tagsInCache.find((tag) => tag.name === tagName);
             if (found) {
               references.push({
                 type: 'tag',

@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('highlighting on filtering works', async function () {
       await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
-      await filterBar.addFilter('agent', 'is', 'Mozilla');
+      await filterBar.addFilter({ field: 'agent', operation: 'is', value: 'Mozilla' });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const dataTable = await find.byCssSelector(`[data-test-subj="embeddedSavedSearchDocTable"]`);

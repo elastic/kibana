@@ -18,9 +18,10 @@ interface MenuItemsProps {
   linkedRules: Rule[];
   canUserEditList?: boolean;
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
-  onExportList: () => void;
   onDeleteList: () => void;
   onManageRules: () => void;
+  onExportList: () => void;
+  onDuplicateList: () => void;
 }
 
 const MenuItemsComponent: FC<MenuItemsProps> = ({
@@ -29,9 +30,10 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
   securityLinkAnchorComponent,
   isReadonly,
   canUserEditList = true,
-  onExportList,
   onDeleteList,
   onManageRules,
+  onExportList,
+  onDuplicateList,
 }) => {
   const referencedLinks = useMemo(
     () =>
@@ -78,10 +80,10 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             data-test-subj={`${dataTestSubj || ''}ManageRulesButton`}
             fill
             onClick={() => {
-              if (typeof onExportList === 'function') onManageRules();
+              if (typeof onManageRules === 'function') onManageRules();
             }}
           >
-            {i18n.EXCEPTION_LIST_HEADER_MANAGE_RULES_BUTTON}
+            {i18n.EXCEPTION_LIST_HEADER_LINK_RULES_BUTTON}
           </EuiButton>
         </EuiFlexItem>
       )}
@@ -100,6 +102,15 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             },
             {
               key: '2',
+              icon: 'copy',
+              label: i18n.EXCEPTION_LIST_HEADER_DUPLICATE_ACTION,
+              onClick: () => {
+                if (typeof onDuplicateList === 'function') onDuplicateList();
+              },
+              disabled: !canUserEditList,
+            },
+            {
+              key: '3',
               icon: 'trash',
               label: i18n.EXCEPTION_LIST_HEADER_DELETE_ACTION,
               onClick: () => {

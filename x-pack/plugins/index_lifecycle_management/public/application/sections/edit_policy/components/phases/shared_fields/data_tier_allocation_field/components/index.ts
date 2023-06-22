@@ -13,11 +13,11 @@ export { DataTierAllocation } from './data_tier_allocation';
 
 export { WillUseFallbackTierNotice } from './will_use_fallback_tier_notice';
 
-export { WillUseFallbackTierUsingNodeAttributesNotice } from './will_use_fallback_tier_using_node_attributes_notice';
+export { WillUseFallbackTierUsingNodeAttributesNotice } from './will_fallback_nodes_notice';
 
 export { NoTiersAvailableNotice } from './no_tiers_available_notice';
 
-export { NoTiersAvailableUsingNodeAttributesNotice } from './no_tiers_available_using_node_attributes_notice';
+export { NoTiersAvailableUsingNodeAttributesNotice } from './no_tiers_nodes_notice';
 
 export { DefaultToDataTiersNotice } from './default_to_data_tiers_notice';
 

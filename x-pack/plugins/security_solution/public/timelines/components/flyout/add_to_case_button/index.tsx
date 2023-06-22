@@ -10,7 +10,7 @@ import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import type { Case } from '@kbn/cases-plugin/common';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
@@ -49,7 +49,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   const [isCaseModalOpen, openCaseModal] = useState(false);
 
   const onRowClick = useCallback(
-    async (theCase?: Case) => {
+    async (theCase?: CaseUI) => {
       openCaseModal(false);
       await navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,

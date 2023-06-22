@@ -22,7 +22,6 @@ export type {
   ExistsFilter,
   FieldFilter,
   Filter,
-  FilterItem,
   FilterCompareOptions,
   FilterMeta,
   LatLon,
@@ -38,6 +37,7 @@ export type {
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
   TimeRange,
+  CombinedFilter,
 } from './src/filters';
 
 export type {
@@ -51,9 +51,11 @@ export type {
 export {
   buildEsQuery,
   buildQueryFromFilters,
+  filterToQueryDsl,
   decorateQuery,
   luceneStringToDsl,
   migrateFilter,
+  fromCombinedFilter,
   isOfQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
@@ -105,9 +107,11 @@ export {
   toggleFilterPinned,
   uniqFilters,
   unpinFilter,
+  updateFilter,
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,
+  BooleanRelation,
 } from './src/filters';
 
 export {

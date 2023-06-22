@@ -10,7 +10,8 @@ import type {
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
 } from '@kbn/core/server';
-import { cloneDeep, omit, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep, omit } from 'lodash';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { removeRuleInformation } from './alerts';
 

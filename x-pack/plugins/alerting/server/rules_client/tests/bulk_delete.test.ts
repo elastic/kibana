@@ -19,7 +19,27 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { loggerMock } from '@kbn/logging-mocks';
-import { enabledRule1, enabledRule2, returnedRule1, returnedRule2 } from './test_helpers';
+import {
+  defaultRule,
+  enabledRule1,
+  enabledRule2,
+  returnedRule1,
+  returnedRule2,
+  siemRule1,
+} from './test_helpers';
+import { schema } from '@kbn/config-schema';
+import { migrateLegacyActions } from '../lib';
+
+jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
+(migrateLegacyActions as jest.Mock).mockResolvedValue({
+  hasLegacyActions: false,
+  resultedActions: [],
+  resultedReferences: [],
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -53,6 +73,49 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
+};
+
+const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
+  id: 'id2',
+  type: 'alert',
+  success: false,
+  error: {
+    error: '',
+    message: 'UPS',
+    statusCode,
+  },
+});
+
+export const enabledRule3 = {
+  ...defaultRule,
+  id: 'id3',
+  attributes: {
+    ...defaultRule.attributes,
+    enabled: true,
+    scheduledTaskId: 'id3',
+    apiKey: Buffer.from('789:ghi').toString('base64'),
+    apiKeyCreatedByUser: true,
+  },
+};
+
+export const returnedRule3 = {
+  actions: [],
+  alertTypeId: 'fakeType',
+  apiKey: 'Nzg5OmdoaQ==',
+  apiKeyCreatedByUser: true,
+  consumer: 'fakeConsumer',
+  enabled: true,
+  id: 'id3',
+  name: 'fakeName',
+  notifyWhen: undefined,
+  params: undefined,
+  schedule: {
+    interval: '5m',
+  },
+  scheduledTaskId: 'id3',
+  snoozeSchedule: [],
 };
 
 beforeEach(() => {
@@ -66,7 +129,7 @@ describe('bulkDelete', () => {
   let rulesClient: RulesClient;
 
   const mockCreatePointInTimeFinderAsInternalUser = (
-    response = { saved_objects: [enabledRule1, enabledRule2] }
+    response = { saved_objects: [enabledRule1, enabledRule2, enabledRule3] }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -108,25 +171,22 @@ describe('bulkDelete', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
+      validate: {
+        params: schema.any(),
+      },
     });
   });
 
-  test('should try to delete rules, one successful and one with 500 error', async () => {
+  test('should try to delete rules, two successful and one with 500 error', async () => {
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [
         { id: 'id1', type: 'alert', success: true },
-        {
-          id: 'id2',
-          type: 'alert',
-          success: false,
-          error: {
-            error: '',
-            message: 'UPS',
-            statusCode: 500,
-          },
-        },
+        getBulkOperationStatusErrorResponse(500),
+        { id: 'id3', type: 'alert', success: true },
       ],
     });
 
@@ -136,9 +196,10 @@ describe('bulkDelete', () => {
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
       enabledRule1,
       enabledRule2,
+      enabledRule3,
     ]);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1']);
+    expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id3']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -146,7 +207,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRule1],
+      rules: [returnedRule1, returnedRule3],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -158,45 +219,17 @@ describe('bulkDelete', () => {
       .mockResolvedValueOnce({
         statuses: [
           { id: 'id1', type: 'alert', success: true },
-          {
-            id: 'id2',
-            type: 'alert',
-            success: false,
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-          },
+          getBulkOperationStatusErrorResponse(409),
         ],
       })
       .mockResolvedValueOnce({
-        statuses: [
-          {
-            id: 'id2',
-            type: 'alert',
-            success: false,
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-          },
-        ],
+        statuses: [getBulkOperationStatusErrorResponse(409)],
       })
       .mockResolvedValueOnce({
-        statuses: [
-          {
-            id: 'id2',
-            type: 'alert',
-            success: false,
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-          },
-        ],
+        statuses: [getBulkOperationStatusErrorResponse(409)],
+      })
+      .mockResolvedValueOnce({
+        statuses: [getBulkOperationStatusErrorResponse(409)],
       });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
@@ -218,13 +251,19 @@ describe('bulkDelete', () => {
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRule2] };
         },
+      })
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [enabledRule2] };
+        },
       });
 
     const result = await rulesClient.bulkDeleteRules({ ids: ['id1', 'id2'] });
 
-    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(3);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1']);
+    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(4);
+    expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -244,16 +283,7 @@ describe('bulkDelete', () => {
       .mockResolvedValueOnce({
         statuses: [
           { id: 'id1', type: 'alert', success: true },
-          {
-            id: 'id2',
-            type: 'alert',
-            success: false,
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 409,
-            },
-          },
+          getBulkOperationStatusErrorResponse(409),
         ],
       })
       .mockResolvedValueOnce({
@@ -290,8 +320,8 @@ describe('bulkDelete', () => {
     const result = await rulesClient.bulkDeleteRules({ ids: ['id1', 'id2'] });
 
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(2);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id2']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
@@ -340,6 +370,25 @@ describe('bulkDelete', () => {
     );
   });
 
+  test('should not mark API keys for invalidation if the user is authenticated using an api key', async () => {
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id3', type: 'alert', success: true },
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
+
+    await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
   describe('taskManager', () => {
     test('should return task id if deleting task failed', async () => {
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
@@ -348,23 +397,14 @@ describe('bulkDelete', () => {
           { id: 'id2', type: 'alert', success: true },
         ],
       });
-      taskManager.bulkRemoveIfExist.mockImplementation(async () => ({
+      taskManager.bulkRemove.mockImplementation(async () => ({
         statuses: [
           {
             id: 'id1',
             type: 'alert',
             success: true,
           },
-          {
-            id: 'id2',
-            type: 'alert',
-            success: false,
-            error: {
-              error: '',
-              message: 'UPS',
-              statusCode: 500,
-            },
-          },
+          getBulkOperationStatusErrorResponse(500),
         ],
       }));
 
@@ -385,7 +425,7 @@ describe('bulkDelete', () => {
           { id: 'id2', type: 'alert', success: true },
         ],
       });
-      taskManager.bulkRemoveIfExist.mockImplementation(() => {
+      taskManager.bulkRemove.mockImplementation(() => {
         throw new Error('UPS');
       });
 
@@ -393,7 +433,7 @@ describe('bulkDelete', () => {
 
       expect(logger.error).toBeCalledTimes(1);
       expect(logger.error).toBeCalledWith(
-        'Failure to delete schedules for underlying tasks: id1, id2. TaskManager bulkRemoveIfExist failed with Error: UPS'
+        'Failure to delete schedules for underlying tasks: id1, id2. TaskManager bulkRemove failed with Error: UPS'
       );
     });
 
@@ -405,7 +445,7 @@ describe('bulkDelete', () => {
           { id: 'id2', type: 'alert', success: true },
         ],
       });
-      taskManager.bulkRemoveIfExist.mockImplementation(async () => ({
+      taskManager.bulkRemove.mockImplementation(async () => ({
         statuses: [
           {
             id: 'id1',
@@ -427,6 +467,46 @@ describe('bulkDelete', () => {
         'Successfully deleted schedules for underlying tasks: id1, id2'
       );
       expect(logger.error).toBeCalledTimes(0);
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions', async () => {
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRule1, enabledRule2, siemRule1] };
+          },
+        });
+
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: enabledRule1.id, type: 'alert', success: true },
+          { id: enabledRule2.id, type: 'alert', success: true },
+          { id: siemRule1.id, type: 'alert', success: true },
+        ],
+      });
+
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledTimes(3);
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: enabledRule1.id,
+        skipActionsValidation: true,
+        attributes: enabledRule1.attributes,
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: enabledRule2.id,
+        skipActionsValidation: true,
+        attributes: enabledRule2.attributes,
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: siemRule1.id,
+        skipActionsValidation: true,
+        attributes: siemRule1.attributes,
+      });
     });
   });
 

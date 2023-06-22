@@ -91,6 +91,9 @@ export const InstallPackageFromRegistryRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.maybe(schema.string()),
   }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
   body: schema.nullable(
     schema.object({
       force: schema.boolean({ defaultValue: false }),
@@ -99,9 +102,25 @@ export const InstallPackageFromRegistryRequestSchema = {
   ),
 };
 
+export const ReauthorizeTransformRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.maybe(schema.string()),
+  }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
+  body: schema.object({
+    transforms: schema.arrayOf(schema.object({ transformId: schema.string() })),
+  }),
+};
+
 export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
+  }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
   }),
   body: schema.nullable(
     schema.object({
@@ -110,12 +129,19 @@ export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   ),
 };
 
-export const BulkUpgradePackagesFromRegistryRequestSchema = {
+export const BulkInstallPackagesFromRegistryRequestSchema = {
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
   }),
   body: schema.object({
-    packages: schema.arrayOf(schema.string(), { minSize: 1 }),
+    packages: schema.arrayOf(
+      schema.oneOf([
+        schema.string(),
+        schema.object({ name: schema.string(), version: schema.string() }),
+      ]),
+      { minSize: 1 }
+    ),
+    force: schema.boolean({ defaultValue: false }),
   }),
 };
 

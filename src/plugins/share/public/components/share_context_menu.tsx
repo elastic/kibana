@@ -25,6 +25,7 @@ export interface ShareContextMenuProps {
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
+  shareableUrlForSavedObject?: string;
   shareMenuItems: ShareMenuItem[];
   sharingData: any;
   onClose: () => void;
@@ -33,6 +34,8 @@ export interface ShareContextMenuProps {
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
+  objectTypeTitle?: string;
+  disabledShareUrl?: boolean;
 }
 
 export class ShareContextMenu extends Component<ShareContextMenuProps> {
@@ -56,7 +59,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
     const permalinkPanel = {
       id: panels.length + 1,
       title: i18n.translate('share.contextMenu.permalinkPanelTitle', {
-        defaultMessage: 'Permalink',
+        defaultMessage: 'Get link',
       }),
       content: (
         <UrlPanelContent
@@ -64,6 +67,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
           objectId={this.props.objectId}
           objectType={this.props.objectType}
           shareableUrl={this.props.shareableUrl}
+          shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
           anonymousAccess={this.props.anonymousAccess}
           showPublicUrlSwitch={this.props.showPublicUrlSwitch}
           urlService={this.props.urlService}
@@ -73,11 +77,14 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
     };
     menuItems.push({
       name: i18n.translate('share.contextMenu.permalinksLabel', {
-        defaultMessage: 'Permalinks',
+        defaultMessage: 'Get links',
       }),
       icon: 'link',
       panel: permalinkPanel.id,
       sortOrder: 0,
+      disabled: Boolean(this.props.disabledShareUrl),
+      // do not break functional tests
+      'data-test-subj': 'Permalinks',
     });
     panels.push(permalinkPanel);
 
@@ -94,6 +101,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
             objectId={this.props.objectId}
             objectType={this.props.objectType}
             shareableUrl={this.props.shareableUrl}
+            shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
             urlParamExtensions={this.props.embedUrlParamExtensions}
             anonymousAccess={this.props.anonymousAccess}
             showPublicUrlSwitch={this.props.showPublicUrlSwitch}
@@ -131,7 +139,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
         title: i18n.translate('share.contextMenuTitle', {
           defaultMessage: 'Share this {objectType}',
           values: {
-            objectType: this.props.objectType,
+            objectType: this.props.objectTypeTitle || this.props.objectType,
           },
         }),
         items: menuItems
@@ -151,7 +159,9 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
             return -1;
           })
           .map((menuItem) => {
-            menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
+            menuItem['data-test-subj'] = `sharePanel-${
+              menuItem['data-test-subj'] ?? menuItem.name.replace(' ', '')
+            }`;
             delete menuItem.sortOrder;
             return menuItem;
           }),

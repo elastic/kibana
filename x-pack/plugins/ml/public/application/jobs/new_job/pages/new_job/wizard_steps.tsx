@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { Fragment, FC, useState, useMemo, useEffect, useContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { type FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { JobCreatorContext } from '../components/job_creator_context';
+import { useMlKibana } from '../../../../contexts/kibana';
+import { FieldStatsFlyoutProvider } from '../../../../components/field_stats_flyout';
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeRangeStep } from '../components/time_range_step';
@@ -29,21 +33,53 @@ interface Props {
 
 export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   const mlContext = useMlContext();
+  const { services } = useMlKibana();
+  const fieldStatsServices: FieldStatsServices = useMemo(() => {
+    const { uiSettings, data, fieldFormats, charts } = services;
+    return {
+      uiSettings,
+      dataViews: data.dataViews,
+      data,
+      fieldFormats,
+      charts,
+    };
+  }, [services]);
+
+  const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
+
+  const [start, setStart] = useState(jobCreator?.start);
+  const [end, setEnd] = useState(jobCreator?.end);
+
+  useEffect(() => {
+    if ((jobCreator && jobCreator.start !== start) || jobCreator.end !== end) {
+      setStart(jobCreator.start);
+      setEnd(jobCreator.end);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated]);
+
+  // Format timestamp to ISO formatted date strings
+  const timeRangeMs = useMemo(() => {
+    // If time range is available via jobCreator, use that
+    // else mimic Discover and set timeRange to be now for data view without time field
+    return start && end ? { from: start, to: end } : undefined;
+  }, [start, end]);
+
   // store whether the advanced and additional sections have been expanded.
   // has to be stored at this level to ensure it's remembered on wizard step change
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [additionalExpanded, setAdditionalExpanded] = useState(false);
-
   function getSummaryStepTitle() {
-    if (mlContext.currentSavedSearch !== null) {
+    if (mlContext.selectedSavedSearch) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
         defaultMessage: 'New job from saved search {title}',
-        values: { title: mlContext.currentSavedSearch.attributes.title as string },
+        values: { title: mlContext.selectedSavedSearch.title ?? '' },
       });
     } else if (mlContext.currentDataView.id !== undefined) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleDataView', {
         defaultMessage: 'New job from data view {dataViewName}',
-        values: { dataViewName: mlContext.currentDataView.title },
+        values: { dataViewName: mlContext.currentDataView.getName() },
       });
     }
     return '';
@@ -81,16 +117,29 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
       )}
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitlePickFields">
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.stepComponentWrapper.pickFieldsTitle"
-              defaultMessage="Pick fields"
-            />
-          </Title>
-          <PickFieldsStep
-            isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
-            setCurrentStep={setCurrentStep}
-          />
+          <FieldStatsFlyoutProvider
+            dataView={mlContext.currentDataView}
+            fieldStatsServices={fieldStatsServices}
+            timeRangeMs={timeRangeMs}
+            dslQuery={jobCreator.query}
+          >
+            <>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <Title data-test-subj="mlJobWizardStepTitlePickFields">
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.stepComponentWrapper.pickFieldsTitle"
+                      defaultMessage="Choose fields"
+                    />
+                  </Title>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <PickFieldsStep
+                isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
+                setCurrentStep={setCurrentStep}
+              />
+            </>
+          </FieldStatsFlyoutProvider>
         </Fragment>
       )}
       {currentStep === WIZARD_STEPS.JOB_DETAILS && (

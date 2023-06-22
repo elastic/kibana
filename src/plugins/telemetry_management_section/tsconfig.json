@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
@@ -11,16 +9,15 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" },
-    { "path": "../telemetry/tsconfig.json" },
-    { "path": "../ui_actions/tsconfig.json" },
-    { "path": "../expressions/tsconfig.json" },
-    { "path": "../home/tsconfig.json" },
-    { "path": "../bfetch/tsconfig.json"},
-    { "path": "../data/tsconfig.json"},
-    { "path": "../advanced_settings/tsconfig.json" },
-    { "path": "../management/tsconfig.json"}
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/telemetry-plugin",
+    "@kbn/advanced-settings-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

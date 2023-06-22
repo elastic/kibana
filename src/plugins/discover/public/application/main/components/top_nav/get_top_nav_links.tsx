@@ -16,7 +16,7 @@ import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
 import { openAlertsPopover } from './open_alerts_popover';
 
@@ -42,13 +42,13 @@ export const getTopNavLinks = ({
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverStateContainer;
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
-  updateDataViewList: (dataView: DataView[]) => Promise<void>;
+  updateDataViewList: (dataView: DataView[]) => void;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }): TopNavMenuData[] => {
@@ -87,7 +87,7 @@ export const getTopNavLinks = ({
         services,
         adHocDataViews,
         updateDataViewList,
-        savedQueryId: state.appStateContainer.getState().savedQuery,
+        savedQueryId: state.appState.getState().savedQuery,
       });
     },
     testId: 'discoverAlertsButton',
@@ -159,14 +159,22 @@ export const getTopNavLinks = ({
     }),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
-      const updatedDataView = await persistDataView(dataView);
-      if (!services.share || !updatedDataView) {
+      if (!services.share) {
         return;
+      }
+      // this prompts the user to save the dataview if adhoc dataview is detected
+      // for text based languages we don't want this check
+      if (!isPlainRecord) {
+        const updatedDataView = await persistDataView(dataView);
+        if (!updatedDataView) {
+          return;
+        }
       }
       const sharingData = await getSharingData(
         searchSource,
-        state.appStateContainer.getState(),
-        services
+        state.appState.getState(),
+        services,
+        isPlainRecord
       );
 
       services.share.toggleShareContextMenu({
@@ -185,7 +193,7 @@ export const getTopNavLinks = ({
               defaultMessage: 'Untitled discover search',
             }),
         },
-        isDirty: !savedSearch.id || state.isAppStateDirty(),
+        isDirty: !savedSearch.id || state.appState.hasChanged(),
         showPublicUrlSwitch,
         onClose: () => {
           anchorElement?.focus();
@@ -212,7 +220,7 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(!isPlainRecord ? [shareSearch] : []),
+    shareSearch,
     ...(services.triggersActionsUi &&
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
     !isPlainRecord

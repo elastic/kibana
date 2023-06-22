@@ -18,7 +18,7 @@ export interface PackageInfo {
   location: 'custom' | 'common';
 }
 
-const REVISION = 1036745;
+const REVISION = 1095492;
 
 enum BaseUrl {
   // see https://www.chromium.org/getting-involved/download-chromium
@@ -45,8 +45,8 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'x64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: 'dd4d44ad97ba2fef5dc47d7f2a39ccaa',
-      binaryChecksum: '4a7a663b2656d66ce975b00a30df3ab4',
+      archiveChecksum: '318ac652b5ba64fb3b37a25e312ffd6e',
+      binaryChecksum: '107a554a0f7828a1844173cb3830716c',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
       location: 'common',
       archivePath: 'Mac',
@@ -56,8 +56,8 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'arm64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: '5afc0d49865d55b69ea1ff65b9cc5794',
-      binaryChecksum: '4a7a663b2656d66ce975b00a30df3ab4',
+      archiveChecksum: 'e8f09d0c992d181b986d38a13dfb88c3',
+      binaryChecksum: '0a12a34a0d8bc9c616d3cc339abb167e',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
       location: 'common',
       archivePath: 'Mac_Arm',
@@ -66,9 +66,9 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-749e738-locales-linux_x64.zip',
-      archiveChecksum: '09ba194e6c720397728fbec3d3895b0b',
-      binaryChecksum: 'df1c957f41dcca8e33369b1d255406c2',
+      archiveFilename: 'chromium-7abd50c-locales-linux_x64.zip',
+      archiveChecksum: 'dc141a6cae734c29a1144d3d9f8ca7ee',
+      binaryChecksum: '9b9611ba0c65fc34d1be1e40ae80c036',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
       isPreInstalled: true,
@@ -76,9 +76,9 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-749e738-locales-linux_arm64.zip',
-      archiveChecksum: '1f535b1c2875d471829c6ff128a13262',
-      binaryChecksum: 'ca6b91d0ba8a65712554572dabc66968',
+      archiveFilename: 'chromium-7abd50c-locales-linux_arm64.zip',
+      archiveChecksum: '1ce431a6cd7b3d7e5aa63fc8f7327b0f',
+      binaryChecksum: 'ef21a88efa18f000e6da6d9c51ee2fd7',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
       isPreInstalled: true,
@@ -87,8 +87,8 @@ export class ChromiumArchivePaths {
       platform: 'win32',
       architecture: 'x64',
       archiveFilename: 'chrome-win.zip',
-      archiveChecksum: '42db052673414b89d8cb45657c1a6aeb',
-      binaryChecksum: '1b6eef775198ffd48fb9669ac0c818f7',
+      archiveChecksum: '83e7e89ae749668d3eaa8b3bd6120e8a',
+      binaryChecksum: 'cbfe0d2db3117f13554999bdc7aab68d',
       binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
       location: 'common',
       archivePath: 'Win',

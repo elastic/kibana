@@ -14,9 +14,10 @@ import {
   defaultAnnotationRangeColor,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
-import type { AccessorConfig, FramePublicAPI } from '../../types';
+import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import type { FramePublicAPI } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { FormatFactory } from '../../../common';
+import { FormatFactory } from '../../../common/types';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import {
@@ -44,15 +45,13 @@ export function getColorAssignments(
 ): ColorAssignments {
   const layersPerPalette: Record<string, XYDataLayerConfig[]> = {};
 
-  layers
-    .filter((layer): layer is XYDataLayerConfig => isDataLayer(layer))
-    .forEach((layer) => {
-      const palette = layer.palette?.name || 'default';
-      if (!layersPerPalette[palette]) {
-        layersPerPalette[palette] = [];
-      }
-      layersPerPalette[palette].push(layer);
-    });
+  layers.filter(isDataLayer).forEach((layer) => {
+    const palette = layer.palette?.name || 'default';
+    if (!layersPerPalette[palette]) {
+      layersPerPalette[palette] = [];
+    }
+    layersPerPalette[palette].push(layer);
+  });
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {
@@ -104,10 +103,10 @@ export function getColorAssignments(
   });
 }
 
-function getDisabledConfig(accessor: string) {
+function getDisabledConfig(accessor: string): AccessorConfig {
   return {
-    columnId: accessor as string,
-    triggerIcon: 'disabled' as const,
+    columnId: accessor,
+    triggerIconType: 'disabled',
   };
 }
 
@@ -125,7 +124,7 @@ export function getAssignedColorConfig(
     const annotation = layer.annotations.find((a) => a.id === accessor);
     return {
       columnId: accessor,
-      triggerIcon: annotation?.isHidden ? ('invisible' as const) : ('color' as const),
+      triggerIconType: annotation?.isHidden ? 'invisible' : 'color',
       color: isRangeAnnotationConfig(annotation)
         ? defaultAnnotationRangeColor
         : defaultAnnotationColor,
@@ -160,8 +159,8 @@ export function getAssignedColorConfig(
         )
       : undefined;
   return {
-    columnId: accessor as string,
-    triggerIcon: assignedColor ? 'color' : 'disabled',
+    columnId: accessor,
+    triggerIconType: assignedColor ? 'color' : 'disabled',
     color: assignedColor ?? undefined,
   };
 }
@@ -186,8 +185,8 @@ export function getAccessorColorConfigs(
     const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     if (currentYConfig?.color) {
       return {
-        columnId: accessor as string,
-        triggerIcon: 'color',
+        columnId: accessor,
+        triggerIconType: 'color',
         color: currentYConfig.color,
       };
     }

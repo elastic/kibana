@@ -6,7 +6,7 @@
  */
 
 import { of, Subject } from 'rxjs';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
@@ -37,13 +37,13 @@ describe('backgroundTaskUtilizationRoute', () => {
     jest.resetAllMocks();
   });
 
-  it('registers the route', async () => {
+  it('registers internal and public route', async () => {
     const router = httpServiceMock.createRouter();
     backgroundTaskUtilizationRoute({
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
@@ -51,11 +51,15 @@ describe('backgroundTaskUtilizationRoute', () => {
       usageCounter: mockUsageCounter,
     });
 
-    const [config] = router.get.mock.calls[0];
+    const [config1] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(
+    expect(config1.path).toMatchInlineSnapshot(
       `"/internal/task_manager/_background_task_utilization"`
     );
+
+    const [config2] = router.get.mock.calls[1];
+
+    expect(config2.path).toMatchInlineSnapshot(`"/api/task_manager/_background_task_utilization"`);
   });
 
   it('checks user privileges and increments usage counter when API is accessed', async () => {
@@ -67,7 +71,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -107,7 +111,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -153,7 +157,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -170,7 +174,7 @@ describe('backgroundTaskUtilizationRoute', () => {
   it(`logs an error if the utilization stats are null`, async () => {
     const router = httpServiceMock.createRouter();
     const stats$ = new Subject<MonitoringStats>();
-    const id = uuid.v4();
+    const id = uuidv4();
     backgroundTaskUtilizationRoute({
       router,
       monitoringStats$: stats$,

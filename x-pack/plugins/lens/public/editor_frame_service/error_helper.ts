@@ -149,35 +149,6 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
   return errorMessages;
 }
 
-export function getMissingVisualizationTypeError() {
-  return i18n.translate('xpack.lens.editorFrame.expressionMissingVisualizationType', {
-    defaultMessage: 'Visualization type not found.',
-  });
-}
-
-export function getMissingCurrentDatasource() {
-  return i18n.translate('xpack.lens.editorFrame.expressionMissingDatasource', {
-    defaultMessage: 'Could not find datasource for the visualization',
-  });
-}
-
-export function getMissingIndexPatterns(indexPatternIds: string[]) {
-  return i18n.translate('xpack.lens.editorFrame.expressionMissingDataView', {
-    defaultMessage: 'Could not find the {count, plural, one {data view} other {data views}}: {ids}',
-    values: { count: indexPatternIds.length, ids: indexPatternIds.join(', ') },
-  });
-}
-
-export function getUnknownVisualizationTypeError(visType: string) {
-  return {
-    shortMessage: i18n.translate('xpack.lens.unknownVisType.shortMessage', {
-      defaultMessage: `Unknown visualization type`,
-    }),
-    longMessage: i18n.translate('xpack.lens.unknownVisType.longMessage', {
-      defaultMessage: `The visualization type {visType} could not be resolved.`,
-      values: {
-        visType,
-      },
-    }),
-  };
-}
+// NOTE - if you are adding a new error message, add it as a UserMessage in get_application_error_messages
+// or the getUserMessages method of a particular datasource or visualization class! Alternatively, use the
+// addUserMessage function passed down by the application component.

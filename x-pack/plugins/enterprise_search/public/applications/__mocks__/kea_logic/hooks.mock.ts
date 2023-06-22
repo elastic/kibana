@@ -36,8 +36,8 @@ export const mockAllActions = {
  */
 jest.mock('kea', () => ({
   ...(jest.requireActual('kea') as object),
-  useValues: jest.fn(() => ({ ...mockAllValues })),
   useActions: jest.fn(() => ({ ...mockAllActions })),
+  useValues: jest.fn(() => ({ ...mockAllValues })),
 }));
 
 /**

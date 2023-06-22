@@ -107,7 +107,7 @@ export const getColumns = (
           <>
             {' '}
             <EuiIconTip
-              type="alert"
+              type="warning"
               content={
                 <FormattedMessage
                   id="data.mgmt.searchSessions.table.notRestorableWarning"
@@ -127,7 +127,7 @@ export const getColumns = (
             <>
               {' '}
               <EuiIconTip
-                type="alert"
+                type="warning"
                 iconProps={{ 'data-test-subj': 'versionIncompatibleWarningTestSubj' }}
                 content={
                   <FormattedMessage

@@ -91,6 +91,7 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
     name: schema.string(),
     is_default: schema.boolean({ defaultValue: false }),
     host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
+    proxy_id: schema.nullable(schema.string()),
   }),
   { defaultValue: [] }
 );
@@ -128,7 +129,16 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
         id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
         name: schema.string(),
         package: schema.object({
-          name: schema.string(),
+          name: schema.string({
+            validate: (value) => {
+              if (value === 'synthetics') {
+                return i18n.translate('xpack.fleet.config.disableSynthetics', {
+                  defaultMessage:
+                    'Synthetics package is not supported via kibana.yml config. Please use Synthetics App to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
+                });
+              }
+            },
+          }),
         }),
         description: schema.maybe(schema.string()),
         namespace: schema.maybe(NamespaceSchema),

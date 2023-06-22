@@ -9,7 +9,7 @@ import type {
   SearchStrategyDependencies,
   DataViewsServerPluginStart,
 } from '@kbn/data-plugin/server';
-import { fieldsBeat as beatFields } from '@kbn/timelines-plugin/server/utils/beat_schema/fields';
+import { fieldsBeat as beatFields } from '@kbn/timelines-plugin/server/utils/beat_schema/fields.json';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { requestEndpointFieldsSearch } from '.';
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';

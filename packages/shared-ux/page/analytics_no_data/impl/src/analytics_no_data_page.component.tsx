@@ -19,6 +19,8 @@ export interface Props {
   onDataViewCreated: (dataView: unknown) => void;
   /** if set to true allows creation of an ad-hoc dataview from data view editor */
   allowAdHocDataView?: boolean;
+  /** if the kibana instance is customly branded */
+  showPlainSpinner: boolean;
 }
 
 const solution = i18n.translate('sharedUXPackages.noDataConfig.analytics', {
@@ -47,6 +49,7 @@ export const AnalyticsNoDataPage = ({
   kibanaGuideDocLink,
   onDataViewCreated,
   allowAdHocDataView,
+  showPlainSpinner,
 }: Props) => {
   const noDataConfig = {
     solution,
@@ -61,5 +64,10 @@ export const AnalyticsNoDataPage = ({
     },
     docsLink: kibanaGuideDocLink,
   };
-  return <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated, allowAdHocDataView }} />;
+
+  return (
+    <KibanaNoDataPage
+      {...{ noDataConfig, onDataViewCreated, allowAdHocDataView, showPlainSpinner }}
+    />
+  );
 };

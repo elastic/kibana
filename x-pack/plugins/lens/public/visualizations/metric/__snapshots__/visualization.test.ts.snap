@@ -8,7 +8,7 @@ Object {
         Object {
           "columnId": "metric-col-id",
           "palette": Array [],
-          "triggerIcon": "colorBy",
+          "triggerIconType": "colorBy",
         },
       ],
       "dataTestSubj": "lnsMetric_primaryMetricDimensionPanel",
@@ -75,7 +75,7 @@ Object {
       "accessors": Array [
         Object {
           "columnId": "breakdown-col-id",
-          "triggerIcon": "aggregate",
+          "triggerIconType": "aggregate",
         },
       ],
       "dataTestSubj": "lnsMetric_breakdownByDimensionPanel",

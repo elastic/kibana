@@ -8,7 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route, Redirect, RouteChildrenProps } from 'react-router-dom';
+import { Router, Switch, Redirect, RouteChildrenProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,7 +21,8 @@ import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { StartServicesAccessor } from '@kbn/core/public';
 
-import { AdvancedSettings, QUERY } from './advanced_settings';
+import { QUERY } from './advanced_settings';
+import { Settings } from './settings';
 import { ComponentRegistry } from '../types';
 
 import './index.scss';
@@ -59,12 +61,14 @@ export async function mountManagementSection(
   usageCollection?: UsageCollectionSetup
 ) {
   params.setBreadcrumbs(crumb);
-  const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
+  const [{ settings, notifications, docLinks, application, chrome }] = await getStartServices();
 
-  const canSave = application.capabilities.advancedSettings.save as boolean;
+  const { advancedSettings, globalSettings } = application.capabilities;
+  const canSaveAdvancedSettings = advancedSettings.save as boolean;
+  const canSaveGlobalSettings = globalSettings.save as boolean;
+  const canShowGlobalSettings = globalSettings.show as boolean;
   const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'advanced_settings');
-
-  if (!canSave) {
+  if (!canSaveAdvancedSettings || (!canSaveGlobalSettings && canShowGlobalSettings)) {
     chrome.setBadge(readOnlyBadge);
   }
 
@@ -78,12 +82,16 @@ export async function mountManagementSection(
             {/* TODO: remove route param (`query`) in 7.13 */}
             <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
             <Route path="/">
-              <AdvancedSettings
+              <Settings
                 history={params.history}
-                enableSaving={canSave}
+                enableSaving={{
+                  namespace: canSaveAdvancedSettings,
+                  global: canSaveGlobalSettings,
+                }}
+                enableShowing={{ namespace: true, global: canShowGlobalSettings }}
                 toasts={notifications.toasts}
                 docLinks={docLinks.links}
-                uiSettings={uiSettings}
+                settingsService={settings}
                 theme={params.theme$}
                 componentRegistry={componentRegistry}
                 trackUiMetric={trackUiMetric}

@@ -8,9 +8,9 @@
 import { JsonObject } from '@kbn/utility-types';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestOptionsPaginated } from '../..';
-import { Ecs } from '../../../../ecs';
 
 export interface TimelineEventsDetailsItem {
   ariaRowindex?: Maybe<number>;

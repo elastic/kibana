@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { first, last } from 'lodash';
+import { first, last, uniq } from 'lodash';
 import moment from 'moment';
 import {
   APIReturnType,
@@ -180,15 +180,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns an array of transaction cold start rates', () => {
-        expect(body.currentPeriod.transactionColdstartRate).to.have.length(3);
-        expect(body.currentPeriod.transactionColdstartRate.every(({ y }) => y === 0.25)).to.be(
-          true
+        const currentValuesUnique = uniq(
+          body.currentPeriod.transactionColdstartRate.map(({ y }) => y)
+        );
+        const prevValuesUnique = uniq(
+          body.previousPeriod.transactionColdstartRate.map(({ y }) => y)
         );
 
+        expect(currentValuesUnique).to.eql([0.25]);
+        expect(body.currentPeriod.transactionColdstartRate).to.have.length(3);
+
+        expect(prevValuesUnique).to.eql([0.5]);
         expect(body.previousPeriod.transactionColdstartRate).to.have.length(3);
-        expect(body.previousPeriod.transactionColdstartRate.every(({ y }) => y === 0.5)).to.be(
-          true
-        );
       });
 
       it('has same average value for both periods', () => {

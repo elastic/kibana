@@ -12,3 +12,4 @@ The response includes sections that can provide useful informations in a debuggi
 - settings: a subset of the kibana.yml settings relevant to stack monitoring
 - monitoredClusters: a representation of the monitoring documents available to the running kibana. It exposes which metricsets are collected by what collection mode and when was the last time it was ingested. The query groups the metricsets by products and can help identify missing documents that could explain why a page is not loading or crashing
 - metricbeatErrors: a list of errors encountered by metricbeat processes when collecting data
+- packageErrors: a list of  errors encountered by integration package processes when collecting data

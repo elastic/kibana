@@ -82,7 +82,7 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
     deserializer: to.booleanOrUndef,
-    serializer: from.undefinedIfValue,
+    serializer: from.undefinedIfValue(true),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.overrideFieldLabel', {
       defaultMessage: 'Override',
     }),
@@ -177,6 +177,7 @@ export const Enrich: FunctionComponent = () => {
         }}
         component={Field}
         path="fields.policy_name"
+        data-test-subj="policyNameField"
       />
 
       <TargetField
@@ -190,9 +191,15 @@ export const Enrich: FunctionComponent = () => {
           }
         )}
         validations={[targetFieldValidator]}
+        data-test-subj="targetField"
       />
 
-      <UseField config={fieldsConfig.override} component={ToggleField} path="fields.override" />
+      <UseField
+        config={fieldsConfig.override}
+        component={ToggleField}
+        path="fields.override"
+        data-test-subj="overrideField"
+      />
 
       <UseField
         config={fieldsConfig.max_matches}

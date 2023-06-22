@@ -11,7 +11,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { ThreatRuleParams } from '../../rule_schema';
 import { threatRuleParams } from '../../rule_schema';
-import { threatMatchExecutor } from '../../signals/executors/threat_match';
+import { indicatorMatchExecutor } from './indicator_match';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 
@@ -82,7 +82,7 @@ export const createIndicatorMatchAlertType = (
         state,
       } = execOptions;
 
-      const result = await threatMatchExecutor({
+      const result = await indicatorMatchExecutor({
         inputIndex,
         runtimeMappings,
         completeRule,

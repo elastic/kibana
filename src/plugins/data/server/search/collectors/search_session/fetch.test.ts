@@ -17,12 +17,13 @@ describe('fetchProvider', () => {
 
   beforeEach(async () => {
     const kibanaIndex = '123';
+    const getIndexForType = () => Promise.resolve(kibanaIndex);
     mockLogger = {
       warn: jest.fn(),
       debug: jest.fn(),
     } as any;
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    fetchFn = fetchProvider(kibanaIndex, mockLogger);
+    fetchFn = fetchProvider(getIndexForType, mockLogger);
   });
 
   test('returns when ES returns no results', async () => {

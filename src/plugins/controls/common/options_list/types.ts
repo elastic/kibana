@@ -9,37 +9,50 @@
 import { FieldSpec, DataView, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
 
-import { SortingType } from './suggestions_sorting';
-import { DataControlInput } from '../types';
+import type { OptionsListSortingType } from './suggestions_sorting';
+import type { DataControlInput } from '../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
+  sort?: OptionsListSortingType;
   selectedOptions?: string[];
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
+  hideActionBar?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
   hideSort?: boolean;
-  sort?: SortingType;
   exclude?: boolean;
+  placeholder?: string;
 }
 
-export type OptionsListField = FieldSpec & {
-  textFieldName?: string;
-  parentFieldName?: string;
-  childFieldName?: string;
-};
+export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
  */
-export interface OptionsListResponse {
-  suggestions: string[];
-  totalCardinality: number;
+export interface OptionsListSuccessResponse {
+  suggestions: OptionsListSuggestions;
+  totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
   invalidSelections?: string[];
 }
+
+/**
+ * The invalid selections are parsed **after** the server returns with the result from the ES client; so, the
+ * suggestion aggregation parser only returns the suggestions list + the cardinality of the result
+ */
+export type OptionsListParsedSuggestions = Pick<
+  OptionsListSuccessResponse,
+  'suggestions' | 'totalCardinality'
+>;
+
+export interface OptionsListFailureResponse {
+  error: 'aborted' | Error;
+}
+
+export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailureResponse;
 
 /**
  * The Options list request type taken in by the public Options List service.
@@ -48,11 +61,12 @@ export type OptionsListRequest = Omit<
   OptionsListRequestBody,
   'filters' | 'fieldName' | 'fieldSpec' | 'textFieldName'
 > & {
+  allowExpensiveQueries: boolean;
   timeRange?: TimeRange;
-  field: OptionsListField;
   runPastTimeout?: boolean;
   dataView: DataView;
   filters?: Filter[];
+  field: FieldSpec;
   query?: Query;
 };
 
@@ -61,13 +75,13 @@ export type OptionsListRequest = Omit<
  */
 export interface OptionsListRequestBody {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
+  allowExpensiveQueries: boolean;
+  sort?: OptionsListSortingType;
   filters?: Array<{ bool: BoolQuery }>;
   selectedOptions?: string[];
   runPastTimeout?: boolean;
-  parentFieldName?: string;
-  textFieldName?: string;
   searchString?: string;
   fieldSpec?: FieldSpec;
-  sort?: SortingType;
   fieldName: string;
+  size: number;
 }

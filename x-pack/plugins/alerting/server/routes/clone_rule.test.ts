@@ -48,6 +48,7 @@ describe('cloneRuleRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
       },
     ],
     enabled: true,
@@ -64,6 +65,7 @@ describe('cloneRuleRoute', () => {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    revision: 0,
   };
 
   const ruleToClone: AsApiContract<CreateOptions<{ bar: boolean }>['data']> = {
@@ -89,6 +91,7 @@ describe('cloneRuleRoute', () => {
     created_at: mockedRule.createdAt,
     updated_at: mockedRule.updatedAt,
     id: mockedRule.id,
+    revision: 0,
     execution_status: {
       status: mockedRule.executionStatus.status,
       last_execution_date: mockedRule.executionStatus.lastExecutionDate,
@@ -97,6 +100,7 @@ describe('cloneRuleRoute', () => {
       {
         ...ruleToClone.actions[0],
         connector_type_id: 'test',
+        uuid: '123-456',
       },
     ],
   };

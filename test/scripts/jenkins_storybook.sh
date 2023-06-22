@@ -6,6 +6,7 @@ cd "$KIBANA_DIR"
 
 yarn storybook --site apm
 yarn storybook --site canvas
+yarn storybook --site cell_actions
 yarn storybook --site ci_composite
 yarn storybook --site content_management
 yarn storybook --site custom_integrations
@@ -27,5 +28,6 @@ yarn storybook --site lists
 yarn storybook --site observability
 yarn storybook --site presentation
 yarn storybook --site security_solution
+yarn storybook --site solution_side_nav
 yarn storybook --site shared_ux
 yarn storybook --site ui_actions_enhanced

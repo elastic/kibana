@@ -9,6 +9,7 @@ import { EuiText, EuiTourStep } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import React, { useCallback, useEffect, useState } from 'react';
+import { siemGuideId } from '../../../../../../common/guided_onboarding/siem_guide_config';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -30,7 +31,7 @@ export const RulesPageTourComponent: React.FC<Props> = ({ children }) => {
   } = useKibana().services;
 
   const isGuidedOnboardingActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', 'rules') ?? of(false),
+    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
     true
   );
 

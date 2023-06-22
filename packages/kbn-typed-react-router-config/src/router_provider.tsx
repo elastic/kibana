@@ -18,7 +18,7 @@ export function RouterProvider({
 }: {
   router: Router<RouteMap>;
   history: History;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
     <ReactRouter history={history}>

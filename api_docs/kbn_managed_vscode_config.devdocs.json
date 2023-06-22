@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/managed-vscode-config",
-        "id": "def-server.updateVscodeConfig",
+        "id": "def-common.updateVscodeConfig",
         "type": "Function",
         "tags": [],
         "label": "updateVscodeConfig",
@@ -31,7 +39,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/managed-vscode-config",
-            "id": "def-server.updateVscodeConfig.$1",
+            "id": "def-common.updateVscodeConfig.$1",
             "type": "Array",
             "tags": [],
             "label": "keys",
@@ -49,7 +57,7 @@
           },
           {
             "parentPluginId": "@kbn/managed-vscode-config",
-            "id": "def-server.updateVscodeConfig.$2",
+            "id": "def-common.updateVscodeConfig.$2",
             "type": "string",
             "tags": [],
             "label": "infoText",
@@ -66,7 +74,7 @@
           },
           {
             "parentPluginId": "@kbn/managed-vscode-config",
-            "id": "def-server.updateVscodeConfig.$3",
+            "id": "def-common.updateVscodeConfig.$3",
             "type": "string",
             "tags": [],
             "label": "json",
@@ -91,7 +99,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/managed-vscode-config",
-        "id": "def-server.MANAGED_CONFIG_FILES",
+        "id": "def-common.MANAGED_CONFIG_FILES",
         "type": "Array",
         "tags": [],
         "label": "MANAGED_CONFIG_FILES",
@@ -106,7 +114,7 @@
       },
       {
         "parentPluginId": "@kbn/managed-vscode-config",
-        "id": "def-server.MANAGED_CONFIG_KEYS",
+        "id": "def-common.MANAGED_CONFIG_KEYS",
         "type": "Array",
         "tags": [],
         "label": "MANAGED_CONFIG_KEYS",
@@ -123,14 +131,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

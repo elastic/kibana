@@ -1,0 +1,171 @@
+{
+  "id": "@kbn/ecs-data-quality-dashboard",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.DataQualityPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "DataQualityPanel",
+        "description": [
+          "Renders the `Data Quality` dashboard content"
+        ],
+        "signature": [
+          "React.NamedExoticComponent<Props>"
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.DataQualityPanel.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.getIlmPhaseDescription",
+        "type": "Function",
+        "tags": [],
+        "label": "getIlmPhaseDescription",
+        "description": [
+          "\nReturns an i18n description of an an ILM phase"
+        ],
+        "signature": [
+          "(phase: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.getIlmPhaseDescription.$1",
+            "type": "string",
+            "tags": [],
+            "label": "phase",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.DATA_QUALITY_SUBTITLE",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_QUALITY_SUBTITLE",
+        "description": [
+          "The subtitle displayed on the Data Quality dashboard"
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.ECS_REFERENCE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "ECS_REFERENCE_URL",
+        "description": [
+          "The documentation link shown in the `Data Quality` dashboard"
+        ],
+        "signature": [
+          "\"https://www.elastic.co/guide/en/ecs/current/ecs-reference.html\""
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/data_quality_panel/index_properties/markdown/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.ILM_PHASE",
+        "type": "string",
+        "tags": [],
+        "label": "ILM_PHASE",
+        "description": [
+          "The label displayed for the `ILM phase` combo box on the Data Quality dashboard"
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.INDEX_LIFECYCLE_MANAGEMENT_PHASES",
+        "type": "string",
+        "tags": [],
+        "label": "INDEX_LIFECYCLE_MANAGEMENT_PHASES",
+        "description": [
+          "The tooltip for the `ILM phase` combo box on the Data Quality Dashboard"
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.SELECT_ONE_OR_MORE_ILM_PHASES",
+        "type": "string",
+        "tags": [],
+        "label": "SELECT_ONE_OR_MORE_ILM_PHASES",
+        "description": [
+          "The placeholder for the `ILM phase` combo box on the Data Quality Dashboard"
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -15,15 +15,11 @@ import {
   EuiText,
   EuiToolTip,
   EuiSpacer,
-  EuiHighlight,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { kibanaService } from '../../../../state/kibana_service';
-import { useRunOnceErrors } from '../../../monitor_management/hooks/use_run_once_errors';
 import { parseTimestamp } from '../parse_timestamp';
-import { DataStream, Ping, PingError } from '../../../../../../common/runtime_types';
+import { Ping, PingError } from '../../../../../../common/runtime_types';
 import {
   STATUS,
   SHORT_TIMESPAN_LOCALE,
@@ -31,21 +27,15 @@ import {
   SHORT_TS_LOCALE,
 } from '../../../../../../common/constants';
 
-import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
-import { MonitorProgress } from './progress/monitor_progress';
-import { refreshedMonitorSelector } from '../../../../state/reducers/monitor_list';
-import { testNowRunSelector } from '../../../../state/reducers/test_now_runs';
-import { clearTestNowMonitorAction } from '../../../../state/actions';
+import {
+  STATUS_DOWN_LABEL,
+  STATUS_UP_LABEL,
+} from '../../../../../../common/translations/translations';
 import { StatusBadge } from './status_badge';
 
 interface MonitorListStatusColumnProps {
-  configId?: string;
-  monitorId?: string;
-  checkGroup?: string;
   status: string;
-  monitorType: string;
   timestamp: string;
-  duration?: number;
   summaryPings: Ping[];
   summaryError?: PingError;
 }
@@ -165,12 +155,7 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
 };
 
 export const MonitorListStatusColumn = ({
-  monitorType,
-  configId,
-  monitorId,
   status,
-  duration,
-  checkGroup,
   summaryError,
   summaryPings = [],
   timestamp: tsString,
@@ -179,60 +164,11 @@ export const MonitorListStatusColumn = ({
 
   const { statusMessage, locTooltip } = getLocationStatus(summaryPings, status);
 
-  const dispatch = useDispatch();
-
-  const stopProgressTrack = useCallback(() => {
-    if (configId) {
-      dispatch(clearTestNowMonitorAction(configId));
-    }
-  }, [configId, dispatch]);
-
-  const refreshedMonitorIds = useSelector(refreshedMonitorSelector);
-
-  const testNowRun = useSelector(testNowRunSelector(configId));
-
-  const { expectPings, errorMessages, hasBlockingError } = useRunOnceErrors({
-    testRunId: testNowRun?.monitorId ?? '',
-    serviceError: (testNowRun?.fetchError as Error) ?? null,
-    locations: testNowRun?.locations ?? [],
-    errors: testNowRun?.errors ?? [],
-  });
-
-  useEffect(() => {
-    errorMessages.forEach(
-      ({ name, message, title }: { name: string; message: string; title: string }) => {
-        kibanaService.toasts.addError({ name, message }, { title });
-      }
-    );
-
-    if (hasBlockingError) {
-      stopProgressTrack();
-    }
-  }, [errorMessages, hasBlockingError, stopProgressTrack]);
-
   return (
     <div>
       <StatusColumnFlexG alignItems="center" gutterSize="xs" wrap={false} responsive={false}>
         <EuiFlexItem grow={false} style={{ flexBasis: 40 }}>
-          {testNowRun && configId && testNowRun?.testRunId ? (
-            <MonitorProgress
-              monitorId={monitorId!}
-              configId={configId}
-              testRunId={testNowRun?.testRunId}
-              monitorType={monitorType as DataStream}
-              duration={duration ?? 0}
-              schedule={testNowRun.schedule}
-              expectPings={expectPings}
-              stopProgressTrack={stopProgressTrack}
-            />
-          ) : (
-            <StatusBadge
-              status={status}
-              checkGroup={checkGroup}
-              summaryError={summaryError}
-              monitorType={monitorType}
-            />
-          )}
+          <StatusBadge status={status} summaryError={summaryError} />
         </EuiFlexItem>
       </StatusColumnFlexG>
       <EuiSpacer size="xs" />
@@ -261,15 +197,9 @@ export const MonitorListStatusColumn = ({
             </>
           }
         >
-          {monitorId && refreshedMonitorIds?.includes(monitorId) ? (
-            <EuiHighlight highlightAll={true} search={getCheckedLabel(timestamp)}>
-              {getCheckedLabel(timestamp)}
-            </EuiHighlight>
-          ) : (
-            <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-              {getCheckedLabel(timestamp)}
-            </EuiText>
-          )}
+          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+            {getCheckedLabel(timestamp)}
+          </EuiText>
         </EuiToolTip>
       </EuiText>
     </div>

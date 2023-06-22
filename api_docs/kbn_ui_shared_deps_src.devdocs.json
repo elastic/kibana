@@ -13,10 +13,18 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/ui-shared-deps-src",
-        "id": "def-server.cssDistFilename",
+        "id": "def-common.cssDistFilename",
         "type": "string",
         "tags": [],
         "label": "cssDistFilename",
@@ -33,7 +41,7 @@
       },
       {
         "parentPluginId": "@kbn/ui-shared-deps-src",
-        "id": "def-server.distDir",
+        "id": "def-common.distDir",
         "type": "string",
         "tags": [],
         "label": "distDir",
@@ -47,7 +55,7 @@
       },
       {
         "parentPluginId": "@kbn/ui-shared-deps-src",
-        "id": "def-server.jsFilename",
+        "id": "def-common.jsFilename",
         "type": "string",
         "tags": [],
         "label": "jsFilename",
@@ -66,7 +74,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/ui-shared-deps-src",
-        "id": "def-server.externals",
+        "id": "def-common.externals",
         "type": "Object",
         "tags": [],
         "label": "externals",
@@ -79,7 +87,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.kbnuitheme",
+            "id": "def-common.externals.kbnuitheme",
             "type": "string",
             "tags": [],
             "label": "'@kbn/ui-theme'",
@@ -92,7 +100,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.kbni18n",
+            "id": "def-common.externals.kbni18n",
             "type": "string",
             "tags": [],
             "label": "'@kbn/i18n'",
@@ -103,7 +111,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.kbni18nreact",
+            "id": "def-common.externals.kbni18nreact",
             "type": "string",
             "tags": [],
             "label": "'@kbn/i18n-react'",
@@ -114,7 +122,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.emotioncache",
+            "id": "def-common.externals.emotioncache",
             "type": "string",
             "tags": [],
             "label": "'@emotion/cache'",
@@ -125,7 +133,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.emotionreact",
+            "id": "def-common.externals.emotionreact",
             "type": "string",
             "tags": [],
             "label": "'@emotion/react'",
@@ -136,7 +144,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.jquery",
+            "id": "def-common.externals.jquery",
             "type": "string",
             "tags": [],
             "label": "jquery",
@@ -147,7 +155,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.moment",
+            "id": "def-common.externals.moment",
             "type": "string",
             "tags": [],
             "label": "moment",
@@ -158,7 +166,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.momenttimezone",
+            "id": "def-common.externals.momenttimezone",
             "type": "string",
             "tags": [],
             "label": "'moment-timezone'",
@@ -169,7 +177,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.react",
+            "id": "def-common.externals.react",
             "type": "string",
             "tags": [],
             "label": "react",
@@ -180,7 +188,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.reactdom",
+            "id": "def-common.externals.reactdom",
             "type": "string",
             "tags": [],
             "label": "'react-dom'",
@@ -191,7 +199,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.reactdomserver",
+            "id": "def-common.externals.reactdomserver",
             "type": "string",
             "tags": [],
             "label": "'react-dom/server'",
@@ -202,7 +210,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.reactrouter",
+            "id": "def-common.externals.reactrouter",
             "type": "string",
             "tags": [],
             "label": "'react-router'",
@@ -213,7 +221,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.reactrouterdom",
+            "id": "def-common.externals.reactrouterdom",
             "type": "string",
             "tags": [],
             "label": "'react-router-dom'",
@@ -224,7 +232,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.styledcomponents",
+            "id": "def-common.externals.styledcomponents",
             "type": "string",
             "tags": [],
             "label": "'styled-components'",
@@ -235,7 +243,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.kbnmonaco",
+            "id": "def-common.externals.kbnmonaco",
             "type": "string",
             "tags": [],
             "label": "'@kbn/monaco'",
@@ -246,7 +254,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.monacoeditoresmvseditoreditor.api",
+            "id": "def-common.externals.monacoeditoresmvseditoreditor.api",
             "type": "string",
             "tags": [],
             "label": "'monaco-editor/esm/vs/editor/editor.api'",
@@ -259,7 +267,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.rxjs",
+            "id": "def-common.externals.rxjs",
             "type": "string",
             "tags": [],
             "label": "rxjs",
@@ -272,7 +280,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.rxjsoperators",
+            "id": "def-common.externals.rxjsoperators",
             "type": "string",
             "tags": [],
             "label": "'rxjs/operators'",
@@ -283,7 +291,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.numeral",
+            "id": "def-common.externals.numeral",
             "type": "string",
             "tags": [],
             "label": "numeral",
@@ -294,7 +302,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.elasticnumeral",
+            "id": "def-common.externals.elasticnumeral",
             "type": "string",
             "tags": [],
             "label": "'@elastic/numeral'",
@@ -305,7 +313,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.elasticcharts",
+            "id": "def-common.externals.elasticcharts",
             "type": "string",
             "tags": [],
             "label": "'@elastic/charts'",
@@ -316,7 +324,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.kbndatemath",
+            "id": "def-common.externals.kbndatemath",
             "type": "string",
             "tags": [],
             "label": "'@kbn/datemath'",
@@ -327,7 +335,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.elasticeui",
+            "id": "def-common.externals.elasticeui",
             "type": "string",
             "tags": [],
             "label": "'@elastic/eui'",
@@ -338,7 +346,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.elasticeuilibservices",
+            "id": "def-common.externals.elasticeuilibservices",
             "type": "string",
             "tags": [],
             "label": "'@elastic/eui/lib/services'",
@@ -349,7 +357,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.elasticeuilibservicesformat",
+            "id": "def-common.externals.elasticeuilibservicesformat",
             "type": "string",
             "tags": [],
             "label": "'@elastic/eui/lib/services/format'",
@@ -360,7 +368,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.elasticeuidisteui_charts_theme",
+            "id": "def-common.externals.elasticeuidisteui_charts_theme",
             "type": "string",
             "tags": [],
             "label": "'@elastic/eui/dist/eui_charts_theme'",
@@ -371,7 +379,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.reactbeautifuldnd",
+            "id": "def-common.externals.reactbeautifuldnd",
             "type": "string",
             "tags": [],
             "label": "'react-beautiful-dnd'",
@@ -384,7 +392,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.lodash",
+            "id": "def-common.externals.lodash",
             "type": "string",
             "tags": [],
             "label": "lodash",
@@ -395,7 +403,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.lodashfp",
+            "id": "def-common.externals.lodashfp",
             "type": "string",
             "tags": [],
             "label": "'lodash/fp'",
@@ -406,7 +414,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.fflate",
+            "id": "def-common.externals.fflate",
             "type": "string",
             "tags": [],
             "label": "fflate",
@@ -417,7 +425,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.tslib",
+            "id": "def-common.externals.tslib",
             "type": "string",
             "tags": [],
             "label": "tslib",
@@ -430,7 +438,18 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.kbnanalytics",
+            "id": "def-common.externals.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnanalytics",
             "type": "string",
             "tags": [],
             "label": "'@kbn/analytics'",
@@ -441,7 +460,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.kbnesquery",
+            "id": "def-common.externals.kbnesquery",
             "type": "string",
             "tags": [],
             "label": "'@kbn/es-query'",
@@ -452,7 +471,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.kbnstd",
+            "id": "def-common.externals.kbnstd",
             "type": "string",
             "tags": [],
             "label": "'@kbn/std'",
@@ -463,7 +482,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.kbnsaferlodashset",
+            "id": "def-common.externals.kbnsaferlodashset",
             "type": "string",
             "tags": [],
             "label": "'@kbn/safer-lodash-set'",
@@ -474,7 +493,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.kbnrison",
+            "id": "def-common.externals.kbnrison",
             "type": "string",
             "tags": [],
             "label": "'@kbn/rison'",
@@ -485,7 +504,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.history",
+            "id": "def-common.externals.history",
             "type": "string",
             "tags": [],
             "label": "history",
@@ -496,7 +515,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.classnames",
+            "id": "def-common.externals.classnames",
             "type": "string",
             "tags": [],
             "label": "classnames",
@@ -507,7 +526,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.tanstackreactquery",
+            "id": "def-common.externals.tanstackreactquery",
             "type": "string",
             "tags": [],
             "label": "'@tanstack/react-query'",
@@ -518,7 +537,7 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.tanstackreactquerydevtools",
+            "id": "def-common.externals.tanstackreactquerydevtools",
             "type": "string",
             "tags": [],
             "label": "'@tanstack/react-query-devtools'",
@@ -531,13 +550,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

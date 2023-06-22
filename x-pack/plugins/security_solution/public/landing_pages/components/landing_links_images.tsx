@@ -13,11 +13,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import styled from 'styled-components';
 import { withSecuritySolutionLink } from '../../common/components/links';
 import { NavItemBetaBadge } from '../../common/components/navigation/nav_item_beta_badge';
 import type { NavLinkItem } from '../../common/components/navigation/types';
+import { TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 interface LandingImagesProps {
   items: NavLinkItem[];
@@ -59,7 +61,13 @@ export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
   <EuiFlexGroup direction="column">
     {items.map(({ title, description, image, id, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
-        <SecuritySolutionLink deepLinkId={id} tabIndex={-1}>
+        <SecuritySolutionLink
+          deepLinkId={id}
+          tabIndex={-1}
+          onClick={() => {
+            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LANDING_CARD}${id}`);
+          }}
+        >
           {/* Empty onClick is to force hover style on `EuiPanel` */}
           <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={() => {}}>
             <EuiFlexGroup>
@@ -141,6 +149,9 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
             </PrimaryEuiTitle>
           }
           description={<LandingCardDescription>{description}</LandingCardDescription>}
+          onClick={() => {
+            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LANDING_CARD}${id}`);
+          }}
         />
       </LandingImageCardItem>
     ))}

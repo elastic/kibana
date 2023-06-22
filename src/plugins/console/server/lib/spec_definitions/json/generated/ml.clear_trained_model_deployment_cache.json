@@ -1,0 +1,11 @@
+{
+  "ml.clear_trained_model_deployment_cache": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/trained_models/{model_id}/deployment/cache/_clear"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/clear-trained-model-deployment-cache.html"
+  }
+}

@@ -11,7 +11,7 @@ import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
@@ -34,6 +34,7 @@ export async function runDockerGenerator(
     image: boolean;
     ironbank?: boolean;
     cloud?: boolean;
+    serverless?: boolean;
     dockerBuildDate?: string;
   }
 ) {
@@ -47,10 +48,17 @@ export async function runDockerGenerator(
   if (flags.baseImage === 'ubi9') imageFlavor += `-ubi9`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
+  if (flags.serverless) imageFlavor += '-serverless';
 
   // General docker var config
   const license = 'Elastic License';
-  const imageTag = `docker.elastic.co/kibana${flags.cloud ? '-ci' : ''}/kibana`;
+  const configuredNamespace = config.getDockerNamespace();
+  const imageNamespace = configuredNamespace
+    ? configuredNamespace
+    : flags.cloud || flags.serverless
+    ? 'kibana-ci'
+    : 'kibana';
+  const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   const artifactPrefix = `kibana-${version}-linux`;
@@ -74,6 +82,7 @@ export async function runDockerGenerator(
   ];
 
   const dockerPush = config.getDockerPush();
+  const dockerTag = config.getDockerTag();
   const dockerTagQualifier = config.getDockerTagQualfiier();
   const dockerCrossCompile = config.getDockerCrossCompile();
   const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
@@ -90,12 +99,14 @@ export async function runDockerGenerator(
     dockerBuildDir,
     dockerTargetFilename,
     dockerPush,
+    dockerTag,
     dockerTagQualifier,
     dockerCrossCompile,
     baseImageName,
     dockerBuildDate,
     baseImage: flags.baseImage,
     cloud: flags.cloud,
+    serverless: flags.serverless,
     metricbeatTarball,
     filebeatTarball,
     ironbank: flags.ironbank,
@@ -121,6 +132,14 @@ export async function runDockerGenerator(
   // into kibana-docker folder
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
     await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
+  }
+
+  // Copy serverless-only configuration files
+  if (flags.serverless) {
+    await mkdirp(resolve(dockerBuildDir, 'config'));
+    await copyAll(config.resolveFromRepo('config'), resolve(dockerBuildDir, 'config'), {
+      select: ['serverless*.yml'],
+    });
   }
 
   // Copy all the needed resources into kibana-docker folder

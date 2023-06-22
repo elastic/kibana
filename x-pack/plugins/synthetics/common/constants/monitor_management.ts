@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+export enum AlertConfigKey {
+  STATUS_ENABLED = 'alert.status.enabled',
+  TLS_ENABLED = 'alert.tls.enabled',
+}
+
 // values must match keys in the integration package
 export enum ConfigKey {
+  ALERT_CONFIG = 'alert',
   APM_SERVICE_NAME = 'service.name',
   CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
   CONFIG_ID = 'config_id',
@@ -21,6 +27,7 @@ export enum ConfigKey {
   JOURNEY_ID = 'journey_id',
   MAX_REDIRECTS = 'max_redirects',
   METADATA = '__ui',
+  MODE = 'mode',
   MONITOR_TYPE = 'type',
   NAME = 'name',
   NAMESPACE = 'namespace',
@@ -31,12 +38,15 @@ export enum ConfigKey {
   ORIGINAL_SPACE = 'original_space', // the original space the montior was saved in. Used by push monitors to ensure uniqueness of monitor id sent to heartbeat and prevent data collisions
   PORT = 'url.port',
   PROXY_URL = 'proxy_url',
+  PROXY_HEADERS = 'proxy_headers',
   PROXY_USE_LOCAL_RESOLVER = 'proxy_use_local_resolver',
   RESPONSE_BODY_CHECK_NEGATIVE = 'check.response.body.negative',
   RESPONSE_BODY_CHECK_POSITIVE = 'check.response.body.positive',
+  RESPONSE_JSON_CHECK = 'check.response.json',
   RESPONSE_BODY_INDEX = 'response.include_body',
   RESPONSE_HEADERS_CHECK = 'check.response.headers',
   RESPONSE_HEADERS_INDEX = 'response.include_headers',
+  RESPONSE_BODY_MAX_BYTES = 'response.include_body_max_bytes',
   RESPONSE_RECEIVE_CHECK = 'check.receive',
   RESPONSE_STATUS_CHECK = 'check.response.status',
   REQUEST_BODY_CHECK = 'check.request.body',
@@ -48,11 +58,8 @@ export enum ConfigKey {
   SCREENSHOTS = 'screenshots',
   SOURCE_PROJECT_CONTENT = 'source.project.content',
   SOURCE_INLINE = 'source.inline.script',
-  SOURCE_ZIP_URL = 'source.zip_url.url',
-  SOURCE_ZIP_USERNAME = 'source.zip_url.username',
-  SOURCE_ZIP_PASSWORD = 'source.zip_url.password',
-  SOURCE_ZIP_FOLDER = 'source.zip_url.folder',
-  SOURCE_ZIP_PROXY_URL = 'source.zip_url.proxy_url',
+  IPV4 = 'ipv4',
+  IPV6 = 'ipv6',
   PROJECT_ID = 'project_id',
   SYNTHETICS_ARGS = 'synthetics_args',
   TEXT_ASSERTION = 'playwright_text_assertion',
@@ -64,24 +71,15 @@ export enum ConfigKey {
   TLS_VERSION = 'ssl.supported_protocols',
   TAGS = 'tags',
   TIMEOUT = 'timeout',
-  THROTTLING_CONFIG = 'throttling.config',
-  IS_THROTTLING_ENABLED = 'throttling.is_enabled',
-  DOWNLOAD_SPEED = 'throttling.download_speed',
-  UPLOAD_SPEED = 'throttling.upload_speed',
-  LATENCY = 'throttling.latency',
+  THROTTLING_CONFIG = 'throttling',
   URLS = 'urls',
   USERNAME = 'username',
   WAIT = 'wait',
-  ZIP_URL_TLS_CERTIFICATE_AUTHORITIES = 'source.zip_url.ssl.certificate_authorities',
-  ZIP_URL_TLS_CERTIFICATE = 'source.zip_url.ssl.certificate',
-  ZIP_URL_TLS_KEY = 'source.zip_url.ssl.key',
-  ZIP_URL_TLS_KEY_PASSPHRASE = 'source.zip_url.ssl.key_passphrase',
-  ZIP_URL_TLS_VERIFICATION_MODE = 'source.zip_url.ssl.verification_mode',
-  ZIP_URL_TLS_VERSION = 'source.zip_url.ssl.supported_protocols',
   MONITOR_QUERY_ID = 'id',
 }
 
 export const secretKeys = [
+  ConfigKey.PROXY_HEADERS,
   ConfigKey.PARAMS,
   ConfigKey.PASSWORD,
   ConfigKey.REQUEST_BODY_CHECK,
@@ -89,16 +87,33 @@ export const secretKeys = [
   ConfigKey.REQUEST_SEND_CHECK,
   ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
   ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
+  ConfigKey.RESPONSE_JSON_CHECK,
   ConfigKey.RESPONSE_HEADERS_CHECK,
   ConfigKey.RESPONSE_RECEIVE_CHECK,
   ConfigKey.SOURCE_INLINE,
   ConfigKey.SOURCE_PROJECT_CONTENT,
-  ConfigKey.SOURCE_ZIP_USERNAME,
-  ConfigKey.SOURCE_ZIP_PASSWORD,
   ConfigKey.SYNTHETICS_ARGS,
   ConfigKey.TLS_KEY,
   ConfigKey.TLS_KEY_PASSPHRASE,
   ConfigKey.USERNAME,
-  ConfigKey.ZIP_URL_TLS_KEY,
-  ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE,
 ] as const;
+
+export enum LegacyConfigKey {
+  SOURCE_ZIP_URL = 'source.zip_url.url',
+  SOURCE_ZIP_USERNAME = 'source.zip_url.username',
+  SOURCE_ZIP_PASSWORD = 'source.zip_url.password',
+  SOURCE_ZIP_FOLDER = 'source.zip_url.folder',
+  SOURCE_ZIP_PROXY_URL = 'source.zip_url.proxy_url',
+  ZIP_URL_TLS_CERTIFICATE_AUTHORITIES = 'source.zip_url.ssl.certificate_authorities',
+  ZIP_URL_TLS_CERTIFICATE = 'source.zip_url.ssl.certificate',
+  ZIP_URL_TLS_KEY = 'source.zip_url.ssl.key',
+  ZIP_URL_TLS_KEY_PASSPHRASE = 'source.zip_url.ssl.key_passphrase',
+  ZIP_URL_TLS_VERIFICATION_MODE = 'source.zip_url.ssl.verification_mode',
+  ZIP_URL_TLS_VERSION = 'source.zip_url.ssl.supported_protocols',
+
+  THROTTLING_CONFIG = 'throttling.config',
+  IS_THROTTLING_ENABLED = 'throttling.is_enabled',
+  DOWNLOAD_SPEED = 'throttling.download_speed',
+  UPLOAD_SPEED = 'throttling.upload_speed',
+  LATENCY = 'throttling.latency',
+}

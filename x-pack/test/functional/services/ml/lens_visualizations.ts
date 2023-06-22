@@ -27,14 +27,21 @@ export function MachineLearningLensVisualizationsProvider(
     async clickCreateJobFromLayerWithWizard(layerIndex: number) {
       await testSubjects.click(`mlLensLayerCreateWithWizardButton_${layerIndex}`);
     },
-    async assertLensLayerSelectorExists() {
-      await testSubjects.existOrFail('mlFlyoutLensLayerSelector');
+    async assertLayerSelectorExists() {
+      await testSubjects.existOrFail('mlFlyoutLayerSelector');
     },
     async assertMLJobMenuActionDoesNotExist() {
       await testSubjects.missingOrFail('embeddablePanelAction-create-ml-ad-job-action');
     },
     async assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers: number) {
       const compatibleLayers = await testSubjects.findAll('mlLensLayerCompatible');
+      expect(compatibleLayers.length).to.eql(
+        numberOfCompatibleLayers,
+        `Expected number of compatible layers to be ${numberOfCompatibleLayers} (got '${compatibleLayers.length}')`
+      );
+    },
+    async assertNumberOfCompatibleMapLayers(numberOfCompatibleLayers: number) {
+      const compatibleLayers = await testSubjects.findAll('mlMapLayerCompatible');
       expect(compatibleLayers.length).to.eql(
         numberOfCompatibleLayers,
         `Expected number of compatible layers to be ${numberOfCompatibleLayers} (got '${compatibleLayers.length}')`

@@ -7,16 +7,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ContentType, Mode } from '../types';
+import { ContentType, CodeEditorMode } from '../types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';
 
-interface Props {
-  contentMode?: Mode;
+export interface HeaderFieldProps {
+  contentMode?: CodeEditorMode;
   defaultValue: Record<string, string>;
   onChange: (value: Record<string, string>) => void;
   onBlur?: () => void;
   'data-test-subj'?: string;
+  readOnly?: boolean;
 }
 
 export const HeaderField = ({
@@ -25,7 +26,8 @@ export const HeaderField = ({
   onChange,
   onBlur,
   'data-test-subj': dataTestSubj,
-}: Props) => {
+  readOnly,
+}: HeaderFieldProps) => {
   const defaultValueKeys = Object.keys(defaultValue).filter((key) => key !== 'Content-Type'); // Content-Type is a secret header we hide from the user
   const formattedDefaultValues: Pair[] = [
     ...defaultValueKeys.map<Pair>((key) => {
@@ -65,13 +67,14 @@ export const HeaderField = ({
       onChange={setHeaders}
       onBlur={() => onBlur?.()}
       data-test-subj={dataTestSubj}
+      readOnly={readOnly}
     />
   );
 };
 
-export const contentTypes: Record<Mode, ContentType> = {
-  [Mode.JSON]: ContentType.JSON,
-  [Mode.PLAINTEXT]: ContentType.TEXT,
-  [Mode.XML]: ContentType.XML,
-  [Mode.FORM]: ContentType.FORM,
+export const contentTypes: Record<CodeEditorMode, ContentType> = {
+  [CodeEditorMode.JSON]: ContentType.JSON,
+  [CodeEditorMode.PLAINTEXT]: ContentType.TEXT,
+  [CodeEditorMode.XML]: ContentType.XML,
+  [CodeEditorMode.FORM]: ContentType.FORM,
 };

@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { errorBudgetSchema } from '../../types/schema';
+import { errorBudgetSchema } from '@kbn/slo-schema';
 
 type ErrorBudget = t.TypeOf<typeof errorBudgetSchema>;
 

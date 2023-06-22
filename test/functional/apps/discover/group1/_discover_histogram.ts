@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
@@ -94,6 +95,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`The first timestamp value in doc table after brushing: ${rowData}`);
         return prevRowData !== rowData;
       });
+    });
+
+    it('should update correctly when switching data views and brushing the histogram', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.selectIndexPattern('logstash-*');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.brushHistogram();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await PageObjects.discover.getHitCount()).to.be('7');
     });
 
     it('should update the histogram timerange when the query is resubmitted', async function () {
@@ -253,6 +268,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         canvasExists = await elasticChart.canvasExists();
         expect(canvasExists).to.be(false);
+      });
+    });
+
+    it('should recover from broken query search when clearing the query bar', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      // Make sure the chart is visible
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      // type an invalid search query, hit refresh
+      await queryBar.setQuery('this is > not valid');
+      await queryBar.submitQuery();
+      // check the error state
+      expect(await testSubjects.exists('embeddable-lens-failure')).to.be(true);
+
+      // now remove the query
+      await queryBar.clearQuery();
+      await queryBar.submitQuery();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      // check no error state
+      expect(await PageObjects.discover.isChartVisible()).to.be(true);
+    });
+
+    it('should reset all histogram state when resetting the saved search', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      const savedSearch = 'histogram state';
+      await PageObjects.discover.saveSearch(savedSearch);
+      await PageObjects.discover.chooseBreakdownField('extension.keyword');
+      await PageObjects.discover.setChartInterval('Second');
+      let requestData = await testSubjects.getAttribute(
+        'unifiedHistogramChart',
+        'data-request-data'
+      );
+      expect(JSON.parse(requestData)).to.eql({
+        dataViewId: 'long-window-logstash-*',
+        timeField: '@timestamp',
+        timeInterval: 's',
+        breakdownField: 'extension.keyword',
+      });
+      await PageObjects.discover.toggleChartVisibility();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.clickResetSavedSearchButton();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      requestData = await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data');
+      expect(JSON.parse(requestData)).to.eql({
+        dataViewId: 'long-window-logstash-*',
+        timeField: '@timestamp',
+        timeInterval: 'auto',
       });
     });
   });

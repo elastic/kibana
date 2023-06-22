@@ -6,19 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { EuiButton, EuiPopoverFooter } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { FieldVisualizeButton } from './field_visualize_button';
+import { getFieldVisualizeButton } from './field_visualize_button';
 import {
   ACTION_VISUALIZE_LENS_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
-  createAction,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
@@ -26,7 +25,7 @@ import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 const ORIGINATING_APP = 'test';
 const mockExecuteAction = jest.fn();
 const uiActions = uiActionsPluginMock.createStartContract();
-const visualizeAction = createAction<VisualizeFieldContext>({
+const visualizeAction = new ActionInternal({
   type: ACTION_VISUALIZE_LENS_FIELD,
   id: ACTION_VISUALIZE_LENS_FIELD,
   getDisplayName: () => 'test',
@@ -37,7 +36,9 @@ const visualizeAction = createAction<VisualizeFieldContext>({
   getHref: async () => '/app/test',
 });
 
-jest.spyOn(uiActions, 'getTriggerCompatibleActions').mockResolvedValue([visualizeAction]);
+jest
+  .spyOn(uiActions, 'getTriggerCompatibleActions')
+  .mockResolvedValue([visualizeAction as ActionInternal<object>]);
 jest.spyOn(uiActions, 'getTrigger').mockReturnValue({
   id: ACTION_VISUALIZE_LENS_FIELD,
   exec: mockExecuteAction,
@@ -54,18 +55,16 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
     jest.spyOn(fieldKeyword, 'visualizable', 'get').mockImplementationOnce(() => true);
     let wrapper: ReactWrapper;
 
+    const button = await getFieldVisualizeButton({
+      field,
+      dataView,
+      multiFields: [fieldKeyword],
+      contextualFields,
+      originatingApp: ORIGINATING_APP,
+      uiActions,
+    });
     await act(async () => {
-      wrapper = await mountWithIntl(
-        <FieldVisualizeButton
-          field={field}
-          dataView={dataView}
-          multiFields={[fieldKeyword]}
-          contextualFields={contextualFields}
-          originatingApp={ORIGINATING_APP}
-          uiActions={uiActions}
-          wrapInContainer={(element) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
-        />
-      );
+      wrapper = await mountWithIntl(button!);
     });
 
     await wrapper!.update();
@@ -87,7 +86,6 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
     });
 
     expect(wrapper!.find(EuiButton).prop('href')).toBe('/app/test');
-    expect(wrapper!.find(EuiPopoverFooter).find(EuiButton).exists()).toBeTruthy(); // wrapped in a container
   });
 
   it('should render correctly for geo fields', async () => {
@@ -96,15 +94,14 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
     jest.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => true);
     let wrapper: ReactWrapper;
 
+    const button = await getFieldVisualizeButton({
+      field,
+      dataView,
+      originatingApp: ORIGINATING_APP,
+      uiActions,
+    });
     await act(async () => {
-      wrapper = await mountWithIntl(
-        <FieldVisualizeButton
-          field={field}
-          dataView={dataView}
-          originatingApp={ORIGINATING_APP}
-          uiActions={uiActions}
-        />
-      );
+      wrapper = await mountWithIntl(button!);
     });
 
     await wrapper!.update();

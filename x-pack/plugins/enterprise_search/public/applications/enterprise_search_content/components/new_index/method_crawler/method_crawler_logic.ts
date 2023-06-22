@@ -10,8 +10,6 @@ import { kea, MakeLogicType } from 'kea';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
-
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
   CreateCrawlerIndexApiLogic,
@@ -28,12 +26,9 @@ type MethodCrawlerActions = Pick<
 
 export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
   connect: {
-    actions: [CreateCrawlerIndexApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
+    actions: [CreateCrawlerIndexApiLogic, ['apiError', 'apiSuccess']],
   },
   listeners: {
-    apiError: (error) => {
-      flashAPIErrors(error);
-    },
     apiSuccess: ({ created }) => {
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
@@ -42,7 +37,6 @@ export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
         })
       );
     },
-    makeRequest: () => clearFlashMessages(),
   },
-  path: ['enterprise_search', 'method_crawler'],
+  path: ['enterprise_search', 'content', 'method_crawler'],
 });

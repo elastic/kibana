@@ -24,7 +24,7 @@ import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
-import { createFleetAuthzMock } from '../../common';
+import { createFleetAuthzMock } from '../../common/mocks';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
 import { packageServiceMock } from '../services/epm/package_service.mock';
@@ -58,11 +58,12 @@ export const createAppContextStartContractMock = (
     elasticsearch: elasticsearchServiceMock.createStart(),
     data: dataPluginMock.createStartContract(),
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
+    encryptedSavedObjectsSetup: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: {} as ExperimentalFeatures,
+    experimentalFeatures: { diagnosticFileUploadEnabled: true } as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -74,6 +75,7 @@ export const createAppContextStartContractMock = (
     kibanaBranch: 'main',
     telemetryEventsSender: createMockTelemetryEventsSender(),
     bulkActionsResolver: {} as any,
+    messageSigningService: createMessageSigningServiceMock(),
   };
 };
 
@@ -90,10 +92,9 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       asCurrentUser: createPackagePolicyServiceMock(),
       asInternalUser: createPackagePolicyServiceMock(),
     },
-    epm: {
-      internalSoClient: savedObjectsClientMock.create(),
-    },
+    internalSoClient: savedObjectsClientMock.create(),
     spaceId: 'default',
+    limitedToPackages: undefined,
   };
 };
 
@@ -123,6 +124,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     bulkUpdate: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),
+    runPostDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
     getUpgradePackagePolicyInfo: jest.fn(),
@@ -158,3 +160,14 @@ export const createMockAgentClient = () => agentServiceMock.createClient();
  * Creates a mock PackageService
  */
 export const createMockPackageService = () => packageServiceMock.create();
+
+export function createMessageSigningServiceMock() {
+  return {
+    isEncryptionAvailable: true,
+    generateKeyPair: jest.fn(),
+    sign: jest.fn(),
+    getPublicKey: jest.fn(),
+    removeKeyPair: jest.fn(),
+    rotateKeyPair: jest.fn(),
+  };
+}

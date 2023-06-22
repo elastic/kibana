@@ -1,0 +1,20 @@
+
+.errorEmbeddableCompact__popover {
+  height: 100%;
+}
+
+.errorEmbeddableCompact__popoverAnchor {
+  max-width: 100%;
+}
+
+.errorEmbeddableCompact__button {
+  :hover {
+    text-decoration: underline;
+    text-decoration-color: $euiTextSubduedColor !important;
+  }
+}
+
+.errorEmbeddableCompact__text {
+  font-size: $euiSizeM;
+  color: $euiTextSubduedColor;
+}

@@ -69,7 +69,7 @@ function createFakeElasticsearchServer() {
 }
 
 // FLAKY: https://github.com/elastic/kibana/issues/129754
-describe.skip('fake elasticsearch', () => {
+describe('fake elasticsearch', () => {
   let esServer: http.Server;
   let kibanaServer: Root;
   let kibanaHttpServer: http.Server;
@@ -81,6 +81,10 @@ describe.skip('fake elasticsearch', () => {
     const kibanaPreboot = await kibanaServer.preboot();
     kibanaHttpServer = kibanaPreboot.http.server.listener; // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
     await kibanaServer.setup();
+    // give kibanaServer's status Observables enough time to bootstrap
+    // and emit a status after the initial "unavailable: Waiting for Elasticsearch"
+    // see https://github.com/elastic/kibana/issues/129754
+    await new Promise((resolve) => setTimeout(resolve, 500));
   });
 
   afterAll(async () => {

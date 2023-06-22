@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { checkA11y } from '../../../support/commands';
@@ -12,14 +13,6 @@ import { generateData } from './generate_data';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
-const errorDetailsPageHref = url.format({
-  pathname:
-    '/app/apm/services/opbeans-java/errors/0000000000000000000000000Error%200',
-  query: {
-    rangeFrom: start,
-    rangeTo: end,
-  },
-});
 
 describe('Error details', () => {
   beforeEach(() => {
@@ -41,18 +34,29 @@ describe('Error details', () => {
     });
 
     it('has no detectable a11y violations on load', () => {
+      const errorGroupingKey = getErrorGroupingKey('Error 1');
+      const errorGroupingKeyShort = errorGroupingKey.slice(0, 5);
+      const errorDetailsPageHref = url.format({
+        pathname: `/app/apm/services/opbeans-java/errors/${errorGroupingKey}`,
+        query: {
+          rangeFrom: start,
+          rangeTo: end,
+        },
+      });
+
       cy.visitKibana(errorDetailsPageHref);
-      cy.contains('Error group 00000');
+      cy.contains(`Error group ${errorGroupingKeyShort}`);
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
     });
 
     describe('when error has no occurrences', () => {
-      it('shows an empty message', () => {
+      it('shows zero occurrences', () => {
+        const errorGroupingKey = getErrorGroupingKey('Error foo bar');
+
         cy.visitKibana(
           url.format({
-            pathname:
-              '/app/apm/services/opbeans-java/errors/0000000000000000000000000Error%201',
+            pathname: `/app/apm/services/opbeans-java/errors/${errorGroupingKey}`,
             query: {
               rangeFrom: start,
               rangeTo: end,
@@ -60,15 +64,25 @@ describe('Error details', () => {
             },
           })
         );
-        cy.contains('No data to display');
+        cy.contains('0 occ');
       });
     });
 
     describe('when error has data', () => {
+      const errorGroupingKey = getErrorGroupingKey('Error 1');
+      const errorGroupingKeyShort = errorGroupingKey.slice(0, 5);
+      const errorDetailsPageHref = url.format({
+        pathname: `/app/apm/services/opbeans-java/errors/${errorGroupingKey}`,
+        query: {
+          rangeFrom: start,
+          rangeTo: end,
+        },
+      });
+
       it('shows errors distribution chart', () => {
         cy.visitKibana(errorDetailsPageHref);
-        cy.contains('Error group 00000');
-        cy.getByTestSubj('errorDistribution').contains('Occurrences');
+        cy.contains(`Error group ${errorGroupingKeyShort}`);
+        cy.getByTestSubj('errorDistribution').contains('Error occurrences');
       });
 
       it('shows top erroneous transactions table', () => {
@@ -89,7 +103,6 @@ describe('Error details', () => {
       describe('when clicking on related transaction sample', () => {
         it('should redirects to the transaction details page', () => {
           cy.visitKibana(errorDetailsPageHref);
-          cy.contains('Error group 00000');
           cy.contains('a', 'GET /apple 🍎').click();
           cy.url().should('include', 'opbeans-java/transactions/view');
         });

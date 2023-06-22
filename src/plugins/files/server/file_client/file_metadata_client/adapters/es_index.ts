@@ -12,6 +12,8 @@ import { Logger } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { MappingProperty, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import pLimit from 'p-limit';
+
 import type { FilesMetrics, FileMetadata, Pagination } from '../../../../common';
 import type { FindFileArgs } from '../../../file_service';
 import type {
@@ -19,6 +21,7 @@ import type {
   FileDescriptor,
   FileMetadataClient,
   GetArg,
+  BulkGetArg,
   GetUsageMetricsArgs,
   UpdateArgs,
 } from '../file_metadata_client';
@@ -26,6 +29,7 @@ import { filterArgsToKuery } from './query_filters';
 import { fileObjectType } from '../../../saved_objects/file';
 
 const filterArgsToESQuery = pipe(filterArgsToKuery, toElasticsearchQuery);
+const bulkGetConcurrency = pLimit(10);
 
 const fileMappings: MappingProperty = {
   dynamic: false,
@@ -35,7 +39,7 @@ const fileMappings: MappingProperty = {
   },
 };
 
-interface FileDocument<M = unknown> {
+export interface FileDocument<M = unknown> {
   file: FileMetadata<M>;
 }
 
@@ -43,7 +47,8 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   constructor(
     private readonly index: string,
     private readonly esClient: ElasticsearchClient,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly indexIsAlias: boolean = false
   ) {}
 
   private createIfNotExists = once(async () => {
@@ -80,13 +85,36 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   }
 
   async get({ id }: GetArg): Promise<FileDescriptor<M>> {
-    const { _source: doc } = await this.esClient.get<FileDocument<M>>({
-      index: this.index,
-      id,
-    });
+    const { esClient, index, indexIsAlias } = this;
+    let doc: FileDocument<M> | undefined;
+
+    if (indexIsAlias) {
+      doc = (
+        await esClient.search<FileDocument<M>>({
+          index,
+          body: {
+            size: 1,
+            query: {
+              term: {
+                _id: id,
+              },
+            },
+          },
+        })
+      ).hits.hits?.[0]?._source;
+    } else {
+      doc = (
+        await esClient.get<FileDocument<M>>({
+          index,
+          id,
+        })
+      )._source;
+    }
 
     if (!doc) {
-      this.logger.error(`File with id "${id}" not found`);
+      this.logger.error(
+        `File with id "${id}" not found in index ${indexIsAlias ? 'alias ' : ''}"${index}"`
+      );
       throw new Error('File not found');
     }
 
@@ -94,6 +122,22 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
       id,
       metadata: doc.file,
     };
+  }
+
+  async bulkGet(arg: { ids: string[]; throwIfNotFound?: true }): Promise<FileDescriptor[]>;
+  async bulkGet({ ids, throwIfNotFound }: BulkGetArg): Promise<Array<FileDescriptor | null>> {
+    const promises = ids.map((id) =>
+      bulkGetConcurrency(() =>
+        this.get({ id }).catch((e) => {
+          if (throwIfNotFound) {
+            throw e;
+          }
+          return null;
+        })
+      )
+    );
+    const result = await Promise.all(promises);
+    return result;
   }
 
   async delete({ id }: DeleteArg): Promise<void> {

@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useState } from 'react';
+import React, { MouseEvent, useState, type FC } from 'react';
 
 import {
-  EuiSpacer,
+  formatDate,
+  EuiPanel,
   EuiBasicTable,
   EuiBasicTableProps,
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE } from '../../../../../../common/constants';
+import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE, TIME_FORMAT } from '../../../../../../common/constants';
 import { isGetTransformsAuditMessagesResponseSchema } from '../../../../../../common/api_schemas/type_guards';
 import { TransformMessage } from '../../../../../../common/types/messages';
 
@@ -28,9 +27,7 @@ import { useApi } from '../../../../hooks/use_api';
 import { JobIcon } from '../../../../components/job_icon';
 import { useRefreshTransformList } from '../../../../common';
 
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
-
-interface Props {
+interface ExpandedRowMessagesPaneProps {
   transformId: string;
 }
 
@@ -39,7 +36,7 @@ interface Sorting {
   direction: 'asc' | 'desc';
 }
 
-export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
+export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ transformId }) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [msgCount, setMsgCount] = useState<number>(0);
 
@@ -218,8 +215,12 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
   };
 
   return (
-    <div data-test-subj="transformMessagesTabContent">
-      <EuiSpacer size="s" />
+    <EuiPanel
+      color="transparent"
+      hasBorder={false}
+      paddingSize="s"
+      data-test-subj="transformMessagesTabContent"
+    >
       <EuiBasicTable
         className="transform__TransformTable__messagesPaneTable"
         items={pageOfMessages}
@@ -231,6 +232,6 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
         onChange={onChange}
         sorting={sorting}
       />
-    </div>
+    </EuiPanel>
   );
 };

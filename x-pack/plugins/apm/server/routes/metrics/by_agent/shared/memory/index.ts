@@ -14,6 +14,7 @@ import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
+  METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION,
 } from '../../../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
@@ -46,9 +47,18 @@ const chartBase: ChartBase = {
   series,
 };
 
-export const percentSystemMemoryUsedScript = {
-  lang: 'painless',
-  source: `
+export const systemMemory = {
+  filter: {
+    bool: {
+      filter: [
+        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      ],
+    },
+  },
+  script: {
+    lang: 'painless',
+    source: `
     if(doc.containsKey('${METRIC_SYSTEM_FREE_MEMORY}') && doc.containsKey('${METRIC_SYSTEM_TOTAL_MEMORY}')){
       double freeMemoryValue =  doc['${METRIC_SYSTEM_FREE_MEMORY}'].value;
       double totalMemoryValue = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
@@ -57,11 +67,23 @@ export const percentSystemMemoryUsedScript = {
     
     return null;
   `,
-} as const;
+  },
+};
 
-export const percentCgroupMemoryUsedScript = {
-  lang: 'painless',
-  source: `
+export const cgroupMemory = {
+  filter: {
+    bool: {
+      filter: [{ exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } }],
+      should: [
+        { exists: { field: METRIC_CGROUP_MEMORY_LIMIT_BYTES } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      ],
+      minimum_should_match: 1,
+    },
+  },
+  script: {
+    lang: 'painless',
+    source: `
     /*
       When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
@@ -79,7 +101,8 @@ export const percentCgroupMemoryUsedScript = {
 
     return used / total;
     `,
-} as const;
+  },
+};
 
 export async function getMemoryChartData({
   environment,
@@ -91,6 +114,7 @@ export async function getMemoryChartData({
   serverlessId,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
@@ -101,9 +125,10 @@ export async function getMemoryChartData({
   serverlessId?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
-  return withApmSpan('get_memory_metrics_charts', async () => {
-    const cgroupResponse = await fetchAndTransformMetrics({
+  if (isOpenTelemetry) {
+    return await fetchAndTransformMetrics({
       environment,
       kuery,
       config,
@@ -114,18 +139,22 @@ export async function getMemoryChartData({
       end,
       chartBase,
       aggs: {
-        memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
-        memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
+        memoryUsedAvg: {
+          avg: { field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION },
+        },
+        memoryUsedMax: {
+          max: { field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION },
+        },
       },
       additionalFilters: [
-        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+        { exists: { field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION } },
         ...termQuery(FAAS_ID, serverlessId),
       ],
-      operationName: 'get_cgroup_memory_metrics_charts',
+      operationName: 'get_otel_system_memory_metrics_charts',
     });
-
-    if (cgroupResponse.series.length === 0) {
-      return await fetchAndTransformMetrics({
+  } else {
+    return withApmSpan('get_memory_metrics_charts', async () => {
+      const cgroupResponse = await fetchAndTransformMetrics({
         environment,
         kuery,
         config,
@@ -136,18 +165,40 @@ export async function getMemoryChartData({
         end,
         chartBase,
         aggs: {
-          memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },
-          memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
+          memoryUsedAvg: { avg: { script: cgroupMemory.script } },
+          memoryUsedMax: { max: { script: cgroupMemory.script } },
         },
         additionalFilters: [
-          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+          cgroupMemory.filter,
           ...termQuery(FAAS_ID, serverlessId),
         ],
-        operationName: 'get_system_memory_metrics_charts',
+        operationName: 'get_cgroup_memory_metrics_charts',
       });
-    }
 
-    return cgroupResponse;
-  });
+      if (cgroupResponse.series.length === 0) {
+        return await fetchAndTransformMetrics({
+          environment,
+          kuery,
+          config,
+          apmEventClient,
+          serviceName,
+          serviceNodeName,
+          start,
+          end,
+          chartBase,
+          aggs: {
+            memoryUsedAvg: { avg: { script: systemMemory.script } },
+            memoryUsedMax: { max: { script: systemMemory.script } },
+          },
+          additionalFilters: [
+            systemMemory.filter,
+            ...termQuery(FAAS_ID, serverlessId),
+          ],
+          operationName: 'get_system_memory_metrics_charts',
+        });
+      }
+
+      return cgroupResponse;
+    });
+  }
 }

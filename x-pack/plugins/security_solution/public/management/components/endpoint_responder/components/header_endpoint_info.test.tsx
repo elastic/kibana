@@ -62,4 +62,8 @@ describe('Responder header endpoint info', () => {
     const lastUpdated = await renderResult.findByTestId('responderHeaderLastSeen');
     expect(lastUpdated).toBeTruthy();
   });
+  it('should show platform icon', async () => {
+    const platformIcon = await renderResult.findByTestId('responderHeaderEndpointPlatformIcon');
+    expect(platformIcon).toBeTruthy();
+  });
 });

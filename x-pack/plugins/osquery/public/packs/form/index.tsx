@@ -145,7 +145,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     async (values: PackFormData) => {
       const serializer = ({
         shards: _,
-        policy_ids: payloadPolicyIds,
+        policy_ids: payloadAgentPolicyIds,
         queries,
         ...restPayload
       }: PackFormData) => {
@@ -158,7 +158,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               })
             ) as string[])
           : [];
-        const policies = [...payloadPolicyIds, ...mappedShards];
+        const policies = [...payloadAgentPolicyIds, ...mappedShards];
 
         return {
           ...restPayload,

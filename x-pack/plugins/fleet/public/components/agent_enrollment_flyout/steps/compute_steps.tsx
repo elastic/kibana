@@ -14,7 +14,11 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
 
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import {
+  fullAgentPolicyToYaml,
+  agentPolicyRouteService,
+  getCloudFormationTemplateUrlFromPackagePolicy,
+} from '../../../services';
 
 import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
@@ -216,6 +220,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   });
 
   const instructionsSteps = useMemo(() => {
+    const cloudFormationTemplateUrl = getCloudFormationTemplateUrlFromPackagePolicy(selectedPolicy);
+
     const steps: EuiContainedStepProps[] = !agentPolicy
       ? [
           AgentPolicySelectionStep({
@@ -248,6 +254,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
         selectedApiKeyId,
         isK8s,
         enrollToken,
+        cloudFormationTemplateUrl,
       })
     );
     if (selectedApiKeyId && apiKeyData) {

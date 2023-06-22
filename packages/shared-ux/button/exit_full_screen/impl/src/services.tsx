@@ -43,6 +43,7 @@ export const ExitFullScreenButtonKibanaProvider: FC<ExitFullScreenButtonKibanaDe
         setIsFullscreen: (isFullscreen: boolean) => {
           services.coreStart.chrome.setIsVisible(!isFullscreen);
         },
+        customBranding$: services.coreStart.customBranding.customBranding$,
       }}
     >
       {children}

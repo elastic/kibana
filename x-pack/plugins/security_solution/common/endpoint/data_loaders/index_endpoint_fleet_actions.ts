@@ -47,7 +47,7 @@ export const indexEndpointAndFleetActionsForHost = async (
 ): Promise<IndexedEndpointAndFleetActionsForHostResponse> => {
   const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
   const agentId = endpointHost.elastic.agent.id;
-  const total = fleetActionGenerator.randomN(5);
+  const total = fleetActionGenerator.randomN(5) + 1; // generate at least one
   const response: IndexedEndpointAndFleetActionsForHostResponse = {
     actions: [],
     actionResponses: [],

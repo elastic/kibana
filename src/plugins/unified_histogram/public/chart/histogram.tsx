@@ -6,18 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import useDebounce from 'react-use/lib/useDebounce';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
+import type { Observable } from 'rxjs';
 import {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -26,53 +25,72 @@ import {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
+  UnifiedHistogramInputMessage,
 } from '../types';
-import { buildBucketInterval } from './build_bucket_interval';
-import { useTimeRange } from './use_time_range';
-import { REQUEST_DEBOUNCE_MS } from './consts';
+import { buildBucketInterval } from './utils/build_bucket_interval';
+import { useTimeRange } from './hooks/use_time_range';
+import { useStableCallback } from './hooks/use_stable_callback';
+import { useLensProps } from './hooks/use_lens_props';
+import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
   dataView: DataView;
-  lastReloadRequestTime: number | undefined;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
-  timeRange: TimeRange;
-  lensAttributes: TypedLensByValueInput['attributes'];
+  isPlainRecord?: boolean;
+  getTimeRange: () => TimeRange;
+  refetch$: Observable<UnifiedHistogramInputMessage>;
+  lensAttributesContext: LensAttributesContext;
+  disableTriggers?: LensEmbeddableInput['disableTriggers'];
+  disabledActions?: LensEmbeddableInput['disabledActions'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
+  onFilter?: LensEmbeddableInput['onFilter'];
+  onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
 }
 
 export function Histogram({
   services: { data, lens, uiSettings },
   dataView,
-  lastReloadRequestTime,
   request,
   hits,
   chart: { timeInterval },
-  timeRange,
-  lensAttributes: attributes,
+  isPlainRecord,
+  getTimeRange,
+  refetch$,
+  lensAttributesContext: attributesContext,
+  disableTriggers,
+  disabledActions,
   onTotalHitsChange,
   onChartLoad,
+  onFilter,
+  onBrushEnd,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
+  const [chartSize, setChartSize] = useState('100%');
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
-    timeRange,
+    timeRange: getTimeRange(),
     timeInterval,
+    isPlainRecord,
   });
-
-  // Keep track of previous hits in a ref to avoid recreating the
-  // onLoad callback when the hits change, which triggers a Lens reload
-  const previousHits = useRef(hits?.total);
+  const chartRef = useRef<HTMLDivElement | null>(null);
+  const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
+  const { attributes } = attributesContext;
 
   useEffect(() => {
-    previousHits.current = hits?.total;
-  }, [hits?.total]);
+    if (attributes.visualizationType === 'lnsMetric') {
+      const size = containerHeight < containerWidth ? containerHeight : containerWidth;
+      setChartSize(`${size}px`);
+    } else {
+      setChartSize('100%');
+    }
+  }, [attributes, containerHeight, containerWidth]);
 
-  const onLoad = useCallback(
+  const onLoad = useStableCallback(
     (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
       const lensRequest = adapters?.requests?.getRequests()[0];
       const requestFailed = lensRequest?.status === RequestStatus.ERROR;
@@ -86,15 +104,18 @@ export function Histogram({
       // This is incorrect, so we check for request failures and shard failures here, and emit an error instead.
       if (requestFailed || response?._shards.failed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
-        onChartLoad?.({ complete: false, adapters: adapters ?? {} });
+        onChartLoad?.({ adapters: adapters ?? {} });
         return;
       }
 
-      const totalHits = adapters?.tables?.tables?.unifiedHistogram?.meta?.statistics?.totalCount;
+      const adapterTables = adapters?.tables?.tables;
+      const totalHits = isPlainRecord
+        ? Object.values(adapterTables ?? {})?.[0]?.rows?.length
+        : adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
 
       onTotalHitsChange?.(
         isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
-        totalHits ?? previousHits.current
+        totalHits ?? hits?.total
       );
 
       if (response) {
@@ -102,17 +123,24 @@ export function Histogram({
           data,
           dataView,
           timeInterval,
-          timeRange,
+          timeRange: getTimeRange(),
           response,
         });
 
         setBucketInterval(newBucketInterval);
       }
 
-      onChartLoad?.({ complete: !isLoading, adapters: adapters ?? {} });
-    },
-    [data, dataView, onChartLoad, onTotalHitsChange, timeInterval, timeRange]
+      onChartLoad?.({ adapters: adapters ?? {} });
+    }
   );
+
+  const { lensProps, requestData } = useLensProps({
+    request,
+    getTimeRange,
+    refetch$,
+    attributesContext,
+    onLoad,
+  });
 
   const { euiTheme } = useEuiTheme();
   const chartCss = css`
@@ -121,6 +149,13 @@ export function Histogram({
 
     & > div {
       height: 100%;
+      position: absolute;
+      width: 100%;
+    }
+
+    & .lnsExpressionRenderer {
+      width: ${chartSize};
+      margin: auto;
     }
 
     & .echLegend .echLegendList {
@@ -135,58 +170,24 @@ export function Histogram({
     }
   `;
 
-  const [debouncedProps, setDebouncedProps] = useState(
-    getLensProps({
-      timeRange,
-      attributes,
-      request,
-      lastReloadRequestTime,
-      onLoad,
-    })
-  );
-
-  useDebounce(
-    () => {
-      setDebouncedProps(
-        getLensProps({ timeRange, attributes, request, lastReloadRequestTime, onLoad })
-      );
-    },
-    REQUEST_DEBOUNCE_MS,
-    [attributes, lastReloadRequestTime, onLoad, request, timeRange]
-  );
-
   return (
     <>
-      <div data-test-subj="unifiedHistogramChart" data-time-range={timeRangeText} css={chartCss}>
-        <lens.EmbeddableComponent {...debouncedProps} />
+      <div
+        data-test-subj="unifiedHistogramChart"
+        data-time-range={timeRangeText}
+        data-request-data={requestData}
+        css={chartCss}
+        ref={chartRef}
+      >
+        <lens.EmbeddableComponent
+          {...lensProps}
+          disableTriggers={disableTriggers}
+          disabledActions={disabledActions}
+          onFilter={onFilter}
+          onBrushEnd={onBrushEnd}
+        />
       </div>
       {timeRangeDisplay}
     </>
   );
 }
-
-export const getLensProps = ({
-  timeRange,
-  attributes,
-  request,
-  lastReloadRequestTime,
-  onLoad,
-}: {
-  timeRange: TimeRange;
-  attributes: TypedLensByValueInput['attributes'];
-  request: UnifiedHistogramRequestContext | undefined;
-  lastReloadRequestTime: number | undefined;
-  onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
-}) => ({
-  id: 'unifiedHistogramLensComponent',
-  viewMode: ViewMode.VIEW,
-  timeRange,
-  attributes,
-  noPadding: true,
-  searchSessionId: request?.searchSessionId,
-  executionContext: {
-    description: 'fetch chart data and total hits',
-  },
-  lastReloadRequestTime,
-  onLoad,
-});

@@ -136,11 +136,12 @@ export function getColumns({
           errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]
             ?.timeseries;
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.FAILED_TRANSACTION_RATE
+          ChartType.ERROR_OCCURRENCES
         );
 
         return (
           <SparkPlot
+            type="bar"
             color={currentPeriodColor}
             isLoading={errorGroupDetailedStatisticsLoading}
             series={currentPeriodTimeseries}

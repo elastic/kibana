@@ -5,16 +5,24 @@
   ],
   "max_empty_searches": 10,
   "query": {
-        "bool": {
-            "filter": [{"exists": {"field": "source.ip"}}],
-            "must": [
-                {"bool": {
-                    "should": [
-                    {"term": {"event.category": "authentication"}},
-                    {"term": {"event.outcome": "success"}}
-                    ]
-                }}
-            ]
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "source.ip"
+          }
+        },
+        {
+          "term": {
+            "event.category": "authentication"
+          }
+        },
+        {
+          "term": {
+            "event.outcome": "success"
+          }
         }
+      ]
+    }
   }
 }

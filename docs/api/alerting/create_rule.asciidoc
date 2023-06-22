@@ -6,6 +6,12 @@
 
 Create {kib} rules.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+====
+
 [[create-rule-api-request]]
 === {api-request-title}
 
@@ -218,7 +224,7 @@ The API returns the following:
   "execution_status": {
     "last_execution_date": "2022-06-08T17:20:31.632Z",
     "status": "pending"
-  }
+  },
   "actions": [
     {
       "group": "threshold met",

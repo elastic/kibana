@@ -1,8 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "skipLibCheck": true
+    "outDir": "target/types",
   },
   "include": [
     "index.ts",
@@ -12,12 +11,15 @@
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" },
-    { "path": "../../src/plugins/field_formats/tsconfig.json" },
-    { "path": "../../src/plugins/data/tsconfig.json" },
-    { "path": "../../src/plugins/data_view_field_editor/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/developer-examples-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-plugin",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/field-types",
   ]
 }

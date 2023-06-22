@@ -79,6 +79,8 @@ import {
   TIMELINE_LUCENELANGUAGE_BUTTON,
   TIMELINE_KQLLANGUAGE_BUTTON,
   TIMELINE_QUERY,
+  PROVIDER_BADGE,
+  PROVIDER_BADGE_DELETE,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -163,10 +165,11 @@ export const addNotesToTimeline = (notes: string) => {
 
         cy.get(NOTES_TEXT_AREA).type(notes, {
           parseSpecialCharSequences: false,
-          delay: 0,
           force: true,
         });
-        cy.get(ADD_NOTE_BUTTON).trigger('click');
+        cy.get(ADD_NOTE_BUTTON)
+          .pipe(($ele) => $ele.trigger('click'))
+          .should('have.attr', 'disabled');
         cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
       });
   });
@@ -245,8 +248,11 @@ export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: 
 export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
   const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
   cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
-  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
-  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).trigger('click', { force: true });
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE)
+    .should('be.visible')
+    .then((el) => {
+      cy.wrap(el).trigger('click');
+    });
 };
 
 export const addNewCase = () => {
@@ -291,6 +297,12 @@ export const closeTimeline = () => {
     .should('not.be.visible');
 };
 
+export const removeDataProvider = () => {
+  cy.get(PROVIDER_BADGE)
+    .click()
+    .then(() => cy.get(PROVIDER_BADGE_DELETE).click());
+};
+
 export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON)
     .filter(':visible')
@@ -308,7 +320,7 @@ export const createNewTimelineTemplate = () => {
 };
 
 export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).clear().type(`${query} {enter}`);
 };
 
 export const executeTimelineSearch = (query: string) => {
@@ -328,6 +340,7 @@ export const deleteTimeline = () => {
 export const markAsFavorite = () => {
   const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
   cy.get(STAR_ICON).should('be.visible').pipe(click);
+  cy.get(LOADING_INDICATOR).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
 };
 

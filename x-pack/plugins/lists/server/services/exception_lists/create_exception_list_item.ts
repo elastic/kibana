@@ -6,13 +6,14 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   CreateCommentsArray,
   Description,
   EntriesArray,
   ExceptionListItemSchema,
   ExceptionListItemType,
+  ExpireTimeOrUndefined,
   ItemId,
   ListId,
   MetaOrUndefined,
@@ -45,11 +46,13 @@ interface CreateExceptionListItemOptions {
   tieBreaker?: string;
   type: ExceptionListItemType;
   osTypes: OsTypeArray;
+  expireTime: ExpireTimeOrUndefined;
 }
 
 export const createExceptionListItem = async ({
   comments,
   entries,
+  expireTime,
   itemId,
   listId,
   savedObjectsClient,
@@ -75,6 +78,7 @@ export const createExceptionListItem = async ({
     created_by: user,
     description,
     entries,
+    expire_time: expireTime,
     immutable: undefined,
     item_id: itemId,
     list_id: listId,
@@ -83,7 +87,7 @@ export const createExceptionListItem = async ({
     name,
     os_types: osTypes as OsTypeArray,
     tags,
-    tie_breaker_id: tieBreaker ?? uuid.v4(),
+    tie_breaker_id: tieBreaker ?? uuidv4(),
     type,
     updated_by: user,
     version: undefined,

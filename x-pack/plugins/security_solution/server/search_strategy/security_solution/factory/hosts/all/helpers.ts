@@ -7,7 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set/fp';
 import { get, has } from 'lodash/fp';
-import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
+import { hostFieldsMap } from '@kbn/securitysolution-ecs';
 import type {
   HostAggEsItem,
   HostsEdges,

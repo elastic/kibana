@@ -213,12 +213,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
-      registerSearchUsageCollector(usageCollection, core.savedObjects.getKibanaIndex());
-      registerSearchSessionUsageCollector(
-        usageCollection,
-        core.savedObjects.getKibanaIndex(),
-        this.logger
-      );
+      const getIndexForType = (type: string) =>
+        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+      registerSearchUsageCollector(usageCollection, getIndexForType);
+      registerSearchSessionUsageCollector(usageCollection, getIndexForType, this.logger);
     }
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));

@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('reassign single agent', () => {
       it('should allow to reassign single agent', async () => {
         await supertest
-          .put(`/api/fleet/agents/agent1/reassign`)
+          .post(`/api/fleet/agents/agent1/reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'policy2',
@@ -49,7 +49,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should throw an error for invalid policy id for single reassign', async () => {
         await supertest
-          .put(`/api/fleet/agents/agent1/reassign`)
+          .post(`/api/fleet/agents/agent1/reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'INVALID_ID',
@@ -61,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
         // policy2 is not hosted
         // reassign succeeds
         await supertest
-          .put(`/api/fleet/agents/agent1/reassign`)
+          .post(`/api/fleet/agents/agent1/reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'policy2',
@@ -79,7 +79,7 @@ export default function (providerContext: FtrProviderContext) {
 
         // reassign fails
         await supertest
-          .put(`/api/fleet/agents/agent1/reassign`)
+          .post(`/api/fleet/agents/agent1/reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'policy2',

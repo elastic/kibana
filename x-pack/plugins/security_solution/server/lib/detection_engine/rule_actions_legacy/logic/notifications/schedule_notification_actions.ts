@@ -14,7 +14,7 @@ import { isThresholdRule } from '../../../../../../common/detection_engine/utils
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
 import type { RuleParams } from '../../../rule_schema';
 import aadFieldConversion from '../../../routes/index/signal_aad_mapping.json';
-import { isDetectionAlert } from '../../../signals/utils';
+import { isDetectionAlert } from '../../../rule_types/utils/utils';
 import type { DetectionAlert } from '../../../../../../common/detection_engine/schemas/alerts';
 
 export type NotificationRuleTypeParams = RuleParams & {
@@ -50,16 +50,18 @@ export const normalizeAlertForNotificationActions = (alert: DetectionAlert) => {
  * the equivalent "legacy" alert context so that pre-8.0 actions will continue to work.
  */
 export const formatAlertsForNotificationActions = (alerts: unknown[]): unknown[] => {
-  return alerts.map((alert) => {
-    if (isDetectionAlert(alert)) {
-      const normalizedAlert = normalizeAlertForNotificationActions(alert);
-      return {
-        ...expandDottedObject(convertToLegacyAlert(normalizedAlert)),
-        ...expandDottedObject(normalizedAlert),
-      };
-    }
-    return alert;
-  });
+  return alerts.map((alert) => formatAlertForNotificationActions(alert));
+};
+
+export const formatAlertForNotificationActions = (alert: unknown): unknown => {
+  if (isDetectionAlert(alert)) {
+    const normalizedAlert = normalizeAlertForNotificationActions(alert);
+    return {
+      ...expandDottedObject(convertToLegacyAlert(normalizedAlert)),
+      ...expandDottedObject(normalizedAlert),
+    };
+  }
+  return alert;
 };
 
 interface ScheduleNotificationActions {

@@ -78,7 +78,7 @@ export class TOCEntryButton extends Component<Props, State> {
               defaultMessage: 'Load warning',
             })}
             size="m"
-            type="alert"
+            type="warning"
             color="warning"
           />
         ),
@@ -97,14 +97,6 @@ export class TOCEntryButton extends Component<Props, State> {
       };
     }
 
-    if (this.props.layer.isLayerLoading()) {
-      return {
-        icon: <EuiLoadingSpinner size="m" />,
-        tooltipContent: '',
-        footnotes: [],
-      };
-    }
-
     if (!this.props.layer.showAtZoomLevel(this.props.zoom)) {
       const minZoom = this.props.layer.getMinZoom();
       const maxZoom = this.props.layer.getMaxZoom();
@@ -114,6 +106,14 @@ export class TOCEntryButton extends Component<Props, State> {
           defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
           values: { minZoom, maxZoom },
         }),
+        footnotes: [],
+      };
+    }
+
+    if (this.props.layer.isLayerLoading()) {
+      return {
+        icon: <EuiLoadingSpinner size="m" />,
+        tooltipContent: '',
         footnotes: [],
       };
     }

@@ -6,20 +6,39 @@
  */
 
 import sinon from 'sinon';
-import { ExecutorError } from './executor_error';
 import { ActionExecutor } from './action_executor';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { savedObjectsClientMock, loggingSystemMock, httpServiceMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  httpServiceMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { ActionTypeDisabledError } from './errors';
 import { actionsClientMock } from '../mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { IN_MEMORY_METRICS } from '../monitoring';
+import { pick } from 'lodash';
+import {
+  isRetryableError,
+  isUnrecoverableError,
+} from '@kbn/task-manager-plugin/server/task_running';
 
+const executeParamsFields = [
+  'actionId',
+  'isEphemeral',
+  'params',
+  'relatedSavedObjects',
+  'executionId',
+  'request.headers',
+  'taskInfo',
+  'source',
+];
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
@@ -75,15 +94,12 @@ const taskRunnerFactoryInitializerParams = {
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   basePathService: httpServiceMock.createBasePath(),
-  getUnsecuredSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
+  savedObjectsRepository: savedObjectsRepositoryMock.create(),
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   actionExecutorInitializerParams.getServices.mockReturnValue(services);
-  taskRunnerFactoryInitializerParams.getUnsecuredSavedObjectsClient.mockReturnValue(
-    services.savedObjectsClient
-  );
 });
 
 test(`throws an error if factory isn't initialized`, () => {
@@ -136,25 +152,25 @@ test('executes the task by calling the executor with proper parameters, using gi
     { namespace: 'namespace-test' }
   );
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
     relatedSavedObjects: [],
     executionId: '123abc',
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
     },
   });
 
-  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
   expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
     executeParams.request,
     '/s/test'
@@ -196,25 +212,25 @@ test('executes the task by calling the executor with proper parameters, using st
     { namespace: 'namespace-test' }
   );
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '9',
     isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
     },
   });
 
-  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
   expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
     executeParams.request,
     '/s/test'
@@ -251,33 +267,33 @@ test('executes the task by calling the executor with proper parameters when cons
     { namespace: 'namespace-test' }
   );
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
     actionId: '2',
     consumer: 'test-consumer',
     isEphemeral: false,
     params: { baz: true },
     relatedSavedObjects: [],
     executionId: '123abc',
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
     },
   });
 
-  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
   expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
     executeParams.request,
     '/s/test'
   );
 });
 
-test('cleans up action_task_params object', async () => {
+test('executes the task by calling the executor with proper parameters when saved_object source is provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -289,24 +305,128 @@ test('cleans up action_task_params object', async () => {
     type: 'action_task_params',
     attributes: {
       actionId: '2',
+      consumer: 'test-consumer',
       params: { baz: true },
       executionId: '123abc',
+      source: 'SAVED_OBJECT',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
-    references: [
-      {
-        id: '2',
-        name: 'actionRef',
-        type: 'action',
+    references: [{ name: 'source', id: 'abc', type: 'alert' }],
+  });
+
+  const runnerResult = await taskRunner.run();
+
+  expect(runnerResult).toBeUndefined();
+  expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { namespace: 'namespace-test' }
+  );
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
+    actionId: '2',
+    consumer: 'test-consumer',
+    isEphemeral: false,
+    params: { baz: true },
+    relatedSavedObjects: [],
+    executionId: '123abc',
+    request: {
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
       },
-    ],
+    },
+    source: {
+      type: 'SAVED_OBJECT',
+      source: { id: 'abc', type: 'alert' },
+    },
+    taskInfo: {
+      scheduled: new Date(),
+      attempts: 0,
+    },
   });
 
-  await taskRunner.run();
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
+});
 
-  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3', {
-    refresh: false,
+test('executes the task by calling the executor with proper parameters when notification source is provided', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
   });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      consumer: 'test-consumer',
+      params: { baz: true },
+      executionId: '123abc',
+      source: 'NOTIFICATION',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+
+  const runnerResult = await taskRunner.run();
+
+  expect(runnerResult).toBeUndefined();
+  expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { namespace: 'namespace-test' }
+  );
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
+    actionId: '2',
+    consumer: 'test-consumer',
+    isEphemeral: false,
+    params: { baz: true },
+    relatedSavedObjects: [],
+    executionId: '123abc',
+    request: {
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    },
+    source: {
+      type: 'NOTIFICATION',
+      source: {},
+    },
+    taskInfo: {
+      scheduled: new Date(),
+      attempts: 0,
+    },
+  });
+
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
+});
+
+test('cleans up action_task_params object through the cleanup runner method', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  await taskRunner.cleanup();
+
+  expect(taskRunnerFactoryInitializerParams.savedObjectsRepository.delete).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { refresh: false }
+  );
 });
 
 test('task runner should implement CancellableTask cancel method with logging warning message', async () => {
@@ -341,37 +461,22 @@ test('task runner should implement CancellableTask cancel method with logging wa
   );
 });
 
-test('runs successfully when cleanup fails and logs the error', async () => {
+test('cleanup runs successfully when action_task_params cleanup fails and logs the error', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
 
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
-  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      executionId: '123abc',
-      apiKey: Buffer.from('123:abc').toString('base64'),
-    },
-    references: [
-      {
-        id: '2',
-        name: 'actionRef',
-        type: 'action',
-      },
-    ],
-  });
-  services.savedObjectsClient.delete.mockRejectedValueOnce(new Error('Fail'));
+  taskRunnerFactoryInitializerParams.savedObjectsRepository.delete.mockRejectedValueOnce(
+    new Error('Fail')
+  );
 
-  await taskRunner.run();
+  await taskRunner.cleanup();
 
-  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3', {
-    refresh: false,
-  });
+  expect(taskRunnerFactoryInitializerParams.savedObjectsRepository.delete).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { refresh: false }
+  );
   expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
     'Failed to cleanup action_task_params object [id="3"]: Fail'
   );
@@ -411,9 +516,7 @@ test('throws an error with suggested retry logic when return status is error', a
     await taskRunner.run();
     throw new Error('Should have thrown');
   } catch (e) {
-    expect(e instanceof ExecutorError).toEqual(true);
-    expect(e.data).toEqual({ foo: true });
-    expect(e.retry).toEqual(false);
+    expect(isRetryableError(e)).toEqual(false);
   }
 });
 
@@ -444,25 +547,25 @@ test('uses API key when provided', async () => {
 
   await taskRunner.run();
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
     },
   });
 
-  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
   expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
     executeParams.request,
     '/s/test'
@@ -502,7 +605,8 @@ test('uses relatedSavedObjects merged with references when provided', async () =
 
   await taskRunner.run();
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
@@ -513,12 +617,12 @@ test('uses relatedSavedObjects merged with references when provided', async () =
         type: 'some-type',
       },
     ],
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
@@ -554,7 +658,8 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
 
   await taskRunner.run();
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
@@ -566,12 +671,12 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
         namespace: 'yo',
       },
     ],
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
@@ -611,16 +716,18 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
   });
 
   await taskRunner.run();
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     executionId: '123abc',
     relatedSavedObjects: [],
     taskInfo: {
@@ -656,22 +763,22 @@ test(`doesn't use API key when not provided`, async () => {
 
   await taskRunner.run();
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],
-    request: expect.objectContaining({
+    request: {
       headers: {},
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
     },
   });
 
-  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
   expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
     executeParams.request,
     '/s/test'
@@ -679,15 +786,12 @@ test(`doesn't use API key when not provided`, async () => {
 });
 
 test(`throws an error when license doesn't support the action type`, async () => {
-  const taskRunner = taskRunnerFactory.create(
-    {
-      taskInstance: {
-        ...mockedTaskInstance,
-        attempts: 1,
-      },
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: {
+      ...mockedTaskInstance,
+      attempts: 1,
     },
-    2
-  );
+  });
 
   mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -714,13 +818,11 @@ test(`throws an error when license doesn't support the action type`, async () =>
     await taskRunner.run();
     throw new Error('Should have thrown');
   } catch (e) {
-    expect(e instanceof ExecutorError).toEqual(true);
-    expect(e.data).toEqual({});
-    expect(e.retry).toEqual(true);
+    expect(isUnrecoverableError(e)).toEqual(true);
   }
 });
 
-test(`treats errors as errors if the task is retryable`, async () => {
+test(`will throw an error with retry: false if the task is not retryable`, async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: {
       ...mockedTaskInstance,
@@ -760,60 +862,13 @@ test(`treats errors as errors if the task is retryable`, async () => {
     err = e;
   }
   expect(err).toBeDefined();
-  expect(err instanceof ExecutorError).toEqual(true);
-  expect(err.data).toEqual({ foo: true });
-  expect(err.retry).toEqual(false);
+  expect(isRetryableError(err)).toEqual(false);
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-    `Action '2' failed and will not retry: Error message`
+    `Action '2' failed: Error message`
   );
 });
 
-test(`treats errors as successes if the task is not retryable`, async () => {
-  const taskRunner = taskRunnerFactory.create({
-    taskInstance: {
-      ...mockedTaskInstance,
-      attempts: 1,
-    },
-  });
-
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-    id: '3',
-    type: 'action_task_params',
-    attributes: {
-      actionId: '2',
-      params: { baz: true },
-      executionId: '123abc',
-      apiKey: Buffer.from('123:abc').toString('base64'),
-    },
-    references: [
-      {
-        id: '2',
-        name: 'actionRef',
-        type: 'action',
-      },
-    ],
-  });
-  mockedActionExecutor.execute.mockResolvedValueOnce({
-    status: 'error',
-    actionId: '2',
-    message: 'Error message',
-    data: { foo: true },
-    retry: false,
-  });
-
-  let err;
-  try {
-    await taskRunner.run();
-  } catch (e) {
-    err = e;
-  }
-  expect(err).toBeUndefined();
-  expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-    `Action '2' failed and will not retry: Error message`
-  );
-});
-
-test('treats errors as errors if the error is thrown instead of returned', async () => {
+test('will rethrow the error if the error is thrown instead of returned', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: {
       ...mockedTaskInstance,
@@ -838,7 +893,8 @@ test('treats errors as errors if the error is thrown instead of returned', async
       },
     ],
   });
-  mockedActionExecutor.execute.mockRejectedValueOnce({});
+  const thrownError = new Error('Fail');
+  mockedActionExecutor.execute.mockRejectedValueOnce(thrownError);
 
   let err;
   try {
@@ -847,12 +903,10 @@ test('treats errors as errors if the error is thrown instead of returned', async
     err = e;
   }
   expect(err).toBeDefined();
-  expect(err instanceof ExecutorError).toEqual(true);
-  expect(err.data).toEqual({});
-  expect(err.retry).toEqual(true);
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-    `Action '2' failed and will retry: undefined`
+    `Action '2' failed: Fail`
   );
+  expect(thrownError).toEqual(err);
 });
 
 test('increments monitoring metrics after execution', async () => {

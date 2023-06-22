@@ -24,9 +24,9 @@ export const SyntheticsCustomAssetsExtension: PackageAssetsComponent = () => {
       name: i18n.translate('xpack.synthetics.fleetIntegration.assets.name', {
         defaultMessage: 'Monitors',
       }),
-      url: http?.basePath.prepend(`/app/${PLUGIN.ID}`) ?? '',
+      url: http?.basePath.prepend(`/app/${PLUGIN.SYNTHETICS_PLUGIN_ID}`) ?? '',
       description: i18n.translate('xpack.synthetics.fleetIntegration.assets.description', {
-        defaultMessage: 'View monitors in Uptime',
+        defaultMessage: 'View monitors in Synthetics',
       }),
     },
   ];

@@ -1,0 +1,53 @@
+{
+  "type": "plugin",
+  "id": "@kbn/canvas-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Adds Canvas application to Kibana",
+  "plugin": {
+    "id": "canvas",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "canvas"
+    ],
+    "requiredPlugins": [
+      "bfetch",
+      "charts",
+      "data",
+      "dataViews",
+      "embeddable",
+      "expressionError",
+      "expressionImage",
+      "expressionMetric",
+      "expressionRepeatImage",
+      "expressionRevealImage",
+      "expressionShape",
+      "expressions",
+      "features",
+      "inspector",
+      "presentationUtil",
+      "visualizations",
+      "uiActions",
+      "share",
+      "savedObjectsManagement",
+      "savedObjectsFinder"
+    ],
+    "optionalPlugins": [
+      "home",
+      "reporting",
+      "spaces",
+      "usageCollection",
+      "savedObjects",
+    ],
+    "requiredBundles": [
+      "discover",
+      "kibanaReact",
+      "kibanaUtils",
+      "lens",
+      "maps",
+      "visualizations",
+      "fieldFormats"
+    ],
+  }
+}

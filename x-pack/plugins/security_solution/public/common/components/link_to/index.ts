@@ -7,10 +7,12 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
-import { useGetUrlSearch, useGetUrlStateQueryString } from '../navigation/use_get_url_search';
+import {
+  useUrlStateQueryParams,
+  useGetUrlStateQueryParams,
+} from '../navigation/use_url_state_query_params';
 import { useAppUrl } from '../../lib/kibana/hooks';
 import type { SecurityPageName } from '../../../app/types';
-import { needsUrlState } from '../../links';
 
 export { getAlertDetailsUrl, getAlertDetailsTabUrl } from './redirect_to_alerts';
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
@@ -43,17 +45,17 @@ export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => s
  */
 export const useFormatUrl = (page: SecurityPageName) => {
   const { getAppUrl } = useAppUrl();
-  const search = useGetUrlSearch(page);
+  const queryParams = useUrlStateQueryParams(page);
 
   const formatUrl = useCallback<FormatUrl>(
     (path: string, { absolute = false, skipSearch = false } = {}) => {
-      const formattedPath = formatPath(path, search, skipSearch);
+      const formattedPath = formatPath(path, queryParams, skipSearch);
       return getAppUrl({ deepLinkId: page, path: formattedPath, absolute });
     },
-    [getAppUrl, page, search]
+    [getAppUrl, page, queryParams]
   );
 
-  return { formatUrl, search };
+  return { formatUrl, search: queryParams };
 };
 
 export type GetSecuritySolutionUrl = (param: {
@@ -65,16 +67,16 @@ export type GetSecuritySolutionUrl = (param: {
 
 export const useGetSecuritySolutionUrl = () => {
   const { getAppUrl } = useAppUrl();
-  const getUrlStateQueryString = useGetUrlStateQueryString();
+  const getUrlStateQueryParams = useGetUrlStateQueryParams();
 
   const getSecuritySolutionUrl = useCallback<GetSecuritySolutionUrl>(
     ({ deepLinkId, path = '', absolute = false, skipSearch = false }) => {
-      const search = needsUrlState(deepLinkId) ? getUrlStateQueryString() : '';
+      const search = getUrlStateQueryParams(deepLinkId);
       const formattedPath = formatPath(path, search, skipSearch);
 
       return getAppUrl({ deepLinkId, path: formattedPath, absolute });
     },
-    [getAppUrl, getUrlStateQueryString]
+    [getAppUrl, getUrlStateQueryParams]
   );
 
   return getSecuritySolutionUrl;

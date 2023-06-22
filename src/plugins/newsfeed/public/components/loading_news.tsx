@@ -9,13 +9,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
 
-export const NewsLoadingPrompt = () => {
+export const NewsLoadingPrompt = ({ showPlainSpinner }: { showPlainSpinner: boolean }) => {
   return (
     <EuiEmptyPrompt
-      title={<EuiLoadingElastic size="xl" />}
+      title={showPlainSpinner ? <EuiLoadingSpinner size="xl" /> : <EuiLoadingElastic size="xl" />}
       body={
         <p>
           <FormattedMessage

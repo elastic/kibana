@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { alertsClientMock } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client.mock';
 import { CaseStatuses } from '../../../common/api';
 import { AlertService } from '.';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('updateAlertsStatus', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.create().get('case');
+  const alertsClient = alertsClientMock.create();
   let alertService: AlertService;
 
   beforeEach(async () => {
-    alertService = new AlertService(esClient, logger);
+    alertService = new AlertService(esClient, logger, alertsClient);
     jest.clearAllMocks();
   });
 
@@ -334,6 +336,134 @@ describe('updateAlertsStatus', () => {
       ]);
 
       expect(res).toBe(undefined);
+    });
+  });
+
+  describe('bulkUpdateCases', () => {
+    const alerts = [
+      {
+        id: 'c3869d546717e8c581add9cbf7d24578f34cd3e72cbc8d8b8e9a9330a899f70f',
+        index: '.internal.alerts-security.alerts-default-000001',
+      },
+    ];
+    const caseIds = ['test-case'];
+
+    it('update case info', async () => {
+      await alertService.bulkUpdateCases({ alerts, caseIds });
+
+      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+    });
+
+    it('filters out alerts with empty id', async () => {
+      await alertService.bulkUpdateCases({
+        alerts: [{ id: '', index: 'test-index' }, ...alerts],
+        caseIds,
+      });
+
+      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+    });
+
+    it('filters out alerts with empty index', async () => {
+      await alertService.bulkUpdateCases({
+        alerts: [{ id: 'test-id', index: '' }, ...alerts],
+        caseIds,
+      });
+
+      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+    });
+
+    it('does not call the alerts client with no alerts', async () => {
+      await alertService.bulkUpdateCases({
+        alerts: [{ id: '', index: 'test-index' }],
+        caseIds,
+      });
+
+      expect(alertsClient.bulkUpdateCases).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removeCaseIdFromAlerts', () => {
+    const alerts = [
+      {
+        id: 'c3869d546717e8c581add9cbf7d24578f34cd3e72cbc8d8b8e9a9330a899f70f',
+        index: '.internal.alerts-security.alerts-default-000001',
+      },
+    ];
+    const caseId = 'test-case';
+
+    it('update case info', async () => {
+      await alertService.removeCaseIdFromAlerts({ alerts, caseId });
+
+      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+    });
+
+    it('filters out alerts with empty id', async () => {
+      await alertService.removeCaseIdFromAlerts({
+        alerts: [{ id: '', index: 'test-index' }, ...alerts],
+        caseId,
+      });
+
+      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+    });
+
+    it('filters out alerts with empty index', async () => {
+      await alertService.removeCaseIdFromAlerts({
+        alerts: [{ id: 'test-id', index: '' }, ...alerts],
+        caseId,
+      });
+
+      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+    });
+
+    it('does not call the alerts client with no alerts', async () => {
+      await alertService.removeCaseIdFromAlerts({
+        alerts: [{ id: '', index: 'test-index' }],
+        caseId,
+      });
+
+      expect(alertsClient.removeCaseIdFromAlerts).not.toHaveBeenCalled();
+    });
+
+    it('should not throw an error and log it', async () => {
+      alertsClient.removeCaseIdFromAlerts.mockRejectedValueOnce('An error');
+
+      await expect(
+        alertService.removeCaseIdFromAlerts({ alerts, caseId })
+      ).resolves.not.toThrowError();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed removing case test-case from alerts: An error'
+      );
+    });
+  });
+
+  describe('removeCaseIdsFromAllAlerts', () => {
+    const caseIds = ['test-case-1', 'test-case-2'];
+
+    it('remove all case ids from alerts', async () => {
+      await alertService.removeCaseIdsFromAllAlerts({ caseIds });
+
+      expect(alertsClient.removeCaseIdsFromAllAlerts).toBeCalledWith({ caseIds });
+    });
+
+    it('does not call the alerts client with no case ids', async () => {
+      await alertService.removeCaseIdsFromAllAlerts({
+        caseIds: [],
+      });
+
+      expect(alertsClient.removeCaseIdsFromAllAlerts).not.toHaveBeenCalled();
+    });
+
+    it('should not throw an error and log it', async () => {
+      alertsClient.removeCaseIdsFromAllAlerts.mockRejectedValueOnce('An error');
+
+      await expect(
+        alertService.removeCaseIdsFromAllAlerts({ caseIds })
+      ).resolves.not.toThrowError();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed removing cases test-case-1,test-case-2 for all alerts: An error'
+      );
     });
   });
 });

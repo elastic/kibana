@@ -91,6 +91,13 @@ export interface UserProfileAvatarData {
 }
 
 /**
+ * User settings stored in the data object of the User Profile
+ */
+export interface UserSettingsData {
+  darkMode?: string;
+}
+
+/**
  * Extended user information returned in user profile (both basic and security related properties).
  */
 export interface UserProfileUserInfoWithSecurity extends UserProfileUserInfo {

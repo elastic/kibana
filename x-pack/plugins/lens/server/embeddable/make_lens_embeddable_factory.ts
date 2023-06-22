@@ -7,12 +7,12 @@
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 import {
   commonEnhanceTableRowHeight,
   commonPreserveOldLegendSizeDefault,

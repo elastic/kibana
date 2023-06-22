@@ -8,6 +8,7 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
+import deepmerge from 'deepmerge';
 import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 import {
   DataViewsServerPluginStart,
@@ -29,6 +30,11 @@ import { StartPlugins } from '../../types';
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
 
+/**
+ * @deprecated use kibana data view api or EcsFlat for index fields
+ * @param getStartServices
+ * @returns
+ */
 export const indexFieldsProvider = (
   getStartServices: StartServicesAccessor<StartPlugins>
 ): ISearchStrategy<
@@ -38,7 +44,7 @@ export const indexFieldsProvider = (
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
+  const beatFields: BeatFields = require('../../utils/beat_schema/fields.json').fieldsBeat;
 
   return {
     search: (request, options, deps) =>
@@ -153,13 +159,18 @@ export const requestIndexFieldSearch = async (
       const fieldDescriptor = (
         await Promise.all(
           indicesExist.map(async (index, n) => {
+            const fieldCapsOptions = request.includeUnmapped
+              ? { includeUnmapped: true, allow_no_indices: true }
+              : undefined;
             if (index.startsWith('.alerts-observability') || useInternalUser) {
               return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
                 pattern: index,
+                fieldCapsOptions,
               });
             }
             return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
               pattern: index,
+              fieldCapsOptions,
             });
           })
         )
@@ -264,7 +275,7 @@ export const createFieldItem = (
 };
 
 /**
- * Iterates over each field, adds description, category, and indexes (index alias)
+ * Iterates over each field, adds description, category, conflictDescriptions, and indexes (index alias)
  *
  * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
  * in size at a time when being called. This function should be as optimized as possible
@@ -298,6 +309,12 @@ export const formatIndexFields = async (
                 const existingIndexField = accumulator[alreadyExistingIndexField];
                 if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
                   accumulator[alreadyExistingIndexField].description = item.description;
+                }
+                if (item.conflictDescriptions) {
+                  accumulator[alreadyExistingIndexField].conflictDescriptions = deepmerge(
+                    existingIndexField.conflictDescriptions ?? {},
+                    item.conflictDescriptions
+                  );
                 }
                 accumulator[alreadyExistingIndexField].indexes = Array.from(
                   new Set(existingIndexField.indexes.concat(item.indexes))

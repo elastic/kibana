@@ -9,7 +9,7 @@ import React, { useContext, useEffect } from 'react';
 import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import classNames from 'classnames';
-import type { FormatFactory } from '../../../../common';
+import type { FormatFactory } from '../../../../common/types';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { ColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';

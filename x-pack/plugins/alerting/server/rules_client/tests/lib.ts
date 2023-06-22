@@ -9,6 +9,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { ConstructorOptions } from '../rules_client';
 import { RuleTypeRegistry } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../../common';
@@ -51,7 +52,23 @@ export function getBeforeSetup(
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
   taskManager.runSoon.mockResolvedValue({ id: '' });
-  taskManager.bulkRemoveIfExist.mockResolvedValue({
+  taskManager.get.mockResolvedValue({
+    id: 'task-123',
+    taskType: 'alerting:123',
+    scheduledAt: new Date(),
+    attempts: 1,
+    status: TaskStatus.Idle,
+    runAt: new Date(),
+    startedAt: null,
+    retryAt: null,
+    state: {},
+    params: {
+      alertId: '1',
+    },
+    ownerId: null,
+    enabled: false,
+  });
+  taskManager.bulkRemove.mockResolvedValue({
     statuses: [{ id: 'taskId', type: 'alert', success: true }],
   });
   const actionsClient = actionsClientMock.create();
@@ -95,8 +112,13 @@ export function getBeforeSetup(
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'alerts',
+    validate: {
+      params: { validate: (params) => params },
+    },
   }));
   rulesClientParams.getEventLogClient.mockResolvedValue(
     eventLogClient ?? eventLogClientMock.create()

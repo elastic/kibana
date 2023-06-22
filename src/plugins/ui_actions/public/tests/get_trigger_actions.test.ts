@@ -6,19 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { ActionInternal, Action } from '../actions';
+import { ActionInternal, ActionDefinition } from '../actions';
 import { uiActionsPluginMock } from '../mocks';
 
-const action1: Action = {
+const action1: ActionDefinition = {
   id: 'action1',
   order: 1,
   type: 'type1',
-} as unknown as Action;
-const action2: Action = {
+  execute: async () => {},
+};
+
+const action2: ActionDefinition = {
   id: 'action2',
   order: 2,
   type: 'type2',
-} as unknown as Action;
+  execute: async () => {},
+};
 
 test('returns actions set on trigger', () => {
   const { setup, doStart } = uiActionsPluginMock.createPlugin();

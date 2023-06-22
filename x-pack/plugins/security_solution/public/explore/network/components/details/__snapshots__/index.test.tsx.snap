@@ -144,6 +144,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
   ip="10.10.10.10"
   isInDetailsSidePanel={false}
   isLoadingAnomaliesData={false}
+  jobNameById={Object {}}
   loading={false}
   narrowDateRange={[MockFunction]}
   startDate="2019-06-15T06:00:00.000Z"
@@ -296,6 +297,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
   ip="10.10.10.10"
   isInDetailsSidePanel={true}
   isLoadingAnomaliesData={false}
+  jobNameById={Object {}}
   loading={false}
   narrowDateRange={[MockFunction]}
   startDate="2019-06-15T06:00:00.000Z"

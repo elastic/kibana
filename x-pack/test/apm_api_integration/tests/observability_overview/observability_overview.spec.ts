@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -32,6 +34,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             probability: 1,
             environment: 'ENVIRONMENT_ALL',
             kuery: '',
+            documentType: ApmDocumentType.TransactionMetric,
+            rollupInterval: RollupInterval.OneMinute,
           },
         },
       }),

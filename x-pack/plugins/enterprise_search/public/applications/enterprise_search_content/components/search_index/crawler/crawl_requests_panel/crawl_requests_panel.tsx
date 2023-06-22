@@ -9,16 +9,44 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { KibanaDeps } from '../../../../../../../common/types';
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';
 import { CrawlerLogic } from '../crawler_logic';
 
 import { CrawlRequestsTable } from './crawl_requests_table';
 
+const CRAWLER_LOGS_DISCOVER_RECORD = {
+  columns: [
+    '@timestamp',
+    'crawler.crawl.id',
+    'url.domain',
+    'url.path',
+    'event.action',
+    'http.response.status_code',
+  ],
+  dataViewSpec: {
+    name: i18n.translate(
+      'xpack.enterpriseSearch.crawler.crawlRequestsPanel.discoverCrawlerLogsTitle',
+      {
+        defaultMessage: 'All Crawler Logs',
+      }
+    ),
+    timeFieldName: '@timestamp',
+    title: 'logs-elastic_crawler-default',
+  },
+  sort: [['@timestamp', 'desc']],
+};
+
 export const CrawlRequestsPanel: React.FC = () => {
   const { data } = useValues(CrawlerLogic);
+  const {
+    services: { discover },
+  } = useKibana<KibanaDeps>();
+
   return (
     <DataPanel
       hasBorder
@@ -31,6 +59,13 @@ export const CrawlRequestsPanel: React.FC = () => {
       }
       titleSize="s"
       iconType="documents"
+      action={
+        <EuiButton onClick={() => discover.locator?.navigate(CRAWLER_LOGS_DISCOVER_RECORD)}>
+          {i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsPanel.linkToDiscover', {
+            defaultMessage: 'View in Discover',
+          })}
+        </EuiButton>
+      }
       subtitle={i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsPanel.description', {
         defaultMessage:
           "Recent crawl requests are logged here. You can track progress and examine crawl events in Kibana's Discover or Logs user intefaces",

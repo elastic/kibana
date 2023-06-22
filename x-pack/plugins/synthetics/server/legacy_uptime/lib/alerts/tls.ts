@@ -8,21 +8,24 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { formatFilterString } from './status_check';
 import { UptimeAlertTypeFactory } from './types';
 import {
   updateState,
   generateAlertMessage,
   setRecoveredAlertsContext,
   getAlertDetailsUrl,
+  UptimeRuleTypeAlertDefinition,
 } from './common';
-import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { Cert, CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
-import { TlsTranslations } from '../../../../common/translations';
+import { TlsTranslations } from '../../../../common/rules/legacy_uptime/translations';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
-import { createUptimeESClient } from '../lib';
+import { UptimeEsClient } from '../lib';
 import { ACTION_VARIABLES, ALERT_DETAILS_URL } from './action_variables';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
@@ -108,7 +111,11 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   producer: 'uptime',
   name: tlsTranslations.alertFactoryName,
   validate: {
-    params: schema.object({}),
+    params: schema.object({
+      search: schema.maybe(schema.string()),
+      certExpirationThreshold: schema.maybe(schema.number()),
+      certAgeThreshold: schema.maybe(schema.number()),
+    }),
   },
   defaultActionGroupId: TLS.id,
   actionGroups: [
@@ -131,6 +138,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   minimumLicenseRequired: 'basic',
   doesSetRecoveryContext: true,
   async executor({
+    params,
     services: {
       alertFactory,
       alertWithLifecycle,
@@ -144,43 +152,44 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     const { basePath } = _server;
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
-    const uptimeEsClient = createUptimeESClient({
-      esClient: scopedClusterClient.asCurrentUser,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-    });
+      scopedClusterClient.asCurrentUser
+    );
+
+    const certExpirationThreshold =
+      params.certExpirationThreshold ??
+      dynamicSettings?.certExpirationThreshold ??
+      DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold;
+
+    const certAgeThreshold =
+      params.certAgeThreshold ??
+      dynamicSettings?.certAgeThreshold ??
+      DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold;
+
+    let filters: QueryDslQueryContainer | undefined;
+
+    if (params.search) {
+      filters = await formatFilterString(uptimeEsClient, undefined, params.search, libs);
+    }
 
     const { certs, total }: CertResult = await libs.requests.getCerts({
       uptimeEsClient,
       pageIndex: 0,
       size: 1000,
-      notValidAfter: `now+${
-        dynamicSettings?.certExpirationThreshold ??
-        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
-      }d`,
-      notValidBefore: `now-${
-        dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
-      }d`,
+      notValidAfter: `now+${certExpirationThreshold}d`,
+      notValidBefore: `now-${certAgeThreshold}d`,
       sortBy: 'common_name',
       direction: 'desc',
+      filters,
     });
 
     const foundCerts = total > 0;
 
     if (foundCerts) {
       certs.forEach((cert) => {
-        const absoluteExpirationThreshold = moment()
-          .add(
-            dynamicSettings.certExpirationThreshold ??
-              DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
-            'd'
-          )
-          .valueOf();
-        const absoluteAgeThreshold = moment()
-          .subtract(
-            dynamicSettings.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
-            'd'
-          )
-          .valueOf();
+        const absoluteExpirationThreshold = moment().add(certExpirationThreshold, 'd').valueOf();
+        const absoluteAgeThreshold = moment().subtract(certAgeThreshold, 'd').valueOf();
         const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
 
         if (!summary.summary || !summary.status) {
@@ -217,6 +226,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
 
-    return updateState(state, foundCerts);
+    return { state: updateState(state, foundCerts) };
   },
+  alerts: UptimeRuleTypeAlertDefinition,
 });

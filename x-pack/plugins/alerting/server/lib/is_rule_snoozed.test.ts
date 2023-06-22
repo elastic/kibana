@@ -299,7 +299,7 @@ describe('isRuleSnoozed', () => {
       },
     ];
 
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(false);
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(true);
     const snoozeScheduleB = [
       {
         duration: 60 * 1000,

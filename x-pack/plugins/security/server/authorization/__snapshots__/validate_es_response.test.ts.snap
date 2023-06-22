@@ -1,21 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`validateEsPrivilegeResponse fails validation when an action is malformed in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: [2]: expected value of type [boolean] but got [string]"`;
+exports[`validateEsPrivilegeResponse fails validation when an action is malformed in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected action values"`;
 
-exports[`validateEsPrivilegeResponse fails validation when an action is missing in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: Payload did not match expected actions"`;
+exports[`validateEsPrivilegeResponse fails validation when an action is missing in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions"`;
 
-exports[`validateEsPrivilegeResponse fails validation when an expected resource property is missing from the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: Payload did not match expected resources"`;
+exports[`validateEsPrivilegeResponse fails validation when an expected resource property is missing from the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected resources"`;
 
-exports[`validateEsPrivilegeResponse fails validation when an extra action is present in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: Payload did not match expected actions"`;
+exports[`validateEsPrivilegeResponse fails validation when an extra action is present in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions"`;
 
-exports[`validateEsPrivilegeResponse fails validation when an extra application is present in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.otherApplication]: definition for this key is missing"`;
+exports[`validateEsPrivilegeResponse fails validation when an extra application is present in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Expected one application but received 2"`;
 
-exports[`validateEsPrivilegeResponse fails validation when an unexpected resource property is present in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: Payload did not match expected resources"`;
+exports[`validateEsPrivilegeResponse fails validation when an unexpected resource property is present in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected resources"`;
 
-exports[`validateEsPrivilegeResponse fails validation when the "application" property is missing from the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: Payload did not match expected resources"`;
+exports[`validateEsPrivilegeResponse fails validation when the "application" property is missing from the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Expected one application but received 0"`;
 
-exports[`validateEsPrivilegeResponse fails validation when the requested application is missing from the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: Payload did not match expected resources"`;
+exports[`validateEsPrivilegeResponse fails validation when the requested application is missing from the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Expected one application but received 0"`;
 
-exports[`validateEsPrivilegeResponse fails validation when the resource propertry is malformed in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: could not parse object value from json input"`;
+exports[`validateEsPrivilegeResponse fails validation when the resource property is malformed in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions"`;
 
-exports[`validateEsPrivilegeResponse fails validation when there are no resource properties in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.foo-application]: Payload did not match expected resources"`;
+exports[`validateEsPrivilegeResponse fails validation when there are no resource properties in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected resources"`;

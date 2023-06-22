@@ -58,6 +58,13 @@ export const QUERY_PREVIEW_SELECT_ARIA = i18n.translate(
   }
 );
 
+export const RULE_PREVIEW_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.rulePreviewError',
+  {
+    defaultMessage: 'Failed to preview rule',
+  }
+);
+
 export const QUERY_PREVIEW_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewLabel',
   {
@@ -163,3 +170,18 @@ export const VIEW_DETAILS_FOR_ROW = ({
     defaultMessage:
       'View details for the alert or event in row {ariaRowindex}, with columns {columnValues}',
   });
+
+export const RULE_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
+  {
+    defaultMessage: 'Rule preview',
+  }
+);
+
+export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription',
+  {
+    defaultMessage:
+      'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
+  }
+);

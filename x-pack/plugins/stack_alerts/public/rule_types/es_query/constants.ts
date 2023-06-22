@@ -18,6 +18,9 @@ export const DEFAULT_VALUES = {
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
   THRESHOLD: [1000],
+  AGGREGATION_TYPE: 'count',
+  TERM_SIZE: 5,
+  GROUP_BY: 'all',
   EXCLUDE_PREVIOUS_HITS: true,
 };
 
@@ -27,6 +30,11 @@ export const COMMON_EXPRESSION_ERRORS = {
   threshold1: new Array<string>(),
   timeWindowSize: new Array<string>(),
   size: new Array<string>(),
+  aggField: new Array<string>(),
+  aggType: new Array<string>(),
+  groupBy: new Array<string>(),
+  termSize: new Array<string>(),
+  termField: new Array<string>(),
 };
 
 export const SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS = {

@@ -8,27 +8,26 @@
 
 import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 
-import type { GuideId } from '@kbn/guided-onboarding';
+import type { GuideId, GuideConfig } from '@kbn/guided-onboarding';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { GUIDED_ONBOARDING_FEATURE } from './feature';
 import { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
 import { defineRoutes } from './routes';
 import { guideStateSavedObjects, pluginStateSavedObjects } from './saved_objects';
-import type { GuideConfig, GuidesConfig } from '../common';
-import { testGuideConfig, testGuideId } from '../common';
+import type { GuidesConfig } from '../common';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
 {
   private readonly logger: Logger;
   private readonly guidesConfig: GuidesConfig;
-  private readonly isDevMode: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.guidesConfig = {} as GuidesConfig;
-    this.isDevMode = initializerContext.env.mode.dev;
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: { features?: FeaturesPluginSetup }) {
     this.logger.debug('guidedOnboarding: Setup');
     const router = core.http.createRouter();
 
@@ -39,10 +38,8 @@ export class GuidedOnboardingPlugin
     core.savedObjects.registerType(guideStateSavedObjects);
     core.savedObjects.registerType(pluginStateSavedObjects);
 
-    // add a config for a test guide if running in dev mode
-    if (this.isDevMode) {
-      this.guidesConfig[testGuideId] = testGuideConfig;
-    }
+    plugins.features?.registerKibanaFeature(GUIDED_ONBOARDING_FEATURE);
+
     return {
       registerGuideConfig: (guideId: GuideId, guideConfig: GuideConfig) => {
         if (this.guidesConfig[guideId]) {

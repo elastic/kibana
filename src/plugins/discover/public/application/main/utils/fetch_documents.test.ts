@@ -36,7 +36,9 @@ describe('test fetchDocuments', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     savedSearchMock.searchSource.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
-    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).resolves.toEqual(documents);
+    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).resolves.toEqual({
+      records: documents,
+    });
   });
 
   test('rejects on query failure', () => {

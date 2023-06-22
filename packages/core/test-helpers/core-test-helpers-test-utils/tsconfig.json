@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -11,5 +9,21 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/core-deprecations-server-mocks",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-http-context-server-internal",
+    "@kbn/core-http-context-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/core-ui-settings-server-mocks"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

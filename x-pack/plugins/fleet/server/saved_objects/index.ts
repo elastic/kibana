@@ -20,6 +20,8 @@ import {
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  INGEST_SAVED_OBJECT_INDEX,
 } from '../constants';
 
 import {
@@ -53,6 +55,8 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
+import { migratePackagePolicyToV870 } from './migrations/security_solution';
+import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
 
 /*
  * Saved object types and mappings
@@ -60,12 +64,11 @@ import {
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-const getSavedObjectTypes = (
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
-): { [key: string]: SavedObjectsType } => ({
+const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   // Deprecated
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -86,6 +89,7 @@ const getSavedObjectTypes = (
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
     name: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -112,6 +116,12 @@ const getSavedObjectTypes = (
         monitoring_output_id: { type: 'keyword' },
         download_source_id: { type: 'keyword' },
         fleet_server_host_id: { type: 'keyword' },
+        agent_features: {
+          properties: {
+            name: { type: 'keyword' },
+            enabled: { type: 'boolean' },
+          },
+        },
       },
     },
     migrations: {
@@ -123,6 +133,7 @@ const getSavedObjectTypes = (
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
     name: OUTPUT_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -143,6 +154,10 @@ const getSavedObjectTypes = (
         is_preconfigured: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
+        shipper: {
+          dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+          properties: {},
+        },
       },
     },
     migrations: {
@@ -152,6 +167,7 @@ const getSavedObjectTypes = (
   },
   [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
     name: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -173,48 +189,13 @@ const getSavedObjectTypes = (
           },
         },
         elasticsearch: {
-          enabled: false,
-          properties: {
-            privileges: {
-              properties: {
-                cluster: { type: 'keyword' },
-              },
-            },
-          },
+          dynamic: false,
+          properties: {},
         },
         vars: { type: 'flattened' },
         inputs: {
-          type: 'nested',
-          enabled: false,
-          properties: {
-            type: { type: 'keyword' },
-            policy_template: { type: 'keyword' },
-            enabled: { type: 'boolean' },
-            vars: { type: 'flattened' },
-            config: { type: 'flattened' },
-            compiled_input: { type: 'flattened' },
-            streams: {
-              type: 'nested',
-              properties: {
-                id: { type: 'keyword' },
-                enabled: { type: 'boolean' },
-                data_stream: {
-                  properties: {
-                    dataset: { type: 'keyword' },
-                    type: { type: 'keyword' },
-                    elasticsearch: {
-                      properties: {
-                        privileges: { type: 'flattened' },
-                      },
-                    },
-                  },
-                },
-                vars: { type: 'flattened' },
-                config: { type: 'flattened' },
-                compiled_stream: { type: 'flattened' },
-              },
-            },
-          },
+          dynamic: false,
+          properties: {},
         },
         revision: { type: 'integer' },
         updated_at: { type: 'date' },
@@ -236,10 +217,13 @@ const getSavedObjectTypes = (
       '8.4.0': migratePackagePolicyToV840,
       '8.5.0': migratePackagePolicyToV850,
       '8.6.0': migratePackagePolicyToV860,
+      '8.7.0': migratePackagePolicyToV870,
+      '8.8.0': migratePackagePolicyToV880,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
     name: PACKAGES_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -252,8 +236,8 @@ const getSavedObjectTypes = (
         internal: { type: 'boolean' },
         keep_policies_up_to_date: { type: 'boolean', index: false },
         es_index_patterns: {
-          enabled: false,
-          type: 'object',
+          dynamic: false,
+          properties: {},
         },
         verification_status: { type: 'keyword' },
         verification_key_id: { type: 'keyword' },
@@ -262,22 +246,18 @@ const getSavedObjectTypes = (
           properties: {
             id: { type: 'keyword' },
             type: { type: 'keyword' },
+            version: { type: 'keyword' },
+            deferred: { type: 'boolean' },
           },
         },
         installed_kibana: {
-          type: 'nested',
-          properties: {
-            id: { type: 'keyword' },
-            type: { type: 'keyword' },
-          },
+          dynamic: false,
+          properties: {},
         },
         installed_kibana_space_id: { type: 'keyword' },
         package_assets: {
-          type: 'nested',
-          properties: {
-            id: { type: 'keyword' },
-            type: { type: 'keyword' },
-          },
+          dynamic: false,
+          properties: {},
         },
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
@@ -290,6 +270,7 @@ const getSavedObjectTypes = (
             data_stream: { type: 'keyword' },
             features: {
               type: 'nested',
+              dynamic: false,
               properties: {
                 synthetic_source: { type: 'boolean' },
                 tsdb: { type: 'boolean' },
@@ -311,6 +292,7 @@ const getSavedObjectTypes = (
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {
     name: ASSETS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -330,6 +312,7 @@ const getSavedObjectTypes = (
   },
   [PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE]: {
     name: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -343,6 +326,7 @@ const getSavedObjectTypes = (
   },
   [DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE]: {
     name: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -359,6 +343,7 @@ const getSavedObjectTypes = (
   },
   [FLEET_SERVER_HOST_SAVED_OBJECT_TYPE]: {
     name: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -376,6 +361,7 @@ const getSavedObjectTypes = (
   },
   [FLEET_PROXY_SAVED_OBJECT_TYPE]: {
     name: FLEET_PROXY_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -393,13 +379,23 @@ const getSavedObjectTypes = (
       },
     },
   },
+  [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE]: {
+    name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      dynamic: false,
+      properties: {},
+    },
+  },
 });
 
-export function registerSavedObjects(
-  savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
-) {
-  const savedObjectTypes = getSavedObjectTypes(encryptedSavedObjects);
+export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
+  const savedObjectTypes = getSavedObjectTypes();
   Object.values(savedObjectTypes).forEach((type) => {
     savedObjects.registerType(type);
   });
@@ -427,4 +423,8 @@ export function registerEncryptedSavedObjects(
     ]),
   });
   // Encrypted saved objects
+  encryptedSavedObjects.registerType({
+    type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['passphrase']),
+  });
 }

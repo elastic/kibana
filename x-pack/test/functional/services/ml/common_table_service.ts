@@ -14,6 +14,7 @@ export type MlTableService = ReturnType<typeof MlTableServiceProvider>;
 export function MlTableServiceProvider({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const commonPage = getPageObject('common');
+  const retry = getService('retry');
 
   const TableService = class {
     constructor(
@@ -100,6 +101,42 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
         expectedRowCount,
         `Filtered table should have ${expectedRowCount} row(s) for filter '${queryString}' (got ${rows.length} matching  items)`
       );
+    }
+
+    public async assertTableSorting(
+      columnName: string,
+      columnIndex: number,
+      expectedDirection: 'desc' | 'asc'
+    ) {
+      const actualDirection = await this.getCurrentSorting();
+      expect(actualDirection?.direction).to.eql(expectedDirection);
+      expect(actualDirection?.columnName).to.eql(columnName);
+    }
+
+    public async getCurrentSorting(): Promise<
+      { columnName: string; direction: string } | undefined
+    > {
+      const table = await testSubjects.find(`~${this.tableTestSubj}`);
+      const headers = await table.findAllByClassName('euiTableHeaderCell');
+      for (const header of headers) {
+        const ariaSort = await header.getAttribute('aria-sort');
+        if (ariaSort !== 'none') {
+          const columnNameFragments = (await header.getAttribute('data-test-subj')).split('_');
+          const columnName = columnNameFragments.slice(1, columnNameFragments.length - 1).join('_');
+          return { columnName, direction: ariaSort.replace('ending', '') };
+        }
+      }
+    }
+
+    public async sortByField(columnName: string, columnIndex: number, direction: 'desc' | 'asc') {
+      const testSubjString = `tableHeaderCell_${columnName}_${columnIndex}`;
+
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click(testSubjString);
+        await this.waitForTableToStartLoading();
+        await this.waitForTableToLoad();
+        await this.assertTableSorting(columnName, columnIndex, direction);
+      });
     }
   };
 

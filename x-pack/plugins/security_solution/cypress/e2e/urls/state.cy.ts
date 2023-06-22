@@ -276,7 +276,6 @@ describe('url state', () => {
 
   it('Do not clears kql when navigating to a new page', () => {
     visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    kqlSearch('source.ip: "10.142.0.9"{enter}');
     navigateFromHeaderTo(NETWORK);
     cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
@@ -287,10 +286,9 @@ describe('url state', () => {
     populateTimeline();
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
-
-    addNameToTimeline(getTimeline().title);
-
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.wait('@timeline').then(({ response }) => {
+      addNameToTimeline(getTimeline().title);
       closeTimeline();
       cy.wrap(response?.statusCode).should('eql', 200);
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;

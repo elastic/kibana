@@ -6,23 +6,26 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ErrorType } from '@kbn/ml-error-utils';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   getInferenceQuerySchema,
+  inferTrainedModelBody,
+  inferTrainedModelQuery,
+  modelAndDeploymentIdSchema,
   modelIdSchema,
   optionalModelIdSchema,
-  putTrainedModelQuerySchema,
-  inferTrainedModelQuery,
-  inferTrainedModelBody,
-  threadingParamsSchema,
   pipelineSimulateBody,
+  putTrainedModelQuerySchema,
+  threadingParamsSchema,
   updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
-import { modelsProvider } from '../models/data_frame_analytics';
+
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
+import { modelsProvider } from '../models/model_management';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -58,17 +61,36 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const result = body.trained_model_configs as TrainedModelConfigResponse[];
         try {
           if (withPipelines) {
+            // Also need to retrieve the list of deployment IDs from stats
+            const stats = await mlClient.getTrainedModelsStats({
+              ...(modelId ? { model_id: modelId } : {}),
+              size: 10000,
+            });
+
+            const modelDeploymentsMap = stats.trained_model_stats.reduce((acc, curr) => {
+              if (!curr.deployment_stats) return acc;
+              // @ts-ignore elasticsearch-js client is missing deployment_id
+              const deploymentId = curr.deployment_stats.deployment_id;
+              if (acc[curr.model_id]) {
+                acc[curr.model_id].push(deploymentId);
+              } else {
+                acc[curr.model_id] = [deploymentId];
+              }
+              return acc;
+            }, {} as Record<string, string[]>);
+
             const modelIdsAndAliases: string[] = Array.from(
-              new Set(
-                result
+              new Set([
+                ...result
                   .map(({ model_id: id, metadata }) => {
                     return [id, ...(metadata?.model_aliases ?? [])];
                   })
-                  .flat()
-              )
+                  .flat(),
+                ...Object.values(modelDeploymentsMap).flat(),
+              ])
             );
 
-            const pipelinesResponse = await modelsProvider(client, mlClient).getModelsPipelines(
+            const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
               modelIdsAndAliases
             );
             for (const model of result) {
@@ -78,6 +100,12 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
                   return {
                     ...acc,
                     ...(pipelinesResponse.get(alias) ?? {}),
+                  };
+                }, {}),
+                ...(modelDeploymentsMap[model.model_id] ?? []).reduce((acc, deploymentId) => {
+                  return {
+                    ...acc,
+                    ...(pipelinesResponse.get(deploymentId) ?? {}),
                   };
                 }, {}),
               };
@@ -178,9 +206,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
       try {
         const { modelId } = request.params;
-        const result = await modelsProvider(client, mlClient).getModelsPipelines(
-          modelId.split(',')
-        );
+        const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
         return response.ok({
           body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
         });
@@ -263,38 +289,6 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   /**
    * @apiGroup TrainedModels
    *
-   * @api {get} /api/ml/trained_models/nodes_overview Get node overview about the models allocation
-   * @apiName GetTrainedModelsNodesOverview
-   * @apiDescription Retrieves the list of ML nodes with memory breakdown and allocated models info
-   */
-  router.get(
-    {
-      path: '/api/ml/trained_models/nodes_overview',
-      validate: {},
-      options: {
-        tags: [
-          'access:ml:canViewMlNodes',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetJobs',
-          'access:ml:canGetTrainedModels',
-        ],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-      try {
-        const result = await modelsProvider(client, mlClient).getNodesOverview();
-        return response.ok({
-          body: result,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
-    })
-  );
-
-  /**
-   * @apiGroup TrainedModels
-   *
    * @api {post} /api/ml/trained_models/:modelId/deployment/_start Start trained model deployment
    * @apiName StartTrainedModelDeployment
    * @apiDescription Starts trained model deployment.
@@ -335,9 +329,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/{modelId}/deployment/_update',
+      path: '/api/ml/trained_models/{modelId}/{deploymentId}/deployment/_update',
       validate: {
-        params: modelIdSchema,
+        params: modelAndDeploymentIdSchema,
         body: updateDeploymentParamsSchema,
       },
       options: {
@@ -346,9 +340,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { modelId } = request.params;
+        const { modelId, deploymentId } = request.params;
         const body = await mlClient.updateTrainedModelDeployment({
           model_id: modelId,
+          deployment_id: deploymentId,
           ...request.body,
         });
         return response.ok({
@@ -369,9 +364,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/{modelId}/deployment/_stop',
+      path: '/api/ml/trained_models/{modelId}/{deploymentId}/deployment/_stop',
       validate: {
-        params: modelIdSchema,
+        params: modelAndDeploymentIdSchema,
         query: forceQuerySchema,
       },
       options: {
@@ -380,13 +375,25 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { modelId } = request.params;
-        const body = await mlClient.stopTrainedModelDeployment({
-          model_id: modelId,
-          force: request.query.force ?? false,
-        });
+        const { deploymentId, modelId } = request.params;
+
+        const results: Record<string, { success: boolean; error?: ErrorType }> = {};
+
+        for (const id of deploymentId.split(',')) {
+          try {
+            const { stopped: success } = await mlClient.stopTrainedModelDeployment({
+              model_id: modelId,
+              deployment_id: id,
+              force: request.query.force ?? false,
+              allow_no_match: false,
+            });
+            results[id] = { success };
+          } catch (error) {
+            results[id] = { success: false, error };
+          }
+        }
         return response.ok({
-          body,
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -436,9 +443,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/infer/{modelId}',
+      path: '/api/ml/trained_models/infer/{modelId}/{deploymentId}',
       validate: {
-        params: modelIdSchema,
+        params: modelAndDeploymentIdSchema,
         query: inferTrainedModelQuery,
         body: inferTrainedModelBody,
       },
@@ -448,9 +455,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { modelId } = request.params;
+        const { modelId, deploymentId } = request.params;
         const body = await mlClient.inferTrainedModel({
           model_id: modelId,
+          deployment_id: deploymentId,
           body: {
             docs: request.body.docs,
             ...(request.body.inference_config

@@ -59,6 +59,6 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['google_cloud', 'cloud', 'network', 'security'],
+    integrationBrowserCategories: ['observability'],
   };
 }

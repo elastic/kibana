@@ -409,9 +409,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -431,7 +431,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"top\" | \"bottom\" | \"left\" | \"right\""
+          "\"top\" | \"left\" | \"right\" | \"bottom\""
         ],
         "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
         "deprecated": false,

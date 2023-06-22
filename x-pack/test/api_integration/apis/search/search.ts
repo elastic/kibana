@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { Context } from 'mocha';
 import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { verifyErrorResponse } from '../../../../../test/api_integration/apis/search/verify_error';
@@ -30,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   });
 
-  async function markRequiresShardDelayAgg(testContext: Context) {
+  async function markRequiresShardDelayAgg(testContext: Mocha.Context) {
     const body = await es.info();
     if (!body.version.number.includes('SNAPSHOT')) {
       log.debug('Skipping because this build does not have the required shard_delay agg');

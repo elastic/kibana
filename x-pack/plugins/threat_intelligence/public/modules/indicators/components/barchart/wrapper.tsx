@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import {
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -41,9 +42,9 @@ export interface IndicatorsBarChartWrapperProps {
 
   dateRange: TimeRangeBounds;
 
-  field: string;
+  field: EuiComboBoxOptionOption<string>;
 
-  onFieldChange: (value: string) => void;
+  onFieldChange: (value: EuiComboBoxOptionOption<string>) => void;
 
   /** Is initial load in progress? */
   isLoading?: boolean;

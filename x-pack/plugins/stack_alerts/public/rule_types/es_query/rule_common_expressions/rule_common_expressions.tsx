@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCheckbox,
@@ -18,25 +18,30 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  builtInAggregationTypes,
   ForLastExpression,
+  GroupByExpression,
   IErrorObject,
+  OfExpression,
   ThresholdExpression,
   ValueExpression,
+  WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { builtInGroupByTypes, FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { CommonRuleParams } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { TestQueryRow, TestQueryRowProps } from '../test_query_row';
 import { QueryThresholdHelpPopover } from './threshold_help_popover';
 
-export interface RuleCommonExpressionsProps {
-  thresholdComparator?: CommonRuleParams['thresholdComparator'];
-  threshold?: CommonRuleParams['threshold'];
-  timeWindowSize: CommonRuleParams['timeWindowSize'];
-  timeWindowUnit: CommonRuleParams['timeWindowUnit'];
-  size: CommonRuleParams['size'];
-  excludeHitsFromPreviousRun: CommonRuleParams['excludeHitsFromPreviousRun'];
+export interface RuleCommonExpressionsProps extends CommonRuleParams {
+  esFields: FieldOption[];
   errors: IErrorObject;
   hasValidationErrors: boolean;
+  onChangeSelectedAggField: Parameters<typeof OfExpression>[0]['onChangeSelectedAggField'];
+  onChangeSelectedAggType: Parameters<typeof WhenExpression>[0]['onChangeSelectedAggType'];
+  onChangeSelectedGroupBy: Parameters<typeof GroupByExpression>[0]['onChangeSelectedGroupBy'];
+  onChangeSelectedTermField: Parameters<typeof GroupByExpression>[0]['onChangeSelectedTermField'];
+  onChangeSelectedTermSize: Parameters<typeof GroupByExpression>[0]['onChangeSelectedTermSize'];
   onChangeThreshold: Parameters<typeof ThresholdExpression>[0]['onChangeSelectedThreshold'];
   onChangeThresholdComparator: Parameters<
     typeof ThresholdExpression
@@ -50,13 +55,24 @@ export interface RuleCommonExpressionsProps {
 }
 
 export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
+  esFields,
   thresholdComparator,
   threshold,
   timeWindowSize,
   timeWindowUnit,
+  aggType,
+  aggField,
+  groupBy,
+  termField,
+  termSize,
   size,
   errors,
   hasValidationErrors,
+  onChangeSelectedAggField,
+  onChangeSelectedAggType,
+  onChangeSelectedGroupBy,
+  onChangeSelectedTermField,
+  onChangeSelectedTermSize,
   onChangeThreshold,
   onChangeThresholdComparator,
   onChangeWindowSize,
@@ -67,18 +83,54 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   excludeHitsFromPreviousRun,
   onChangeExcludeHitsFromPreviousRun,
 }) => {
+  const [isExcludeHitsDisabled, setIsExcludeHitsDisabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (groupBy) {
+      setIsExcludeHitsDisabled(groupBy !== builtInGroupByTypes.all.value);
+    }
+  }, [groupBy]);
   return (
     <>
       <EuiTitle size="xs">
         <h4>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.conditionsPrompt"
-            defaultMessage="Set the threshold and time window"
+            defaultMessage="Set the group, threshold, and time window"
           />{' '}
           <QueryThresholdHelpPopover />
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
+      <WhenExpression
+        display="fullWidth"
+        data-test-subj="whenExpression"
+        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+        onChangeSelectedAggType={onChangeSelectedAggType}
+      />
+      {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
+        <OfExpression
+          aggField={aggField}
+          data-test-subj="aggTypeExpression"
+          fields={esFields}
+          aggType={aggType}
+          errors={errors}
+          display="fullWidth"
+          onChangeSelectedAggField={onChangeSelectedAggField}
+        />
+      ) : null}
+      <GroupByExpression
+        groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
+        data-test-subj="groupByExpression"
+        termField={termField}
+        termSize={termSize}
+        errors={errors}
+        fields={esFields}
+        display="fullWidth"
+        onChangeSelectedGroupBy={onChangeSelectedGroupBy}
+        onChangeSelectedTermField={onChangeSelectedTermField}
+        onChangeSelectedTermSize={onChangeSelectedTermSize}
+      />
       <ThresholdExpression
         data-test-subj="thresholdExpression"
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
@@ -92,8 +144,8 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
       <ForLastExpression
         data-test-subj="forLastExpression"
         popupPosition="upLeft"
-        timeWindowSize={timeWindowSize}
-        timeWindowUnit={timeWindowUnit}
+        timeWindowSize={timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE}
+        timeWindowUnit={timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT}
         display="fullWidth"
         errors={errors}
         onChangeWindowSize={onChangeWindowSize}
@@ -138,6 +190,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
       <EuiSpacer size="m" />
       <EuiFormRow>
         <EuiCheckbox
+          disabled={isExcludeHitsDisabled}
           data-test-subj="excludeHitsFromPreviousRunExpression"
           checked={excludeHitsFromPreviousRun}
           id="excludeHitsFromPreviousRunExpressionId"

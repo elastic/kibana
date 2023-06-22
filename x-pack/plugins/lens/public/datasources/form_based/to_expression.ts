@@ -31,6 +31,7 @@ import { isColumnFormatted, isColumnOfType } from './operations/definitions/help
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
+import { getSamplingValue } from './utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -158,7 +159,12 @@ function getExpressionForLayer(
         let aggAst = def.toEsAggsFn(
           {
             ...col,
-            timeShift: resolveTimeShift(col.timeShift, dateRange, histogramBarsTarget),
+            timeShift: resolveTimeShift(
+              col.timeShift,
+              dateRange,
+              histogramBarsTarget,
+              hasDateHistogram
+            ),
           },
           wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
           indexPattern,
@@ -181,11 +187,21 @@ function getExpressionForLayer(
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
                   timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
-                  timeShift: resolveTimeShift(col.timeShift, dateRange, histogramBarsTarget),
+                  timeShift: resolveTimeShift(
+                    col.timeShift,
+                    dateRange,
+                    histogramBarsTarget,
+                    hasDateHistogram
+                  ),
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
-              timeShift: resolveTimeShift(col.timeShift, dateRange, histogramBarsTarget),
+              timeShift: resolveTimeShift(
+                col.timeShift,
+                dateRange,
+                histogramBarsTarget,
+                hasDateHistogram
+              ),
             }
           ).toAst();
         }
@@ -400,7 +416,7 @@ function getExpressionForLayer(
           metricsAtAllLevels: false,
           partialRows: false,
           timeFields: allDateHistogramFields,
-          probability: layer.sampling || 1,
+          probability: getSamplingValue(layer),
           samplerSeed: seedrandom(searchSessionId).int32(),
         }).toAst(),
         {

@@ -8,7 +8,6 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 function ndjsonToObject(input: string) {
   return input.split('\n').map((str) => JSON.parse(str));
@@ -19,10 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const SPACE_ID = 'ftr-so-export';
 
   describe('export', () => {
-    let KIBANA_VERSION: string;
-
     before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
@@ -30,7 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    after(() => kibanaServer.spaces.delete(SPACE_ID));
+    after(async () => {
+      await kibanaServer.spaces.delete(SPACE_ID);
+    });
 
     describe('basic amount of saved objects', () => {
       it('should return objects in dependency order', async () => {
@@ -352,8 +350,9 @@ export default function ({ getService }: FtrProviderContext) {
                 version: 1,
               },
               id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-              migrationVersion: objects[0].migrationVersion,
-              coreMigrationVersion: KIBANA_VERSION,
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: objects[0].typeMigrationVersion,
+              managed: objects[0].managed,
               references: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -366,7 +365,8 @@ export default function ({ getService }: FtrProviderContext) {
               created_at: objects[0].created_at,
               version: objects[0].version,
             });
-            expect(objects[0].migrationVersion).to.be.ok();
+            expect(objects[0].typeMigrationVersion).to.be.ok();
+            expect(objects[0].managed).to.not.be.ok();
             expect(() =>
               JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
             ).not.to.throwError();
@@ -413,8 +413,9 @@ export default function ({ getService }: FtrProviderContext) {
                 version: 1,
               },
               id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-              migrationVersion: objects[0].migrationVersion,
-              coreMigrationVersion: KIBANA_VERSION,
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: objects[0].typeMigrationVersion,
+              managed: objects[0].managed,
               references: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -427,7 +428,8 @@ export default function ({ getService }: FtrProviderContext) {
               created_at: objects[0].created_at,
               version: objects[0].version,
             });
-            expect(objects[0].migrationVersion).to.be.ok();
+            expect(objects[0].typeMigrationVersion).to.be.ok();
+            expect(objects[0].managed).to.not.be.ok();
             expect(() =>
               JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
             ).not.to.throwError();
@@ -479,8 +481,9 @@ export default function ({ getService }: FtrProviderContext) {
                 version: 1,
               },
               id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-              migrationVersion: objects[0].migrationVersion,
-              coreMigrationVersion: KIBANA_VERSION,
+              coreMigrationVersion: '8.8.0',
+              typeMigrationVersion: objects[0].typeMigrationVersion,
+              managed: objects[0].managed,
               references: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -493,7 +496,8 @@ export default function ({ getService }: FtrProviderContext) {
               created_at: objects[0].updated_at,
               version: objects[0].version,
             });
-            expect(objects[0].migrationVersion).to.be.ok();
+            expect(objects[0].typeMigrationVersion).to.be.ok();
+            expect(objects[0].managed).to.not.be.ok();
             expect(() =>
               JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
             ).not.to.throwError();
@@ -574,6 +578,47 @@ export default function ({ getService }: FtrProviderContext) {
           // @ts-expect-error TS complains about using `anotherCustomVisId` before it is assigned
           .delete(`/s/${SPACE_ID}/api/saved_objects/visualization/${anotherCustomVisId}`)
           .expect(200);
+      });
+    });
+
+    describe('should retain the managed property value of exported saved objects', () => {
+      before(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+          { space: SPACE_ID }
+        );
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_objects.json',
+          { space: SPACE_ID }
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_objects.json',
+          { space: SPACE_ID }
+        );
+      });
+      it('should retain all existing saved object properties', async () => {
+        // we're specifically asserting that the `managed` property isn't overwritten during export.
+        await supertest
+          .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
+          .send({
+            type: ['config', 'index-pattern'],
+          })
+          .expect(200)
+          .then((resp) => {
+            const objects = ndjsonToObject(resp.text);
+            expect(objects).to.have.length(3);
+            expect(objects[0]).to.have.property('id', '6cda943f-a70e-43d4-b0cb-feb1b624cb62');
+            expect(objects[0]).to.have.property('type', 'index-pattern');
+            expect(objects[0]).to.have.property('managed', true);
+            expect(objects[1]).to.have.property('id', 'c1818992-bb2c-4a9a-b276-83ada7cce03e');
+            expect(objects[1]).to.have.property('type', 'config');
+            expect(objects[1]).to.have.property('managed', false);
+            expect(objects[2]).to.have.property('exportedCount', 2);
+            expect(objects[2]).to.have.property('missingRefCount', 0);
+            expect(objects[2].missingReferences).to.have.length(0);
+          });
       });
     });
   });

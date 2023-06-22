@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects([
@@ -85,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   async function checkSampleDashboardLoaded(visualizationContainer?: string) {
     log.debug('Checking no error labels');
-    await testSubjects.missingOrFail('embeddableError');
+    await dashboardExpect.noErrorEmbeddablesPresent();
     log.debug('Checking charts rendered');
     await elasticChart.waitForRenderComplete(visualizationContainer ?? 'lnsVisualizationContainer');
     log.debug('Checking saved searches rendered');

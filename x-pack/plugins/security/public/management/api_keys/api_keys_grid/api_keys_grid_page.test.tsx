@@ -116,7 +116,7 @@ describe('APIKeysGridPage', () => {
     const secondKey = getByText(/second-api-key/).closest('td');
     const secondKeyEuiLink = secondKey!.querySelector('button');
     expect(secondKeyEuiLink).not.toBeNull();
-    expect(secondKeyEuiLink!.getAttribute('data-test-subj')).toBe('roleRowName-second-api-key');
+    expect(secondKeyEuiLink!.getAttribute('data-test-subj')).toBe('apiKeyRowName-second-api-key');
   });
 
   afterAll(() => {

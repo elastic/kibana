@@ -101,4 +101,7 @@ export const i18nTexts = {
       defaultMessage: 'Upload error',
     }),
   } as Record<FileStatus, string>,
+  rowCheckboxDisabled: i18n.translate('filesManagement.table.checkBoxDisabledLabel', {
+    defaultMessage: 'This file cannot be deleted.',
+  }),
 };

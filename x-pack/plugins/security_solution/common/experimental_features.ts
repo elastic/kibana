@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type ExperimentalFeatures = typeof allowedExperimentalValues;
+export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
 
 /**
  * A list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.
@@ -20,8 +20,9 @@ export const allowedExperimentalValues = Object.freeze({
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
-  chartEmbeddablesEnabled: false,
-
+  chartEmbeddablesEnabled: true,
+  donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
+  alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -52,19 +53,30 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
+   * Enables the new API and UI for https://github.com/elastic/security-team/issues/1974.
+   * It's a temporary feature flag that will be removed once the feature gets a basic production-ready implementation.
+   */
+  prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: false,
+
+  /**
    * Enables the SOC trends timerange and stats on D&R page
    */
   socTrendsEnabled: false,
 
   /**
-   * Enables the detection response actions in rule + alerts
+   * Enables the automated response actions in rule + alerts
    */
   responseActionsEnabled: true,
 
   /**
+   * Enables the automated endpoint response action in rule + alerts
+   */
+  endpointResponseActionsEnabled: false,
+
+  /**
    * Enables endpoint package level rbac
    */
-  endpointRbacEnabled: false,
+  endpointRbacEnabled: true,
 
   /**
    * Enables endpoint package level rbac for response actions only.
@@ -79,12 +91,22 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the `get-file` endpoint response action
    */
-  responseActionGetFileEnabled: false,
+  responseActionGetFileEnabled: true,
+
+  /**
+   * Enables the `execute` endpoint response action
+   */
+  responseActionExecuteEnabled: true,
 
   /**
    * Enables top charts on Alerts Page
    */
-  alertsPageChartsEnabled: false,
+  alertsPageChartsEnabled: true,
+  alertTypeEnabled: false,
+  /**
+   * Enables the new security flyout over the current alert details flyout
+   */
+  securityFlyoutEnabled: false,
 
   /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
@@ -95,6 +117,18 @@ export const allowedExperimentalValues = Object.freeze({
    */
   riskyHostsEnabled: false, // DEPRECATED
   riskyUsersEnabled: false, // DEPRECATED
+
+  /*
+   * Enables new Set of filters on the Alerts page.
+   *
+   **/
+  alertsPageFiltersEnabled: true,
+
+  /*
+   * Enables the new user details flyout displayed on the Alerts page and timeline.
+   *
+   **/
+  newUserDetailsFlyout: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -127,7 +161,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
   };
 };
 
-export const isValidExperimentalValue = (value: string): boolean => {
+export const isValidExperimentalValue = (value: string): value is keyof ExperimentalFeatures => {
   return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 

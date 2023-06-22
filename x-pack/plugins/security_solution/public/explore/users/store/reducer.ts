@@ -6,7 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { set } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../../common/store/constants';
 
 import {
@@ -25,7 +25,9 @@ import { Direction } from '../../../../common/search_strategy/common';
 import { RiskScoreFields } from '../../../../common/search_strategy';
 import { UsersFields } from '../../../../common/search_strategy/security_solution/users/common';
 
-export const initialUsersState: UsersModel = {
+export type UsersState = UsersModel;
+
+export const initialUsersState: UsersState = {
   page: {
     queries: {
       [UsersTableType.allUsers]: {

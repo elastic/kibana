@@ -7,9 +7,11 @@
 
 import React, { useEffect } from 'react';
 
-import { Route, Switch, useLocation, useParams } from 'react-router-dom';
+import { Switch, useLocation, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { AppLogic } from '../../app_logic';
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';

@@ -123,6 +123,17 @@ export async function getColdstartRate({
   return { transactionColdstartRate, average };
 }
 
+export interface ColdstartRateResponse {
+  currentPeriod: {
+    transactionColdstartRate: Coordinate[];
+    average: number | null;
+  };
+  previousPeriod: {
+    transactionColdstartRate: Coordinate[];
+    average: number | null;
+  };
+}
+
 export async function getColdstartRatePeriods({
   environment,
   kuery,
@@ -145,7 +156,7 @@ export async function getColdstartRatePeriods({
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<ColdstartRateResponse> {
   const commonProps = {
     environment,
     kuery,

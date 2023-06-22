@@ -9,6 +9,7 @@ import { groupBy, keyBy, memoize, partition } from 'lodash';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isDefined } from '@kbn/ml-is-defined';
 import { MlClient } from '../ml_client';
 import { JobSelection } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';
@@ -30,7 +31,6 @@ import {
 import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { isDefined } from '../../../common/types/guards';
 import {
   jobAuditMessagesProvider,
   JobAuditMessagesService,

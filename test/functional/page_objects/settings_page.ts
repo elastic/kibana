@@ -36,6 +36,12 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.existOrFail('managementSettingsTitle');
   }
 
+  async clickKibanaGlobalSettings() {
+    await this.testSubjects.click('settings');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.click('advancedSettingsTab-global-settings');
+  }
+
   async clickKibanaSavedObjects() {
     await this.testSubjects.click('objects');
     await this.savedObjects.waitTableIsLoaded();
@@ -130,6 +136,13 @@ export class SettingsPageObject extends FtrService {
       `advancedSetting-editField-${propertyName}-editor`,
       propertyValue
     );
+    await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async setAdvancedSettingsImage(propertyName: string, path: string) {
+    const input = await this.testSubjects.find(`advancedSetting-editField-${propertyName}`);
+    await input.type(path);
     await this.testSubjects.click(`advancedSetting-saveButton`);
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -700,6 +713,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async addRuntimeField(name: string, type: string, script: string, doSaveField = true) {
+    const startingCount = parseInt(await this.getFieldsTabCount(), 10);
     await this.clickAddField();
     await this.setFieldName(name);
     await this.setFieldType(type);
@@ -709,6 +723,9 @@ export class SettingsPageObject extends FtrService {
 
     if (doSaveField) {
       await this.clickSaveField();
+      await this.retry.try(async () => {
+        expect(parseInt(await this.getFieldsTabCount(), 10)).to.be(startingCount + 1);
+      });
     }
   }
 
@@ -778,6 +795,7 @@ export class SettingsPageObject extends FtrService {
   async clickSaveField() {
     this.log.debug('click Save');
     await this.testSubjects.click('fieldSaveButton');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async setFieldName(name: string) {

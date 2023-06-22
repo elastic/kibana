@@ -10,7 +10,7 @@ import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
 import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
-import { createLensVisToADJobAction } from './open_lens_vis_in_ml_action';
+import { createVisToADJobAction } from './open_vis_in_ml_action';
 import { MlPluginStart, MlStartDependencies } from '../plugin';
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
 import {
@@ -27,7 +27,7 @@ export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { EDIT_SWIMLANE_PANEL_ACTION } from './edit_swimlane_panel_action';
 export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
 export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
-export { CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION } from './open_lens_vis_in_ml_action';
+export { CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION } from './open_vis_in_ml_action';
 export { SWIM_LANE_SELECTION_TRIGGER };
 /**
  * Register ML UI actions
@@ -44,7 +44,7 @@ export function registerMlUiActions(
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
   const editExplorerPanelAction = createEditAnomalyChartsPanelAction(core.getStartServices);
-  const lensVisToADJobAction = createLensVisToADJobAction(core.getStartServices);
+  const visToAdJobAction = createVisToADJobAction(core.getStartServices);
 
   // Register actions
   uiActions.registerAction(editSwimlanePanelAction);
@@ -68,5 +68,5 @@ export function registerMlUiActions(
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, openInExplorerAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, clearSelectionAction);
   uiActions.addTriggerAction(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER, applyEntityFieldFilterAction);
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, lensVisToADJobAction);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, visToAdJobAction);
 }

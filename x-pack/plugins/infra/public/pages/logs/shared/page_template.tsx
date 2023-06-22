@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
-interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProps {
+export interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProps {
   hasData?: boolean;
   isDataLoading?: boolean;
 }
@@ -25,7 +25,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
 }) => {
   const {
     services: {
-      observability: {
+      observabilityShared: {
         navigation: { PageTemplate },
       },
       docLinks,

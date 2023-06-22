@@ -1,0 +1,20 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "@kbn/ambient-storybook-types",
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/storybook",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

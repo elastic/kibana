@@ -6,7 +6,8 @@
  */
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { ESQuery } from '../../../../../common/typed_json';
+import type { VisualizationResponse } from '../../../../common/components/visualization_actions/types';
 
 interface StatusBySeverity {
   doc_count_error_upper_bound: number;
@@ -15,12 +16,12 @@ interface StatusBySeverity {
 }
 
 interface StatusBucket {
-  key: Status;
+  key: AlertsByStatus;
   doc_count: number;
   statusBySeverity?: StatusBySeverity;
 }
 
-interface SeverityBucket {
+export interface SeverityBucket {
   key: Severity;
   doc_count: number;
 }
@@ -57,5 +58,19 @@ export interface SeverityBuckets {
   label?: string;
 }
 export type ParsedAlertsData = Partial<
-  Record<Status, { total: number; severities: SeverityBuckets[] }>
+  Record<AlertsByStatus, { total: number; severities: SeverityBuckets[] }>
 > | null;
+
+export type AlertsByStatus = 'open' | 'acknowledged' | 'closed';
+
+export interface VisualizationAlertsByStatusData {
+  responses: VisualizationResponse[];
+  requests: ESQuery[];
+  isLoading: boolean;
+}
+export interface VisualizationInspectQuery {
+  dsl: ESQuery[];
+  response: VisualizationResponse[];
+}
+
+export const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';

@@ -9,7 +9,7 @@ import React from 'react';
 import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { reactToUiComponent, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableContext, ViewMode, CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   isEnhancedEmbeddable,
@@ -43,7 +43,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
     return 'list';
   }
 
-  MenuItem = reactToUiComponent(MenuItem);
+  public readonly MenuItem = MenuItem as any;
 
   public async isCompatible({ embeddable }: EmbeddableContext) {
     if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
@@ -80,7 +80,8 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
           placeContext={{ embeddable }}
           templates={templates}
           onClose={close}
-        />
+        />,
+        { theme$: core.theme.theme$ }
       ),
       {
         ownFocus: true,

@@ -14,7 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { SIGNALS_TEMPLATE_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
-import { Signal } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { Signal } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,

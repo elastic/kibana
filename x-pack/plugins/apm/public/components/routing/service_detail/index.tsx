@@ -6,6 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+} from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import qs from 'query-string';
@@ -15,9 +19,9 @@ import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { AlertsOverview } from '../../app/alerts_overview';
+import { AlertsOverview, ALERT_STATUS_ALL } from '../../app/alerts_overview';
 import { ErrorGroupDetails } from '../../app/error_group_details';
 import { ErrorGroupOverview } from '../../app/error_group_overview';
 import { InfraOverview } from '../../app/infra_overview';
@@ -44,7 +48,7 @@ function page({
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: {
-    showKueryBar?: boolean;
+    showUnifiedSearchBar?: boolean;
     showTransactionTypeSelector?: boolean;
     showTimeComparison?: boolean;
     hidden?: boolean;
@@ -93,9 +97,9 @@ function RedirectNodeMetricsToMetricsDetails() {
 export const serviceDetail = {
   '/services/{serviceName}': {
     element: (
-      <TimeRangeMetadataContextProvider>
+      <ApmTimeRangeMetadataContextProvider>
         <ApmServiceWrapper />
-      </TimeRangeMetadataContextProvider>
+      </ApmTimeRangeMetadataContextProvider>
     ),
     params: t.intersection([
       t.type({
@@ -150,10 +154,6 @@ export const serviceDetail = {
             pageSize: toNumberRt,
             sortField: t.string,
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-            device: t.string,
-            osVersion: t.string,
-            appVersion: t.string,
-            netConnectionType: t.string,
           }),
         }),
       },
@@ -190,6 +190,7 @@ export const serviceDetail = {
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
+                  flyoutDetailTab: t.string,
                 }),
                 offsetRt,
               ]),
@@ -241,6 +242,7 @@ export const serviceDetail = {
               path: t.type({
                 groupId: t.string,
               }),
+              query: t.partial({ errorId: t.string }),
             }),
           },
           '/services/{serviceName}/errors': {
@@ -318,7 +320,7 @@ export const serviceDetail = {
         }),
         element: <ServiceLogs />,
         searchBarOptions: {
-          showKueryBar: false,
+          showUnifiedSearchBar: false,
         },
       }),
       '/services/{serviceName}/infrastructure': {
@@ -329,7 +331,7 @@ export const serviceDetail = {
           }),
           element: <InfraOverview />,
           searchBarOptions: {
-            showKueryBar: false,
+            showUnifiedSearchBar: false,
           },
         }),
         params: t.partial({
@@ -342,16 +344,27 @@ export const serviceDetail = {
           }),
         }),
       },
-      '/services/{serviceName}/alerts': page({
-        tab: 'alerts',
-        title: i18n.translate('xpack.apm.views.alerts.title', {
-          defaultMessage: 'Alerts',
+      '/services/{serviceName}/alerts': {
+        ...page({
+          tab: 'alerts',
+          title: i18n.translate('xpack.apm.views.alerts.title', {
+            defaultMessage: 'Alerts',
+          }),
+          element: <AlertsOverview />,
+          searchBarOptions: {
+            hidden: true,
+          },
         }),
-        element: <AlertsOverview />,
-        searchBarOptions: {
-          hidden: true,
-        },
-      }),
+        params: t.partial({
+          query: t.partial({
+            alertStatus: t.union([
+              t.literal(ALERT_STATUS_ACTIVE),
+              t.literal(ALERT_STATUS_RECOVERED),
+              t.literal(ALERT_STATUS_ALL),
+            ]),
+          }),
+        }),
+      },
       '/services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,
       },

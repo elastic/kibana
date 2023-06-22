@@ -136,7 +136,7 @@ describe('Saved query management list component', () => {
         .find('[data-test-subj="saved-query-management-apply-changes-button"]')
         .first()
         .text()
-    ).toBe('Apply saved query');
+    ).toBe('Load query');
 
     const newProps = {
       ...props,
@@ -149,7 +149,7 @@ describe('Saved query management list component', () => {
         .find('[data-test-subj="saved-query-management-apply-changes-button"]')
         .first()
         .text()
-    ).toBe('Replace with selected saved query');
+    ).toBe('Load query');
   });
 
   it('should render the modal on delete', async () => {
@@ -157,5 +157,30 @@ describe('Saved query management list component', () => {
     await flushEffect(component);
     findTestSubject(component, 'delete-saved-query-Test-button').simulate('click');
     expect(component.find('[data-test-subj="confirmModalConfirmButton"]').length).toBeTruthy();
+  });
+
+  it('should render the onClearSavedQuery on delete of the current selected query', async () => {
+    const onClearSavedQuerySpy = jest.fn();
+    const newProps = {
+      ...props,
+      loadedSavedQuery: {
+        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+        attributes: {
+          title: 'Test',
+          description: '',
+          query: {
+            query: 'category.keyword : "Men\'s Shoes" ',
+            language: 'kuery',
+          },
+          filters: [],
+        },
+      },
+      onClearSavedQuery: onClearSavedQuerySpy,
+    };
+    const component = mount(wrapSavedQueriesListComponentInContext(newProps));
+    await flushEffect(component);
+    findTestSubject(component, 'delete-saved-query-Test-button').simulate('click');
+    findTestSubject(component, 'confirmModalConfirmButton').simulate('click');
+    expect(onClearSavedQuerySpy).toBeCalled();
   });
 });

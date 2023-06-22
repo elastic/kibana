@@ -21,11 +21,13 @@ export function PrimaryProfilingSearchBar({ showSubmitButton }: { showSubmitButt
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath();
 
-  const {
-    path,
-    query,
-    query: { rangeFrom, rangeTo, kuery },
-  } = useProfilingParams('/*');
+  const { path, query } = useProfilingParams('/*');
+
+  if (!('rangeFrom' in query)) {
+    throw new Error('Range query parameters are missing');
+  }
+
+  const { rangeFrom, rangeTo, kuery } = query;
 
   const { refresh } = useTimeRangeContext();
 

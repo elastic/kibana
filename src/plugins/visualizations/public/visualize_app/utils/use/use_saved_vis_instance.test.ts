@@ -147,6 +147,46 @@ describe('useSavedVisInstance', () => {
       expect(result.current.savedVisInstance).toBeDefined();
     });
 
+    test('should pass the input timeRange if it exists', async () => {
+      const embeddableInput = {
+        timeRange: {
+          from: 'now-7d/d',
+          to: 'now',
+        },
+        id: 'panel1',
+      };
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          true,
+          undefined,
+          savedVisId,
+          embeddableInput
+        )
+      );
+
+      result.current.visEditorRef.current = document.createElement('div');
+      expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, savedVisId);
+      expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
+
+      await waitForNextUpdate();
+      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
+      expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
+      expect(getEditBreadcrumbs).toHaveBeenCalledWith(
+        { originatingAppName: undefined, redirectToOrigin: undefined },
+        'Test Vis'
+      );
+      expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
+      expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
+      expect(result.current.visEditorController).toBeDefined();
+      expect(result.current.savedVisInstance).toBeDefined();
+      expect(result.current.savedVisInstance?.panelTimeRange).toStrictEqual({
+        from: 'now-7d/d',
+        to: 'now',
+      });
+    });
+
     test('should destroy the editor and the savedVis on unmount if chrome exists', async () => {
       const { result, unmount, waitForNextUpdate } = renderHook(() =>
         useSavedVisInstance(mockServices, eventEmitter, true, undefined, savedVisId)

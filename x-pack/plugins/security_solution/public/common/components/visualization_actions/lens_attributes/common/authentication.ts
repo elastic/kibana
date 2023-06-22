@@ -20,7 +20,7 @@ export const authenticationLensAttributes: LensAttributes = {
       title: 'Empty XY chart',
       legend: {
         isVisible: true,
-        position: 'right',
+        position: 'left',
       },
       valueLabels: 'hide',
       preferredSeriesType: 'bar_stacked',

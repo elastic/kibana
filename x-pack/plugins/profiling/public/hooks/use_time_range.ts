@@ -14,18 +14,25 @@ interface TimeRangeAPI {
   timeRangeId: string;
 }
 
+interface TimeRangeInSeconds {
+  inSeconds: { start: number; end: number };
+}
+interface PartialTimeRangeInSeconds {
+  inSeconds: Pick<Partial<TimeRangeInSeconds['inSeconds']>, 'start' | 'end'>;
+}
+
 type PartialTimeRange = Pick<Partial<TimeRange>, 'start' | 'end'>;
 
 export function useTimeRange(range: {
   rangeFrom?: string;
   rangeTo?: string;
   optional: true;
-}): TimeRangeAPI & PartialTimeRange;
+}): TimeRangeAPI & PartialTimeRange & PartialTimeRangeInSeconds;
 
 export function useTimeRange(range: {
   rangeFrom: string;
   rangeTo: string;
-}): TimeRangeAPI & TimeRange;
+}): TimeRangeAPI & TimeRange & TimeRangeInSeconds;
 
 export function useTimeRange({
   rangeFrom,
@@ -35,7 +42,9 @@ export function useTimeRange({
   rangeFrom?: string;
   rangeTo?: string;
   optional?: boolean;
-}): TimeRangeAPI & (TimeRange | PartialTimeRange) {
+}): TimeRangeAPI &
+  (TimeRange | PartialTimeRange) &
+  (TimeRangeInSeconds | PartialTimeRangeInSeconds) {
   const timeRangeApi = useTimeRangeContext();
 
   const { start, end } = useMemo(() => {
@@ -54,6 +63,10 @@ export function useTimeRange({
   return {
     start,
     end,
+    inSeconds: {
+      start: start ? new Date(start).getTime() / 1000 : undefined,
+      end: end ? new Date(end).getTime() / 1000 : undefined,
+    },
     timeRangeId: timeRangeApi.timeRangeId,
   };
 }

@@ -14,6 +14,7 @@ import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
  */
 export const getQuerySignalsId = (ids: string[], size = 10) => ({
   size,
+  sort: ['@timestamp'],
   query: {
     terms: {
       [ALERT_RULE_UUID]: ids,

@@ -12,9 +12,10 @@ import { i18n } from '@kbn/i18n';
 
 import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
 
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { LogCategorizationPage as Page } from '../../../aiops/log_categorization';
 
@@ -28,7 +29,7 @@ export const logCategorizationRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'log_categorization',
-  path: '/aiops/log_categorization',
+  path: createPath(ML_PAGES.AIOPS_LOG_CATEGORIZATION),
   title: i18n.translate('xpack.ml.aiops.logCategorization.docTitle', {
     defaultMessage: 'Log Pattern Analysis',
   }),
@@ -49,11 +50,19 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
-    checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-  });
+  const { context } = useResolver(
+    index,
+    savedSearchId,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      checkBasicLicense,
+      cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
+      checkGetJobsCapabilities: () =>
+        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+    }
+  );
 
   return (
     <PageLoader context={context}>

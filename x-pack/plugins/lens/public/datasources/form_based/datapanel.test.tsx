@@ -17,7 +17,7 @@ import { InnerFormBasedDataPanel, FormBasedDataPanel } from './datapanel';
 import { FieldListGrouped } from '@kbn/unified-field-list-plugin/public';
 import * as UseExistingFieldsApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
-import { FieldItem } from './field_item';
+import { FieldItem } from '../common/field_item';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { FormBasedPrivateState } from './types';
@@ -30,13 +30,14 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TermsIndexPatternColumn } from './operations';
-import { DOCUMENT_FIELD_NAME } from '../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
 import { DataViewsState } from '../../state_management';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ReactWrapper } from 'enzyme';
+import { IndexPatternField } from '../../types';
 
 const fieldsOne = [
   {
@@ -374,6 +375,7 @@ describe('FormBased Data Panel', () => {
     (UseExistingFieldsApi.useExistingFieldsReader as jest.Mock).mockClear();
     (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockClear();
     UseExistingFieldsApi.resetExistingFieldsCache();
+    window.localStorage.removeItem('lens.unifiedFieldList.initiallyOpenSections');
   });
 
   it('should render a warning if there are no index patterns', async () => {
@@ -786,7 +788,11 @@ describe('FormBased Data Panel', () => {
     it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
-      expect(wrapper.find(FieldItem).first().prop('field').displayName).toEqual('Records');
+      expect(wrapper.find(FieldItem).first().prop('field')).toEqual(
+        expect.objectContaining({
+          displayName: 'Records',
+        })
+      );
       const availableAccordion = wrapper.find('[data-test-subj="lnsIndexPatternAvailableFields"]');
       expect(
         availableAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
@@ -802,7 +808,9 @@ describe('FormBased Data Panel', () => {
         emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['client', 'source', 'timestamp']);
       expect(
-        emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        emptyAccordion
+          .find(FieldItem)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['client', 'source', 'timestampLabel']);
       expect(emptyAccordion.find(FieldItem).at(1).prop('exists')).toEqual(false);
     });
@@ -871,7 +879,7 @@ describe('FormBased Data Panel', () => {
         wrapper
           .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
           .find(FieldItem)
-          .map((fieldItem) => fieldItem.prop('field').displayName)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 
@@ -926,7 +934,7 @@ describe('FormBased Data Panel', () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"] input').simulate('change', {
           target: { value: 'me' },
         });
       });
@@ -946,7 +954,7 @@ describe('FormBased Data Panel', () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"] input').simulate('change', {
           target: { value: 'me' },
         });
       });
@@ -965,19 +973,27 @@ describe('FormBased Data Panel', () => {
     it('should filter down by type', async () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFieldTypeFilterToggle"]')
+        .last()
+        .simulate('click');
 
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
       expect(
-        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        wrapper
+          .find(FieldItem)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['amemory', 'bytes']);
     });
 
     it('should display no fields in groups when filtered by type Record', async () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFieldTypeFilterToggle"]')
+        .last()
+        .simulate('click');
 
       wrapper.find('[data-test-subj="typeFilter-document"]').first().simulate('click');
 
@@ -990,7 +1006,10 @@ describe('FormBased Data Panel', () => {
     it('should toggle type if clicked again', async () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFieldTypeFilterToggle"]')
+        .last()
+        .simulate('click');
 
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
@@ -1000,7 +1019,9 @@ describe('FormBased Data Panel', () => {
         .first()
         .simulate('click');
       expect(
-        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+        wrapper
+          .find(FieldItem)
+          .map((fieldItem) => (fieldItem.prop('field') as IndexPatternField).displayName)
       ).toEqual(['Records', 'amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 
@@ -1008,12 +1029,15 @@ describe('FormBased Data Panel', () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"] input').simulate('change', {
           target: { value: 'me' },
         });
       });
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFieldTypeFilterToggle"]')
+        .last()
+        .simulate('click');
 
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 

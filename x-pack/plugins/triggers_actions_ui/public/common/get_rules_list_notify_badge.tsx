@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { RulesListNotifyBadge } from '../application/sections';
-import type { RulesListNotifyBadgeProps } from '../application/sections/rules_list/components/rules_list_notify_badge';
+import { RulesListNotifyBadgeWithApi } from '../application/sections';
+import type { RulesListNotifyBadgePropsWithApi } from '../application/sections/rules_list/components/notify_badge';
 
-export const getRulesListNotifyBadgeLazy = (props: RulesListNotifyBadgeProps) => {
-  return <RulesListNotifyBadge {...props} />;
+export const getRulesListNotifyBadgeLazy = (props: RulesListNotifyBadgePropsWithApi) => {
+  return <RulesListNotifyBadgeWithApi {...props} />;
 };

@@ -7,6 +7,7 @@
 
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
+  EuiAccordion,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +16,7 @@ import {
   EuiSpacer,
   EuiButtonGroup,
   EuiText,
+  EuiRadioGroup,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
@@ -28,6 +30,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -40,7 +43,11 @@ import {
   getStepDataDataSource,
 } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
-import { RuleStep, DataSourceType } from '../../../pages/detection_engine/rules/types';
+import {
+  RuleStep,
+  DataSourceType,
+  GroupByOptions,
+} from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarDefineRuleProps } from '../query_bar';
 import { QueryBarDefineRule } from '../query_bar';
@@ -82,7 +89,11 @@ import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils'
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { GroupByFields } from '../group_by_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
+import {
+  minimumLicenseForSuppression,
+  AlertSuppressionMissingFieldsStrategy,
+} from '../../../../../common/detection_engine/rule_schema';
+import { DurationInput } from '../duration_input';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -169,6 +180,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'historyWindowSize',
       'shouldLoadQueryDynamically',
       'groupByFields',
+      'groupByRadioSelection',
+      'groupByDuration.value',
+      'groupByDuration.unit',
+      'suppressionMissingFields',
     ],
     onChange: (data: DefineStepRule) => {
       if (onRuleDataChange) {
@@ -179,16 +194,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     },
   });
-
-  const handleSetRuleFromTimeline = useCallback(
-    ({ index: timelineIndex, queryBar: timelineQueryBar }) => {
-      setFieldValue('index', timelineIndex);
-      setFieldValue('queryBar', timelineQueryBar);
-    },
-    [setFieldValue]
-  );
-  const { onOpenTimeline, loading: timelineQueryLoading } =
-    useRuleFromTimeline(handleSetRuleFromTimeline);
 
   const {
     index: formIndex,
@@ -201,6 +206,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     dataSourceType: formDataSourceType,
     newTermsFields,
     shouldLoadQueryDynamically: formShouldLoadQueryDynamically,
+    groupByFields,
   } = formData;
 
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
@@ -212,6 +218,38 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const dataSourceType = formDataSourceType || initialState.dataSourceType;
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const queryBar = formQuery ?? initialState.queryBar;
+
+  const setRuleTypeCallback = useSetFieldValueWithCallback({
+    field: 'ruleType',
+    value: ruleType,
+    setFieldValue,
+  });
+
+  const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
+    initialState.eqlOptions || {}
+  );
+
+  const handleSetRuleFromTimeline = useCallback(
+    ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
+      const setQuery = () => {
+        setFieldValue('index', timelineIndex);
+        setFieldValue('queryBar', timelineQueryBar);
+      };
+      if (timelineQueryBar.query.language === 'eql') {
+        setRuleTypeCallback('eql', setQuery);
+        setOptionsSelected((prevOptions) => ({
+          ...prevOptions,
+          ...(eqlOptions != null ? eqlOptions : {}),
+        }));
+      } else {
+        setQuery();
+      }
+    },
+    [setFieldValue, setRuleTypeCallback]
+  );
+
+  const { onOpenTimeline, loading: timelineQueryLoading } =
+    useRuleFromTimeline(handleSetRuleFromTimeline);
 
   const [isPreviewValid, setIsPreviewValid] = useState(false);
   useEffect(() => {
@@ -253,13 +291,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
-    initialState.eqlOptions || {}
-  );
-  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] = useFetchIndex(
-    index,
-    false
-  );
+  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
+    useFetchIndex(index);
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
 
   const { data } = useKibana().services;
@@ -487,6 +520,76 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatIndexPatterns,
       threatIndexPatternsLoading,
     ]
+  );
+
+  const GroupByChildren = useCallback(
+    ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
+      <EuiRadioGroup
+        disabled={
+          !license.isAtLeast(minimumLicenseForSuppression) ||
+          groupByFields == null ||
+          groupByFields.length === 0
+        }
+        idSelected={groupByRadioSelection.value}
+        options={[
+          {
+            id: GroupByOptions.PerRuleExecution,
+            label: 'Per rule execution',
+          },
+          {
+            id: GroupByOptions.PerTimePeriod,
+            label: (
+              <>
+                {`Per time period`}
+                <DurationInput
+                  durationValueField={groupByDurationValue}
+                  durationUnitField={groupByDurationUnit}
+                  isDisabled={
+                    !license.isAtLeast(minimumLicenseForSuppression) ||
+                    groupByFields?.length === 0 ||
+                    groupByRadioSelection.value !== GroupByOptions.PerTimePeriod
+                  }
+                  minimumValue={1}
+                />
+              </>
+            ),
+          },
+        ]}
+        onChange={(id: string) => {
+          groupByRadioSelection.setValue(id);
+        }}
+        data-test-subj="groupByDurationOptions"
+      />
+    ),
+    [license, groupByFields]
+  );
+
+  const AlertsSuppressionMissingFields = useCallback(
+    ({ suppressionMissingFields }) => (
+      <EuiRadioGroup
+        disabled={
+          !license.isAtLeast(minimumLicenseForSuppression) ||
+          groupByFields == null ||
+          groupByFields.length === 0
+        }
+        idSelected={suppressionMissingFields.value}
+        options={[
+          {
+            id: AlertSuppressionMissingFieldsStrategy.Suppress,
+            label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION,
+          },
+          {
+            id: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION,
+          },
+        ]}
+        onChange={(id: string) => {
+          suppressionMissingFields.setValue(id);
+        }}
+        data-test-subj="suppressionMissingFieldsOptions"
+      />
+    ),
+    [license, groupByFields]
   );
 
   const dataViewIndexPatternToggleButtonOptions: EuiButtonGroupOptionProps[] = useMemo(
@@ -796,18 +899,68 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           )}
 
-          <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)}>
-            <UseField
-              path="groupByFields"
-              component={GroupByFields}
-              componentProps={{
-                browserFields: termsAggregationFields,
-                isDisabled:
-                  !license.isAtLeast(minimumLicenseForSuppression) &&
-                  initialState.groupByFields.length === 0,
-              }}
-            />
-          </RuleTypeEuiFormRow>
+          <EuiSpacer size="l" />
+          <EuiAccordion
+            data-test-subj="alertSuppressionAccordion"
+            id="alertSuppressionAccordion"
+            buttonContent={i18n.ALERT_SUPPRESSION_ACCORDION_BUTTON}
+          >
+            <EuiSpacer size="l" />
+
+            <RuleTypeEuiFormRow
+              $isVisible={isQueryRule(ruleType)}
+              data-test-subj="alertSuppressionInput"
+            >
+              <UseField
+                path="groupByFields"
+                component={GroupByFields}
+                componentProps={{
+                  browserFields: termsAggregationFields,
+                  isDisabled:
+                    !license.isAtLeast(minimumLicenseForSuppression) &&
+                    initialState.groupByFields.length === 0,
+                }}
+              />
+            </RuleTypeEuiFormRow>
+
+            <RuleTypeEuiFormRow
+              $isVisible={isQueryRule(ruleType)}
+              data-test-subj="alertSuppressionDuration"
+            >
+              <UseMultiFields
+                fields={{
+                  groupByRadioSelection: {
+                    path: 'groupByRadioSelection',
+                  },
+                  groupByDurationValue: {
+                    path: 'groupByDuration.value',
+                  },
+                  groupByDurationUnit: {
+                    path: 'groupByDuration.unit',
+                  },
+                }}
+              >
+                {GroupByChildren}
+              </UseMultiFields>
+            </RuleTypeEuiFormRow>
+
+            <RuleTypeEuiFormRow
+              $isVisible={isQueryRule(ruleType)}
+              data-test-subj="alertSuppressionMissingFields"
+              label={i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL}
+            >
+              <UseMultiFields
+                fields={{
+                  suppressionMissingFields: {
+                    path: 'suppressionMissingFields',
+                  },
+                }}
+              >
+                {AlertsSuppressionMissingFields}
+              </UseMultiFields>
+            </RuleTypeEuiFormRow>
+          </EuiAccordion>
+          <EuiSpacer size="l" />
 
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>

@@ -84,6 +84,9 @@ describe('DomainsTable', () => {
       .text();
   });
 
+  const getTableBody = () =>
+    wrapper.find(EuiBasicTable).dive().find('RenderWithEuiTheme').renderProp('children')();
+
   it('renders', () => {
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
 
@@ -104,8 +107,7 @@ describe('DomainsTable', () => {
     });
 
     it('renders a clickable domain url', () => {
-      const basicTable = wrapper.find(EuiBasicTable).dive();
-      const link = basicTable.find('[data-test-subj="CrawlerDomainURL"]').at(0);
+      const link = getTableBody().find('[data-test-subj="CrawlerDomainURL"]').at(0);
 
       expect(link.dive().text()).toContain('elastic.co');
       expect(link.props()).toEqual(
@@ -126,8 +128,7 @@ describe('DomainsTable', () => {
     });
 
     describe('actions column', () => {
-      const getTable = () => wrapper.find(EuiBasicTable).dive();
-      const getActions = () => getTable().find('ExpandedItemActions');
+      const getActions = () => getTableBody().find('ExpandedItemActions');
       const getActionItems = () => getActions().first().dive().find('DefaultItemAction');
 
       it('will hide the action buttons if the user cannot manage/delete engines', () => {

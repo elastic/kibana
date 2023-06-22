@@ -30,6 +30,7 @@ describe('Timeline search and filters', () => {
     cleanKibana();
     login();
   });
+
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
       visit(HOSTS_URL);
@@ -54,14 +55,12 @@ describe('Timeline search and filters', () => {
   });
 
   describe('Update kqlMode for timeline', () => {
-    before(() => {
+    beforeEach(() => {
       visitWithoutDateRange(TIMELINES_URL);
       waitForTimelinesPanelToBeLoaded();
       openTimelineUsingToggle();
-    });
-
-    beforeEach(() => {
       cy.intercept('PATCH', '/api/timeline').as('update');
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.get(TIMELINE_SEARCH_OR_FILTER)
         .pipe(($el) => $el.trigger('click'))
         .should('exist');

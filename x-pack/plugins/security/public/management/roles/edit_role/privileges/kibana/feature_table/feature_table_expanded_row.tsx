@@ -70,7 +70,7 @@ export const FeatureTableExpandedRow = ({
   };
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <div>
           <EuiSwitch

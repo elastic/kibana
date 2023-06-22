@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { LAYER_TYPE, SCALING_TYPES, SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import type {
@@ -97,6 +97,16 @@ export const lmc: LayerMappingCollection = {
   'traces-apm*,logs-apm*,metrics-apm*,apm-*': APM_LAYER_FIELD_MAPPING,
 };
 
+export const getRequiredMapsFields = (title: string): string[] => {
+  const fieldMappings = lmc[title] ?? lmc.default;
+  return [
+    fieldMappings.source.metricField,
+    fieldMappings.source.geoField,
+    fieldMappings.destination.metricField,
+    fieldMappings.destination.geoField,
+  ];
+};
+
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
  * destination, and line layer for each of the provided indexPatterns
@@ -107,7 +117,7 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
   return [
     {
       sourceDescriptor: { type: SOURCE_TYPES.EMS_TMS, isAutoSelect: true },
-      id: uuid.v4(),
+      id: uuidv4(),
       label: null,
       minZoom: 0,
       maxZoom: 24,
@@ -118,7 +128,7 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
     },
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
       const layerGroupDescriptor = {
-        id: uuid.v4(),
+        id: uuidv4(),
         label: title,
         sourceDescriptor: null,
         type: LAYER_TYPE.LAYER_GROUP,
@@ -161,7 +171,7 @@ export const getSourceLayer = (
   layerDetails: LayerMappingDetails
 ) => ({
   sourceDescriptor: {
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'ES_SEARCH',
     applyGlobalQuery: true,
     geoField: layerDetails.geoField,
@@ -198,7 +208,7 @@ export const getSourceLayer = (
       },
     },
   },
-  id: uuid.v4(),
+  id: uuidv4(),
   parent: parentId,
   label: `${indexPatternTitle} | ${layerDetails.label}`,
   minZoom: 0,
@@ -227,7 +237,7 @@ export const getDestinationLayer = (
   layerDetails: LayerMappingDetails
 ) => ({
   sourceDescriptor: {
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'ES_SEARCH',
     scalingType: SCALING_TYPES.LIMIT,
     applyGlobalQuery: true,
@@ -265,7 +275,7 @@ export const getDestinationLayer = (
       },
     },
   },
-  id: uuid.v4(),
+  id: uuidv4(),
   parent: parentId,
   label: `${indexPatternTitle} | ${layerDetails.label}`,
   minZoom: 0,
@@ -294,7 +304,7 @@ export const getLineLayer = (
   sourceDescriptor: {
     type: SOURCE_TYPES.ES_PEW_PEW,
     applyGlobalQuery: true,
-    id: uuid.v4(),
+    id: uuidv4(),
     indexPatternId,
     sourceGeoField: layerDetails.source.geoField,
     destGeoField: layerDetails.destination.geoField,
@@ -352,7 +362,7 @@ export const getLineLayer = (
       },
     },
   },
-  id: uuid.v4(),
+  id: uuidv4(),
   parent: parentId,
   label: `${indexPatternTitle} | ${i18n.LINE_LAYER}`,
   minZoom: 0,

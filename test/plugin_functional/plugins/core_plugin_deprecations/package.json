@@ -1,5 +1,5 @@
 {
-  "name": "core_plugin_deprecations",
+  "name": "@kbn/core-plugin-deprecations-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/core_plugin_deprecations",
   "kibana": {

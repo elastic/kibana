@@ -9,4 +9,4 @@
 export * from './inspect_panel_action';
 export * from './add_panel';
 export * from './remove_panel_action';
-export * from './customize_title';
+export * from './customize_panel';

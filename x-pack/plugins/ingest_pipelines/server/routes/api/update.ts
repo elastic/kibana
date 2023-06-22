@@ -33,7 +33,7 @@ export const registerUpdateRoute = ({
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params;
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { description, processors, version, on_failure } = req.body;
+      const { description, processors, version, on_failure, _meta } = req.body;
 
       try {
         // Verify pipeline exists; ES will throw 404 if it doesn't
@@ -46,6 +46,7 @@ export const registerUpdateRoute = ({
             processors,
             version,
             on_failure,
+            _meta,
           },
         });
 

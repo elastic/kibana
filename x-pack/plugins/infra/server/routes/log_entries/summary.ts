@@ -37,11 +37,11 @@ export const initLogEntriesSummaryRoute = ({ framework, logEntries }: InfraBacke
         logEntriesSummaryRequestRT.decode(request.body),
         fold(throwErrors(Boom.badRequest), identity)
       );
-      const { sourceId, startTimestamp, endTimestamp, bucketSize, query } = payload;
+      const { logView, startTimestamp, endTimestamp, bucketSize, query } = payload;
 
       const buckets = await logEntries.getLogSummaryBucketsBetween(
         requestContext,
-        sourceId,
+        logView,
         startTimestamp,
         endTimestamp,
         bucketSize,

@@ -75,7 +75,10 @@ import type {
   RiskScoreRequestOptions,
 } from './risk_score';
 import type { UsersQueries } from './users';
-import type { UserDetailsRequestOptions, UserDetailsStrategyResponse } from './users/details';
+import type {
+  ObservedUserDetailsRequestOptions,
+  ObservedUserDetailsStrategyResponse,
+} from './users/observed_details';
 import type {
   TotalUsersKpiRequestOptions,
   TotalUsersKpiStrategyResponse,
@@ -96,6 +99,10 @@ import type {
   FirstLastSeenRequestOptions,
   FirstLastSeenStrategyResponse,
 } from './first_last_seen';
+import type {
+  ManagedUserDetailsRequestOptions,
+  ManagedUserDetailsStrategyResponse,
+} from './users/managed_details';
 
 export * from './cti';
 export * from './hosts';
@@ -144,8 +151,10 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsKpiHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsStrategyResponse
-  : T extends UsersQueries.details
-  ? UserDetailsStrategyResponse
+  : T extends UsersQueries.observedDetails
+  ? ObservedUserDetailsStrategyResponse
+  : T extends UsersQueries.managedDetails
+  ? ManagedUserDetailsStrategyResponse
   : T extends UsersQueries.kpiTotalUsers
   ? TotalUsersKpiStrategyResponse
   : T extends UsersQueries.authentications
@@ -210,8 +219,10 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsKpiUniqueIpsRequestOptions
   : T extends UsersQueries.authentications
   ? UserAuthenticationsRequestOptions
-  : T extends UsersQueries.details
-  ? UserDetailsRequestOptions
+  : T extends UsersQueries.observedDetails
+  ? ObservedUserDetailsRequestOptions
+  : T extends UsersQueries.managedDetails
+  ? ManagedUserDetailsRequestOptions
   : T extends UsersQueries.kpiTotalUsers
   ? TotalUsersKpiRequestOptions
   : T extends UsersQueries.users

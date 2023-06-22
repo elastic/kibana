@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/jest-serializers",
-        "id": "def-server.createAbsolutePathSerializer",
+        "id": "def-common.createAbsolutePathSerializer",
         "type": "Function",
         "tags": [],
         "label": "createAbsolutePathSerializer",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createAbsolutePathSerializer.$1",
+            "id": "def-common.createAbsolutePathSerializer.$1",
             "type": "string",
             "tags": [],
             "label": "rootPath",
@@ -42,7 +50,7 @@
           },
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createAbsolutePathSerializer.$2",
+            "id": "def-common.createAbsolutePathSerializer.$2",
             "type": "string",
             "tags": [],
             "label": "replacement",
@@ -61,7 +69,7 @@
       },
       {
         "parentPluginId": "@kbn/jest-serializers",
-        "id": "def-server.createAnyInstanceSerializer",
+        "id": "def-common.createAnyInstanceSerializer",
         "type": "Function",
         "tags": [],
         "label": "createAnyInstanceSerializer",
@@ -75,7 +83,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createAnyInstanceSerializer.$1",
+            "id": "def-common.createAnyInstanceSerializer.$1",
             "type": "Object",
             "tags": [],
             "label": "Class",
@@ -90,7 +98,7 @@
           },
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createAnyInstanceSerializer.$2",
+            "id": "def-common.createAnyInstanceSerializer.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "name",
@@ -109,7 +117,7 @@
       },
       {
         "parentPluginId": "@kbn/jest-serializers",
-        "id": "def-server.createRecursiveSerializer",
+        "id": "def-common.createRecursiveSerializer",
         "type": "Function",
         "tags": [],
         "label": "createRecursiveSerializer",
@@ -123,7 +131,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createRecursiveSerializer.$1",
+            "id": "def-common.createRecursiveSerializer.$1",
             "type": "Function",
             "tags": [],
             "label": "test",
@@ -138,7 +146,7 @@
           },
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createRecursiveSerializer.$2",
+            "id": "def-common.createRecursiveSerializer.$2",
             "type": "Function",
             "tags": [],
             "label": "print",
@@ -157,7 +165,7 @@
       },
       {
         "parentPluginId": "@kbn/jest-serializers",
-        "id": "def-server.createReplaceSerializer",
+        "id": "def-common.createReplaceSerializer",
         "type": "Function",
         "tags": [],
         "label": "createReplaceSerializer",
@@ -171,7 +179,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createReplaceSerializer.$1",
+            "id": "def-common.createReplaceSerializer.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "toReplace",
@@ -186,7 +194,7 @@
           },
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createReplaceSerializer.$2",
+            "id": "def-common.createReplaceSerializer.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "replaceWith",
@@ -205,7 +213,7 @@
       },
       {
         "parentPluginId": "@kbn/jest-serializers",
-        "id": "def-server.createStripAnsiSerializer",
+        "id": "def-common.createStripAnsiSerializer",
         "type": "Function",
         "tags": [],
         "label": "createStripAnsiSerializer",
@@ -221,14 +229,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

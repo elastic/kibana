@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ambient-ftr-types",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

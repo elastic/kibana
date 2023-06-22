@@ -38,7 +38,7 @@ There are cases where `@kbn/pm` relies on code from packages, mostly to prevent 
 
 Option 1 is used in several places, with contingencies in place in case bootstrap failed. Option 2 is used for two pieces of code which are needed in order to run bootstrap:
 
- 1. `@kbn/plugin-discovery` as we need to populate the `@kbn/synthetic-package-map` to run Bazel
+ 1. `@kbn/plugin-discovery` as we need to populate the `@kbn/package-map` to run Bazel
  2. `@kbn/bazel-runner` as we want to have the logic for running bazel in a single location
 
 Because we load these two packages from source, without being built, before bootstrap is ever run, they can not depend on other packages and must be written in Vanilla JS as well.

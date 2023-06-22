@@ -114,6 +114,7 @@ describe('getCerts', () => {
             "issuer": "GlobalSign CloudSSL CA - SHA256 - G3",
             "monitors": Array [
               Object {
+                "configId": undefined,
                 "id": "real-world-test",
                 "name": "Real World Test",
                 "url": undefined,
@@ -158,6 +159,7 @@ describe('getCerts', () => {
                       "monitor.id",
                       "monitor.name",
                       "url.full",
+                      "config_id",
                     ],
                   },
                   "collapse": Object {

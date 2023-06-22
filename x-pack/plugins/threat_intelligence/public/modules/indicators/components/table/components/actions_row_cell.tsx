@@ -12,8 +12,7 @@ import { InvestigateInTimelineButtonIcon } from '../../../../timeline';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 import { IndicatorsTableContext } from '../contexts';
-
-const INVESTIGATE_TEST_ID = 'tiIndicatorTableInvestigateInTimelineButtonIcon';
+import { INVESTIGATE_IN_TIMELINE_TEST_ID } from './test_ids';
 
 export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => {
   const indicatorTableContext = useContext(IndicatorsTableContext);
@@ -34,7 +33,10 @@ export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => 
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <InvestigateInTimelineButtonIcon data={indicator} data-test-subj={INVESTIGATE_TEST_ID} />
+        <InvestigateInTimelineButtonIcon
+          data={indicator}
+          data-test-subj={INVESTIGATE_IN_TIMELINE_TEST_ID}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <MoreActions indicator={indicator} />

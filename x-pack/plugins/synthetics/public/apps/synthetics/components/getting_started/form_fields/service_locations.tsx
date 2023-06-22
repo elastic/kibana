@@ -11,6 +11,8 @@ import { useSelector } from 'react-redux';
 
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ServiceLocation } from '../../../../../../common/runtime_types';
+import { formatLocation } from '../../../../../../common/utils/location_formatter';
 import { selectServiceLocationsState } from '../../../state';
 
 import { SimpleFormData } from '../simple_monitor_form';
@@ -29,7 +31,7 @@ export const ServiceLocationsField = ({
     <EuiFormRow
       fullWidth
       label={LOCATIONS_LABEL}
-      helpText={!errors?.[ConfigKey.LOCATIONS] ? SELECT_ONE_OR_MORE_LOCATIONS : undefined}
+      helpText={!errors?.[ConfigKey.LOCATIONS] ? SELECT_ONE_OR_MORE_LOCATIONS_DETAILS : undefined}
       isInvalid={!!errors?.[ConfigKey.LOCATIONS]}
       error={SELECT_ONE_OR_MORE_LOCATIONS}
     >
@@ -50,6 +52,9 @@ export const ServiceLocationsField = ({
             isClearable={true}
             data-test-subj="syntheticsServiceLocations"
             {...field}
+            onChange={(selectedOptions) =>
+              field.onChange(selectedOptions.map((loc) => formatLocation(loc as ServiceLocation)))
+            }
             isInvalid={!!errors?.[ConfigKey.LOCATIONS]}
           />
         )}
@@ -61,7 +66,14 @@ export const ServiceLocationsField = ({
 const SELECT_ONE_OR_MORE_LOCATIONS = i18n.translate(
   'xpack.synthetics.monitorManagement.selectOneOrMoreLocations',
   {
-    defaultMessage: 'Select one or more locations',
+    defaultMessage: 'Select one or more locations.',
+  }
+);
+
+const SELECT_ONE_OR_MORE_LOCATIONS_DETAILS = i18n.translate(
+  'xpack.synthetics.monitorManagement.selectOneOrMoreLocationsDetails',
+  {
+    defaultMessage: 'Select locations where monitors will be executed.',
   }
 );
 

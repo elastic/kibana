@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment-timezone';
-import { has, set, unset, find, some, mapKeys } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { has, unset, find, some, mapKeys } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';

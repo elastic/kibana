@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getBucketSize } from '../get_bucket_size';
+import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 
 export function getBucketSizeForAggregatedTransactions({
   start,

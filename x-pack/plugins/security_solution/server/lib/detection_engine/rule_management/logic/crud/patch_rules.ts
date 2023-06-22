@@ -10,18 +10,22 @@ import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 import type { PatchRuleRequestBody } from '../../../../../../common/detection_engine/rule_management';
 import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { convertPatchAPIToInternalSchema } from '../../normalization/rule_converters';
-import { maybeMute } from '../rule_actions/muting';
 
 export interface PatchRulesOptions {
   rulesClient: RulesClient;
   nextParams: PatchRuleRequestBody;
   existingRule: RuleAlertType | null | undefined;
+  allowMissingConnectorSecrets?: boolean;
+
+  shouldIncrementRevision?: boolean;
 }
 
 export const patchRules = async ({
   rulesClient,
   existingRule,
   nextParams,
+  allowMissingConnectorSecrets,
+  shouldIncrementRevision = true,
 }: PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (existingRule == null) {
     return null;
@@ -32,16 +36,9 @@ export const patchRules = async ({
   const update = await rulesClient.update({
     id: existingRule.id,
     data: patchedRule,
+    allowMissingConnectorSecrets,
+    shouldIncrementRevision: () => shouldIncrementRevision,
   });
-
-  if (nextParams.throttle !== undefined) {
-    await maybeMute({
-      rulesClient,
-      muteAll: existingRule.muteAll,
-      throttle: nextParams.throttle,
-      id: update.id,
-    });
-  }
 
   if (existingRule.enabled && nextParams.enabled === false) {
     await rulesClient.disable({ id: existingRule.id });

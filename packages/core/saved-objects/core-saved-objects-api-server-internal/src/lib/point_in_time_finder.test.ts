@@ -235,6 +235,52 @@ describe('createPointInTimeFinder()', () => {
     );
   });
 
+  test('still applies the defaults in the mandatory fields even when `undefined` is explicitly provided', async () => {
+    repository.openPointInTimeForType.mockResolvedValueOnce({
+      id: 'abc123',
+    });
+    repository.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: mockHits,
+      pit_id: 'abc123',
+      per_page: 2,
+      page: 0,
+    });
+
+    const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+      type: ['visualization'],
+      search: 'foo*',
+      // Intentionally trying to remove the sort fields
+      sortField: undefined,
+      sortOrder: undefined,
+    };
+
+    const internalOptions = {};
+    const finder = new PointInTimeFinder(findOptions, {
+      logger,
+      client: repository,
+      internalOptions,
+    });
+    const hits: SavedObjectsFindResult[] = [];
+    for await (const result of finder.find()) {
+      hits.push(...result.saved_objects);
+    }
+
+    expect(hits.length).toBe(2);
+    expect(repository.openPointInTimeForType).toHaveBeenCalledTimes(1);
+    expect(repository.closePointInTime).toHaveBeenCalledTimes(1);
+    expect(repository.find).toHaveBeenCalledTimes(1);
+    expect(repository.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pit: expect.objectContaining({ id: 'abc123', keepAlive: '2m' }),
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+        type: ['visualization'],
+      }),
+      internalOptions
+    );
+  });
+
   describe('#close', () => {
     test('calls closePointInTime with correct ID', async () => {
       repository.openPointInTimeForType.mockResolvedValueOnce({

@@ -34,11 +34,14 @@ export const EPM_API_ROUTES = {
   DELETE_PATTERN: EPM_PACKAGES_ONE,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
+  VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
 
   INFO_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
   INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
   DELETE_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
+
+  REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
 };
 
 // Data stream API routes
@@ -144,7 +147,6 @@ export const AGENT_API_ROUTES = {
   STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
-  CURRENT_UPGRADES_PATTERN: `${API_ROOT}/agents/current_upgrades`,
   ACTION_STATUS_PATTERN: `${API_ROOT}/agents/action_status`,
   LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
   LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
@@ -167,6 +169,11 @@ export const ENROLLMENT_API_KEY_ROUTES = {
 export const AGENTS_SETUP_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/agents/setup`,
   CREATE_PATTERN: `${API_ROOT}/agents/setup`,
+};
+
+// Message signing service
+export const MESSAGE_SIGNING_SERVICE_API_ROUTES = {
+  ROTATE_KEY_PAIR: `${API_ROOT}/message_signing_service/rotate_key_pair`,
 };
 
 export const SETUP_API_ROUTE = `${API_ROOT}/setup`;

@@ -13,6 +13,7 @@ import {
   EuiLoadingChart,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { CHART_PANEL_TEST_SUBJECTS } from './test_subjects';
 
@@ -52,6 +53,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
   isError,
   children,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const renderChart = () => {
     if (isLoading) return <Loading />;
     if (isError) return <Error />;
@@ -64,7 +66,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
         <EuiFlexItem grow={false}>
           {title && (
             <EuiTitle size="xs">
-              <h3 style={{ lineHeight: 'initial' }}>{title}</h3>
+              <h3 style={{ lineHeight: 'initial', paddingLeft: euiTheme.size.s }}>{title}</h3>
             </EuiTitle>
           )}
         </EuiFlexItem>

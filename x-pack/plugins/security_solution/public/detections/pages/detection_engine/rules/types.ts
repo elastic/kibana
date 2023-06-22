@@ -33,6 +33,7 @@ import type {
   RuleNameOverride,
   SetupGuide,
   TimestampOverride,
+  AlertSuppressionMissingFields,
 } from '../../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -143,6 +144,11 @@ export enum DataSourceType {
   DataView = 'dataView',
 }
 
+export enum GroupByOptions {
+  PerRuleExecution = 'per-rule-execution',
+  PerTimePeriod = 'per-time-period',
+}
+
 /**
  * add / update data source types to show XOR relationship between 'index' and 'dataViewId' fields
  * Maybe something with io-ts?
@@ -169,6 +175,14 @@ export interface DefineStepRule {
   historyWindowSize: string;
   shouldLoadQueryDynamically: boolean;
   groupByFields: string[];
+  groupByRadioSelection: GroupByOptions;
+  groupByDuration: Duration;
+  suppressionMissingFields?: AlertSuppressionMissingFields;
+}
+
+export interface Duration {
+  value: number;
+  unit: string;
 }
 
 export interface ScheduleStepRule {
@@ -182,7 +196,6 @@ export interface ActionsStepRule {
   responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
-  throttle?: string | null;
 }
 
 export interface DefineStepRuleJson {

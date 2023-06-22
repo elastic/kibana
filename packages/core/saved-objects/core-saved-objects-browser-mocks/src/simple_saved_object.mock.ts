@@ -26,6 +26,7 @@ const simpleSavedObjectMockDefaults: Partial<SimpleSavedObject<T>> = {
   updatedAt: '',
   createdAt: '',
   namespaces: undefined,
+  managed: false,
 };
 
 const createSimpleSavedObjectMock = (
@@ -39,6 +40,8 @@ const createSimpleSavedObjectMock = (
     type: savedObject.type,
     migrationVersion: savedObject.migrationVersion,
     coreMigrationVersion: savedObject.coreMigrationVersion,
+    typeMigrationVersion: savedObject.typeMigrationVersion,
+    managed: savedObject.managed,
     error: savedObject.error,
     references: savedObject.references,
     updatedAt: savedObject.updated_at,
@@ -63,6 +66,9 @@ const createSimpleSavedObjectMock = (
   return mock;
 };
 
+/**
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
+ */
 export const simpleSavedObjectMock = {
   create: (client: SavedObjectsClientContract, savedObject: SavedObject) =>
     createSimpleSavedObjectMock(savedObject),

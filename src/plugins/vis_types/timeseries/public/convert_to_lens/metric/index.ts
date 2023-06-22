@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DataView, parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
@@ -118,7 +118,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
 
     const extendedLayer: ExtendedLayer = {
       indexPatternId: indexPatternId as string,
-      layerId: uuid(),
+      layerId: uuidv4(),
       columns: [...metrics, ...(bucket ? [bucket] : [])],
       columnOrder: [],
     };

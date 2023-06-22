@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type {
   AggregationsAggregate,
+  OpenPointInTimeResponse,
   SearchRequest,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -28,16 +29,24 @@ import {
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+import type {
+  SearchHit,
+  SearchRequest as ESSearchRequest,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
-import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { Agent, AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
+import type {
+  AgentClient,
+  AgentPolicyServiceInterface,
+  PackageService,
+} from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
   exceptionListItemToTelemetryEntry,
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
-  metricsResponseToValueListMetaData,
   tlog,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -51,7 +60,7 @@ import type {
   GetEndpointListResponse,
   RuleSearchResult,
   ExceptionListItem,
-  ValueListMetaData,
+  ValueListResponse,
   ValueListResponseAggregation,
   ValueListItemsResponseAggregation,
   ValueListExceptionListResponseAggregation,
@@ -59,17 +68,21 @@ import type {
 } from './types';
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
+import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
 
 export interface ITelemetryReceiver {
   start(
     core?: CoreStart,
-    kibanaIndex?: string,
+    getIndexForType?: (type: string) => string,
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
-    exceptionListClient?: ExceptionListClient
+    exceptionListClient?: ExceptionListClient,
+    packageService?: PackageService
   ): Promise<void>;
 
   getClusterInfo(): ESClusterInfo | undefined;
+
+  fetchDetectionRulesPackageVersion(): Promise<Installation | undefined>;
 
   fetchFleetAgents(): Promise<
     | {
@@ -149,9 +162,7 @@ export interface ITelemetryReceiver {
 
   fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
 
-  fetchTimelineEndpointAlerts(
-    interval: number
-  ): Promise<SearchResponse<EnhancedAlertEvent, Record<string, AggregationsAggregate>>>;
+  fetchTimelineEndpointAlerts(interval: number): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
 
   buildProcessTree(
     entityId: string,
@@ -164,7 +175,7 @@ export interface ITelemetryReceiver {
     nodeIds: string[]
   ): Promise<SearchResponse<SafeEndpointEvent, Record<string, AggregationsAggregate>>>;
 
-  fetchValueListMetaData(interval: number): Promise<ValueListMetaData>;
+  fetchValueListMetaData(interval: number): Promise<ValueListResponse>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -174,10 +185,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
-  private kibanaIndex?: string;
+  private getIndexForType?: (type: string) => string;
   private alertsIndex?: string;
   private clusterInfo?: ESClusterInfo;
   private processTreeFetcher?: Fetcher;
+  private packageService?: PackageService;
   private readonly maxRecords = 10_000 as const;
 
   constructor(logger: Logger) {
@@ -186,17 +198,19 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public async start(
     core?: CoreStart,
-    kibanaIndex?: string,
+    getIndexForType?: (type: string) => string,
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
-    exceptionListClient?: ExceptionListClient
+    exceptionListClient?: ExceptionListClient,
+    packageService?: PackageService
   ) {
-    this.kibanaIndex = kibanaIndex;
+    this.getIndexForType = getIndexForType;
     this.alertsIndex = alertsIndex;
-    this.agentClient = endpointContextService?.getAgentService()?.asInternalUser;
-    this.agentPolicyService = endpointContextService?.getAgentPolicyService();
+    this.agentClient = endpointContextService?.getInternalFleetServices().agent;
+    this.agentPolicyService = endpointContextService?.getInternalFleetServices().agentPolicy;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
+    this.packageService = packageService;
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.clusterInfo = await this.fetchClusterInfo();
@@ -207,6 +221,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public getClusterInfo(): ESClusterInfo | undefined {
     return this.clusterInfo;
+  }
+
+  public async fetchDetectionRulesPackageVersion(): Promise<Installation | undefined> {
+    return this.packageService?.asInternalUser.getInstallation(PREBUILT_RULES_PACKAGE_NAME);
   }
 
   public async fetchFleetAgents() {
@@ -475,7 +493,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.kibanaIndex}*`,
+      index: this.getIndexForType?.('alert'),
       ignore_unavailable: true,
       body: {
         size: this.maxRecords,
@@ -560,12 +578,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       body: {
         size: 1_000,
         _source: {
-          exclude: [
-            'message',
-            'kibana.alert.rule.note',
-            'kibana.alert.rule.parameters.note',
-            'powershell.file.script_block_text',
-          ],
+          exclude: ['message', 'kibana.alert.rule.note', 'kibana.alert.rule.parameters.note'],
         },
         query: {
           bool: {
@@ -687,12 +700,22 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
-    const query: SearchRequest = {
-      expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.alertsIndex}*`,
-      ignore_unavailable: true,
-      body: {
-        size: 30,
+    // default is from looking at Kibana saved objects and online documentation
+    const keepAlive = '5m';
+
+    // create and assign an initial point in time
+    let pitId: OpenPointInTimeResponse['id'] = (
+      await this.esClient.openPointInTime({
+        index: `${this.alertsIndex}*`,
+        keep_alive: keepAlive,
+      })
+    ).id;
+
+    let fetchMore = true;
+    let searchAfter: SortResults | undefined;
+    let alertsToReturn: Array<SearchHit<EnhancedAlertEvent>> = [];
+    while (fetchMore) {
+      const query: ESSearchRequest = {
         query: {
           bool: {
             filter: [
@@ -736,10 +759,53 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             },
           },
         },
-      },
-    };
+        track_total_hits: false,
+        sort: [
+          { '@timestamp': { order: 'asc', format: 'strict_date_optional_time_nanos' } },
+          { _shard_doc: 'desc' },
+        ] as unknown as string[],
+        pit: { id: pitId },
+        search_after: searchAfter,
+        size: 1000,
+      };
 
-    return this.esClient.search<EnhancedAlertEvent>(query);
+      tlog(this.logger, `Getting alerts with point in time (PIT) query: ${JSON.stringify(query)}`);
+
+      let response = null;
+      try {
+        response = await this.esClient.search<EnhancedAlertEvent>(query);
+        const numOfHits = response?.hits.hits.length;
+
+        if (numOfHits > 0) {
+          const lastHit = response?.hits.hits[numOfHits - 1];
+          searchAfter = lastHit?.sort;
+        }
+
+        fetchMore = numOfHits > 0;
+      } catch (e) {
+        tlog(this.logger, e);
+        fetchMore = false;
+      }
+
+      const alerts = response?.hits.hits;
+      alertsToReturn = alertsToReturn.concat(alerts ?? []);
+
+      if (response?.pit_id != null) {
+        pitId = response?.pit_id;
+      }
+    }
+
+    try {
+      await this.esClient.closePointInTime({ id: pitId });
+    } catch (error) {
+      tlog(
+        this.logger,
+        `Error trying to close point in time: "${pitId}", it will expire within "${keepAlive}". Error is: "${error}"`
+      );
+    }
+
+    tlog(this.logger, `Timeline alerts to return: ${alertsToReturn.length}`);
+    return alertsToReturn;
   }
 
   public async buildProcessTree(
@@ -858,7 +924,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
     const exceptionListQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.kibanaIndex}*`,
+      index: this.getIndexForType?.('exception-list'),
       ignore_unavailable: true,
       body: {
         size: 0, // no query results required - only aggregation quantity
@@ -878,7 +944,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
     const indicatorMatchRuleQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.kibanaIndex}*`,
+      index: this.getIndexForType?.('alert'),
       ignore_unavailable: true,
       body: {
         size: 0,
@@ -909,12 +975,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       exceptionListMetrics as unknown as ValueListExceptionListResponseAggregation;
     const indicatorMatchMetricsResponse =
       indicatorMatchMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
-    return metricsResponseToValueListMetaData({
+    return {
       listMetricsResponse,
       itemMetricsResponse,
       exceptionListMetricsResponse,
       indicatorMatchMetricsResponse,
-    });
+    };
   }
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {

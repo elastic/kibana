@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Subject, Observable } from 'rxjs';
 import stats from 'stats-lite';
 import sinon from 'sinon';
@@ -375,24 +375,24 @@ describe('Task Run Statistics', () => {
               { Success: 40, RetryScheduled: 40, Failed: 20, status: 'OK' },
             ]);
 
-            expect(logger.debug).toHaveBeenCalledTimes(5);
-            expect(logger.debug).toHaveBeenNthCalledWith(
+            expect(logger.warn).toHaveBeenCalledTimes(5);
+            expect(logger.warn).toHaveBeenNthCalledWith(
               1,
               'Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (40) is greater than warn_threshold (39)'
             );
-            expect(logger.debug).toHaveBeenNthCalledWith(
+            expect(logger.warn).toHaveBeenNthCalledWith(
               2,
               'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
             );
-            expect(logger.debug).toHaveBeenNthCalledWith(
+            expect(logger.warn).toHaveBeenNthCalledWith(
               3,
               'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
             );
-            expect(logger.debug).toHaveBeenNthCalledWith(
+            expect(logger.warn).toHaveBeenNthCalledWith(
               4,
               'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
             );
-            expect(logger.debug).toHaveBeenNthCalledWith(
+            expect(logger.warn).toHaveBeenNthCalledWith(
               5,
               'Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (40) is greater than warn_threshold (39)'
             );
@@ -916,7 +916,7 @@ const mockTaskPollingEvent = (overrides: Partial<ConcreteTaskInstance> = {}) => 
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
-  id: uuid.v4(),
+  id: uuidv4(),
   attempts: 0,
   status: TaskStatus.Running,
   version: '123',

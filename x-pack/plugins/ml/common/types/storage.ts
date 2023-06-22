@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EntityFieldType } from './anomalies';
+import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+import type { FrozenTierPreference } from '@kbn/ml-date-picker';
 
 export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields' as const;
 export const ML_APPLY_TIME_RANGE_CONFIG = 'ml.jobSelectorFlyout.applyTimeRange';
@@ -36,7 +37,7 @@ export type PartitionFieldConfig =
   | undefined;
 
 export type PartitionFieldsConfig =
-  | Partial<Record<EntityFieldType, PartitionFieldConfig>>
+  | Partial<Record<MlEntityFieldType, PartitionFieldConfig>>
   | undefined;
 
 export type ApplyTimeRangeConfig = boolean | undefined;
@@ -51,14 +52,17 @@ export interface AnomalyExplorerPanelsState {
   mainPage: { size: number };
 }
 
-export type MlStorage = Partial<{
+export interface MlStorageRecord {
+  [key: string]: unknown;
   [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
   [ML_APPLY_TIME_RANGE_CONFIG]: ApplyTimeRangeConfig;
   [ML_GETTING_STARTED_CALLOUT_DISMISSED]: boolean | undefined;
-  [ML_FROZEN_TIER_PREFERENCE]: 'exclude-frozen' | 'include-frozen';
+  [ML_FROZEN_TIER_PREFERENCE]: FrozenTierPreference;
   [ML_ANOMALY_EXPLORER_PANELS]: AnomalyExplorerPanelsState | undefined;
   [ML_NOTIFICATIONS_LAST_CHECKED_AT]: number | undefined;
-}> | null;
+}
+
+export type MlStorage = Partial<MlStorageRecord> | null;
 
 export type MlStorageKey = keyof Exclude<MlStorage, null>;
 
@@ -69,7 +73,7 @@ export type TMlStorageMapped<T extends MlStorageKey> = T extends typeof ML_ENTIT
   : T extends typeof ML_GETTING_STARTED_CALLOUT_DISMISSED
   ? boolean | undefined
   : T extends typeof ML_FROZEN_TIER_PREFERENCE
-  ? 'exclude-frozen' | 'include-frozen' | undefined
+  ? FrozenTierPreference | undefined
   : T extends typeof ML_ANOMALY_EXPLORER_PANELS
   ? AnomalyExplorerPanelsState | undefined
   : T extends typeof ML_NOTIFICATIONS_LAST_CHECKED_AT
@@ -83,8 +87,4 @@ export const ML_STORAGE_KEYS = [
   ML_FROZEN_TIER_PREFERENCE,
   ML_ANOMALY_EXPLORER_PANELS,
   ML_NOTIFICATIONS_LAST_CHECKED_AT,
-];
-
-export function isMlStorageKey(key: unknown): key is MlStorageKey {
-  return typeof key === 'string' && ML_STORAGE_KEYS.includes(key);
-}
+] as const;

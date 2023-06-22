@@ -22,6 +22,15 @@ import {
   EMAIL_CONNECTOR_PASSWORD_INPUT,
   FORM_VALIDATION_ERROR,
   JSON_EDITOR,
+  ACTIONS_SUMMARY_BUTTON,
+  ACTIONS_NOTIFY_WHEN_BUTTON,
+  ACTIONS_THROTTLE_INPUT,
+  ACTIONS_THROTTLE_UNIT_INPUT,
+  ACTIONS_SUMMARY_ALERT_BUTTON,
+  ACTIONS_SUMMARY_FOR_EACH_ALERT_BUTTON,
+  ACTIONS_NOTIFY_CUSTOM_FREQUENCY_BUTTON,
+  actionFormSelector,
+  ACTIONS_NOTIFY_PER_RULE_RUN_BUTTON,
 } from '../../screens/common/rule_actions';
 import { COMBO_BOX_INPUT, COMBO_BOX_SELECTION } from '../../screens/common/controls';
 import type { EmailConnector, IndexConnector } from '../../objects/connector';
@@ -82,5 +91,81 @@ export const fillIndexConnectorForm = (connector: IndexConnector = getIndexConne
   cy.get(JSON_EDITOR).click();
   cy.get(JSON_EDITOR).type(connector.document, {
     parseSpecialCharSequences: false,
+  });
+};
+
+export interface RuleActionCustomFrequency {
+  throttle?: number;
+  throttleUnit?: 's' | 'm' | 'h' | 'd';
+}
+
+export const pickSummaryOfAlertsOption = (index = 0) => {
+  const form = cy.get(actionFormSelector(index));
+  form.within(() => {
+    cy.get(ACTIONS_SUMMARY_BUTTON).click();
+  });
+  cy.get(ACTIONS_SUMMARY_ALERT_BUTTON).click();
+};
+export const pickForEachAlertOption = (index = 0) => {
+  const form = cy.get(actionFormSelector(index));
+  form.within(() => {
+    cy.get(ACTIONS_SUMMARY_BUTTON).click();
+  });
+  cy.get(ACTIONS_SUMMARY_FOR_EACH_ALERT_BUTTON).click();
+};
+
+export const pickCustomFrequencyOption = (
+  { throttle = 1, throttleUnit = 'h' }: RuleActionCustomFrequency,
+  index = 0
+) => {
+  const form = cy.get(actionFormSelector(index));
+  form.within(() => {
+    cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).click();
+  });
+  cy.get(ACTIONS_NOTIFY_CUSTOM_FREQUENCY_BUTTON).click();
+  form.within(() => {
+    cy.get(ACTIONS_THROTTLE_INPUT).type(`{selectAll}${throttle}`);
+    cy.get(ACTIONS_THROTTLE_UNIT_INPUT).select(throttleUnit);
+  });
+};
+
+export const pickPerRuleRunFrequencyOption = (index = 0) => {
+  const form = cy.get(actionFormSelector(index));
+  form.within(() => {
+    cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).click();
+  });
+  cy.get(ACTIONS_NOTIFY_PER_RULE_RUN_BUTTON).click();
+};
+
+export const assertSelectedSummaryOfAlertsOption = (index = 0) => {
+  const form = cy.get(actionFormSelector(index));
+  form.within(() => {
+    cy.get(ACTIONS_SUMMARY_BUTTON).should('have.text', 'Summary of alerts');
+  });
+};
+
+export const assertSelectedForEachAlertOption = (index = 0) => {
+  const form = cy.get(actionFormSelector(index));
+  form.within(() => {
+    cy.get(ACTIONS_SUMMARY_BUTTON).should('have.text', 'For each alert');
+  });
+};
+
+export const assertSelectedCustomFrequencyOption = (
+  { throttle = 1, throttleUnit = 'h' }: RuleActionCustomFrequency,
+  index = 0
+) => {
+  const form = cy.get(actionFormSelector(index));
+  form.within(() => {
+    cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Custom frequency');
+    cy.get(ACTIONS_THROTTLE_INPUT).should('have.value', throttle);
+    cy.get(ACTIONS_THROTTLE_UNIT_INPUT).should('have.value', throttleUnit);
+  });
+};
+
+export const assertSelectedPerRuleRunFrequencyOption = (index = 0) => {
+  const form = cy.get(actionFormSelector(index));
+  form.within(() => {
+    cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Per rule run');
   });
 };

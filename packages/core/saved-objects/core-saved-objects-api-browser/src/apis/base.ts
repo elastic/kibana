@@ -12,6 +12,7 @@ import { SimpleSavedObject } from '../simple_saved_object';
  * Batch response for simple saved objects
  *
  * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface SavedObjectsBatchResponse<T = unknown> {
   /** Array of simple saved objects */

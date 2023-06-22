@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectSanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
-import { CaseSeverity, ConnectorTypes, NONE_CONNECTOR_ID } from '../../../common/api';
+import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 import { getNoneCaseConnector } from '../../common/utils';
 import type { ESCaseConnectorWithId } from '../../services/test_utils';
 import { createExternalService } from '../../services/test_utils';
@@ -16,7 +17,11 @@ import {
   addAssignees,
   addDuration,
   addSeverity,
+  addTotalAlerts,
+  addTotalComments,
   caseConnectorIdMigration,
+  convertSeverity,
+  convertStatus,
   removeCaseType,
 } from './cases';
 
@@ -574,6 +579,141 @@ describe('case migrations', () => {
           ...doc.attributes,
           assignees,
         },
+      });
+    });
+  });
+
+  describe('update severity', () => {
+    it.each([
+      [CaseSeverity.LOW, CasePersistedSeverity.LOW],
+      [CaseSeverity.MEDIUM, CasePersistedSeverity.MEDIUM],
+      [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
+      [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
+    ])(
+      'migrates "%s" severity keyword value to matching short',
+      (oldSeverityValue, expectedSeverityValue) => {
+        const doc = {
+          id: '123',
+          type: 'abc',
+          attributes: {
+            severity: oldSeverityValue,
+          },
+          references: [],
+        } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+        expect(convertSeverity(doc)).toEqual({
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            severity: expectedSeverityValue,
+          },
+          references: [],
+        });
+      }
+    );
+
+    it('default value for severity is 0(LOW) if it does not exist', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {},
+        references: [],
+      } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+      expect(convertSeverity(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          severity: CasePersistedSeverity.LOW,
+        },
+        references: [],
+      });
+    });
+  });
+
+  describe('update status', () => {
+    it.each([
+      [CaseStatuses.open, CasePersistedStatus.OPEN],
+      [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
+      [CaseStatuses.closed, CasePersistedStatus.CLOSED],
+    ])(
+      'migrates "%s" status keyword value to matching short',
+      (oldStatusValue, expectedStatusValue) => {
+        const doc = {
+          id: '123',
+          type: 'abc',
+          attributes: {
+            status: oldStatusValue,
+          },
+          references: [],
+        } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+        expect(convertStatus(doc)).toEqual({
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            status: expectedStatusValue,
+          },
+          references: [],
+        });
+      }
+    );
+
+    it('default value for status is 0(OPEN) if it does not exist', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {},
+        references: [],
+      } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+      expect(convertStatus(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          status: CasePersistedStatus.OPEN,
+        },
+        references: [],
+      });
+    });
+
+    it('default value for total_alerts is -1', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {
+          title: 'foobar',
+        },
+        references: [],
+      } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+      expect(addTotalAlerts(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          total_alerts: -1,
+        },
+        references: [],
+      });
+    });
+
+    it('default value for total_comments is -1', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {
+          title: 'foobar',
+        },
+        references: [],
+      } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+      expect(addTotalComments(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          total_comments: -1,
+        },
+        references: [],
       });
     });
   });

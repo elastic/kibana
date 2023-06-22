@@ -11,7 +11,7 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
+import type { Immutable, EndpointPendingActions } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
 import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -29,7 +29,6 @@ import {
 
 import type { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
-import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
@@ -46,6 +45,9 @@ export const listError = (state: Immutable<EndpointState>) => state.error;
 
 export const detailsData = (state: Immutable<EndpointState>) =>
   state.endpointDetails.hostDetails.details;
+
+export const fullDetailsHostInfo = (state: Immutable<EndpointState>) =>
+  state.endpointDetails.hostInfo;
 
 export const detailsLoading = (state: Immutable<EndpointState>): boolean =>
   state.endpointDetails.hostDetails.detailsLoading;
@@ -70,15 +72,6 @@ export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.i
 export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
 
 export const policyVersionInfo = (state: Immutable<EndpointState>) => state.policyVersionInfo;
-
-export const areEndpointsEnrolling = (state: Immutable<EndpointState>) => {
-  return state.agentsWithEndpointsTotal > state.endpointsTotal;
-};
-
-export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =>
-  state.agentsWithEndpointsTotalError;
-
-export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
 
 export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
   isLoadedResourceState(info) ? info.data.version : undefined
@@ -275,48 +268,6 @@ export const getEndpointPendingActionsState = (
   return state.endpointPendingActions;
 };
 
-/**
- * Returns a function (callback) that can be used to retrieve the props for the `EndpointHostIsolationStatus`
- * component for a given Endpoint
- */
-export const getEndpointHostIsolationStatusPropsCallback: (
-  state: Immutable<EndpointState>
-) => (endpoint: HostMetadata) => EndpointHostIsolationStatusProps = createSelector(
-  getEndpointPendingActionsState,
-  (pendingActionsState) => {
-    return (endpoint: HostMetadata) => {
-      let pendingIsolate = 0;
-      let pendingUnIsolate = 0;
-      let pendingKillProcess = 0;
-      let pendingSuspendProcess = 0;
-      let pendingRunningProcesses = 0;
-
-      if (isLoadedResourceState(pendingActionsState)) {
-        const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
-
-        if (endpointPendingActions) {
-          pendingIsolate = endpointPendingActions?.isolate ?? 0;
-          pendingUnIsolate = endpointPendingActions?.unisolate ?? 0;
-          pendingKillProcess = endpointPendingActions?.['kill-process'] ?? 0;
-          pendingSuspendProcess = endpointPendingActions?.['suspend-process'] ?? 0;
-          pendingRunningProcesses = endpointPendingActions?.['running-processes'] ?? 0;
-        }
-      }
-
-      return {
-        isIsolated: isEndpointHostIsolated(endpoint),
-        pendingActions: {
-          pendingIsolate,
-          pendingUnIsolate,
-          pendingKillProcess,
-          pendingSuspendProcess,
-          pendingRunningProcesses,
-        },
-      };
-    };
-  }
-);
-
 export const getMetadataTransformStats = (state: Immutable<EndpointState>) =>
   state.metadataTransformStats;
 
@@ -325,3 +276,24 @@ export const metadataTransformStats = (state: Immutable<EndpointState>) =>
 
 export const isMetadataTransformStatsLoading = (state: Immutable<EndpointState>) =>
   isLoadingResourceState(state.metadataTransformStats);
+
+/**
+ * Returns a function (callback) that can be used to retrieve the list of pending actions against
+ * an endpoint currently displayed in the endpoint list
+ */
+export const getEndpointPendingActionsCallback: (
+  state: Immutable<EndpointState>
+) => (endpointId: string) => EndpointPendingActions['pending_actions'] = createSelector(
+  getEndpointPendingActionsState,
+  (pendingActionsState) => {
+    return (endpointId: string) => {
+      let response: EndpointPendingActions['pending_actions'] = {};
+
+      if (isLoadedResourceState(pendingActionsState)) {
+        response = pendingActionsState.data.get(endpointId) ?? {};
+      }
+
+      return response;
+    };
+  }
+);

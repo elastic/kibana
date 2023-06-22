@@ -19,9 +19,17 @@ export const getHunter: () => Omit<Role, 'name'> = () => {
           ...noResponseActionsRole.kibana[0].feature,
           siem: [
             'minimal_all',
-            'actions_log_management_all',
+
+            'policy_management_read',
+
+            'trusted_applications_read',
+            'event_filters_read',
+            'host_isolation_exceptions_read',
+            'blocklist_all',
+
             'host_isolation_all',
             'process_operations_all',
+            'actions_log_management_all',
           ],
         },
       },

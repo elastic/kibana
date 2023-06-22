@@ -5,18 +5,33 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
+  const fieldStatsEntries = [
+    {
+      fieldName: 'g1',
+      type: 'number' as FieldStatsType,
+      isDependentVariableInput: true,
+      isIncludeFieldInput: true,
+    },
+    {
+      fieldName: 'g2',
+      type: 'number' as FieldStatsType,
+      isIncludeFieldInput: true,
+    },
+  ];
+
   describe('regression creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
-      await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -38,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${jobId}`;
         },
+        fieldStatsEntries,
         runtimeFields: {
           uppercase_stab: {
             type: 'keyword',
@@ -69,16 +85,77 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '16mb',
+                  'Version',
+                  '8.9.0',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '400',
+                  'Test docs',
+                  '1600',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: [
+                  'Phase 8/8',
+                  'reindexing',
+                  '100%',
+                  'loading_data',
+                  '100%',
+                  'feature_selection',
+                  '100%',
+                  'coarse_parameter_search',
+                  '100%',
+                  'fine_tuning_parameters',
+                  '100%',
+                  'final_training',
+                  '100%',
+                  'writing_results',
+                  '100%',
+                  'inference',
+                  '100%',
+                ],
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: jobId,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":400,"test_docs_count":1600,"skipped_docs_count":0}',
-                  description:
-                    'Regression job based on ft_egs_regression dataset with runtime fields',
+                  '': '',
+                  timestamp: 'February 28th 2023, 22:20:30',
+                  timing_stats: '{"elapsed_time":0,"iteration_time":0}',
+                  alpha: '0.0001097308602104853',
+                  downsample_factor: '1',
+                  eta: '0.020888927310242174',
+                  eta_growth_rate_per_tree: '1.010444463655121',
+                  feature_bag_fraction: '0.6317118309501533',
+                  gamma: '0.0000023617026632010964',
+                  lambda: '2.668084016785013',
+                  max_attempts_to_add_tree: '0',
+                  max_optimization_rounds_per_hyperparameter: '2',
+                  max_trees: '272',
+                  num_folds: '0',
+                  num_splits_per_feature: '0',
+                  soft_tree_depth_limit: '2',
+                  soft_tree_depth_tolerance: '0.15',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '8/8' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -132,8 +209,20 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.runtimeFieldsEditorContent
           );
 
-          await ml.testExecution.logTestStep('inputs the dependent variable');
+          await ml.testExecution.logTestStep(
+            'opens field stats flyout from dependent variable input'
+          );
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isDependentVariableInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
+              fieldName,
+              fieldType
+            );
+          }
+
+          await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.selectDependentVariable(testData.dependentVariable);
 
           await ml.testExecution.logTestStep('inputs the training percent');
@@ -145,6 +234,16 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('opens field stats flyout from include fields input');
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isIncludeFieldInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatFlyoutContentFromIncludeFieldTrigger(
+              fieldName,
+              fieldType
+            );
+          }
 
           await ml.testExecution.logTestStep(
             'sets the sample size to 10000 for the scatterplot matrix'

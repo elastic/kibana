@@ -51,7 +51,7 @@ yarn kbn bootstrap
 
 Generated plugins receive a handful of scripts that can be used during development. Those scripts are detailed in the [README.md](template/README.md) file in each newly generated plugin, and expose the scripts provided by the [Kibana plugin helpers](../kbn-plugin-helpers), but here is a quick reference in case you need it:
 
-> ***NOTE:*** The following scripts should be run from the generated plugin.
+> ***NOTE:*** The following scripts should be run from the generated plugin root folder.
 
   - `yarn kbn bootstrap`
 
@@ -63,12 +63,16 @@ Generated plugins receive a handful of scripts that can be used during developme
 
     Build a distributable archive of your plugin.
 
+  - `yarn dev --watch`
+
+    Builds and starts the watch mode of your ui browser side plugin so it can be picked up by Kibana in development.
+
 
 To start kibana run the following command from Kibana root.
 
   - `yarn start`
 
-    Start kibana and it will automatically include this plugin. You can pass any arguments that you would normally send to `bin/kibana`
+    Start kibana and, if you had previously run in another terminal `yarn dev --watch` at the root of your plugin, it will automatically include this plugin. You can pass any arguments that you would normally send to `bin/kibana`
 
       ```
       yarn start --elasticsearch.hosts http://localhost:9220

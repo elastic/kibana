@@ -158,6 +158,8 @@ export function registerAnomalyDetectionAlertType({
           recoveredAlert.setContext(executionResult.context);
         }
       }
+
+      return { state: {} };
     },
   });
 }

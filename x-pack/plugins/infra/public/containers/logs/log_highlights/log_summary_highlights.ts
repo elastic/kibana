@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 
+import { LogViewReference } from '../../../../common/log_views';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogSummaryHighlights } from './api/fetch_log_summary_highlights';
 import { LogEntriesSummaryHighlightsResponse } from '../../../../common/http_api';
@@ -15,7 +16,7 @@ import { useBucketSize } from '../log_summary/bucket_size';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const useLogSummaryHighlights = (
-  sourceId: string,
+  logViewReference: LogViewReference,
   sourceVersion: string | undefined,
   startTimestamp: number | null,
   endTimestamp: number | null,
@@ -39,7 +40,7 @@ export const useLogSummaryHighlights = (
 
         return await fetchLogSummaryHighlights(
           {
-            sourceId,
+            logView: logViewReference,
             startTimestamp,
             endTimestamp,
             bucketSize,
@@ -53,7 +54,7 @@ export const useLogSummaryHighlights = (
         setLogSummaryHighlights(response.data);
       },
     },
-    [sourceId, startTimestamp, endTimestamp, bucketSize, filterQuery, highlightTerms]
+    [logViewReference, startTimestamp, endTimestamp, bucketSize, filterQuery, highlightTerms]
   );
 
   const debouncedLoadSummaryHighlights = useMemo(

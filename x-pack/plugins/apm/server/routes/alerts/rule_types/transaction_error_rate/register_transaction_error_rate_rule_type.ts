@@ -5,60 +5,58 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { firstValueFrom } from 'rxjs';
+import {
+  formatDurationFromTimeUnitChar,
+  ProcessorEvent,
+  TimeUnitChar,
+} from '@kbn/observability-plugin/common';
+import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
-import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
-import { termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
-import {
-  ENVIRONMENT_NOT_DEFINED,
-  getEnvironmentEsField,
-  getEnvironmentLabel,
-} from '../../../../../common/environment_filter_values';
-import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
-import {
-  ApmRuleType,
-  RULE_TYPES_CONFIG,
-  APM_SERVER_FEATURE_ID,
-  formatTransactionErrorRateReason,
-} from '../../../../../common/rules/apm_rule_types';
+import { firstValueFrom } from 'rxjs';
+import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
+import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
-import { asDecimalOrInteger } from '../../../../../common/utils/formatters';
+import {
+  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
+  formatTransactionErrorRateReason,
+  RULE_TYPES_CONFIG,
+} from '../../../../../common/rules/apm_rule_types';
+import { transactionErrorRateParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
+import {
+  asDecimalOrInteger,
+  getAlertUrlTransaction,
+} from '../../../../../common/utils/formatters';
+import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
 import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
-import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
-import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
+import {
+  ApmRuleTypeAlertDefinition,
+  RegisterRuleDependencies,
+} from '../../register_apm_rule_types';
 import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-
-const paramsSchema = schema.object({
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  threshold: schema.number(),
-  transactionType: schema.maybe(schema.string()),
-  serviceName: schema.maybe(schema.string()),
-  environment: schema.string(),
-});
+import { getGroupByTerms } from '../utils/get_groupby_terms';
+import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
@@ -67,7 +65,6 @@ export function registerTransactionErrorRateRuleType({
   basePath,
   config$,
   logger,
-  observability,
   ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -81,20 +78,17 @@ export function registerTransactionErrorRateRuleType({
       name: ruleTypeConfig.name,
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-      validate: {
-        params: paramsSchema,
-      },
+      validate: { params: transactionErrorRateParamsSchema },
       actionVariables: {
         context: [
-          ...(observability.getAlertDetailsConfig()?.apm.enabled
-            ? [apmActionVariables.alertDetailsUrl]
-            : []),
           apmActionVariables.environment,
           apmActionVariables.interval,
           apmActionVariables.reason,
           apmActionVariables.serviceName,
+          apmActionVariables.transactionName,
           apmActionVariables.threshold,
           apmActionVariables.transactionType,
+          apmActionVariables.transactionName,
           apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
         ],
@@ -103,10 +97,19 @@ export function registerTransactionErrorRateRuleType({
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ services, spaceId, params: ruleParams }) => {
+        const predefinedGroupby = [
+          SERVICE_NAME,
+          SERVICE_ENVIRONMENT,
+          TRANSACTION_TYPE,
+        ];
+
+        const allGroupbyFields = Array.from(
+          new Set([...predefinedGroupby, ...(ruleParams.groupBy ?? [])])
+        );
+
         const config = await firstValueFrom(config$);
 
-        const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
-          services;
+        const { savedObjectsClient, scopedClusterClient } = services;
 
         const indices = await getApmIndices({
           config,
@@ -156,6 +159,9 @@ export function registerTransactionErrorRateRuleType({
                   ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
                     queryEmptyString: false,
                   }),
+                  ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+                    queryEmptyString: false,
+                  }),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },
@@ -163,14 +169,7 @@ export function registerTransactionErrorRateRuleType({
             aggs: {
               series: {
                 multi_terms: {
-                  terms: [
-                    { field: SERVICE_NAME },
-                    {
-                      field: SERVICE_ENVIRONMENT,
-                      missing: ENVIRONMENT_NOT_DEFINED.value,
-                    },
-                    { field: TRANSACTION_TYPE },
-                  ],
+                  terms: [...getGroupByTerms(allGroupbyFields)],
                   size: 1000,
                   order: { _count: 'desc' as const },
                 },
@@ -193,12 +192,21 @@ export function registerTransactionErrorRateRuleType({
         });
 
         if (!response.aggregations) {
-          return {};
+          return { state: {} };
         }
 
         const results = [];
+
         for (const bucket of response.aggregations.series.buckets) {
-          const [serviceName, environment, transactionType] = bucket.key;
+          const groupByFields = bucket.key.reduce(
+            (obj, bucketKey, bucketIndex) => {
+              obj[allGroupbyFields[bucketIndex]] = bucketKey;
+              return obj;
+            },
+            {} as Record<string, string>
+          );
+
+          const bucketKey = bucket.key;
 
           const failedOutcomeBucket = bucket.outcomes.buckets.find(
             (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
@@ -212,54 +220,32 @@ export function registerTransactionErrorRateRuleType({
 
           if (errorRate >= ruleParams.threshold) {
             results.push({
-              serviceName,
-              environment,
-              transactionType,
               errorRate,
               sourceFields: getServiceGroupFields(failedOutcomeBucket),
+              groupByFields,
+              bucketKey,
             });
           }
         }
 
         results.forEach((result) => {
-          const {
-            serviceName,
-            environment,
-            transactionType,
-            errorRate,
-            sourceFields,
-          } = result;
+          const { errorRate, sourceFields, groupByFields, bucketKey } = result;
 
           const reasonMessage = formatTransactionErrorRateReason({
             threshold: ruleParams.threshold,
             measured: errorRate,
             asPercent,
-            serviceName,
             windowSize: ruleParams.windowSize,
             windowUnit: ruleParams.windowUnit,
+            groupByFields,
           });
 
-          const id = [
-            ApmRuleType.TransactionErrorRate,
-            serviceName,
-            transactionType,
-            environment,
-          ]
-            .filter((name) => name)
-            .join('_');
-
-          const alertUuid = getAlertUuid(id);
-
-          const alertDetailsUrl = getAlertDetailsUrl(
-            basePath,
-            spaceId,
-            alertUuid
-          );
-
           const relativeViewInAppUrl = getAlertUrlTransaction(
-            serviceName,
-            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
-            transactionType
+            groupByFields[SERVICE_NAME],
+            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
+              SERVICE_ENVIRONMENT
+            ],
+            groupByFields[TRANSACTION_TYPE]
           );
 
           const viewInAppUrl = addSpaceIdToPath(
@@ -268,35 +254,39 @@ export function registerTransactionErrorRateRuleType({
             relativeViewInAppUrl
           );
 
+          const groupByActionVariables =
+            getGroupByActionVariables(groupByFields);
+
           services
             .alertWithLifecycle({
-              id,
+              id: bucketKey.join('_'),
               fields: {
-                [SERVICE_NAME]: serviceName,
-                ...getEnvironmentEsField(environment),
-                [TRANSACTION_TYPE]: transactionType,
+                [TRANSACTION_NAME]: ruleParams.transactionName,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_EVALUATION_VALUE]: errorRate,
                 [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
                 [ALERT_REASON]: reasonMessage,
                 ...sourceFields,
+                ...groupByFields,
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-              alertDetailsUrl,
-              environment: getEnvironmentLabel(environment),
-              interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+              interval: formatDurationFromTimeUnitChar(
+                ruleParams.windowSize,
+                ruleParams.windowUnit as TimeUnitChar
+              ),
               reason: reasonMessage,
-              serviceName,
               threshold: ruleParams.threshold,
-              transactionType,
+              transactionName: ruleParams.transactionName,
               triggerValue: asDecimalOrInteger(errorRate),
               viewInAppUrl,
+              ...groupByActionVariables,
             });
         });
 
-        return {};
+        return { state: {} };
       },
+      alerts: ApmRuleTypeAlertDefinition,
     })
   );
 }

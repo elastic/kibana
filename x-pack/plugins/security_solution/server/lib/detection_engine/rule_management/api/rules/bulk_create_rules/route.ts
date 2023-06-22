@@ -121,7 +121,7 @@ export const bulkCreateRulesRoute = (
                 params: payloadRule,
               });
 
-              return transformValidateBulkError(createdRule.params.ruleId, createdRule, null);
+              return transformValidateBulkError(createdRule.params.ruleId, createdRule);
             } catch (err) {
               return transformBulkError(
                 payloadRule.rule_id,

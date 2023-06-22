@@ -17,7 +17,6 @@ import {
   StackMode,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
@@ -47,6 +46,7 @@ type GetSeriesPropsFn = (config: {
   paletteService: PaletteRegistry;
   syncColors?: boolean;
   yAxis?: GroupsConfiguration[number];
+  xAxis?: GroupsConfiguration[number];
   timeZone?: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
@@ -388,6 +388,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   paletteService,
   syncColors,
   yAxis,
+  xAxis,
   timeZone,
   emphasizeFitting,
   fillOpacity,
@@ -451,9 +452,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   );
 
   const emptyX: Record<string, string> = {
-    unifiedX: i18n.translate('expressionXY.xyChart.emptyXLabel', {
-      defaultMessage: '(empty)',
-    }),
+    unifiedX: '',
   };
 
   if (!xColumnId) {
@@ -546,5 +545,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     name(d) {
       return getSeriesNameFn(d);
     },
+    yNice: Boolean(yAxis?.extent?.niceValues),
+    xNice: Boolean(xAxis?.extent?.niceValues),
   };
 };

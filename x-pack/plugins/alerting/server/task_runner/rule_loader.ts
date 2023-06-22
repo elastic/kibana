@@ -6,9 +6,8 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
-import type { Request } from '@hapi/hapi';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { CoreKibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -117,6 +116,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
     rawRule: rawRule.attributes as RawRule,
     references: rawRule.references,
     includeLegacyId: false,
+    omitGeneratedValues: false,
   });
 
   return {
@@ -134,7 +134,7 @@ export function getFakeKibanaRequest(
   spaceId: string,
   apiKey: RawRule['apiKey']
 ) {
-  const requestHeaders: Record<string, string> = {};
+  const requestHeaders: Headers = {};
 
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
@@ -142,20 +142,12 @@ export function getFakeKibanaRequest(
 
   const path = addSpaceIdToPath('/', spaceId);
 
-  const fakeRequest = CoreKibanaRequest.from({
+  const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
     path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
-  } as unknown as Request);
+  };
 
+  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
   context.basePathService.set(fakeRequest, path);
 
   return fakeRequest;

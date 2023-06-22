@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Screen } from '@testing-library/react';
-import { waitFor, within, screen } from '@testing-library/react';
+import { waitFor, within, screen, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
@@ -41,7 +41,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import userEvent from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
 import type { CaseAttachments } from '../../types';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
@@ -51,7 +51,7 @@ jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_configure');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
@@ -64,7 +64,7 @@ jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/user_profiles/api');
 jest.mock('../../common/use_license');
 
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
@@ -84,13 +84,15 @@ const sampleId = 'case-id';
 const defaultPostCase = {
   isLoading: false,
   isError: false,
-  postCase,
+  mutateAsync: postCase,
 };
 
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
   connectors: [],
   withSteps: true,
+  owner: ['securitySolution'],
+  draftStorageKey: 'cases.kibana.createCase.description.markdownEditor',
 };
 
 const defaultPostPushToService = {
@@ -178,6 +180,10 @@ describe('Create case', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
+  });
+
   describe('Step 1 - Case Fields', () => {
     it('renders correctly', async () => {
       mockedContext.render(
@@ -220,7 +226,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({ ...sampleDataWithoutTags, tags: sampleTags });
+      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, tags: sampleTags } });
     });
 
     it('should post a case on submit click with the selected severity', async () => {
@@ -252,8 +258,10 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        severity: CaseSeverity.HIGH,
+        request: {
+          ...sampleDataWithoutTags,
+          severity: CaseSeverity.HIGH,
+        },
       });
     });
 
@@ -276,7 +284,7 @@ describe('Create case', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText('The length of the title is too long. The maximum length is 160.')
+          screen.getByText('The length of the name is too long. The maximum length is 160.')
         ).toBeInTheDocument();
       });
 
@@ -307,8 +315,10 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        settings: { syncAlerts: false },
+        request: {
+          ...sampleDataWithoutTags,
+          settings: { syncAlerts: false },
+        },
       });
     });
 
@@ -337,8 +347,10 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        settings: { syncAlerts: false },
+        request: {
+          ...sampleDataWithoutTags,
+          settings: { syncAlerts: false },
+        },
       });
     });
 
@@ -353,8 +365,9 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
 
       expect(screen.getByTestId('caseSeverity')).toBeTruthy();
-      // there should be 2 low elements. one for the options popover and one for the displayed one.
-      expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(2);
+      // ID removed for options dropdown here:
+      // https://github.com/elastic/eui/pull/6630#discussion_r1123657852
+      expect(screen.getAllByTestId('case-severity-selection-low').length).toBe(1);
 
       await waitForComponentToUpdate();
     });
@@ -391,18 +404,20 @@ describe('Create case', () => {
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        connector: {
-          fields: {
-            impact: null,
-            severity: null,
-            urgency: null,
-            category: null,
-            subcategory: null,
+        request: {
+          ...sampleDataWithoutTags,
+          connector: {
+            fields: {
+              impact: null,
+              severity: null,
+              urgency: null,
+              category: null,
+              subcategory: null,
+            },
+            id: 'servicenow-1',
+            name: 'My SN connector',
+            type: '.servicenow',
           },
-          id: 'servicenow-1',
-          name: 'My Connector',
-          type: '.servicenow',
         },
       });
     });
@@ -442,7 +457,7 @@ describe('Create case', () => {
       });
 
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
-      expect(postCase).toBeCalledWith(sampleDataWithoutTags);
+      expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
     });
   });
 
@@ -494,12 +509,14 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        connector: {
-          id: 'resilient-2',
-          name: 'My Connector 2',
-          type: '.resilient',
-          fields: { incidentTypes: ['21'], severityCode: '4' },
+        request: {
+          ...sampleDataWithoutTags,
+          connector: {
+            id: 'resilient-2',
+            name: 'My Resilient connector',
+            type: '.resilient',
+            fields: { incidentTypes: ['21'], severityCode: '4' },
+          },
         },
       });
 
@@ -507,7 +524,7 @@ describe('Create case', () => {
         caseId: sampleId,
         connector: {
           id: 'resilient-2',
-          name: 'My Connector 2',
+          name: 'My Resilient connector',
           type: '.resilient',
           fields: { incidentTypes: ['21'], severityCode: '4' },
         },
@@ -565,6 +582,7 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
+
     const attachments = [
       {
         alertId: '1234',
@@ -616,6 +634,7 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
+
     const attachments: CaseAttachments = [];
 
     mockedContext.render(
@@ -759,8 +778,10 @@ describe('Create case', () => {
       });
 
       expect(postCase).toBeCalledWith({
-        ...sampleDataWithoutTags,
-        assignees: [{ uid: userProfiles[0].uid }],
+        request: {
+          ...sampleDataWithoutTags,
+          assignees: [{ uid: userProfiles[0].uid }],
+        },
       });
     });
 
@@ -778,6 +799,66 @@ describe('Create case', () => {
       await waitForComponentToUpdate();
 
       expect(screen.queryByTestId('createCaseAssigneesComboBox')).toBeNull();
+    });
+  });
+
+  describe('draft comment', () => {
+    describe('existing storage key', () => {
+      beforeEach(() => {
+        sessionStorage.setItem(defaultCreateCaseForm.draftStorageKey, 'value set in storage');
+      });
+
+      afterEach(() => {
+        sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
+      });
+
+      it('should have session storage value same as draft comment', async () => {
+        mockedContext.render(
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
+            <SubmitCaseButton />
+          </FormContext>
+        );
+
+        await waitForFormToRender(screen);
+        const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+          'euiMarkdownEditorTextArea'
+        );
+
+        jest.useFakeTimers();
+
+        act(() => jest.advanceTimersByTime(1000));
+
+        await waitFor(() => expect(descriptionInput).toHaveValue('value set in storage'));
+
+        jest.useRealTimers();
+      });
+    });
+
+    describe('set storage key', () => {
+      afterEach(() => {
+        sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
+      });
+
+      it('should have session storage value same as draft comment', async () => {
+        mockedContext.render(
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
+            <SubmitCaseButton />
+          </FormContext>
+        );
+
+        await waitForFormToRender(screen);
+        const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+          'euiMarkdownEditorTextArea'
+        );
+
+        await waitFor(() => {
+          expect(descriptionInput).toHaveValue(
+            sessionStorage.getItem(defaultCreateCaseForm.draftStorageKey)
+          );
+        });
+      });
     });
   });
 });

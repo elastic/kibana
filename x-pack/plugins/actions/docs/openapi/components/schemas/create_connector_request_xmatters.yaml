@@ -1,0 +1,25 @@
+title: Create xMatters connector request
+description: >
+  The xMatters connector uses the xMatters Workflow for Elastic to send
+  actionable alerts to on-call xMatters resources.
+type: object
+required:
+  - config
+  - connector_type_id
+  - name
+  - secrets
+properties:
+  config:
+    $ref: 'config_properties_xmatters.yaml'
+  connector_type_id:
+    type: string
+    description: The type of connector.
+    enum:
+      - .xmatters
+    example: .xmatters
+  name:
+    type: string
+    description: The display name for the connector.
+    example: my-connector
+  secrets:
+    $ref: 'secrets_properties_xmatters.yaml' 

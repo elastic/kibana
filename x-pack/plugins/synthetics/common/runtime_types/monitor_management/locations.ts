@@ -11,6 +11,7 @@ import { tEnum } from '../../utils/t_enum';
 
 export enum LocationStatus {
   GA = 'ga',
+  BETA = 'beta',
   EXPERIMENTAL = 'experimental',
 }
 

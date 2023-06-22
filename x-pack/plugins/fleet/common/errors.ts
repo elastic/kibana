@@ -17,3 +17,5 @@ export class FleetError extends Error {
 }
 
 export class PackagePolicyValidationError extends FleetError {}
+
+export class MessageSigningError extends FleetError {}

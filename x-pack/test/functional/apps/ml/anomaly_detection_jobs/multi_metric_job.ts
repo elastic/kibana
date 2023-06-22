@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -71,6 +72,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
+  const fieldStatsEntries = [
+    {
+      fieldName: '@version.keyword',
+      type: 'keyword' as FieldStatsType,
+      expectedValues: ['1'],
+    },
+  ];
+
   describe('multi metric', function () {
     this.tags(['ml']);
     before(async () => {
@@ -129,9 +138,20 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       await ml.testExecution.logTestStep(
-        'job creation inputs the split field and displays split cards'
+        'job creation opens field stats flyout from split field input'
       );
       await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
+      for (const { fieldName, type: fieldType, expectedValues } of fieldStatsEntries) {
+        await ml.jobWizardMultiMetric.assertFieldStatFlyoutContentFromSplitFieldInputTrigger(
+          fieldName,
+          fieldType,
+          expectedValues
+        );
+      }
+
+      await ml.testExecution.logTestStep(
+        'job creation inputs the split field and displays split cards'
+      );
       await ml.jobWizardMultiMetric.selectSplitField(splitField);
 
       await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
@@ -140,8 +160,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
 
-      await ml.testExecution.logTestStep('job creation displays the influencer field');
+      await ml.testExecution.logTestStep(
+        'job creation opens field stats flyout from influencer field input'
+      );
       await ml.jobWizardCommon.assertInfluencerInputExists();
+      for (const { fieldName, type: fieldType, expectedValues } of fieldStatsEntries) {
+        await ml.jobWizardCommon.assertFieldStatFlyoutContentFromInfluencerInputTrigger(
+          fieldName,
+          fieldType,
+          expectedValues
+        );
+      }
+
+      await ml.testExecution.logTestStep('job creation displays the influencer field');
       await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
 
       await ml.testExecution.logTestStep('job creation inputs the bucket span');

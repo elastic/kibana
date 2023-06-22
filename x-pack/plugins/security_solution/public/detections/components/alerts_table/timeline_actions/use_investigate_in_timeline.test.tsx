@@ -8,7 +8,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 import * as actions from '../actions';
 import { coreMock } from '@kbn/core/public/mocks';

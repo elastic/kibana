@@ -7,9 +7,9 @@
 
 import type { PartialTheme } from '@elastic/charts';
 import { useMemo } from 'react';
-import { useCurrentEuiTheme } from './use_color_range';
+import { useCurrentEuiTheme } from '../../../hooks/use_current_eui_theme';
 export const useDataVizChartTheme = (): PartialTheme => {
-  const { euiTheme } = useCurrentEuiTheme();
+  const euiTheme = useCurrentEuiTheme();
   const chartTheme = useMemo<PartialTheme>(() => {
     const AREA_SERIES_COLOR = euiTheme.euiColorVis0;
     return {

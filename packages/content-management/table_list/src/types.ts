@@ -12,3 +12,16 @@ export interface Tag {
   description: string;
   color: string;
 }
+
+export type TableRowAction = 'delete';
+
+export type RowActions = {
+  [action in TableRowAction]?: {
+    enabled: boolean;
+    reason?: string;
+  };
+};
+
+export interface TableItemsRowActions {
+  [id: string]: RowActions | undefined;
+}

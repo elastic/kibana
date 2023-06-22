@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import type { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 import { OverflowField } from '../../../../../../common/components/tables/helpers';
 

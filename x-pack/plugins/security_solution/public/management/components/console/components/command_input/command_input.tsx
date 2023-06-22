@@ -12,6 +12,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@el
 import styled from 'styled-components';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
+import { InputDisplay } from './components/input_display';
+import type { ExecuteCommandPayload, ConsoleDataState } from '../console_state/types';
 import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
 import { EnteredInput } from './lib/entered_input';
 import type { InputCaptureProps } from './components/input_capture';
@@ -48,19 +50,13 @@ const CommandInputContainer = styled.div`
     padding-right: 1ch;
   }
 
-  .cursor {
-    display: inline-block;
-    width: 1px;
-    height: ${({ theme: { eui } }) => eui.euiLineHeight}em;
-    background-color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-  }
-
   &.withPopover {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
   }
 
   &.hasFocus {
+    // Cursor is defined in '<InputDisplay>' component
     .cursor {
       background-color: ${({ theme: { eui } }) => eui.euiTextColor};
       animation: cursor-blink-animation 1s steps(5, start) infinite;
@@ -88,13 +84,17 @@ export interface CommandInputProps extends CommonProps {
 
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
   useInputHints();
-  const dispatch = useConsoleStateDispatch();
-  const { rightOfCursor, textEntered, fullTextEntered } = useWithInputTextEntered();
-  const visibleState = useWithInputVisibleState();
-  const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const dispatch = useConsoleStateDispatch();
+  const { rightOfCursorText, leftOfCursorText, fullTextEntered, enteredCommand, parsedInput } =
+    useWithInputTextEntered();
+  const visibleState = useWithInputVisibleState();
   const isPopoverOpen = !!useWithInputShowPopover();
-  const [commandToExecute, setCommandToExecute] = useState('');
+
+  const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
+  const [commandToExecute, setCommandToExecute] = useState<ExecuteCommandPayload | undefined>(
+    undefined
+  );
   const [popoverWidth, setPopoverWidth] = useState('94vw');
 
   const _focusRef: InputCaptureProps['focusRef'] = useRef(null);
@@ -111,6 +111,10 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
   const disableArrowButton = useMemo(() => fullTextEntered.trim().length === 0, [fullTextEntered]);
 
+  const userInput = useMemo(() => {
+    return new EnteredInput(leftOfCursorText, rightOfCursorText, parsedInput, enteredCommand);
+  }, [enteredCommand, leftOfCursorText, parsedInput, rightOfCursorText]);
+
   const handleOnResize = useCallback<EuiResizeObserverProps['onResize']>(({ width }) => {
     if (width > 0) {
       setPopoverWidth(`${width}px`);
@@ -118,15 +122,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   }, []);
 
   const handleSubmitButton = useCallback<MouseEventHandler>(() => {
-    setCommandToExecute(textEntered + rightOfCursor.text);
-    dispatch({
-      type: 'updateInputTextEnteredState',
-      payload: {
-        textEntered: '',
-        rightOfCursor: undefined,
-      },
+    setCommandToExecute({
+      input: userInput.getFullText(true),
+      enteredCommand,
+      parsedInput,
     });
-  }, [dispatch, textEntered, rightOfCursor.text]);
+  }, [enteredCommand, parsedInput, userInput]);
 
   const handleOnChangeFocus = useCallback<NonNullable<InputCaptureProps['onChangeFocus']>>(
     (hasFocus) => {
@@ -163,8 +164,18 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
-        payload: ({ textEntered: prevLeftOfCursor, rightOfCursor: prevRightOfCursor }) => {
-          let inputText = new EnteredInput(prevLeftOfCursor, prevRightOfCursor.text);
+        payload: ({
+          leftOfCursorText: prevLeftOfCursor,
+          rightOfCursorText: prevRightOfCursor,
+          enteredCommand: prevEnteredCommand,
+          parsedInput: prevParsedInput,
+        }) => {
+          const inputText = new EnteredInput(
+            prevLeftOfCursor,
+            prevRightOfCursor,
+            prevParsedInput,
+            prevEnteredCommand
+          );
 
           inputText.addValue(value ?? '', selection);
 
@@ -181,8 +192,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
             // ENTER  = Execute command and blank out the input area
             case 13:
-              setCommandToExecute(inputText.getFullText());
-              inputText = new EnteredInput('', '');
+              setCommandToExecute({
+                input: inputText.getFullText(true),
+                enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
+                parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
+              });
+              inputText.clear();
               break;
 
             // ARROW LEFT
@@ -207,8 +222,9 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           }
 
           return {
-            textEntered: inputText.getLeftOfCursorText(),
-            rightOfCursor: { text: inputText.getRightOfCursorText() },
+            leftOfCursorText: inputText.getLeftOfCursorText(),
+            rightOfCursorText: inputText.getRightOfCursorText(),
+            argState: inputText.getArgState(),
           };
         },
       });
@@ -219,8 +235,17 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   // Execute the command if one was ENTER'd.
   useEffect(() => {
     if (commandToExecute) {
-      dispatch({ type: 'executeCommand', payload: { input: commandToExecute } });
-      setCommandToExecute('');
+      dispatch({ type: 'executeCommand', payload: commandToExecute });
+      setCommandToExecute(undefined);
+
+      // reset input
+      dispatch({
+        type: 'updateInputTextEnteredState',
+        payload: {
+          leftOfCursorText: '',
+          rightOfCursorText: '',
+        },
+      });
     }
   }, [commandToExecute, dispatch]);
 
@@ -236,7 +261,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               ref={resizeRef}
               data-test-subj={getTestId('cmdInput-container')}
             >
-              <EuiFlexGroup wrap responsive={false} alignItems="center" gutterSize="none">
+              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
                 {prompt && (
                   <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
                     <span className="eui-displayInlineBlock prompt">{prompt}</span>
@@ -248,19 +273,10 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                     onChangeFocus={handleOnChangeFocus}
                     focusRef={focusRef}
                   >
-                    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-                      <EuiFlexItem grow={false}>
-                        <div data-test-subj={getTestId('cmdInput-leftOfCursor')}>{textEntered}</div>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <span className="cursor essentialAnimation" />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>
-                          {rightOfCursor.text}
-                        </div>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <InputDisplay
+                      leftOfCursor={userInput.getLeftOfCursorRenderingContent()}
+                      rightOfCursor={userInput.getRightOfCursorRenderingContent()}
+                    />
                   </InputCapture>
                   <InputPlaceholder />
                 </EuiFlexItem>

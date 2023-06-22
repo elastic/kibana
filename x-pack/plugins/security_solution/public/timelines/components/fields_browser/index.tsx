@@ -63,10 +63,12 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     scopeIdSelector(state, sourcererScope)
   );
   useEffect(() => {
+    const fetchAndSetDataView = async (dataViewId: string) => {
+      const aDatView = await dataViews.get(dataViewId);
+      setDataView(aDatView);
+    };
     if (selectedDataViewId != null && !missingPatterns.length) {
-      dataViews.get(selectedDataViewId).then((dataViewResponse) => {
-        setDataView(dataViewResponse);
-      });
+      fetchAndSetDataView(selectedDataViewId);
     }
   }, [selectedDataViewId, missingPatterns, dataViews]);
 
@@ -170,8 +172,12 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     openDeleteFieldModal,
   });
 
-  return {
-    createFieldButton,
-    getFieldTableColumns,
-  };
+  const memoized = useMemo(
+    () => ({
+      createFieldButton,
+      getFieldTableColumns,
+    }),
+    [createFieldButton, getFieldTableColumns]
+  );
+  return memoized;
 };

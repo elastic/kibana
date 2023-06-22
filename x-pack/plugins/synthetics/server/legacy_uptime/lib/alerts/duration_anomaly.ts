@@ -13,30 +13,30 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
-import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
+import { getSeverityType, type MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
+import { UptimeEsClient } from '../lib';
 import {
   updateState,
   generateAlertMessage,
   getViewInAppUrl,
   setRecoveredAlertsContext,
+  UptimeRuleTypeAlertDefinition,
 } from './common';
-import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../../common/lib';
 
-import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/translations';
+import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/rules/legacy_uptime/translations';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 
-import { createUptimeESClient } from '../lib';
 import { ALERT_REASON_MSG, ACTION_VARIABLES, VIEW_IN_APP_URL } from './action_variables';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
-export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Ping) => {
+export const getAnomalySummary = (anomaly: MlAnomaliesTableRecord, monitorInfo: Ping) => {
   return {
     severity: getSeverityType(anomaly.severity),
     severityScore: Math.round(anomaly.severity),
@@ -125,10 +125,10 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
     state,
     startedAt,
   }) {
-    const uptimeEsClient = createUptimeESClient({
-      esClient: scopedClusterClient.asCurrentUser,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-    });
+      scopedClusterClient.asCurrentUser
+    );
     const { basePath } = server;
 
     const { anomalies } =
@@ -187,6 +187,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
 
     setRecoveredAlertsContext({ alertFactory });
 
-    return updateState(state, foundAnomalies);
+    return { state: updateState(state, foundAnomalies) };
   },
+  alerts: UptimeRuleTypeAlertDefinition,
 });

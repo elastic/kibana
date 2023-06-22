@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -11,6 +9,14 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-application-browser-internal",
+    "@kbn/core-injected-metadata-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

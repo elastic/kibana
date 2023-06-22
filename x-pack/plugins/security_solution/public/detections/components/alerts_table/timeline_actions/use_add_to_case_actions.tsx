@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
 import {
   AlertsCasesTourSteps,
@@ -18,7 +19,6 @@ import {
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { Ecs } from '../../../../../common/ecs';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 
 export interface UseAddToCaseActions {
@@ -29,6 +29,7 @@ export interface UseAddToCaseActions {
   onSuccess?: () => Promise<void>;
   isActiveTimelines: boolean;
   isInDetections: boolean;
+  refetch: (() => void) | undefined;
 }
 
 export const useAddToCaseActions = ({
@@ -39,6 +40,7 @@ export const useAddToCaseActions = ({
   onSuccess,
   isActiveTimelines,
   isInDetections,
+  refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
@@ -62,6 +64,16 @@ export const useAddToCaseActions = ({
 
   const { activeStep, incrementStep, setStep, isTourShown } = useTourContext();
 
+  const onCaseSuccess = () => {
+    if (onSuccess) {
+      onSuccess();
+    }
+
+    if (refetch) {
+      refetch();
+    }
+  };
+
   const afterCaseCreated = useCallback(async () => {
     if (isTourShown(SecurityStepId.alertsCases)) {
       setStep(SecurityStepId.alertsCases, AlertsCasesTourSteps.viewCase);
@@ -79,16 +91,16 @@ export const useAddToCaseActions = ({
     [activeStep, isTourShown]
   );
 
-  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
+  const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout({
     onClose: onMenuItemClick,
-    onSuccess,
+    onSuccess: onCaseSuccess,
     afterCaseCreated,
     ...prefillCasesValue,
   });
 
-  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
+  const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal({
     onClose: onMenuItemClick,
-    onRowClick: onSuccess,
+    onSuccess: onCaseSuccess,
   });
 
   const handleAddToNewCaseClick = useCallback(() => {
@@ -115,7 +127,7 @@ export const useAddToCaseActions = ({
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    selectCaseModal.open({ attachments: caseAttachments });
+    selectCaseModal.open({ getAttachments: () => caseAttachments });
   }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems = useMemo(() => {

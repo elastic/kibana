@@ -15,7 +15,7 @@ import { ChartData } from '../../../../common/types/field_histograms';
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { ColumnChart } from './column_chart';
-import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED, INIT_MAX_COLUMNS } from './common';
+import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD, INIT_MAX_COLUMNS } from './common';
 import {
   ChartsVisible,
   ColumnId,
@@ -24,9 +24,14 @@ import {
   OnChangeItemsPerPage,
   OnChangePage,
   OnSort,
-  RowCountRelation,
+  RowCountInfo,
   UseDataGridReturnType,
 } from './types';
+
+const rowCountDefault: RowCountInfo = {
+  rowCount: 0,
+  rowCountRelation: undefined,
+};
 
 export const useDataGrid = (
   columns: EuiDataGridColumn[],
@@ -40,13 +45,14 @@ export const useDataGrid = (
   const [noDataMessage, setNoDataMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
-  const [rowCount, setRowCount] = useState(0);
-  const [rowCountRelation, setRowCountRelation] = useState<RowCountRelation>(undefined);
+  const [rowCountInfo, setRowCountInfo] = useState<RowCountInfo>(rowCountDefault);
   const [columnCharts, setColumnCharts] = useState<ChartData[]>([]);
   const [tableItems, setTableItems] = useState<DataGridItem[]>([]);
   const [pagination, setPagination] = useState(defaultPagination);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const [chartsVisible, setChartsVisible] = useState<ChartsVisible>(undefined);
+
+  const { rowCount, rowCountRelation } = rowCountInfo;
 
   const toggleChartVisibility = () => {
     if (chartsVisible !== undefined) {
@@ -148,7 +154,7 @@ export const useDataGrid = (
   useEffect(() => {
     if (chartsVisible === undefined && rowCount > 0 && rowCountRelation !== undefined) {
       setChartsVisible(
-        rowCount <= COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED &&
+        rowCount <= COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD &&
           rowCountRelation !== ES_CLIENT_TOTAL_HITS_RELATION.GTE
       );
     }
@@ -174,8 +180,7 @@ export const useDataGrid = (
     setErrorMessage,
     setNoDataMessage,
     setPagination,
-    setRowCount,
-    setRowCountRelation,
+    setRowCountInfo,
     setSortingColumns,
     setStatus,
     setTableItems,

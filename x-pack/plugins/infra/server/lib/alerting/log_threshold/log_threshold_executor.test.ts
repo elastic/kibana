@@ -6,8 +6,8 @@
  */
 
 import {
-  getPositiveComparators,
-  getNegativeComparators,
+  positiveComparators,
+  negativeComparators,
   queryMappings,
   buildFiltersFromCriteria,
   getUngroupedESQuery,
@@ -125,7 +125,11 @@ const expectedNegativeFilterClauses = [
   },
 ];
 
-const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit'> = {
+const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit' | 'logView'> = {
+  logView: {
+    logViewId: 'Default',
+    type: 'log-view-reference',
+  },
   count: {
     comparator: Comparator.GT,
     value: 5,
@@ -136,7 +140,9 @@ const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit'> = {
 
 const TIMESTAMP_FIELD = '@timestamp';
 const FILEBEAT_INDEX = 'filebeat-*';
-const EXECUTION_TIMESTAMP = new Date('2022-01-01T00:00:00.000Z').valueOf();
+const EXECUTION_TIMERANGE = {
+  lte: new Date('2022-01-01T00:00:00.000Z').valueOf(),
+};
 
 const runtimeMappings: estypes.MappingRuntimeFields = {
   runtime_field: {
@@ -151,15 +157,15 @@ const runtimeMappings: estypes.MappingRuntimeFields = {
 describe('Log threshold executor', () => {
   describe('Comparators', () => {
     test('Correctly categorises positive comparators', () => {
-      expect(getPositiveComparators().length).toBe(7);
+      expect(positiveComparators.length).toBe(7);
     });
 
     test('Correctly categorises negative comparators', () => {
-      expect(getNegativeComparators().length).toBe(3);
+      expect(negativeComparators.length).toBe(3);
     });
 
     test('There is a query mapping for every comparator', () => {
-      const comparators = [...getPositiveComparators(), ...getNegativeComparators()];
+      const comparators = [...positiveComparators, ...negativeComparators];
       expect(Object.keys(queryMappings).length).toBe(comparators.length);
     });
   });
@@ -169,7 +175,7 @@ describe('Log threshold executor', () => {
         ...baseRuleParams,
         criteria: positiveCriteria,
       };
-      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMESTAMP);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMERANGE);
       expect(filters.mustFilters).toEqual(expectedPositiveFilterClauses);
     });
 
@@ -178,14 +184,14 @@ describe('Log threshold executor', () => {
         ...baseRuleParams,
         criteria: negativeCriteria,
       };
-      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMESTAMP);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMERANGE);
 
       expect(filters.mustNotFilters).toEqual(expectedNegativeFilterClauses);
     });
 
     test('Handles time range', () => {
       const ruleParams: RuleParams = { ...baseRuleParams, criteria: [] };
-      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMESTAMP);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMERANGE);
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].gte).toBe('number');
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].lte).toBe('number');
       expect(filters.rangeFilter.range[TIMESTAMP_FIELD].format).toBe('epoch_millis');
@@ -208,7 +214,7 @@ describe('Log threshold executor', () => {
           TIMESTAMP_FIELD,
           FILEBEAT_INDEX,
           runtimeMappings,
-          EXECUTION_TIMESTAMP
+          EXECUTION_TIMERANGE
         );
         expect(query).toEqual({
           index: 'filebeat-*',
@@ -216,6 +222,7 @@ describe('Log threshold executor', () => {
           ignore_unavailable: true,
           body: {
             track_total_hits: true,
+            aggregations: {},
             query: {
               bool: {
                 filter: [
@@ -259,7 +266,7 @@ describe('Log threshold executor', () => {
             TIMESTAMP_FIELD,
             FILEBEAT_INDEX,
             runtimeMappings,
-            EXECUTION_TIMESTAMP
+            EXECUTION_TIMERANGE
           );
 
           expect(query).toEqual({
@@ -286,6 +293,15 @@ describe('Log threshold executor', () => {
               },
               aggregations: {
                 groups: {
+                  aggregations: {
+                    additionalContext: {
+                      top_hits: {
+                        _source: false,
+                        fields: ['host.*'],
+                        size: 1,
+                      },
+                    },
+                  },
                   composite: {
                     size: 2000,
                     sources: [
@@ -330,7 +346,7 @@ describe('Log threshold executor', () => {
             TIMESTAMP_FIELD,
             FILEBEAT_INDEX,
             runtimeMappings,
-            EXECUTION_TIMESTAMP
+            EXECUTION_TIMERANGE
           );
 
           expect(query).toEqual({
@@ -384,6 +400,15 @@ describe('Log threshold executor', () => {
                             ...expectedPositiveFilterClauses,
                           ],
                           must_not: [...expectedNegativeFilterClauses],
+                        },
+                      },
+                      aggregations: {
+                        additionalContext: {
+                          top_hits: {
+                            _source: false,
+                            fields: ['host.*'],
+                            size: 1,
+                          },
                         },
                       },
                     },
@@ -544,6 +569,17 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 10,
+              additionalContext: {
+                hits: {
+                  hits: [
+                    {
+                      fields: {
+                        'host.name': ['i-am-a-host-name-1'],
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -554,6 +590,17 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 2,
+              additionalContext: {
+                hits: {
+                  hits: [
+                    {
+                      fields: {
+                        'host.name': ['i-am-a-host-name-2'],
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -564,6 +611,17 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 20,
+              additionalContext: {
+                hits: {
+                  hits: [
+                    {
+                      fields: {
+                        'host.name': ['i-am-a-host-name-3'],
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
@@ -590,6 +648,9 @@ describe('Log threshold executor', () => {
               isRatio: false,
               reason:
                 '10 log entries in the last 5 mins for i-am-a-host-name-1, i-am-a-dataset-1. Alert when > 5.',
+              host: {
+                name: 'i-am-a-host-name-1',
+              },
             },
           },
         ]);
@@ -613,6 +674,9 @@ describe('Log threshold executor', () => {
               isRatio: false,
               reason:
                 '20 log entries in the last 5 mins for i-am-a-host-name-3, i-am-a-dataset-3. Alert when > 5.',
+              host: {
+                name: 'i-am-a-host-name-3',
+              },
             },
           },
         ]);
@@ -640,6 +704,17 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 10,
+              additionalContext: {
+                hits: {
+                  hits: [
+                    {
+                      fields: {
+                        'host.name': ['i-am-a-host-name-1'],
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -650,6 +725,17 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 2,
+              additionalContext: {
+                hits: {
+                  hits: [
+                    {
+                      fields: {
+                        'host.name': ['i-am-a-host-name-2'],
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -660,6 +746,17 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 20,
+              additionalContext: {
+                hits: {
+                  hits: [
+                    {
+                      fields: {
+                        'host.name': ['i-am-a-host-name-3'],
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
@@ -692,6 +789,17 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 10,
+              additionalContext: {
+                hits: {
+                  hits: [
+                    {
+                      fields: {
+                        'host.name': ['i-am-a-host-name-1'],
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -702,6 +810,17 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 2,
+              additionalContext: {
+                hits: {
+                  hits: [
+                    {
+                      fields: {
+                        'host.name': ['i-am-a-host-name-2'],
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -712,6 +831,17 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 20,
+              additionalContext: {
+                hits: {
+                  hits: [
+                    {
+                      fields: {
+                        'host.name': ['i-am-a-host-name-3'],
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];

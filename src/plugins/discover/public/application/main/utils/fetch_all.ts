@@ -10,6 +10,7 @@ import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
+import { DiscoverAppState } from '../services/discover_app_state_container';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   checkHitCount,
@@ -21,15 +22,14 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
 import { fetchDocuments } from './fetch_documents';
-import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
-import { DataMsg, RecordRawType, SavedSearchData } from '../hooks/use_saved_search';
+import { DataMsg, RecordRawType, SavedSearchData } from '../services/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
 
 export interface FetchDeps {
   abortController: AbortController;
-  appStateContainer: ReduxLikeStateContainer<AppState>;
+  appStateContainer: ReduxLikeStateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
@@ -52,7 +52,14 @@ export function fetchAll(
   reset = false,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
+  const {
+    initialFetchStatus,
+    appStateContainer,
+    services,
+    useNewFieldsApi,
+    data,
+    inspectorAdapters,
+  } = fetchDeps;
 
   try {
     const dataView = searchSource.getField('index')!;
@@ -79,37 +86,38 @@ export function fetchAll(
     sendLoadingMsg(dataSubjects.totalHits$, { recordRawType });
 
     // Start fetching all required requests
-    const documents =
+    const response =
       useSql && query
-        ? fetchSql(query, services.dataViews, data, services.expressions)
+        ? fetchSql(query, dataView, data, services.expressions, inspectorAdapters)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
-    documents
-      .then((docs) => {
+    response
+      .then(({ records, textBasedQueryColumns }) => {
         // If the total hits (or chart) query is still loading, emit a partial
         // hit count that's at least our retrieved document count
         if (dataSubjects.totalHits$.getValue().fetchStatus === FetchStatus.LOADING) {
           dataSubjects.totalHits$.next({
             fetchStatus: FetchStatus.PARTIAL,
-            result: docs.length,
+            result: records.length,
             recordRawType,
           });
         }
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,
-          result: docs,
+          result: records,
+          textBasedQueryColumns,
           recordRawType,
           query,
         });
 
-        checkHitCount(dataSubjects.main$, docs.length);
+        checkHitCount(dataSubjects.main$, records.length);
       })
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out
       // but their errors will be shown in-place (e.g. of the chart).
-      .catch(sendErrorTo(data, dataSubjects.documents$, dataSubjects.main$));
+      .catch(sendErrorTo(dataSubjects.documents$, dataSubjects.main$));
 
     // Return a promise that will resolve once all the requests have finished or failed
     return firstValueFrom(

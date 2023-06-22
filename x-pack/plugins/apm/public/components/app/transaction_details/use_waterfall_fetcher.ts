@@ -16,6 +16,8 @@ const INITIAL_DATA: APIReturnType<'GET /internal/apm/traces/{traceId}'> = {
     traceDocs: [],
     exceedsMax: false,
     spanLinksCountById: {},
+    traceItemCount: 0,
+    maxTraceItems: 0,
   },
   entryTransaction: undefined,
 };

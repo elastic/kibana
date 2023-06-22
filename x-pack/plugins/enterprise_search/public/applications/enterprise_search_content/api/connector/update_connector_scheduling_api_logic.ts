@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { ConnectorScheduling } from '../../../../../common/types/connectors';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -28,5 +30,12 @@ export const updateConnectorScheduling = async ({
 
 export const UpdateConnectorSchedulingApiLogic = createApiLogic(
   ['content', 'update_connector_scheduling_api_logic'],
-  updateConnectorScheduling
+  updateConnectorScheduling,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate(
+        'xpack.enterpriseSearch.content.indices.configurationConnector.scheduling.successToast.title',
+        { defaultMessage: 'Scheduling successfully updated' }
+      ),
+  }
 );

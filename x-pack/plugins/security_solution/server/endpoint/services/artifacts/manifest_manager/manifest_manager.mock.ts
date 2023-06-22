@@ -36,7 +36,7 @@ type FindExceptionListItemOptions = Parameters<ExceptionListClient['findExceptio
 
 const FILTER_PROPERTY_PREFIX = 'exception-list-agnostic\\.attributes';
 const FILTER_REGEXP = new RegExp(
-  `^${FILTER_PROPERTY_PREFIX}\.os_types:"([^"]+)"( and \\(${FILTER_PROPERTY_PREFIX}\.tags:"policy:all"( or ${FILTER_PROPERTY_PREFIX}\.tags:"policy:([^"]+)")?\\))?$`
+  `^${FILTER_PROPERTY_PREFIX}\\.os_types:"([^"]+)"( and \\(${FILTER_PROPERTY_PREFIX}\\.tags:"policy:all"( or ${FILTER_PROPERTY_PREFIX}\\.tags:"policy:([^"]+)")?\\))?$`
 );
 
 export const mockFindExceptionListItemResponses = (

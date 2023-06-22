@@ -41,7 +41,7 @@ describe('DeleteConfirmModal', () => {
     onCancel = jest.fn();
   });
 
-  it('displays a loader if `isDeleting` is true', () => {
+  it('displays a EuiLoadingElastic spinner if `isDeleting` is true', () => {
     const wrapper = mountWithIntl(
       <DeleteConfirmModal
         isDeleting={true}
@@ -53,6 +53,21 @@ describe('DeleteConfirmModal', () => {
     );
     expect(wrapper.find('EuiLoadingElastic')).toHaveLength(1);
     expect(wrapper.find('EuiModal')).toHaveLength(0);
+  });
+
+  it('displays a EuiLoadingSpinner if `isDeleting` is true and `showPlainSpinner` is true', () => {
+    const wrapper = mountWithIntl(
+      <DeleteConfirmModal
+        isDeleting={true}
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+        selectedObjects={[]}
+        allowedTypes={allowedTypes}
+        showPlainSpinner={true}
+      />
+    );
+    expect(wrapper.find('EuiLoadingElastic')).toHaveLength(0);
+    expect(wrapper.find('EuiLoadingSpinner')).toHaveLength(1);
   });
 
   it('lists the objects to delete', () => {

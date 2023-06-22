@@ -29,8 +29,6 @@ export default class RowParser {
       return MODE.BETWEEN_REQUESTS;
     }
     const mode = this.editor.getLineState(lineNumber);
-    const pos = this.editor.getCurrentPosition();
-    const token = this.editor.getTokenAt(pos);
 
     if (!mode) {
       return MODE.BETWEEN_REQUESTS;
@@ -59,9 +57,8 @@ export default class RowParser {
       return MODE.BETWEEN_REQUESTS;
     } // empty line or a comment waiting for a new req to start
 
-    // If the line ends with a closing curly brace, it's the end of a request,
-    // and we should also check if the current token is not an url token
-    if (line.indexOf('}', line.length - 1) >= 0 && token?.type !== 'url.part') {
+    // Check for multi doc requests
+    if (line.endsWith('}') && !this.isRequestLine(line)) {
       // check for a multi doc request must start a new json doc immediately after this one end.
       lineNumber++;
       if (lineNumber < linesCount + 1) {
@@ -166,5 +163,10 @@ export default class RowParser {
         token.type === 'comment.line' ||
         token.type === 'comment.block')
     );
+  }
+
+  isRequestLine(line: string) {
+    const methods = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'];
+    return methods.some((m) => line.startsWith(m));
   }
 }

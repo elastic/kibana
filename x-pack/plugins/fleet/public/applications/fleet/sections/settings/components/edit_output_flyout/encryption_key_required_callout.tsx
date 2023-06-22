@@ -15,7 +15,7 @@ export const EncryptionKeyRequiredCallout: React.FunctionComponent = () => {
   const { docLinks } = useStartServices();
   return (
     <EuiCallOut
-      iconType="alert"
+      iconType="warning"
       color="warning"
       title={
         <FormattedMessage

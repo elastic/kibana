@@ -61,7 +61,7 @@ export const NotFoundErrors = ({ type, docLinks }: NotFoundErrors) => {
           defaultMessage="There is a problem with this saved object"
         />
       }
-      iconType="alert"
+      iconType="warning"
       color="danger"
     >
       <div>{getMessage()}</div>

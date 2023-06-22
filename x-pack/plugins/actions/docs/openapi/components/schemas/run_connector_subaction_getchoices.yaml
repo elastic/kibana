@@ -1,0 +1,23 @@
+title: The getChoices subaction
+type: object
+required:
+  - subAction
+  - subActionParams
+description: The `getChoices` subaction for ServiceNow ITOM, ServiceNow ITSM, and ServiceNow SecOps connectors.
+properties:
+  subAction:
+    type: string
+    description: The action to test.
+    enum:
+      - getChoices
+  subActionParams:
+    type: object
+    description: The set of configuration properties for the action.
+    required:
+      - fields
+    properties:
+      fields:
+        type: array
+        description: An array of fields.
+        items:
+          type: string

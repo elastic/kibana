@@ -22,6 +22,7 @@ export function MLManageJobsLink({ children, external, jobId }: Props) {
 
   return (
     <EuiLink
+      data-test-subj="apmMLManageJobsLinkLink"
       children={children}
       href={mlADLink}
       external={external}

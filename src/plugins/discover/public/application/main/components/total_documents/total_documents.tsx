@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 
 export const TotalDocuments = ({ totalHitCount }: { totalHitCount: number }) => {
@@ -22,7 +22,11 @@ export const TotalDocuments = ({ totalHitCount }: { totalHitCount: number }) => 
         id="discover.docTable.totalDocuments"
         defaultMessage="{totalDocuments} documents"
         values={{
-          totalDocuments: <strong>{totalHitCount}</strong>,
+          totalDocuments: (
+            <strong>
+              <FormattedNumber value={totalHitCount} />
+            </strong>
+          ),
         }}
       />
     </EuiText>

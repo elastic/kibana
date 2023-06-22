@@ -5,14 +5,12 @@
  * 2.0.
  */
 
+import { v1 as uuidv1 } from 'uuid';
+
 import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import {
-  CaseResponse,
-  CaseSeverity,
-  CaseStatuses,
-  CommentType,
-} from '@kbn/cases-plugin/common/api';
+import { Case, CaseSeverity, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -28,7 +26,7 @@ import {
   createCase,
   updateCase,
   createComment,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   obsOnly,
   secOnly,
@@ -238,9 +236,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns the correct fields', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        // all fields that contain the UserRT definition must be included here (aka created_by, closed_by, and updated_by)
+        // all fields that contain the UserRt definition must be included here (aka created_by, closed_by, and updated_by)
         // see https://github.com/elastic/kibana/issues/139503
-        const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
+        const queryFields: Array<keyof Case | Array<keyof Case>> = [
           ['title', 'created_by', 'closed_by', 'updated_by'],
           ['title', 'description', 'created_by', 'closed_by', 'updated_by'],
         ];
@@ -267,6 +265,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 external_service: postedCase.external_service,
                 owner: postedCase.owner,
                 connector: postedCase.connector,
+                severity: postedCase.severity,
+                status: postedCase.status,
                 comments: [],
                 totalAlerts: 0,
                 totalComment: 0,
@@ -310,9 +310,41 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
+      it('sorts by severity', async () => {
+        const case4 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.CRITICAL,
+        });
+        const case3 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.HIGH,
+        });
+        const case2 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.MEDIUM,
+        });
+        const case1 = await createCase(supertest, { ...postCaseReq, severity: CaseSeverity.LOW });
+
+        const cases = await findCases({
+          supertest,
+          query: { sortField: 'severity', sortOrder: 'asc' },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 4,
+          cases: [case1, case2, case3, case4],
+          count_open_cases: 4,
+        });
+      });
+
       describe('search and searchField', () => {
         beforeEach(async () => {
           await createCase(supertest, postCaseReq);
+        });
+
+        afterEach(async () => {
+          await deleteAllCaseItems(es);
         });
 
         it('should successfully find a case when using valid searchFields', async () => {
@@ -331,6 +363,44 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           expect(cases.total).to.be(1);
+        });
+
+        it('should successfully find a case when using a valid uuid', async () => {
+          const caseWithId = await createCase(supertest, postCaseReq);
+
+          const cases = await findCases({
+            supertest,
+            query: { searchFields: ['title', 'description'], search: caseWithId.id },
+          });
+
+          expect(cases.total).to.be(1);
+          expect(cases.cases[0].id).to.equal(caseWithId.id);
+        });
+
+        it('should successfully find a case with a valid uuid in title', async () => {
+          const uuid = uuidv1();
+          await createCase(supertest, { ...postCaseReq, title: uuid });
+
+          const cases = await findCases({
+            supertest,
+            query: { searchFields: ['title', 'description'], search: uuid },
+          });
+
+          expect(cases.total).to.be(1);
+          expect(cases.cases[0].title).to.equal(uuid);
+        });
+
+        it('should successfully find a case with a valid uuid in title', async () => {
+          const uuid = uuidv1();
+          await createCase(supertest, { ...postCaseReq, description: uuid });
+
+          const cases = await findCases({
+            supertest,
+            query: { searchFields: ['title', 'description'], search: uuid },
+          });
+
+          expect(cases.total).to.be(1);
+          expect(cases.cases[0].description).to.equal(uuid);
         });
 
         it('should not find any cases when it does not use a wildcard and the string does not match', async () => {
@@ -426,7 +496,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllCaseItems(es);
       });
 
-      const createCasesWithTitleAsNumber = async (total: number): Promise<CaseResponse[]> => {
+      const createCasesWithTitleAsNumber = async (total: number): Promise<Case[]> => {
         const responsePromises = [];
         for (let i = 0; i < total; i++) {
           // this doesn't guarantee that the cases will be created in order that the for-loop executes,
@@ -449,7 +519,7 @@ export default ({ getService }: FtrProviderContext): void => {
        */
       const getAllCasesSortedByCreatedAtAsc = async () => {
         const cases = await es.search<CaseAttributes>({
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           body: {
             size: 10000,
             sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],

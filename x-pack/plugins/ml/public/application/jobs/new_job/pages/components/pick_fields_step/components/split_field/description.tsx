@@ -20,11 +20,11 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.splitField.description"
-          defaultMessage="Select a field to split analysis by. Each value of this field will be modeled independently."
+          defaultMessage="A field to split analysis by. Each value of this field will be modeled independently."
         />
       }
     >
-      <EuiFormRow label={title}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

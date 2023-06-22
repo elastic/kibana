@@ -1,0 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+
+import type { Inspect, Maybe, TimerangeInput } from '../../../common';
+import type { UserItem } from '../common';
+import type { RequestBasicOptions } from '../..';
+
+export interface ObservedUserDetailsStrategyResponse extends IEsSearchResponse {
+  userDetails: UserItem;
+  inspect?: Maybe<Inspect>;
+}
+
+export interface ObservedUserDetailsRequestOptions extends Partial<RequestBasicOptions> {
+  userName: string;
+  skip?: boolean;
+  timerange: TimerangeInput;
+  inspect?: Maybe<Inspect>;
+}

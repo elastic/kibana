@@ -18,15 +18,16 @@ import {
   REASON_ID_TYPES,
   validateAbsoluteTimeShift,
 } from '@kbn/data-plugin/common';
+import { nonNullable } from '../../../../../utils';
 import { DateRange } from '../../../../../../common/types';
 import {
   findMathNodes,
   findVariables,
   getOperationParams,
+  getTypeI18n,
   getValueOrName,
   groupArgsByType,
   isMathNode,
-  nonNullable,
   tinymathFunctions,
 } from './util';
 
@@ -116,10 +117,14 @@ type ErrorTypes = keyof ValidationErrors;
 type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
 export interface ErrorWrapper {
+  type?: ErrorTypes; // TODO - make this required?
   message: string;
   locations: TinymathLocation[];
   severity?: 'error' | 'warning';
+  extraInfo?: { missingFields: string[] };
 }
+
+const DEFAULT_RETURN_TYPE = getTypeI18n('number');
 
 function getNodeLocation(node: TinymathFunction): TinymathLocation[] {
   return [node.location].filter(nonNullable);
@@ -127,15 +132,15 @@ function getNodeLocation(node: TinymathFunction): TinymathLocation[] {
 
 function getArgumentType(arg: TinymathAST, operations: Record<string, GenericOperationDefinition>) {
   if (!isObject(arg)) {
-    return typeof arg;
+    return getTypeI18n(typeof arg);
   }
   if (arg.type === 'function') {
     if (tinymathFunctions[arg.name]) {
-      return tinymathFunctions[arg.name].outputType ?? 'number';
+      return tinymathFunctions[arg.name].outputType ?? DEFAULT_RETURN_TYPE;
     }
     // Assume it's a number for now
     if (operations[arg.name]) {
-      return 'number';
+      return DEFAULT_RETURN_TYPE;
     }
   }
   // leave for now other argument types
@@ -405,7 +410,7 @@ function getMessageFromId<K extends ErrorTypes>({
       break;
   }
 
-  return { message, locations };
+  return { type: messageId, message, locations };
 }
 
 export function tryToParse(
@@ -498,16 +503,17 @@ function checkMissingVariableOrFunctions(
 
   // need to check the arguments here: check only strings for now
   if (missingVariables.length) {
-    missingErrors.push(
-      getMessageFromId({
+    missingErrors.push({
+      ...getMessageFromId({
         messageId: 'missingField',
         values: {
           variablesLength: missingVariables.length,
           variablesList: missingVariables.map(({ value }) => value).join(', '),
         },
         locations: missingVariables.map(({ location }) => location),
-      })
-    );
+      }),
+      extraInfo: { missingFields: [...new Set(missingVariables.map(({ value }) => value))] },
+    });
   }
   const invalidVariableErrors = checkVariableEdgeCases(
     ast,
@@ -708,7 +714,6 @@ function validateNameArguments(
   return errors;
 }
 
-const DEFAULT_RETURN_TYPE = 'number';
 function checkTopNodeReturnType(ast: TinymathAST): ErrorWrapper[] {
   if (
     isObject(ast) &&
@@ -1175,7 +1180,7 @@ export function validateMathNodes(
           values: {
             operation: node.name,
             name: positionalArguments[wrongTypeArgumentIndex].name,
-            type: getArgumentType(arg, operations) || 'number',
+            type: getArgumentType(arg, operations) || DEFAULT_RETURN_TYPE,
             expectedType: positionalArguments[wrongTypeArgumentIndex].type || '',
           },
           locations: getNodeLocation(node),

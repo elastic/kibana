@@ -15,20 +15,32 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   registerFindRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
+const testTypes = [
+  { name: 'index-pattern', hide: false },
+  { name: 'visualization', hide: false },
+  { name: 'dashboard', hide: false },
+  { name: 'foo', hide: false },
+  { name: 'bar', hide: false },
+  { name: 'hidden-type', hide: true },
+  { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
+];
 describe('GET /api/saved_objects/_find', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
+  let loggerWarnSpy: jest.SpyInstance;
 
   const clientResponse = {
     total: 0,
@@ -39,6 +51,13 @@ describe('GET /api/saved_objects/_find', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
+
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
+      return testTypes
+        .map((typeDesc) => createHiddenTypeVariants(typeDesc))
+        .find((fullTest) => fullTest.name === typename);
+    });
+
     savedObjectsClient = handlerContext.savedObjects.client;
 
     savedObjectsClient.find.mockResolvedValue(clientResponse);
@@ -48,7 +67,13 @@ describe('GET /api/saved_objects/_find', () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsFind.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerFindRoute(router, { coreUsageData });
+
+    const logger = loggerMock.create();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+
+    const config = setupConfig();
+
+    registerFindRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });
@@ -65,6 +90,33 @@ describe('GET /api/saved_objects/_find', () => {
     expect(result.body.message).toContain(
       '[request query.type]: expected at least one defined value'
     );
+  });
+
+  it('returns with status 400 when type is hidden from the HTTP APIs', async () => {
+    const findResponse = {
+      error: 'Bad Request',
+      message: 'Unsupported saved object type(s): hidden-from-http: Bad Request',
+      statusCode: 400,
+    };
+    const result = await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=hidden-from-http')
+      .expect(400);
+
+    expect(result.body).toEqual(findResponse);
+  });
+
+  it('returns with status 200 when type is hidden', async () => {
+    const findResponse = {
+      total: 0,
+      per_page: 0,
+      page: 0,
+      saved_objects: [],
+    };
+    const result = await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=hidden-type')
+      .expect(200);
+
+    expect(result.body).toEqual(findResponse);
   });
 
   it('formats successful response and records usage stats', async () => {
@@ -124,6 +176,7 @@ describe('GET /api/saved_objects/_find', () => {
       defaultSearchOperator: 'OR',
       hasReferenceOperator: 'OR',
       hasNoReferenceOperator: 'OR',
+      migrationVersionCompatibility: 'compatible',
     });
   });
 
@@ -134,7 +187,7 @@ describe('GET /api/saved_objects/_find', () => {
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.mock.calls[0][0];
+    const [[options]] = savedObjectsClient.find.mock.calls;
     expect(options).toEqual(expect.objectContaining({ perPage: 10, page: 50 }));
   });
 
@@ -384,5 +437,12 @@ describe('GET /api/saved_objects/_find', () => {
         namespaces: ['default', 'foo'],
       })
     );
+  });
+
+  it('logs a warning message when called', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&type=bar')
+      .expect(200);
+    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
 });

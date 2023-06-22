@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
@@ -31,6 +31,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesObject,
@@ -39,11 +40,11 @@ import type {
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
+  SavedObjectsGetOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 /**
  * Core internal implementation of {@link SavedObjectsClientContract}
@@ -104,7 +105,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** {@inheritDoc SavedObjectsClientContract.bulkGet} */
   async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsGetOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     return await this._repository.bulkGet(objects, options);
   }
@@ -113,7 +114,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   async get<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsGetOptions = {}
   ): Promise<SavedObject<T>> {
     return await this._repository.get(type, id, options);
   }
@@ -121,7 +122,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** {@inheritDoc SavedObjectsClientContract.bulkResolve} */
   async bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsResolveOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
     return await this._repository.bulkResolve(objects, options);
   }
@@ -130,7 +131,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   async resolve<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
     return await this._repository.resolve(type, id, options);
   }
@@ -208,5 +209,10 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       spacesToRemove,
       options
     );
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.getCurrentNamespace} */
+  getCurrentNamespace() {
+    return this._repository.getCurrentNamespace();
   }
 }

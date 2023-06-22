@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -11,5 +9,39 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/config",
+    "@kbn/std",
+    "@kbn/logging",
+    "@kbn/i18n",
+    "@kbn/analytics-client",
+    "@kbn/core-base-common",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-metrics-server",
+    "@kbn/core-metrics-server-internal",
+    "@kbn/core-usage-data-server",
+    "@kbn/core-analytics-server",
+    "@kbn/core-environment-server-internal",
+    "@kbn/core-elasticsearch-server-internal",
+    "@kbn/core-saved-objects-server-internal",
+    "@kbn/core-status-server",
+    "@kbn/core-status-common",
+    "@kbn/core-status-common-internal",
+    "@kbn/core-usage-data-base-server-internal",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-environment-server-mocks",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-metrics-server-mocks",
+    "@kbn/config-mocks",
+    "@kbn/core-usage-data-server-mocks",
+    "@kbn/core-analytics-server-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

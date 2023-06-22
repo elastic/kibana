@@ -251,9 +251,15 @@ describe('EventLogStart', () => {
     });
     test('calls aggregateEventsWithAuthFilter with given aggregation', async () => {
       savedObjectGetter.mockResolvedValueOnce(expectedSavedObject);
-      await eventLogClient.aggregateEventsWithAuthFilter('saved-object-type', testAuthFilter, {
-        aggs: { myAgg: {} },
-      });
+      await eventLogClient.aggregateEventsWithAuthFilter(
+        'saved-object-type',
+        testAuthFilter,
+        {
+          aggs: { myAgg: {} },
+        },
+        undefined,
+        true
+      );
       expect(esContext.esAdapter.aggregateEventsWithAuthFilter).toHaveBeenCalledWith({
         index: esContext.esNames.indexPattern,
         namespaces: [undefined],
@@ -270,6 +276,7 @@ describe('EventLogStart', () => {
             },
           ],
         },
+        includeSpaceAgnostic: true,
       });
     });
   });

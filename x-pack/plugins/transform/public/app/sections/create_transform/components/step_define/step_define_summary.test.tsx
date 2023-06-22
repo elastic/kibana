@@ -34,7 +34,7 @@ describe('Transform: <DefinePivotSummary />', () => {
 
     const searchItems = {
       dataView: {
-        title: 'the-data-view-title',
+        getIndexPattern: () => 'the-data-view-title',
         fields: [] as any[],
       } as SearchItems['dataView'],
     };

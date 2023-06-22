@@ -1,0 +1,7 @@
+in: path
+name: sloId
+description: An identifier for the slo.
+required: true
+schema:
+  type: string
+  example: 9c235211-6834-11ea-a78c-6feb38a34414

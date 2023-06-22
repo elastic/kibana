@@ -11,9 +11,21 @@ import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockBrowserFields } from '../../containers/source/mock';
 import type { EventFieldsData } from './types';
-import { get } from 'lodash/fp';
 
 jest.mock('../../lib/kibana');
+
+jest.mock('@kbn/cell-actions/src/hooks/use_load_actions', () => {
+  const actual = jest.requireActual('@kbn/cell-actions/src/hooks/use_load_actions');
+  return {
+    ...actual,
+    useLoadActions: jest.fn().mockImplementation(() => ({
+      value: [],
+      error: undefined,
+      loading: false,
+    })),
+  };
+});
+
 interface Column {
   field: string;
   name: string | JSX.Element;
@@ -59,95 +71,21 @@ describe('getColumns', () => {
       actionsColumn = getColumns(defaultProps)[0] as Column;
     });
 
-    describe('filter in', () => {
-      test('it renders a filter for (+) button', () => {
-        const wrapper = mount(
-          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
-        ) as ReactWrapper;
+    test('it renders inline actions', () => {
+      const wrapper = mount(
+        <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+      ) as ReactWrapper;
 
-        expect(wrapper.find('[data-test-subj="hover-actions-filter-for"]').exists()).toBeTruthy();
-      });
+      expect(wrapper.find('[data-test-subj="inlineActions"]').exists()).toBeTruthy();
     });
 
-    describe('filter out', () => {
-      test('it renders a filter out (-) button', () => {
-        const wrapper = mount(
-          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
-        ) as ReactWrapper;
+    test('it does not render inline actions when readOnly prop is passed', () => {
+      actionsColumn = getColumns({ ...defaultProps, isReadOnly: true })[0] as Column;
+      const wrapper = mount(
+        <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+      ) as ReactWrapper;
 
-        expect(wrapper.find('[data-test-subj="hover-actions-filter-out"]').exists()).toBeTruthy();
-      });
-    });
-
-    describe('overflow button', () => {
-      test('it renders an overflow button', () => {
-        const wrapper = mount(
-          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
-        ) as ReactWrapper;
-
-        expect(wrapper.find('[data-test-subj="more-actions-agent.id"]').exists()).toBeTruthy();
-      });
-    });
-
-    describe('column toggle', () => {
-      test('it renders a column toggle button', () => {
-        const wrapper = mount(
-          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
-        ) as ReactWrapper;
-
-        expect(
-          get(['items', 0, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
-        ).toEqual('hover-actions-toggle-column');
-      });
-    });
-
-    describe('add to timeline', () => {
-      test('it renders an add to timeline button', () => {
-        const wrapper = mount(
-          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
-        ) as ReactWrapper;
-
-        expect(
-          get(['items', 1, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
-        ).toEqual('hover-actions-add-timeline');
-      });
-    });
-
-    describe('topN', () => {
-      test('it renders a show topN button', () => {
-        const wrapper = mount(
-          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
-        ) as ReactWrapper;
-
-        expect(
-          get(['items', 2, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
-        ).toEqual('hover-actions-show-top-n');
-      });
-    });
-
-    describe('copy', () => {
-      test('it renders a copy button', () => {
-        const wrapper = mount(
-          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
-        ) as ReactWrapper;
-
-        expect(
-          get(['items', 3, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
-        ).toEqual('hover-actions-copy-button');
-      });
-    });
-
-    describe('does not render hover actions when readOnly prop is passed', () => {
-      test('it renders a filter for (+) button', () => {
-        actionsColumn = getColumns({ ...defaultProps, isReadOnly: true })[0] as Column;
-        const wrapper = mount(
-          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
-        ) as ReactWrapper;
-
-        expect(wrapper.find('[data-test-subj="hover-actions-filter-for"]').exists()).toBeFalsy();
-        expect(wrapper.find('[data-test-subj="hover-actions-filter-out"]').exists()).toBeFalsy();
-        expect(wrapper.find('[data-test-subj="more-actions-agent.id"]').exists()).toBeFalsy();
-      });
+      expect(wrapper.find('[data-test-subj="inlineActions"]').exists()).toBeFalsy();
     });
   });
 });

@@ -8,15 +8,16 @@
 
 import fetch from 'node-fetch';
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { v2 } from '../../common/types';
+import { EncryptedTelemetryPayload, UnencryptedTelemetryPayload } from '../../common/types';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
-import type { UnencryptedTelemetryPayload } from '../../common/types';
 
 interface SendTelemetryOptInStatusConfig {
   sendUsageTo: 'staging' | 'prod';
@@ -35,7 +36,7 @@ export async function sendTelemetryOptInStatus(
     channelName: 'optInStatus',
   });
 
-  const optInStatusPayload: UnencryptedTelemetryPayload =
+  const optInStatusPayload: UnencryptedTelemetryPayload | EncryptedTelemetryPayload =
     await telemetryCollectionManager.getOptInStats(newOptInStatus, statsGetterConfig);
 
   await Promise.all(
@@ -90,7 +91,8 @@ export function registerTelemetryOptInStatsRoutes(
           newOptInStatus,
           statsGetterConfig
         );
-        return res.ok({ body: optInStatus });
+        const body: v2.OptInStatsResponse = optInStatus;
+        return res.ok({ body });
       } catch (err) {
         return res.ok({ body: [] });
       }

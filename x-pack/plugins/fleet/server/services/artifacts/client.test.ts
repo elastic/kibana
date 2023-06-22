@@ -80,6 +80,56 @@ describe('When using the Fleet Artifacts Client', () => {
     });
   });
 
+  describe('and calling `bulkCreateArtifacts()`', () => {
+    it('should create a new artifact', async () => {
+      expect(
+        await artifactClient.bulkCreateArtifacts([
+          {
+            content: '{ "key": "value" }',
+            identifier: 'some-identifier',
+            type: 'type A',
+          },
+          {
+            content: '{ "key": "value2" }',
+            identifier: 'some-identifier2',
+            type: 'type B',
+          },
+        ])
+      ).toEqual({
+        artifacts: [
+          {
+            ...generateArtifactMock(),
+            body: 'eJyrVlDKTq1UslJQKkvMKU1VUqgFADNPBYE=',
+            created: expect.any(String),
+            decodedSha256: '05d13b11501327cc43f9a29165f1b4cab5c65783d86227536fcf798e6fa45586',
+            decodedSize: 18,
+            encodedSha256: '373d059bac3b51b05af96128cdaf013abd0c59d3d50579589937068059690a68',
+            encodedSize: 26,
+            id: expect.any(String),
+            identifier: 'some-identifier',
+            relative_url:
+              '/api/fleet/artifacts/some-identifier/05d13b11501327cc43f9a29165f1b4cab5c65783d86227536fcf798e6fa45586',
+            type: 'type A',
+          },
+          {
+            ...generateArtifactMock(),
+            body: 'eJyrVlDKTq1UslJQKkvMKU01UlKoBQA42QWz',
+            created: expect.any(String),
+            decodedSha256: '98fdb0001b0ddb7acb15136579aab7074cf2b6df9db009568e04294bd97e7dd3',
+            decodedSize: 19,
+            encodedSha256: '220b82f2f2013cd5137966d0f9c81ace9156319e8f420bbad0f05fc0f61eec5d',
+            encodedSize: 27,
+            id: expect.any(String),
+            identifier: 'some-identifier2',
+            relative_url:
+              '/api/fleet/artifacts/some-identifier2/98fdb0001b0ddb7acb15136579aab7074cf2b6df9db009568e04294bd97e7dd3',
+            type: 'type B',
+          },
+        ],
+      });
+    });
+  });
+
   describe('and calling `deleteArtifact()`', () => {
     it('should delete the artifact', async () => {
       setEsClientGetMock();

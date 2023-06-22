@@ -17,8 +17,8 @@ import {
 import type { LegacyNotificationAlertTypeDefinition } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationParams } from './legacy_types';
-import type { AlertAttributes } from '../../../signals/types';
-import { siemRuleActionGroups } from '../../../signals/siem_rule_action_groups';
+import type { AlertAttributes } from '../../../rule_types/types';
+import { siemRuleActionGroups } from '../../../rule_types/utils/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
 import { getSignals } from './get_signals';

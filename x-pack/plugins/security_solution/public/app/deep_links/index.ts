@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { getSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/public';
+import { getSecuritySolutionLink as getCloudDefendSecuritySolutionLink } from '@kbn/cloud-defend-plugin/public';
+import { getSecuritySolutionLink as getCloudPostureSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/public';
 import { getSecuritySolutionDeepLink } from '@kbn/threat-intelligence-plugin/public';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
@@ -27,6 +28,7 @@ import {
   BLOCKLIST,
   CREATE_NEW_RULE,
   DASHBOARDS,
+  DATA_QUALITY,
   DETECT,
   DETECTION_RESPONSE,
   ENDPOINTS,
@@ -54,6 +56,7 @@ import {
   BLOCKLIST_PATH,
   CASES_FEATURE_ID,
   CASES_PATH,
+  DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   ENDPOINTS_PATH,
   EVENT_FILTERS_PATH,
@@ -75,7 +78,7 @@ import {
   USERS_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { hasCapabilities, subscribeAppLinks } from '../../common/links';
+import { appLinks$, hasCapabilities } from '../../common/links';
 import type { AppLinkItems } from '../../common/links/types';
 
 export const FEATURE = {
@@ -129,7 +132,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     ],
   },
   {
-    id: SecurityPageName.dashboardsLanding,
+    id: SecurityPageName.dashboards,
     title: DASHBOARDS,
     path: OVERVIEW_PATH,
     navLinkStatus: AppNavLinkStatus.visible,
@@ -165,7 +168,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         ],
       },
       {
-        ...getSecuritySolutionLink<SecurityPageName>('dashboard'),
+        ...getCloudPostureSecuritySolutionLink<SecurityPageName>('dashboard'),
         features: [FEATURE.general],
       },
       {
@@ -177,6 +180,17 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         keywords: [
           i18n.translate('xpack.securitySolution.search.entityAnalytics', {
             defaultMessage: 'Entity Analytics',
+          }),
+        ],
+      },
+      {
+        id: SecurityPageName.dataQuality,
+        title: DATA_QUALITY,
+        path: DATA_QUALITY_PATH,
+        features: [FEATURE.general],
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.dataQualityDashboard', {
+            defaultMessage: 'Data quality',
           }),
         ],
       },
@@ -238,7 +252,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     ],
   },
   {
-    ...getSecuritySolutionLink<SecurityPageName>('findings'),
+    ...getCloudPostureSecuritySolutionLink<SecurityPageName>('findings'),
     features: [FEATURE.general],
     navLinkStatus: AppNavLinkStatus.visible,
     order: 9002,
@@ -516,7 +530,10 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         path: RESPONSE_ACTIONS_HISTORY_PATH,
       },
       {
-        ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
+        ...getCloudPostureSecuritySolutionLink<SecurityPageName>('benchmarks'),
+      },
+      {
+        ...getCloudDefendSecuritySolutionLink<SecurityPageName>('policies'),
       },
     ],
   },
@@ -613,7 +630,7 @@ const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
  * Registers any change in appLinks to be updated in app deepLinks
  */
 export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>): Subscription => {
-  return subscribeAppLinks((appLinks) => {
+  return appLinks$.subscribe((appLinks) => {
     appUpdater$.next(() => ({
       navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent main security link to switch to visible after update
       deepLinks: formatDeepLinks(appLinks),

@@ -1,0 +1,56 @@
+{
+  "type": "plugin",
+  "id": "@kbn/maps-plugin",
+  "owner": "@elastic/kibana-gis",
+  "plugin": {
+    "id": "maps",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "maps"
+    ],
+    "requiredPlugins": [
+      "controls",
+      "unifiedSearch",
+      "lens",
+      "licensing",
+      "features",
+      "inspector",
+      "data",
+      "fieldFormats",
+      "fileUpload",
+      "uiActions",
+      "navigation",
+      "expressions",
+      "visualizations",
+      "dashboard",
+      "embeddable",
+      "mapsEms",
+      "savedObjects",
+      "share",
+      "presentationUtil",
+      "contentManagement"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "customIntegrations",
+      "home",
+      "savedObjectsTagging",
+      "charts",
+      "screenshotMode",
+      "security",
+      "spaces",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "usageCollection",
+      "unifiedSearch"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { Location } from 'history';
+import { createMemoryHistory } from 'history';
 import { IBasePath } from '@kbn/core/public';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
+import {
+  apmRouter as apmRouterBase,
+  ApmRouter,
+} from '../../routing/apm_route_config';
+
+const apmRouter = {
+  ...apmRouterBase,
+  link: (...args: [any]) =>
+    `some-basepath/app/apm${apmRouterBase.link(...args)}`,
+} as ApmRouter;
 
 describe('Transaction action menu', () => {
   const basePath = {
@@ -19,17 +29,11 @@ describe('Transaction action menu', () => {
   const date = '2020-02-06T11:00:00.000Z';
   const timestamp = { us: new Date(date).getTime() };
 
-  const urlParams = {
-    rangeFrom: 'now-24h',
-    rangeTo: 'now',
-    refreshPaused: true,
-    refreshInterval: 0,
-  };
-
-  const location = {
-    search:
-      '?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
-  } as unknown as Location;
+  const history = createMemoryHistory();
+  history.replace(
+    '/services/testbeans-go/transactions/view?rangeFrom=now-24h&rangeTo=now&transactionName=GET+%2Ftestbeans-go%2Fapi'
+  );
+  const location = history.location;
 
   it('shows required sections only', () => {
     const transaction = {
@@ -43,7 +47,7 @@ describe('Transaction action menu', () => {
         transaction,
         basePath,
         location,
-        urlParams,
+        apmRouter,
       })
     ).toEqual([
       [
@@ -56,6 +60,19 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
+              condition: true,
+            },
+          ],
+        },
+        {
+          key: 'serviceMap',
+          title: 'Service map',
+          subtitle: 'View service map filtered by this trace.',
+          actions: [
+            {
+              key: 'serviceMap',
+              label: 'Show in service map',
+              href: 'some-basepath/app/apm/service-map?comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now&serviceGroup=',
               condition: true,
             },
           ],
@@ -90,7 +107,7 @@ describe('Transaction action menu', () => {
         transaction,
         basePath,
         location,
-        urlParams,
+        apmRouter,
       })
     ).toEqual([
       [
@@ -127,6 +144,19 @@ describe('Transaction action menu', () => {
             },
           ],
         },
+        {
+          key: 'serviceMap',
+          title: 'Service map',
+          subtitle: 'View service map filtered by this trace.',
+          actions: [
+            {
+              key: 'serviceMap',
+              label: 'Show in service map',
+              href: 'some-basepath/app/apm/service-map?comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now&serviceGroup=',
+              condition: true,
+            },
+          ],
+        },
       ],
       [
         {
@@ -157,7 +187,7 @@ describe('Transaction action menu', () => {
         transaction,
         basePath,
         location,
-        urlParams,
+        apmRouter,
       })
     ).toEqual([
       [
@@ -189,6 +219,19 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
+              condition: true,
+            },
+          ],
+        },
+        {
+          key: 'serviceMap',
+          title: 'Service map',
+          subtitle: 'View service map filtered by this trace.',
+          actions: [
+            {
+              key: 'serviceMap',
+              label: 'Show in service map',
+              href: 'some-basepath/app/apm/service-map?comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now&serviceGroup=',
               condition: true,
             },
           ],

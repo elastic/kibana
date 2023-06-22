@@ -11,6 +11,7 @@ import { KbnClient } from '@kbn/test';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
+import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 
 class EndpointPolicyGenerator extends BaseDataGenerator {
   public policyName(preFix: string | number = '') {
@@ -30,7 +31,8 @@ export const cli = () => {
       log.info(`Creating ${count} endpoint policies...`);
 
       try {
-        const { endpointPackage } = await setupFleetForEndpoint(kbn);
+        await setupFleetForEndpoint(kbn);
+        const endpointPackage = await getEndpointPackageInfo(kbn);
 
         while (created < max) {
           created++;
@@ -53,11 +55,11 @@ export const cli = () => {
         string: ['kibana'],
         default: {
           count: 15,
-          kibana: 'http://elastic:changeme@localhost:5601',
+          kibana: 'http://elastic:changeme@127.0.0.1:5601',
         },
         help: `
         --count            Number of Endpoint Policies to create. Default: 15
-        --kibana           The URL to kibana including credentials. Default: http://elastic:changeme@localhost:5601
+        --kibana           The URL to kibana including credentials. Default: http://elastic:changeme@127.0.0.1:5601
       `,
       },
     }

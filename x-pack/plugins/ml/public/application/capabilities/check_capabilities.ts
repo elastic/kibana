@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
+import { isEqual } from 'lodash';
+import useObservable from 'react-use/lib/useObservable';
+import { useMlKibana } from '../contexts/kibana';
 import { hasLicenseExpired } from '../license';
 
 import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/capabilities';
@@ -15,11 +19,52 @@ import type { MlApiServices } from '../services/ml_api_service';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
+export class MlCapabilitiesService {
+  private _capabilities$ = new BehaviorSubject<MlCapabilities>(getDefaultCapabilities());
+
+  public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
+
+  public getCapabilities(): MlCapabilities {
+    return this._capabilities$.getValue();
+  }
+
+  public updateCapabilities(update: MlCapabilities) {
+    this._capabilities$.next(update);
+  }
+}
+
+/**
+ * TODO should be initialized in getMlGlobalServices
+ * Temp solution to make it work with the current setup.
+ */
+export const mlCapabilities = new MlCapabilitiesService();
+
+/**
+ * Check the privilege type and the license to see whether a user has permission to access a feature.
+ *
+ * @param capability
+ */
+export function usePermissionCheck(capability: keyof MlCapabilities) {
+  const {
+    services: {
+      mlServices: { mlCapabilities: mlCapabilitiesService },
+    },
+  } = useMlKibana();
+
+  const licenseHasExpired = hasLicenseExpired();
+  const capabilities = useObservable(
+    mlCapabilitiesService.capabilities$,
+    mlCapabilitiesService.getCapabilities()
+  );
+  return capabilities[capability] && !licenseHasExpired;
+}
+
 export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiServices) {
   return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
     checkMlCapabilities()
       .then(({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
         _capabilities = capabilities;
+        mlCapabilities.updateCapabilities(capabilities);
         // Loop through all capabilities to ensure they are all set to true.
         const isManageML = Object.values(_capabilities).every((p) => p === true);
 
@@ -42,6 +87,7 @@ export function checkGetJobsCapabilitiesResolver(
     getCapabilities()
       .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
         _capabilities = capabilities;
+        mlCapabilities.updateCapabilities(capabilities);
         // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
         // all other functionality is controlled by the return capabilities object.
         // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
@@ -68,6 +114,7 @@ export function checkCreateJobsCapabilitiesResolver(
     getCapabilities()
       .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
         _capabilities = capabilities;
+        mlCapabilities.updateCapabilities(capabilities);
         // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
         // allow the promise to resolve as the separate license check will redirect then user to
         // a basic feature
@@ -94,6 +141,7 @@ export function checkFindFileStructurePrivilegeResolver(
     getCapabilities()
       .then(async ({ capabilities }) => {
         _capabilities = capabilities;
+        mlCapabilities.updateCapabilities(capabilities);
         // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
         // all other functionality is controlled by the return _capabilities object
         if (_capabilities.canFindFileStructure) {
@@ -110,8 +158,10 @@ export function checkFindFileStructurePrivilegeResolver(
   });
 }
 
-// check the privilege type and the license to see whether a user has permission to access a feature.
-// takes the name of the privilege variable as specified in get_privileges.js
+/**
+ * @deprecated use {@link usePermissionCheck} instead.
+ * @param capability
+ */
 export function checkPermission(capability: keyof MlCapabilities) {
   const licenseHasExpired = hasLicenseExpired();
   return _capabilities[capability] === true && licenseHasExpired !== true;

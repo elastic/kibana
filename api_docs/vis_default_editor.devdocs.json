@@ -311,53 +311,6 @@
       },
       {
         "parentPluginId": "visDefaultEditor",
-        "id": "def-public.getInitialWidth",
-        "type": "Function",
-        "tags": [],
-        "label": "getInitialWidth",
-        "description": [],
-        "signature": [
-          "(size: ",
-          {
-            "pluginId": "visDefaultEditor",
-            "scope": "public",
-            "docId": "kibVisDefaultEditorPluginApi",
-            "section": "def-public.DefaultEditorSize",
-            "text": "DefaultEditorSize"
-          },
-          ") => 15 | 50 | 30"
-        ],
-        "path": "src/plugins/vis_default_editor/public/editor_size.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visDefaultEditor",
-            "id": "def-public.getInitialWidth.$1",
-            "type": "Enum",
-            "tags": [],
-            "label": "size",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "visDefaultEditor",
-                "scope": "public",
-                "docId": "kibVisDefaultEditorPluginApi",
-                "section": "def-public.DefaultEditorSize",
-                "text": "DefaultEditorSize"
-              }
-            ],
-            "path": "src/plugins/vis_default_editor/public/editor_size.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visDefaultEditor",
         "id": "def-public.groupAndSortBy",
         "type": "Function",
         "tags": [],
@@ -367,13 +320,7 @@
         ],
         "signature": [
           "(objects: T[], groupBy: TGroupBy, labelName: TLabelName, keyName: TKeyName | undefined) => ",
-          {
-            "pluginId": "visDefaultEditor",
-            "scope": "public",
-            "docId": "kibVisDefaultEditorPluginApi",
-            "section": "def-public.ComboBoxGroupedOptions",
-            "text": "ComboBoxGroupedOptions"
-          },
+          "ComboBoxGroupedOptions",
           "<T>"
         ],
         "path": "src/plugins/vis_default_editor/public/utils.ts",
@@ -950,21 +897,6 @@
       }
     ],
     "misc": [
-      {
-        "parentPluginId": "visDefaultEditor",
-        "id": "def-public.ComboBoxGroupedOptions",
-        "type": "Type",
-        "tags": [],
-        "label": "ComboBoxGroupedOptions",
-        "description": [],
-        "signature": [
-          "GroupOrOption<T>[]"
-        ],
-        "path": "src/plugins/vis_default_editor/public/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "visDefaultEditor",
         "id": "def-public.SetColorRangeValue",

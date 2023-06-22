@@ -49,10 +49,7 @@ describe('[Monitor Management] validation', () => {
     });
   });
 
-  describe.each([
-    [ConfigKey.SOURCE_INLINE, 'step(() => {});'],
-    [ConfigKey.SOURCE_ZIP_URL, 'https://test.zip'],
-  ])('Browser', (configKey, value) => {
+  describe.each([[ConfigKey.SOURCE_INLINE, 'step(() => {});']])('Browser', (configKey, value) => {
     const browserProps: Partial<BrowserFields> = {
       ...commonPropsValid,
       [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,

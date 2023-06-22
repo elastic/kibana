@@ -11,6 +11,7 @@ import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
   LogView,
   LogViewAttributes,
+  LogViewReference,
   LogViewStatus,
   ResolvedLogView,
 } from '../../../common/log_views';
@@ -28,9 +29,12 @@ export interface LogViewsServiceStartDeps {
 }
 
 export interface ILogViewsClient {
-  getLogView(logViewId: string): Promise<LogView>;
+  getLogView(logViewReference: LogViewReference): Promise<LogView>;
   getResolvedLogViewStatus(resolvedLogView: ResolvedLogView): Promise<LogViewStatus>;
-  getResolvedLogView(logViewId: string): Promise<ResolvedLogView>;
-  putLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): Promise<LogView>;
+  getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView>;
+  putLogView(
+    logViewReference: LogViewReference,
+    logViewAttributes: Partial<LogViewAttributes>
+  ): Promise<LogView>;
   resolveLogView(logViewId: string, logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
 }

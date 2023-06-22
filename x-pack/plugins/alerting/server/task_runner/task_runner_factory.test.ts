@@ -26,15 +26,26 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
+import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { schema } from '@kbn/config-schema';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+const mockAlertService = alertsServiceMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
 const uiSettingsService = uiSettingsServiceMock.createStartContract();
 const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const dataPlugin = dataPluginMock.createStartContract();
+const dataViewsMock = {
+  dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+} as DataViewsServerPluginStart;
 const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
   name: 'My test alert',
@@ -48,6 +59,9 @@ const ruleType: UntypedNormalizedRuleType = {
   },
   executor: jest.fn(),
   producer: 'alerts',
+  validate: {
+    params: schema.any(),
+  },
 };
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -83,7 +97,9 @@ describe('Task Runner Factory', () => {
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     data: dataPlugin,
+    dataViews: dataViewsMock,
     savedObjects: savedObjectsService,
+    share: {} as SharePluginStart,
     uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
@@ -95,6 +111,7 @@ describe('Task Runner Factory', () => {
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
+    alertsService: mockAlertService,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: true,
     maxEphemeralActionsPerRule: 10,
@@ -107,6 +124,10 @@ describe('Task Runner Factory', () => {
         max: 1000,
       },
     },
+    getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
+    getMaintenanceWindowClientWithRequest: jest
+      .fn()
+      .mockReturnValue(maintenanceWindowClientMock.create()),
   };
 
   beforeEach(() => {

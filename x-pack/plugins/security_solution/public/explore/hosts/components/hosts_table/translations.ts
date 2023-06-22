@@ -59,10 +59,6 @@ export const VERSION = i18n.translate('xpack.securitySolution.hostsTable.version
   defaultMessage: 'Version',
 });
 
-export const HOST_RISK = i18n.translate('xpack.securitySolution.hostsTable.hostRiskTitle', {
-  defaultMessage: 'Host risk classification',
-});
-
 export const ROWS_5 = i18n.translate('xpack.securitySolution.hostsTable.rows', {
   values: { numRows: 5 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',

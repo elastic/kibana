@@ -6,9 +6,9 @@
  */
 
 import { pick } from 'lodash';
+import { isDefined } from '@kbn/ml-is-defined';
 import { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
 import { resolveMaxTimeInterval } from './job_utils';
-import { isDefined } from '../types/guards';
 import { parseInterval } from './parse_interval';
 import { JobsHealthRuleTestsConfig, JobsHealthTests } from '../types/alerts';
 

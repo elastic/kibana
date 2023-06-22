@@ -22,9 +22,6 @@ import {
   IndexedHostsAndAlertsResponse,
   indexHostsAndAlerts,
 } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { TransformConfigUnion } from '@kbn/transform-plugin/common/types/transform';
-import { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
-import { catchAndWrapError } from '@kbn/security-solution-plugin/server/endpoint/utils';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
@@ -33,7 +30,8 @@ import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/end
 import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
 import { merge } from 'lodash';
-import { kibanaPackageJson } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { kibanaPackageJson } from '@kbn/repo-info';
 import seedrandom from 'seedrandom';
 import { FtrService } from '../../functional/ftr_provider_context';
 
@@ -55,56 +53,9 @@ export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');
   private readonly retry = this.ctx.getService('retry');
   private readonly kbnClient = this.ctx.getService('kibanaServer');
-  private readonly transform = this.ctx.getService('transform');
   private readonly config = this.ctx.getService('config');
   private readonly supertest = this.ctx.getService('supertest');
   private readonly log = this.ctx.getService('log');
-
-  private generateTransformId(endpointPackageVersion?: string): string {
-    return `${metadataTransformPrefix}-${endpointPackageVersion ?? ''}`;
-  }
-
-  /**
-   * Fetches the information for the endpoint transform
-   *
-   * @param [endpointPackageVersion] if set, it will be used to get the specific transform this this package version. Else just returns first one found
-   */
-  async getTransform(endpointPackageVersion?: string): Promise<TransformConfigUnion> {
-    const transformId = this.generateTransformId(endpointPackageVersion);
-    let transform: TransformConfigUnion | undefined;
-
-    if (endpointPackageVersion) {
-      await this.transform.api.waitForTransformToExist(transformId);
-
-      transform = (
-        (
-          await this.transform.api
-            .getTransform(transformId)
-            .catch(catchAndWrapError)
-            .then((response: { body: GetTransformsResponseSchema }) => response)
-        ).body as GetTransformsResponseSchema
-      ).transforms[0];
-    } else {
-      transform = (
-        await this.transform.api.getTransformList(100).catch(catchAndWrapError)
-      ).transforms.find((t) => t.id.startsWith(transformId));
-    }
-
-    if (!transform) {
-      throw new EndpointError('Endpoint metadata transform not found');
-    }
-
-    return transform;
-  }
-
-  async setMetadataTransformFrequency(
-    frequency: string,
-    /** Used to update the transform installed with the given package version */
-    endpointPackageVersion?: string
-  ): Promise<void> {
-    const transform = await this.getTransform(endpointPackageVersion).catch(catchAndWrapError);
-    await this.transform.api.updateTransform(transform.id, { frequency }).catch(catchAndWrapError);
-  }
 
   private async stopTransform(transformId: string) {
     const stopRequest = {
@@ -165,7 +116,7 @@ export class EndpointTestResources extends FtrService {
       customIndexFn,
     } = options;
 
-    if (waitUntilTransformed) {
+    if (waitUntilTransformed && customIndexFn) {
       // need this before indexing docs so that the united transform doesn't
       // create a checkpoint with a timestamp after the doc timestamps
       await this.stopTransform(metadataTransformPrefix);
@@ -191,11 +142,14 @@ export class EndpointTestResources extends FtrService {
           CurrentKibanaVersionDocGenerator
         );
 
-    if (waitUntilTransformed) {
+    if (waitUntilTransformed && customIndexFn) {
       await this.startTransform(metadataTransformPrefix);
       const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
       await this.waitForEndpoints(metadataIds, waitTimeout);
       await this.startTransform(METADATA_UNITED_TRANSFORM);
+    }
+
+    if (waitUntilTransformed) {
       const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
       await this.waitForUnitedEndpoints(agentIds, waitTimeout);
     }

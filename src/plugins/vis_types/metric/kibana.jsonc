@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/vis-type-metric-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "description": "Registers the Metric aggregation-based visualization.",
+  "plugin": {
+    "id": "visTypeMetric",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "visualizations",
+      "charts",
+      "expressions",
+      "dataViews"
+    ],
+    "requiredBundles": [
+      "visDefaultEditor",
+      "kibanaUtils"
+    ]
+  }
+}

@@ -6,14 +6,21 @@
  */
 
 import React, { memo, useMemo, type CSSProperties } from 'react';
-import { EuiButtonEmpty, EuiLoadingContent, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiButtonEmpty,
+  EuiSkeletonText,
+  EuiText,
+  EuiSpacer,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { FormattedError } from '../formatted_error';
 import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { ActionDetails } from '../../../../common/endpoint/types/actions';
@@ -33,17 +40,72 @@ export const FILE_NO_LONGER_AVAILABLE_MESSAGE = i18n.translate(
   { defaultMessage: 'File has expired and is no longer available for download.' }
 );
 
+export const FILE_DELETED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.responseActionFileDownloadLink.deleteNotice',
+  {
+    defaultMessage:
+      'Files are periodically deleted to clear storage space. Download and save file locally if needed.',
+  }
+);
+
+export const FILE_PASSCODE_INFO_MESSAGE = i18n.translate(
+  'xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo',
+  {
+    defaultMessage: '(ZIP file passcode: {passcode}).',
+    values: {
+      passcode: 'elastic',
+    },
+  }
+);
+
+export const FILE_TRUNCATED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.responseActionFileDownloadLink.fileTruncated',
+  {
+    defaultMessage:
+      'Output data in the provided zip file is truncated due to file size limitations.',
+  }
+);
+
 const FileDownloadLinkContainer = styled.div`
   & > * {
     vertical-align: middle;
   }
 `;
 
+interface TruncatedTextInfoProps {
+  textSize: Required<ResponseActionFileDownloadLinkProps['textSize']>;
+  'data-test-subj'?: string;
+}
+
+const TruncatedTextInfo = memo<TruncatedTextInfoProps>(
+  ({ textSize, 'data-test-subj': dataTestSubj }) => {
+    const alertIconSize = useMemo(() => (textSize === 'xs' ? 's' : 'm'), [textSize]);
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon size={alertIconSize} type="warning" color="warning" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size={textSize} color="warning" data-test-subj={dataTestSubj}>
+              {FILE_TRUNCATED_MESSAGE}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  }
+);
+
+TruncatedTextInfo.displayName = 'TruncatedTextInfo';
 export interface ResponseActionFileDownloadLinkProps {
   action: MaybeImmutable<ActionDetails>;
   /** If left undefined, the first agent that the action was sent to will be used */
   agentId?: string;
   buttonTitle?: string;
+  canAccessFileDownloadLink: boolean;
+  isTruncatedFile?: boolean;
   'data-test-subj'?: string;
   textSize?: 's' | 'xs';
 }
@@ -56,14 +118,16 @@ export interface ResponseActionFileDownloadLinkProps {
  */
 export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLinkProps>(
   ({
-    action,
+    action: _action,
     agentId,
     buttonTitle = DEFAULT_BUTTON_TITLE,
-    'data-test-subj': dataTestSubj,
+    canAccessFileDownloadLink,
+    isTruncatedFile = false,
     textSize = 's',
+    'data-test-subj': dataTestSubj,
   }) => {
+    const action = _action as ActionDetails; // cast to remove `Immutable`
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
 
     const shouldFetchFileInfo: boolean = useMemo(() => {
       return action.isCompleted && action.wasSuccessful;
@@ -72,30 +136,34 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const downloadUrl: string = useMemo(() => {
       return resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
         action_id: action.id,
-        agent_id: agentId ?? action.agents[0],
+        file_id: getFileDownloadId(action, agentId),
       });
-    }, [action.agents, action.id, agentId]);
+    }, [action, agentId]);
 
     const {
       isFetching,
       data: fileInfo,
       error,
     } = useGetFileInfo(action, undefined, {
-      enabled: canWriteFileOperations && shouldFetchFileInfo,
+      enabled: canAccessFileDownloadLink && shouldFetchFileInfo,
     });
 
-    if (!canWriteFileOperations || !action.isCompleted || !action.wasSuccessful) {
+    if (!canAccessFileDownloadLink || !action.isCompleted || !action.wasSuccessful) {
       return null;
     }
 
     if (isFetching) {
-      return <EuiLoadingContent lines={1} data-test-subj={getTestId('loading')} />;
+      return <EuiSkeletonText lines={1} data-test-subj={getTestId('loading')} />;
     }
 
     // Check if file is no longer available
     if ((error && error?.response?.status === 404) || fileInfo?.data.status === 'DELETED') {
       return (
-        <EuiText size={textSize} data-test-subj={getTestId('fileNoLongerAvailable')}>
+        <EuiText
+          size={textSize}
+          color="warning"
+          data-test-subj={getTestId('fileNoLongerAvailable')}
+        >
           {FILE_NO_LONGER_AVAILABLE_MESSAGE}
         </EuiText>
       );
@@ -121,20 +189,17 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           data-test-subj={getTestId('passcodeMessage')}
           className="eui-displayInline"
         >
-          <FormattedMessage
-            id="xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo"
-            defaultMessage="(ZIP file passcode: {passcode})."
-            values={{
-              passcode: 'elastic',
-            }}
-          />
+          {FILE_PASSCODE_INFO_MESSAGE}
         </EuiText>
-        <EuiText size={textSize} data-test-subj={getTestId('fileDeleteMessage')}>
-          <FormattedMessage
-            id="xpack.securitySolution.responseActionFileDownloadLink.deleteNotice"
-            defaultMessage="Files are periodically deleted to clear storage space. Download and save file locally if needed."
-          />
+        <EuiText size={textSize} color="warning" data-test-subj={getTestId('fileDeleteMessage')}>
+          {FILE_DELETED_MESSAGE}
         </EuiText>
+        {isTruncatedFile && (
+          <TruncatedTextInfo
+            textSize={textSize}
+            data-test-subj={getTestId('fileTruncatedMessage')}
+          />
+        )}
       </FileDownloadLinkContainer>
     );
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper } from '@kbn/presentation-util-plugin/common';
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { lt } from './lt';
 
 describe('lt', () => {

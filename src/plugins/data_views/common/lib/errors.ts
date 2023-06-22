@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @kbn/imports/uniform_imports */
-
-import { KbnError } from '../../../kibana_utils/common';
+import { KbnError } from '@kbn/kibana-utils-plugin/common';
 
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned

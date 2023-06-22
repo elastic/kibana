@@ -6,6 +6,7 @@
  */
 import { get } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { estypes } from '@elastic/elasticsearch';
 
 // elasticsearch index.max_result_window default value
 const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
@@ -63,7 +64,7 @@ const getSavedObjectsList = async ({
   filter,
 }: {
   esClient: ElasticsearchClient;
-  searchAfter: string[] | undefined;
+  searchAfter: estypes.SortResults | undefined;
   kibanaIndex: string;
   filterPath: string[];
   filter: ESFilterProps;

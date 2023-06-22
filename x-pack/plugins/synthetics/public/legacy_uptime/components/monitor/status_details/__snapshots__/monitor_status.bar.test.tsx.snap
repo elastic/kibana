@@ -67,6 +67,7 @@ Array [
     >
       <a
         class="euiLink emotion-euiLink-primary"
+        data-test-subj="syntheticsMonitorTagsSetTagsLink"
         href="undefined/monitor-options.html#monitor-tags"
         rel="noopener noreferrer"
         target="_blank"

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FormBasedLayer } from './types';
 import type { IndexPattern } from '../../types';
+import type { FieldBasedOperationErrorMessage } from './operations/definitions';
 
 export const reducedTimeRangeOptions = [
   {
@@ -56,7 +57,7 @@ export function getColumnReducedTimeRangeError(
   layer: FormBasedLayer,
   columnId: string,
   indexPattern: IndexPattern
-): string[] | undefined {
+): FieldBasedOperationErrorMessage[] | undefined {
   const currentColumn = layer.columns[columnId];
   if (!currentColumn.reducedTimeRange) {
     return;
@@ -65,7 +66,7 @@ export function getColumnReducedTimeRangeError(
     (column) => column.operationType === 'date_histogram'
   );
   const hasTimeField = Boolean(indexPattern.timeFieldName);
-  return [
+  const errors: FieldBasedOperationErrorMessage[] = [
     hasDateHistogram &&
       i18n.translate('xpack.lens.indexPattern.reducedTimeRangeWithDateHistogram', {
         defaultMessage:
@@ -82,5 +83,7 @@ export function getColumnReducedTimeRangeError(
           column: currentColumn.label,
         },
       }),
-  ].filter(Boolean) as string[];
+  ].filter(Boolean) as FieldBasedOperationErrorMessage[];
+
+  return errors;
 }

@@ -15,7 +15,7 @@ export const SubscriptionNotAllowed = () => {
   return (
     <EuiPageSection color="danger" alignment="center">
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         title={
           <h2>
             <FormattedMessage

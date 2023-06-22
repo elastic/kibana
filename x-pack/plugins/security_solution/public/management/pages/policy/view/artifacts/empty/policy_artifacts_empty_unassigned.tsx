@@ -22,12 +22,21 @@ interface CommonProps {
   policyName: string;
   listId: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS;
+  canWriteArtifact?: boolean;
   getPolicyArtifactsPath: (policyId: string) => string;
   getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
 }
 
 export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
-  ({ policyId, policyName, listId, labels, getPolicyArtifactsPath, getArtifactPath }) => {
+  ({
+    policyId,
+    policyName,
+    listId,
+    labels,
+    canWriteArtifact = false,
+    getPolicyArtifactsPath,
+    getArtifactPath,
+  }) => {
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const { onClickHandler, toRouteUrl } = useGetLinkTo(
       policyId,
@@ -50,24 +59,34 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
           iconType="plusInCircle"
           data-test-subj="policy-artifacts-empty-unassigned"
           title={<h2>{labels.emptyUnassignedTitle}</h2>}
-          body={labels.emptyUnassignedMessage(policyName)}
+          body={
+            canWriteArtifact
+              ? labels.emptyUnassignedMessage(policyName)
+              : labels.emptyUnassignedNoPrivilegesMessage(policyName)
+          }
           actions={[
-            ...(canCreateArtifactsByPolicy
+            ...(canCreateArtifactsByPolicy && canWriteArtifact
               ? [
                   <EuiButton
                     color="primary"
                     fill
                     onClick={onClickPrimaryButtonHandler}
-                    data-test-subj="assign-artifacts-button"
+                    data-test-subj="unassigned-assign-artifacts-button"
                   >
                     {labels.emptyUnassignedPrimaryActionButtonTitle}
                   </EuiButton>,
                 ]
               : []),
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiLink onClick={onClickHandler} href={toRouteUrl}>
-              {labels.emptyUnassignedSecondaryActionButtonTitle}
-            </EuiLink>,
+            canWriteArtifact ? (
+              // eslint-disable-next-line @elastic/eui/href-or-on-click
+              <EuiLink
+                onClick={onClickHandler}
+                href={toRouteUrl}
+                data-test-subj="unassigned-manage-artifacts-button"
+              >
+                {labels.emptyUnassignedSecondaryActionButtonTitle}
+              </EuiLink>
+            ) : null,
           ]}
         />
       </EuiPageTemplate>

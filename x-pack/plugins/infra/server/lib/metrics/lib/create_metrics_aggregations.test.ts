@@ -27,6 +27,7 @@ const options: MetricsAPIRequest = {
       },
     },
   ],
+  includeTimeseries: true,
 };
 
 describe('createMetricsAggregations(options)', () => {

@@ -42,7 +42,7 @@ export const useAlertsActions = ({
   }, [closePopover, refetch]);
 
   const scopedActions = getScopedActions(scopeId);
-  const setEventsLoading = useCallback(
+  const localSetEventsLoading = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
       if (scopedActions) {
         dispatch(scopedActions.setEventsLoading({ id: scopeId, eventIds, isLoading }));
@@ -64,7 +64,7 @@ export const useAlertsActions = ({
     eventIds: [eventId],
     currentStatus: alertStatus as AlertWorkflowStatus,
     indexName,
-    setEventsLoading,
+    setEventsLoading: localSetEventsLoading,
     setEventsDeleted,
     onUpdateSuccess: onStatusUpdate,
     onUpdateFailure: onStatusUpdate,

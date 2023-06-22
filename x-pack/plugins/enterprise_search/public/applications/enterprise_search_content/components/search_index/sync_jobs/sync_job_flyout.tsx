@@ -33,7 +33,11 @@ interface SyncJobFlyoutProps {
 }
 
 export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }) => {
-  const filtering = syncJob?.connector.filtering ? syncJob.connector.filtering[0] : null;
+  const filtering = syncJob?.connector.filtering
+    ? Array.isArray(syncJob?.connector.filtering)
+      ? syncJob?.connector.filtering?.[0]
+      : syncJob?.connector.filtering
+    : null;
   const visible = !!syncJob;
   return visible ? (
     <EuiFlyout onClose={onClose}>
@@ -71,7 +75,7 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
           <EuiFlexItem>
             <SyncJobDocumentsPanel
               added={syncJob.indexed_document_count}
-              total={0}
+              total={syncJob.total_document_count ?? 0}
               removed={syncJob.deleted_document_count}
               volume={syncJob.indexed_document_volume ?? 0}
             />
@@ -81,9 +85,9 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
               canceledAt={syncJob.canceled_at ?? ''}
               cancelationRequestedAt={syncJob.cancelation_requested_at ?? ''}
               syncRequestedAt={syncJob.created_at}
-              syncStarted={syncJob.started_at}
+              syncStarted={syncJob.started_at ?? ''}
               completed={syncJob.completed_at ?? ''}
-              lastUpdated={syncJob.last_seen}
+              lastUpdated={syncJob.last_seen ?? ''}
               triggerMethod={syncJob.trigger_method}
             />
           </EuiFlexItem>

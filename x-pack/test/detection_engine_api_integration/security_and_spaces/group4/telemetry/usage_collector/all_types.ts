@@ -10,7 +10,7 @@ import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getStats,
 } from '../../../../utils';
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('should have initialized empty/zero values when no rules are running', async () => {

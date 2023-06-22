@@ -12,7 +12,15 @@ describe('journey screenshot route', () => {
   let handlerContext: any;
   beforeEach(() => {
     handlerContext = {
-      uptimeEsClient: jest.fn(),
+      uptimeEsClient: {
+        search: jest.fn().mockResolvedValue({
+          body: {
+            hits: {
+              hits: [],
+            },
+          },
+        }),
+      },
       request: {
         params: {
           checkGroup: 'check_group',
@@ -63,6 +71,18 @@ describe('journey screenshot route', () => {
       totalSteps: 3,
     };
 
+    handlerContext.uptimeEsClient.search = jest.fn().mockResolvedValue({
+      body: {
+        hits: {
+          total: {
+            value: 3,
+          },
+          hits: [],
+        },
+        aggregations: { step: { image: { hits: { hits: [{ _source: mock }] } } } },
+      },
+    });
+
     const route = createJourneyScreenshotRoute({
       requests: {
         getJourneyScreenshot: jest.fn().mockReturnValue(mock),
@@ -93,8 +113,20 @@ describe('journey screenshot route', () => {
         },
         type: 'step/screenshot',
       },
-      totalSteps: 3,
     };
+
+    handlerContext.uptimeEsClient.search = jest.fn().mockResolvedValue({
+      body: {
+        hits: {
+          total: {
+            value: 3,
+          },
+          hits: [],
+        },
+        aggregations: { step: { image: { hits: { hits: [{ _source: mock }] } } } },
+      },
+    });
+
     const route = createJourneyScreenshotRoute({
       requests: {
         getJourneyScreenshot: jest.fn().mockReturnValue(mock),
@@ -133,6 +165,17 @@ describe('journey screenshot route', () => {
         type: 'step/screenshot',
       },
     };
+    handlerContext.uptimeEsClient.search = jest.fn().mockResolvedValue({
+      body: {
+        hits: {
+          total: {
+            value: 3,
+          },
+          hits: [],
+        },
+        aggregations: { step: { image: { hits: { hits: [{ _source: mock }] } } } },
+      },
+    });
     const route = createJourneyScreenshotRoute({
       requests: {
         getJourneyScreenshot: jest.fn().mockReturnValue(mock),

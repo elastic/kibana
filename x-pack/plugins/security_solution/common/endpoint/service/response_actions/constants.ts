@@ -17,9 +17,14 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'suspend-process',
   'running-processes',
   'get-file',
+  'execute',
 ] as const;
 
 export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
+
+export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
+  'isolate',
+];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
@@ -30,6 +35,7 @@ export const ENDPOINT_CAPABILITIES = [
   'suspend_process',
   'running_processes',
   'get_file',
+  'execute',
 ] as const;
 
 export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
@@ -45,6 +51,43 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'suspend-process',
   'processes',
   'get-file',
+  'execute',
 ] as const;
 
 export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];
+
+export type ResponseConsoleRbacControls =
+  | 'writeHostIsolation'
+  | 'writeProcessOperations'
+  | 'writeFileOperations'
+  | 'writeExecuteOperations';
+
+/**
+ * maps the console command to the RBAC control that is required to access it via console
+ */
+export const commandToRBACMap: Record<ConsoleResponseActionCommands, ResponseConsoleRbacControls> =
+  Object.freeze({
+    isolate: 'writeHostIsolation',
+    release: 'writeHostIsolation',
+    'kill-process': 'writeProcessOperations',
+    'suspend-process': 'writeProcessOperations',
+    processes: 'writeProcessOperations',
+    'get-file': 'writeFileOperations',
+    execute: 'writeExecuteOperations',
+  });
+
+export const RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP = Object.freeze<
+  Record<ResponseActionsApiCommandNames, ConsoleResponseActionCommands>
+>({
+  isolate: 'isolate',
+  unisolate: 'release',
+  execute: 'execute',
+  'get-file': 'get-file',
+  'running-processes': 'processes',
+  'kill-process': 'kill-process',
+  'suspend-process': 'suspend-process',
+});
+
+// 4 hrs in seconds
+// 4 * 60 * 60
+export const DEFAULT_EXECUTE_ACTION_TIMEOUT = 14400;

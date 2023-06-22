@@ -17,7 +17,7 @@ import { services } from './services';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
-  const testEndpointsPlugin = resolve(__dirname, './fixtures/test_endpoints');
+  const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
 
   const tempKibanaYamlFile = join(getDataPath(), `interactive_setup_kibana_${Date.now()}.yml`);
   await fs.writeFile(tempKibanaYamlFile, '');

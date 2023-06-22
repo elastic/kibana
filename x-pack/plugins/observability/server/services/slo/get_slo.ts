@@ -5,47 +5,24 @@
  * 2.0.
  */
 
-import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
-import { GetSLOResponse, getSLOResponseSchema } from '../../types/rest_specs';
+import { GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
+import { SLO, SLOId, SLOWithSummary, Summary } from '../../domain/models';
 import { SLORepository } from './slo_repository';
-import { SLIClient } from './sli_client';
-import { computeSLI, computeErrorBudget } from '../../domain/services';
+import { SummaryClient } from './summary_client';
 
 export class GetSLO {
-  constructor(private repository: SLORepository, private sliClient: SLIClient) {}
+  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
 
   public async execute(sloId: string): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
+    const summaryBySlo = await this.summaryClient.fetchSummary([slo]);
 
-    const indicatorDataBySlo = await this.sliClient.fetchCurrentSLIData([slo]);
-    const sloWithSummary = computeSloWithSummary(slo, indicatorDataBySlo);
+    const sloWithSummary = mergeSloWithSummary(slo, summaryBySlo);
 
-    return this.toResponse(sloWithSummary);
-  }
-
-  private toResponse(slo: SLOWithSummary): GetSLOResponse {
-    return getSLOResponseSchema.encode({
-      id: slo.id,
-      name: slo.name,
-      description: slo.description,
-      indicator: slo.indicator,
-      time_window: slo.time_window,
-      budgeting_method: slo.budgeting_method,
-      objective: slo.objective,
-      settings: slo.settings,
-      summary: slo.summary,
-      revision: slo.revision,
-      created_at: slo.created_at,
-      updated_at: slo.updated_at,
-    });
+    return getSLOResponseSchema.encode(sloWithSummary);
   }
 }
 
-function computeSloWithSummary(
-  slo: SLO,
-  indicatorDataBySlo: Record<SLOId, IndicatorData>
-): SLOWithSummary {
-  const sliValue = computeSLI(indicatorDataBySlo[slo.id]);
-  const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
-  return { ...slo, summary: { sli_value: sliValue, error_budget: errorBudget } };
+function mergeSloWithSummary(slo: SLO, summaryBySlo: Record<SLOId, Summary>): SLOWithSummary {
+  return { ...slo, summary: summaryBySlo[slo.id] };
 }

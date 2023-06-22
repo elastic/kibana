@@ -431,6 +431,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
+        // Navigate home before attempting to login or we may get redirected to
+        // Discover with a forbidden error, which hides the chrome and causes
+        // PageObjects.security.login to fail when checking for the logout button
+        await PageObjects.common.navigateToUrl('home', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+
         await PageObjects.security.login(
           'no_discover_privileges_user',
           'no_discover_privileges_user-password',

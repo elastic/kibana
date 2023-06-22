@@ -16,6 +16,10 @@ import {
 } from '../../../timelines/components/timeline/body/constants';
 
 import * as i18n from '../../components/alerts_table/translations';
+import {
+  DEFAULT_TABLE_COLUMN_MIN_WIDTH,
+  DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
+} from './translations';
 
 const getBaseColumns = (
   license?: LicenseService
@@ -119,4 +123,34 @@ export const getRulePreviewColumns = (
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
   },
   ...getBaseColumns(license),
+];
+
+export const eventRenderedViewColumns: ColumnHeaderOptions[] = [
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: '@timestamp',
+    displayAsText: i18n.EVENT_RENDERED_VIEW_COLUMNS.timestamp,
+    initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH + 50,
+    actions: false,
+    isExpandable: false,
+    isResizable: false,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    displayAsText: i18n.EVENT_RENDERED_VIEW_COLUMNS.rule,
+    id: 'kibana.alert.rule.name',
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH + 50,
+    linkField: 'kibana.alert.rule.uuid',
+    actions: false,
+    isExpandable: false,
+    isResizable: false,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'eventSummary',
+    displayAsText: i18n.EVENT_RENDERED_VIEW_COLUMNS.eventSummary,
+    actions: false,
+    isExpandable: false,
+    isResizable: false,
+  },
 ];

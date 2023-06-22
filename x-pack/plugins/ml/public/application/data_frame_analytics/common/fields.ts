@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getNumTopClasses, getNumTopFeatureImportanceValues } from './analytics';
 import { Field } from '../../../../common/types/fields';
 import {

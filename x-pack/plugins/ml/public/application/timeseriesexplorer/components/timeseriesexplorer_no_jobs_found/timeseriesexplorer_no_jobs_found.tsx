@@ -27,7 +27,7 @@ export const TimeseriesexplorerNoJobsFound = () => {
   return (
     <EuiEmptyPrompt
       data-test-subj="mlNoSingleMetricJobsFound"
-      iconType="alert"
+      iconType="warning"
       title={
         <h2>
           <FormattedMessage

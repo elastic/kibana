@@ -7,6 +7,7 @@
 
 import { getSecuritySolutionNavTab as getSecuritySolutionCSPNavTab } from '@kbn/cloud-security-posture-plugin/public';
 import { getSecuritySolutionNavTab as getSecuritySolutionTINavTab } from '@kbn/threat-intelligence-plugin/public';
+import { getSecuritySolutionNavTab as getSecuritySolutionCloudDefendNavTab } from '@kbn/cloud-defend-plugin/public';
 import * as i18n from '../translations';
 import type { SecurityNav, SecurityNavGroup } from '../../common/components/navigation/types';
 import { SecurityNavGroupKey } from '../../common/components/navigation/types';
@@ -32,6 +33,7 @@ import {
   APP_LANDING_PATH,
   APP_RESPONSE_ACTIONS_HISTORY_PATH,
   APP_ENTITY_ANALYTICS_PATH,
+  APP_DATA_QUALITY_PATH,
   APP_PATH,
 } from '../../../common/constants';
 
@@ -185,12 +187,23 @@ export const navTabs: SecurityNav = {
     ...getSecuritySolutionCSPNavTab<SecurityPageName>('benchmarks', APP_PATH),
     urlKey: 'administration',
   },
+  [SecurityPageName.cloudDefendPolicies]: {
+    ...getSecuritySolutionCloudDefendNavTab<SecurityPageName>('policies', APP_PATH),
+    urlKey: 'administration',
+  },
   [SecurityPageName.entityAnalytics]: {
     id: SecurityPageName.entityAnalytics,
     name: i18n.ENTITY_ANALYTICS,
     href: APP_ENTITY_ANALYTICS_PATH,
     disabled: false,
     urlKey: 'entity_analytics',
+  },
+  [SecurityPageName.dataQuality]: {
+    id: SecurityPageName.dataQuality,
+    name: i18n.DATA_QUALITY,
+    href: APP_DATA_QUALITY_PATH,
+    disabled: false,
+    urlKey: 'data_quality',
   },
 };
 

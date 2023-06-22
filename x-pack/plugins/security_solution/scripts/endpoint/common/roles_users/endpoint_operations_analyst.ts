@@ -19,9 +19,17 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
           ...noResponseActionsRole.kibana[0].feature,
           siem: [
             'minimal_all',
-            'actions_log_management_all',
+
+            'policy_management_all',
+
+            'trusted_applications_all',
+            'event_filters_all',
+            'host_isolation_exceptions_all',
+            'blocklist_all',
+
             'host_isolation_all',
             'process_operations_all',
+            'actions_log_management_all',
           ],
         },
       },

@@ -20,6 +20,7 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
 export const NoDataEmptyState = memo<{
   onAdd: () => void;
   titleLabel: string;
+  titleNoEntriesLabel: string;
   aboutInfo: string;
   primaryButtonLabel: string;
   canCreateItems?: boolean;
@@ -35,6 +36,7 @@ export const NoDataEmptyState = memo<{
     backComponent,
     'data-test-subj': dataTestSubj,
     titleLabel,
+    titleNoEntriesLabel,
     aboutInfo,
     primaryButtonLabel,
     secondaryAboutInfo,
@@ -44,37 +46,41 @@ export const NoDataEmptyState = memo<{
 
     return (
       <ManagementEmptyStateWrapper>
-        <EmptyPrompt
-          data-test-subj={dataTestSubj}
-          iconType="plusInCircle"
-          title={<h2 data-test-subj={getTestId('title')}>{titleLabel}</h2>}
-          body={
-            <div data-test-subj={getTestId('aboutInfo')}>
-              {aboutInfo}
-              {secondaryAboutInfo ? (
-                <>
-                  <EuiSpacer size="m" />
-                  {secondaryAboutInfo}
-                </>
-              ) : undefined}
-            </div>
-          }
-          actions={
-            canCreateItems
-              ? [
-                  <EuiButton
-                    fill
-                    isDisabled={isAddDisabled}
-                    onClick={onAdd}
-                    data-test-subj={getTestId('addButton')}
-                  >
-                    {primaryButtonLabel}
-                  </EuiButton>,
-                  ...(backComponent ? [backComponent] : []),
-                ]
-              : []
-          }
-        />
+        {canCreateItems ? (
+          <EmptyPrompt
+            data-test-subj={dataTestSubj}
+            iconType="plusInCircle"
+            title={<h2 data-test-subj={getTestId('title')}>{titleLabel}</h2>}
+            body={
+              <div data-test-subj={getTestId('aboutInfo')}>
+                {aboutInfo}
+                {secondaryAboutInfo ? (
+                  <>
+                    <EuiSpacer size="m" />
+                    {secondaryAboutInfo}
+                  </>
+                ) : undefined}
+              </div>
+            }
+            actions={[
+              <EuiButton
+                fill
+                isDisabled={isAddDisabled}
+                onClick={onAdd}
+                data-test-subj={getTestId('addButton')}
+              >
+                {primaryButtonLabel}
+              </EuiButton>,
+              ...(backComponent ? [backComponent] : []),
+            ]}
+          />
+        ) : (
+          <EmptyPrompt
+            data-test-subj={dataTestSubj}
+            iconType="iInCircle"
+            title={<h2 data-test-subj={getTestId('title-no-entries')}>{titleNoEntriesLabel}</h2>}
+          />
+        )}
       </ManagementEmptyStateWrapper>
     );
   }

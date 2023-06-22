@@ -65,7 +65,7 @@ export const NodeEventsInCategory = memo(function ({
                 }
               )}
               color="danger"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="resolver:nodeEventsInCategory:error"
             >
               <p>

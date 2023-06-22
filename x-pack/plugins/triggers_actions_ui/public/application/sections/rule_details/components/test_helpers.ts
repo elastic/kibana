@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
 
 export const getMockLogResponse = () => {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     timestamp: '2022-03-20T07:40:44-07:00',
     duration: 5000000,
     status: 'success',
@@ -36,9 +36,9 @@ export const mockLogResponse: any = {
 
 export function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid.v4()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',
@@ -54,6 +54,7 @@ export function mockRule(overloads: Partial<Rule> = {}): Rule {
     notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
+    revision: 0,
     executionStatus: {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
@@ -94,6 +95,7 @@ export function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSumma
     throttle: '',
     enabled: true,
     errorMessages: [],
+    revision: 0,
     statusStartDate: '2022-03-21T07:40:46-07:00',
     statusEndDate: '2022-03-25T07:40:46-07:00',
     alerts: {

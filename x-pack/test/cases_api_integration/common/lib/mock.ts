@@ -7,9 +7,9 @@
 
 import {
   CasePostRequest,
-  CaseResponse,
+  Case,
   CasesFindResponse,
-  CommentResponse,
+  Comment,
   ConnectorTypes,
   CommentRequestUserType,
   CommentRequestAlertType,
@@ -22,7 +22,10 @@ import {
   CommentRequestExternalReferenceSOType,
   CommentRequestExternalReferenceNoSOType,
   CommentRequestPersistableStateType,
+  FILE_ATTACHMENT_TYPE,
+  FileAttachmentMetadata,
 } from '@kbn/cases-plugin/common/api';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 /**
@@ -122,6 +125,32 @@ export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType =
   externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
 };
 
+export const fileMetadata = () => ({
+  name: 'test_file',
+  extension: 'png',
+  mimeType: 'image/png',
+  created: '2023-02-27T20:26:54.345Z',
+});
+
+export const fileAttachmentMetadata: FileAttachmentMetadata = {
+  files: [fileMetadata()],
+};
+
+export const getFilesAttachmentReq = (
+  req?: Partial<CommentRequestExternalReferenceSOType>
+): CommentRequestExternalReferenceSOType => {
+  return {
+    ...postExternalReferenceSOReq,
+    externalReferenceStorage: {
+      type: ExternalReferenceStorageType.savedObject,
+      soType: FILE_SO_TYPE,
+    },
+    externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+    externalReferenceMetadata: { ...fileAttachmentMetadata },
+    ...req,
+  };
+};
+
 export const persistableStateAttachment: CommentRequestPersistableStateType = {
   type: CommentType.persistableState,
   owner: 'securitySolutionFixture',
@@ -132,7 +161,7 @@ export const persistableStateAttachment: CommentRequestPersistableStateType = {
 export const postCaseResp = (
   id?: string | null,
   req: CasePostRequest = postCaseReq
-): Partial<CaseResponse> => ({
+): Partial<Case> => ({
   ...req,
   ...(id != null ? { id } : {}),
   comments: [],
@@ -156,7 +185,7 @@ export const commentsResp = ({
   comments,
 }: {
   comments: CommentRequestWithID[];
-}): Array<Partial<CommentResponse>> => {
+}): Array<Partial<Comment>> => {
   return comments.map(({ comment, id }) => {
     const baseFields = {
       id,

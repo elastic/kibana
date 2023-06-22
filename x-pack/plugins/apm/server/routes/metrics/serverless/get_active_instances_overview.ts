@@ -23,7 +23,7 @@ import {
 import { getServerlessFunctionNameFromId } from '../../../../common/serverless';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Coordinate } from '../../../../typings/timeseries';
-import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
+import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { calcMemoryUsed } from './helper';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -59,7 +59,7 @@ export async function getServerlessActiveInstancesOverview({
   end: number;
   serverlessId?: string;
   apmEventClient: APMEventClient;
-}) {
+}): Promise<ActiveInstanceOverview[]> {
   const { intervalString } = getBucketSize({
     start,
     end,

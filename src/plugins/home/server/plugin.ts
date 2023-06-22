@@ -31,9 +31,12 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   private readonly sampleDataRegistry: SampleDataRegistry;
   private customIntegrations?: CustomIntegrationsPluginSetup;
 
+  private readonly isDevMode: boolean;
+
   constructor(private readonly initContext: PluginInitializerContext) {
     this.sampleDataRegistry = new SampleDataRegistry(this.initContext);
     this.tutorialsRegistry = new TutorialsRegistry(this.initContext);
+    this.isDevMode = this.initContext.env.mode.dev;
   }
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
@@ -48,7 +51,12 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },
       sampleData: {
-        ...this.sampleDataRegistry.setup(core, plugins.usageCollection, plugins.customIntegrations),
+        ...this.sampleDataRegistry.setup(
+          core,
+          plugins.usageCollection,
+          plugins.customIntegrations,
+          this.isDevMode
+        ),
       },
     };
   }

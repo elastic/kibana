@@ -22,8 +22,16 @@ import {
   registerGetRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
+import { loggerMock } from '@kbn/logging-mocks';
+import { setupConfig } from './routes_test_utils';
 
 const coreId = Symbol('core');
+const testTypes = [
+  { name: 'index-pattern', hide: false },
+  { name: 'hidden-type', hide: true },
+  { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
+];
 
 describe('GET /api/saved_objects/{type}/{id}', () => {
   let server: HttpService;
@@ -31,6 +39,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   let handlerContext: ReturnType<typeof coreMock.createRequestHandlerContext>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
+  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
@@ -44,6 +53,12 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     });
 
     handlerContext = coreMock.createRequestHandlerContext();
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
+      return testTypes
+        .map((typeDesc) => createHiddenTypeVariants(typeDesc))
+        .find((fullTest) => fullTest.name === typename);
+    });
+
     savedObjectsClient = handlerContext.savedObjects.client;
 
     httpSetup.registerRouteHandlerContext<InternalSavedObjectsRequestHandlerContext, 'core'>(
@@ -56,10 +71,16 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
 
     const router =
       httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsGet.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerGetRoute(router, { coreUsageData });
+
+    const logger = loggerMock.create();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+
+    const config = setupConfig();
+    registerGetRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });
@@ -97,8 +118,22 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
       .expect(200);
 
     expect(savedObjectsClient.get).toHaveBeenCalled();
+    expect(savedObjectsClient.get).nthCalledWith(1, 'index-pattern', 'logstash-*', {
+      migrationVersionCompatibility: 'compatible',
+    });
+  });
 
-    const args = savedObjectsClient.get.mock.calls[0];
-    expect(args).toEqual(['index-pattern', 'logstash-*']);
+  it('returns with status 400 when a type is hidden from the http APIs', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/hidden-from-http/hiddenId')
+      .expect(400);
+    expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
+  });
+
+  it('logs a warning message when called', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/index-pattern/logstash-*')
+      .expect(200);
+    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
 });

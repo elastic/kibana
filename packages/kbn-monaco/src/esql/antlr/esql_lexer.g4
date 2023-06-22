@@ -29,7 +29,6 @@ WS
     : [ \r\n\t]+ -> channel(HIDDEN)
     ;
 
-
 mode EXPRESSION;
 
 PIPE : '|' -> popMode;
@@ -73,30 +72,30 @@ DECIMAL_LITERAL
 BY : 'by';
 
 AND : 'and';
-ASC : 'asc';
 ASSIGN : '=';
 COMMA : ',';
-DESC : 'desc';
 DOT : '.';
-FALSE : 'false';
-FIRST : 'first';
-LAST : 'last';
 LP : '(';
 OPENING_BRACKET : '[' -> pushMode(DEFAULT_MODE);
 CLOSING_BRACKET : ']' -> popMode, popMode; // pop twice, once to clear mode of current cmd and once to exit DEFAULT_MODE
 NOT : 'not';
 NULL : 'null';
-NULLS : 'nulls';
 OR : 'or';
 RP : ')';
-TRUE : 'true';
 
-EQ  : '==';
-NEQ : '!=';
-LT  : '<';
-LTE : '<=';
-GT  : '>';
-GTE : '>=';
+BOOLEAN_VALUE
+   : 'true'
+   | 'false'
+   ;
+
+COMPARISON_OPERATOR
+    : '=='
+    |'!='
+    | '<'
+    | '<='
+    | '>'
+    | '>='
+    ;
 
 PLUS : '+';
 MINUS : '-';
@@ -104,12 +103,24 @@ ASTERISK : '*';
 SLASH : '/';
 PERCENT : '%';
 
-ROUND_FUNCTION_MATH : 'round';
-AVG_FUNCTION_MATH : 'avg';
-SUM_FUNCTION_MATH : 'sum';
-MIN_FUNCTION_MATH : 'min';
-MAX_FUNCTION_MATH : 'max';
+ORDERING
+    : 'asc'
+    | 'desc'
+    ;
 
+NULLS_ORDERING: 'nulls';
+NULLS_ORDERING_DIRECTION
+    : 'first'
+    | 'last'
+    ;
+
+UNARY_FUNCTION
+    : 'round'
+    | 'avg'
+    | 'min'
+    | 'max'
+    | 'sum'
+    ;
 
 UNQUOTED_IDENTIFIER
     : (LETTER | '_') (LETTER | DIGIT | '_')*
@@ -163,5 +174,3 @@ SRC_MULTILINE_COMMENT
 SRC_WS
     : WS -> channel(HIDDEN)
     ;
-
-UNKNOWN_CMD : ~[ \r\n\t[\]/]+ -> pushMode(EXPRESSION);

@@ -36,7 +36,7 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
-  defaultViewport: { width?: number };
+  defaultViewport: { width?: number; deviceScaleFactor?: number };
   openUrlTimeout: number;
 }
 
@@ -145,6 +145,7 @@ export class HeadlessChromiumDriverFactory {
       const viewport = {
         ...DEFAULT_VIEWPORT,
         width: defaultViewport.width ?? DEFAULT_VIEWPORT.width,
+        deviceScaleFactor: defaultViewport.deviceScaleFactor ?? DEFAULT_VIEWPORT.deviceScaleFactor,
       };
 
       logger.debug(

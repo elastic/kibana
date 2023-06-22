@@ -8,14 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
-import { RuleNotifyWhenType } from '../../common';
 import { UpdateOptions } from '../rules_client';
 import {
   verifyAccessAndContext,
   RewriteResponseCase,
   RewriteRequestCase,
   handleDisabledApiKeysError,
-  rewriteActions,
+  rewriteActionsReq,
+  rewriteActionsRes,
   actionsSchema,
   rewriteRuleLastRun,
 } from './lib';
@@ -40,16 +40,28 @@ const bodySchema = schema.object({
   throttle: schema.nullable(schema.maybe(schema.string({ validate: validateDurationSchema }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   actions: actionsSchema,
-  notify_when: schema.maybe(schema.string({ validate: validateNotifyWhenType })),
+  notify_when: schema.maybe(
+    schema.nullable(
+      schema.oneOf(
+        [
+          schema.literal('onActionGroupChange'),
+          schema.literal('onActiveAlert'),
+          schema.literal('onThrottleInterval'),
+        ],
+        { validate: validateNotifyWhenType }
+      )
+    )
+  ),
 });
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
-  const { notify_when: notifyWhen, ...rest } = result.data;
+  const { notify_when: notifyWhen, actions, ...rest } = result.data;
   return {
     ...result,
     data: {
       ...rest,
       notifyWhen,
+      actions: rewriteActionsReq(actions),
     },
   };
 };
@@ -62,6 +74,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   createdAt,
   updatedAt,
   apiKeyOwner,
+  apiKeyCreatedByUser,
   notifyWhen,
   muteAll,
   mutedInstanceIds,
@@ -96,16 +109,12 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: actions.map(({ group, id, actionTypeId, params }) => ({
-          group,
-          id,
-          params,
-          connector_type_id: actionTypeId,
-        })),
+        actions: rewriteActionsRes(actions),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
 });
 
 export const updateRuleRoute = (
@@ -127,16 +136,7 @@ export const updateRuleRoute = (
           const { id } = req.params;
           const rule = req.body;
           try {
-            const alertRes = await rulesClient.update(
-              rewriteBodyReq({
-                id,
-                data: {
-                  ...rule,
-                  actions: rewriteActions(rule.actions),
-                  notify_when: rule.notify_when as RuleNotifyWhenType,
-                },
-              })
-            );
+            const alertRes = await rulesClient.update(rewriteBodyReq({ id, data: rule }));
             return res.ok({
               body: rewriteBodyRes(alertRes),
             });

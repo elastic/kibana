@@ -6,6 +6,12 @@
 
 Retrieve the health status of the alerting framework.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+====
+
 [[get-alerting-framework-health-api-request]]
 === {api-request-title}
 
@@ -63,20 +69,6 @@ The API returns the following:
          "status":"ok",
          "timestamp":"2022-06-21T21:46:15.023Z"
       }
-   },
-   "alerting_framework_heath":{ <4>
-      "_deprecated":"This state property has a typo, use \"alerting_framework_health\" instead.","decryption_health":{
-         "status":"ok",
-         "timestamp":"2022-06-21T21:46:15.023Z"
-      },
-      "execution_health":{
-         "status":"ok",
-         "timestamp":"2022-06-21T21:46:15.023Z"
-      },
-      "read_health":{
-         "status":"ok",
-         "timestamp":"2022-06-21T21:46:15.023Z"
-      }
    }
 }
 --------------------------------------------------
@@ -89,5 +81,3 @@ the alerting framework: `decryption_health`, `execution_health`, and
 decryption: `ok`, `warn` or `error`. `execution_health` returns the timestamp
 and status of the rule execution: `ok`, `warn` or `error`. `read_health` returns
 the timestamp and status of the rule reading events: `ok`, `warn` or `error`.
-<4> `alerting_framework_heath` has a typo, use `alerting_framework_health`
-instead. deprecated:[8.0.0]

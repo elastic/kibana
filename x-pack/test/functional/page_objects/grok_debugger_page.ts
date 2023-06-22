@@ -9,7 +9,7 @@ import { FtrService } from '../ftr_provider_context';
 
 export class GrokDebuggerPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly aceEditor = this.ctx.getService('aceEditor');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly retry = this.ctx.getService('retry');
 
   async simulateButton() {
@@ -17,30 +17,19 @@ export class GrokDebuggerPageObject extends FtrService {
   }
 
   async getEventOutput() {
-    return await this.aceEditor.getValue(
-      'grokDebuggerContainer > aceEventOutput > codeEditorContainer'
-    );
+    return await this.testSubjects.getVisibleText('eventOutputCodeBlock');
   }
 
   async setEventInput(value: string) {
-    await this.aceEditor.setValue(
-      'grokDebuggerContainer > aceEventInput > codeEditorContainer',
-      value
-    );
+    await this.monacoEditor.setCodeEditorValue(value, 0);
   }
 
   async setPatternInput(pattern: string) {
-    await this.aceEditor.setValue(
-      'grokDebuggerContainer > acePatternInput > codeEditorContainer',
-      pattern
-    );
+    await this.monacoEditor.setCodeEditorValue(pattern, 1);
   }
 
   async setCustomPatternInput(customPattern: string) {
-    await this.aceEditor.setValue(
-      'grokDebuggerContainer > aceCustomPatternsInput > codeEditorContainer',
-      customPattern
-    );
+    await this.monacoEditor.setCodeEditorValue(customPattern, 2);
   }
 
   async toggleSetCustomPattern() {

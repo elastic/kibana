@@ -59,6 +59,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                   title: 'new title!',
                 },
                 overwrite: true,
+                managed: false,
               },
             ],
           });

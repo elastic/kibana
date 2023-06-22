@@ -262,7 +262,7 @@ const NoMarginTopFlexItem = styled(EuiFlexItem)`
 `;
 
 const AccordionContent = styled.div`
-  margin-top: 8px;
+  padding-top: 8px;
 `;
 
 const OverviewHostStatsComponent: React.FC<OverviewHostProps> = ({ data, loading }) => {

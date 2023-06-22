@@ -8,11 +8,7 @@
 
 import { omit } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import type {
-  UiSettingsParams,
-  PublicUiSettingsParams,
-  UserProvidedValues,
-} from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 
 export interface BaseUiSettingsDefaultsClientOptions {
@@ -42,7 +38,7 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   getRegistered() {
-    const copiedDefaults: Record<string, PublicUiSettingsParams> = {};
+    const copiedDefaults: Record<string, Omit<UiSettingsParams, 'schema'>> = {};
     for (const [key, value] of Object.entries(this.defaults)) {
       copiedDefaults[key] = omit(value, 'schema');
     }

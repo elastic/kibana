@@ -17,11 +17,12 @@ interface SessionPersistedTermsBucket {
   doc_count: number;
 }
 
-export function fetchProvider(kibanaIndex: string, logger: Logger) {
+export function fetchProvider(getIndexForType: (type: string) => Promise<string>, logger: Logger) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
     try {
+      const searchSessionIndex = await getIndexForType(SEARCH_SESSION_TYPE);
       const esResponse = await esClient.search<unknown>({
-        index: kibanaIndex,
+        index: searchSessionIndex,
         body: {
           size: 0,
           aggs: {

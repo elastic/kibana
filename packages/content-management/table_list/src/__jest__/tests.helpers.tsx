@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ComponentType } from 'react';
 import { from } from 'rxjs';
-import { InspectorProvider } from '@kbn/content-management-inspector';
+import { ContentEditorProvider } from '@kbn/content-management-content-editor';
 
 import { TagList } from '../mocks';
 import { TableListViewProvider, Services } from '../services';
@@ -35,11 +35,11 @@ export function WithServices<P>(Comp: ComponentType<P>, overrides: Partial<Servi
   return (props: P) => {
     const services = getMockServices(overrides);
     return (
-      <InspectorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
+      <ContentEditorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
         <TableListViewProvider {...services}>
           <Comp {...(props as any)} />
         </TableListViewProvider>
-      </InspectorProvider>
+      </ContentEditorProvider>
     );
   };
 }

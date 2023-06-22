@@ -91,6 +91,7 @@ export interface SavedObjectsImportFailure {
    * If `overwrite` is specified, an attempt was made to overwrite an existing object.
    */
   overwrite?: boolean;
+  managed?: boolean;
   error:
     | SavedObjectsImportConflictError
     | SavedObjectsImportAmbiguousConflictError
@@ -125,6 +126,14 @@ export interface SavedObjectsImportSuccess {
    * If `overwrite` is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution).
    */
   overwrite?: boolean;
+  /**
+   * Flag indicating if a saved object is managed by Kibana (default=false)
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }
 
 /**

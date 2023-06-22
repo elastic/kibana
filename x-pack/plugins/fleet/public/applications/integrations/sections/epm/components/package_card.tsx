@@ -7,11 +7,16 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import {
+  DEFERRED_ASSETS_WARNING_LABEL,
+  DEFERRED_ASSETS_WARNING_MSG,
+} from '../screens/detail/assets/deferred_assets_warning';
 
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
@@ -39,6 +44,7 @@ export function PackageCard({
   release,
   id,
   fromIntegrations,
+  isReauthorizationRequired,
   isUnverified,
   isUpdateAvailable,
   showLabels = true,
@@ -69,6 +75,25 @@ export function PackageCard({
               defaultMessage="Unverified"
             />
           </EuiBadge>
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  let hasDeferredInstallationsBadge: React.ReactNode | null = null;
+
+  if (isReauthorizationRequired && showLabels) {
+    hasDeferredInstallationsBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiToolTip
+            display="inlineBlock"
+            content={DEFERRED_ASSETS_WARNING_MSG}
+            title={DEFERRED_ASSETS_WARNING_LABEL}
+          >
+            <EuiBadge color="warning">{DEFERRED_ASSETS_WARNING_LABEL} </EuiBadge>
+          </EuiToolTip>
         </span>
       </EuiFlexItem>
     );
@@ -135,10 +160,11 @@ export function PackageCard({
           }
           onClick={onCardClick}
         >
-          <EuiFlexGroup gutterSize="xs">
+          <EuiFlexGroup gutterSize="xs" wrap={true}>
             {verifiedBadge}
             {updateAvailableBadge}
             {releaseBadge}
+            {hasDeferredInstallationsBadge}
           </EuiFlexGroup>
         </Card>
       </TrackApplicationView>

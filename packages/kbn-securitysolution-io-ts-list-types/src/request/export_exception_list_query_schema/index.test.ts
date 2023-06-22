@@ -45,6 +45,7 @@ describe('export_exception_list_schema', () => {
 
     expect(message.schema).toEqual({
       id: 'uuid_here',
+      include_expired_exceptions: 'true',
       list_id: 'some-list-id',
       namespace_type: 'single',
     });

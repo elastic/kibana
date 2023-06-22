@@ -27,7 +27,7 @@ import type {
 } from '../../types';
 import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
-import type { LayerType } from '../../../common';
+import type { LayerType } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
 import type {
   ColumnState,
@@ -226,7 +226,7 @@ export const getDatatableVisualization = ({
             )
             .map((accessor) => ({
               columnId: accessor,
-              triggerIcon: columnMap[accessor].hidden
+              triggerIconType: columnMap[accessor].hidden
                 ? 'invisible'
                 : columnMap[accessor].collapseFn
                 ? 'aggregate'
@@ -289,7 +289,7 @@ export const getDatatableVisualization = ({
 
               return {
                 columnId: accessor,
-                triggerIcon: columnConfig?.hidden
+                triggerIconType: columnConfig?.hidden
                   ? 'invisible'
                   : hasColoring
                   ? 'colorBy'
@@ -499,10 +499,6 @@ export const getDatatableVisualization = ({
     };
   },
 
-  getErrorMessages(state) {
-    return undefined;
-  },
-
   getRenderEventCounters(state) {
     const events = {
       color_by_value: false,
@@ -614,7 +610,11 @@ export const getDatatableVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: DatatableVisualizationState) {
+  getVisualizationInfo(state) {
+    const visibleMetricColumns = state.columns.filter(
+      (c) => !c.hidden && c.colorMode && c.colorMode !== 'none'
+    );
+
     return {
       layers: [
         {
@@ -622,6 +622,11 @@ export const getDatatableVisualization = ({
           layerType: state.layerType,
           chartType: 'table',
           ...this.getDescription(state),
+          palette:
+            // if multiple columns have color by value, do not show the palette for now: see #154349
+            visibleMetricColumns.length > 1
+              ? undefined
+              : visibleMetricColumns[0]?.palette?.params?.stops?.map(({ color }) => color),
           dimensions: state.columns.map((column) => {
             let name = i18n.translate('xpack.lens.datatable.metric', {
               defaultMessage: 'Metric',

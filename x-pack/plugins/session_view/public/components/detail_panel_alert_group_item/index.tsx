@@ -51,7 +51,7 @@ export const DetailPanelAlertGroupItem = ({
           size="s"
         >
           <p css={styles.alertTitle}>
-            <EuiIcon color="danger" type="alert" css={styles.alertIcon} />
+            <EuiIcon color="danger" type="warning" css={styles.alertIcon} />
             {dataOrDash(rule?.name)}
           </p>
         </EuiText>

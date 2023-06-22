@@ -87,15 +87,9 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
 `;
 
 exports[`LayerWizardSelect Should render loading screen before layer wizards are loaded 1`] = `
-<div>
-  <EuiCard
-    description={
-      <EuiLoadingContent
-        lines={2}
-      />
-    }
-    layout="horizontal"
-    title=""
+<EuiPanel>
+  <EuiLoadingContent
+    lines={2}
   />
-</div>
+</EuiPanel>
 `;

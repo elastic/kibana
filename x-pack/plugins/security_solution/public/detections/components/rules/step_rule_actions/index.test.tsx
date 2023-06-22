@@ -46,6 +46,7 @@ describe('StepRuleActions', () => {
     const wrapper = shallow(
       <StepRuleActions
         actionMessageParams={actionMessageParams}
+        summaryActionMessageParams={actionMessageParams}
         isReadOnlyView={false}
         isLoading={false}
       />

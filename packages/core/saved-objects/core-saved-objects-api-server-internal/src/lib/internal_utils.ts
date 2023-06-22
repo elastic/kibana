@@ -7,17 +7,15 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
 import {
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
+  type SavedObject,
   SavedObjectsErrorHelpers,
-  SavedObjectsUtils,
-  ALL_NAMESPACES_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+  type SavedObjectsRawDocParseOptions,
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   decodeRequestVersion,
   encodeHitVersion,
@@ -116,6 +114,14 @@ export function getExpectedVersionProperties(version?: string, document?: SavedO
 }
 
 /**
+ * @internal
+ */
+export interface GetSavedObjectFromSourceOptions {
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: SavedObjectsRawDocParseOptions['migrationVersionCompatibility'];
+}
+
+/**
  * Gets a saved object from a raw ES document.
  *
  * @param registry
@@ -129,9 +135,20 @@ export function getSavedObjectFromSource<T>(
   registry: ISavedObjectTypeRegistry,
   type: string,
   id: string,
-  doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
+  doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource },
+  { migrationVersionCompatibility = 'raw' }: GetSavedObjectFromSourceOptions = {}
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt, created_at: createdAt } = doc._source;
+  const {
+    originId,
+    updated_at: updatedAt,
+    created_at: createdAt,
+    coreMigrationVersion,
+    typeMigrationVersion,
+    managed,
+    migrationVersion = migrationVersionCompatibility === 'compatible' && typeMigrationVersion
+      ? { [type]: typeMigrationVersion }
+      : undefined,
+  } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -144,14 +161,16 @@ export function getSavedObjectFromSource<T>(
     id,
     type,
     namespaces,
+    migrationVersion,
+    coreMigrationVersion,
+    typeMigrationVersion,
     ...(originId && { originId }),
     ...(updatedAt && { updated_at: updatedAt }),
     ...(createdAt && { created_at: createdAt }),
     version: encodeHitVersion(doc),
     attributes: doc._source[type],
     references: doc._source.references || [],
-    migrationVersion: doc._source.migrationVersion,
-    coreMigrationVersion: doc._source.coreMigrationVersion,
+    managed,
   };
 }
 
@@ -254,4 +273,25 @@ export function normalizeNamespace(namespace?: string) {
  */
 export function getCurrentTime() {
   return new Date(Date.now()).toISOString();
+}
+
+/**
+ * Returns the managed boolean to apply to a document as it's managed value.
+ * For use by applications to modify behavior for managed saved objects.
+ * The behavior is as follows:
+ * If `optionsManaged` is set, it will override any existing `managed` value in all the documents being created
+ * If `optionsManaged` is not provided, then the documents are created with whatever may be assigned to their `managed` property
+ * or default to `false`.
+ *
+ * @internal
+ */
+
+export function setManaged({
+  optionsManaged,
+  objectManaged,
+}: {
+  optionsManaged?: boolean;
+  objectManaged?: boolean;
+}): boolean {
+  return optionsManaged ?? objectManaged ?? false;
 }

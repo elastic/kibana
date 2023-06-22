@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import {
   AggDescriptor,
@@ -158,7 +158,7 @@ export function createLayerDescriptor({
   const metricsDescriptor = createAggDescriptor(metric);
 
   if (display === DISPLAY.CHOROPLETH) {
-    const joinId = uuid();
+    const joinId = uuidv4();
     const joinKey = getJoinAggKey({
       aggType: metricsDescriptor.type,
       aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',

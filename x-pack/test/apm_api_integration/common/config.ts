@@ -28,7 +28,7 @@ import { RegistryProvider } from './registry';
 export interface ApmFtrConfig {
   name: APMFtrConfigName;
   license: 'basic' | 'trial';
-  kibanaConfig?: Record<string, string | string[]>;
+  kibanaConfig?: Record<string, any>;
 }
 
 async function getApmApiClient({
@@ -56,7 +56,10 @@ type ApmApiClientKey =
   | 'noMlAccessUser'
   | 'manageOwnAgentKeysUser'
   | 'createAndAllAgentKeysUser'
-  | 'monitorClusterAndIndicesUser';
+  | 'monitorClusterAndIndicesUser'
+  | 'manageServiceAccount';
+
+export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
 
 export interface CreateTest {
   testFiles: string[];
@@ -66,9 +69,7 @@ export interface CreateTest {
     apmFtrConfig: () => ApmFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
     synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    apmApiClient: (
-      context: InheritedFtrProviderContext
-    ) => Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
+    apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
     ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
   };
   junit: { reportName: string };
@@ -145,6 +146,10 @@ export function createTestConfig(
             monitorClusterAndIndicesUser: await getApmApiClient({
               kibanaServer,
               username: ApmUsername.apmMonitorClusterAndIndices,
+            }),
+            manageServiceAccount: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmManageServiceAccount,
             }),
           };
         },

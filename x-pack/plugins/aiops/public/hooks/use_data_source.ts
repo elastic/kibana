@@ -7,15 +7,14 @@
 
 import { createContext, useContext } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { SavedSearchSavedObject } from '../application/utils/search_utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 export const DataSourceContext = createContext<{
   dataView: DataView | never;
-  savedSearch: SavedSearch | SavedSearchSavedObject | null;
+  savedSearch: SavedSearch | null;
 }>({
   get dataView(): never {
-    throw new Error('Context is not implemented');
+    throw new Error('DataSourceContext is not implemented');
   },
   savedSearch: null,
 });

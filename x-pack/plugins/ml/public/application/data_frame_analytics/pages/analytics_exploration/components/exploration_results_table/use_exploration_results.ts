@@ -10,9 +10,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from '@kbn/core/public';
-
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { MlApiServices } from '../../../../../services/ml_api_service';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
@@ -35,7 +36,6 @@ import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
 import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 import { isRegressionAnalysis } from '../../../../common/analytics';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
 import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
 import { useExplorationDataGrid } from './use_exploration_data_grid';

@@ -78,6 +78,14 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
+    label: Trigger unsupported ftr tests
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+    agents:
+      queue: 'kibana-default'
+
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
@@ -149,3 +157,11 @@ steps:
     timeout_in_minutes: 10
     agents:
       queue: kibana-default
+
+  - wait
+
+  - command: '.buildkite/scripts/steps/artifacts/docker_image_trigger.sh'
+    label: Trigger container image build
+    timeout_in_minutes: 10
+    agents:
+      queue: 'kibana-default'

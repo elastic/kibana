@@ -7,7 +7,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, Switch, Redirect } from 'react-router-dom';
+import { Router, Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 

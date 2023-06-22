@@ -1,0 +1,32 @@
+{
+  "type": "plugin",
+  "id": "@kbn/upgrade-assistant-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "upgradeAssistant",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "upgrade_assistant"
+    ],
+    "requiredPlugins": [
+      "management",
+      "data",
+      "licensing",
+      "features",
+      "share"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "cloud",
+      "security",
+      "infra"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  }
+}

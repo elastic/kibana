@@ -30,7 +30,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (node) => {
     return node;
   },
-  reactToUiComponent: jest.fn(),
 }));
 
 // Mock the call for loading the list of filters.

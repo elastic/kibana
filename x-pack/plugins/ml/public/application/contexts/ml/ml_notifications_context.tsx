@@ -10,9 +10,13 @@ import { combineLatest, timer } from 'rxjs';
 import { switchMap, map, tap, retry } from 'rxjs/operators';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { useStorage } from '@kbn/ml-local-storage';
 import { useMlKibana } from '../kibana';
-import { useStorage } from '../storage';
-import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
+import {
+  ML_NOTIFICATIONS_LAST_CHECKED_AT,
+  type MlStorageKey,
+  type TMlStorageMapped,
+} from '../../../../common/types/storage';
 import { useAsObservable } from '../../hooks';
 import type { NotificationsCountResponse } from '../../../../common/types/notifications';
 
@@ -47,7 +51,10 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
 
   const canGetNotifications = canGetJobs && canGetDataFrameAnalytics && canGetTrainedModels;
 
-  const [lastCheckedAt, setLastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
+  const [lastCheckedAt, setLastCheckedAt] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_NOTIFICATIONS_LAST_CHECKED_AT>
+  >(ML_NOTIFICATIONS_LAST_CHECKED_AT);
   const lastCheckedAt$ = useAsObservable(lastCheckedAt);
 
   /** Holds the value used for the actual request */

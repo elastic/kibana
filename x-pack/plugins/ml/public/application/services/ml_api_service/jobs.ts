@@ -124,8 +124,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  deleteJobs(jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
+  deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean) {
+    const body = JSON.stringify({ jobIds, deleteUserAnnotations });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/delete_jobs`,
       method: 'POST',
@@ -142,8 +142,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  resetJobs(jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
+  resetJobs(jobIds: string[], deleteUserAnnotations?: boolean) {
+    const body = JSON.stringify({ jobIds, deleteUserAnnotations });
     return httpService.http<ResetJobsResponse>({
       path: `${ML_BASE_PATH}/jobs/reset_jobs`,
       method: 'POST',
@@ -368,8 +368,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   ) {
     const body = JSON.stringify({ jobId, snapshotId, replay, end, calendarEvents });
     return httpService.http<{
-      total: number;
-      categories: Array<{ count?: number; category: Category }>;
+      success: boolean;
     }>({
       path: `${ML_BASE_PATH}/jobs/revert_model_snapshot`,
       method: 'POST',
@@ -379,10 +378,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
 
   datafeedPreview(datafeedId?: string, job?: Job, datafeed?: Datafeed) {
     const body = JSON.stringify({ datafeedId, job, datafeed });
-    return httpService.http<{
-      total: number;
-      categories: Array<{ count?: number; category: Category }>;
-    }>({
+    return httpService.http<unknown[]>({
       path: `${ML_BASE_PATH}/jobs/datafeed_preview`,
       method: 'POST',
       body,

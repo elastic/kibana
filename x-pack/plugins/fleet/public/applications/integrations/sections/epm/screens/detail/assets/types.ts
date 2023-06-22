@@ -8,13 +8,15 @@
 import type { SimpleSavedObject } from '@kbn/core/public';
 
 import type { KibanaAssetType } from '../../../../../types';
+import type { ElasticsearchAssetType } from '../../../../../types';
 
 export type AssetSavedObject = SimpleSavedObject<{ title: string; description?: string }>;
 
 export type AllowedAssetTypes = [
   KibanaAssetType.dashboard,
   KibanaAssetType.search,
-  KibanaAssetType.visualization
+  KibanaAssetType.visualization,
+  ElasticsearchAssetType.transform
 ];
 
 export type AllowedAssetType = AllowedAssetTypes[number] | 'view';

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 import { CrawlRequestOverrides } from '../../components/search_index/crawler/crawler_logic';
@@ -23,4 +25,9 @@ export const startSync = async ({ connectorId, nextSyncConfig }: StartSyncArgs) 
   });
 };
 
-export const StartSyncApiLogic = createApiLogic(['start_sync_api_logic'], startSync);
+export const StartSyncApiLogic = createApiLogic(['start_sync_api_logic'], startSync, {
+  showSuccessFlashFn: () =>
+    i18n.translate('xpack.enterpriseSearch.content.searchIndex.index.syncSuccess.message', {
+      defaultMessage: 'Successfully scheduled a sync, waiting for a connector to pick it up',
+    }),
+});

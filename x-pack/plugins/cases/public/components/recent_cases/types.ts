@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type FilterMode = 'recentlyCreated' | 'myRecentlyReported';
+export type FilterMode = 'recentlyCreated' | 'myRecentlyReported' | 'myRecentlyAssigned';

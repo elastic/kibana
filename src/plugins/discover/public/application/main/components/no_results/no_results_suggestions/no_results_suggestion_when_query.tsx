@@ -7,25 +7,199 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLink } from '@elastic/eui';
+import { SyntaxExamples, SyntaxSuggestionsPopover } from './syntax_suggestions_popover';
+import { type DiscoverServices } from '../../../../../build_services';
+import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 
-export function NoResultsSuggestionWhenQuery() {
-  return (
-    <EuiDescriptionList compressed>
-      <EuiDescriptionListTitle data-test-subj="discoverNoResultsAdjustSearch">
-        <FormattedMessage id="discover.noResults.adjustSearch" defaultMessage="Adjust your query" />
-      </EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
+const getExamples = (
+  querySyntax: string | undefined,
+  docLinks: DiscoverServices['docLinks']
+): SyntaxExamples | null => {
+  if (!querySyntax) {
+    return null;
+  }
+
+  if (querySyntax === 'lucene') {
+    return {
+      title: i18n.translate('discover.noResults.luceneExamples.title', {
+        defaultMessage: 'Lucene examples',
+      }),
+      items: [
+        {
+          label: i18n.translate(
+            'discover.noResults.luceneExamples.findRequestsThatContain200Text',
+            {
+              defaultMessage: 'Find requests that contain the number 200, in any field',
+            }
+          ),
+          example: '200',
+        },
+        {
+          label: i18n.translate('discover.noResults.luceneExamples.find200InStatusFieldText', {
+            defaultMessage: 'Find 200 in the status field',
+          }),
+          example: 'status:200',
+        },
+        {
+          label: i18n.translate('discover.noResults.luceneExamples.findAllStatusCodesText', {
+            defaultMessage: 'Find all status codes between 400-499',
+          }),
+          example: 'status:[400 TO 499]',
+        },
+        {
+          label: i18n.translate('discover.noResults.luceneExamples.findStatusCodesWithPHPText', {
+            defaultMessage: 'Find status codes 400-499 with the extension php',
+          }),
+          example: 'status:[400 TO 499] AND extension:PHP',
+        },
+        {
+          label: i18n.translate(
+            'discover.noResults.luceneExamples.findStatusCodesWithPhpOrHtmlText',
+            {
+              defaultMessage: 'Find status codes 400-499 with the extension php or html',
+            }
+          ),
+          example: 'status:[400 TO 499] AND (extension:php OR extension:html)',
+        },
+      ],
+      footer: (
         <FormattedMessage
-          id="discover.noResults.trySearchingForDifferentCombination"
-          defaultMessage="Try searching for a different combination of terms."
+          id="discover.noResults.luceneExamples.footerDescription"
+          defaultMessage="Learn more about {luceneLink}"
+          values={{
+            luceneLink: (
+              <EuiLink href={docLinks.links.query.luceneQuerySyntax} target="_blank">
+                <FormattedMessage
+                  id="discover.noResults.luceneExamples.footerLuceneLink"
+                  defaultMessage="query string syntax"
+                />
+              </EuiLink>
+            ),
+          }}
         />
-      </EuiDescriptionListDescription>
-    </EuiDescriptionList>
-  );
+      ),
+    };
+  }
+
+  if (querySyntax === 'kuery') {
+    return {
+      title: i18n.translate('discover.noResults.kqlExamples.title', {
+        defaultMessage: 'KQL examples',
+      }),
+      items: [
+        {
+          label: i18n.translate('discover.noResults.kqlExamples.filterForExistingFieldsText', {
+            defaultMessage: 'Filter for documents where a field exists',
+          }),
+          example: 'http.request.method: *',
+        },
+        {
+          label: i18n.translate('discover.noResults.kqlExamples.filterForDocsThatMatchValueText', {
+            defaultMessage: 'Filter for documents that match a value',
+          }),
+          example: 'http.request.method: GET',
+        },
+        {
+          label: i18n.translate('discover.noResults.kqlExamples.filterForDocsWithinRangeText', {
+            defaultMessage: 'Filter for documents within a range',
+          }),
+          example: 'http.response.bytes > 10000 and http.response.bytes <= 20000',
+        },
+        {
+          label: i18n.translate('discover.noResults.kqlExamples.filterForDocsWithWildcardsText', {
+            defaultMessage: 'Filter for documents using wildcards',
+          }),
+          example: 'http.response.status_code: 4*',
+        },
+        {
+          label: i18n.translate('discover.noResults.kqlExamples.negatingQueryText', {
+            defaultMessage: 'Negating a query',
+          }),
+          example: 'NOT http.request.method: GET',
+        },
+        {
+          label: i18n.translate('discover.noResults.kqlExamples.combineMultipleText', {
+            defaultMessage: 'Combining multiple queries with AND/OR',
+          }),
+          example: 'http.request.method: GET AND http.response.status_code: 400',
+        },
+        {
+          label: i18n.translate('discover.noResults.kqlExamples.queryMultipleText', {
+            defaultMessage: 'Querying multiple values for the same field',
+          }),
+          example: 'http.request.method: (GET OR POST OR DELETE)',
+        },
+      ],
+      footer: (
+        <FormattedMessage
+          id="discover.noResults.kqlExamples.kqlDescription"
+          defaultMessage="Learn more about {kqlLink}"
+          values={{
+            kqlLink: (
+              <EuiLink href={docLinks.links.query.kueryQuerySyntax} target="_blank">
+                <FormattedMessage
+                  id="discover.noResults.kqlExamples.footerKQLLink"
+                  defaultMessage="KQL"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      ),
+    };
+  }
+
+  return null;
+};
+
+export interface NoResultsSuggestionWhenQueryProps {
+  querySyntax: string | undefined;
 }
+
+export const NoResultsSuggestionWhenQuery: React.FC<NoResultsSuggestionWhenQueryProps> = ({
+  querySyntax,
+}) => {
+  const services = useDiscoverServices();
+  const { docLinks } = services;
+  const examplesMeta = getExamples(querySyntax, docLinks);
+
+  return (
+    <>
+      <EuiFlexGroup
+        direction="row"
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        wrap={false}
+        css={css`
+          display: inline-flex;
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText data-test-subj="discoverNoResultsAdjustSearch">
+            {examplesMeta ? (
+              <FormattedMessage
+                id="discover.noResults.suggestion.adjustYourQueryWithExamplesText"
+                defaultMessage="Try a different query"
+              />
+            ) : (
+              <FormattedMessage
+                id="discover.noResults.suggestion.adjustYourQueryText"
+                defaultMessage="Adjust your query"
+              />
+            )}
+          </EuiText>
+        </EuiFlexItem>
+        {!!examplesMeta && (
+          <EuiFlexItem grow={false}>
+            <SyntaxSuggestionsPopover meta={examplesMeta} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </>
+  );
+};

@@ -15,6 +15,8 @@ export const INTEGRATION_NAME_LINK = 'integrationNameLink';
 
 export const CONFIRM_MODAL_BTN = 'confirmModalConfirmButton';
 export const CONFIRM_MODAL_BTN_SEL = `[data-test-subj=${CONFIRM_MODAL_BTN}]`;
+export const TOAST_CLOSE_BTN = 'toastCloseButton';
+export const TOAST_CLOSE_BTN_SEL = `[data-test-subj=${TOAST_CLOSE_BTN}]`;
 
 export const SETTINGS_TAB = 'tab-settings';
 export const POLICIES_TAB = 'tab-policies';

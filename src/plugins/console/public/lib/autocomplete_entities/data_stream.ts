@@ -11,12 +11,19 @@ import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/ap
 export class DataStream {
   private dataStreams: string[] = [];
 
+  public perDataStreamIndices: Record<string, string[]> = {};
+
   getDataStreams = (): string[] => {
     return [...this.dataStreams];
   };
 
   loadDataStreams = (dataStreams: IndicesGetDataStreamResponse) => {
     this.dataStreams = (dataStreams.data_streams ?? []).map(({ name }) => name).sort();
+
+    this.perDataStreamIndices = dataStreams.data_streams.reduce((acc, { name, indices }) => {
+      acc[name] = indices.map((index) => index.index_name);
+      return acc;
+    }, {} as Record<string, string[]>);
   };
 
   clearDataStreams = () => {

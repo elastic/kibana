@@ -7,6 +7,7 @@
 
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, skipWhile, switchMap } from 'rxjs/operators';
+import type { PageUrlStateService } from '@kbn/ml-url-state';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
@@ -16,7 +17,6 @@ import {
 } from './explorer_charts/explorer_charts_container_service';
 import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { getSelectionInfluencers, getSelectionJobIds } from './explorer_utils';
-import type { PageUrlStateService } from '../util/url_state';
 import type { TableSeverity } from '../components/controls/select_severity/select_severity';
 import { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 

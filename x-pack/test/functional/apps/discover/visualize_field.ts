@@ -74,7 +74,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should preserve app filters in lens', async () => {
-      await filterBar.addFilter('bytes', 'is between', '3500', '4000');
+      await filterBar.addFilter({
+        field: 'bytes',
+        operation: 'is between',
+        value: { from: '3500', to: '4000' },
+      });
       await PageObjects.discover.findFieldByName('geo.src');
       await PageObjects.discover.clickFieldListItemVisualize('geo.src');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -126,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should visualize correctly text based language queries', async () => {
+    it('should visualize correctly text based language queries in Discover', async () => {
       await PageObjects.discover.selectTextBaseLang('SQL');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -134,13 +138,49 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+      expect(await testSubjects.exists('heatmapChart')).to.be(true);
 
-      await testSubjects.click('textBased-visualize');
+      await PageObjects.discover.chooseLensChart('Donut');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await testSubjects.exists('partitionVisChart')).to.be(true);
+    });
 
-      await retry.try(async () => {
+    it('should visualize correctly text based language queries in Lens', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedTextLangEditor-expand');
+      await testSubjects.click('unifiedHistogramEditVisualization');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('lens visualization', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
-        expect(dimensions).to.have.length(2);
-        expect(await dimensions[1].getVisibleText()).to.be('average');
+        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
+      });
+    });
+
+    it('should visualize correctly text based language queries based on index patterns', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedTextLangEditor-expand');
+      await testSubjects.click('unifiedHistogramEditVisualization');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('lens visualization', async () => {
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
+        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
       });
     });
   });

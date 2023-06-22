@@ -46,7 +46,7 @@ describe('extract search response warnings', () => {
             'Field [kubernetes.container.memory.available.bytes] of type' +
             ' [aggregate_metric_double] is not supported for aggregation [percentiles]',
         },
-        text: 'The data you are seeing might be incomplete or wrong.',
+        text: 'The data might be incomplete or wrong.',
       },
     ]);
   });
@@ -78,7 +78,7 @@ describe('extract search response warnings', () => {
         type: 'shard_failure',
         message: '77 of 79 shards failed',
         reason: { type: 'generic_shard_warning' },
-        text: 'The data you are seeing might be incomplete or wrong.',
+        text: 'The data might be incomplete or wrong.',
       },
     ]);
   });
@@ -95,7 +95,7 @@ describe('extract search response warnings', () => {
         type: 'shard_failure',
         message: '77 of 79 shards failed',
         reason: { type: 'generic_shard_warning' },
-        text: 'The data you are seeing might be incomplete or wrong.',
+        text: 'The data might be incomplete or wrong.',
       },
     ]);
   });

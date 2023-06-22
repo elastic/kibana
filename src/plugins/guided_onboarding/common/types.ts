@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { GuideId, GuideState, GuideStepIds, StepStatus } from '@kbn/guided-onboarding';
+import type { GuideId, GuideState, GuideConfig } from '@kbn/guided-onboarding';
 
 /**
  * Guided onboarding overall status:
@@ -30,41 +30,6 @@ export interface PluginState {
   // a specific period after deployment creation when guided onboarding UI is highlighted
   isActivePeriod: boolean;
   activeGuide?: GuideState;
-}
-
-export interface StepConfig {
-  id: GuideStepIds;
-  title: string;
-  // description is displayed as a single paragraph, can be combined with description list
-  description?: string;
-  // description list is displayed as an unordered list, can be combined with description
-  descriptionList?: Array<string | React.ReactNode>;
-  location?: {
-    appID: string;
-    path: string;
-  };
-  status?: StepStatus;
-  integration?: string;
-  manualCompletion?: {
-    title: string;
-    description: string;
-    readyToCompleteOnNavigation?: boolean;
-  };
-}
-
-export interface GuideConfig {
-  title: string;
-  description: string;
-  guideName: string;
-  docs?: {
-    text: string;
-    url: string;
-  };
-  completedGuideRedirectLocation?: {
-    appID: string;
-    path: string;
-  };
-  steps: StepConfig[];
 }
 
 export type GuidesConfig = {

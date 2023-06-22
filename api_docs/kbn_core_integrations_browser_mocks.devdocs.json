@@ -30,7 +30,7 @@
         "label": "IntegrationsServiceContract",
         "description": [],
         "signature": [
-          "{ setup: () => Promise<void>; start: ({ uiSettings }: ",
+          "{ start: ({ uiSettings }: ",
           {
             "pluginId": "@kbn/core-integrations-browser-internal",
             "scope": "common",
@@ -38,7 +38,7 @@
             "section": "def-common.IntegrationsServiceSetupDeps",
             "text": "IntegrationsServiceSetupDeps"
           },
-          ") => Promise<void>; stop: () => Promise<void>; }"
+          ") => Promise<void>; setup: () => Promise<void>; stop: () => Promise<void>; }"
         ],
         "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
         "deprecated": false,
@@ -53,7 +53,7 @@
         "label": "IntegrationsServiceMock",
         "description": [],
         "signature": [
-          "{ setup: jest.MockInstance<Promise<void>, []>; start: jest.MockInstance<Promise<void>, [",
+          "{ start: jest.MockInstance<Promise<void>, [",
           {
             "pluginId": "@kbn/core-integrations-browser-internal",
             "scope": "common",
@@ -61,7 +61,7 @@
             "section": "def-common.IntegrationsServiceSetupDeps",
             "text": "IntegrationsServiceSetupDeps"
           },
-          "]>; stop: jest.MockInstance<Promise<void>, []>; } & ",
+          "]>; setup: jest.MockInstance<Promise<void>, []>; stop: jest.MockInstance<Promise<void>, []>; } & ",
           {
             "pluginId": "@kbn/core-integrations-browser-mocks",
             "scope": "common",

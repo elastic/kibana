@@ -8,14 +8,10 @@
 import type { Client } from '@elastic/elasticsearch';
 import { cloneDeep } from 'lodash';
 import type { AxiosResponse } from 'axios';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient } from '@kbn/test';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  Agent,
-  CreatePackagePolicyResponse,
-  GetPackagesResponse,
-} from '@kbn/fleet-plugin/common';
+import type { Agent, CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../generate_data';
 import type { HostMetadata, HostPolicyResponse } from '../types';
 import type {
@@ -79,6 +75,7 @@ export interface IndexedHostsResponse
  * @param policyResponseIndex
  * @param enrollFleet
  * @param generator
+ * @param disableEndpointActionsForHost
  */
 export async function indexEndpointHostDocs({
   numDocs,
@@ -90,16 +87,18 @@ export async function indexEndpointHostDocs({
   policyResponseIndex,
   enrollFleet,
   generator,
+  withResponseActions = true,
 }: {
   numDocs: number;
   client: Client;
   kbnClient: KbnClient;
   realPolicies: Record<string, CreatePackagePolicyResponse['item']>;
-  epmEndpointPackage: GetPackagesResponse['items'][0];
+  epmEndpointPackage: GetInfoResponse['item'];
   metadataIndex: string;
   policyResponseIndex: string;
   enrollFleet: boolean;
   generator: EndpointDocGenerator;
+  withResponseActions?: boolean;
 }): Promise<IndexedHostsResponse> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
@@ -137,7 +136,7 @@ export async function indexEndpointHostDocs({
 
     if (enrollFleet) {
       const { id: appliedPolicyId, name: appliedPolicyName } = hostMetadata.Endpoint.policy.applied;
-      const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuid.v4()}`;
+      const uniqueAppliedPolicyName = `${appliedPolicyName}-${uuidv4()}`;
 
       // If we don't yet have a "real" policy record, then create it now in ingest (package config)
       if (!realPolicies[appliedPolicyId]) {
@@ -194,8 +193,15 @@ export async function indexEndpointHostDocs({
         },
       };
 
-      // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-      await indexEndpointAndFleetActionsForHost(client, hostMetadata, undefined);
+      if (withResponseActions) {
+        // Create some fleet endpoint actions and .logs-endpoint actions for this Host
+        const actionsResponse = await indexEndpointAndFleetActionsForHost(
+          client,
+          hostMetadata,
+          undefined
+        );
+        mergeAndAppendArrays(response, actionsResponse);
+      }
     }
 
     await client

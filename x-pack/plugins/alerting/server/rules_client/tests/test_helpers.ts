@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 export const savedObjectWith500Error = {
   id: 'id2',
@@ -39,6 +40,20 @@ export const defaultRule = {
   },
   references: [],
   version: '1',
+};
+
+export const siemRule1 = {
+  ...defaultRule,
+  attributes: {
+    ...defaultRule.attributes,
+    consumer: AlertConsumers.SIEM,
+  },
+  id: 'siem-id1',
+};
+
+export const siemRule2 = {
+  ...siemRule1,
+  id: 'siem-id2',
 };
 
 export const enabledRule1 = {

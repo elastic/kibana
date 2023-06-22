@@ -8,13 +8,12 @@ import type { SavedObject } from '@kbn/core/server';
 
 import type {
   AlertResponse,
-  AllCommentsResponse,
+  Comments,
   AttributesTypeAlerts,
-  CommentResponse,
-  CommentsResponse,
-  FindQueryParams,
+  Comment,
+  CommentsFindResponse,
 } from '../../../common/api';
-import { AllCommentsResponseRt, CommentResponseRt, CommentsResponseRt } from '../../../common/api';
+import { CommentsRt, CommentRt, CommentsFindResponseRt } from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
@@ -29,48 +28,7 @@ import { combineFilters, stringToKueryNode } from '../utils';
 import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import type { CasesClient } from '../client';
-
-/**
- * Parameters for finding attachments of a case
- */
-export interface FindArgs {
-  /**
-   * The case ID for finding associated attachments
-   */
-  caseID: string;
-  /**
-   * Optional parameters for filtering the returned attachments
-   */
-  queryParams?: FindQueryParams;
-}
-
-/**
- * Parameters for retrieving all attachments of a case
- */
-export interface GetAllArgs {
-  /**
-   * The case ID to retrieve all attachments for
-   */
-  caseID: string;
-}
-
-export interface GetArgs {
-  /**
-   * The ID of the case to retrieve an attachment from
-   */
-  caseID: string;
-  /**
-   * The ID of the attachment to retrieve
-   */
-  attachmentID: string;
-}
-
-export interface GetAllAlertsAttachToCase {
-  /**
-   * The ID of the case to retrieve the alerts from
-   */
-  caseId: string;
-}
+import type { FindArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -92,8 +50,6 @@ const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>
 
 /**
  * Retrieves all alerts attached to a specific case.
- *
- * @ignore
  */
 export const getAllAlertsAttachToCase = async (
   { caseId }: GetAllAlertsAttachToCase,
@@ -101,7 +57,6 @@ export const getAllAlertsAttachToCase = async (
   casesClient: CasesClient
 ): Promise<AlertResponse> => {
   const {
-    unsecuredSavedObjectsClient,
     authorization,
     services: { attachmentService },
     logger,
@@ -117,8 +72,7 @@ export const getAllAlertsAttachToCase = async (
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
 
-    const alerts = await attachmentService.getAllAlertsAttachToCase({
-      unsecuredSavedObjectsClient,
+    const alerts = await attachmentService.getter.getAllAlertsAttachToCase({
       caseId: theCase.id,
       filter: authorizationFilter,
     });
@@ -142,13 +96,11 @@ export const getAllAlertsAttachToCase = async (
 
 /**
  * Retrieves the attachments for a case entity. This support pagination.
- *
- * @ignore
  */
 export async function find(
   { caseID, queryParams }: FindArgs,
   clientArgs: CasesClientArgs
-): Promise<CommentsResponse> {
+): Promise<CommentsFindResponse> {
   const {
     unsecuredSavedObjectsClient,
     services: { caseService },
@@ -207,7 +159,7 @@ export async function find(
       }))
     );
 
-    return CommentsResponseRt.encode(transformComments(theComments));
+    return CommentsFindResponseRt.encode(transformComments(theComments));
   } catch (error) {
     throw createCaseError({
       message: `Failed to find comments case id: ${caseID}: ${error}`,
@@ -219,23 +171,19 @@ export async function find(
 
 /**
  * Retrieves a single attachment by its ID.
- *
- * @ignore
  */
 export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
-): Promise<CommentResponse> {
+): Promise<Comment> {
   const {
     services: { attachmentService },
-    unsecuredSavedObjectsClient,
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const comment = await attachmentService.get({
-      unsecuredSavedObjectsClient,
+    const comment = await attachmentService.getter.get({
       attachmentId: attachmentID,
     });
 
@@ -244,7 +192,7 @@ export async function get(
       operation: Operations.getComment,
     });
 
-    return CommentResponseRt.encode(flattenCommentSavedObject(comment));
+    return CommentRt.encode(flattenCommentSavedObject(comment));
   } catch (error) {
     throw createCaseError({
       message: `Failed to get comment case id: ${caseID} attachment id: ${attachmentID}: ${error}`,
@@ -256,13 +204,11 @@ export async function get(
 
 /**
  * Retrieves all the attachments for a case.
- *
- * @ignore
  */
 export async function getAll(
   { caseID }: GetAllArgs,
   clientArgs: CasesClientArgs
-): Promise<AllCommentsResponse> {
+): Promise<Comments> {
   const {
     services: { caseService },
     logger,
@@ -286,7 +232,7 @@ export async function getAll(
       comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
     );
 
-    return AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects));
+    return CommentsRt.encode(flattenCommentSavedObjects(comments.saved_objects));
   } catch (error) {
     throw createCaseError({
       message: `Failed to get all comments case id: ${caseID}: ${error}`,

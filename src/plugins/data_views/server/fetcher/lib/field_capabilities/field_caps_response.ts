@@ -72,7 +72,6 @@ export function readFieldCapsResponse(
   fieldCapsResponse: estypes.FieldCapsResponse
 ): FieldDescriptor[] {
   const capsByNameThenType = fieldCapsResponse.fields;
-
   const kibanaFormattedCaps = Object.keys(capsByNameThenType).reduce<{
     array: FieldDescriptor[];
     hash: Record<string, FieldDescriptor>;

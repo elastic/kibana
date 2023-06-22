@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuidv1 from 'uuid/v1';
-import uuidv5 from 'uuid/v5';
+import { v1 as uuidv1, v5 as uuidv5 } from 'uuid';
 import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,

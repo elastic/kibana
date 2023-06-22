@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { SerializableRecord } from '@kbn/utility-types';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 import { MlCoreSetup } from '../plugin';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import {
@@ -18,13 +19,14 @@ import {
   isSwimLaneEmbeddable,
   SwimLaneDrilldownContext,
 } from '../embeddables';
-import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
 import { ExplorerAppState } from '../../common/types/locator';
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
-export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext>({
+export function createOpenInExplorerAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext> {
+  return {
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
     getIconType(context): string {
@@ -74,7 +76,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         if (
           Array.isArray(entityFields) &&
           entityFields.length === 1 &&
-          entityFields[0].operation === ENTITY_FIELD_OPERATIONS.ADD
+          entityFields[0].operation === ML_ENTITY_FIELD_OPERATIONS.ADD
         ) {
           const { fieldName, fieldValue } = entityFields[0];
           if (fieldName !== undefined && fieldValue !== undefined) {
@@ -129,5 +131,5 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
       );
     },
-  });
+  };
 }

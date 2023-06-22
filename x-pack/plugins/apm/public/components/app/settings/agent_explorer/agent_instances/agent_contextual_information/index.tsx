@@ -8,16 +8,18 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
+import { isEmpty } from 'lodash';
 import React from 'react';
 import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useDefaultTimeRange } from '../../../../../../hooks/use_default_time_range';
 import { ApmRoutes } from '../../../../../routing/apm_route_config';
-import { ServiceLink } from '../../../../../shared/service_link';
+import { ServiceLink } from '../../../../../shared/links/apm/service_link';
 import { StickyProperties } from '../../../../../shared/sticky_properties';
 import { getComparisonEnabled } from '../../../../../shared/time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../../agent_explorer_docs_link';
+import { AgentLatestVersion } from '../../agent_latest_version';
 
 const serviceLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.serviceLabel',
@@ -40,6 +42,13 @@ const instancesLabel = i18n.translate(
   }
 );
 
+const latestVersionLabel = i18n.translate(
+  'xpack.apm.agentInstancesDetails.latestVersionLabel',
+  {
+    defaultMessage: 'Latest agent version',
+  }
+);
+
 const agentDocsLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.agentDocsUrlLabel',
   {
@@ -52,17 +61,25 @@ export function AgentContextualInformation({
   serviceName,
   agentDocsPageUrl,
   instances,
+  latestVersion,
   query,
+  isLatestVersionsLoading,
+  latestVersionsFailed,
 }: {
   agentName: AgentName;
   serviceName: string;
   agentDocsPageUrl?: string;
   instances: number;
+  latestVersion?: string;
   query: TypeOf<ApmRoutes, '/settings/agent-explorer'>['query'];
+  isLatestVersionsLoading: boolean;
+  latestVersionsFailed: boolean;
 }) {
-  const { core } = useApmPluginContext();
+  const { core, config } = useApmPluginContext();
+  const latestAgentVersionEnabled = !isEmpty(config.latestAgentVersionsUrl);
   const comparisonEnabled = getComparisonEnabled({ core });
   const { rangeFrom, rangeTo } = useDefaultTimeRange();
+  const width = latestAgentVersionEnabled ? '20%' : '25%';
 
   const stickyProperties = [
     {
@@ -88,7 +105,7 @@ export function AgentContextualInformation({
           }
         />
       ),
-      width: '25%',
+      width,
     },
     {
       label: agentNameLabel,
@@ -100,7 +117,7 @@ export function AgentContextualInformation({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      width: '25%',
+      width,
     },
     {
       label: instancesLabel,
@@ -112,8 +129,25 @@ export function AgentContextualInformation({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      width: '25%',
+      width,
     },
+    ...(latestAgentVersionEnabled
+      ? [
+          {
+            label: latestVersionLabel,
+            fieldName: latestVersionLabel,
+            val: (
+              <AgentLatestVersion
+                agentName={agentName}
+                isLoading={isLatestVersionsLoading}
+                latestVersion={latestVersion}
+                failed={latestVersionsFailed}
+              />
+            ),
+            width,
+          },
+        ]
+      : []),
     {
       label: agentDocsLabel,
       fieldName: agentDocsLabel,
@@ -129,7 +163,7 @@ export function AgentContextualInformation({
           }
         />
       ),
-      width: '25%',
+      width,
     },
   ];
 

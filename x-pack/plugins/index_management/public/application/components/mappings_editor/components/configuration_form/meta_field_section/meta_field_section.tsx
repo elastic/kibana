@@ -43,7 +43,7 @@ export const MetaFieldSection = () => (
       path="metaField"
       component={JsonEditorField}
       componentProps={{
-        euiCodeEditorProps: {
+        codeEditorProps: {
           height: '400px',
           'aria-label': i18n.translate('xpack.idxMgmt.mappingsEditor.metaFieldEditorAriaLabel', {
             defaultMessage: '_meta field data editor',

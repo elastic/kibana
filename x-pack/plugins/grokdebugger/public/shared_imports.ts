@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';
-
 export { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';

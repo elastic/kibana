@@ -10,17 +10,19 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
-import type { IndexPattern } from '../../../../types';
 import {
   FieldOption,
   FieldOptionValue,
   FieldPicker,
+} from '@kbn/visualization-ui-components/public';
+import {
   useDebouncedValue,
   NewBucketButton,
   DragDropBuckets,
   DraggableBucketContainer,
   FieldsBucketContainer,
-} from '../../../../shared_components';
+} from '@kbn/visualization-ui-components/public';
+import type { IndexPattern } from '../../../../types';
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 2;
 

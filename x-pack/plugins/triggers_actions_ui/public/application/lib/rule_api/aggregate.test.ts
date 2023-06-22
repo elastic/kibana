@@ -23,7 +23,7 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     };
-    http.get.mockResolvedValueOnce(resolvedValue);
+    http.post.mockResolvedValueOnce(resolvedValue);
 
     const result = await loadRuleAggregations({ http });
     expect(result).toEqual({
@@ -35,16 +35,11 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     });
-    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "query": Object {
-            "default_search_operator": "AND",
-            "filter": undefined,
-            "search": undefined,
-            "search_fields": undefined,
-          },
+          "body": "{\\"default_search_operator\\":\\"AND\\"}",
         },
       ]
     `);
@@ -60,7 +55,7 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     };
-    http.get.mockResolvedValueOnce(resolvedValue);
+    http.post.mockResolvedValueOnce(resolvedValue);
 
     const result = await loadRuleAggregations({ http, searchText: 'apples' });
     expect(result).toEqual({
@@ -72,16 +67,11 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     });
-    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "query": Object {
-            "default_search_operator": "AND",
-            "filter": undefined,
-            "search": "apples",
-            "search_fields": "[\\"name\\",\\"tags\\"]",
-          },
+          "body": "{\\"search_fields\\":\\"[\\\\\\"name\\\\\\",\\\\\\"tags\\\\\\"]\\",\\"search\\":\\"apples\\",\\"default_search_operator\\":\\"AND\\"}",
         },
       ]
     `);
@@ -97,7 +87,7 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     };
-    http.get.mockResolvedValueOnce(resolvedValue);
+    http.post.mockResolvedValueOnce(resolvedValue);
 
     const result = await loadRuleAggregations({
       http,
@@ -113,16 +103,11 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     });
-    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "query": Object {
-            "default_search_operator": "AND",
-            "filter": "(alert.attributes.actions:{ actionTypeId:action } OR alert.attributes.actions:{ actionTypeId:type })",
-            "search": "foo",
-            "search_fields": "[\\"name\\",\\"tags\\"]",
-          },
+          "body": "{\\"search_fields\\":\\"[\\\\\\"name\\\\\\",\\\\\\"tags\\\\\\"]\\",\\"search\\":\\"foo\\",\\"filter\\":\\"(alert.attributes.actions:{ actionTypeId:action } OR alert.attributes.actions:{ actionTypeId:type })\\",\\"default_search_operator\\":\\"AND\\"}",
         },
       ]
     `);
@@ -138,7 +123,7 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     };
-    http.get.mockResolvedValueOnce(resolvedValue);
+    http.post.mockResolvedValueOnce(resolvedValue);
 
     const result = await loadRuleAggregations({
       http,
@@ -153,16 +138,11 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     });
-    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "query": Object {
-            "default_search_operator": "AND",
-            "filter": "alert.attributes.alertTypeId:(foo or bar)",
-            "search": undefined,
-            "search_fields": undefined,
-          },
+          "body": "{\\"filter\\":\\"alert.attributes.alertTypeId:(foo or bar)\\",\\"default_search_operator\\":\\"AND\\"}",
         },
       ]
     `);
@@ -178,7 +158,7 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     };
-    http.get.mockResolvedValueOnce(resolvedValue);
+    http.post.mockResolvedValueOnce(resolvedValue);
 
     const result = await loadRuleAggregations({
       http,
@@ -195,16 +175,11 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     });
-    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "query": Object {
-            "default_search_operator": "AND",
-            "filter": "alert.attributes.alertTypeId:(foo or bar) and (alert.attributes.actions:{ actionTypeId:action } OR alert.attributes.actions:{ actionTypeId:type })",
-            "search": "baz",
-            "search_fields": "[\\"name\\",\\"tags\\"]",
-          },
+          "body": "{\\"search_fields\\":\\"[\\\\\\"name\\\\\\",\\\\\\"tags\\\\\\"]\\",\\"search\\":\\"baz\\",\\"filter\\":\\"alert.attributes.alertTypeId:(foo or bar) and (alert.attributes.actions:{ actionTypeId:action } OR alert.attributes.actions:{ actionTypeId:type })\\",\\"default_search_operator\\":\\"AND\\"}",
         },
       ]
     `);
@@ -220,7 +195,7 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     };
-    http.get.mockResolvedValue(resolvedValue);
+    http.post.mockResolvedValue(resolvedValue);
 
     let result = await loadRuleAggregations({
       http,
@@ -237,16 +212,11 @@ describe('loadRuleAggregations', () => {
       },
     });
 
-    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "query": Object {
-            "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled: true",
-            "search": undefined,
-            "search_fields": undefined,
-          },
+          "body": "{\\"filter\\":\\"alert.attributes.enabled: true\\",\\"default_search_operator\\":\\"AND\\"}",
         },
       ]
     `);
@@ -256,16 +226,11 @@ describe('loadRuleAggregations', () => {
       ruleStatusesFilter: ['enabled', 'snoozed'],
     });
 
-    expect(http.get.mock.calls[1]).toMatchInlineSnapshot(`
+    expect(http.post.mock.calls[1]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "query": Object {
-            "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled: true and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })",
-            "search": undefined,
-            "search_fields": undefined,
-          },
+          "body": "{\\"filter\\":\\"alert.attributes.enabled: true and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })\\",\\"default_search_operator\\":\\"AND\\"}",
         },
       ]
     `);
@@ -275,16 +240,11 @@ describe('loadRuleAggregations', () => {
       ruleStatusesFilter: ['enabled', 'disabled', 'snoozed'],
     });
 
-    expect(http.get.mock.calls[1]).toMatchInlineSnapshot(`
+    expect(http.post.mock.calls[1]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "query": Object {
-            "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled: true and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })",
-            "search": undefined,
-            "search_fields": undefined,
-          },
+          "body": "{\\"filter\\":\\"alert.attributes.enabled: true and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })\\",\\"default_search_operator\\":\\"AND\\"}",
         },
       ]
     `);
@@ -300,7 +260,7 @@ describe('loadRuleAggregations', () => {
         unknown: 0,
       },
     };
-    http.get.mockResolvedValueOnce(resolvedValue);
+    http.post.mockResolvedValueOnce(resolvedValue);
 
     const result = await loadRuleAggregations({
       http,
@@ -318,16 +278,11 @@ describe('loadRuleAggregations', () => {
       },
     });
 
-    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "query": Object {
-            "default_search_operator": "AND",
-            "filter": "alert.attributes.tags:(a or b or c)",
-            "search": "baz",
-            "search_fields": "[\\"name\\",\\"tags\\"]",
-          },
+          "body": "{\\"search_fields\\":\\"[\\\\\\"name\\\\\\",\\\\\\"tags\\\\\\"]\\",\\"search\\":\\"baz\\",\\"filter\\":\\"alert.attributes.tags:(a or b or c)\\",\\"default_search_operator\\":\\"AND\\"}",
         },
       ]
     `);

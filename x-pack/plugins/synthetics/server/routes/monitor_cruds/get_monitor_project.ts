@@ -25,31 +25,33 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
     }),
     query: querySchema,
   },
-  handler: async ({
-    request,
-    response,
-    server: { logger },
-    savedObjectsClient,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const {
+      request,
+      server: { logger },
+    } = routeContext;
+
     const { projectName } = request.params;
     const { per_page: perPage = 500, search_after: searchAfter } = request.query;
     const decodedProjectName = decodeURI(projectName);
     const decodedSearchAfter = searchAfter ? decodeURI(searchAfter) : undefined;
 
     try {
-      const { saved_objects: monitors, total } = await getMonitors(
-        {
-          filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
-          fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
-          perPage,
-          sortField: ConfigKey.JOURNEY_ID,
-          sortOrder: 'asc',
-          searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,
+      const { saved_objects: monitors, total } = await getMonitors({
+        ...routeContext,
+        request: {
+          ...request,
+          query: {
+            ...request.query,
+            filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
+            fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
+            perPage,
+            sortField: ConfigKey.JOURNEY_ID,
+            sortOrder: 'asc',
+            searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,
+          },
         },
-        syntheticsMonitorClient.syntheticsService,
-        savedObjectsClient
-      );
+      });
       const projectMonitors = monitors.map((monitor) => ({
         journey_id: monitor.attributes[ConfigKey.JOURNEY_ID],
         hash: monitor.attributes[ConfigKey.CONFIG_HASH] || '',

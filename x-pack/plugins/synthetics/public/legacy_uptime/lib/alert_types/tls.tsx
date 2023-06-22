@@ -8,11 +8,16 @@
 import React from 'react';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
-import { TlsTranslations } from '../../../../common/translations';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import { TLSParams } from '../../../../common/runtime_types/alerts/tls';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
+import { TlsTranslations } from '../../../../common/rules/legacy_uptime/translations';
 import { AlertTypeInitializer } from '.';
 
 import { CERTIFICATES_ROUTE } from '../../../../common/constants/ui';
+
+let validateFunc: (ruleParams: any) => ValidationResult;
 
 const { defaultActionMessage, defaultRecoveryMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
@@ -25,9 +30,24 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   documentationUrl(docLinks) {
     return `${docLinks.links.observability.tlsCertificate}`;
   },
-  ruleParamsExpression: (params: any) => <TLSAlert core={core} plugins={plugins} params={params} />,
+  ruleParamsExpression: (params: RuleTypeParamsExpressionProps<TLSParams>) => (
+    <TLSAlert
+      core={core}
+      plugins={plugins}
+      ruleParams={params.ruleParams}
+      setRuleParams={params.setRuleParams}
+    />
+  ),
   description,
-  validate: () => ({ errors: {} }),
+  validate: (ruleParams: any) => {
+    if (!validateFunc) {
+      (async function loadValidate() {
+        const { validateTLSAlertParams } = await import('./lazy_wrapper/validate_tls_alert');
+        validateFunc = validateTLSAlertParams;
+      })();
+    }
+    return validateFunc ? validateFunc(ruleParams) : ({} as ValidationResult);
+  },
   defaultActionMessage,
   defaultRecoveryMessage,
   requiresAppContext: false,

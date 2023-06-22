@@ -31,7 +31,7 @@ describe('createActionRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id?}"`);
 
     const createResult = {
       id: '1',
@@ -86,6 +86,7 @@ describe('createActionRoute', () => {
             "name": "My name",
             "secrets": Object {},
           },
+          "options": undefined,
         },
       ]
     `);

@@ -122,5 +122,12 @@ export const esBeatsResponse = (date = moment().format('YYYY.MM.DD')) => {
         },
       },
     },
+    packageErrors: {
+      execution: {
+        errors: [],
+        timedOut: false,
+      },
+      products: {},
+    },
   };
 };

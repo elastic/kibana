@@ -10,6 +10,7 @@ import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const dataAnalyticsJobConfigSchema = schema.object({
   description: schema.maybe(schema.string()),
+  _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   dest: schema.object({
     index: schema.string(),
     results_field: schema.maybe(schema.string()),
@@ -59,6 +60,7 @@ export const dataAnalyticsExplainSchema = schema.object({
   analyzed_fields: schema.maybe(schema.any()),
   model_memory_limit: schema.maybe(schema.string()),
   max_num_threads: schema.maybe(schema.number()),
+  _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 export const analyticsIdSchema = schema.object({
@@ -89,6 +91,7 @@ export const dataAnalyticsJobUpdateSchema = schema.object({
   model_memory_limit: schema.maybe(schema.string()),
   allow_lazy_start: schema.maybe(schema.boolean()),
   max_num_threads: schema.maybe(schema.number()),
+  _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({

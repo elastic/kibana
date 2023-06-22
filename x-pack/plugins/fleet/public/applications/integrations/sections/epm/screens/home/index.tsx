@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
-import { getPackageReleaseLabel } from '../../../../../../services/package_prerelease';
+import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
+import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 
@@ -26,7 +28,7 @@ import type {
   IntegrationCardReleaseLabel,
 } from '../../../../../../../common/types/models';
 
-import { useGetPackages } from '../../../../hooks';
+import { useGetPackagesQuery } from '../../../../hooks';
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
@@ -35,14 +37,15 @@ import { AvailablePackages } from './available_packages';
 
 export interface CategoryParams {
   category?: ExtendedIntegrationCategory;
+  subcategory?: string;
 }
 
 export const getParams = (params: CategoryParams, search: string) => {
-  const { category } = params;
+  const { category, subcategory } = params;
   const selectedCategory: ExtendedIntegrationCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam };
+  return { selectedCategory, searchParam, selectedSubcategory: subcategory };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {
@@ -71,6 +74,7 @@ export const mapToCard = ({
   const version = 'version' in item ? item.version || '' : '';
 
   let isUpdateAvailable = false;
+  let isReauthorizationRequired = false;
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
       ? addBasePath(item.uiInternalPath)
@@ -81,6 +85,8 @@ export const mapToCard = ({
       urlVersion = item.savedObject.attributes.version || item.version;
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
       isUpdateAvailable = isPackageUpdatable(item);
+
+      isReauthorizationRequired = hasDeferredInstallations(item);
     }
 
     const url = getHref('integration_details_overview', {
@@ -105,21 +111,22 @@ export const mapToCard = ({
     version,
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
+    isReauthorizationRequired,
     isUnverified,
     isUpdateAvailable,
   };
 };
 
 export const EPMHomePage: React.FC = () => {
+  const [prereleaseEnabled, setPrereleaseEnabled] = useState<boolean>(false);
+
   // loading packages to find installed ones
-  const { data: allPackages, isLoading } = useGetPackages({
-    prerelease: true,
+  const { data: allPackages, isLoading } = useGetPackagesQuery({
+    prerelease: prereleaseEnabled,
   });
 
-  const installedPackages = useMemo(
-    () =>
-      (allPackages?.response || []).filter((pkg) => pkg.status === installationStatuses.Installed),
-    [allPackages?.response]
+  const installedPackages = (allPackages?.items || []).filter(
+    (pkg) => pkg.status === installationStatuses.Installed
   );
 
   const unverifiedPackageCount = installedPackages.filter(
@@ -140,7 +147,7 @@ export const EPMHomePage: React.FC = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
         <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-          <AvailablePackages />
+          <AvailablePackages setPrereleaseEnabled={setPrereleaseEnabled} />
         </DefaultLayout>
       </Route>
     </Switch>

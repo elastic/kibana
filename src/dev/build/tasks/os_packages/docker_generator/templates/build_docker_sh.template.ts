@@ -14,6 +14,7 @@ function generator({
   imageTag,
   imageFlavor,
   dockerPush,
+  dockerTag,
   dockerTagQualifier,
   dockerCrossCompile,
   version,
@@ -21,9 +22,9 @@ function generator({
   baseImageName,
   architecture,
 }: TemplateContext) {
-  const dockerTargetName = `${imageTag}${imageFlavor}:${version}${
-    dockerTagQualifier ? '-' + dockerTagQualifier : ''
-  }`;
+  const tag =
+    (dockerTag ? dockerTag : version) + (dockerTagQualifier ? '-' + dockerTagQualifier : '');
+  const dockerTargetName = `${imageTag}${imageFlavor}:${tag}`;
   const dockerArchitecture = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
   const dockerBuild = dockerCrossCompile
     ? `docker buildx build --platform ${dockerArchitecture} -t ${dockerTargetName} -f Dockerfile . || exit 1;`

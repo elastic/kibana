@@ -9,7 +9,7 @@ import rison from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import { QuickJobCreator } from './quick_create_job';
+import { QuickLensJobCreator } from './quick_create_job';
 import { ml } from '../../../services/ml_api_service';
 
 import {
@@ -71,7 +71,7 @@ export async function resolver(
     layerIndex = undefined;
   }
 
-  const jobCreator = new QuickJobCreator(
+  const jobCreator = new QuickLensJobCreator(
     getLens(),
     getUiSettings(),
     getTimefilter(),

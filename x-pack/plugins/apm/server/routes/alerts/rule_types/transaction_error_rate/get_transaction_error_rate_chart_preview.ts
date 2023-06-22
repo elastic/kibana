@@ -9,6 +9,7 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { AlertParams } from '../../route';
@@ -23,6 +24,12 @@ import {
 } from '../../../../lib/helpers/transaction_error_rate';
 import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../../common/document_type';
+
+export type TransactionErrorRateChartPreviewResponse = Array<{
+  x: number;
+  y: number;
+}>;
 
 export async function getTransactionErrorRateChartPreview({
   config,
@@ -32,9 +39,16 @@ export async function getTransactionErrorRateChartPreview({
   config: APMConfig;
   apmEventClient: APMEventClient;
   alertParams: AlertParams;
-}) {
-  const { serviceName, environment, transactionType, interval, start, end } =
-    alertParams;
+}): Promise<TransactionErrorRateChartPreviewResponse> {
+  const {
+    serviceName,
+    environment,
+    transactionType,
+    interval,
+    start,
+    end,
+    transactionName,
+  } = alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
     config,
@@ -43,8 +57,6 @@ export async function getTransactionErrorRateChartPreview({
     start,
     end,
   });
-
-  const outcomes = getOutcomeAggregation();
 
   const params = {
     apm: {
@@ -58,6 +70,7 @@ export async function getTransactionErrorRateChartPreview({
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...getDocumentTypeFilterForTransactions(
@@ -67,7 +80,6 @@ export async function getTransactionErrorRateChartPreview({
         },
       },
       aggs: {
-        outcomes,
         timeseries: {
           date_histogram: {
             field: '@timestamp',
@@ -77,7 +89,11 @@ export async function getTransactionErrorRateChartPreview({
               max: end,
             },
           },
-          aggs: { outcomes },
+          aggs: getOutcomeAggregation(
+            searchAggregatedTransactions
+              ? ApmDocumentType.TransactionMetric
+              : ApmDocumentType.TransactionEvent
+          ),
         },
       },
     },
@@ -95,7 +111,7 @@ export async function getTransactionErrorRateChartPreview({
   return resp.aggregations.timeseries.buckets.map((bucket) => {
     return {
       x: bucket.key,
-      y: calculateFailedTransactionRate(bucket.outcomes),
+      y: calculateFailedTransactionRate(bucket),
     };
   });
 }

@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { LogViewReference } from '../../../../common/log_views';
 import { LogEntriesHighlightsResponse } from '../../../../common/http_api';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
@@ -14,7 +15,7 @@ import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogEntriesHighlights } from './api/fetch_log_entries_highlights';
 
 export const useLogEntryHighlights = (
-  sourceId: string,
+  logViewReference: LogViewReference,
   sourceVersion: string | undefined,
   startTimestamp: number | null,
   endTimestamp: number | null,
@@ -37,7 +38,7 @@ export const useLogEntryHighlights = (
 
         return await fetchLogEntriesHighlights(
           {
-            sourceId,
+            logView: logViewReference,
             startTimestamp,
             endTimestamp,
             center: centerPoint,
@@ -52,7 +53,7 @@ export const useLogEntryHighlights = (
         setLogEntryHighlights(response.data);
       },
     },
-    [sourceId, startTimestamp, endTimestamp, centerPoint, size, filterQuery, highlightTerms]
+    [logViewReference, startTimestamp, endTimestamp, centerPoint, size, filterQuery, highlightTerms]
   );
 
   useEffect(() => {

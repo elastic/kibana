@@ -63,7 +63,9 @@ describe('FileService', () => {
     });
     fileKindsRegistry.register({
       id: fileKindTinyFiles,
-      maxSizeBytes: 10,
+      maxSizeBytes: (file) => {
+        return file.mimeType === 'text/json' ? 3 : 10;
+      },
       http: {},
     });
     esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -97,7 +99,7 @@ describe('FileService', () => {
     return file;
   }
   afterEach(async () => {
-    await Promise.all(disposables.map((file) => file.delete()));
+    await fileService.bulkDelete({ ids: disposables.map((d) => d.id) });
     const { files } = await fileService.find({ kind: [fileKind] });
     expect(files.length).toBe(0);
     disposables = [];
@@ -138,6 +140,56 @@ describe('FileService', () => {
     expect(myFile?.id).toMatch(id);
   });
 
+  it('retrieves a file using the bulk method', async () => {
+    const { id } = await createDisposableFile({ fileKind, name: 'test' });
+    const [myFile] = await fileService.bulkGetById({ ids: [id] });
+    expect(myFile?.id).toMatch(id);
+  });
+
+  it('retrieves multiple files using the bulk method', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const file2 = await createDisposableFile({ fileKind, name: 'test' });
+    const [myFile1, myFile2] = await fileService.bulkGetById({ ids: [file1.id, file2.id] });
+    expect(myFile1?.id).toMatch(file1.id);
+    expect(myFile2?.id).toMatch(file2.id);
+  });
+
+  it('throws if one of the file does not exists', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const unknownID = 'foo';
+
+    expect(async () => {
+      await fileService.bulkGetById({ ids: [file1.id, unknownID] });
+    }).rejects.toThrowError(`File [${unknownID}] not found`);
+  });
+
+  it('does not throw if one of the file does not exists', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const unknownID = 'foo';
+
+    const [myFile1, myFile2] = await fileService.bulkGetById({
+      ids: [file1.id, unknownID],
+      throwIfNotFound: false,
+    });
+
+    expect(myFile1?.id).toBe(file1?.id);
+    expect(myFile2).toBe(null);
+  });
+
+  it('returns the files under a map of id/File', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const unknownID = 'foo';
+
+    const myFiles = await fileService.bulkGetById({
+      ids: [file1.id, unknownID],
+      throwIfNotFound: false,
+      format: 'map',
+    });
+
+    expect(myFiles[file1?.id]?.id).toBe(file1?.id);
+    expect(myFiles[unknownID]).toBe(null);
+  });
+
   it('lists files', async () => {
     await Promise.all([
       createDisposableFile({ fileKind, name: 'test-1' }),
@@ -155,35 +207,119 @@ describe('FileService', () => {
       createDisposableFile({ fileKind, name: 'foo-2' }),
       createDisposableFile({ fileKind, name: 'foo-3' }),
       createDisposableFile({ fileKind, name: 'test-3' }),
+      createDisposableFile({ fileKind: fileKindNonDefault, name: 'foo-1' }),
     ]);
     {
       const { files, total } = await fileService.find({
-        kind: [fileKind],
+        kind: [fileKind, fileKindNonDefault],
         name: ['foo*'],
         perPage: 2,
         page: 1,
       });
       expect(files.length).toBe(2);
-      expect(total).toBe(3);
+      expect(total).toBe(4);
     }
 
     {
       const { files, total } = await fileService.find({
-        kind: [fileKind],
+        kind: [fileKind, fileKindNonDefault],
         name: ['foo*'],
         perPage: 2,
         page: 2,
       });
-      expect(files.length).toBe(1);
+      expect(files.length).toBe(2);
+      expect(total).toBe(4);
+    }
+
+    // Filter out fileKind
+    {
+      const { files, total } = await fileService.find({
+        kindToExclude: [fileKindNonDefault],
+        name: ['foo*'],
+        perPage: 10,
+        page: 1,
+      });
+      expect(files.length).toBe(3); // foo-1 from fileKindNonDefault not returned
       expect(total).toBe(3);
     }
   });
 
-  it('deletes files', async () => {
+  it('filters files by mime type', async () => {
+    await Promise.all([
+      createDisposableFile({ fileKind, name: 'My pic', mime: 'image/png' }),
+      createDisposableFile({ fileKind, name: 'Vern payslip', mime: 'application/pdf' }),
+    ]);
+
+    const result1 = await fileService.find({
+      kind: [fileKind],
+      mimeType: ['image/png'],
+    });
+
+    expect(result1.files.length).toBe(1);
+    expect(result1.files[0].name).toBe('My pic');
+
+    const result2 = await fileService.find({
+      kind: [fileKind],
+      mimeType: ['application/pdf'],
+    });
+
+    expect(result2.files.length).toBe(1);
+    expect(result2.files[0].name).toBe('Vern payslip');
+  });
+
+  it('filters files by user ID', async () => {
+    await Promise.all([
+      createDisposableFile({ fileKind, name: "Johnny's file", user: { id: '123' } }),
+      createDisposableFile({ fileKind, name: "Marry's file", user: { id: '456' } }),
+    ]);
+
+    const result1 = await fileService.find({
+      kind: [fileKind],
+      user: ['123'],
+    });
+
+    expect(result1.files.length).toBe(1);
+    expect(result1.files[0].name).toBe("Johnny's file");
+
+    const result2 = await fileService.find({
+      kind: [fileKind],
+      user: ['456'],
+    });
+
+    expect(result2.files.length).toBe(1);
+    expect(result2.files[0].name).toBe("Marry's file");
+
+    const result3 = await fileService.find({
+      user: ['456', '123'],
+    });
+
+    expect(result3.files.length).toBe(2);
+  });
+
+  it('deletes a single file', async () => {
     const file = await fileService.create({ fileKind, name: 'test' });
     const result = await fileService.find({ kind: [fileKind] });
     expect(result.files.length).toBe(1);
     await file.delete();
+    expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
+  });
+
+  it('deletes a single file using the bulk method', async () => {
+    const file = await fileService.create({ fileKind, name: 'test' });
+    const result = await fileService.find({ kind: [fileKind] });
+    expect(result.files.length).toBe(1);
+    await fileService.bulkDelete({ ids: [file.id] });
+    expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
+  });
+
+  it('deletes multiple files using the bulk method', async () => {
+    const promises = Array.from({ length: 15 }, (v, i) =>
+      fileService.create({ fileKind, name: 'test ' + i })
+    );
+    const files = await Promise.all(promises);
+    const result = await fileService.find({ kind: [fileKind] });
+    expect(result.files.length).toBe(15);
+    await fileService.bulkDelete({ ids: files.map((file) => file.id) });
     expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
   });
 
@@ -211,7 +347,7 @@ describe('FileService', () => {
     expect(updatedFile2.data.alt).toBe(updatableFields.alt);
   });
 
-  it('enforces max size settings', async () => {
+  it('enforces file kind max size settings', async () => {
     const file = await createDisposableFile({ fileKind: fileKindTinyFiles, name: 'test' });
     const tinyContent = Readable.from(['ok']);
     await file.uploadContent(tinyContent);
@@ -220,6 +356,26 @@ describe('FileService', () => {
     const notSoTinyContent = Readable.from(['nok'.repeat(10)]);
     await expect(() => file2.uploadContent(notSoTinyContent)).rejects.toThrow(
       new Error('Maximum of 10 bytes exceeded')
+    );
+  });
+
+  it('enforces per file max size settings, using mime type', async () => {
+    const file = await createDisposableFile({
+      fileKind: fileKindTinyFiles,
+      name: 'test',
+      mime: 'text/mime',
+    });
+    const tinyContent = Readable.from(['ok ok ok']);
+    await file.uploadContent(tinyContent);
+
+    const file2 = await createDisposableFile({
+      fileKind: fileKindTinyFiles,
+      name: 'test',
+      mime: 'text/json',
+    });
+    const notSoTinyContent = Readable.from(['[123]']);
+    await expect(() => file2.uploadContent(notSoTinyContent)).rejects.toThrow(
+      new Error('Maximum of 3 bytes exceeded')
     );
   });
 

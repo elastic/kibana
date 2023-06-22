@@ -34,4 +34,11 @@ export type EcsFieldsResponse = BasicFields & {
 } & {
   [x: string]: unknown[];
 };
-export type RuleRegistrySearchResponse = IEsSearchResponse<EcsFieldsResponse>;
+
+export interface RuleRegistryInspect {
+  dsl: string[];
+}
+
+export interface RuleRegistrySearchResponse extends IEsSearchResponse<EcsFieldsResponse> {
+  inspect?: RuleRegistryInspect;
+}

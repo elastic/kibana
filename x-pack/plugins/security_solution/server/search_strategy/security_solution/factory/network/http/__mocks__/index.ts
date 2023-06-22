@@ -83,8 +83,8 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
               buckets: [
-                { key: 200, doc_count: 72174 },
-                { key: 401, doc_count: 34530 },
+                { key: '200', doc_count: 72174 },
+                { key: '401', doc_count: 34530 },
               ],
             },
           },
@@ -125,8 +125,8 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
               buckets: [
-                { key: 200, doc_count: 75394 },
-                { key: 401, doc_count: 1350 },
+                { key: '200', doc_count: 75394 },
+                { key: '401', doc_count: 1350 },
               ],
             },
           },
@@ -166,7 +166,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 58746 }],
+              buckets: [{ key: '200', doc_count: 58746 }],
             },
           },
           {
@@ -202,7 +202,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 28715 }],
+              buckets: [{ key: '200', doc_count: 28715 }],
             },
           },
           {
@@ -238,7 +238,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 28161 }],
+              buckets: [{ key: '200', doc_count: 28161 }],
             },
           },
           {
@@ -277,7 +277,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 23283 }],
+              buckets: [{ key: '200', doc_count: 23283 }],
             },
           },
           {
@@ -317,8 +317,8 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
               buckets: [
-                { key: 200, doc_count: 12084 },
-                { key: 401, doc_count: 8640 },
+                { key: '200', doc_count: 12084 },
+                { key: '401', doc_count: 8640 },
               ],
             },
           },
@@ -365,10 +365,10 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 3,
               buckets: [
-                { key: 401, doc_count: 18220 },
-                { key: 404, doc_count: 30 },
-                { key: 302, doc_count: 27 },
-                { key: 200, doc_count: 26 },
+                { key: '401', doc_count: 18220 },
+                { key: '404', doc_count: 30 },
+                { key: '302', doc_count: 27 },
+                { key: '200', doc_count: 26 },
               ],
             },
           },
@@ -408,7 +408,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 18048 }],
+              buckets: [{ key: '200', doc_count: 18048 }],
             },
           },
           {
@@ -444,7 +444,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 14046 }],
+              buckets: [{ key: '200', doc_count: 14046 }],
             },
           },
         ],

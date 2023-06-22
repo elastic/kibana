@@ -22,9 +22,15 @@ import type {
   ActionResponseOutput,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  ResponseActionsExecuteParameters,
+  ResponseActionExecuteOutputContent,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
+import {
+  DEFAULT_EXECUTE_ACTION_TIMEOUT,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+} from '../service/response_actions/constants';
+import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -52,6 +58,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         user: {
           id: this.randomUser(),
         },
+        rule: undefined,
       },
       overrides
     );
@@ -80,8 +87,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     });
 
     const command = overrides?.EndpointActions?.data?.command ?? this.randomResponseActionCommand();
-    let output: ActionResponseOutput<ResponseActionGetFileOutputContent> = overrides
-      ?.EndpointActions?.data?.output as ActionResponseOutput<ResponseActionGetFileOutputContent>;
+    let output: ActionResponseOutput<
+      ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
+    > = overrides?.EndpointActions?.data?.output as ActionResponseOutput<
+      ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
+    >;
 
     if (command === 'get-file') {
       if (!output) {
@@ -101,6 +111,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ],
           },
         };
+      }
+    }
+
+    if (command === 'execute') {
+      if (!output) {
+        output = this.generateExecuteActionResponseOutput();
       }
     }
 
@@ -139,38 +155,37 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     TOutputType extends object = object,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
-    overrides: Partial<ActionDetails<TOutputType, TParameters>> = {}
+    overrides: DeepPartial<ActionDetails<TOutputType, TParameters>> = {}
   ): ActionDetails<TOutputType, TParameters> {
-    const details: ActionDetails = merge(
-      {
-        agents: ['agent-a'],
-        command: 'isolate',
-        completedAt: '2022-04-30T16:08:47.449Z',
-        hosts: { 'agent-a': { name: 'Host-agent-a' } },
-        id: '123',
-        isCompleted: true,
-        isExpired: false,
-        wasSuccessful: true,
-        errors: undefined,
-        startedAt: '2022-04-27T16:08:47.449Z',
-        status: 'successful',
-        comment: 'thisisacomment',
-        createdBy: 'auserid',
-        parameters: undefined,
-        outputs: {},
-        agentState: {
-          'agent-a': {
-            errors: undefined,
-            isCompleted: true,
-            completedAt: '2022-04-30T16:08:47.449Z',
-            wasSuccessful: true,
-          },
+    const details: ActionDetails = {
+      agents: ['agent-a'],
+      command: 'isolate',
+      completedAt: '2022-04-30T16:08:47.449Z',
+      hosts: { 'agent-a': { name: 'Host-agent-a' } },
+      id: '123',
+      isCompleted: true,
+      isExpired: false,
+      wasSuccessful: true,
+      errors: undefined,
+      startedAt: '2022-04-27T16:08:47.449Z',
+      status: 'successful',
+      comment: 'thisisacomment',
+      createdBy: 'auserid',
+      parameters: undefined,
+      outputs: {},
+      agentState: {
+        'agent-a': {
+          errors: undefined,
+          isCompleted: true,
+          completedAt: '2022-04-30T16:08:47.449Z',
+          wasSuccessful: true,
         },
       },
-      overrides
-    );
+    };
 
-    if (details.command === 'get-file') {
+    const command = overrides.command ?? details.command;
+
+    if (command === 'get-file') {
       if (!details.parameters) {
         (
           details as ActionDetails<
@@ -197,7 +212,37 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
     }
 
-    return details as unknown as ActionDetails<TOutputType, TParameters>;
+    if (command === 'execute') {
+      if (!details.parameters) {
+        (
+          details as ActionDetails<
+            ResponseActionExecuteOutputContent,
+            ResponseActionsExecuteParameters
+          >
+        ).parameters = {
+          command: (overrides.parameters as ResponseActionsExecuteParameters)?.command ?? 'ls -al',
+          timeout:
+            (overrides.parameters as ResponseActionsExecuteParameters)?.timeout ??
+            DEFAULT_EXECUTE_ACTION_TIMEOUT, // 4hrs
+        };
+      }
+
+      if (!details.outputs || Object.keys(details.outputs).length === 0) {
+        details.outputs = {
+          [details.agents[0]]: this.generateExecuteActionResponseOutput({
+            content: {
+              output_file_id: getFileDownloadId(details, details.agents[0]),
+              ...(overrides.outputs?.[details.agents[0]]?.content ?? {}),
+            },
+          }),
+        };
+      }
+    }
+
+    return merge(details, overrides as ActionDetails) as unknown as ActionDetails<
+      TOutputType,
+      TParameters
+    >;
   }
 
   randomGetFileFailureCode(): string {
@@ -258,6 +303,42 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       },
       overrides
     );
+  }
+
+  generateExecuteActionResponseOutput(
+    overrides?: Partial<ActionResponseOutput<Partial<ResponseActionExecuteOutputContent>>>
+  ): ActionResponseOutput<ResponseActionExecuteOutputContent> {
+    return merge(
+      {
+        type: 'json',
+        content: {
+          code: 'ra_execute_success_done',
+          stdout: this.randomChoice([
+            this.randomString(1280),
+            this.randomString(3580),
+            `-rw-r--r--    1 elastic  staff      458 Jan 26 09:10 doc.txt\
+          -rw-r--r--     1 elastic  staff  298 Feb  2 09:10 readme.md`,
+          ]),
+          stderr: this.randomChoice([
+            this.randomString(1280),
+            this.randomString(3580),
+            `error line 1\
+          error line 2\
+          error line 3 that is quite very long and will be truncated, and should not be visible in the UI\
+          errorline4thathasalotmoretextthatdoesnotendfortestingpurposesrepeatalotoftexthereandkeepaddingmoreandmoretextwithoutendtheideabeingthatwedonotuseperiodsorcommassothattheconsoleuiisunabletobreakthislinewithoutsomecssrulessowiththislineweshouldbeabletotestthatwithgenerateddata`,
+          ]),
+          stdout_truncated: true,
+          stderr_truncated: true,
+          shell_code: 0,
+          shell: 'bash',
+          cwd: this.randomChoice(['/some/path', '/a-very/long/path'.repeat(30)]),
+          output_file_id: 'some-output-file-id',
+          output_file_stdout_truncated: this.randomChoice([true, false]),
+          output_file_stderr_truncated: this.randomChoice([true, false]),
+        },
+      },
+      overrides
+    ) as ActionResponseOutput<ResponseActionExecuteOutputContent>;
   }
 
   randomFloat(): number {

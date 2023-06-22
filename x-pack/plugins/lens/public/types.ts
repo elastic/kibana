@@ -13,19 +13,22 @@ import type { MutableRefObject } from 'react';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
-  ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
+  ExpressionRendererEvent,
 } from '@kbn/expressions-plugin/public';
 import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
   RowClickContext,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
+import type {
+  ClickTriggerEvent,
+  BrushTriggerEvent,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -35,8 +38,15 @@ import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
-import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import type { DateRange, LayerType, SortingHint } from '../common';
+import { CellValueContext } from '@kbn/embeddable-plugin/public';
+import type {
+  DraggingIdentifier,
+  DragDropIdentifier,
+  DragContextState,
+  DropType,
+} from '@kbn/dom-drag-drop';
+import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
   LensResizeActionData,
@@ -88,7 +98,7 @@ export type IndexPatternField = FieldSpec & {
    * Map of fields which can be used, but may fail partially (ranked lower than others)
    */
   partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
-  timeSeriesMetricType?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
   timeSeriesRollup?: boolean;
   meta?: boolean;
   runtime?: boolean;
@@ -104,6 +114,8 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
   indexPatternService: IndexPatternServiceAPI;
+  getUserMessages: UserMessagesGetter;
+  addUserMessages: AddUserMessages;
 }
 
 export type VisualizationMap = Record<string, Visualization>;
@@ -153,6 +165,7 @@ export interface VisualizationInfo {
     icon?: IconType;
     label?: string;
     dimensions: Array<{ name: string; id: string; dimensionType: string }>;
+    palette?: string[];
   }>;
 }
 
@@ -207,24 +220,6 @@ export type TableChangeType =
   | 'reorder'
   | 'layers';
 
-export type DropType =
-  | 'field_add'
-  | 'field_replace'
-  | 'reorder'
-  | 'move_compatible'
-  | 'replace_compatible'
-  | 'move_incompatible'
-  | 'replace_incompatible'
-  | 'replace_duplicate_compatible'
-  | 'duplicate_compatible'
-  | 'swap_compatible'
-  | 'replace_duplicate_incompatible'
-  | 'duplicate_incompatible'
-  | 'swap_incompatible'
-  | 'field_combine'
-  | 'combine_compatible'
-  | 'combine_incompatible';
-
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
   table: TableSuggestion;
@@ -251,6 +246,8 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   searchQuery?: Query;
   searchFilters?: Filter[];
   title?: string;
+  description?: string;
+  panelTimeRange?: TimeRange;
   visTypeTitle?: string;
   isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
@@ -269,6 +266,49 @@ interface DimensionLink {
     groupId: string;
     layerId: string;
   };
+}
+
+type UserMessageDisplayLocation =
+  | {
+      // NOTE: We want to move toward more errors that do not block the render!
+      id:
+        | 'toolbar'
+        | 'embeddableBadge'
+        | 'visualization' // blocks render
+        | 'visualizationOnEmbeddable' // blocks render in embeddable only
+        | 'visualizationInEditor' // blocks render in editor only
+        | 'textBasedLanguagesQueryInput'
+        | 'banner';
+    }
+  | { id: 'dimensionButton'; dimensionId: string };
+
+export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
+
+export interface UserMessage {
+  uniqueId?: string;
+  severity: 'error' | 'warning' | 'info';
+  shortMessage: string;
+  longMessage: React.ReactNode | string;
+  fixableInEditor: boolean;
+  displayLocations: UserMessageDisplayLocation[];
+}
+
+export type RemovableUserMessage = UserMessage & { uniqueId: string };
+
+export interface UserMessageFilters {
+  severity?: UserMessage['severity'];
+  dimensionId?: string;
+}
+
+export type UserMessagesGetter = (
+  locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
+  filters?: UserMessageFilters
+) => UserMessage[];
+
+export type AddUserMessages = (messages: RemovableUserMessage[]) => () => void;
+
+export function isMessageRemovable(message: UserMessage): message is RemovableUserMessage {
+  return Boolean(message.uniqueId);
 }
 
 /**
@@ -290,7 +330,6 @@ export interface Datasource<T = unknown, P = unknown> {
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
-  getUnifiedSearchErrors?: (state: T) => Error[];
 
   insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   createEmptyLayer: (indexPatternId: string) => T;
@@ -432,28 +471,17 @@ export interface Datasource<T = unknown, P = unknown> {
    */
   checkIntegrity: (state: T, indexPatterns: IndexPatternMap) => string[];
 
-  getErrorMessages: (
-    state: T,
-    indexPatterns: Record<string, IndexPattern>
-  ) =>
-    | Array<{
-        shortMessage: string;
-        longMessage: React.ReactNode;
-        fixAction?: { label: string; newState: () => Promise<T> };
-      }>
-    | undefined;
-
   /**
-   * The frame calls this function to display warnings about visualization
+   * The frame calls this function to display messages to the user
    */
-  getWarningMessages?: (
+  getUserMessages: (
     state: T,
-    frame: FramePublicAPI,
-    adapters: Adapters,
-    setState: StateSetter<T>
-  ) => React.ReactNode[] | undefined;
-
-  getDeprecationMessages?: (state: T) => React.ReactNode[] | undefined;
+    deps: {
+      frame: FrameDatasourceAPI;
+      setState: StateSetter<T>;
+      visualizationInfo?: VisualizationInfo;
+    }
+  ) => UserMessage[];
 
   /**
    * The embeddable calls this function to display warnings about visualization on the dashboard
@@ -463,22 +491,12 @@ export interface Datasource<T = unknown, P = unknown> {
     warning: SearchResponseWarning,
     request: SearchRequest,
     response: estypes.SearchResponse
-  ) => Array<string | React.ReactNode> | undefined;
+  ) => UserMessage[];
 
   /**
    * Checks if the visualization created is time based, for example date histogram
    */
   isTimeBased: (state: T, indexPatterns: IndexPatternMap) => boolean;
-  /**
-   * Given the current state layer and a columnId will verify if the column configuration has errors
-   */
-  isValidColumn: (
-    state: T,
-    indexPatterns: IndexPatternMap,
-    layerId: string,
-    columnId: string,
-    dateRange?: DateRange
-  ) => boolean;
   /**
    * Are these datasources equivalent?
    */
@@ -570,7 +588,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   showNoDataPopover: () => void;
   core: Pick<
     CoreStart,
-    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application'
+    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application' | 'docLinks'
   >;
   query: Query;
   dateRange: DateRange;
@@ -620,9 +638,6 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   activeData?: Record<string, Datatable>;
   dateRange: DateRange;
   indexPatterns: IndexPatternMap;
-  hideTooltip?: boolean;
-  invalid?: boolean;
-  invalidMessage?: string;
 };
 export type ParamEditorCustomProps = Record<string, unknown> & {
   labels?: string[];
@@ -790,13 +805,6 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
-export interface AccessorConfig {
-  columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible' | 'aggregate';
-  color?: string;
-  palette?: string[] | Array<{ color: string; stop: number }>;
-}
-
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
   dimensionEditorGroupLabel?: string;
@@ -826,9 +834,6 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // this dimension group in the hierarchy. If not specified, the position of the dimension in the array is used. specified nesting
   // orders are always higher in the hierarchy than non-specified ones.
   nestingOrder?: number;
-  // some type of layers can produce groups even if invalid. Keep this information to visually show the user that.
-  invalid?: boolean;
-  invalidMessage?: string;
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
@@ -858,6 +863,8 @@ export interface Suggestion<T = unknown, V = unknown> {
   previewExpression?: Ast | string;
   previewIcon: IconType;
   hide?: boolean;
+  // flag to indicate if the visualization is incomplete
+  incomplete?: boolean;
   changeType: TableChangeType;
   keptLayerIds: string[];
 }
@@ -910,6 +917,10 @@ export interface VisualizationSuggestion<T = unknown> {
    * directly.
    */
   hide?: boolean;
+  /**
+   * Flag indicating whether this suggestion is incomplete
+   */
+  incomplete?: boolean;
   /**
    * Descriptive title of the suggestion. Should be as short as possible. This title is shown if
    * the suggestion is advertised to the user and will also show either the `previewExpression` or
@@ -990,7 +1001,7 @@ interface VisualizationStateFromContextChangeProps {
   context: VisualizeEditorContext;
 }
 
-export interface Visualization<T = unknown, P = unknown> {
+export interface Visualization<T = unknown, P = T> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
 
@@ -1000,7 +1011,13 @@ export interface Visualization<T = unknown, P = unknown> {
    * - Loading from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
+  initialize: (
+    addNewLayer: () => string,
+    state?: T | P,
+    mainPalette?: PaletteOutput,
+    references?: SavedObjectReference[],
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  ) => T;
 
   getUsedDataView?: (state: T, layerId: string) => string | undefined;
   /**
@@ -1032,12 +1049,6 @@ export interface Visualization<T = unknown, P = unknown> {
   getDescription: (state: T) => { icon?: IconType; label: string };
   /** Visualizations can have references as well */
   getPersistableState?: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
-  /** Hydrate from persistable state and references to final state */
-  fromPersistableState?: (
-    state: P,
-    references?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext | VisualizeEditorContext
-  ) => T;
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */
@@ -1166,11 +1177,11 @@ export interface Visualization<T = unknown, P = unknown> {
   /**
    * Allows the visualization to announce whether or not it has any settings to show
    */
-  hasLayerSettings?: (props: VisualizationConfigProps<T>) => boolean;
+  hasLayerSettings?: (props: VisualizationConfigProps<T>) => Record<'data' | 'appearance', boolean>;
 
   renderLayerSettings?: (
     domElement: Element,
-    props: VisualizationLayerSettingsProps<T>
+    props: VisualizationLayerSettingsProps<T> & { section: 'data' | 'appearance' }
   ) => ((cleanupElement: Element) => void) | void;
 
   /**
@@ -1204,8 +1215,6 @@ export interface Visualization<T = unknown, P = unknown> {
     columnId: string;
     label: string;
     hideTooltip?: boolean;
-    invalid?: boolean;
-    invalidMessage?: string;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers
@@ -1237,32 +1246,12 @@ export interface Visualization<T = unknown, P = unknown> {
     datasourceLayers: DatasourceLayers,
     datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
+
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getErrorMessages: (
-    state: T,
-    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
-  ) =>
-    | Array<{
-        shortMessage: string;
-        longMessage: React.ReactNode;
-      }>
-    | undefined;
-
-  validateColumn?: (
-    state: T,
-    frame: Pick<FramePublicAPI, 'dataViews'>,
-    layerId: string,
-    columnId: string,
-    group?: VisualizationDimensionGroupConfig
-  ) => { invalid: boolean; invalidMessage?: string };
-
-  /**
-   * The frame calls this function to display warnings about visualization
-   */
-  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
+  getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state
@@ -1290,7 +1279,11 @@ export interface Visualization<T = unknown, P = unknown> {
     props: VisualizationStateFromContextChangeProps
   ) => Suggestion<T> | undefined;
 
-  getVisualizationInfo?: (state: T) => VisualizationInfo;
+  getVisualizationInfo?: (state: T, frame?: FramePublicAPI) => VisualizationInfo;
+  /**
+   * A visualization can return custom dimensions for the reporting tool
+   */
+  getReportingLayout?: (state: T) => { height: number; width: number };
 }
 
 // Use same technique as TriggerContext
@@ -1323,6 +1316,12 @@ export function isLensFilterEvent(event: ExpressionRendererEvent): event is Clic
   return event.name === 'filter';
 }
 
+export function isLensMultiFilterEvent(
+  event: ExpressionRendererEvent
+): event is MultiClickTriggerEvent {
+  return event.name === 'multiFilter';
+}
+
 export function isLensBrushEvent(event: ExpressionRendererEvent): event is BrushTriggerEvent {
   return event.name === 'brush';
 }
@@ -1335,7 +1334,7 @@ export function isLensEditEvent<T extends LensEditSupportedActions>(
 
 export function isLensTableRowContextMenuClickEvent(
   event: ExpressionRendererEvent
-): event is BrushTriggerEvent {
+): event is LensTableRowContextMenuEvent {
   return event.name === 'tableRowContextMenuClick';
 }
 
@@ -1376,3 +1375,14 @@ export type LensTopNavMenuEntryGenerator = (props: {
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: Document | undefined;
 }) => undefined | TopNavMenuData;
+
+export interface LensCellValueAction {
+  id: string;
+  iconType: string;
+  displayName: string;
+  execute: (data: CellValueContext['data']) => void;
+}
+
+export type GetCompatibleCellValueActions = (
+  data: CellValueContext['data']
+) => Promise<LensCellValueAction[]>;

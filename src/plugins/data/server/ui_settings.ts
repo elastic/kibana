@@ -115,7 +115,6 @@ export function getUiSettings(
       description: i18n.translate('data.advancedSettings.query.allowWildcardsText', {
         defaultMessage:
           'When set, * is allowed as the first character in a query clause. ' +
-          'Currently only applies when experimental query features are enabled in the query bar. ' +
           'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}.',
         values: {
           queryStringOptionsPattern: UI_SETTINGS.QUERY_STRING_OPTIONS,
@@ -166,12 +165,12 @@ export function getUiSettings(
     },
     defaultIndex: {
       name: i18n.translate('data.advancedSettings.defaultIndexTitle', {
-        defaultMessage: 'Default index',
+        defaultMessage: 'Default data view',
       }),
       value: null,
       type: 'string',
       description: i18n.translate('data.advancedSettings.defaultIndexText', {
-        defaultMessage: 'The index to access if no index is set',
+        defaultMessage: 'Used by discover and visualizations when a data view is not set.',
       }),
       schema: schema.nullable(schema.string()),
     },
@@ -505,7 +504,7 @@ export function getUiSettings(
           'The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the ' +
           'Elasticsearch terms enum API for improved autocomplete suggestion performance. (Note that terms_enum is ' +
           'incompatible with Document Level Security.) Select terms_agg to use an Elasticsearch terms aggregation. ' +
-          '{learnMoreLink}',
+          '(Note that terms_agg is incompatible with IP-type fields.) {learnMoreLink}',
         values: {
           learnMoreLink:
             `<a href=${docLinks.links.kibana.autocompleteSuggestions} target="_blank" rel="noopener">` +

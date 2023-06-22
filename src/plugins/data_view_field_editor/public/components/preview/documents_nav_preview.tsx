@@ -15,21 +15,32 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { useStateSelector } from '../../state_utils';
+import { PreviewState } from './types';
 
 import { useFieldPreviewContext } from './field_preview_context';
 
+const docIdSelector = (state: PreviewState) => {
+  const doc = state.documents[state.currentIdx];
+  return {
+    documentId: doc ? (doc._id as string) : undefined,
+    customId: state.customId,
+  };
+};
+
 export const DocumentsNavPreview = () => {
   const {
-    currentDocument: { id: documentId, isCustomId },
     documents: { loadSingle, loadFromCluster, fetchDocError },
-    navigation: { prev, next },
+    controller,
   } = useFieldPreviewContext();
+  const { goToPreviousDocument: prev, goToNextDocument: next } = controller;
+  const { documentId, customId } = useStateSelector(controller.state$, docIdSelector);
 
   const isInvalid = fetchDocError?.code === 'DOC_NOT_FOUND';
 
   // We don't display the nav button when the user has entered a custom
   // document ID as at that point there is no more reference to what's "next"
-  const showNavButtons = isCustomId === false;
+  const showNavButtons = !customId;
 
   const onDocumentIdChange = useCallback(
     (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -52,13 +63,13 @@ export const DocumentsNavPreview = () => {
           >
             <EuiFieldText
               isInvalid={isInvalid}
-              value={documentId ?? ''}
+              value={customId || documentId || ''}
               onChange={onDocumentIdChange}
               fullWidth
               data-test-subj="documentIdField"
             />
           </EuiFormRow>
-          {isCustomId && (
+          {customId && (
             <span>
               <EuiButtonEmpty
                 color="primary"

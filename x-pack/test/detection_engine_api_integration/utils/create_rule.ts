@@ -40,7 +40,7 @@ export const createRule = async (
           response.body
         )}, status: ${JSON.stringify(response.status)}`
       );
-      await deleteRule(supertest, log, rule.rule_id);
+      await deleteRule(supertest, rule.rule_id);
       const secondResponseTry = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
@@ -59,7 +59,9 @@ export const createRule = async (
     }
   } else if (response.status !== 200) {
     throw new Error(
-      `Unexpected non 200 ok when attempting to create a rule: ${JSON.stringify(response.status)}`
+      `Unexpected non 200 ok when attempting to create a rule: ${JSON.stringify(
+        response.status
+      )},${JSON.stringify(response, null, 4)}`
     );
   } else {
     return response.body;

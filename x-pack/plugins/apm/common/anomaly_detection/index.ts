@@ -6,11 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  getSeverityType,
-  getSeverityColor as mlGetSeverityColor,
-} from '@kbn/ml-plugin/common';
-import { ANOMALY_SEVERITY } from '../ml_constants';
+import { getSeverityType } from '@kbn/ml-anomaly-utils/get_severity_type';
+import { getSeverityColor as mlGetSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ServiceHealthStatus } from '../service_health_status';
 
 export interface ServiceAnomalyStats {
@@ -23,7 +21,7 @@ export interface ServiceAnomalyStats {
 
 export function getSeverity(score: number | undefined) {
   if (score === undefined) {
-    return ANOMALY_SEVERITY.UNKNOWN;
+    return ML_ANOMALY_SEVERITY.UNKNOWN;
   }
 
   return getSeverityType(score);

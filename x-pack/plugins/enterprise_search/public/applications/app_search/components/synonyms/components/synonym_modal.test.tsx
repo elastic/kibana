@@ -59,7 +59,7 @@ describe('SynonymModal', () => {
     const wrapper = shallow(<SynonymModal />);
 
     it('renders', () => {
-      expect(wrapper.find('h1').text()).toEqual('Add a synonym set');
+      expect(wrapper.find('EuiModalHeaderTitle').render().text()).toEqual('Add a synonym set');
     });
 
     it('populates MultiInputRows with two empty rows', () => {
@@ -87,7 +87,7 @@ describe('SynonymModal', () => {
     });
 
     it('renders', () => {
-      expect(wrapper.find('h1').text()).toEqual('Manage synonym set');
+      expect(wrapper.find('EuiModalHeaderTitle').render().text()).toEqual('Manage synonym set');
     });
 
     it('populates MultiInputRows with ID & initial values', () => {

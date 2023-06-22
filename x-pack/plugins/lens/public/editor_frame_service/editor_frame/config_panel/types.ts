@@ -15,7 +15,9 @@ import {
   VisualizationDimensionGroupConfig,
   DatasourceMap,
   VisualizationMap,
+  UserMessagesGetter,
 } from '../../../types';
+
 export interface ConfigPanelWrapperProps {
   framePublicAPI: FramePublicAPI;
   datasourceMap: DatasourceMap;
@@ -23,6 +25,7 @@ export interface ConfigPanelWrapperProps {
   core: DatasourceDimensionEditorProps['core'];
   indexPatternService: IndexPatternServiceAPI;
   uiActions: UiActionsStart;
+  getUserMessages: UserMessagesGetter;
 }
 
 export interface LayerPanelProps {

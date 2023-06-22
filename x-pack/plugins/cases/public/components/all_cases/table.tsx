@@ -14,26 +14,26 @@ import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
-import type { Cases, Case } from '../../../common/ui/types';
+import type { CasesFindResponseUI, CasesUI, CaseUI } from '../../../common/ui/types';
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface CasesTableProps {
-  columns: EuiBasicTableProps<Case>['columns'];
-  data: Cases;
+  columns: EuiBasicTableProps<CaseUI>['columns'];
+  data: CasesFindResponseUI;
   goToCreateCase?: () => void;
   isCasesLoading: boolean;
   isCommentUpdating: boolean;
   isDataEmpty: boolean;
   isSelectorView?: boolean;
-  onChange: EuiBasicTableProps<Case>['onChange'];
+  onChange: EuiBasicTableProps<CaseUI>['onChange'];
   pagination: Pagination;
-  selectedCases: Case[];
-  selection: EuiTableSelectionType<Case>;
-  sorting: EuiBasicTableProps<Case>['sorting'];
+  selectedCases: CasesUI;
+  selection: EuiTableSelectionType<CaseUI>;
+  sorting: EuiBasicTableProps<CaseUI>['sorting'];
   tableRef: MutableRefObject<EuiBasicTable | null>;
-  tableRowProps: EuiBasicTableProps<Case>['rowProps'];
+  tableRowProps: EuiBasicTableProps<CaseUI>['rowProps'];
   deselectCases: () => void;
 }
 

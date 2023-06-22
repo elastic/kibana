@@ -5,6 +5,31 @@
  * 2.0.
  */
 
-export const TRANSACTION_PAGE_LOAD = 'page-load';
+import { isRumAgentName, isMobileAgentName } from './agent_name';
+
+const TRANSACTION_PAGE_LOAD = 'page-load';
+const TRANSACTION_MOBILE = 'mobile';
+
 export const TRANSACTION_REQUEST = 'request';
-export const TRANSACTION_ROUTE_CHANGE = 'route-change';
+
+export const defaultTransactionTypes = [
+  TRANSACTION_REQUEST,
+  TRANSACTION_PAGE_LOAD,
+  TRANSACTION_MOBILE,
+];
+
+export function getDefaultTransactionType(agentName?: string) {
+  if (isRumAgentName(agentName)) {
+    return TRANSACTION_PAGE_LOAD;
+  }
+
+  if (isMobileAgentName(agentName)) {
+    return TRANSACTION_MOBILE;
+  }
+
+  return TRANSACTION_REQUEST;
+}
+
+export function isDefaultTransactionType(transactionType: string) {
+  return defaultTransactionTypes.includes(transactionType);
+}

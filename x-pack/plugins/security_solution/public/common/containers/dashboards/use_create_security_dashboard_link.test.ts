@@ -9,26 +9,15 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock/test_providers';
-import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
 import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
+import { MOCK_TAG_ID } from './api/__mocks__';
+import { getSecurityTagIds as mockGetSecurityTagIds } from './utils';
 
 jest.mock('../../lib/kibana');
 
-const TAG_ID = 'securityTagId';
-const CREATED_TAG: Tag = {
-  id: TAG_ID,
-  name: 'tag title',
-  description: 'tag description',
-  color: '#999999',
-};
 const URL = '/path';
 
-const mockGetSecurityTagId = jest.fn(async (): Promise<string | null> => null);
-const mockCreateSecurityTag = jest.fn(async () => CREATED_TAG);
-jest.mock('./utils', () => ({
-  getSecurityTagId: () => mockGetSecurityTagId(),
-  createSecurityTag: () => mockCreateSecurityTag(),
-}));
+jest.mock('./utils');
 
 const renderUseCreateSecurityDashboardLink = () =>
   renderHook(() => useCreateSecurityDashboardLink(), {
@@ -57,8 +46,7 @@ describe('useCreateSecurityDashboardLink', () => {
     it('should request when renders', async () => {
       await asyncRenderUseCreateSecurityDashboard();
 
-      expect(mockGetSecurityTagId).toHaveBeenCalledTimes(1);
-      expect(mockCreateSecurityTag).toHaveBeenCalledTimes(1);
+      expect(mockGetSecurityTagIds).toHaveBeenCalledTimes(1);
     });
 
     it('should return a memoized value when rerendered', async () => {
@@ -71,28 +59,18 @@ describe('useCreateSecurityDashboardLink', () => {
       expect(result1).toBe(result2);
     });
 
-    it('should not request create tag if already exists', async () => {
-      mockGetSecurityTagId.mockResolvedValueOnce(TAG_ID);
-      await asyncRenderUseCreateSecurityDashboard();
-
-      expect(mockGetSecurityTagId).toHaveBeenCalledTimes(1);
-      expect(mockCreateSecurityTag).not.toHaveBeenCalled();
-    });
-
     it('should generate create url with tag', async () => {
       await asyncRenderUseCreateSecurityDashboard();
 
-      expect(mockGetRedirectUrl).toHaveBeenCalledWith({ tags: [TAG_ID] });
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith({ tags: [MOCK_TAG_ID] });
     });
 
     it('should not re-request tag id when re-rendered', async () => {
       const { rerender } = await asyncRenderUseCreateSecurityDashboard();
 
-      expect(mockGetSecurityTagId).toHaveBeenCalledTimes(1);
-      expect(mockCreateSecurityTag).toHaveBeenCalledTimes(1);
+      expect(mockGetSecurityTagIds).toHaveBeenCalledTimes(1);
       act(() => rerender());
-      expect(mockGetSecurityTagId).toHaveBeenCalledTimes(1);
-      expect(mockCreateSecurityTag).toHaveBeenCalledTimes(1);
+      expect(mockGetSecurityTagIds).toHaveBeenCalledTimes(1);
     });
 
     it('should return isLoading while requesting', async () => {

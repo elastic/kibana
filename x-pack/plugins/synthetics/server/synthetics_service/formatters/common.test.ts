@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { stringToObjectFormatter } from './common';
+import { ConfigKey } from '../../../common/runtime_types';
+import { stringToObjectFormatter } from './formatting_utils';
 
 describe('common formatters', () => {
   it.each([
@@ -14,6 +15,6 @@ describe('common formatters', () => {
     ['{}', undefined],
     ['{"some": "json"}', { some: 'json' }],
   ])('formats strings to objects correctly, avoiding errors', (input, expected) => {
-    expect(stringToObjectFormatter(input)).toEqual(expected);
+    expect(stringToObjectFormatter({ name: input }, ConfigKey.NAME)).toEqual(expected);
   });
 });

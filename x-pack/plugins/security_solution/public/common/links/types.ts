@@ -131,3 +131,19 @@ export type AppLinkItems = Readonly<LinkItem[]>;
 export type LinkInfo = Omit<LinkItem, 'links'>;
 export type NormalizedLink = LinkInfo & { parentId?: SecurityPageName };
 export type NormalizedLinks = Partial<Record<SecurityPageName, NormalizedLink>>;
+
+export interface NavigationLink {
+  categories?: LinkCategories;
+  description?: string;
+  disabled?: boolean;
+  icon?: IconType;
+  id: SecurityPageName;
+  links?: NavigationLink[];
+  image?: string;
+  title: string;
+  skipUrlState?: boolean;
+  isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
+}

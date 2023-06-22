@@ -1,0 +1,37 @@
+format_version: 1.0.0
+name: input_package
+title: Test Custom Logs Input Package
+description: >-
+  Read lines from active log files with Elastic Agent.
+type: input
+version: 1.0.0
+license: basic
+categories:
+  - custom
+policy_templates:
+  - name: logs
+    type: logs
+    title: Custom log file
+    description: Collect your custom log files.
+    input: logfile
+    template_path: input.yml.hbs
+    vars:
+      - name: paths
+        type: text
+        title: Paths
+        multi: true
+        required: true
+        show_user: true
+      - name: tags
+        type: text
+        title: Tags
+        multi: true
+        required: true
+        show_user: false
+      - name: ignore_older
+        type: text
+        title: Ignore events older than
+        required: false
+        default: 72h
+owner:
+  github: elastic/integrations

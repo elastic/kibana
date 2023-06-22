@@ -16,10 +16,9 @@ import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import { ExpressionMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
 
 async function metricFilterable(
   dimensions: VisParams['dimensions'],
@@ -56,7 +55,7 @@ export const getMetricVisRenderer = (
     name: EXPRESSION_METRIC_NAME,
     displayName: 'metric visualization',
     reuseDomNode: true,
-    render: async (domNode, { visData, visConfig }, handlers) => {
+    render: async (domNode, { visData, visConfig, overrides }, handlers) => {
       const { core, plugins } = deps.getStartDeps();
 
       handlers.onDestroy(() => {
@@ -104,6 +103,7 @@ export const getMetricVisRenderer = (
               fireEvent={handlers.event}
               renderMode={handlers.getRenderMode()}
               filterable={filterable}
+              overrides={overrides}
             />
           </div>
         </KibanaThemeProvider>,

@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/files-management-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Simple UI for managing files in Kibana",
+  "plugin": {
+    "id": "filesManagement",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "files",
+      "management"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

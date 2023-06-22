@@ -19,9 +19,6 @@ export function createMockClient() {
 
 export function createMockClientArgs() {
   const authorization = createAuthorizationMock();
-  authorization.getAuthorizationFilter.mockImplementation(async () => {
-    return { filter: undefined, ensureSavedObjectsAreAuthorized: () => {} };
-  });
 
   const soClient = savedObjectsClientMock.create();
 

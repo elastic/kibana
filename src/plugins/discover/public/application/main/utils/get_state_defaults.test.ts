@@ -8,8 +8,9 @@
 
 import { getStateDefaults } from './get_state_defaults';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { savedSearchMock, savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
@@ -74,5 +75,43 @@ describe('getStateDefaults', () => {
         "viewMode": undefined,
       }
     `);
+  });
+
+  test('should set view mode correctly', () => {
+    const actualForUndefinedViewMode = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: {
+        ...savedSearchMockWithSQL,
+        viewMode: undefined,
+      },
+    });
+    expect(actualForUndefinedViewMode.viewMode).toBeUndefined();
+
+    const actualForTextBasedWithInvalidViewMode = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: {
+        ...savedSearchMockWithSQL,
+        viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+      },
+    });
+    expect(actualForTextBasedWithInvalidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+
+    const actualForTextBasedWithValidViewMode = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: {
+        ...savedSearchMockWithSQL,
+        viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+      },
+    });
+    expect(actualForTextBasedWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+
+    const actualForWithValidViewMode = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: {
+        ...savedSearchMock,
+        viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+      },
+    });
+    expect(actualForWithValidViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
   });
 });

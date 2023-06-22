@@ -30,6 +30,7 @@ import {
   SavedObjectsClientContract,
   HttpSetup,
   CoreStart,
+  NotificationsStart,
 } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
@@ -122,6 +123,15 @@ const fields = [
     searchable: true,
     exists: true,
   },
+  // Added to test issue#148062 about the use of Object method names as fields name
+  ...Object.getOwnPropertyNames(Object.getPrototypeOf({})).map((name) => ({
+    name,
+    displayName: name,
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  })),
   documentField,
 ];
 
@@ -223,6 +233,7 @@ describe('FormBasedDimensionEditor', () => {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
+      notifications: {} as NotificationsStart,
       data: {
         fieldFormats: {
           getType: jest.fn().mockReturnValue({
@@ -330,7 +341,7 @@ describe('FormBasedDimensionEditor', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options).toHaveLength(2);
+    expect(options).toHaveLength(3);
 
     expect(options![0].label).toEqual('Records');
     expect(options![1].options!.map(({ label }) => label)).toEqual([
@@ -339,6 +350,11 @@ describe('FormBasedDimensionEditor', () => {
       'memory',
       'source',
     ]);
+
+    // these fields are generated to test the issue #148062 about fields that are using JS Object method names
+    expect(options![2].options!.map(({ label }) => label)).toEqual(
+      Object.getOwnPropertyNames(Object.getPrototypeOf({})).sort()
+    );
   });
 
   it('should hide fields that have no data', () => {

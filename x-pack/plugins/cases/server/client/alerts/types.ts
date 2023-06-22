@@ -24,16 +24,26 @@ export type CasesClientGetAlertsResponse = Alert[];
 /**
  * Defines the fields necessary to update an alert's status.
  */
-export interface UpdateAlertRequest {
+export interface UpdateAlertStatusRequest {
   id: string;
   index: string;
   status: CaseStatuses;
 }
 
 export interface AlertUpdateStatus {
-  alerts: UpdateAlertRequest[];
+  alerts: UpdateAlertStatusRequest[];
 }
 
 export interface AlertGet {
   alertsInfo: AlertInfo[];
+}
+
+export interface UpdateAlertCasesRequest {
+  alerts: AlertInfo[];
+  caseIds: string[];
+}
+
+export interface RemoveCaseIdFromAlertsRequest {
+  alerts: AlertInfo[];
+  caseId: string;
 }

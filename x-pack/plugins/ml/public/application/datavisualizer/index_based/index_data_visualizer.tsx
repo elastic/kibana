@@ -14,7 +14,8 @@ import type {
   GetAdditionalLinks,
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
-import { useMlKibana, useTimefilter, useMlLocator } from '../../contexts/kibana';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';

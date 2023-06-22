@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useState } from 'react';
-import styled from 'styled-components';
 import { JourneyStep } from '../../../../../common/runtime_types';
 import { STATUS_LABEL } from '../../monitor/ping_list/translations';
 import { COLLAPSE_LABEL, EXPAND_LABEL, STEP_NAME_LABEL } from '../translations';
@@ -27,10 +26,6 @@ import { StepImage } from './step_image';
 import { useExpandedRow } from './use_expanded_row';
 import { StepDuration } from './step_duration';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
-
-export const SpanWithMargin = styled.span`
-  margin-right: 16px;
-`;
 
 interface Props {
   data: JourneyStep[];

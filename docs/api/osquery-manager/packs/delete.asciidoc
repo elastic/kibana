@@ -33,7 +33,7 @@ WARNING: Once you delete a pack, _it cannot be recovered_.
 `200`::
   Indicates that the pack is deleted. Returns an empty response body. 
 
-
+[[osquery-manager-packs-api-delete-example]]
 ==== Example
 
 Delete a pack object with the `bbe5b070-0c51-11ed-b0f8-ad31b008e832` ID:

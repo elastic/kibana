@@ -34,3 +34,6 @@ export const TREND_CHART_CATEGORY = 'trend';
 
 /** settings for view selection are grouped under this category */
 export const VIEW_CATEGORY = 'view';
+
+/** settings for group by selection on summary tab */
+export const GROUP_BY_SETTING_NAME = 'group-by';

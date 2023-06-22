@@ -11,13 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   apmLabsButton,
-  apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   defaultApmServiceEnvironment,
   enableComparisonByDefault,
   enableInspectEsQueries,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -28,12 +29,13 @@ import { BottomBarActions } from '../bottom_bar_actions';
 const apmSettingsKeys = [
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
-  apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   enableInspectEsQueries,
   apmLabsButton,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
 ];
 
 export function GeneralSettings() {
@@ -82,6 +84,7 @@ export function GeneralSettings() {
             values={{
               link: (
                 <EuiLink
+                  data-test-subj="apmGeneralSettingsKibanaAdvancedSettingsLink"
                   href={application.getUrlForApp('management', {
                     path: `/kibana/settings?query=category:(observability)`,
                   })}

@@ -32,6 +32,7 @@ export interface Props {
   stackByField1ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByWidth?: number;
   uniqueQueryId: string;
+  useLensCompatibleFields?: boolean;
 }
 
 const FieldSelectionComponent: React.FC<Props> = ({
@@ -46,6 +47,7 @@ const FieldSelectionComponent: React.FC<Props> = ({
   stackByField1ComboboxRef,
   stackByWidth,
   uniqueQueryId,
+  useLensCompatibleFields,
 }: Props) => (
   <EuiFlexGroup alignItems="flexStart" data-test-subj="fieldSelection" gutterSize="none">
     <EuiFlexItem grow={false}>
@@ -58,6 +60,7 @@ const FieldSelectionComponent: React.FC<Props> = ({
         selected={stackByField0}
         inputRef={setStackByField0ComboboxInputRef}
         width={stackByWidth}
+        useLensCompatibleFields={useLensCompatibleFields}
       />
       <EuiSpacer size="s" />
       <StackByComboBox
@@ -69,6 +72,7 @@ const FieldSelectionComponent: React.FC<Props> = ({
         selected={stackByField1 ?? ''}
         inputRef={setStackByField1ComboboxInputRef}
         width={stackByWidth}
+        useLensCompatibleFields={useLensCompatibleFields}
       />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>

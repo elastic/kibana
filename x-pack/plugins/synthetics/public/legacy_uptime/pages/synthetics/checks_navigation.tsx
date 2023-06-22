@@ -32,6 +32,7 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
     <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="syntheticsChecksNavigationPreviousCheckButton"
           size={isMobile ? 'xs' : 'm'}
           iconType="arrowLeft"
           isDisabled={!details?.previous}
@@ -52,6 +53,7 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="syntheticsChecksNavigationNextCheckButton"
           size={isMobile ? 'xs' : 'm'}
           iconType="arrowRight"
           iconSide="right"

@@ -13,7 +13,7 @@ import { MetricsSection } from '../../../components/app/section/metrics';
 import { UptimeSection } from '../../../components/app/section/uptime';
 import { UXSection } from '../../../components/app/section/ux';
 import { HasDataMap } from '../../../context/has_data_context';
-import { BucketSize } from '../containers';
+import type { BucketSize } from '../helpers/calculate_bucket_size';
 
 interface Props {
   bucketSize: BucketSize;

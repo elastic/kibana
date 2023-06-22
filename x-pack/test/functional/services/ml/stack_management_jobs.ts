@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import path from 'path';
 
@@ -326,7 +327,7 @@ export function MachineLearningStackManagementJobsProvider({
 
     async getDownload(filePath: string) {
       return retry.tryForTime(5000, async () => {
-        expect(fs.existsSync(filePath)).to.be(true);
+        expect(fs.existsSync(filePath)).to.eql(true, `File path ${filePath} should exist`);
         return fs.readFileSync(filePath).toString();
       });
     },
@@ -356,8 +357,7 @@ export function MachineLearningStackManagementJobsProvider({
       const title: string = await titleElement.getVisibleText();
       expect(title).to.match(/^Your file is downloading in the background$/);
 
-      const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
-      await dismissButton.click();
+      await toasts.dismissAllToastsWithChecks();
 
       // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtExportJobsFlyout', { timeout: 60 * 1000 });

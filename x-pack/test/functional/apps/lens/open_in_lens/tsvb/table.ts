@@ -88,6 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setStaticValue(10);
       await header.waitUntilLoadingHasFinished();
       await visualBuilder.clickSeriesOption();
+      await header.waitUntilLoadingHasFinished();
       await visualBuilder.setFieldForAggregateBy('bytes');
       await visualBuilder.setFunctionForAggregateFunction('Sum');
       await header.waitUntilLoadingHasFinished();

@@ -6,9 +6,15 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
 import type { CreateCommentsMigrationsDeps } from './migrations';
 import { createCommentsMigrations } from './migrations';
+
+/**
+ * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
+ * Remove these comments when https://github.com/elastic/kibana/issues/152756 is resolved.
+ */
 
 export const createCaseCommentSavedObjectType = ({
   migrationDeps,
@@ -16,10 +22,12 @@ export const createCaseCommentSavedObjectType = ({
   migrationDeps: CreateCommentsMigrationsDeps;
 }): SavedObjectsType => ({
   name: CASE_COMMENT_SAVED_OBJECT,
+  indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
+    dynamic: false,
     properties: {
       comment: {
         type: 'text',
@@ -32,41 +40,47 @@ export const createCaseCommentSavedObjectType = ({
       },
       actions: {
         properties: {
+          /*
           targets: {
-            type: 'nested',
             properties: {
               hostname: { type: 'keyword' },
               endpointId: { type: 'keyword' },
-            },
-          },
+            }
+          }
+           */
           type: { type: 'keyword' },
         },
       },
       alertId: {
         type: 'keyword',
       },
+      /*
       index: {
         type: 'keyword',
-      },
+      }
+       */
       created_at: {
         type: 'date',
       },
       created_by: {
         properties: {
+          /*
           full_name: {
             type: 'keyword',
-          },
-          username: {
-            type: 'keyword',
-          },
+          }
           email: {
             type: 'keyword',
-          },
+          }
           profile_uid: {
+            type: 'keyword',
+          }
+           */
+          username: {
             type: 'keyword',
           },
         },
       },
+      /*
       externalReferenceId: {
         type: 'keyword',
       },
@@ -79,25 +93,25 @@ export const createCaseCommentSavedObjectType = ({
           },
         },
       },
-      externalReferenceAttachmentTypeId: {
-        type: 'keyword',
-      },
       externalReferenceMetadata: {
         dynamic: false,
-        type: 'object',
-        enabled: false,
+        properties: {},
+      },
+      persistableStateAttachmentState: {
+        dynamic: false,
+        properties: {},
+      },
+       */
+      externalReferenceAttachmentTypeId: {
+        type: 'keyword',
       },
       persistableStateAttachmentTypeId: {
         type: 'keyword',
       },
-      persistableStateAttachmentState: {
-        dynamic: false,
-        type: 'object',
-        enabled: false,
-      },
       pushed_at: {
         type: 'date',
       },
+      /*
       pushed_by: {
         properties: {
           username: {
@@ -124,9 +138,11 @@ export const createCaseCommentSavedObjectType = ({
           },
         },
       },
+      */
       updated_at: {
         type: 'date',
       },
+      /*
       updated_by: {
         properties: {
           username: {
@@ -143,6 +159,7 @@ export const createCaseCommentSavedObjectType = ({
           },
         },
       },
+      */
     },
   },
   migrations: () => createCommentsMigrations(migrationDeps),

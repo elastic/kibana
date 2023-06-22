@@ -143,6 +143,28 @@ describe('ExpressionRenderHandler', () => {
       });
     });
 
+    it('should pass through provided "getCompatibleCellValueActions" to the expression renderer', async () => {
+      const getCompatibleCellValueActions = jest.fn();
+      const cellValueActionsParameter = [{ value: 'testValue' }];
+      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
+      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
+        get: () => ({
+          render: (domNode: HTMLElement, config: unknown, handlers: IInterpreterRenderHandlers) => {
+            handlers.getCompatibleCellValueActions!(cellValueActionsParameter);
+          },
+        }),
+      });
+
+      const expressionRenderHandler = new ExpressionRenderHandler(element, {
+        onRenderError: mockMockErrorRenderFunction,
+        getCompatibleCellValueActions,
+      });
+      expect(getCompatibleCellValueActions).toHaveBeenCalledTimes(0);
+      await expressionRenderHandler.render({ type: 'render', as: 'something' });
+      expect(getCompatibleCellValueActions).toHaveBeenCalledTimes(1);
+      expect(getCompatibleCellValueActions).toHaveBeenCalledWith(cellValueActionsParameter);
+    });
+
     it('sends a next observable once rendering is complete', () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
       expect.assertions(1);

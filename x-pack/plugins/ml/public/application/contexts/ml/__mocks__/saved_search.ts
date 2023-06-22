@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const savedSearchMock: any = {
+export const deprecatedSavedSearchSimpleObjMock: any = {
   id: 'the-saved-search-id',
   type: 'search',
   attributes: {

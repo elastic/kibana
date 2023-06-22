@@ -27,7 +27,12 @@ export interface RulesQueryData {
  */
 export const useFindRules = (
   requestArgs: FindRulesQueryArgs,
-  options: UseQueryOptions<RulesQueryData, Error, RulesQueryData, [...string[], FindRulesQueryArgs]>
+  options?: UseQueryOptions<
+    RulesQueryData,
+    Error,
+    RulesQueryData,
+    [...string[], FindRulesQueryArgs]
+  >
 ) => {
   const { addError } = useAppToasts();
 

@@ -138,7 +138,7 @@ describe('metric_visualization', () => {
         groups: [
           expect.objectContaining({
             accessors: expect.arrayContaining([
-              { columnId: 'a', triggerIcon: 'colorBy', palette: [] },
+              { columnId: 'a', triggerIconType: 'colorBy', palette: [] },
             ]),
           }),
         ],
@@ -160,7 +160,7 @@ describe('metric_visualization', () => {
         groups: [
           expect.objectContaining({
             accessors: expect.arrayContaining([
-              { columnId: 'a', triggerIcon: undefined, palette: undefined },
+              { columnId: 'a', triggerIconType: undefined, palette: undefined },
             ]),
           }),
         ],
@@ -382,14 +382,6 @@ describe('metric_visualization', () => {
           "type": "expression",
         }
       `);
-    });
-  });
-
-  describe('#getErrorMessages', () => {
-    it('returns undefined if no error is raised', () => {
-      const error = metricVisualization.getErrorMessages(exampleState());
-
-      expect(error).not.toBeDefined();
     });
   });
 });

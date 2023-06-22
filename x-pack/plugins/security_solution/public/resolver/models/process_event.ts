@@ -63,12 +63,13 @@ export function eventType(passedEvent: SafeResolverEvent): ResolverProcessType {
     const category = new Set(eventModel.eventCategory(passedEvent));
     const kind = new Set(eventModel.eventKind(passedEvent));
     if (category.has('process')) {
-      if (type.has('start') || type.has('change') || type.has('creation')) {
+      // checking for end event.type first as multiple values are possible (merged process events). e.g event.type: ['start', 'end']
+      if (type.has('end')) {
+        return 'processTerminated';
+      } else if (type.has('start') || type.has('change') || type.has('creation')) {
         return 'processCreated';
       } else if (type.has('info')) {
         return 'processRan';
-      } else if (type.has('end')) {
-        return 'processTerminated';
       } else {
         return 'unknownProcessEvent';
       }

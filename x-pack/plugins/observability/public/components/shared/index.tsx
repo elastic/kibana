@@ -16,8 +16,6 @@ import type {
 } from './field_value_suggestions/types';
 import type { DatePickerProps } from './date_picker';
 import type { FilterValueLabelProps } from './filter_value_label/filter_value_label';
-import type { SelectableUrlListProps } from './exploratory_view/components/url_search/selectable_url_list';
-import type { ExploratoryViewPageProps } from './exploratory_view';
 export { createLazyObservabilityPageTemplate } from './page_template';
 export type { LazyObservabilityPageTemplateProps } from './page_template';
 
@@ -69,28 +67,6 @@ export function FilterValueLabel(props: FilterValueLabelProps) {
   return (
     <Suspense fallback={null}>
       <FilterValueLabelLazy {...props} />
-    </Suspense>
-  );
-}
-
-const SelectableUrlListLazy = lazy(
-  () => import('./exploratory_view/components/url_search/selectable_url_list')
-);
-
-export function SelectableUrlList(props: SelectableUrlListProps) {
-  return (
-    <Suspense fallback={null}>
-      <SelectableUrlListLazy {...props} />
-    </Suspense>
-  );
-}
-
-const ExploratoryViewLazy = lazy(() => import('./exploratory_view'));
-
-export function ExploratoryView(props: ExploratoryViewPageProps) {
-  return (
-    <Suspense fallback={null}>
-      <ExploratoryViewLazy {...props} />
     </Suspense>
   );
 }

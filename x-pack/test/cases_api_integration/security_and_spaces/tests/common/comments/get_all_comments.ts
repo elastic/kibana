@@ -17,7 +17,7 @@ import {
   getAllComments,
   superUserSpace1Auth,
   extractWarningValueFromWarningHeader,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,

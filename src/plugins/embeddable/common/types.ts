@@ -24,6 +24,7 @@ export enum ViewMode {
 export type EmbeddableInput = {
   viewMode?: ViewMode;
   title?: string;
+  description?: string;
   /**
    * Note this is not a saved object id. It is used to uniquely identify this
    * Embeddable instance from others (e.g. inside a container).  It's possible to

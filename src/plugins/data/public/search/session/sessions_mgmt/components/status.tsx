@@ -104,7 +104,7 @@ const getStatusAttributes = ({
 
     case SearchSessionStatus.CANCELLED:
       return {
-        icon: <EuiIcon color="#9AA" type="crossInACircleFilled" />,
+        icon: <EuiIcon color="#9AA" type="error" />,
         label: <TableText>{getStatusText(session.status)}</TableText>,
         toolTipContent: i18n.translate('data.mgmt.searchSessions.status.message.cancelled', {
           defaultMessage: 'Cancelled by user',
@@ -114,7 +114,7 @@ const getStatusAttributes = ({
     case SearchSessionStatus.ERROR:
       return {
         textColor: 'danger',
-        icon: <EuiIcon color="danger" type="crossInACircleFilled" />,
+        icon: <EuiIcon color="danger" type="error" />,
         label: <TableText>{getStatusText(session.status)}</TableText>,
         toolTipContent:
           session.errors && session.errors.length > 0

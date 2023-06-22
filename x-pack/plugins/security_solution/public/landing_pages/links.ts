@@ -6,41 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  DASHBOARDS_PATH,
-  EXPLORE_PATH,
-  SecurityPageName,
-  SERVER_APP_ID,
-} from '../../common/constants';
-import { DASHBOARDS, EXPLORE } from '../app/translations';
+import { EXPLORE_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
+import { EXPLORE } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
-import { overviewLinks, detectionResponseLinks, entityAnalyticsLinks } from '../overview/links';
-import { links as hostsLinks } from '../explore/hosts/links';
-import { links as networkLinks } from '../explore/network/links';
-import { links as usersLinks } from '../explore/users/links';
-import { links as kubernetesLinks } from '../kubernetes/links';
-import { dashboardLinks as cloudSecurityPostureLinks } from '../cloud_security_posture/links';
 
-export const dashboardsLandingLinks: LinkItem = {
-  id: SecurityPageName.dashboardsLanding,
-  title: DASHBOARDS,
-  path: DASHBOARDS_PATH,
-  globalNavPosition: 1,
-  capabilities: [`${SERVER_APP_ID}.show`],
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.dashboards', {
-      defaultMessage: 'Dashboards',
-    }),
-  ],
-  links: [
-    overviewLinks,
-    detectionResponseLinks,
-    kubernetesLinks,
-    cloudSecurityPostureLinks,
-    entityAnalyticsLinks,
-  ],
-  skipUrlState: true,
-};
+import { exploreLinks } from '../explore/links';
 
 export const threatHuntingLandingLinks: LinkItem = {
   id: SecurityPageName.exploreLanding,
@@ -53,6 +23,6 @@ export const threatHuntingLandingLinks: LinkItem = {
       defaultMessage: 'Explore',
     }),
   ],
-  links: [hostsLinks, networkLinks, usersLinks],
+  links: exploreLinks,
   skipUrlState: true,
 };

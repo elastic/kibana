@@ -21,3 +21,4 @@ export * from './check_permissions';
 export * from './download_sources';
 export * from './tags';
 export * from './health_check';
+export * from './message_signing_service';

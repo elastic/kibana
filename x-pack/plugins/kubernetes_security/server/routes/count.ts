@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter } from '@kbn/core/server';
-import { PROCESS_EVENTS_INDEX } from '@kbn/session-view-plugin/common/constants';
 import { COUNT_ROUTE } from '../../common/constants';
 
 export const registerCountRoute = (router: IRouter) => {
@@ -16,9 +15,9 @@ export const registerCountRoute = (router: IRouter) => {
       path: COUNT_ROUTE,
       validate: {
         query: schema.object({
+          index: schema.string(),
           query: schema.string(),
           field: schema.string(),
-          index: schema.maybe(schema.string()),
         }),
       },
     },
@@ -27,7 +26,7 @@ export const registerCountRoute = (router: IRouter) => {
       const { query, field, index } = request.query;
 
       try {
-        const body = await doCount(client, query, field, index);
+        const body = await doCount(client, index, query, field);
 
         return response.ok({ body });
       } catch (err) {
@@ -39,14 +38,14 @@ export const registerCountRoute = (router: IRouter) => {
 
 export const doCount = async (
   client: ElasticsearchClient,
+  index: string,
   query: string,
-  field: string,
-  index?: string
+  field: string
 ) => {
   const queryDSL = JSON.parse(query);
 
   const search = await client.search({
-    index: [index || PROCESS_EVENTS_INDEX],
+    index: [index],
     body: {
       query: queryDSL,
       size: 0,

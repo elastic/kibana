@@ -1,0 +1,219 @@
+{
+  "id": "@kbn/chart-expressions-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.extractContainerType",
+        "type": "Function",
+        "tags": [],
+        "label": "extractContainerType",
+        "description": [],
+        "signature": [
+          "(context?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
+          " | undefined) => string | undefined"
+        ],
+        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.extractContainerType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.extractVisualizationType",
+        "type": "Function",
+        "tags": [],
+        "label": "extractVisualizationType",
+        "description": [],
+        "signature": [
+          "(context?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
+          " | undefined) => string | undefined"
+        ],
+        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.extractVisualizationType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getOverridesFor",
+        "type": "Function",
+        "tags": [],
+        "label": "getOverridesFor",
+        "description": [
+          "\nGet an override specification and returns a props object to use directly with the Component"
+        ],
+        "signature": [
+          "(overrides: O | undefined, componentName: K) => { [k: string]: unknown; }"
+        ],
+        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getOverridesFor.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "overrides",
+            "description": [
+              "Overrides object"
+            ],
+            "signature": [
+              "O | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getOverridesFor.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "componentName",
+            "description": [
+              "name of the Component to look for (i.e. \"settings\", \"axisX\")"
+            ],
+            "signature": [
+              "K"
+            ],
+            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "an props object to use directly with the component"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.MakeOverridesSerializable",
+        "type": "Type",
+        "tags": [],
+        "label": "MakeOverridesSerializable",
+        "description": [],
+        "signature": [
+          "{ [KeyType in keyof T]: NonNullable<T[KeyType]> extends Function ? \"ignore\" : NonNullable<T[KeyType]> extends React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactChildren ? never : NonNullable<T[KeyType]> extends object ? ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<T[KeyType]> : NonNullable<T[KeyType]>; }"
+        ],
+        "path": "src/plugins/chart_expressions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.Simplify",
+        "type": "Type",
+        "tags": [],
+        "label": "Simplify",
+        "description": [],
+        "signature": [
+          "{ [KeyType in keyof T]: T[KeyType]; }"
+        ],
+        "path": "src/plugins/chart_expressions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

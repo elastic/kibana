@@ -21,6 +21,7 @@ import type {
 } from '../../../../../../../common/types/feature_importance';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';
+import { TopClass } from '../../../../../../../common/types/feature_importance';
 
 interface ClassificationDecisionPathProps {
   predictedValue: string | boolean;
@@ -42,12 +43,20 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
   const [currentClass, setCurrentClass] = useState<string>(
     getStringBasedClassName(topClasses[0].class_name)
   );
+  const selectedClass = topClasses.find(
+    (t) => getStringBasedClassName(t.class_name) === getStringBasedClassName(currentClass)
+  ) as TopClass;
+  const predictedProbabilityForCurrentClass = selectedClass
+    ? selectedClass.class_probability
+    : undefined;
+
   const { decisionPathData } = useDecisionPathData({
     baseline,
     featureImportance,
     predictedValue: currentClass,
-    predictedProbability,
+    predictedProbability: predictedProbabilityForCurrentClass,
   });
+
   const options = useMemo(() => {
     const predictionValueStr = getStringBasedClassName(predictedValue);
 

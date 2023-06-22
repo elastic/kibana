@@ -18,7 +18,7 @@ import {
   useGlobalFullScreen,
 } from '../../../../common/containers/use_full_screen';
 import { useSessionView, useSessionViewNavigation } from './use_session_view';
-import { TableId } from '../../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/hooks/use_selector');

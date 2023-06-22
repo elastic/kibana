@@ -18,10 +18,6 @@ export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetu
     isReady: () => true,
     fetch: async () => await getMapsTelemetry(),
     schema: {
-      indexPatternsWithGeoFieldCount: { type: 'long' },
-      indexPatternsWithGeoPointFieldCount: { type: 'long' },
-      indexPatternsWithGeoShapeFieldCount: { type: 'long' },
-      geoShapeAggLayersCount: { type: 'long' },
       mapsTotalCount: { type: 'long' },
       timeCaptured: { type: 'date' },
       layerTypes: {

@@ -7,8 +7,16 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ComplianceDashboardData } from '../../../common/types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
+import { schema } from '@kbn/config-schema';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+import type { PosturePolicyTemplate, ComplianceDashboardData } from '../../../common/types';
+import {
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  STATS_ROUTE_PATH,
+} from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
@@ -25,23 +33,32 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
     ...cluster,
     trend: trends.map(({ timestamp, clusters: clustersTrendData }) => ({
       timestamp,
-      ...clustersTrendData[cluster.meta.clusterId],
+      ...clustersTrendData[cluster.meta.assetIdentifierId],
     })),
   }));
 
 const getSummaryTrend = (trends: Trends) =>
   trends.map(({ timestamp, summary }) => ({ timestamp, ...summary }));
 
+const queryParamsSchema = {
+  params: schema.object({
+    policy_template: schema.oneOf([
+      schema.literal(CSPM_POLICY_TEMPLATE),
+      schema.literal(KSPM_POLICY_TEMPLATE),
+    ]),
+  }),
+};
+
 export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
   router.get(
     {
       path: STATS_ROUTE_PATH,
-      validate: false,
+      validate: queryParamsSchema,
       options: {
         tags: ['access:cloud-security-posture-read'],
       },
     },
-    async (context, _, response) => {
+    async (context, request, response) => {
       const cspContext = await context.csp;
 
       try {
@@ -52,16 +69,23 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
           keep_alive: '30s',
         });
 
+        const policyTemplate = request.params.policy_template as PosturePolicyTemplate;
+
+        // runtime mappings create the `safe_posture_type` field, which equals to `kspm` or `cspm` based on the value and existence of the `posture_type` field which was introduced at 8.7
+        // the `query` is then being passed to our getter functions to filter per posture type even for older findings before 8.7
+        const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
         const query: QueryDslQueryContainer = {
-          match_all: {},
+          bool: {
+            filter: [{ term: { safe_posture_type: policyTemplate } }],
+          },
         };
 
         const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] = await Promise.all(
           [
-            getStats(esClient, query, pitId),
-            getGroupedFindingsEvaluation(esClient, query, pitId),
-            getClusters(esClient, query, pitId),
-            getTrends(esClient),
+            getStats(esClient, query, pitId, runtimeMappings),
+            getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings),
+            getClusters(esClient, query, pitId, runtimeMappings),
+            getTrends(esClient, policyTemplate),
           ]
         );
 

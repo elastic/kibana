@@ -24,11 +24,14 @@ import { BehaviorSubject, pluck } from 'rxjs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
+import { dataTableSelectors } from '@kbn/securitysolution-data-table';
+import { initialGroupingState } from './grouping/reducer';
+import type { GroupState } from './grouping/types';
 import {
+  DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   SERVER_APP_ID,
-  SOURCERER_API_URL,
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
@@ -41,12 +44,11 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/timeline/types';
-import { dataTableSelectors } from './data_table';
 import type { KibanaDataView, SourcererModel } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
-import type { SecurityDataView } from '../containers/sourcerer/api';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
 
 type ComposeType = typeof compose;
 declare global {
@@ -79,12 +81,17 @@ export const createStoreFactory = async (
   let kibanaDataViews: SourcererModel['kibanaDataViews'];
   try {
     // check for/generate default Security Solution Kibana data view
-    const sourcererDataViews: SecurityDataView = await coreStart.http.fetch(SOURCERER_API_URL, {
-      method: 'POST',
-      body: JSON.stringify({
+    const sourcererDataViews = await createSourcererDataView({
+      body: {
         patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
-      }),
+      },
+      dataViewService: startPlugins.data.dataViews,
+      dataViewId: `${DEFAULT_DATA_VIEW_ID}-${(await startPlugins.spaces?.getActiveSpace())?.id}`,
     });
+
+    if (sourcererDataViews === undefined) {
+      throw new Error('');
+    }
     defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
     kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: KibanaDataView) => ({
       ...initDataView,
@@ -110,18 +117,20 @@ export const createStoreFactory = async (
   const dataTableInitialState = {
     dataTable: {
       tableById: {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
         ...subPlugins.alerts.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.rules.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.exceptions.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...subPlugins.hosts.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...subPlugins.network.storageDataTables!.tableById,
+        ...subPlugins.explore.exploreDataTables!.hosts.tableById,
+        ...subPlugins.explore.exploreDataTables!.network.tableById,
+        ...subPlugins.explore.exploreDataTables!.users.tableById,
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
       },
     },
+  };
+
+  const groupsInitialState: GroupState = {
+    groups: initialGroupingState,
   };
 
   const timelineReducer = reduceReducers(
@@ -132,9 +141,7 @@ export const createStoreFactory = async (
 
   const initialState = createInitialState(
     {
-      ...subPlugins.hosts.store.initialState,
-      ...subPlugins.users.store.initialState,
-      ...subPlugins.network.store.initialState,
+      ...subPlugins.explore.store.initialState,
       ...timelineInitialState,
       ...subPlugins.management.store.initialState,
     },
@@ -144,13 +151,12 @@ export const createStoreFactory = async (
       signalIndexName: signal.name,
       enableExperimental,
     },
-    dataTableInitialState
+    dataTableInitialState,
+    groupsInitialState
   );
 
   const rootReducer = {
-    ...subPlugins.hosts.store.reducer,
-    ...subPlugins.users.store.reducer,
-    ...subPlugins.network.store.reducer,
+    ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
   };

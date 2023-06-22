@@ -8,37 +8,39 @@
 import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { RawRule } from '../../types';
+import { validateHours } from '../../routes/lib/validate_hours';
+import { RawRule, RuleNotifyWhen } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertAction } from '../types';
 import { RulesClientContext } from '../types';
+import { parseDuration } from '../../lib';
+
+export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
+  actions: NormalizedAlertAction[];
+};
 
 export async function validateActions(
   context: RulesClientContext,
-  alertType: UntypedNormalizedRuleType,
-  data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertAction[] }
+  ruleType: UntypedNormalizedRuleType,
+  data: ValidateActionsData,
+  allowMissingConnectorSecrets?: boolean
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
-  const hasNotifyWhen = typeof notifyWhen !== 'undefined';
-  const hasThrottle = typeof throttle !== 'undefined';
-  let usesRuleLevelFreqParams;
-  // I removed the below ` && hasThrottle` check temporarily.
-  // Currently the UI sends "throttle" as undefined but schema converts it to null, so they never become both undefined
-  // I changed the schema too, but as the UI (and tests) sends "notifyWhen" as string and "throttle" as undefined, they never become both defined.
-  // We should add it back when the UI is changed (https://github.com/elastic/kibana/issues/143369)
-  if (hasNotifyWhen) usesRuleLevelFreqParams = true;
-  else if (!hasNotifyWhen && !hasThrottle) usesRuleLevelFreqParams = false;
-  else {
-    throw Boom.badRequest(
-      i18n.translate('xpack.alerting.rulesClient.usesValidGlobalFreqParams.oneUndefined', {
-        defaultMessage:
-          'Rule-level notifyWhen and throttle must both be defined or both be undefined',
-      })
-    );
-  }
-
+  const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
+  const hasRuleLevelThrottle = Boolean(throttle);
   if (actions.length === 0) {
     return;
+  }
+
+  const errors = [];
+
+  const uniqueActions = new Set(actions.map((action) => action.uuid));
+  if (uniqueActions.size < actions.length) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.hasDuplicatedUuid', {
+        defaultMessage: 'Actions have duplicated UUIDs',
+      })
+    );
   }
 
   // check for actions using connectors with missing secrets
@@ -48,29 +50,35 @@ export async function validateActions(
   const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
     (result) => result.isMissingSecrets
   );
-
   if (actionsUsingConnectorsWithMissingSecrets.length) {
-    throw Boom.badRequest(
-      i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
-        defaultMessage: 'Invalid connectors: {groups}',
-        values: {
-          groups: actionsUsingConnectorsWithMissingSecrets
-            .map((connector) => connector.name)
-            .join(', '),
-        },
-      })
-    );
+    if (allowMissingConnectorSecrets) {
+      context.logger.error(
+        `Invalid connectors with "allowMissingConnectorSecrets": ${actionsUsingConnectorsWithMissingSecrets
+          .map((connector) => connector.name)
+          .join(', ')}`
+      );
+    } else {
+      errors.push(
+        i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
+          defaultMessage: 'Invalid connectors: {groups}',
+          values: {
+            groups: actionsUsingConnectorsWithMissingSecrets
+              .map((connector) => connector.name)
+              .join(', '),
+          },
+        })
+      );
+    }
   }
-
   // check for actions with invalid action groups
-  const { actionGroups: alertTypeActionGroups } = alertType;
+  const { actionGroups: alertTypeActionGroups } = ruleType;
   const usedAlertActionGroups = actions.map((action) => action.group);
   const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));
   const invalidActionGroups = usedAlertActionGroups.filter(
     (group) => !availableAlertTypeActionGroups.has(group)
   );
   if (invalidActionGroups.length) {
-    throw Boom.badRequest(
+    errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.invalidGroups', {
         defaultMessage: 'Invalid action groups: {groups}',
         values: {
@@ -81,13 +89,13 @@ export async function validateActions(
   }
 
   // check for actions using frequency params if the rule has rule-level frequency params defined
-  if (usesRuleLevelFreqParams) {
+  if (hasRuleLevelNotifyWhen || hasRuleLevelThrottle) {
     const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
     if (actionsWithFrequency.length) {
-      throw Boom.badRequest(
+      errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
           defaultMessage:
-            'Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: {groups}',
+            'Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: {groups}',
           values: {
             groups: actionsWithFrequency.map((a) => a.group).join(', '),
           },
@@ -97,7 +105,7 @@ export async function validateActions(
   } else {
     const actionsWithoutFrequency = actions.filter((action) => !action.frequency);
     if (actionsWithoutFrequency.length) {
-      throw Boom.badRequest(
+      errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq', {
           defaultMessage: 'Actions missing frequency parameters: {groups}',
           values: {
@@ -106,5 +114,155 @@ export async function validateActions(
         })
       );
     }
+  }
+
+  const scheduleInterval = parseDuration(data.schedule.interval);
+  const actionsWithInvalidThrottles = [];
+  const actionWithoutQueryAndTimeframe = [];
+  const actionWithInvalidTimeframe = [];
+  const actionsWithInvalidTimeRange = [];
+  const actionsWithInvalidDays = [];
+  const actionsWithAlertsFilterWithoutSummaryGetter = [];
+
+  for (const action of actions) {
+    const { alertsFilter } = action;
+
+    // check for actions throttled shorter than the rule schedule
+    if (
+      action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
+      parseDuration(action.frequency.throttle!) < scheduleInterval
+    ) {
+      actionsWithInvalidThrottles.push(action);
+    }
+
+    if (alertsFilter) {
+      // Action has alertsFilter but the ruleType does not support AAD
+      if (!ruleType.getSummarizedAlerts) {
+        actionsWithAlertsFilterWithoutSummaryGetter.push(action);
+      }
+
+      // alertsFilter must have at least one of query and timeframe
+      if (!alertsFilter.query && !alertsFilter.timeframe) {
+        actionWithoutQueryAndTimeframe.push(action);
+      }
+      if (alertsFilter.timeframe) {
+        // hours, days and timezone fields are required
+        if (
+          !alertsFilter.timeframe.hours ||
+          !alertsFilter.timeframe.days ||
+          !alertsFilter.timeframe.timezone
+        ) {
+          actionWithInvalidTimeframe.push(action);
+        }
+        if (alertsFilter.timeframe.hours) {
+          if (
+            validateHours(alertsFilter.timeframe.hours.start) ||
+            validateHours(alertsFilter.timeframe.hours.end)
+          ) {
+            actionsWithInvalidTimeRange.push(action);
+          }
+        }
+        if (alertsFilter.timeframe.days) {
+          if (alertsFilter.timeframe.days.some((day) => ![1, 2, 3, 4, 5, 6, 7].includes(day))) {
+            actionsWithInvalidDays.push(action);
+          }
+        }
+      }
+    }
+  }
+
+  if (actionsWithInvalidThrottles.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidThrottles', {
+        defaultMessage:
+          'Action frequency cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
+        values: {
+          scheduleIntervalText: data.schedule.interval,
+          groups: actionsWithInvalidThrottles
+            .map((a) => `${a.group} (${a.frequency?.throttle})`)
+            .join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionWithoutQueryAndTimeframe.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidAlertsFilter', {
+        defaultMessage: `Action's alertsFilter  must have either "query" or "timeframe" : {uuids}`,
+        values: {
+          uuids: actionWithoutQueryAndTimeframe.map((a) => `${a.uuid}`).join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionWithInvalidTimeframe.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionWithInvalidTimeframe', {
+        defaultMessage: `Action's alertsFilter timeframe has missing fields: days, hours or timezone: {uuids}`,
+        values: {
+          uuids: actionWithInvalidTimeframe.map((a) => a.uuid).join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionsWithInvalidDays.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidDays', {
+        defaultMessage: `Action's alertsFilter days has invalid values: {uuidAndDays}`,
+        values: {
+          uuidAndDays: actionsWithInvalidDays
+            .map((a) => `(${a.uuid}:[${a.alertsFilter!.timeframe!.days}]) `)
+            .join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionsWithInvalidTimeRange.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidTimeRange', {
+        defaultMessage: `Action's alertsFilter time range has an invalid value: {hours}`,
+        values: {
+          hours: actionsWithInvalidTimeRange
+            .map(
+              (a) =>
+                `${a.alertsFilter!.timeframe!.hours.start}-${a.alertsFilter!.timeframe!.hours.end}`
+            )
+            .join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionsWithAlertsFilterWithoutSummaryGetter.length > 0) {
+    errors.push(
+      i18n.translate(
+        'xpack.alerting.rulesClient.validateActions.actionsWithAlertsFilterWithoutSummaryGetter',
+        {
+          defaultMessage: `This ruleType ({ruleType}) can't have an action with Alerts Filter. Actions: [{uuids}]`,
+          values: {
+            uuids: actionsWithAlertsFilterWithoutSummaryGetter.map((a) => a.uuid).join(', '),
+            ruleType: ruleType.name,
+          },
+        }
+      )
+    );
+  }
+
+  // Finalize and throw any errors present
+  if (errors.length) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.errorSummary', {
+        defaultMessage:
+          'Failed to validate actions due to the following {errorNum, plural, one {error:} other {# errors:\n-}} {errorList}',
+        values: {
+          errorNum: errors.length,
+          errorList: errors.join('\n- '),
+        },
+      })
+    );
   }
 }

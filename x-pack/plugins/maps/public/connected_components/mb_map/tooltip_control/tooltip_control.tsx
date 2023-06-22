@@ -16,8 +16,9 @@ import {
   Point2D,
   PointLike,
 } from '@kbn/mapbox-gl';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { Geometry } from 'geojson';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { LON_INDEX, RawValue, SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
@@ -65,6 +66,7 @@ export interface Props {
   openTooltips: TooltipState[];
   renderTooltipContent?: RenderToolTipContent;
   updateOpenTooltips: (openTooltips: TooltipState[]) => void;
+  executionContext: KibanaExecutionContext;
 }
 
 export class TooltipControl extends Component<Props, {}> {
@@ -182,6 +184,15 @@ export class TooltipControl extends Component<Props, {}> {
         continue;
       }
 
+      // masking must use paint property "opacity" to hide features in order to support feature state
+      // therefore, there is no way to remove masked features with queryRenderedFeatures
+      // masked features must be removed via manual filtering
+      const masks = layer.getMasks();
+      const maskHiddingFeature = masks.find((mask) => mask.isFeatureMasked(mbFeature));
+      if (maskHiddingFeature) {
+        continue;
+      }
+
       const featureId = layer.getFeatureId(mbFeature);
       if (featureId === undefined) {
         continue;
@@ -251,7 +262,7 @@ export class TooltipControl extends Component<Props, {}> {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
     const isLocked = true;
-    const tooltipId = uuid();
+    const tooltipId = uuidv4();
     const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;
@@ -293,7 +304,7 @@ export class TooltipControl extends Component<Props, {}> {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
 
     const isLocked = false;
-    const tooltipId = uuid();
+    const tooltipId = uuidv4();
     const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;
@@ -376,6 +387,7 @@ export class TooltipControl extends Component<Props, {}> {
           isLocked={isLocked}
           index={index}
           loadFeatureGeometry={this._getFeatureGeometry}
+          executionContext={this.props.executionContext}
         />
       );
     });

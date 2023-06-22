@@ -12,6 +12,6 @@
     "patterns": [
       "{indices}/_fleet/global_checkpoints"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-global-checkpoints.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-global-checkpoints.html"
   }
 }

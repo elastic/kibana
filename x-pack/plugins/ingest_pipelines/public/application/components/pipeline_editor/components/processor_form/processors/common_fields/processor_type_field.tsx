@@ -7,7 +7,7 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, ReactNode } from 'react';
+import React, { FunctionComponent, ReactNode, useMemo } from 'react';
 import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
 
@@ -15,6 +15,7 @@ import {
   FieldValidateResponse,
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ILicense } from '../../../../../../../types';
 import {
   FIELD_TYPES,
   FieldConfig,
@@ -25,11 +26,12 @@ import {
 
 import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../shared';
 
-const extractProcessorTypesAndLabels = flow(
+export const extractProcessorDetails = flow(
   Object.entries,
-  map(([type, { label }]) => ({
+  map(([type, { label, forLicenseAtLeast }]) => ({
     label,
     value: type,
+    ...(forLicenseAtLeast ? { forLicenseAtLeast } : {}),
   })),
   (arr) => arr.sort((a, b) => a.label.localeCompare(b.label))
 );
@@ -39,9 +41,17 @@ interface ProcessorTypeAndLabel {
   label: string;
 }
 
-const processorTypesAndLabels: ProcessorTypeAndLabel[] = extractProcessorTypesAndLabels(
-  mapProcessorTypeToDescriptor
-);
+export const getProcessorTypesAndLabels = (license: ILicense | null) => {
+  return (
+    extractProcessorDetails(mapProcessorTypeToDescriptor)
+      // Filter out any processors that are not available for the current license type
+      .filter((option) => {
+        return option.forLicenseAtLeast ? license?.hasAtLeast(option.forLicenseAtLeast) : true;
+      })
+      // Convert to EuiComboBox options
+      .map(({ value, label }) => ({ label, value }))
+  );
+};
 
 interface Props {
   initialType?: string;
@@ -68,9 +78,12 @@ const typeConfig: FieldConfig<string> = {
 
 export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
   const {
-    services: { documentation },
+    services: { documentation, license },
   } = useKibana();
   const esDocUrl = documentation.getEsDocsBasePath();
+  // Some processors are only available for certain license types
+  const processorOptions = useMemo(() => getProcessorTypesAndLabels(license), [license]);
+
   return (
     <UseField<string> config={typeConfig} defaultValue={initialType} path="type">
       {(typeField) => {
@@ -128,7 +141,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
                   defaultMessage: 'Type and then hit "ENTER"',
                 }
               )}
-              options={processorTypesAndLabels}
+              options={processorOptions}
               selectedOptions={selectedOptions}
               onCreateOption={onCreateComboOption}
               onChange={(options: Array<EuiComboBoxOptionOption<string>>) => {

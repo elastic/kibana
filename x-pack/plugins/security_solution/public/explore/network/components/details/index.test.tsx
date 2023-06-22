@@ -55,6 +55,7 @@ describe('IP Overview Component', () => {
         flowTarget: FlowTargetSourceDest;
       }>,
       indexPatterns: [],
+      jobNameById: {},
     };
 
     test('it renders the default IP Overview', () => {

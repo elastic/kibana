@@ -17,16 +17,16 @@ const INITIAL_STATE = { annotations: [] };
 
 export function AnnotationsContextProvider({
   children,
+  serviceName,
   environment,
   start,
   end,
-  serviceName,
 }: {
   children: React.ReactNode;
+  serviceName: string;
   environment: string;
   start: string;
   end: string;
-  serviceName?: string;
 }) {
   const { data = INITIAL_STATE } = useFetcher(
     (callApmApi) => {

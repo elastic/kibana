@@ -24,10 +24,19 @@ const EXT_RE = /\.(jsx?|(d\.)?tsx?)$/;
 const INDEX_IN_INDEX_RE = /\/index\/index(\.jsx?|\.d\.tsx?|\.tsx?)$/;
 const INCLUDES_FILENAME_RE = /\/.*\..{2,4}$/;
 
-export function reduceImportRequest(req: string, type: ImportType, original?: string) {
+export function reduceImportRequest(
+  req: string,
+  type: ImportType,
+  original?: string,
+  sourceExt?: string
+) {
   let reduced = req;
 
-  if (type === 'require-resolve' && original && original.match(INCLUDES_FILENAME_RE)) {
+  if (
+    original &&
+    (type === 'require-resolve' || sourceExt === '.mjs') &&
+    original.match(INCLUDES_FILENAME_RE)
+  ) {
     // require.resolve() can be a complicated, it's often used in config files and
     // sometimes we don't have babel to help resolve .ts to .js, so we try to rely
     // on the original request and keep the filename listed if it's in the original
@@ -65,6 +74,7 @@ interface RelativeImportReqOptions extends WrapOptions {
   dirname: string;
   absolute: string;
   type: ImportType;
+  sourcePath?: string;
   original?: string;
 }
 
@@ -74,7 +84,8 @@ export function getRelativeImportReq(options: RelativeImportReqOptions) {
     reduceImportRequest(
       relative.startsWith('.') ? relative : `./${relative}`,
       options.type,
-      options.original
+      options.original,
+      options.sourcePath ? Path.extname(options.sourcePath) : undefined
     ),
     options
   );
@@ -82,19 +93,43 @@ export function getRelativeImportReq(options: RelativeImportReqOptions) {
 
 interface PackageRelativeImportReqOptions extends WrapOptions {
   packageDir: string;
-  packageId: string;
   absolute: string;
+  pkgId: string;
   type: ImportType;
 }
 
+const pkgMainCache = new Map<string, string | null>();
+function getPkgMain(pkgDir: string) {
+  const cached = pkgMainCache.get(pkgDir);
+  if (cached !== undefined) {
+    return cached;
+  }
+  try {
+    const main = require.resolve(pkgDir);
+    pkgMainCache.set(pkgDir, main);
+    return main;
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      pkgMainCache.set(pkgDir, null);
+      return null;
+    }
+
+    throw error;
+  }
+}
+
 export function getPackageRelativeImportReq(options: PackageRelativeImportReqOptions) {
+  if (options.absolute === getPkgMain(options.packageDir)) {
+    return wrap(options.pkgId, options);
+  }
+
   const relative = normalizePath(Path.relative(options.packageDir, options.absolute));
 
   if (!relative) {
-    return wrap(options.packageId, options);
+    return wrap(options.pkgId, options);
   }
 
   const subPath = reduceImportRequest(relative, options.type);
 
-  return wrap(subPath ? `${options.packageId}/${subPath}` : options.packageId, options);
+  return wrap(subPath ? `${options.pkgId}/${subPath}` : options.pkgId, options);
 }

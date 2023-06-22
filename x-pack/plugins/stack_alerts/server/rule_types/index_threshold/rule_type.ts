@@ -11,12 +11,16 @@ import {
   TimeSeriesQuery,
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
+import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './rule_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import { ComparatorFns, getHumanReadableComparator } from '../lib';
-import { getComparatorScript } from '../lib/comparator';
+import {
+  ComparatorFns,
+  getComparatorScript,
+  getHumanReadableComparator,
+  STACK_ALERTS_FEATURE_ID,
+} from '../../../common';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';
@@ -192,7 +196,7 @@ export function getRuleType(
     });
     logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
 
-    const isGroupAgg = !!queryParams.termField;
+    const isGroupAgg = isGroupAggregation(queryParams.termField);
 
     const unmetGroupValues: Record<string, number> = {};
     const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
@@ -257,5 +261,7 @@ export function getRuleType(
       const recoveryContext = addMessages(name, baseContext, params, true);
       recoveredAlert.setContext(recoveryContext);
     }
+
+    return { state: {} };
   }
 }

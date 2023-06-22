@@ -9,37 +9,37 @@ import type {
   EqlSearchRequest,
   FieldCapsRequest,
   FieldCapsResponse,
+  MsearchMultisearchBody,
+  MsearchMultisearchHeader,
   TermsEnumRequest,
   TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { unwrapEsResponse } from '@kbn/observability-plugin/server';
-import { omit } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { withApmSpan } from '../../../../utils/with_apm_span';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import { compact, omit } from 'lodash';
+import { ValuesType } from 'utility-types';
+import { ApmDataSource } from '../../../../../common/data_source';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
+import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   callAsyncWithDebug,
   getDebugBody,
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import {
-  unpackProcessorEvents,
-  processorEventsToIndex,
-} from './unpack_processor_events';
+import { ProcessorEventOfDocumentType } from '../document_type';
+import { getRequestBase, processorEventsToIndex } from './get_request_base';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
-    events: ProcessorEvent[];
     includeLegacyData?: boolean;
-  };
+  } & ({ events: ProcessorEvent[] } | { sources: ApmDataSource[] });
   body: {
     size: number;
     track_total_hits: boolean | number;
@@ -69,9 +69,23 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
   InferSearchResponseOf<
-    TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
+    TypeOfProcessorEvent<
+      ValuesType<
+        TParams['apm'] extends { events: ProcessorEvent[] }
+          ? TParams['apm']['events']
+          : TParams['apm'] extends { sources: ApmDataSource[] }
+          ? ProcessorEventOfDocumentType<
+              ValuesType<TParams['apm']['sources']>['documentType']
+            >
+          : never
+      >
+    >,
     TParams
   >;
+
+interface TypedMSearchResponse<TParams extends APMEventESSearchRequest> {
+  responses: Array<TypedSearchResponse<TParams>>;
+}
 
 export interface APMEventClientConfig {
   esClient: ElasticsearchClient;
@@ -124,7 +138,6 @@ export class APMEventClient {
       isCalledWithInternalUser: false,
       debug: this.debug,
       request: this.request,
-      requestType,
       operationName,
       requestParams: params,
       cb: () => {
@@ -147,20 +160,30 @@ export class APMEventClient {
     operationName: string,
     params: TParams
   ): Promise<TypedSearchResponse<TParams>> {
-    const withProcessorEventFilter = unpackProcessorEvents(
-      params,
-      this.indices
-    );
+    const { events, index, filters } = getRequestBase({
+      apm: params.apm,
+      indices: this.indices,
+    });
 
     const forceSyntheticSourceForThisRequest =
-      this.forceSyntheticSource &&
-      params.apm.events.includes(ProcessorEvent.metric);
+      this.forceSyntheticSource && events.includes(ProcessorEvent.metric);
 
     const searchParams = {
-      ...withProcessorEventFilter,
+      ...omit(params, 'apm', 'body'),
+      index,
+      body: {
+        ...params.body,
+        query: {
+          bool: {
+            filter: filters,
+            must: compact([params.body.query]),
+          },
+        },
+      },
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',
+      expand_wildcards: ['open' as const, 'hidden' as const],
       ...(forceSyntheticSourceForThisRequest
         ? { force_synthetic_source: true }
         : {}),
@@ -177,12 +200,63 @@ export class APMEventClient {
     });
   }
 
+  async msearch<TParams extends APMEventESSearchRequest>(
+    operationName: string,
+    ...allParams: TParams[]
+  ): Promise<TypedMSearchResponse<TParams>> {
+    const searches = allParams
+      .map((params) => {
+        const { index, filters } = getRequestBase({
+          apm: params.apm,
+          indices: this.indices,
+        });
+
+        const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] =
+          [
+            {
+              index,
+              preference: 'any',
+              ...(this.includeFrozen ? { ignore_throttled: false } : {}),
+              ignore_unavailable: true,
+              expand_wildcards: ['open' as const, 'hidden' as const],
+            },
+            {
+              ...omit(params, 'apm', 'body'),
+              ...params.body,
+              query: {
+                bool: {
+                  filter: compact([params.body.query, ...filters]),
+                },
+              },
+            },
+          ];
+
+        return searchParams;
+      })
+      .flat();
+
+    return this.callAsyncWithDebug({
+      cb: (opts) =>
+        this.esClient.msearch(
+          {
+            searches,
+          },
+          opts
+        ) as unknown as Promise<{
+          body: TypedMSearchResponse<TParams>;
+        }>,
+      operationName,
+      params: searches,
+      requestType: 'msearch',
+    });
+  }
+
   async eqlSearch(operationName: string, params: APMEventEqlSearchRequest) {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams = {
-      index,
       ...omit(params, 'apm'),
+      index,
     };
 
     return this.callAsyncWithDebug({
@@ -200,8 +274,8 @@ export class APMEventClient {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams = {
-      index,
       ...omit(params, 'apm'),
+      index,
     };
 
     return this.callAsyncWithDebug({
@@ -219,8 +293,8 @@ export class APMEventClient {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams = {
-      index: Array.isArray(index) ? index.join(',') : index,
       ...omit(params, 'apm'),
+      index: index.join(','),
     };
 
     return this.callAsyncWithDebug({

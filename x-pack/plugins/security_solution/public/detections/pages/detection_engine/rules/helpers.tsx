@@ -23,6 +23,7 @@ import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ResponseAction } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
@@ -37,7 +38,7 @@ import type {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
-import { DataSourceType } from './types';
+import { DataSourceType, GroupByOptions } from './types';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
@@ -76,12 +77,11 @@ export const getActionsStepsData = (
     response_actions?: ResponseAction[];
   }
 ): ActionsStepRule => {
-  const { enabled, throttle, meta, actions = [], response_actions: responseActions } = rule;
+  const { enabled, meta, actions = [], response_actions: responseActions } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
     responseActions: responseActions?.map(transformRuleToAlertResponseAction),
-    throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
   };
@@ -136,6 +136,12 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
   groupByFields: rule.alert_suppression?.group_by ?? [],
+  groupByRadioSelection: rule.alert_suppression?.duration
+    ? GroupByOptions.PerTimePeriod
+    : GroupByOptions.PerRuleExecution,
+  groupByDuration: rule.alert_suppression?.duration ?? { value: 5, unit: 'm' },
+  suppressionMissingFields:
+    rule.alert_suppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
 });
 
 const convertHistoryStartToSize = (relativeTime: string) => {

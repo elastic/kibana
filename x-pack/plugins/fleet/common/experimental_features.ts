@@ -15,8 +15,14 @@ export const allowedExperimentalValues = Object.freeze({
   createPackagePolicyMultiPageLayout: true,
   packageVerification: true,
   showDevtoolsRequest: true,
-  diagnosticFileUploadEnabled: false,
-  inactivityTimeout: false,
+  diagnosticFileUploadEnabled: true,
+  experimentalDataStreamSettings: false,
+  displayAgentMetrics: true,
+  showIntegrationsSubcategories: true,
+  agentFqdnMode: true,
+  showExperimentalShipperOptions: false,
+  fleetServerStandalone: false,
+  agentTamperProtectionEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

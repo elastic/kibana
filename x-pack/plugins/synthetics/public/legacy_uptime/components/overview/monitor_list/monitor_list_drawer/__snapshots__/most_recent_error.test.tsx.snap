@@ -13,17 +13,14 @@ exports[`MostRecentError component renders properly with mock data 1`] = `
   <dd
     class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
   >
-    <button
+    <a
       class="euiLink emotion-euiLink-primary"
-      type="button"
+      data-test-subj="monitor-page-link-bad-ssl"
+      href="/monitor/YmFkLXNzbA==/?statusFilter=down"
+      rel="noreferrer"
     >
-      <a
-        data-test-subj="monitor-page-link-bad-ssl"
-        href="/monitor/YmFkLXNzbA==/?statusFilter=down"
-      >
-        Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
-      </a>
-    </button>
+      Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
+    </a>
   </dd>
 </dl>
 `;

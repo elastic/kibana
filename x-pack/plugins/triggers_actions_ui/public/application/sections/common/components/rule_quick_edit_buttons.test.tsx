@@ -18,16 +18,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
   }),
 }));
 
-const setRulesToUpdateAPIKey = jest.fn();
-const setRulesToSnooze = jest.fn();
-const setRulesToUnsnooze = jest.fn();
-const setRulesToSchedule = jest.fn();
-const setRulesToUnschedule = jest.fn();
-const setRulesToSnoozeFilter = jest.fn();
-const setRulesToUnsnoozeFilter = jest.fn();
-const setRulesToScheduleFilter = jest.fn();
-const setRulesToUnscheduleFilter = jest.fn();
-const setRulesToUpdateAPIKeyFilter = jest.fn();
+const updateRulesToBulkEdit = jest.fn();
 
 describe('rule_quick_edit_buttons', () => {
   afterEach(() => {
@@ -49,18 +40,7 @@ describe('rule_quick_edit_buttons', () => {
         onActionPerformed={() => {}}
         onEnable={async () => {}}
         onDisable={async () => {}}
-        setRulesToDelete={() => {}}
-        setRulesToDeleteFilter={() => {}}
-        setRulesToUpdateAPIKey={() => {}}
-        setRulesToSnooze={() => {}}
-        setRulesToUnsnooze={() => {}}
-        setRulesToSchedule={() => {}}
-        setRulesToUnschedule={() => {}}
-        setRulesToSnoozeFilter={() => {}}
-        setRulesToUnsnoozeFilter={() => {}}
-        setRulesToScheduleFilter={() => {}}
-        setRulesToUnscheduleFilter={() => {}}
-        setRulesToUpdateAPIKeyFilter={() => {}}
+        updateRulesToBulkEdit={() => {}}
       />
     );
 
@@ -89,18 +69,7 @@ describe('rule_quick_edit_buttons', () => {
         onActionPerformed={() => {}}
         onEnable={async () => {}}
         onDisable={async () => {}}
-        setRulesToDelete={() => {}}
-        setRulesToDeleteFilter={() => {}}
-        setRulesToUpdateAPIKey={() => {}}
-        setRulesToSnooze={() => {}}
-        setRulesToUnsnooze={() => {}}
-        setRulesToSchedule={() => {}}
-        setRulesToUnschedule={() => {}}
-        setRulesToSnoozeFilter={() => {}}
-        setRulesToUnsnoozeFilter={() => {}}
-        setRulesToScheduleFilter={() => {}}
-        setRulesToUnscheduleFilter={() => {}}
-        setRulesToUpdateAPIKeyFilter={() => {}}
+        updateRulesToBulkEdit={() => {}}
       />
     );
 
@@ -123,18 +92,7 @@ describe('rule_quick_edit_buttons', () => {
         onActionPerformed={() => {}}
         onEnable={async () => {}}
         onDisable={async () => {}}
-        setRulesToDelete={() => {}}
-        setRulesToDeleteFilter={() => {}}
-        setRulesToUpdateAPIKey={() => {}}
-        setRulesToSnooze={() => {}}
-        setRulesToUnsnooze={() => {}}
-        setRulesToSchedule={() => {}}
-        setRulesToUnschedule={() => {}}
-        setRulesToSnoozeFilter={() => {}}
-        setRulesToUnsnoozeFilter={() => {}}
-        setRulesToScheduleFilter={() => {}}
-        setRulesToUnscheduleFilter={() => {}}
-        setRulesToUpdateAPIKeyFilter={() => {}}
+        updateRulesToBulkEdit={() => {}}
       />
     );
 
@@ -167,41 +125,12 @@ describe('rule_quick_edit_buttons', () => {
         onActionPerformed={() => {}}
         onEnable={async () => {}}
         onDisable={async () => {}}
-        setRulesToDelete={() => {}}
-        setRulesToDeleteFilter={() => {}}
-        setRulesToSnooze={setRulesToSnooze}
-        setRulesToUnsnooze={setRulesToUnsnooze}
-        setRulesToSchedule={setRulesToSchedule}
-        setRulesToUnschedule={setRulesToUnschedule}
-        setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
-        setRulesToSnoozeFilter={setRulesToSnoozeFilter}
-        setRulesToUnsnoozeFilter={setRulesToUnsnoozeFilter}
-        setRulesToScheduleFilter={setRulesToScheduleFilter}
-        setRulesToUnscheduleFilter={setRulesToUnscheduleFilter}
-        setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
+        updateRulesToBulkEdit={updateRulesToBulkEdit}
       />
     );
 
     wrapper.find('[data-test-subj="bulkSnooze"]').first().simulate('click');
-    expect(setRulesToSnooze).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="bulkUnsnooze"]').first().simulate('click');
-    expect(setRulesToUnsnooze).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').first().simulate('click');
-    expect(setRulesToSchedule).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').first().simulate('click');
-    expect(setRulesToUnschedule).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="updateAPIKeys"]').first().simulate('click');
-    expect(setRulesToUpdateAPIKey).toHaveBeenCalledTimes(1);
-
-    expect(setRulesToSnoozeFilter).not.toHaveBeenCalled();
-    expect(setRulesToUnsnoozeFilter).not.toHaveBeenCalled();
-    expect(setRulesToScheduleFilter).not.toHaveBeenCalled();
-    expect(setRulesToUnscheduleFilter).not.toHaveBeenCalled();
-    expect(setRulesToUpdateAPIKeyFilter).not.toHaveBeenCalled();
+    expect(updateRulesToBulkEdit).toHaveBeenCalledTimes(1);
   });
 
   it('properly sets rules or filters to delete when selecting all', async () => {
@@ -220,40 +149,11 @@ describe('rule_quick_edit_buttons', () => {
         onActionPerformed={() => {}}
         onEnable={async () => {}}
         onDisable={async () => {}}
-        setRulesToDelete={() => {}}
-        setRulesToDeleteFilter={() => {}}
-        setRulesToSnooze={setRulesToSnooze}
-        setRulesToUnsnooze={setRulesToUnsnooze}
-        setRulesToSchedule={setRulesToSchedule}
-        setRulesToUnschedule={setRulesToUnschedule}
-        setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
-        setRulesToSnoozeFilter={setRulesToSnoozeFilter}
-        setRulesToUnsnoozeFilter={setRulesToUnsnoozeFilter}
-        setRulesToScheduleFilter={setRulesToScheduleFilter}
-        setRulesToUnscheduleFilter={setRulesToUnscheduleFilter}
-        setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
+        updateRulesToBulkEdit={updateRulesToBulkEdit}
       />
     );
 
     wrapper.find('[data-test-subj="bulkSnooze"]').first().simulate('click');
-    expect(setRulesToSnoozeFilter).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="bulkUnsnooze"]').first().simulate('click');
-    expect(setRulesToUnsnoozeFilter).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').first().simulate('click');
-    expect(setRulesToScheduleFilter).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').first().simulate('click');
-    expect(setRulesToUnscheduleFilter).toHaveBeenCalledTimes(1);
-
-    wrapper.find('[data-test-subj="updateAPIKeys"]').first().simulate('click');
-    expect(setRulesToUpdateAPIKeyFilter).toHaveBeenCalledTimes(1);
-
-    expect(setRulesToSnooze).not.toHaveBeenCalled();
-    expect(setRulesToUnsnooze).not.toHaveBeenCalled();
-    expect(setRulesToSchedule).not.toHaveBeenCalled();
-    expect(setRulesToUnschedule).not.toHaveBeenCalled();
-    expect(setRulesToUpdateAPIKey).not.toHaveBeenCalled();
+    expect(updateRulesToBulkEdit).toHaveBeenCalledTimes(1);
   });
 });

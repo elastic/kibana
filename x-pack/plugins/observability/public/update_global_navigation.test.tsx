@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { App, AppDeepLink, ApplicationStart, AppNavLinkStatus, AppUpdater } from '@kbn/core/public';
-import { casesFeatureId } from '../common';
+import { casesFeatureId, sloFeatureId } from '../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
@@ -59,15 +59,17 @@ describe('updateGlobalNavigation', () => {
           [casesFeatureId]: { read_cases: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
-        const deepLinks = [
-          {
-            id: 'cases',
-            title: 'Cases',
-            order: 8002,
-            path: '/cases',
-            navLinkStatus: AppNavLinkStatus.hidden,
-          },
-        ];
+
+        const caseRoute = {
+          id: 'cases',
+          title: 'Cases',
+          order: 8003,
+          path: '/cases',
+          navLinkStatus: AppNavLinkStatus.hidden,
+        };
+
+        const deepLinks = [caseRoute];
+
         const callback = jest.fn();
         const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
@@ -78,10 +80,7 @@ describe('updateGlobalNavigation', () => {
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
             {
-              id: 'cases',
-              title: 'Cases',
-              order: 8002,
-              path: '/cases',
+              ...caseRoute,
               navLinkStatus: AppNavLinkStatus.visible,
             },
           ],
@@ -96,15 +95,17 @@ describe('updateGlobalNavigation', () => {
           [casesFeatureId]: { read_cases: false },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
-        const deepLinks = [
-          {
-            id: 'cases',
-            title: 'Cases',
-            order: 8002,
-            path: '/cases',
-            navLinkStatus: AppNavLinkStatus.hidden,
-          },
-        ];
+
+        const caseRoute = {
+          id: 'cases',
+          title: 'Cases',
+          order: 8003,
+          path: '/cases',
+          navLinkStatus: AppNavLinkStatus.hidden,
+        };
+
+        const deepLinks = [caseRoute];
+
         const callback = jest.fn();
         const updater$ = {
           next: (cb: AppUpdater) => callback(cb(app)),
@@ -115,10 +116,7 @@ describe('updateGlobalNavigation', () => {
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
             {
-              id: 'cases',
-              title: 'Cases',
-              order: 8002,
-              path: '/cases',
+              ...caseRoute,
               navLinkStatus: AppNavLinkStatus.hidden,
             },
           ],
@@ -157,6 +155,76 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
+              navLinkStatus: AppNavLinkStatus.visible,
+            },
+          ],
+          navLinkStatus: AppNavLinkStatus.visible,
+        });
+      });
+    });
+
+    it("hides the slo link when the capabilities don't include it", () => {
+      const capabilities = {
+        navLinks: { apm: true, logs: false, metrics: false, uptime: false },
+      } as unknown as ApplicationStart['capabilities'];
+
+      const sloRoute = {
+        id: 'slos',
+        title: 'SLOs',
+        order: 8002,
+        path: '/slos',
+        navLinkStatus: AppNavLinkStatus.hidden,
+      };
+
+      const deepLinks = [sloRoute];
+
+      const callback = jest.fn();
+      const updater$ = {
+        next: (cb: AppUpdater) => callback(cb(app)),
+      } as unknown as Subject<AppUpdater>;
+
+      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+
+      expect(callback).toHaveBeenCalledWith({
+        deepLinks: [
+          {
+            ...sloRoute,
+            navLinkStatus: AppNavLinkStatus.hidden,
+          },
+        ],
+        navLinkStatus: AppNavLinkStatus.visible,
+      });
+    });
+
+    describe('when slos are enabled', () => {
+      it('shows the slos deep link', () => {
+        const capabilities = {
+          [casesFeatureId]: { read_cases: true },
+          [sloFeatureId]: { read: true },
+          navLinks: { apm: false, logs: false, metrics: false, uptime: false },
+        } as unknown as ApplicationStart['capabilities'];
+
+        const sloRoute = {
+          id: 'slos',
+          title: 'SLOs',
+          order: 8002,
+          path: '/slos',
+          navLinkStatus: AppNavLinkStatus.hidden,
+        };
+
+        const deepLinks = [sloRoute];
+
+        const callback = jest.fn();
+        const updater$ = {
+          next: (cb: AppUpdater) => callback(cb(app)),
+        } as unknown as Subject<AppUpdater>;
+
+        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+
+        expect(callback).toHaveBeenCalledWith({
+          deepLinks: [
+            {
+              ...sloRoute,
               navLinkStatus: AppNavLinkStatus.visible,
             },
           ],

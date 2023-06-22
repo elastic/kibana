@@ -25,6 +25,9 @@ import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 describe('SearchBar', () => {
   before(() => {
     login();
+  });
+
+  beforeEach(() => {
     visit(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });

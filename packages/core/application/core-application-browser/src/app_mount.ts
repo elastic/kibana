@@ -142,6 +142,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * This will be called either when the user goes to another application, or when
    * trying to close the tab or manually changing the url.
    *
+   *
    * @example
    *
    * ```ts
@@ -165,8 +166,10 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * }
    * ```
    *
-   * @deprecated {@link ScopedHistory.block} should be used instead.
-   * @removeBy 8.8.0
+   * @remarks prefer {@link ScopedHistory.block} instead
+   * Resources with names containing percent sign with other special characters or
+   * containing `%25` sequence can experience navigation issues. Refs https://github.com/elastic/kibana/issues/82440 and https://github.com/elastic/kibana/issues/132600
+
    */
   onAppLeave: (handler: AppLeaveHandler) => void;
 

@@ -5,19 +5,21 @@ A custom version of the handlebars package which, to improve security, does not 
 ## Limitations
 
 - Only the following compile options are supported:
+  - `data`
   - `knownHelpers`
   - `knownHelpersOnly`
+  - `noEscape`
   - `strict`
   - `assumeObjects`
-  - `noEscape`
-  - `data`
+  - `preventIndent`
+  - `explicitPartialContext`
 
 - Only the following runtime options are supported:
-  - `helpers`
-  - `blockParams`
   - `data`
-
-The [Inline partials](https://handlebarsjs.com/guide/partials.html#inline-partials) handlebars template feature is currently not supported by `@kbn/handlebars`.
+  - `helpers`
+  - `partials`
+  - `decorators` (not documented in the official Handlebars [runtime options documentation](https://handlebarsjs.com/api-reference/runtime-options.html))
+  - `blockParams` (not documented in the official Handlebars [runtime options documentation](https://handlebarsjs.com/api-reference/runtime-options.html))
 
 ## Implementation differences
 
@@ -58,7 +60,7 @@ To instruct the `Visitor` code to traverse any child nodes of a given node, our 
 
 We keep state internally in the `ElasticHandlebarsVisitor` object using the following private properties:
 
-- `scopes`: An array (stack) of `context` objects. In a simple template this array will always only contain a single element: The main `context` object. In more complicated scenarios, new `context` objects will be pushed and popped to and from the `scopes` stack as needed.
+- `contexts`: An array (stack) of `context` objects. In a simple template this array will always only contain a single element: The main `context` object. In more complicated scenarios, new `context` objects will be pushed and popped to and from the `contexts` stack as needed.
 - `output`: An array containing the "rendered" output of each node (normally just one element per node). In the most simple template, this is simply joined together into a the final output string after the AST has been traversed. In more complicated templates, we use this array temporarily to collect parameters to give to helper functions (see the `getParams` function).
 
 ## Testing
@@ -76,25 +78,21 @@ By default, each test will run both the original `handlebars` code and the modif
 
 ## Development
 
-Some of the tests have been copied from the upstream `handlebars` project and modified to fit our use-case, test-suite, and coding conventions. They are all located under the `packages/kbn-handlebars/src/upstream` directory. To check if any of the copied files have received updates upstream that we might want to include in our copies, you can run the following script:
+Some of the tests have been copied from the upstream `handlebars` project and modified to fit our use-case, test-suite, and coding conventions. They are all located under the `packages/kbn-handlebars/src/spec` directory. To check if any of the copied files have received updates upstream that we might want to include in our copies, you can run the following script:
 
 ```sh
-./packages/kbn-handlebars/scripts/check_for_test_changes.sh
+./packages/kbn-handlebars/scripts/check_for_upstream_updates.sh
 ```
 
-If the script outputs a diff for a given file, it means that this file has been updated.
-
-_Note: that this will look for changes in the `4.x` branch of the `handlebars.js` repo only. Changes in the `master` branch are ignored._
+_Note: This will look for changes in the `4.x` branch of the `handlebars.js` repo only. Changes in the `master` branch are ignored._
 
 Once all updates have been manually merged with our versions of the files, run the following script to "lock" us into the new updates:
 
 ```sh
-./packages/kbn-handlebars/scripts/update_test_patches.sh
+./packages/kbn-handlebars/scripts/update_upstream_git_hash.sh
 ```
 
-This will update the `.patch` files inside the `packages/kbn-handlebars/.patches` directory. Make sure to commit those changes.
-
-_Note: If we manually make changes to our test files in the `upstream` directory, we need to run the `update_test_patches.sh` script as well._
+This will update file `packages/kbn-handlebars/src/spec/.upstream_git_hash`. Make sure to commit changes to this file as well.
 
 ## Debugging
 

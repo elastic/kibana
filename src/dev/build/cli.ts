@@ -22,7 +22,7 @@ const { showHelp, unknownFlags, log, buildOptions } = readCliArgs(process.argv);
 
 if (unknownFlags.length) {
   const pluralized = unknownFlags.length > 1 ? 'flags' : 'flag';
-  log.error(`Unknown ${pluralized}: ${unknownFlags.join(', ')}}`);
+  log.error(`Unknown ${pluralized}: ${unknownFlags.join(', ')}`);
 }
 
 if (showHelp) {
@@ -51,6 +51,8 @@ if (showHelp) {
         --verbose,-v                         {dim Turn on verbose logging}
         --no-debug                           {dim Turn off debug logging}
         --epr-registry                       {dim Specify the EPR registry to use for Fleet packages, 'production' or 'snapshot'}
+        --with-test-plugins                  {dim Pass to include test plugins in the build output}
+        --with-example-plugins               {dim Pass to include example plugins in the build output}
     `) + '\n'
   );
   process.exit(1);

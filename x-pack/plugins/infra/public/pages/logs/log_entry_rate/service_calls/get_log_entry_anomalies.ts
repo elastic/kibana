@@ -6,6 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import { PersistedLogViewReference } from '../../../../../common/log_views';
 import {
   getLogEntryAnomaliesRequestPayloadRT,
   getLogEntryAnomaliesSuccessReponsePayloadRT,
@@ -15,7 +16,7 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { AnomaliesSort, Pagination } from '../../../../../common/log_analysis';
 
 interface RequestArgs {
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   startTime: number;
   endTime: number;
   sort: AnomaliesSort;
@@ -24,13 +25,13 @@ interface RequestArgs {
 }
 
 export const callGetLogEntryAnomaliesAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
-  const { sourceId, startTime, endTime, sort, pagination, datasets } = requestArgs;
+  const { logViewReference, startTime, endTime, sort, pagination, datasets } = requestArgs;
   const response = await fetch(LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getLogEntryAnomaliesRequestPayloadRT.encode({
         data: {
-          sourceId,
+          logView: logViewReference,
           timeRange: {
             startTime,
             endTime,

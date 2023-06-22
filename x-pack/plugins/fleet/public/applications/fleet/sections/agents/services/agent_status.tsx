@@ -21,6 +21,7 @@ const colorToHexMap = {
   warning: visColors[5],
   danger: visColors[9],
   inactive: euiLightVars.euiColorDarkShade,
+  lightest: euiLightVars.euiColorDisabled,
 };
 
 export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
@@ -29,6 +30,7 @@ export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
   'updating',
   'offline',
   'inactive',
+  'unenrolled',
 ];
 
 export function getColorForAgentStatus(agentStatus: SimplifiedAgentStatus): string {
@@ -43,8 +45,10 @@ export function getColorForAgentStatus(agentStatus: SimplifiedAgentStatus): stri
       return colorToHexMap.warning;
     case 'updating':
       return colorToHexMap.primary;
+    case 'unenrolled':
+      return colorToHexMap.lightest;
     default:
-      throw new Error(`Insuported Agent status ${agentStatus}`);
+      throw new Error(`Unsupported Agent status ${agentStatus}`);
   }
 }
 
@@ -62,6 +66,10 @@ export function getLabelForAgentStatus(agentStatus: SimplifiedAgentStatus): stri
       return i18n.translate('xpack.fleet.agentStatus.inactiveLabel', {
         defaultMessage: 'Inactive',
       });
+    case 'unenrolled':
+      return i18n.translate('xpack.fleet.agentStatus.unenrolledLabel', {
+        defaultMessage: 'Unenrolled',
+      });
     case 'unhealthy':
       return i18n.translate('xpack.fleet.agentStatus.unhealthyLabel', {
         defaultMessage: 'Unhealthy',
@@ -71,6 +79,6 @@ export function getLabelForAgentStatus(agentStatus: SimplifiedAgentStatus): stri
         defaultMessage: 'Updating',
       });
     default:
-      throw new Error(`Insuported Agent status ${agentStatus}`);
+      throw new Error(`Unsupported Agent status ${agentStatus}`);
   }
 }

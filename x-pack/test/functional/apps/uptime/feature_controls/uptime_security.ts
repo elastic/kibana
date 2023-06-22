@@ -65,15 +65,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('global_uptime_all_user');
       });
 
-      it('shows uptime navlink', async () => {
-        const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql([
-          'Overview',
-          'Alerts',
-          'Uptime',
-          'Synthetics',
-          'Stack Management',
-        ]);
+      it('shows Uptime navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Uptime');
       });
 
       it('can navigate to Uptime app', async () => {
@@ -122,9 +116,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('global_uptime_read_user');
       });
 
-      it('shows uptime navlink', async () => {
+      it('shows Uptime navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'Uptime', 'Synthetics', 'Stack Management']);
+        expect(navLinks).to.contain('Uptime');
       });
 
       it('can navigate to Uptime app', async () => {
@@ -173,7 +167,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_uptime_privileges_user');
       });
 
-      it(`doesn't show uptime navlink`, async () => {
+      it(`doesn't show Uptime navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Uptime');
       });

@@ -99,3 +99,13 @@ export function timeIntervalInputValidator() {
     return null;
   };
 }
+
+export function dictionaryValidator(dict: string[], shouldInclude: boolean = false) {
+  const dictSet = new Set(dict);
+  return (value: string) => {
+    if (dictSet.has(value) !== shouldInclude) {
+      return { matchDict: value };
+    }
+    return null;
+  };
+}

@@ -8,7 +8,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { RouteProps } from 'react-router-dom';
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';

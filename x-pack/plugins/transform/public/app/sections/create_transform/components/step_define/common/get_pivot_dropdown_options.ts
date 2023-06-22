@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { getNestedProperty } from '@kbn/ml-nested-property';
 
-import { getNestedProperty } from '../../../../../../../common/utils/object_utils';
+import { isCounterTimeSeriesMetric, TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import { removeKeywordPostfix } from '../../../../../../../common/utils/field_utils';
 
 import { isRuntimeMappings } from '../../../../../../../common/shared_imports';
 
 import {
-  DropDownLabel,
   DropDownOption,
   PivotAggsConfigWithUiSupportDict,
   pivotAggsFieldSupport,
@@ -54,16 +53,22 @@ export function getKibanaFieldTypeFromEsType(type: string): KBN_FIELD_TYPES {
   }
 }
 
+export interface DropDownOptionWithField extends DropDownOption {
+  field: {
+    id: string;
+    type: ES_FIELD_TYPES;
+  };
+}
 export function getPivotDropdownOptions(
   dataView: DataView,
   runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ) {
   // The available group by options
-  const groupByOptions: EuiComboBoxOptionOption[] = [];
+  const groupByOptions: Array<Omit<DropDownOptionWithField, 'options'>> = [];
   const groupByOptionsData: PivotGroupByConfigWithUiSupportDict = {};
 
   // The available aggregations
-  const aggOptions: EuiComboBoxOptionOption[] = [];
+  const aggOptions: DropDownOptionWithField[] = [];
   const aggOptionsData: PivotAggsConfigWithUiSupportDict = {};
 
   const ignoreFieldNames = ['_id', '_index', '_type'];
@@ -77,7 +82,14 @@ export function getPivotDropdownOptions(
         // even when the TS interface is a non-optional `string`.
         typeof field.type !== 'undefined'
     )
-    .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
+    .map(
+      (field): Field => ({
+        name: field.name,
+        type: isCounterTimeSeriesMetric(field)
+          ? TIME_SERIES_METRIC_TYPES.COUNTER
+          : (field.type as KBN_FIELD_TYPES),
+      })
+    );
 
   // Support for runtime_mappings that are defined by queries
   let runtimeFields: Field[] = [];
@@ -104,7 +116,10 @@ export function getPivotDropdownOptions(
         const aggName = displayFieldName.replace(illegalEsAggNameChars, '').trim();
         // Option name in the dropdown for the group-by is in the form of `sum(fieldname)`.
         const dropDownName = `${groupByAgg}(${displayFieldName})`;
-        const groupByOption: DropDownLabel = { label: dropDownName };
+        const groupByOption: Omit<DropDownOptionWithField, 'options'> = {
+          label: dropDownName,
+          field: { id: rawFieldName, type: field.type as KBN_FIELD_TYPES & ES_FIELD_TYPES },
+        };
         groupByOptions.push(groupByOption);
         groupByOptionsData[dropDownName] = getDefaultGroupByConfig(
           aggName,
@@ -116,7 +131,12 @@ export function getPivotDropdownOptions(
     }
 
     // Aggregations
-    const aggOption: DropDownOption = { label: displayFieldName, options: [] };
+    const aggOption: DropDownOptionWithField = {
+      label: displayFieldName,
+      options: [],
+      field: { id: rawFieldName, type: field.type as KBN_FIELD_TYPES & ES_FIELD_TYPES },
+    };
+
     const availableAggs: [] = getNestedProperty(pivotAggsFieldSupport, field.type);
 
     if (availableAggs !== undefined) {

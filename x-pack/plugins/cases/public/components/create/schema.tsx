@@ -58,7 +58,7 @@ export const schema: FormSchema<FormProps> = {
       {
         validator: maxLengthField({
           length: MAX_TITLE_LENGTH,
-          message: i18n.MAX_LENGTH_ERROR('title', MAX_TITLE_LENGTH),
+          message: i18n.MAX_LENGTH_ERROR('name', MAX_TITLE_LENGTH),
         }),
       },
     ],

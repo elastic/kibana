@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+
 import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz, useLink, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
@@ -78,6 +80,7 @@ export const TableRowActions: React.FunctionComponent<{
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
+        key="agentUnenrollBtn"
         disabled={!hasFleetAllPrivileges || !agent.active}
         icon="trash"
         onClick={() => {
@@ -97,6 +100,7 @@ export const TableRowActions: React.FunctionComponent<{
         )}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
+        key="agentUpgradeBtn"
         icon="refresh"
         disabled={!isAgentUpgradeable(agent, kibanaVersion)}
         onClick={() => {
@@ -109,24 +113,27 @@ export const TableRowActions: React.FunctionComponent<{
         />
       </EuiContextMenuItem>
     );
-
-    if (diagnosticFileUploadEnabled) {
-      menuItems.push(
-        <EuiContextMenuItem
-          icon="download"
-          disabled={!hasFleetAllPrivileges}
-          onClick={() => {
-            onRequestDiagnosticsClick();
-          }}
-        >
-          <FormattedMessage
-            id="xpack.fleet.agentList.diagnosticsOneButton"
-            defaultMessage="Request diagnostics .zip"
-          />
-        </EuiContextMenuItem>
-      );
-    }
   }
+
+  if (diagnosticFileUploadEnabled) {
+    menuItems.push(
+      <EuiContextMenuItem
+        key="requestAgentDiagnosticsBtn"
+        icon="download"
+        data-test-subj="requestAgentDiagnosticsBtn"
+        disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
+        onClick={() => {
+          onRequestDiagnosticsClick();
+        }}
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.diagnosticsOneButton"
+          defaultMessage="Request diagnostics .zip"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
   return (
     <ContextMenuActions
       isOpen={isMenuOpen}

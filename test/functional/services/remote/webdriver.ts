@@ -26,7 +26,7 @@ import { Executor } from 'selenium-webdriver/lib/http';
 import { getLogger } from 'selenium-webdriver/lib/logging';
 import { installDriver } from 'ms-chromium-edge-driver';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
@@ -99,9 +99,12 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   }
 
   if (headlessBrowser === '1') {
+    // Using the new headless mode (instead of `options.headless()`)
+    // See: https://www.selenium.dev/blog/2023/headless-is-going-away/
+    options.addArguments('headless=new');
+
     // Use --disable-gpu to avoid an error from a missing Mesa library, as per
     // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-    options.headless();
     options.addArguments('disable-gpu');
   }
 
@@ -111,7 +114,11 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
 
   if (remoteDebug === '1') {
     // Visit chrome://inspect in chrome to remotely view/debug
-    options.headless();
+
+    // Using the new headless mode (instead of `options.headless()`)
+    // See: https://www.selenium.dev/blog/2023/headless-is-going-away/
+    options.addArguments('headless=new');
+
     options.addArguments('disable-gpu', 'remote-debugging-port=9222');
   }
 

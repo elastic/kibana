@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { Ref } from 'react';
-import { EuiButtonIcon, EuiDualRange, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+
+import { getIsAnchored } from '../time_slider_selectors';
+import { TimeSliderStrings } from './time_slider_strings';
+import { useTimeSlider } from '../embeddable/time_slider_embeddable';
+import { TimeSliderAnchoredRange } from './time_slider_anchored_range';
+import { EuiDualRangeRef, TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
 
 interface Props {
   value: [number, number];
@@ -19,14 +23,10 @@ interface Props {
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
-  rangeRef?: Ref<EuiDualRange>;
+  rangeRef?: Ref<EuiDualRangeRef>;
 }
 
 export function TimeSliderPopoverContent(props: Props) {
-  function onChange(value?: [number | string, number | string]) {
-    props.onChange(value as [number, number]);
-  }
-
   const ticks =
     props.ticks.length <= 12
       ? props.ticks
@@ -40,6 +40,32 @@ export function TimeSliderPopoverContent(props: Props) {
           };
         });
 
+  const timeSlider = useTimeSlider();
+  const isAnchored = timeSlider.select(getIsAnchored);
+  const rangeInput = isAnchored ? (
+    <TimeSliderAnchoredRange
+      value={props.value}
+      onChange={props.onChange}
+      stepSize={props.stepSize}
+      ticks={ticks}
+      timeRangeMin={props.timeRangeMin}
+      timeRangeMax={props.timeRangeMax}
+    />
+  ) : (
+    <TimeSliderSlidingWindowRange
+      value={props.value}
+      onChange={props.onChange}
+      stepSize={props.stepSize}
+      rangeRef={props.rangeRef}
+      ticks={ticks}
+      timeRangeMin={props.timeRangeMin}
+      timeRangeMax={props.timeRangeMax}
+    />
+  );
+  const anchorStartToggleButtonLabel = isAnchored
+    ? TimeSliderStrings.control.getUnpinStart()
+    : TimeSliderStrings.control.getPinStart();
+
   return (
     <EuiFlexGroup
       className="rangeSlider__actions"
@@ -47,33 +73,30 @@ export function TimeSliderPopoverContent(props: Props) {
       data-test-subj="timeSlider-popoverContents"
       responsive={false}
     >
-      <EuiFlexItem>
-        <EuiDualRange
-          ref={props.rangeRef}
-          fullWidth={true}
-          value={props.value}
-          onChange={onChange}
-          showTicks={true}
-          min={props.timeRangeMin}
-          max={props.timeRangeMax}
-          step={props.stepSize}
-          ticks={ticks}
-          isDraggable
-        />
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
-            defaultMessage: 'Clear time selection',
-          })}
-        >
+        <EuiToolTip content={anchorStartToggleButtonLabel}>
+          <EuiButtonIcon
+            iconType={isAnchored ? 'pinFilled' : 'pin'}
+            onClick={() => {
+              const nextIsAnchored = !isAnchored;
+              if (nextIsAnchored) {
+                props.onChange([props.timeRangeMin, props.value[1]]);
+              }
+              timeSlider.dispatch.setIsAnchored({ isAnchored: nextIsAnchored });
+            }}
+            aria-label={anchorStartToggleButtonLabel}
+            data-test-subj="timeSlider__anchorStartToggleButton"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem>{rangeInput}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={TimeSliderStrings.control.getClearSelection()}>
           <EuiButtonIcon
             iconType="eraser"
             color="danger"
             onClick={props.onClear}
-            aria-label={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
-              defaultMessage: 'Clear time selection',
-            })}
+            aria-label={TimeSliderStrings.control.getClearSelection()}
             data-test-subj="timeSlider__clearTimeButton"
           />
         </EuiToolTip>

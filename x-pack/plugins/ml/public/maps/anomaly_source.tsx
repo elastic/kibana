@@ -174,7 +174,7 @@ export class AnomalySource implements IVectorSource {
   }
 
   isMvt() {
-    return true;
+    return false;
   }
 
   showJoinEditor(): boolean {

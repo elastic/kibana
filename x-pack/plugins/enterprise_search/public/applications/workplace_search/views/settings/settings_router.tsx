@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
 
 import { useActions } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   ORG_SETTINGS_CUSTOMIZE_PATH,

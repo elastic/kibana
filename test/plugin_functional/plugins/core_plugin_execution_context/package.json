@@ -1,5 +1,5 @@
 {
-  "name": "core_plugin_execution_context",
+  "name": "@kbn/core-plugin-execution-context-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/core_plugin_execution_context",
   "kibana": {

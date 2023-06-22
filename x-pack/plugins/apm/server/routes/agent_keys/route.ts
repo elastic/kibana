@@ -9,21 +9,23 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { getAgentKeys } from './get_agent_keys';
-import { getAgentKeysPrivileges } from './get_agent_keys_privileges';
-import { invalidateAgentKey } from './invalidate_agent_key';
-import { createAgentKey } from './create_agent_key';
+import { AgentKeysResponse, getAgentKeys } from './get_agent_keys';
+import {
+  AgentKeysPrivilegesResponse,
+  getAgentKeysPrivileges,
+} from './get_agent_keys_privileges';
+import {
+  invalidateAgentKey,
+  InvalidateAgentKeyResponse,
+} from './invalidate_agent_key';
+import { createAgentKey, CreateAgentKeyResponse } from './create_agent_key';
 import { privilegesTypeRt } from '../../../common/privilege_type';
 
 const agentKeysRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_keys',
   options: { tags: ['access:apm'] },
 
-  handler: async (
-    resources
-  ): Promise<{
-    agentKeys: Array<import('./../../../../security/common/index').ApiKey>;
-  }> => {
+  handler: async (resources): Promise<AgentKeysResponse> => {
     const { context } = resources;
     const agentKeys = await getAgentKeys({
       context,
@@ -37,13 +39,7 @@ const agentKeysPrivilegesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_keys/privileges',
   options: { tags: ['access:apm'] },
 
-  handler: async (
-    resources
-  ): Promise<{
-    areApiKeysEnabled: boolean;
-    isAdmin: boolean;
-    canManage: boolean;
-  }> => {
+  handler: async (resources): Promise<AgentKeysPrivilegesResponse> => {
     const {
       plugins: { security },
       context,
@@ -69,7 +65,7 @@ const invalidateAgentKeyRoute = createApmServerRoute({
   params: t.type({
     body: t.type({ id: t.string }),
   }),
-  handler: async (resources): Promise<{ invalidatedAgentKeys: string[] }> => {
+  handler: async (resources): Promise<InvalidateAgentKeyResponse> => {
     const {
       context,
       params,
@@ -108,11 +104,7 @@ const createAgentKeyRoute = createApmServerRoute({
       privileges: privilegesTypeRt,
     }),
   }),
-  handler: async (
-    resources
-  ): Promise<{
-    agentKey: import('./../../../../../../node_modules/@elastic/elasticsearch/lib/api/types').SecurityCreateApiKeyResponse;
-  }> => {
+  handler: async (resources): Promise<CreateAgentKeyResponse> => {
     const { context, params } = resources;
 
     const { body: requestBody } = params;

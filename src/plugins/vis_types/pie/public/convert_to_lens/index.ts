@@ -11,7 +11,7 @@ import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
 import { ConvertPieToLensVisualization } from './types';
@@ -62,7 +62,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
     return null;
   }
 
-  const layerId = uuid();
+  const layerId = uuidv4();
 
   const indexPatternId = dataView.id!;
   return {

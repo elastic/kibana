@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { FILE_FORMATS } from '../../../../../common/constants';
 
@@ -40,14 +40,6 @@ function getProps() {
 }
 
 describe('Overrides', () => {
-  test('render overrides', () => {
-    const props = getProps();
-
-    const component = shallowWithIntl(<Overrides {...props} />);
-
-    expect(component).toMatchSnapshot();
-  });
-
   test('render overrides and trigger a state change', () => {
     const FORMAT_1 = FILE_FORMATS.DELIMITED;
     const FORMAT_2 = FILE_FORMATS.NDJSON;

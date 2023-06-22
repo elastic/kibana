@@ -21,13 +21,16 @@ export default function ({ getPageObjects, getService }) {
     const MAP2_NAME = `${MAP_NAME_PREFIX}map2`;
 
     describe('read', () => {
+      let joinMapUrl = '';
       before(async () => {
         await security.testUser.setRoles([
           'global_maps_all',
           'geoshape_data_reader',
+          'meta_for_geoshape_data_reader',
           'test_logstash_reader',
         ]);
         await PageObjects.maps.loadSavedMap('join example');
+        joinMapUrl = await browser.getCurrentUrl();
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -56,6 +59,17 @@ export default function ({ getPageObjects, getService }) {
       it('should load map layers stored with map', async () => {
         const layerExists = await PageObjects.maps.doesLayerExist('geo_shapes*');
         expect(layerExists).to.equal(true);
+      });
+
+      it('should override time stored with map when query is provided in global state', async () => {
+        const urlSplit = joinMapUrl.split('?');
+        const globalState = `_g=(time:(from:now-36m,to:now))`;
+        await browser.get(`${urlSplit[0]}?${globalState}`, true);
+        await PageObjects.maps.waitForLayersToLoad();
+
+        const timeConfig = await PageObjects.timePicker.getTimeConfig();
+        expect(timeConfig.start).to.equal('~ 36 minutes ago');
+        expect(timeConfig.end).to.equal('now');
       });
 
       describe('mapState contains query', () => {

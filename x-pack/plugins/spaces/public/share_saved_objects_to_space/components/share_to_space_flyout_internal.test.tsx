@@ -523,7 +523,7 @@ describe('ShareToSpaceFlyout', () => {
               color="warning"
               content="This feature is disabled in this space."
               position="left"
-              type="alert"
+              type="warning"
             />
           </React.Fragment>
         `);
@@ -560,7 +560,7 @@ describe('ShareToSpaceFlyout', () => {
           color="warning"
           content="This feature is disabled in this space."
           position="left"
-          type="alert"
+          type="warning"
         />
       `);
       expect(option.checked).toEqual('on');

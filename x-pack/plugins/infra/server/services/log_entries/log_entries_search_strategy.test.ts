@@ -57,7 +57,7 @@ describe('LogEntries search strategy', () => {
       logEntriesSearchStrategy.search(
         {
           params: {
-            sourceId: 'SOURCE_ID',
+            logView: { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
             startTimestamp: 100,
             endTimestamp: 200,
             size: 3,
@@ -143,7 +143,7 @@ describe('LogEntries search strategy', () => {
         {
           id: requestId,
           params: {
-            sourceId: 'SOURCE_ID',
+            logView: { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
             startTimestamp: 100,
             endTimestamp: 200,
             size: 3,
@@ -223,7 +223,7 @@ describe('LogEntries search strategy', () => {
       {
         id: logEntriesSearchRequestStateRT.encode({ esRequestId: 'UNKNOWN_ID' }),
         params: {
-          sourceId: 'SOURCE_ID',
+          logView: { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
           startTimestamp: 100,
           endTimestamp: 200,
           size: 3,

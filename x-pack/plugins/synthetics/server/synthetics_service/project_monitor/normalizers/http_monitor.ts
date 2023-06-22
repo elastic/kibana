@@ -7,11 +7,11 @@
 import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
+  CodeEditorMode,
   ConfigKey,
   DataStream,
   FormMonitorType,
   HTTPFields,
-  Mode,
   TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
 import {
@@ -22,7 +22,8 @@ import {
   getOptionalListField,
   getOptionalArrayField,
   getUnsupportedKeysError,
-  getMultipleUrlsOrHostsError,
+  getInvalidUrlsOrHostsError,
+  getHasTLSFields,
 } from './common_fields';
 
 export const getNormalizeHTTPFields = ({
@@ -36,7 +37,7 @@ export const getNormalizeHTTPFields = ({
   const defaultFields = DEFAULT_FIELDS[DataStream.HTTP];
   const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
-  const commonFields = getNormalizeCommonFields({
+  const { errors: commonErrors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
     privateLocations,
     monitor,
@@ -45,12 +46,14 @@ export const getNormalizeHTTPFields = ({
     version,
   });
 
+  // Add common erros to errors arary
+  errors.push(...commonErrors);
+
   /* Check if monitor has multiple urls */
   const urls = getOptionalListField(monitor.urls);
-  if (urls.length > 1) {
-    errors.push(getMultipleUrlsOrHostsError(monitor, 'urls', version));
+  if (urls.length !== 1) {
+    errors.push(getInvalidUrlsOrHostsError(monitor, 'urls', version));
   }
-
   if (unsupportedKeys.length) {
     errors.push(getUnsupportedKeysError(monitor, unsupportedKeys, version));
   }
@@ -67,10 +70,20 @@ export const getNormalizeHTTPFields = ({
       (yamlConfig as Record<keyof HTTPFields, unknown>)[ConfigKey.REQUEST_BODY_CHECK] as string,
       defaultFields[ConfigKey.REQUEST_BODY_CHECK]
     ),
+    [ConfigKey.RESPONSE_BODY_MAX_BYTES]: `${get(
+      yamlConfig,
+      ConfigKey.RESPONSE_BODY_MAX_BYTES,
+      defaultFields[ConfigKey.RESPONSE_BODY_MAX_BYTES]
+    )}`,
     [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
+    [ConfigKey.METADATA]: {
+      ...DEFAULT_FIELDS[DataStream.HTTP][ConfigKey.METADATA],
+      is_tls_enabled: getHasTLSFields(monitor),
+    },
   };
+
   return {
     normalizedFields: {
       ...defaultFields,
@@ -86,14 +99,14 @@ export const getRequestBodyField = (
   defaultValue: HTTPFields[ConfigKey.REQUEST_BODY_CHECK]
 ): HTTPFields[ConfigKey.REQUEST_BODY_CHECK] => {
   let parsedValue: string;
-  let type: Mode;
+  let type: CodeEditorMode;
 
   if (typeof value === 'object') {
     parsedValue = JSON.stringify(value);
-    type = Mode.JSON;
+    type = CodeEditorMode.JSON;
   } else {
     parsedValue = value;
-    type = Mode.PLAINTEXT;
+    type = CodeEditorMode.PLAINTEXT;
   }
   return {
     type,

@@ -108,6 +108,10 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const logThresholdRule = {
           params: {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             timeSize: 5,
             timeUnit: 'm',
             count: { value: 75, comparator: 'more than' },

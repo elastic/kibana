@@ -6,8 +6,8 @@
  */
 
 import type { Headers, Logger } from '@kbn/core/server';
+import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '@kbn/reporting-common';
 import { ReportingCore } from '../..';
-import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
 
 export const getCustomLogo = async (
   reporting: ReportingCore,
@@ -15,7 +15,7 @@ export const getCustomLogo = async (
   spaceId: string | undefined,
   logger: Logger
 ) => {
-  const fakeRequest = reporting.getFakeRequest({ headers }, spaceId, logger);
+  const fakeRequest = reporting.getFakeRequest(headers, spaceId, logger);
   const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
   const logo: string = await uiSettingsClient.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
 

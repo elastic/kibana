@@ -18,7 +18,10 @@ export class FilesExamplePlugin
     core: CoreSetup<FilesExamplePluginsStart>,
     { files, developerExamples }: FilesExamplePluginsSetup
   ) {
-    files.registerFileKind(exampleFileKind);
+    files.registerFileKind({
+      id: exampleFileKind.id,
+      allowedMimeTypes: exampleFileKind.allowedMimeTypes,
+    });
 
     developerExamples.register({
       appId: PLUGIN_ID,

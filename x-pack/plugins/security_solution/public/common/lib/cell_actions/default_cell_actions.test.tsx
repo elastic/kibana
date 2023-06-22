@@ -6,12 +6,12 @@
  */
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { ColumnHeaderType, DataTableCellAction } from '../../../../common/types';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import type {
   BrowserFields,
   TimelineNonEcsData,
 } from '@kbn/timelines-plugin/common/search_strategy';
-import type { Ecs } from '../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { defaultCellActions } from './default_cell_actions';
 import { COLUMNS_WITH_LINKS, EmptyComponent } from './helpers';
 
@@ -64,6 +64,7 @@ describe('default cell actions', () => {
       initialWidth: 105,
     },
   ]);
+
   describe.each(columnHeadersToTest)('columns with a link action', (columnHeaders) => {
     test(`${columnHeaders.id ?? columnHeaders.type}`, () => {
       const columnsWithCellActions: EuiDataGridColumn[] = [columnHeaders].map((header) => {

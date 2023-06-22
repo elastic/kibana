@@ -99,37 +99,14 @@ exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = 
   </EuiButton>
   <EuiConfirmModal
     buttonColor="danger"
-    cancelButtonText={
-      <FormattedMessage
-        defaultMessage="Cancel"
-        id="xpack.ml.settings.filterLists.deleteFilterListModal.cancelButtonLabel"
-        values={Object {}}
-      />
-    }
+    cancelButtonText="Cancel"
     className="eui-textBreakWord"
-    confirmButtonText={
-      <FormattedMessage
-        defaultMessage="Delete"
-        id="xpack.ml.settings.filterLists.deleteFilterListModal.confirmButtonLabel"
-        values={Object {}}
-      />
-    }
+    confirmButtonText="Delete"
     data-test-subj="mlFilterListDeleteConfirmation"
     defaultFocusedButton="confirm"
     onCancel={[Function]}
     onConfirm={[Function]}
-    title={
-      <FormattedMessage
-        defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}?"
-        id="xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle"
-        values={
-          Object {
-            "selectedFilterId": "web_domains",
-            "selectedFilterListsLength": 2,
-          }
-        }
-      />
-    }
+    title="Delete 2 filter lists?"
   />
 </div>
 `;

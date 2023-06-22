@@ -21,6 +21,7 @@ import {
   EuiResizeObserver,
   EuiLoadingSpinner,
   useEuiTheme,
+  useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
@@ -88,7 +89,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
   const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
-  const [tableWidth, setTableWidth] = useState<number>(1400);
 
   const toggleExpandAll = useCallback(
     (shouldExpandAll: boolean) => {
@@ -109,10 +109,9 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     throttle((e: { width: number; height: number }) => {
       // When window or table is resized,
       // update the column widths and other settings accordingly
-      setTableWidth(e.width);
       setDimensions(calculateTableColumnsDimensions(e.width));
     }, 500),
-    [tableWidth]
+    []
   );
 
   const toggleShowDistribution = useCallback(() => {
@@ -138,6 +137,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   const columns = useMemo(() => {
     const expanderColumn: EuiTableComputedColumnType<DataVisualizerTableItem> = {
       name:
+        // EUI will automatically show an expander button when table is mobile view (where width <700)
+        // so we need to not render any addition button
         dimensions.breakPoint !== 'small' ? (
           <EuiButtonIcon
             data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
@@ -192,8 +193,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         name: i18n.translate('xpack.dataVisualizer.dataGrid.typeColumnName', {
           defaultMessage: 'Type',
         }),
-        render: (fieldType: SupportedFieldType) => {
-          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} />;
+        render: (fieldType: SupportedFieldType, item: DataVisualizerTableItem) => {
+          return <FieldTypeIcon type={item.secondaryType ?? fieldType} tooltipEnabled={true} />;
         },
         width: dimensions.type,
         sortable: true,
@@ -383,6 +384,85 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     return getItemIdToExpandedRowMap(itemIds, items);
   }, [items, expandedRowItemIds, getItemIdToExpandedRowMap]);
 
+  const $panelWidthS = `calc(max(20%, 225px))`;
+  const $panelWidthM = `calc(max(30%, 300px))`;
+
+  const dvTableCss = css({
+    thead: {
+      position: 'sticky',
+      insetBlockStart: 0,
+      zIndex: 1,
+      backgroundColor: euiTheme.colors.emptyShade,
+      boxShadow: `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color}`,
+    },
+    '.euiTableRow > .euiTableRowCel': {
+      borderTop: 0,
+    },
+    [useEuiMinBreakpoint('s')]: {
+      '& .columnHeader__title': {
+        display: 'flex',
+        alignItems: 'center',
+      },
+      '& .columnHeader__icon': {
+        paddingRight: euiTheme.size.xs,
+      },
+      '& .euiTableRow > .euiTableRowCell': {
+        borderTop: 0,
+        borderBottom: euiTheme.border.thin,
+      },
+      '& .euiTableCellContent': {
+        padding: euiTheme.size.xs,
+      },
+      '& .euiTableRow-isExpandedRow': {
+        '.euiTableRowCell': {
+          backgroundColor: `${euiTheme.colors.emptyShade} !important`,
+          borderTop: 0,
+          borderBottom: euiTheme.border.thin,
+          '&:hover': {
+            backgroundColor: `${euiTheme.colors.emptyShade} !important`,
+          },
+        },
+      },
+      '& .dvSummaryTable': {
+        '.euiTableHeaderCell': {
+          display: 'none',
+        },
+      },
+      '& .dvSummaryTable__wrapper': {
+        minWidth: $panelWidthS,
+        maxWidth: $panelWidthS,
+        '&.dvPanel__dateSummary': {
+          minWidth: $panelWidthM,
+          maxWidth: $panelWidthM,
+        },
+      },
+      '& .dvTopValues__wrapper': {
+        minWidth: 'fit-content',
+      },
+      '& .dvPanel__wrapper': {
+        '&.dvPanel--compressed': {
+          width: $panelWidthS,
+        },
+        '&.dvPanel--uniform': {
+          minWidth: $panelWidthS,
+          maxWidth: $panelWidthS,
+        },
+      },
+      '& .dvPanel__wrapper:not(:last-child)': {
+        margin: `${euiTheme.size.xs} ${euiTheme.size.m} ${euiTheme.size.m} 0`,
+      },
+      '& .dvPanel__wrapper:last-child': {
+        margin: `${euiTheme.size.xs} 0 ${euiTheme.size.m} 0`,
+      },
+
+      '& .dvMap__wrapper': {
+        height: '240px',
+      },
+      '& .dvText__wrapper': {
+        minWidth: $panelWidthS,
+      },
+    },
+  });
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (
@@ -395,7 +475,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
                   })
                 : undefined
             }
-            className={'dvTable'}
+            css={dvTableCss}
             items={items}
             itemId={FIELD_NAME}
             columns={columns}
@@ -409,18 +489,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             rowProps={(item) => ({
               'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
             })}
-            css={css`
-              thead {
-                position: sticky;
-                inset-block-start: 0;
-                z-index: 1;
-                background-color: ${euiTheme.colors.emptyShade};
-                box-shadow: inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color};
-              }
-              .euiTableRow > .euiTableRowCel {
-                border-top: 0px;
-              }
-            `}
           />
         </div>
       )}

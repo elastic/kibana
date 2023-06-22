@@ -46,12 +46,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async findFieldByName(name: string) {
-    const fieldSearch = await this.testSubjects.find('fieldFilterSearchInput');
+    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
     await fieldSearch.type(name);
   }
 
   public async clearFieldSearchInput() {
-    const fieldSearch = await this.testSubjects.find('fieldFilterSearchInput');
+    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
     await fieldSearch.clearValue();
   }
 
@@ -208,6 +208,10 @@ export class DiscoverPageObject extends FtrService {
 
   public async chooseBreakdownField(field: string) {
     await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
+  }
+
+  public async chooseLensChart(chart: string) {
+    await this.comboBox.set('unifiedHistogramSuggestionSelector', chart);
   }
 
   public async getHistogramLegendList() {
@@ -390,7 +394,7 @@ export class DiscoverPageObject extends FtrService {
   public async getAllFieldNames() {
     const sidebar = await this.testSubjects.find('discover-sidebar');
     const $ = await sidebar.parseDomContent();
-    return $('.dscSidebarField__name')
+    return $('.kbnFieldButton__name')
       .toArray()
       .map((field) => $(field).text());
   }
@@ -406,7 +410,9 @@ export class DiscoverPageObject extends FtrService {
   public async removeField(field: string) {
     await this.clickFieldListItem(field);
     await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
-    await this.testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+    await this.retry.waitFor('modal to open', async () => {
+      return await this.testSubjects.exists('runtimeFieldDeleteConfirmModal');
+    });
     await this.fieldEditor.confirmDelete();
   }
 
@@ -441,6 +447,9 @@ export class DiscoverPageObject extends FtrService {
   async createAdHocDataView(name: string, hasTimeField = false) {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
+    await this.retry.waitFor('flyout to get closed', async () => {
+      return !(await this.testSubjects.exists('indexPatternEditor__form'));
+    });
   }
 
   async clickAddField() {
@@ -457,10 +466,33 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
+  public noResultsErrorVisible() {
+    return this.testSubjects.exists('discoverNoResultsError');
+  }
+
+  public mainErrorVisible() {
+    return this.testSubjects.exists('discoverMainError');
+  }
+
+  public getDiscoverErrorMessage() {
+    return this.testSubjects.getVisibleText('discoverErrorCalloutMessage');
+  }
+
+  public async expandTimeRangeAsSuggestedInNoResultsMessage() {
+    await this.retry.waitFor('the button before pressing it', async () => {
+      return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
+    });
+    return await this.testSubjects.click('discoverNoResultsViewAllMatches');
+  }
+
   public async getSidebarAriaDescription(): Promise<string> {
     return await (
       await this.testSubjects.find('fieldListGrouped__ariaDescription')
     ).getAttribute('innerText');
+  }
+
+  public async cleanSidebarLocalStorage(): Promise<void> {
+    await this.browser.setLocalStorageItem('discover.unifiedFieldList.initiallyOpenSections', '{}');
   }
 
   public async waitUntilSidebarHasLoaded() {
@@ -555,6 +587,12 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async isAdHocDataViewSelected() {
+    const dataView = await this.getCurrentlySelectedDataView();
+    await this.testSubjects.click('discover-dataView-switch-link');
+    return this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+  }
+
   public async isFieldSelected(field: string) {
     if (!(await this.testSubjects.exists('fieldListGroupedSelectedFields'))) {
       return false;
@@ -588,7 +626,13 @@ export class DiscoverPageObject extends FtrService {
     }
 
     await this.waitUntilFieldPopoverIsOpen();
-    await this.testSubjects.click(`fieldVisualize-${fieldName}`);
+    const visualizeButtonTestSubject = `fieldVisualize-${fieldName}`;
+    // wrap visualize button click in retry to ensure button is clicked and retry if button click is not registered
+    await this.retry.try(async () => {
+      await this.testSubjects.click(visualizeButtonTestSubject);
+      await this.testSubjects.waitForDeleted(visualizeButtonTestSubject);
+      await this.testSubjects.missingOrFail(visualizeButtonTestSubject);
+    });
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -655,15 +699,15 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async openSidebarFieldFilter() {
-    await this.testSubjects.click('toggleFieldFilterButton');
-    await this.testSubjects.existOrFail('filterSelectionPanel');
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
+    await this.testSubjects.existOrFail('fieldListFiltersFieldTypeFilterOptions');
   }
 
   public async closeSidebarFieldFilter() {
-    await this.testSubjects.click('toggleFieldFilterButton');
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
 
     await this.retry.waitFor('sidebar filter closed', async () => {
-      return !(await this.testSubjects.exists('filterSelectionPanel'));
+      return !(await this.testSubjects.exists('fieldListFiltersFieldTypeFilterOptions'));
     });
   }
 
@@ -779,7 +823,10 @@ export class DiscoverPageObject extends FtrService {
     return button.getAttribute('title');
   }
 
-  public async getCurrentDataViewId() {
+  /**
+   * Validates if data view references in the URL are equal.
+   */
+  public async validateDataViewReffsEquality() {
     const currentUrl = await this.browser.getCurrentUrl();
     const matches = currentUrl.matchAll(/index:[^,]*/g);
     const indexes = [];
@@ -792,14 +839,25 @@ export class DiscoverPageObject extends FtrService {
     if (first) {
       const allEqual = indexes.every((val) => val === first);
       if (allEqual) {
-        return first;
+        return { valid: true, result: first };
       } else {
-        throw new Error(
-          'Discover URL state contains different index references. They should be all the same.'
-        );
+        return {
+          valid: false,
+          message:
+            'Discover URL state contains different index references. They should be all the same.',
+        };
       }
     }
-    throw new Error("Discover URL state doesn't contain an index reference.");
+    return { valid: false, message: "Discover URL state doesn't contain an index reference." };
+  }
+
+  public async getCurrentDataViewId() {
+    const validationResult = await this.validateDataViewReffsEquality();
+    if (validationResult.valid) {
+      return validationResult.result!;
+    } else {
+      throw new Error(validationResult.message);
+    }
   }
 
   public async addRuntimeField(name: string, script: string) {
@@ -809,5 +867,52 @@ export class DiscoverPageObject extends FtrService {
     await this.fieldEditor.typeScript(script);
     await this.fieldEditor.save();
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  private async waitForDropToFinish() {
+    await this.retry.try(async () => {
+      const exists = await this.find.existsByCssSelector('.domDragDrop-isActiveGroup');
+      if (exists) {
+        throw new Error('UI still in drag/drop mode');
+      }
+    });
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  /**
+   * Drags field to add as a column
+   *
+   * @param fieldName
+   * */
+  public async dragFieldToTable(fieldName: string) {
+    await this.waitUntilSidebarHasLoaded();
+
+    const from = `dscFieldListPanelField-${fieldName}`;
+    await this.find.existsByCssSelector(from);
+    await this.browser.html5DragAndDrop(
+      this.testSubjects.getCssSelector(from),
+      this.testSubjects.getCssSelector('dscMainContent')
+    );
+    await this.waitForDropToFinish();
+  }
+
+  /**
+   * Drags field with keyboard actions to add as a column
+   *
+   * @param fieldName
+   * */
+  public async dragFieldWithKeyboardToTable(fieldName: string) {
+    const field = await this.find.byCssSelector(
+      `[data-test-subj="domDragDrop_draggable-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+    );
+    await field.focus();
+    await this.retry.try(async () => {
+      await this.browser.pressKeys(this.browser.keys.ENTER);
+      await this.testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+    });
+    await this.browser.pressKeys(this.browser.keys.RIGHT);
+    await this.browser.pressKeys(this.browser.keys.ENTER);
+    await this.waitForDropToFinish();
   }
 }

@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState } from 'react';
-import { Observable, Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { first } from 'rxjs/operators';
+import React, { FC, useState } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { timeSliderReducers } from '../time_slider_reducers';
-import { TimeSliderReduxState } from '../types';
+import { Observable, Subscription } from 'rxjs';
+import { useTimeSlider } from '../embeddable/time_slider_embeddable';
 
 interface Props {
   onNext: () => void;
@@ -22,11 +20,7 @@ interface Props {
 }
 
 export const TimeSliderPrepend: FC<Props> = (props: Props) => {
-  const { useEmbeddableDispatch, actions } = useReduxEmbeddableContext<
-    TimeSliderReduxState,
-    typeof timeSliderReducers
-  >();
-  const dispatch = useEmbeddableDispatch();
+  const timeSlider = useTimeSlider();
 
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
@@ -51,13 +45,13 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   };
 
   const onPlay = () => {
-    dispatch(actions.setIsOpen({ isOpen: true }));
+    timeSlider.dispatch.setIsOpen({ isOpen: true });
     setIsPaused(false);
     playNextFrame();
   };
 
   const onPause = () => {
-    dispatch(actions.setIsOpen({ isOpen: true }));
+    timeSlider.dispatch.setIsOpen({ isOpen: true });
     setIsPaused(true);
     if (subscription) {
       subscription.unsubscribe();

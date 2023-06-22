@@ -49,7 +49,7 @@ describe('AlertsTreemap', () => {
     });
 
     test('it renders the treemap', () => {
-      expect(screen.getByTestId('treemap').querySelector('.echChart')).toBeInTheDocument();
+      expect(screen.getByTestId('alerts-treemap').querySelector('.echChart')).toBeInTheDocument();
     });
 
     test('it renders the legend with the expected overflow-y style', () => {
@@ -71,7 +71,7 @@ describe('AlertsTreemap', () => {
     });
 
     test('it does NOT render the treemap', () => {
-      expect(screen.queryByTestId('treemap')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alerts-treemap')).not.toBeInTheDocument();
     });
 
     test('it does NOT render the legend', () => {
@@ -127,7 +127,7 @@ describe('AlertsTreemap', () => {
     });
 
     test('it renders the treemap', () => {
-      expect(screen.getByTestId('treemap').querySelector('.echChart')).toBeInTheDocument();
+      expect(screen.getByTestId('alerts-treemap').querySelector('.echChart')).toBeInTheDocument();
     });
 
     test('it does NOT render the "no data" message', () => {

@@ -6,17 +6,23 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ALL_VALUE,
+  apmTransactionErrorRateIndicatorSchema,
+  timeslicesBudgetingMethodSchema,
+} from '@kbn/slo-schema';
+
 import { InvalidTransformError } from '../../../errors';
-import { ALL_VALUE, apmTransactionErrorRateIndicatorSchema } from '../../../types/schema';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { TransformGenerator } from '.';
+import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../assets/constants';
 import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
-import { DEFAULT_APM_INDEX } from './constants';
+import { Query } from './types';
+import { parseIndex } from './common';
 
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
 const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
@@ -29,9 +35,10 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
+      this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildCommonGroupBy(slo),
+      this.buildGroupBy(slo),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo)
     );
@@ -42,7 +49,16 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
-    const queryFilter = [];
+    const queryFilter: Query[] = [
+      {
+        range: {
+          '@timestamp': {
+            gte: `now-${slo.timeWindow.duration.format()}`,
+          },
+        },
+      },
+    ];
+
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {
@@ -59,33 +75,36 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       });
     }
 
-    if (indicator.params.transaction_name !== ALL_VALUE) {
+    if (indicator.params.transactionName !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.name': indicator.params.transaction_name,
+          'transaction.name': indicator.params.transactionName,
         },
       });
     }
 
-    if (indicator.params.transaction_type !== ALL_VALUE) {
+    if (indicator.params.transactionType !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.type': indicator.params.transaction_type,
+          'transaction.type': indicator.params.transactionType,
         },
       });
+    }
+
+    if (indicator.params.filter) {
+      queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
     }
 
     return {
-      index: indicator.params.index ?? DEFAULT_APM_INDEX,
+      index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
           filter: [
-            {
-              match: {
-                'transaction.root': true,
-              },
-            },
+            { terms: { 'processor.event': ['metric'] } },
+            { term: { 'metricset.name': 'transaction' } },
+            { exists: { field: 'transaction.duration.histogram' } },
+            { exists: { field: 'transaction.result' } },
             ...queryFilter,
           ],
         },
@@ -101,7 +120,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
   }
 
   private buildAggregations(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
-    const goodStatusCodesFilter = this.getGoodStatusCodesFilter(indicator.params.good_status_codes);
+    const goodStatusCodesFilter = this.getGoodStatusCodesFilter(indicator.params.goodStatusCodes);
 
     return {
       'slo.numerator': {
@@ -116,6 +135,17 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           field: 'transaction.duration.histogram',
         },
       },
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+        'slo.isGoodSlice': {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'slo.numerator>_count',
+              totalEvents: 'slo.denominator.value',
+            },
+            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+          },
+        },
+      }),
     };
   }
 

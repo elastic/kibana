@@ -5,27 +5,50 @@
  * 2.0.
  */
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  BUCKET_SELECTOR_FIELD,
+  buildAggregation,
+  isCountAggregation,
+  parseAggregationResults,
+} from '@kbn/triggers-actions-ui-plugin/common';
+import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
+import { getComparatorScript } from '../../../../common';
 import { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { ES_QUERY_ID } from '../constants';
 import { getSearchParams } from './get_search_params';
 
-/**
- * Fetching matching documents for a given rule from elasticsearch by a given index and query
- */
-export async function fetchEsQuery(
-  ruleId: string,
-  name: string,
-  params: OnlyEsQueryRuleParams,
-  timestamp: string | undefined,
+export interface FetchEsQueryOpts {
+  ruleId: string;
+  name: string;
+  params: OnlyEsQueryRuleParams;
+  timestamp: string | undefined;
+  publicBaseUrl: string;
+  spacePrefix: string;
   services: {
     scopedClusterClient: IScopedClusterClient;
     logger: Logger;
-  }
-) {
+  };
+  alertLimit?: number;
+}
+
+/**
+ * Fetching matching documents for a given rule from elasticsearch by a given index and query
+ */
+export async function fetchEsQuery({
+  ruleId,
+  name,
+  params,
+  spacePrefix,
+  publicBaseUrl,
+  timestamp,
+  services,
+  alertLimit,
+}: FetchEsQueryOpts) {
   const { scopedClusterClient, logger } = services;
   const esClient = scopedClusterClient.asCurrentUser;
+  const isGroupAgg = isGroupAggregation(params.termField);
+  const isCountAgg = isCountAggregation(params.aggType);
   const {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     parsedQuery: { query, fields, runtime_mappings, _source },
@@ -69,7 +92,7 @@ export async function fetchEsQuery(
     from: dateStart,
     to: dateEnd,
     filter,
-    size: params.size,
+    size: isGroupAgg ? 0 : params.size,
     sortOrder: 'desc',
     searchAfterSortId: undefined,
     timeField: params.timeField,
@@ -77,6 +100,21 @@ export async function fetchEsQuery(
     fields,
     runtime_mappings,
     _source,
+    aggs: buildAggregation({
+      aggType: params.aggType,
+      aggField: params.aggField,
+      termField: params.termField,
+      termSize: params.termSize,
+      condition: {
+        resultLimit: alertLimit,
+        conditionScript: getComparatorScript(
+          params.thresholdComparator,
+          params.threshold,
+          BUCKET_SELECTOR_FIELD
+        ),
+      },
+      ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+    }),
   });
 
   logger.debug(
@@ -88,10 +126,18 @@ export async function fetchEsQuery(
   logger.debug(
     ` es query rule ${ES_QUERY_ID}:${ruleId} "${name}" result - ${JSON.stringify(searchResult)}`
   );
+
+  const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
+
   return {
-    numMatches: (searchResult.hits.total as estypes.SearchTotalHits).value,
-    searchResult,
+    parsedResults: parseAggregationResults({
+      isCountAgg,
+      isGroupAgg,
+      esResult: searchResult,
+      resultLimit: alertLimit,
+    }),
     dateStart,
     dateEnd,
+    link,
   };
 }

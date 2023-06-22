@@ -10,18 +10,21 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { durationAnomalyAlertFactory } from './duration_anomaly';
-import { DURATION_ANOMALY } from '../../../../common/constants/alerts';
-import { AnomaliesTableRecord, AnomalyRecordDoc } from '@kbn/ml-plugin/common/types/anomalies';
+import { DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
+import {
+  getSeverityType,
+  type MlAnomaliesTableRecord,
+  type MlAnomalyRecordDoc,
+} from '@kbn/ml-anomaly-utils';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
-import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
 import { Ping } from '../../../../common/runtime_types/ping';
 
 interface MockAnomaly {
-  severity: AnomaliesTableRecord['severity'];
-  source: Partial<AnomalyRecordDoc>;
-  actualSort: AnomaliesTableRecord['actualSort'];
-  typicalSort: AnomaliesTableRecord['typicalSort'];
-  entityValue: AnomaliesTableRecord['entityValue'];
+  severity: MlAnomaliesTableRecord['severity'];
+  source: Partial<MlAnomalyRecordDoc>;
+  actualSort: MlAnomaliesTableRecord['actualSort'];
+  typicalSort: MlAnomaliesTableRecord['typicalSort'];
+  entityValue: MlAnomaliesTableRecord['entityValue'];
 }
 
 interface MockAnomalyResult {

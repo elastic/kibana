@@ -75,29 +75,17 @@ describe('ServiceNowSIR Fields', () => {
     act(() => {
       onChoicesSuccess(mockChoices);
     });
-    wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(0).text()).toEqual(
-      'Destination IPs: Yes'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(1).text()).toEqual(
-      'Source IPs: Yes'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
-      'Malware URLs: Yes'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(3).text()).toEqual(
-      'Malware Hashes: Yes'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(4).text()).toEqual(
-      'Priority: 1 - Critical'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(5).text()).toEqual(
-      'Category: Denial of Service'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(6).text()).toEqual(
-      'Subcategory: Single or distributed (DoS or DDoS)'
-    );
+    wrapper.update();
+    const nodes = wrapper.find('[data-test-subj="card-list-item"]').hostNodes();
+
+    expect(nodes.at(0).text()).toEqual('Destination IPs: Yes');
+    expect(nodes.at(1).text()).toEqual('Source IPs: Yes');
+    expect(nodes.at(2).text()).toEqual('Malware URLs: Yes');
+    expect(nodes.at(3).text()).toEqual('Malware Hashes: Yes');
+    expect(nodes.at(4).text()).toEqual('Priority: 1 - Critical');
+    expect(nodes.at(5).text()).toEqual('Category: Denial of Service');
+    expect(nodes.at(6).text()).toEqual('Subcategory: Single or distributed (DoS or DDoS)');
   });
 
   test('it transforms the categories to options correctly', async () => {

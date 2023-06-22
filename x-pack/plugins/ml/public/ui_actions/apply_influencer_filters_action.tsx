@@ -7,9 +7,9 @@
 
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
-import { DashboardConstants } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
@@ -17,12 +17,12 @@ import { CONTROLLED_BY_SWIM_LANE_FILTER } from './constants';
 
 export const APPLY_INFLUENCER_FILTERS_ACTION = 'applyInfluencerFiltersAction';
 
-const supportedApps = [DashboardConstants.DASHBOARDS_ID];
+const supportedApps = [DASHBOARD_APP_ID];
 
 export function createApplyInfluencerFiltersAction(
   getStartServices: MlCoreSetup['getStartServices']
-) {
-  return createAction<SwimLaneDrilldownContext>({
+): UiActionsActionDefinition<SwimLaneDrilldownContext> {
+  return {
     id: 'apply-to-current-view',
     type: APPLY_INFLUENCER_FILTERS_ACTION,
     getIconType(context: SwimLaneDrilldownContext): string {
@@ -85,5 +85,5 @@ export function createApplyInfluencerFiltersAction(
         supportedApps.includes(appId!)
       );
     },
-  });
+  };
 }

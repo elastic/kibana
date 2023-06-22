@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../__mocks__/kea_logic';
+import { LogicMounter, mockFlashMessageHelpers } from '../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -26,6 +26,7 @@ describe('CreateApiLogic', () => {
   const apiCallMock = jest.fn();
   const logic = createApiLogic(['path'], apiCallMock);
   const { mount } = new LogicMounter(logic);
+  const { clearFlashMessages, flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,6 +46,7 @@ describe('CreateApiLogic', () => {
           apiStatus: { status: Status.LOADING },
           status: Status.LOADING,
         });
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
 
       it('should set persist data in between new requests', () => {
@@ -56,6 +58,16 @@ describe('CreateApiLogic', () => {
           data: 123,
           status: Status.LOADING,
         });
+      });
+
+      it('should not call clearFlashMessages if clearFlashMessages param is false', () => {
+        const messageLogic = createApiLogic(['message_path'], apiCallMock, {
+          clearFlashMessagesOnMakeRequest: false,
+        });
+        const { mount: messageMount } = messageLogic;
+        messageMount();
+        messageLogic.actions.makeRequest({});
+        expect(clearFlashMessages).not.toHaveBeenCalled();
       });
     });
     describe('apiSuccess', () => {
@@ -70,6 +82,16 @@ describe('CreateApiLogic', () => {
           data: { success: 'data' },
           status: Status.SUCCESS,
         });
+        expect(flashSuccessToast).not.toHaveBeenCalled();
+      });
+      it('should call flashSuccessToast if success function provided', () => {
+        const messageLogic = createApiLogic(['message_path'], apiCallMock, {
+          showSuccessFlashFn: () => 'test message',
+        });
+        const { mount: messageMount } = messageLogic;
+        messageMount();
+        messageLogic.actions.apiSuccess({});
+        expect(flashSuccessToast).toHaveBeenCalledWith('test message');
       });
     });
     describe('apiError', () => {
@@ -86,6 +108,16 @@ describe('CreateApiLogic', () => {
           error: 'error',
           status: Status.ERROR,
         });
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+      it('should not call flashApiErrors if showErrorFlash param is set to false', () => {
+        const messageLogic = createApiLogic(['message_path'], apiCallMock, {
+          showErrorFlash: false,
+        });
+        const { mount: messageMount } = messageLogic;
+        messageMount();
+        messageLogic.actions.apiError('error' as any as HttpError);
+        expect(flashAPIErrors).not.toHaveBeenCalledWith('error');
       });
     });
     describe('apiReset', () => {

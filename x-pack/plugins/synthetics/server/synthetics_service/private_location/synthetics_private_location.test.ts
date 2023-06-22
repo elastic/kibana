@@ -107,8 +107,8 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.createMonitors(
-        [testConfig],
+      await syntheticsPrivateLocation.createPackagePolicies(
+        [{ config: testConfig, globalParams: {} }],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
         [mockPrivateLocation],
@@ -138,7 +138,7 @@ describe('SyntheticsPrivateLocation', () => {
 
     try {
       await syntheticsPrivateLocation.editMonitors(
-        [testConfig],
+        [{ config: testConfig, globalParams: {} }],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
         [mockPrivateLocation],
@@ -156,7 +156,7 @@ describe('SyntheticsPrivateLocation', () => {
     ],
     [
       false,
-      'Unable to delete Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
+      'Unable to delete Synthetics package policy for monitor Test Monitor. Fleet write permissions are needed to use Synthetics private locations.',
     ],
   ])('throws errors for delete monitor', async (writeIntegrationPolicies, error) => {
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
@@ -181,7 +181,12 @@ describe('SyntheticsPrivateLocation', () => {
   });
 
   it('formats monitors stream properly', () => {
-    const test = formatSyntheticsPolicy(testMonitorPolicy, DataStream.BROWSER, dummyBrowserConfig);
+    const test = formatSyntheticsPolicy(
+      testMonitorPolicy,
+      DataStream.BROWSER,
+      dummyBrowserConfig,
+      {}
+    );
 
     expect(test.formattedPolicy.inputs[3].streams[1]).toStrictEqual({
       data_stream: {
@@ -193,7 +198,7 @@ describe('SyntheticsPrivateLocation', () => {
         __ui: {
           type: 'yaml',
           value:
-            '{"script_source":{"is_generated_script":false,"file_name":""},"is_zip_url_tls_enabled":false,"is_tls_enabled":true}',
+            '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":true}',
         },
         config_id: {
           type: 'text',
@@ -248,44 +253,6 @@ describe('SyntheticsPrivateLocation', () => {
           value:
             "\"step('Go to https://www.elastic.co/', async () => {\\n  await page.goto('https://www.elastic.co/');\\n});\"",
         },
-        'source.zip_url.folder': {
-          type: 'text',
-          value: '',
-        },
-        'source.zip_url.password': {
-          type: 'password',
-          value: '',
-        },
-        'source.zip_url.proxy_url': {
-          type: 'text',
-          value: '',
-        },
-        'source.zip_url.ssl.certificate': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.certificate_authorities': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.key': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.key_passphrase': {
-          type: 'text',
-        },
-        'source.zip_url.ssl.supported_protocols': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.verification_mode': {
-          type: 'text',
-        },
-        'source.zip_url.url': {
-          type: 'text',
-          value: '',
-        },
-        'source.zip_url.username': {
-          type: 'text',
-          value: '',
-        },
         synthetics_args: {
           type: 'text',
           value: null,
@@ -296,7 +263,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'throttling.config': {
           type: 'text',
-          value: '5d/3u/20l',
+          value: JSON.stringify({ download: 5, upload: 3, latency: 20 }),
         },
         timeout: {
           type: 'text',
@@ -331,7 +298,6 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   playwright_options: '',
   __ui: {
     script_source: { is_generated_script: false, file_name: '' },
-    is_zip_url_tls_enabled: false,
     is_tls_enabled: true,
   },
   params: '',
@@ -339,22 +305,13 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   'source.inline.script':
     "step('Go to https://www.elastic.co/', async () => {\n  await page.goto('https://www.elastic.co/');\n});",
   'source.project.content': '',
-  'source.zip_url.url': '',
-  'source.zip_url.username': '',
-  'source.zip_url.password': '',
-  'source.zip_url.folder': '',
-  'source.zip_url.proxy_url': '',
   urls: 'https://www.elastic.co/',
   screenshots: 'on',
   synthetics_args: [],
   'filter_journeys.match': '',
   'filter_journeys.tags': [],
   ignore_https_errors: false,
-  'throttling.is_enabled': true,
-  'throttling.download_speed': '5',
-  'throttling.upload_speed': '3',
-  'throttling.latency': '20',
-  'throttling.config': '5d/3u/20l',
+  throttling: { value: { download: '5', upload: '3', latency: '20' }, label: 'test', id: 'test' },
   id: '75cdd125-5b62-4459-870c-46f59bf37e89',
   config_id: '75cdd125-5b62-4459-870c-46f59bf37e89',
   fields: { config_id: '75cdd125-5b62-4459-870c-46f59bf37e89', run_once: true },

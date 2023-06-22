@@ -18,9 +18,9 @@ interface MonitorDurationTrendProps {
 }
 
 export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const monitorId = useMonitorQueryId();
   const selectedLocation = useSelectedLocation();
@@ -31,6 +31,7 @@ export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id="monitorDurationTrend"
       customHeight="240px"
       reportType="kpi-over-time"
       attributes={Object.keys(metricsToShow).map((metric) => ({

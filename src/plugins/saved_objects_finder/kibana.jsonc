@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-objects-finder-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "plugin": {
+    "id": "savedObjectsFinder",
+    "server": true,
+    "browser": true,
+  }
+}

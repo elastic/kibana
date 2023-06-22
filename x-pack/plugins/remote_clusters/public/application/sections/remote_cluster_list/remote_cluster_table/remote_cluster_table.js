@@ -172,7 +172,7 @@ export class RemoteClusterTable extends Component {
                   data-test-subj="remoteClustersTableListDeprecatedSetttingsTooltip"
                 >
                   <EuiIconTip
-                    type="alert"
+                    type="warning"
                     color="warning"
                     content={
                       <FormattedMessage

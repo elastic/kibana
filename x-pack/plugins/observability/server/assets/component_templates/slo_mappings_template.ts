@@ -29,27 +29,11 @@ export const getSLOMappingsTemplate = (name: string) => ({
             denominator: {
               type: 'long',
             },
+            isGoodSlice: {
+              type: 'byte',
+            },
             context: {
               type: 'flattened',
-            },
-            _internal: {
-              properties: {
-                name: { type: 'keyword', ignore_above: 256 },
-                budgeting_method: { type: 'keyword' },
-                objective: {
-                  properties: {
-                    target: { type: 'double' },
-                    timeslice_target: { type: 'double' },
-                    timeslice_window: { type: 'keyword' },
-                  },
-                },
-                time_window: {
-                  properties: {
-                    duration: { type: 'keyword' },
-                    is_rolling: { type: 'boolean' },
-                  },
-                },
-              },
             },
           },
         },
@@ -59,5 +43,7 @@ export const getSLOMappingsTemplate = (name: string) => ({
   _meta: {
     description: 'Mappings for SLO rollup data',
     version: 1,
+    managed: true,
+    managed_by: 'observability',
   },
 });

@@ -7,16 +7,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
   >
     <div
       data-test-subj="flyout-pane"
-      style="display: none;"
-    >
-      <div
-        data-eui="EuiFlyout"
-        data-test-subj="eui-flyout"
-        role="dialog"
-      >
-        <div />
-      </div>
-    </div>
+    />
   </div>
   .c2 {
   display: block;

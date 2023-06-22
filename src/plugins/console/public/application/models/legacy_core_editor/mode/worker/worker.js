@@ -47,8 +47,7 @@
   (hence the redefining of everything).  It is based on the javascript
   mode from the brace distro.
 */
-
-(function (window) {
+function init(window) {
   function resolveModuleId(id, paths) {
     for (let testPath = id, tail = ''; testPath;) {
       let alias = paths[testPath];
@@ -235,7 +234,8 @@
       }
     };
   }
-}(this)),
+}
+init(this);
 ace.define('ace/lib/oop', ['require', 'exports', 'module'], function (
   acequire,
   exports

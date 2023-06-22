@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { snakeCase } from 'lodash';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 
 interface KibanaSavedObjectCounts {
@@ -26,10 +26,9 @@ interface KibanaUsage extends KibanaSavedObjectCounts {
 const TYPES = ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-workspace'];
 
 export async function getKibanaSavedObjectCounts(
-  esClient: ElasticsearchClient,
-  kibanaIndex: string
+  soClient: SavedObjectsClientContract
 ): Promise<KibanaSavedObjectCounts> {
-  const { per_type: buckets } = await getSavedObjectsCounts(esClient, kibanaIndex, TYPES, true);
+  const { per_type: buckets } = await getSavedObjectsCounts(soClient, TYPES, true);
 
   const allZeros = Object.fromEntries(
     TYPES.map((type) => [snakeCase(type), { total: 0 }])
@@ -44,7 +43,7 @@ export async function getKibanaSavedObjectCounts(
 
 export function registerKibanaUsageCollector(
   usageCollection: UsageCollectionSetup,
-  kibanaIndex: string
+  getIndicesForTypes: (types: string[]) => Promise<string[]>
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<KibanaUsage>({
@@ -80,10 +79,11 @@ export function registerKibanaUsageCollector(
           },
         },
       },
-      async fetch({ esClient }) {
+      async fetch({ soClient }) {
+        const indices = await getIndicesForTypes(['dashboard', 'visualization', 'search']);
         return {
-          index: kibanaIndex,
-          ...(await getKibanaSavedObjectCounts(esClient, kibanaIndex)),
+          index: indices[0],
+          ...(await getKibanaSavedObjectCounts(soClient)),
         };
       },
     })

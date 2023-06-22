@@ -24,6 +24,11 @@ const schemaLatest = schema.object(
     }),
     // Cloud requires the ability to hide internal node attributes from users.
     filteredNodeAttributes: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    /**
+     * Disables the plugin.
+     * Added back in 8.8.
+     */
+    enabled: schema.boolean({ defaultValue: true }),
   },
   { defaultValue: undefined }
 );

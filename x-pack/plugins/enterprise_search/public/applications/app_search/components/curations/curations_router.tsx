@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   ENGINE_CURATIONS_PATH,

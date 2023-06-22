@@ -44,7 +44,6 @@ describe('isCrossClusterSearch', () => {
         metric: '',
         error: '',
         onboarding: 'apm-*,remote_cluster:apm-*',
-        sourcemap: 'apm-*,remote_cluster:apm-*',
       } as ApmIndicesConfig,
     } as unknown as APMEventClient;
 

@@ -7,9 +7,13 @@
  */
 
 export type DeeplyMockedKeys<T> = {
-  [P in keyof T]: T[P] extends (...args: any[]) => any
+  [P in keyof T]: T[P] extends readonly any[]
+    ? ReadonlyArray<DeeplyMockedKeys<T[P][0]>>
+    : T[P] extends (...args: any[]) => any
     ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
-    : DeeplyMockedKeys<T[P]>;
+    : T[P] extends object
+    ? DeeplyMockedKeys<T[P]>
+    : T[P];
 } & T;
 
 export type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };

@@ -61,6 +61,7 @@ export const useRecentlyViewedMonitors = () => {
       .map(({ saved_object: monitor }) => ({
         key: monitor.id,
         label: (monitor.attributes as MonitorFields).name,
+        locationIds: (monitor.attributes as MonitorFields).locations.map((location) => location.id),
       }));
   }, [monitorId, recentlyViewed]);
 

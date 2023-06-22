@@ -25,21 +25,26 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
     services: { ml, http, application },
   } = useKibanaContextForPlugin();
 
-  const viewAnomalyInMachineLearningLink = useMlHref(ml, http.basePath.get(), {
-    page: ML_PAGES.SINGLE_METRIC_VIEWER,
-    pageState: {
-      jobIds: [categorizationJobId],
-      timeRange: {
-        from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        mode: 'absolute',
-      },
-      entities: {
-        [partitionField]: dataset,
-        mlcategory: `${categoryId}`,
+  const viewAnomalyInMachineLearningLink = useMlHref(
+    ml,
+    http.basePath.get(),
+    {
+      page: ML_PAGES.SINGLE_METRIC_VIEWER,
+      pageState: {
+        jobIds: [categorizationJobId],
+        timeRange: {
+          from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          mode: 'absolute',
+        },
+        entities: {
+          [partitionField]: dataset,
+          mlcategory: `${categoryId}`,
+        },
       },
     },
-  });
+    [categorizationJobId]
+  );
 
   const handleClick = useCallback(
     (e) => {

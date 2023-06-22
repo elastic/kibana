@@ -79,7 +79,7 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
         <EuiPageBody>
           <EuiPageContent verticalPosition="center" horizontalPosition="center">
             <EuiEmptyPrompt
-              iconType="alert"
+              iconType="warning"
               iconColor="danger"
               title={
                 <h2>
@@ -119,7 +119,7 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
               ]}
             />
             {this.state.errors.map((error, i) => (
-              <EuiCallOut key={i} title={error.message} color="danger" iconType="alert">
+              <EuiCallOut key={i} title={error.message} color="danger" iconType="warning">
                 <EuiCodeBlock language="bash" className="eui-textBreakAll">
                   {`Version: ${this.props.kibanaVersion}` +
                     '\n' +

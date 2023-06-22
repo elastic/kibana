@@ -111,7 +111,7 @@ const ValidationErrors: React.FC<{ errors: ValidationUIError[] }> = ({ errors })
 
   return (
     <>
-      <EuiCallOut color="danger" iconType="alert" title={errorCalloutTitle}>
+      <EuiCallOut color="danger" iconType="warning" title={errorCalloutTitle}>
         <ul>
           {errors.map((error, i) => (
             <li key={i}>{formatValidationError(error)}</li>

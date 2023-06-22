@@ -1,11 +1,15 @@
 {
   "ml.stop_trained_model_deployment": {
+    "url_params": {
+      "allow_no_match": "__flag__",
+      "force": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_ml/trained_models/{model_id}/deployment/_stop"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/stop-trained-model-deployment.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/stop-trained-model-deployment.html"
   }
 }

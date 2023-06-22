@@ -27,7 +27,11 @@ export const LocationLink = ({ location, textSize }: LocationLinkProps) => {
       {location}
     </EuiText>
   ) : (
-    <EuiLink href={locationDocsLink} target="_blank">
+    <EuiLink
+      data-test-subj="syntheticsLocationLinkAddLocationLink"
+      href={locationDocsLink}
+      target="_blank"
+    >
       {i18n.translate('xpack.synthetics.monitorList.geoName.helpLinkAnnotation', {
         defaultMessage: 'Add location',
         description:

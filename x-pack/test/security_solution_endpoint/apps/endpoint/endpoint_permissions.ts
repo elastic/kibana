@@ -18,15 +18,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
-  const policyTestResources = getService('policyTestResources');
 
   describe('Endpoint permissions:', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
       // todo: way to force an endpoint to be created in isolated mode so we can check that state in the UI
-      const endpointPackage = await policyTestResources.getEndpointPackage();
-      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();
 
       // Force a logout so that we start from the login page
@@ -59,7 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('should NOT allow access to endpoint management pages', async () => {
           await PageObjects.endpoint.navigateToEndpointList();
-          await testSubjects.existOrFail('noIngestPermissions');
+          await testSubjects.existOrFail('noPrivilegesPage');
         });
 
         it('should display endpoint data on Host Details', async () => {

@@ -7,40 +7,29 @@
 
 import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
-import memoizeOne from 'memoize-one';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import {
+import type {
   Datasource,
-  DatasourceLayers,
   DatasourceMap,
-  FramePublicAPI,
   IndexPattern,
   IndexPatternMap,
   IndexPatternRef,
   InitializationOptions,
-  Visualization,
   VisualizationMap,
   VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
-import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
-import type { ErrorMessage } from '../types';
-import {
-  getMissingCurrentDatasource,
-  getMissingIndexPatterns,
-  getMissingVisualizationTypeError,
-  getUnknownVisualizationTypeError,
-} from '../error_helper';
-import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
+import type { DatasourceStates, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
+import { getDatasourceLayers } from '../../state_management/utils';
 
 function getIndexPatterns(
   references?: SavedObjectReference[],
@@ -49,18 +38,19 @@ function getIndexPatterns(
   adHocDataviews?: string[]
 ) {
   const indexPatternIds = [];
+
+  // use the initialId only when no context is passed over
+  if (!initialContext && initialId) {
+    indexPatternIds.push(initialId);
+  }
   if (initialContext) {
     if ('isVisualizeAction' in initialContext) {
       indexPatternIds.push(...initialContext.indexPatternIds);
     } else {
       indexPatternIds.push(initialContext.dataViewSpec.id!);
     }
-  } else {
-    // use the initialId only when no context is passed over
-    if (initialId) {
-      indexPatternIds.push(initialId);
-    }
   }
+
   if (references) {
     for (const reference of references) {
       if (reference.type === 'index-pattern') {
@@ -248,8 +238,10 @@ export function initializeVisualization({
 }) {
   if (visualizationState?.activeId) {
     return (
-      visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
+      visualizationMap[visualizationState.activeId]?.initialize(
+        () => '',
         visualizationState.state,
+        undefined,
         references,
         initialContext
       ) ?? visualizationState.state
@@ -290,30 +282,6 @@ export function initializeDatasources({
   return states;
 }
 
-export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
-  datasourceStates: DatasourceStates,
-  datasourceMap: DatasourceMap,
-  indexPatterns: DataViewsState['indexPatterns']
-) {
-  const datasourceLayers: DatasourceLayers = {};
-  Object.keys(datasourceMap)
-    .filter((id) => datasourceStates[id] && !datasourceStates[id].isLoading)
-    .forEach((id) => {
-      const datasourceState = datasourceStates[id].state;
-      const datasource = datasourceMap[id];
-
-      const layers = datasource.getLayers(datasourceState);
-      layers.forEach((layer) => {
-        datasourceLayers[layer] = datasourceMap[id].getPublicAPI({
-          state: datasourceState,
-          layerId: layer,
-          indexPatterns,
-        });
-      });
-    });
-  return datasourceLayers;
-});
-
 export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
@@ -324,7 +292,11 @@ export async function persistedStateToExpression(
     dataViews: DataViewsContract;
     timefilter: TimefilterContract;
   }
-): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
+): Promise<{
+  ast: Ast | null;
+  indexPatterns: IndexPatternMap;
+  indexPatternRefs: IndexPatternRef[];
+}> {
   const {
     state: {
       visualization: persistedVisualizationState,
@@ -338,16 +310,7 @@ export async function persistedStateToExpression(
     description,
   } = doc;
   if (!visualizationType) {
-    return {
-      ast: null,
-      errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
-    };
-  }
-  if (!visualizations[visualizationType]) {
-    return {
-      ast: null,
-      errors: [getUnknownVisualizationTypeError(visualizationType)],
-    };
+    return { ast: null, indexPatterns: {}, indexPatternRefs: [] };
   }
   const visualization = visualizations[visualizationType!];
   const visualizationState = initializeVisualization({
@@ -390,30 +353,11 @@ export async function persistedStateToExpression(
   if (datasourceId == null) {
     return {
       ast: null,
-      errors: [{ shortMessage: '', longMessage: getMissingCurrentDatasource() }],
+      indexPatterns,
+      indexPatternRefs,
     };
   }
 
-  const indexPatternValidation = validateRequiredIndexPatterns(
-    datasourceMap[datasourceId],
-    datasourceStates[datasourceId],
-    indexPatterns
-  );
-
-  if (indexPatternValidation) {
-    return {
-      ast: null,
-      errors: indexPatternValidation,
-    };
-  }
-
-  const validationResult = validateDatasourceAndVisualization(
-    datasourceMap[datasourceId],
-    datasourceStates[datasourceId].state,
-    visualization,
-    visualizationState,
-    { datasourceLayers, dataViews: { indexPatterns } as DataViewsState }
-  );
   const currentTimeRange = services.timefilter.getAbsoluteTime();
 
   return {
@@ -428,16 +372,21 @@ export async function persistedStateToExpression(
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
     }),
-    errors: validationResult,
+    indexPatterns,
+    indexPatternRefs,
   };
 }
 
 export function getMissingIndexPattern(
-  currentDatasource: Datasource | null,
-  currentDatasourceState: { state: unknown } | null,
+  currentDatasource: Datasource | null | undefined,
+  currentDatasourceState: { isLoading: boolean; state: unknown } | null,
   indexPatterns: IndexPatternMap
 ) {
-  if (currentDatasourceState == null || currentDatasource == null) {
+  if (
+    currentDatasourceState?.isLoading ||
+    currentDatasourceState?.state == null ||
+    currentDatasource == null
+  ) {
     return [];
   }
   const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state, indexPatterns);
@@ -446,55 +395,3 @@ export function getMissingIndexPattern(
   }
   return missingIds;
 }
-
-const validateRequiredIndexPatterns = (
-  currentDatasource: Datasource,
-  currentDatasourceState: { state: unknown } | null,
-  indexPatterns: IndexPatternMap
-): ErrorMessage[] | undefined => {
-  const missingIds = getMissingIndexPattern(
-    currentDatasource,
-    currentDatasourceState,
-    indexPatterns
-  );
-
-  if (!missingIds.length) {
-    return;
-  }
-
-  return [{ shortMessage: '', longMessage: getMissingIndexPatterns(missingIds), type: 'fixable' }];
-};
-
-export const validateDatasourceAndVisualization = (
-  currentDataSource: Datasource | null,
-  currentDatasourceState: unknown | null,
-  currentVisualization: Visualization | null,
-  currentVisualizationState: unknown | undefined,
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
-): ErrorMessage[] | undefined => {
-  try {
-    const datasourceValidationErrors = currentDatasourceState
-      ? currentDataSource?.getErrorMessages(currentDatasourceState, frame.dataViews.indexPatterns)
-      : undefined;
-
-    const visualizationValidationErrors = currentVisualizationState
-      ? currentVisualization?.getErrorMessages(currentVisualizationState, frame)
-      : undefined;
-
-    if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
-      return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
-    }
-  } catch (e) {
-    showMemoizedErrorNotification(e);
-    if (e.message) {
-      return [
-        {
-          shortMessage: e.message,
-          longMessage: e.message,
-          type: 'critical',
-        },
-      ];
-    }
-  }
-  return undefined;
-};

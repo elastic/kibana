@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
@@ -38,6 +37,7 @@ import { IndexViewLogic } from '../index_view_logic';
 
 import { DeleteInferencePipelineButton } from './delete_inference_pipeline_button';
 import { TrainedModelHealth } from './ml_model_health';
+import { MLModelTypeBadge } from './ml_model_type_badge';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => {
@@ -167,6 +167,12 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                       )}
                     >
                       <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
+                          {
+                            defaultMessage: 'Fix issue in Trained Models',
+                          }
+                        )}
                         data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
                         href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
                         display="base"
@@ -180,7 +186,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
                       <span>
-                        <EuiBadge color="hollow">{modelType}</EuiBadge>
+                        <MLModelTypeBadge type={modelType} />
                       </span>
                     </EuiFlexItem>
                   </EuiFlexGroup>

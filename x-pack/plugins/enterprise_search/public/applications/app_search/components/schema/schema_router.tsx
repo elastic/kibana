@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 
 import { useValues } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { ENGINE_REINDEX_JOB_PATH } from '../../routes';
 import { EngineLogic } from '../engine';

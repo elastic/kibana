@@ -9,8 +9,7 @@ import React, { VFC } from 'react';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { IndicatorEmptyPrompt } from '../empty_prompt';
 import { IndicatorFieldsTable } from '../fields_table';
-
-export const TABLE_TEST_ID = 'tiFlyoutTable';
+import { FLYOUT_TABLE_TEST_ID } from './test_ids';
 
 const search = {
   box: {
@@ -37,7 +36,7 @@ export const IndicatorsFlyoutTable: VFC<IndicatorsFlyoutTableProps> = ({ indicat
     <IndicatorEmptyPrompt />
   ) : (
     <IndicatorFieldsTable
-      data-test-subj={TABLE_TEST_ID}
+      data-test-subj={FLYOUT_TABLE_TEST_ID}
       search={search}
       fields={items}
       indicator={indicator}

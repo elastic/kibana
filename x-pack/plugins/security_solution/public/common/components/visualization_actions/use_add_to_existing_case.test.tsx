@@ -30,7 +30,7 @@ jest.mock('../../lib/kibana', () => {
         ...mockedUseKibana.services,
         cases: {
           hooks: {
-            getUseCasesAddToExistingCaseModal: mockGetUseCasesAddToExistingCaseModal,
+            useCasesAddToExistingCaseModal: mockGetUseCasesAddToExistingCaseModal,
           },
         },
       },
@@ -49,7 +49,7 @@ describe('useAddToExistingCase', () => {
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
   });
 
-  it('getUseCasesAddToExistingCaseModal with attachments', () => {
+  it('useCasesAddToExistingCaseModal with attachments', () => {
     const { result } = renderHook(() =>
       useAddToExistingCase({
         lensAttributes: kpiHostMetricLensAttributes,
@@ -59,7 +59,9 @@ describe('useAddToExistingCase', () => {
     );
     expect(mockGetUseCasesAddToExistingCaseModal).toHaveBeenCalledWith({
       onClose: mockOnAddToCaseClicked,
-      toastContent: 'Successfully added visualization to the case',
+      successToaster: {
+        title: 'Successfully added visualization to the case',
+      },
     });
     expect(result.current.disabled).toEqual(false);
   });

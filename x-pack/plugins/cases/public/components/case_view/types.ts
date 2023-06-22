@@ -7,7 +7,7 @@
 import type { MutableRefObject } from 'react';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import type { CasesNavigation } from '../links';
-import type { CaseViewRefreshPropInterface, Case } from '../../../common';
+import type { CaseViewRefreshPropInterface, CaseUI } from '../../../common';
 import type { UseFetchAlertData } from '../../../common/ui';
 
 export interface CaseViewBaseProps {
@@ -30,12 +30,12 @@ export interface CaseViewProps extends CaseViewBaseProps {
 export interface CaseViewPageProps extends CaseViewBaseProps {
   caseId: string;
   fetchCase: () => void;
-  caseData: Case;
+  caseData: CaseUI;
 }
 
 export interface OnUpdateFields {
-  key: keyof Case;
-  value: Case[keyof Case];
+  key: keyof CaseUI;
+  value: CaseUI[keyof CaseUI];
   onSuccess?: () => void;
   onError?: () => void;
 }

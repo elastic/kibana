@@ -10,11 +10,13 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Toolbar } from './toolbar';
-import { PrimaryButton } from '../buttons';
+import { ToolbarButton } from '../buttons';
 
 describe('<Toolbar />', () => {
   test('is rendered', () => {
-    const primaryButton = <PrimaryButton label="Create chart" onClick={() => 'click'} />;
+    const primaryButton = (
+      <ToolbarButton type="primary" label="Create chart" onClick={() => 'click'} />
+    );
     const children = { primaryButton };
     const component = mountWithIntl(<Toolbar children={children} />);
 
@@ -23,7 +25,9 @@ describe('<Toolbar />', () => {
 
   test('onClick works as expected when the primary button is clicked', () => {
     const mockClickHandler = jest.fn();
-    const primaryButton = <PrimaryButton label="Create chart" onClick={mockClickHandler} />;
+    const primaryButton = (
+      <ToolbarButton type="primary" label="Create chart" onClick={mockClickHandler} />
+    );
     const children = { primaryButton };
     const component = mountWithIntl(<Toolbar children={children} />);
     component.find('button').simulate('click');

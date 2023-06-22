@@ -12,7 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { BulkCreateCommentRequest, CaseResponse, CommentRequest } from '../../../common/api';
+import type { Case, CommentRequest } from '../../../common/api';
 import { BulkCreateCommentRequestRt, throwErrors } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
@@ -22,11 +22,8 @@ import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
-
-export interface BulkCreateArgs {
-  caseId: string;
-  attachments: BulkCreateCommentRequest;
-}
+import type { BulkCreateArgs } from './types';
+import { validateRegisteredAttachments } from './validators';
 
 /**
  * Create an attachment to a case.
@@ -36,7 +33,7 @@ export interface BulkCreateArgs {
 export const bulkCreate = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
-): Promise<CaseResponse> => {
+): Promise<Case> => {
   const { attachments, caseId } = args;
 
   pipe(
@@ -44,11 +41,21 @@ export const bulkCreate = async (
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  attachments.forEach((attachment) => {
-    decodeCommentRequest(attachment);
-  });
+  const {
+    logger,
+    authorization,
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+  } = clientArgs;
 
-  const { logger, authorization } = clientArgs;
+  attachments.forEach((attachment) => {
+    decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
+    validateRegisteredAttachments({
+      query: attachment,
+      persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry,
+    });
+  });
 
   try {
     const [attachmentsWithIds, entities]: [Array<{ id: string } & CommentRequest>, OwnerEntity[]] =
@@ -64,7 +71,7 @@ export const bulkCreate = async (
       );
 
     await authorization.ensureAuthorized({
-      operation: Operations.createComment,
+      operation: Operations.bulkCreateAttachments,
       entities,
     });
 

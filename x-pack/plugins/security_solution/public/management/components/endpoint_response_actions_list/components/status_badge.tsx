@@ -6,14 +6,19 @@
  */
 import React, { memo } from 'react';
 import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const StatusBadge = memo(
-  ({ color, status }: { color: EuiBadgeProps['color']; status: string }) => {
-    const getTestId = useTestIdGenerator('response-actions-list');
-
+  ({
+    color,
+    status,
+    'data-test-subj': dataTestSubj,
+  }: {
+    color: EuiBadgeProps['color'];
+    'data-test-subj'?: string;
+    status: string;
+  }) => {
     return (
-      <EuiBadge data-test-subj={getTestId('column-status')} color={color}>
+      <EuiBadge data-test-subj={dataTestSubj} color={color}>
         {status}
       </EuiBadge>
     );

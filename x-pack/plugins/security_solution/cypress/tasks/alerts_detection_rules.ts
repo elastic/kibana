@@ -12,22 +12,18 @@ import {
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   DELETE_RULE_BULK_BTN,
+  RULES_SELECTED_TAG,
   LOAD_PREBUILT_RULES_BTN,
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_TABLE_INITIAL_LOADING_INDICATOR,
-  RULES_TABLE_REFRESH_INDICATOR,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
-  PAGINATION_POPOVER_BTN,
   RULE_CHECKBOX,
   RULE_NAME,
   RULE_SWITCH,
   RULE_SWITCH_LOADER,
-  RULES_TABLE,
-  SORT_RULES_BTN,
+  RULES_MANAGEMENT_TABLE,
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
-  rowsPerPageSelector,
-  pageSelector,
   DUPLICATE_RULE_ACTION_BTN,
   DUPLICATE_RULE_MENU_PANEL_BTN,
   DUPLICATE_RULE_BULK_BTN,
@@ -56,8 +52,21 @@ import {
   MODAL_CONFIRMATION_CANCEL_BTN,
   MODAL_CONFIRMATION_BODY,
   RULE_SEARCH_FIELD,
-  RULE_DETAILS_BACK_TO_ALL_RULES,
+  RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX,
+  RULES_TAGS_FILTER_BTN,
+  RULES_TAGS_FILTER_POPOVER,
+  RULES_TABLE_REFRESH_INDICATOR,
+  RULES_MANAGEMENT_TAB,
+  RULES_MONITORING_TAB,
+  ENABLED_RULES_BTN,
+  DISABLED_RULES_BTN,
+  REFRESH_RULES_TABLE_BUTTON,
+  RULE_LAST_RUN,
+  DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
+  DUPLICATE_WITH_EXCEPTIONS_OPTION,
+  DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
 } from '../screens/alerts_detection_rules';
+import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
@@ -139,10 +148,27 @@ export const deleteRuleFromDetailsPage = () => {
     .should(($el) => expect($el).to.be.not.visible);
 };
 
-export const duplicateSelectedRules = () => {
+export const duplicateSelectedRulesWithoutExceptions = () => {
   cy.log('Duplicate selected rules');
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DUPLICATE_RULE_BULK_BTN).click();
+  cy.get(DUPLICATE_WITHOUT_EXCEPTIONS_OPTION).click();
+  cy.get(CONFIRM_DUPLICATE_RULE).click();
+};
+
+export const duplicateSelectedRulesWithExceptions = () => {
+  cy.log('Duplicate selected rules');
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+  cy.get(DUPLICATE_WITH_EXCEPTIONS_OPTION).click();
+  cy.get(CONFIRM_DUPLICATE_RULE).click();
+};
+
+export const duplicateSelectedRulesWithNonExpiredExceptions = () => {
+  cy.log('Duplicate selected rules');
+  cy.get(BULK_ACTIONS_BTN).click({ force: true });
+  cy.get(DUPLICATE_RULE_BULK_BTN).click();
+  cy.get(DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION).click();
   cy.get(CONFIRM_DUPLICATE_RULE).click();
 };
 
@@ -158,8 +184,10 @@ export const disableSelectedRules = () => {
   cy.get(DISABLE_RULE_BULK_BTN).click();
 };
 
-export const exportFirstRule = () => {
-  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
+export const exportRule = (name: string) => {
+  cy.log(`Export rule "${name}"`);
+
+  cy.contains(RULE_NAME, name).parents(RULES_ROW).find(COLLAPSED_ACTION_BTN).click();
   cy.get(EXPORT_ACTION_BTN).click();
   cy.get(EXPORT_ACTION_BTN).should('not.exist');
 };
@@ -167,8 +195,29 @@ export const exportFirstRule = () => {
 export const filterBySearchTerm = (term: string) => {
   cy.log(`Filter rules by search term: "${term}"`);
   cy.get(RULE_SEARCH_FIELD)
-    .type(term, { waitForAnimations: true })
+    .type(term, { force: true })
     .trigger('search', { waitForAnimations: true });
+};
+
+export const filterByTags = (tags: string[]) => {
+  cy.get(RULES_TAGS_FILTER_BTN).click();
+
+  for (const tag of tags) {
+    cy.get(RULES_TAGS_FILTER_POPOVER).contains(tag).click();
+  }
+};
+
+export const waitForRuleExecution = (name: string) => {
+  cy.log(`Wait for rule "${name}" to be executed`);
+  cy.waitUntil(() => {
+    cy.get(REFRESH_RULES_TABLE_BUTTON).click();
+
+    return cy
+      .contains(RULE_NAME, name)
+      .parents(RULES_ROW)
+      .find(RULE_LAST_RUN)
+      .then(($el) => $el.text().endsWith('ago'));
+  });
 };
 
 export const filterByElasticRules = () => {
@@ -180,12 +229,16 @@ export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click({ force: true });
 };
 
-export const goToRuleDetails = () => {
-  cy.get(RULE_NAME).first().click({ force: true });
+export const filterByEnabledRules = () => {
+  cy.get(ENABLED_RULES_BTN).click({ force: true });
 };
 
-export const goBackFromRuleDetails = () => {
-  cy.get(RULE_DETAILS_BACK_TO_ALL_RULES).click({ force: true });
+export const filterByDisabledRules = () => {
+  cy.get(DISABLED_RULES_BTN).click({ force: true });
+};
+
+export const goToRuleDetails = () => {
+  cy.get(RULE_NAME).first().click({ force: true });
 };
 
 export const goToTheRuleDetailsOf = (ruleName: string) => {
@@ -276,11 +329,6 @@ export const confirmRulesDelete = () => {
   cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('not.exist');
 };
 
-export const sortByEnabledRules = () => {
-  cy.get(SORT_RULES_BTN).contains('Enabled').click({ force: true });
-  cy.get(SORT_RULES_BTN).contains('Enabled').click({ force: true });
-};
-
 /**
  * Because the Rule Management page is relatively slow, in order to avoid timeouts and flakiness,
  * we almost always want to wait until the Rules table is "loaded" before we do anything with it.
@@ -296,7 +344,7 @@ export const sortByEnabledRules = () => {
  */
 export const waitForRulesTableToShow = () => {
   // Wait up to 5 minutes for the table to show up as in CI containers this can be very slow
-  cy.get(RULES_TABLE, { timeout: 300000 }).should('exist');
+  cy.get(RULES_MANAGEMENT_TABLE, { timeout: 300000 }).should('exist');
 };
 
 /**
@@ -323,7 +371,7 @@ export const waitForRulesTableToBeRefreshed = () => {
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
   cy.log('Wait for prebuilt rules to be loaded');
   cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('not.exist');
-  cy.get(RULES_TABLE).should('exist');
+  cy.get(RULES_MANAGEMENT_TABLE).should('exist');
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
 
@@ -344,40 +392,98 @@ export const checkAutoRefresh = (ms: number, condition: string) => {
   cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should(condition);
 };
 
-export const changeRowsPerPageTo = (rowsCount: number) => {
-  cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
-  cy.get(rowsPerPageSelector(rowsCount))
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.exist');
-};
-
-export const goToPage = (pageNumber: number) => {
-  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
-  cy.get(pageSelector(pageNumber)).last().click({ force: true });
-};
-
 export const importRules = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).should('exist');
-  cy.get(INPUT_FILE).trigger('click', { force: true }).attachFile(rulesFile).trigger('change');
+  cy.get(INPUT_FILE).trigger('click', { force: true }).selectFile(rulesFile).trigger('change');
   cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
 };
 
-export const expectNumberOfRules = (expectedNumber: number) => {
-  cy.get(RULES_TABLE).then(($table) => {
-    const rulesRow = cy.wrap($table.find(RULES_ROW));
-
-    rulesRow.should('have.length', expectedNumber);
-  });
+export const expectRulesManagementTab = () => {
+  cy.log(`Expecting rules management tab to be selected`);
+  cy.get(RULES_MANAGEMENT_TAB).should('have.attr', 'aria-selected');
 };
 
-export const expectToContainRule = (ruleName: string) => {
-  cy.get(RULES_TABLE).then(($table) => {
-    const rulesRow = cy.wrap($table.find(RULES_ROW));
+export const expectRulesMonitoringTab = () => {
+  cy.log(`Expecting rules monitoring tab to be selected`);
+  cy.get(RULES_MONITORING_TAB).should('have.attr', 'aria-selected');
+};
 
-    rulesRow.should('include.text', ruleName);
-  });
+export const expectFilterSearchTerm = (searchTerm: string) => {
+  cy.log(`Expecting rules table filtering by search term '${searchTerm}'`);
+  cy.get(RULE_SEARCH_FIELD).should('have.value', searchTerm);
+};
+
+export const expectFilterByTags = (tags: string[]) => {
+  cy.log(`Expecting rules table filtering by tags [${tags.join(', ')}]`);
+
+  cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
+
+  cy.get(RULES_TAGS_FILTER_POPOVER)
+    .find(RULES_SELECTED_TAG)
+    .should('have.length', tags.length)
+    .each(($el, index) => {
+      cy.wrap($el).contains(tags[index]);
+    });
+};
+
+export const expectNoFilterByTags = () => {
+  cy.log(`Expecting rules table has no filtering by tags`);
+  cy.get(RULES_TAGS_FILTER_BTN).contains('Tags').click();
+  cy.get(RULES_TAGS_FILTER_POPOVER).find(RULES_SELECTED_TAG).should('not.exist');
+};
+
+export const expectFilterByPrebuiltRules = () => {
+  cy.log(`Expecting rules table filtering by prebuilt rules`);
+  cy.get(`${ELASTIC_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+};
+
+export const expectFilterByCustomRules = () => {
+  cy.log(`Expecting rules table filtering by custom rules`);
+  cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+};
+
+export const expectNoFilterByElasticOrCustomRules = () => {
+  cy.log(`Expecting rules table has no filtering by either elastic nor custom rules`);
+  cy.get(ELASTIC_RULES_BTN).should('exist');
+  cy.get(`${ELASTIC_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
+  cy.get(CUSTOM_RULES_BTN).should('exist');
+  cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
+};
+
+export const expectFilterByEnabledRules = () => {
+  cy.log(`Expecting rules table filtering by enabled rules`);
+  cy.get(`${ENABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+};
+
+export const expectFilterByDisabledRules = () => {
+  cy.log(`Expecting rules table filtering by disabled rules`);
+  cy.get(`${DISABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+};
+
+export const expectNoFilterByEnabledOrDisabledRules = () => {
+  cy.log(`Expecting rules table has no filtering by either enabled nor disabled rules`);
+  cy.get(ENABLED_RULES_BTN).should('exist');
+  cy.get(`${ENABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
+  cy.get(DISABLED_RULES_BTN).should('exist');
+  cy.get(`${DISABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
+};
+
+export const expectNumberOfRules = (
+  tableSelector: typeof RULES_MANAGEMENT_TABLE | typeof RULES_MONITORING_TABLE,
+  expectedNumber: number
+) => {
+  cy.log(`Expecting rules table to contain #${expectedNumber} rules`);
+  cy.get(tableSelector).find(RULES_ROW).should('have.length', expectedNumber);
+};
+
+export const expectToContainRule = (
+  tableSelector: typeof RULES_MANAGEMENT_TABLE | typeof RULES_MONITORING_TABLE,
+  ruleName: string
+) => {
+  cy.log(`Expecting rules table to contain '${ruleName}'`);
+  cy.get(tableSelector).find(RULES_ROW).should('include.text', ruleName);
 };
 
 const selectOverwriteRulesImport = () => {
@@ -386,18 +492,31 @@ const selectOverwriteRulesImport = () => {
     .should('be.checked');
 };
 
+export const expectManagementTableRules = (ruleNames: string[]): void => {
+  expectNumberOfRules(RULES_MANAGEMENT_TABLE, ruleNames.length);
+
+  for (const ruleName of ruleNames) {
+    expectToContainRule(RULES_MANAGEMENT_TABLE, ruleName);
+  }
+};
+
 const selectOverwriteExceptionsRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX)
     .pipe(($el) => $el.trigger('click'))
     .should('be.checked');
 };
-
+const selectOverwriteConnectorsRulesImport = () => {
+  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX)
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.checked');
+};
 export const importRulesWithOverwriteAll = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).should('exist');
-  cy.get(INPUT_FILE).trigger('click', { force: true }).attachFile(rulesFile).trigger('change');
+  cy.get(INPUT_FILE).trigger('click', { force: true }).selectFile(rulesFile).trigger('change');
   selectOverwriteRulesImport();
   selectOverwriteExceptionsRulesImport();
+  selectOverwriteConnectorsRulesImport();
   cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
 };

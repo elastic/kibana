@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/image-embeddable-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Image embeddable",
+  "plugin": {
+    "id": "imageEmbeddable",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "embeddable",
+      "files",
+      "uiActions"
+    ],
+    "optionalPlugins": [
+      "security",
+      "screenshotMode",
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact"
+    ]
+  }
+}

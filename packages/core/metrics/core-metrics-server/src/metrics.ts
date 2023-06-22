@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { EventLoopUtilization } from 'perf_hooks';
+
 /**
  * an IntervalHistogram object that samples and reports the event loop delay over time.
  * The delays will be reported in milliseconds.
@@ -85,6 +87,8 @@ export interface OpsProcessMetrics {
   event_loop_delay: number;
   /** node event loop delay histogram since last collection */
   event_loop_delay_histogram: IntervalHistogram;
+  /** node event loop utilization since last collection */
+  event_loop_utilization: EventLoopUtilization;
   /** uptime of the kibana process */
   uptime_in_millis: number;
 }
@@ -191,8 +195,7 @@ export interface OpsMetrics {
   elasticsearch_client: ElasticsearchClientsMetrics;
   /**
    * Process related metrics.
-   * @deprecated use the processes field instead.
-   * @removeBy 8.8.0
+   * @remarks processes field preferred
    */
   process: OpsProcessMetrics;
   /** Process related metrics. Reports an array of objects for each kibana pid.*/

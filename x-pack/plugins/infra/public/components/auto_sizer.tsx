@@ -7,7 +7,6 @@
 
 import { isEqual } from 'lodash';
 import React from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
 
 interface Measurement {
   width?: number;

@@ -25,7 +25,7 @@ export const LogCategorizationPage: FC = () => {
 
   const context = useMlContext();
   const dataView = context.currentDataView;
-  const savedSearch = context.currentSavedSearch;
+  const savedSearch = context.selectedSavedSearch;
 
   return (
     <>
@@ -49,6 +49,7 @@ export const LogCategorizationPage: FC = () => {
           appDependencies={pick(services, [
             'application',
             'data',
+            'executionContext',
             'charts',
             'fieldFormats',
             'http',

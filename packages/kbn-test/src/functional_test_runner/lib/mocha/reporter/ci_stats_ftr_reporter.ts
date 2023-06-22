@@ -8,7 +8,7 @@
 
 import * as Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   CiStatsReporter,
   CiStatsReportTestsOptions,
@@ -16,38 +16,21 @@ import {
 } from '@kbn/ci-stats-reporter';
 
 import { Config } from '../../config';
-import { Runner } from '../../../fake_mocha_types';
+import { Runner, Runnable } from '../../../fake_mocha_types';
 import { Lifecycle } from '../../lifecycle';
 import { getSnapshotOfRunnableLogs } from '../../../../mocha';
 
-interface Suite {
-  _beforeAll: Runnable[];
-  _beforeEach: Runnable[];
-  _afterEach: Runnable[];
-  _afterAll: Runnable[];
-}
-
-interface Runnable {
-  isFailed(): boolean;
-  isPending(): boolean;
-  duration?: number;
-  titlePath(): string[];
-  file: string;
-  title: string;
-  parent: Suite;
-}
-
 function getHookType(hook: Runnable): CiStatsTestType {
-  if (hook.parent._afterAll.includes(hook)) {
+  if (hook.parent?._afterAll.includes(hook)) {
     return 'after all hook';
   }
-  if (hook.parent._afterEach.includes(hook)) {
+  if (hook.parent?._afterEach.includes(hook)) {
     return 'after each hook';
   }
-  if (hook.parent._beforeEach.includes(hook)) {
+  if (hook.parent?._beforeEach.includes(hook)) {
     return 'before each hook';
   }
-  if (hook.parent._beforeAll.includes(hook)) {
+  if (hook.parent?._beforeAll.includes(hook)) {
     return 'before all hook';
   }
 
@@ -100,7 +83,7 @@ export function setupCiStatsFtrTestGroupReporter({
       startTime: new Date(Date.now() - (runnable.duration ?? 0)).toJSON(),
       durationMs: runnable.duration ?? 0,
       seq: testRuns.length + 1,
-      file: Path.relative(REPO_ROOT, runnable.file),
+      file: Path.relative(REPO_ROOT, runnable.file ?? '.'),
       name: runnable.title,
       suites: runnable.titlePath().slice(0, -1),
       result: runnable.isFailed() ? 'fail' : runnable.isPending() ? 'skip' : 'pass',

@@ -40,7 +40,7 @@ describe('Hover actions', () => {
   });
 
   beforeEach(() => {
-    visit(NETWORK_URL, onBeforeLoadCallback);
+    visit(NETWORK_URL, { onBeforeLoad: onBeforeLoadCallback });
     openHoverActions();
     mouseoverOnToOverflowItem();
   });

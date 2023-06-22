@@ -17,12 +17,15 @@ import {
   EuiFieldPassword,
   EuiCodeBlock,
   EuiTextArea,
+  EuiComboBox,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
-import type { RegistryVarsEntry } from '../../../../../../types';
+import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
+
+import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
 import { DatasetComboBox } from './dataset_combo';
@@ -39,7 +42,9 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   forceShowErrors?: boolean;
   frozen?: boolean;
   packageType?: string;
-  datasets?: string[];
+  packageName?: string;
+  datastreams?: DataStream[];
+  isEditPage?: boolean;
 }> = memo(
   ({
     varDef,
@@ -49,14 +54,16 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     forceShowErrors,
     frozen,
     packageType,
-    datasets = [],
+    packageName,
+    datastreams = [],
+    isEditPage = false,
   }) => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
-    const { multi, required, type, title, name, description } = varDef;
+    const { multi, required, type, title, name, description, options } = varDef;
     const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
     const errors = isInvalid ? varErrors : null;
     const fieldLabel = title || name;
-
+    const fieldTestSelector = fieldLabel.replace(/\s/g, '-').toLowerCase();
     const field = useMemo(() => {
       if (multi) {
         return (
@@ -65,12 +72,20 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             onChange={onChange}
             onBlur={() => setIsDirty(true)}
             isDisabled={frozen}
+            data-test-subj={`multiTextInput-${fieldTestSelector}`}
           />
         );
       }
-
-      if (name === 'data_stream.dataset' && packageType === 'input') {
-        return <DatasetComboBox datasets={datasets} value={value} onChange={onChange} />;
+      if (name === DATASET_VAR_NAME && packageType === 'input') {
+        return (
+          <DatasetComboBox
+            pkgName={packageName}
+            datastreams={datastreams}
+            value={value}
+            onChange={onChange}
+            isDisabled={isEditPage}
+          />
+        );
       }
       switch (type) {
         case 'textarea':
@@ -82,6 +97,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               onBlur={() => setIsDirty(true)}
               disabled={frozen}
               resize="vertical"
+              data-test-subj={`textAreaInput-${fieldTestSelector}`}
             />
           );
         case 'yaml':
@@ -128,6 +144,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               onChange={(e) => onChange(e.target.checked)}
               onBlur={() => setIsDirty(true)}
               disabled={frozen}
+              data-test-subj={`switch-${fieldTestSelector}`}
             />
           );
         case 'password':
@@ -139,6 +156,32 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               onChange={(e) => onChange(e.target.value)}
               onBlur={() => setIsDirty(true)}
               disabled={frozen}
+              data-test-subj={`passwordInput-${fieldTestSelector}`}
+            />
+          );
+        case 'select':
+          const selectOptions = options?.map((option) => ({
+            value: option.value,
+            label: option.text,
+          }));
+          const selectedOptions =
+            value === undefined ? [] : selectOptions?.filter((option) => option.value === value);
+          return (
+            <EuiComboBox
+              placeholder={i18n.translate('xpack.fleet.packagePolicyField.selectPlaceholder', {
+                defaultMessage: 'Select an option',
+              })}
+              singleSelection={{ asPlainText: true }}
+              options={selectOptions}
+              selectedOptions={selectedOptions}
+              isClearable={true}
+              onChange={(newSelectedOptions: Array<{ label: string; value?: string }>) => {
+                const newValue =
+                  newSelectedOptions.length === 0 ? undefined : newSelectedOptions[0].value;
+                return onChange(newValue);
+              }}
+              onBlur={() => setIsDirty(true)}
+              data-test-subj={`select-${fieldTestSelector}`}
             />
           );
         default:
@@ -149,10 +192,26 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               onChange={(e) => onChange(e.target.value)}
               onBlur={() => setIsDirty(true)}
               disabled={frozen}
+              data-test-subj={`textInput-${fieldTestSelector}`}
             />
           );
       }
-    }, [isInvalid, multi, onChange, type, value, fieldLabel, frozen, datasets, name, packageType]);
+    }, [
+      multi,
+      name,
+      packageType,
+      type,
+      value,
+      onChange,
+      frozen,
+      packageName,
+      datastreams,
+      isEditPage,
+      isInvalid,
+      fieldLabel,
+      options,
+      fieldTestSelector,
+    ]);
 
     // Boolean cannot be optional by default set to false
     const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);

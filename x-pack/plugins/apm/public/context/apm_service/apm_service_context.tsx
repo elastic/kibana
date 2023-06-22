@@ -8,23 +8,22 @@
 import React, { createContext, ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
 import { History } from 'history';
-import { isRumAgentName } from '../../../common/agent_name';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { getDefaultTransactionType } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
-import { useApmParams } from '../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
 import { replace } from '../../components/shared/links/url_helpers';
 import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import { ServerlessType } from '../../../common/serverless';
 
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
+  serverlessType?: ServerlessType;
   transactionType?: string;
+  transactionTypeStatus: FETCH_STATUS;
   transactionTypes: string[];
   runtimeName?: string;
   fallbackToTransactions: boolean;
@@ -33,6 +32,7 @@ export interface APMServiceContextValue {
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
   serviceName: '',
+  transactionTypeStatus: FETCH_STATUS.NOT_INITIATED,
   transactionTypes: [],
   fallbackToTransactions: false,
   serviceAgentStatus: FETCH_STATUS.NOT_INITIATED,
@@ -49,13 +49,17 @@ export function ApmServiceContextProvider({
     path: { serviceName },
     query,
     query: { kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const {
     agentName,
     runtimeName,
+    serverlessType,
     status: serviceAgentStatus,
   } = useServiceAgentFetcher({
     serviceName,
@@ -63,11 +67,12 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const transactionTypes = useServiceTransactionTypesFetcher({
-    serviceName,
-    start,
-    end,
-  });
+  const { transactionTypes, status: transactionTypeStatus } =
+    useServiceTransactionTypesFetcher({
+      serviceName,
+      start,
+      end,
+    });
 
   const currentTransactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
@@ -85,7 +90,9 @@ export function ApmServiceContextProvider({
       value={{
         serviceName,
         agentName,
+        serverlessType,
         transactionType: currentTransactionType,
+        transactionTypeStatus,
         transactionTypes,
         runtimeName,
         fallbackToTransactions,
@@ -135,10 +142,7 @@ export function getTransactionType({
 
   if (isNoAgentAndNoTransactionTypesExists) return undefined;
 
-  // The default transaction type is "page-load" for RUM agents and "request" for all others
-  const defaultTransactionType = isRumAgentName(agentName)
-    ? TRANSACTION_PAGE_LOAD
-    : TRANSACTION_REQUEST;
+  const defaultTransactionType = getDefaultTransactionType(agentName);
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
   const currentTransactionType = transactionTypes.includes(

@@ -70,6 +70,10 @@ export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.
   defaultMessage: 'Osquery Results',
 });
 
+export const ENDPOINT_VIEW = i18n.translate('xpack.securitySolution.eventDetails.endpointView', {
+  defaultMessage: 'Endpoint Results',
+});
+
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
   defaultMessage: 'Field',
 });
@@ -105,6 +109,13 @@ export const NESTED_COLUMN = (field: string) =>
 export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
   defaultMessage: 'Agent status',
 });
+
+export const QUARANTINED_FILE_PATH = i18n.translate(
+  'xpack.securitySolution.detections.alerts.quarantinedFilePath',
+  {
+    defaultMessage: 'Quarantined file path',
+  }
+);
 
 export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
   defaultMessage: 'Rule type',

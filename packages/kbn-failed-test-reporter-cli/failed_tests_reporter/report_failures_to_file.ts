@@ -12,7 +12,7 @@ import { createHash } from 'crypto';
 
 import globby from 'globby';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { escape } from 'he';
 import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
 import { JourneyScreenshots } from '@kbn/journeys';

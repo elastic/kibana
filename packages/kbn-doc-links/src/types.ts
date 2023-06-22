@@ -109,22 +109,37 @@ export interface DocLinks {
   };
   readonly enterpriseSearch: {
     readonly apiKeys: string;
+    readonly behavioralAnalytics: string;
+    readonly behavioralAnalyticsEvents: string;
+    readonly buildConnector: string;
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
+    readonly connectorsAzureBlobStorage: string;
+    readonly connectorsGoogleCloudStorage: string;
+    readonly connectorsMicrosoftSQL: string;
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
+    readonly connectorsNetworkDrive: string;
+    readonly connectorsOracle: string;
+    readonly connectorsPostgreSQL: string;
+    readonly connectorsS3: string;
     readonly connectorsWorkplaceSearch: string;
+    readonly crawlerExtractionRules: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
+    readonly elser: string;
+    readonly engines: string;
+    readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
     readonly licenseManagement: string;
     readonly machineLearningStart: string;
     readonly mailService: string;
+    readonly mlDocumentEnrichment: string;
     readonly start: string;
     readonly syncRules: string;
     readonly troubleshootSetup: string;
@@ -216,6 +231,7 @@ export interface DocLinks {
     readonly std_dev: string;
     readonly sum: string;
     readonly top_hits: string;
+    readonly change_point: string;
   };
   readonly runtimeFields: {
     readonly overview: string;
@@ -286,6 +302,7 @@ export interface DocLinks {
       value_lists: string;
     };
     readonly privileges: string;
+    readonly manageDetectionRules: string;
   };
   readonly query: {
     readonly eql: string;
@@ -350,9 +367,35 @@ export interface DocLinks {
     createAlerts: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
+    syntheticsMigrateFromIntegration: string;
   }>;
-  readonly alerting: Record<string, string>;
+  readonly alerting: Readonly<{
+    guide: string;
+    actionTypes: string;
+    apmRules: string;
+    emailAction: string;
+    emailActionConfig: string;
+    emailExchangeClientSecretConfig: string;
+    emailExchangeClientIdConfig: string;
+    generalSettings: string;
+    indexAction: string;
+    esQuery: string;
+    indexThreshold: string;
+    pagerDutyAction: string;
+    preconfiguredConnectors: string;
+    preconfiguredAlertHistoryConnector: string;
+    serviceNowAction: string;
+    serviceNowSIRAction: string;
+    setupPrerequisites: string;
+    slackAction: string;
+    teamsAction: string;
+    connectors: string;
+  }>;
+  readonly taskManager: Readonly<{
+    healthMonitoring: string;
+  }>;
   readonly maps: Readonly<{
+    connectToEms: string;
     guide: string;
     importGeospatialPrivileges: string;
     gdalTutorial: string;
@@ -408,6 +451,7 @@ export interface DocLinks {
     datastreams: string;
     datastreamsILM: string;
     datastreamsNamingScheme: string;
+    datastreamsManualRollover: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     packageSignatures: string;
@@ -417,6 +461,7 @@ export interface DocLinks {
     onPremRegistry: string;
     secureLogstash: string;
     agentPolicy: string;
+    api: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -436,7 +481,6 @@ export interface DocLinks {
     readonly netIntroduction: string;
     readonly netNest: string;
     readonly netSingleNode: string;
-    readonly perlGuide: string;
     readonly phpGuide: string;
     readonly phpConnecting: string;
     readonly phpInstallation: string;

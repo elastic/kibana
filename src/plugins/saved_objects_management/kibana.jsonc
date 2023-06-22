@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-objects-management-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "savedObjectsManagement",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "management",
+      "data",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "home",
+      "savedObjectsTaggingOss",
+      "spaces"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "public/lib"
+    ]
+  }
+}

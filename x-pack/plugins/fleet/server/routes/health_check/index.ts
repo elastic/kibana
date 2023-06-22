@@ -9,9 +9,10 @@ import https from 'https';
 import type { TypeOf } from '@kbn/config-schema';
 import fetch from 'node-fetch';
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { APP_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
-import type { FleetAuthzRouter } from '../security';
 import { defaultFleetErrorHandler } from '../../errors';
 import { PostHealthCheckRequestSchema } from '../../types';
 

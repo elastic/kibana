@@ -9,14 +9,15 @@ import type { ActorRef } from 'xstate';
 import type {
   LogView,
   LogViewAttributes,
+  LogViewReference,
   LogViewStatus,
   ResolvedLogView,
 } from '../../../../common/log_views';
 import { type NotificationChannel } from '../../xstate_helpers';
 import { type LogViewNotificationEvent } from './notifications';
 
-export interface LogViewContextWithId {
-  logViewId: string;
+export interface LogViewContextWithReference {
+  logViewReference: LogViewReference;
 }
 
 export interface LogViewContextWithLogView {
@@ -38,46 +39,55 @@ export interface LogViewContextWithError {
 export type LogViewTypestate =
   | {
       value: 'uninitialized';
-      context: LogViewContextWithId;
+      context: LogViewContextWithReference;
     }
   | {
       value: 'loading';
-      context: LogViewContextWithId;
+      context: LogViewContextWithReference;
     }
   | {
       value: 'resolving';
-      context: LogViewContextWithId & LogViewContextWithLogView;
+      context: LogViewContextWithReference & LogViewContextWithLogView;
     }
   | {
       value: 'checkingStatus';
-      context: LogViewContextWithId & LogViewContextWithLogView & LogViewContextWithResolvedLogView;
+      context: LogViewContextWithReference &
+        LogViewContextWithLogView &
+        LogViewContextWithResolvedLogView;
     }
   | {
-      value: 'resolved';
-      context: LogViewContextWithId &
+      value: 'resolvedPersistedLogView';
+      context: LogViewContextWithReference &
+        LogViewContextWithLogView &
+        LogViewContextWithResolvedLogView &
+        LogViewContextWithStatus;
+    }
+  | {
+      value: 'resolvedInlineLogView';
+      context: LogViewContextWithReference &
         LogViewContextWithLogView &
         LogViewContextWithResolvedLogView &
         LogViewContextWithStatus;
     }
   | {
       value: 'updating';
-      context: LogViewContextWithId;
+      context: LogViewContextWithReference;
     }
   | {
       value: 'loadingFailed';
-      context: LogViewContextWithId & LogViewContextWithError;
+      context: LogViewContextWithReference & LogViewContextWithError;
     }
   | {
       value: 'updatingFailed';
-      context: LogViewContextWithId & LogViewContextWithError;
+      context: LogViewContextWithReference & LogViewContextWithError;
     }
   | {
       value: 'resolutionFailed';
-      context: LogViewContextWithId & LogViewContextWithLogView & LogViewContextWithError;
+      context: LogViewContextWithReference & LogViewContextWithLogView & LogViewContextWithError;
     }
   | {
       value: 'checkingStatusFailed';
-      context: LogViewContextWithId & LogViewContextWithLogView & LogViewContextWithError;
+      context: LogViewContextWithReference & LogViewContextWithLogView & LogViewContextWithError;
     };
 
 export type LogViewContext = LogViewTypestate['context'];
@@ -86,8 +96,12 @@ export type LogViewStateValue = LogViewTypestate['value'];
 
 export type LogViewEvent =
   | {
-      type: 'LOG_VIEW_ID_CHANGED';
-      logViewId: string;
+      type: 'LOG_VIEW_REFERENCE_CHANGED';
+      logViewReference: LogViewReference;
+    }
+  | {
+      type: 'INITIALIZED_FROM_URL';
+      logViewReference: LogViewReference | null;
     }
   | {
       type: 'LOADING_SUCCEEDED';
@@ -130,7 +144,17 @@ export type LogViewEvent =
     }
   | {
       type: 'RELOAD_LOG_VIEW';
-    };
+    }
+  | {
+      type: 'PERSIST_INLINE_LOG_VIEW';
+    }
+  | { type: 'PERSISTING_INLINE_LOG_VIEW_FAILED'; error: Error }
+  | { type: 'PERSISTING_INLINE_LOG_VIEW_SUCCEEDED'; logView: LogView }
+  | {
+      type: 'RETRY_PERSISTING_INLINE_LOG_VIEW';
+    }
+  | { type: 'LOG_VIEW_URL_KEY_REMOVED' }
+  | { type: 'LOG_VIEW_URL_KEY_CHANGED' };
 
 export type LogViewActorRef = ActorRef<LogViewEvent, LogViewContext>;
 export type LogViewNotificationChannel = NotificationChannel<

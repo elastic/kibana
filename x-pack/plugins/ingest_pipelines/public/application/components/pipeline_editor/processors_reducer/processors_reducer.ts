@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Reducer, useReducer, Dispatch } from 'react';
 import { DeserializeResult } from '../deserialize';
 import { getValue, setValue } from '../utils';
@@ -94,10 +94,10 @@ export const reducer: Reducer<State, Action> = (state, action) => {
       return setValue(
         targetSelector,
         state,
-        targetProcessor.concat({ ...processor, id: uuid.v4() })
+        targetProcessor.concat({ ...processor, id: uuidv4() })
       );
     } else {
-      const processorWithId = { ...processor, id: uuid.v4() };
+      const processorWithId = { ...processor, id: uuidv4() };
       targetProcessor.onFailure = targetProcessor.onFailure
         ? targetProcessor.onFailure.concat(processorWithId)
         : [processorWithId];

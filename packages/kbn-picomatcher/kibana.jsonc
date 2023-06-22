@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/picomatcher",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

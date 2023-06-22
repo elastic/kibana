@@ -12,7 +12,7 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { ThreatEcs } from '@kbn/security-solution-plugin/common/ecs/threat';
+import { ThreatEcs } from '@kbn/securitysolution-ecs';
 import {
   EqlRuleCreateProps,
   QueryRuleCreateProps,
@@ -23,7 +23,7 @@ import {
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   finalizeSignalsMigration,
   getEqlRuleForSignalTesting,
@@ -34,10 +34,11 @@ import {
   getThresholdRuleForSignalTesting,
   startSignalsMigration,
   waitFor,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { removeRandomValuedProperties } from '../../rule_execution_logic/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -69,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('allows querying of legacy enriched signals by threat.indicator', async () => {
@@ -185,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
           '.siem-signals-*',
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -198,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -218,34 +219,25 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const rule: QueryRuleCreateProps = getRuleForSignalTesting([`.siem-signals-*`]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
-        const {
-          '@timestamp': timestamp,
-          'kibana.version': kibanaVersion,
-          'kibana.alert.rule.created_at': createdAt,
-          'kibana.alert.rule.updated_at': updatedAt,
-          'kibana.alert.rule.execution.uuid': executionUuid,
-          'kibana.alert.uuid': alertId,
-          ...source
-        } = hit._source!;
+        const source = removeRandomValuedProperties(hit._source);
         expect(source).to.eql({
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.rule.consumer': 'siem',
           'kibana.alert.rule.name': 'Signal Testing Query',
           'kibana.alert.rule.producer': 'siem',
           'kibana.alert.rule.rule_type_id': 'siem.queryRule',
-          'kibana.alert.rule.uuid': id,
           'kibana.space_ids': ['default'],
           'kibana.alert.rule.tags': [],
           agent: {
@@ -376,6 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.threat': [],
           'kibana.alert.rule.to': 'now',
           'kibana.alert.rule.references': [],
+          'kibana.alert.rule.revision': 0,
           'kibana.alert.rule.version': 1,
           'kibana.alert.rule.exceptions_list': [],
           'kibana.alert.rule.immutable': false,
@@ -393,28 +386,19 @@ export default ({ getService }: FtrProviderContext) => {
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
-        const {
-          '@timestamp': timestamp,
-          'kibana.version': kibanaVersion,
-          'kibana.alert.rule.created_at': createdAt,
-          'kibana.alert.rule.updated_at': updatedAt,
-          'kibana.alert.rule.execution.uuid': executionUuid,
-          'kibana.alert.uuid': alertId,
-          ...source
-        } = hit._source!;
+        const source = removeRandomValuedProperties(hit._source);
         expect(source).to.eql({
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.rule.consumer': 'siem',
           'kibana.alert.rule.name': 'Signal Testing Query',
           'kibana.alert.rule.producer': 'siem',
           'kibana.alert.rule.rule_type_id': 'siem.queryRule',
-          'kibana.alert.rule.uuid': id,
           'kibana.space_ids': ['default'],
           'kibana.alert.rule.tags': [],
           agent: {
@@ -545,6 +529,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.threat': [],
           'kibana.alert.rule.to': 'now',
           'kibana.alert.rule.references': [],
+          'kibana.alert.rule.revision': 0,
           'kibana.alert.rule.version': 1,
           'kibana.alert.rule.exceptions_list': [],
           'kibana.alert.rule.immutable': false,
@@ -569,15 +554,16 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
-        const rule: SavedQueryRuleCreateProps = getSavedQueryRuleForSignalTesting([
-          `.siem-signals-*`,
-        ]);
+        const rule: SavedQueryRuleCreateProps = {
+          ...getSavedQueryRuleForSignalTesting([`.siem-signals-*`]),
+          query: 'agent.name: "security-linux-1.example.dev"',
+        };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -586,11 +572,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const rule: SavedQueryRuleCreateProps = getSavedQueryRuleForSignalTesting([
-          `.alerts-security.alerts-default`,
-        ]);
+        const rule: SavedQueryRuleCreateProps = {
+          ...getSavedQueryRuleForSignalTesting([`.alerts-security.alerts-default`]),
+          query: 'agent.name: "security-linux-1.example.dev"',
+        };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -610,13 +597,17 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
-        const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting(['.siem-signals-*']);
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForSignalTesting(['.siem-signals-*']),
+          query: 'any where agent.name == "security-linux-1.example.dev"',
+          max_signals: 1000,
+        };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -625,11 +616,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting([
-          `.alerts-security.alerts-default`,
-        ]);
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForSignalTesting([`.alerts-security.alerts-default`]),
+          query: 'any where agent.name == "security-linux-1.example.dev"',
+          max_signals: 1000,
+        };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -649,7 +642,7 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
@@ -665,7 +658,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -686,7 +679,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);

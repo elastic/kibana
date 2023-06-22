@@ -1,0 +1,29 @@
+title: Connector response properties for a Webhook connector
+type: object
+required:
+  - config
+  - connector_type_id
+  - id
+  - is_deprecated
+  - is_preconfigured
+  - name
+properties:
+  config:
+    $ref: 'config_properties_webhook.yaml'
+  connector_type_id:
+    type: string
+    description: The type of connector.
+    enum:
+      - .webhook
+  id:
+    type: string
+    description: The identifier for the connector.
+  is_deprecated:
+   $ref: 'is_deprecated.yaml'
+  is_missing_secrets:
+    $ref: 'is_missing_secrets.yaml'
+  is_preconfigured:
+    $ref: 'is_preconfigured.yaml'
+  name:
+    type: string
+    description: The display name for the connector.

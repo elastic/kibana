@@ -149,7 +149,7 @@ export const mockEnableChartsData = {
   from: '2019-06-15T06:00:00.000Z',
   id: 'statItem',
   loading: false,
-  statKey: 'UniqueIps',
+  statKey: 'uniqueIps',
   setQuerySkip: jest.fn(),
   to: '2019-06-18T06:00:00.000Z',
   updateDateRange: mockUpdateDateRange,

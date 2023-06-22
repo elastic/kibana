@@ -16,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
-import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import {
   asMillisecondDuration,
@@ -31,13 +30,13 @@ import {
 import { ImpactBar } from '../impact_bar';
 import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
 import { ListMetric } from '../list_metric';
-import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getLatencyColumnLabel } from './get_latency_column_label';
 
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
-type ServiceTransactionGroupItem = ValuesType<
+export type ServiceTransactionGroupItem = ValuesType<
   TransactionGroupMainStatistics['transactionGroups']
 >;
 type TransactionGroupDetailedStatistics =
@@ -51,6 +50,7 @@ export function getColumns({
   comparisonEnabled,
   shouldShowSparkPlots = true,
   offset,
+  transactionOverflowCount,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
@@ -59,6 +59,7 @@ export function getColumns({
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
   offset?: string;
+  transactionOverflowCount: number;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -71,21 +72,17 @@ export function getColumns({
       width: '30%',
       render: (_, { name, transactionType: type }) => {
         return (
-          <TruncateWithTooltip
-            text={name}
-            content={
-              <TransactionDetailLink
-                serviceName={serviceName}
-                transactionName={name}
-                transactionType={type}
-                latencyAggregationType={latencyAggregationType}
-                comparisonEnabled={comparisonEnabled}
-                offset={offset}
-              >
-                {name}
-              </TransactionDetailLink>
-            }
-          />
+          <TransactionDetailLink
+            serviceName={serviceName}
+            transactionName={name}
+            transactionType={type}
+            latencyAggregationType={latencyAggregationType}
+            comparisonEnabled={comparisonEnabled}
+            offset={offset}
+            overflowCount={transactionOverflowCount}
+          >
+            {name}
+          </TransactionDetailLink>
         );
       },
     },

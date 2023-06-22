@@ -1,0 +1,6 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/alerting-api-integration-helpers",
+  "owner": "@elastic/response-ops",
+  "devOnly": true
+}

@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -16,20 +16,21 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import type { CaseUI, CaseStatusWithAllStatus } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
 import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface AllCasesSelectorModalProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
-  onRowClick?: (theCase?: Case) => void;
+  onRowClick?: (theCase?: CaseUI) => void;
   onClose?: () => void;
 }
 
 const Modal = styled(EuiModal)`
   ${({ theme }) => `
-    min-width: ${theme.eui.euiBreakpoints.l};
+    min-width: ${theme.eui.euiBreakpoints.m};
     max-width: ${theme.eui.euiBreakpoints.xl};
   `}
 `;
@@ -45,7 +46,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
     }, [onClose]);
 
     const onClick = useCallback(
-      (theCase?: Case) => {
+      (theCase?: CaseUI) => {
         closeModal();
         if (onRowClick) {
           onRowClick(theCase);
@@ -56,6 +57,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
 
     return isModalOpen ? (
       <QueryClientProvider client={casesQueryClient}>
+        <ReactQueryDevtools initialIsOpen={false} />
         <Modal onClose={closeModal} data-test-subj="all-cases-modal">
           <EuiModalHeader>
             <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
@@ -68,13 +70,13 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
             />
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton
-              color="text"
+            <EuiButtonEmpty
+              color="primary"
               onClick={closeModal}
               data-test-subj="all-cases-modal-cancel-button"
             >
               {i18n.CANCEL}
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiModalFooter>
         </Modal>
       </QueryClientProvider>

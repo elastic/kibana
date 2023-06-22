@@ -7,15 +7,9 @@
 
 import React, { VFC } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiCopy } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { COPY_TITLE } from './translations';
 
 const COPY_ICON = 'copyClipboard';
-const COPY_TITLE = i18n.translate(
-  'xpack.threatIntelligence.indicators.table.copyToClipboardLabel',
-  {
-    defaultMessage: 'Copy to clipboard',
-  }
-);
 
 export interface CopyToClipboardProps {
   /**

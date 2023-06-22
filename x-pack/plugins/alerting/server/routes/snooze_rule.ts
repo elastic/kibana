@@ -8,11 +8,9 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState, RuleMutedError } from '../lib';
-import { verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext, rRuleSchema } from './lib';
 import { SnoozeOptions } from '../rules_client';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { validateSnoozeStartDate, validateSnoozeEndDate } from '../lib/validate_snooze_date';
-import { createValidateRruleBy } from '../lib/validate_rrule_by';
 import { validateSnoozeSchedule } from '../lib/validate_snooze_schedule';
 
 const paramSchema = schema.object({
@@ -23,43 +21,7 @@ export const snoozeScheduleSchema = schema.object(
   {
     id: schema.maybe(schema.string()),
     duration: schema.number(),
-    rRule: schema.object({
-      dtstart: schema.string({ validate: validateSnoozeStartDate }),
-      tzid: schema.string(),
-      freq: schema.maybe(
-        schema.oneOf([schema.literal(0), schema.literal(1), schema.literal(2), schema.literal(3)])
-      ),
-      interval: schema.maybe(
-        schema.number({
-          validate: (interval: number) => {
-            if (interval < 1) return 'rRule interval must be > 0';
-          },
-        })
-      ),
-      until: schema.maybe(schema.string({ validate: validateSnoozeEndDate })),
-      count: schema.maybe(
-        schema.number({
-          validate: (count: number) => {
-            if (count < 1) return 'rRule count must be > 0';
-          },
-        })
-      ),
-      byweekday: schema.maybe(
-        schema.arrayOf(schema.string(), {
-          validate: createValidateRruleBy('byweekday'),
-        })
-      ),
-      bymonthday: schema.maybe(
-        schema.arrayOf(schema.number(), {
-          validate: createValidateRruleBy('bymonthday'),
-        })
-      ),
-      bymonth: schema.maybe(
-        schema.arrayOf(schema.number(), {
-          validate: createValidateRruleBy('bymonth'),
-        })
-      ),
-    }),
+    rRule: rRuleSchema,
   },
   { validate: validateSnoozeSchedule }
 );

@@ -28,6 +28,8 @@ export type {
 
 export type { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
 
+export { ALL_SPACES_ID } from '../common/constants';
+
 export const plugin: PluginInitializer<
   SecurityPluginSetup,
   SecurityPluginStart,

@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 
 import { NonEmptyArray, TimeDuration } from '@kbn/securitysolution-io-ts-types';
 import {
+  RuleActionFrequency,
   RuleActionGroup,
   RuleActionId,
   RuleActionParams,
@@ -66,7 +67,9 @@ const BulkActionEditPayloadTags = t.type({
   value: RuleTagArray,
 });
 
-type BulkActionEditPayloadIndexPatterns = t.TypeOf<typeof BulkActionEditPayloadIndexPatterns>;
+export type BulkActionEditPayloadIndexPatterns = t.TypeOf<
+  typeof BulkActionEditPayloadIndexPatterns
+>;
 const BulkActionEditPayloadIndexPatterns = t.intersection([
   t.type({
     type: t.union([
@@ -94,11 +97,14 @@ const BulkActionEditPayloadTimeline = t.type({
  */
 type NormalizedRuleAction = t.TypeOf<typeof NormalizedRuleAction>;
 const NormalizedRuleAction = t.exact(
-  t.type({
-    group: RuleActionGroup,
-    id: RuleActionId,
-    params: RuleActionParams,
-  })
+  t.intersection([
+    t.type({
+      group: RuleActionGroup,
+      id: RuleActionId,
+      params: RuleActionParams,
+    }),
+    t.partial({ frequency: RuleActionFrequency }),
+  ])
 );
 
 export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof BulkActionEditPayloadRuleActions>;
@@ -107,10 +113,12 @@ export const BulkActionEditPayloadRuleActions = t.type({
     t.literal(BulkActionEditType.add_rule_actions),
     t.literal(BulkActionEditType.set_rule_actions),
   ]),
-  value: t.type({
-    throttle: ThrottleForBulkActions,
-    actions: t.array(NormalizedRuleAction),
-  }),
+  value: t.intersection([
+    t.partial({ throttle: ThrottleForBulkActions }),
+    t.type({
+      actions: t.array(NormalizedRuleAction),
+    }),
+  ]),
 });
 
 type BulkActionEditPayloadSchedule = t.TypeOf<typeof BulkActionEditPayloadSchedule>;
@@ -134,6 +142,7 @@ export const BulkActionEditPayload = t.union([
 const bulkActionDuplicatePayload = t.exact(
   t.type({
     include_exceptions: t.boolean,
+    include_expired_exceptions: t.boolean,
   })
 );
 

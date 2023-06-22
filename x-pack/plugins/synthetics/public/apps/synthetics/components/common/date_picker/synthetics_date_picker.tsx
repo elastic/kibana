@@ -15,12 +15,6 @@ import {
   SyntheticsRefreshContext,
 } from '../../../contexts';
 
-const isSyntheticsDefaultDateRange = (dateRangeStart: string, dateRangeEnd: string) => {
-  const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS;
-
-  return dateRangeStart === DATE_RANGE_START && dateRangeEnd === DATE_RANGE_END;
-};
-
 export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => {
   const [getUrlParams, updateUrl] = useUrlParams();
   const { commonlyUsedRanges } = useContext(SyntheticsSettingsContext);
@@ -31,19 +25,11 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
   // read time from state and update the url
   const sharedTimeState = data?.query.timefilter.timefilter.getTime();
 
-  const {
-    autorefreshInterval,
-    autorefreshIsPaused,
-    dateRangeStart: start,
-    dateRangeEnd: end,
-  } = getUrlParams();
+  const { dateRangeStart: start, dateRangeEnd: end } = getUrlParams();
 
   useEffect(() => {
     const { from, to } = sharedTimeState ?? {};
-    // if it's synthetics default range, and we have shared state from kibana, let's use that
-    if (isSyntheticsDefaultDateRange(start, end) && (from !== start || to !== end)) {
-      updateUrl({ dateRangeStart: from, dateRangeEnd: to });
-    } else if (from !== start || to !== end) {
+    if (from !== start || to !== end) {
       // if it's coming url. let's update shared state
       data?.query.timefilter.timefilter.setTime({ from: start, to: end });
     }
@@ -70,8 +56,6 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
       start={start}
       end={end}
       commonlyUsedRanges={euiCommonlyUsedRanges}
-      isPaused={autorefreshIsPaused}
-      refreshInterval={autorefreshInterval}
       onTimeChange={({ start: startN, end: endN }) => {
         if (data?.query?.timefilter?.timefilter) {
           data?.query.timefilter.timefilter.setTime({ from: startN, to: endN });
@@ -81,13 +65,6 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
         refreshApp();
       }}
       onRefresh={refreshApp}
-      onRefreshChange={({ isPaused, refreshInterval }) => {
-        updateUrl({
-          autorefreshInterval:
-            refreshInterval === undefined ? autorefreshInterval : refreshInterval,
-          autorefreshIsPaused: isPaused,
-        });
-      }}
     />
   );
 };

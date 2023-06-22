@@ -121,6 +121,103 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser-internal",
+        "id": "def-common.UiSettingsService",
+        "type": "Class",
+        "tags": [
+          "Internal",
+          "Deprecated"
+        ],
+        "label": "UiSettingsService",
+        "description": [],
+        "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser-internal",
+            "id": "def-common.UiSettingsService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "({ http, injectedMetadata }: ",
+              "UiSettingsServiceDeps",
+              ") => ",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser-internal",
+                "id": "def-common.UiSettingsService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ http, injectedMetadata }",
+                "description": [],
+                "signature": [
+                  "UiSettingsServiceDeps"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser-internal",
+            "id": "def-common.UiSettingsService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser-internal",
+            "id": "def-common.UiSettingsService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [],

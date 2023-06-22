@@ -8,6 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { ERRORS_LABEL } from './monitor_errors_count';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 
@@ -15,11 +16,12 @@ interface Props {
   from: string;
   to: string;
   monitorId: string[];
+  id: string;
 }
-export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+export const MonitorErrorSparklines = ({ from, to, monitorId, id }: Props) => {
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
 
@@ -33,6 +35,7 @@ export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id={id}
       reportType="kpi-over-time"
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
@@ -46,8 +49,8 @@ export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
             'observer.geo.name': [selectedLocation?.label],
           },
           dataType: 'synthetics',
-          selectedMetricField: 'state.up',
-          name: 'Monitor errors',
+          selectedMetricField: 'monitor_errors',
+          name: ERRORS_LABEL,
           color: euiTheme.colors.danger,
           operationType: 'unique_count',
         },

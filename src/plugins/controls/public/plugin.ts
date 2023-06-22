@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 import {
   ControlGroupContainerFactory,
@@ -28,7 +28,6 @@ import {
   IEditableControlFactory,
   ControlInput,
 } from './types';
-
 export class ControlsPlugin
   implements
     Plugin<
@@ -113,10 +112,21 @@ export class ControlsPlugin
   }
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps): ControlsPluginStart {
-    this.startControlsKibanaServices(coreStart, startPlugins);
+    this.startControlsKibanaServices(coreStart, startPlugins).then(async () => {
+      const { uiActions } = startPlugins;
+
+      const { DeleteControlAction } = await import('./control_group/actions/delete_control_action');
+      const deleteControlAction = new DeleteControlAction();
+      uiActions.registerAction(deleteControlAction);
+      uiActions.attachAction(PANEL_HOVER_TRIGGER, deleteControlAction.id);
+
+      const { EditControlAction } = await import('./control_group/actions/edit_control_action');
+      const editControlAction = new EditControlAction(deleteControlAction);
+      uiActions.registerAction(editControlAction);
+      uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
+    });
 
     const { getControlFactory, getControlTypes } = controlsService;
-
     return {
       getControlFactory,
       getControlTypes,

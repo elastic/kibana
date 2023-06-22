@@ -14,14 +14,17 @@ const getWorkerEntry = (language) => {
       return 'monaco-editor/esm/vs/editor/editor.worker.js';
     case 'json':
       return 'monaco-editor/esm/vs/language/json/json.worker.js';
+    case 'yaml':
+      return 'monaco-yaml/lib/esm/yaml.worker.js';
     default:
       return path.resolve(__dirname, 'src', language, 'worker', `${language}.worker.ts`);
   }
 };
 
 const getWorkerConfig = (language) => ({
-  mode: 'production',
+  mode: process.env.NODE_ENV || 'development',
   entry: getWorkerEntry(language),
+  devtool: process.env.NODE_ENV === 'production' ? false : '#cheap-source-map',
   output: {
     path: path.resolve(__dirname, 'target_workers'),
     filename: `${language}.editor.worker.js`,
@@ -33,12 +36,13 @@ const getWorkerConfig = (language) => ({
   module: {
     rules: [
       {
-        test: /\.(js|ts)$/,
-        exclude: /node_modules/,
+        test: /\.(jsx?|tsx?)$/,
+        exclude: /node_modules(?!\/@kbn\/)(\/[^\/]+\/)/,
         use: {
           loader: 'babel-loader',
           options: {
             babelrc: false,
+            envName: process.env.NODE_ENV || 'development',
             presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
           },
         },
@@ -47,4 +51,4 @@ const getWorkerConfig = (language) => ({
   },
 });
 
-module.exports = ['default', 'json', 'painless', 'xjson', 'esql'].map(getWorkerConfig);
+module.exports = ['default', 'json', 'painless', 'xjson', 'esql', 'yaml'].map(getWorkerConfig);

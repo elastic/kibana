@@ -1,0 +1,6 @@
+summary: Create an index connector.
+value:
+  name: my-connector
+  connector_type_id: .index
+  config:
+    index: test-index

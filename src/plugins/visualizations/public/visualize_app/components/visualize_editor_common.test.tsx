@@ -39,7 +39,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     },
   })),
   withKibana: jest.fn((comp) => comp),
-  reactToUiComponent: jest.fn(),
 }));
 
 jest.mock('../../services', () => ({
@@ -119,47 +118,6 @@ describe('VisualizeEditorCommon', () => {
       aliasPurpose: 'savedObjectConversion',
       objectNoun: 'TSVB visualization',
     });
-  });
-
-  it('should display a warning callout for new heatmap implementation with split aggs', async () => {
-    const wrapper = shallowWithIntl(
-      <VisualizeEditorCommon
-        appState={null}
-        hasUnsavedChanges={false}
-        setHasUnsavedChanges={() => {}}
-        hasUnappliedChanges={false}
-        isEmbeddableRendered={false}
-        onAppLeave={() => {}}
-        visEditorRef={React.createRef()}
-        visInstance={
-          {
-            savedVis: {
-              id: 'test',
-              sharingSavedObjectProps: {
-                outcome: 'conflict',
-                aliasTargetId: 'alias_id',
-              },
-            },
-            vis: {
-              type: {
-                title: 'Heatmap',
-                name: 'heatmap',
-              },
-              data: {
-                aggs: {
-                  aggs: [
-                    {
-                      schema: 'split',
-                    },
-                  ],
-                },
-              },
-            },
-          } as unknown as VisualizeEditorVisInstance
-        }
-      />
-    );
-    expect(wrapper.find(VizChartWarning).length).toBe(1);
   });
 
   it('should not display a warning callout for XY charts with split aggs', async () => {

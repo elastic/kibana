@@ -16,7 +16,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -44,6 +44,7 @@ import {
   UiActionsStart,
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
+  VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import {
   VISUALIZE_EDITOR_TRIGGER,
@@ -54,6 +55,11 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -89,6 +95,8 @@ import type {
   VisualizationType,
   EditorFrameSetup,
   LensTopNavMenuEntryGenerator,
+  VisualizeEditorContext,
+  Suggestion,
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
@@ -110,6 +118,10 @@ import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
+import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
+import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
+
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -124,6 +136,7 @@ export interface LensPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   uiActionsEnhanced: AdvancedUiActionsSetup;
   share?: SharePluginSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -144,10 +157,11 @@ export interface LensPluginStartDependencies {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
   inspector: InspectorStartContract;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
   docLinks: DocLinksStart;
   share?: SharePluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export interface LensPublicSetup {
@@ -230,8 +244,15 @@ export interface LensPublicStart {
   stateHelperApi: () => Promise<{
     formula: FormulaPublicApi;
     chartInfo: ChartInfoApi;
+    suggestions: LensSuggestionsApi;
   }>;
 }
+
+export type LensSuggestionsApi = (
+  context: VisualizeFieldContext | VisualizeEditorContext,
+  dataViews: DataView,
+  excludedVisualizations?: string[]
+) => Suggestion[] | undefined;
 
 export class LensPlugin {
   private datatableVisualization: DatatableVisualizationType | undefined;
@@ -250,6 +271,7 @@ export class LensPlugin {
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
   private initDependenciesForApi: () => void = () => {};
+  private locator?: LensAppLocator;
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
@@ -266,6 +288,7 @@ export class LensPlugin {
       usageCollection,
       uiActionsEnhanced,
       share,
+      contentManagement,
     }: LensPluginSetupDependencies
   ) {
     const startServices = createStartServicesGetter(core.getStartServices);
@@ -297,6 +320,7 @@ export class LensPlugin {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
+        coreStart,
         data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
@@ -324,6 +348,17 @@ export class LensPlugin {
       embeddable.registerEmbeddableFactory('lens', new EmbeddableFactory(getStartServices));
     }
 
+    if (share) {
+      this.locator = share.url.locators.create(new LensAppLocatorDefinition());
+
+      share.register(
+        downloadCsvShareProvider({
+          uiSettings: core.uiSettings,
+          formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+        })
+      );
+    }
+
     visualizations.registerAlias(getLensAliasConfig());
 
     uiActionsEnhanced.registerDrilldown(
@@ -334,6 +369,16 @@ export class LensPlugin {
         application: () => startServices().core.application,
       })
     );
+
+    contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: i18n.translate('xpack.lens.content.name', {
+        defaultMessage: 'Lens Visualization',
+      }),
+    });
 
     setupExpressions(
       expressions,
@@ -384,6 +429,7 @@ export class LensPlugin {
           attributeService: getLensAttributeService(coreStart, deps),
           getPresentationUtilContext,
           topNavMenuEntryGenerators: this.topNavMenuEntries,
+          locator: this.locator,
         });
       },
     });
@@ -569,13 +615,28 @@ export class LensPlugin {
       },
 
       stateHelperApi: async () => {
-        const { createFormulaPublicApi, createChartInfoApi } = await import('./async_services');
+        const { createFormulaPublicApi, createChartInfoApi, suggestionsApi } = await import(
+          './async_services'
+        );
         if (!this.editorFrameService) {
           await this.initDependenciesForApi();
         }
+        const [visualizationMap, datasourceMap] = await Promise.all([
+          this.editorFrameService!.loadVisualizations(),
+          this.editorFrameService!.loadDatasources(),
+        ]);
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
+          suggestions: (context, dataView, excludedVisualizations) => {
+            return suggestionsApi({
+              datasourceMap,
+              visualizationMap,
+              context,
+              dataView,
+              excludedVisualizations,
+            });
+          },
         };
       },
     };

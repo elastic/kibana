@@ -15,6 +15,7 @@ import {
   EuiLoadingContent,
   EuiFacetGroup,
   EuiFacetButton,
+  EuiPanel,
   EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
@@ -136,9 +137,9 @@ export class LayerWizardSelect extends Component<Props, State> {
   render() {
     if (!this.state.hasLoadedWizards) {
       return (
-        <div>
-          <EuiCard title={''} description={<EuiLoadingContent lines={2} />} layout="horizontal" />
-        </div>
+        <EuiPanel>
+          <EuiLoadingContent lines={2} />
+        </EuiPanel>
       );
     }
 

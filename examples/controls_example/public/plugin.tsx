@@ -13,9 +13,11 @@ import {
   CoreStart,
   Plugin,
 } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import img from './control_group_image.png';
+import { PLUGIN_ID } from './constants';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -23,6 +25,7 @@ interface SetupDeps {
 
 export interface ControlsExampleStartDeps {
   data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export class ControlsExamplePlugin
@@ -30,7 +33,7 @@ export class ControlsExamplePlugin
 {
   public setup(core: CoreSetup<ControlsExampleStartDeps>, { developerExamples }: SetupDeps) {
     core.application.register({
-      id: 'controlsExamples',
+      id: PLUGIN_ID,
       title: 'Controls examples',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {

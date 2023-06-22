@@ -75,7 +75,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services/foo/errors/bar?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services/foo/errors/bar/samples?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -103,7 +103,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=&probability=1`,
+        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=&probability=1&documentType=transactionMetric&rollupInterval=1m`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -136,14 +136,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&kuery=`,
+        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&kuery=&documentType=transactionMetric&rollupInterval=1m&bucketSizeInSeconds=60`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&transactionName=baz&kuery=`,
+        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&transactionName=baz&kuery=&documentType=transactionMetric&rollupInterval=1m&bucketSizeInSeconds=60`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

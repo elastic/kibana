@@ -1,0 +1,615 @@
+{
+  "id": "@kbn/ml-url-state",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.PageUrlStateService",
+        "type": "Class",
+        "tags": [],
+        "label": "PageUrlStateService",
+        "description": [
+          "\nService for managing URL state of particular page."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-url-state",
+            "scope": "common",
+            "docId": "kibKbnMlUrlStatePluginApi",
+            "section": "def-common.PageUrlStateService",
+            "text": "PageUrlStateService"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.PageUrlStateService.getPageUrlState$",
+            "type": "Function",
+            "tags": [],
+            "label": "getPageUrlState$",
+            "description": [
+              "\nProvides updates for the page URL state."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<T>"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.PageUrlStateService.getPageUrlState",
+            "type": "Function",
+            "tags": [],
+            "label": "getPageUrlState",
+            "description": [],
+            "signature": [
+              "() => T | null"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.PageUrlStateService.updateUrlState",
+            "type": "Function",
+            "tags": [],
+            "label": "updateUrlState",
+            "description": [],
+            "signature": [
+              "(update: Partial<T>, replaceState?: boolean | undefined) => void"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-url-state",
+                "id": "def-common.PageUrlStateService.updateUrlState.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "update",
+                "description": [],
+                "signature": [
+                  "Partial<T>"
+                ],
+                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ml-url-state",
+                "id": "def-common.PageUrlStateService.updateUrlState.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "replaceState",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.PageUrlStateService.setCurrentState",
+            "type": "Function",
+            "tags": [],
+            "label": "setCurrentState",
+            "description": [
+              "\nPopulates internal subject with currently active state."
+            ],
+            "signature": [
+              "(currentState: T) => void"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-url-state",
+                "id": "def-common.PageUrlStateService.setCurrentState.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "currentState",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.PageUrlStateService.setUpdateCallback",
+            "type": "Function",
+            "tags": [],
+            "label": "setUpdateCallback",
+            "description": [
+              "\nSets the callback for the state update."
+            ],
+            "signature": [
+              "(callback: (update: Partial<T>, replaceState?: boolean | undefined) => void) => void"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-url-state",
+                "id": "def-common.PageUrlStateService.setUpdateCallback.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "(update: Partial<T>, replaceState?: boolean | undefined) => void"
+                ],
+                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.isRisonSerializationRequired",
+        "type": "Function",
+        "tags": [],
+        "label": "isRisonSerializationRequired",
+        "description": [
+          "\nChecks if the URL query parameter requires rison serialization."
+        ],
+        "signature": [
+          "(queryParam: string) => boolean"
+        ],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.isRisonSerializationRequired.$1",
+            "type": "string",
+            "tags": [],
+            "label": "queryParam",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.parseUrlState",
+        "type": "Function",
+        "tags": [],
+        "label": "parseUrlState",
+        "description": [],
+        "signature": [
+          "(search: string) => ",
+          {
+            "pluginId": "@kbn/ml-url-state",
+            "scope": "common",
+            "docId": "kibKbnMlUrlStatePluginApi",
+            "section": "def-common.Dictionary",
+            "text": "Dictionary"
+          },
+          "<any>"
+        ],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.parseUrlState.$1",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.Provider",
+        "type": "Function",
+        "tags": [],
+        "label": "Provider",
+        "description": [],
+        "signature": [
+          "React.ProviderExoticComponent<React.ProviderProps<",
+          "UrlState",
+          ">>"
+        ],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.Provider.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.UrlStateProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "UrlStateProvider",
+        "description": [],
+        "signature": [
+          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+        ],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.UrlStateProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "signature": [
+              "{ children?: React.ReactNode; }"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.usePageUrlState",
+        "type": "Function",
+        "tags": [],
+        "label": "usePageUrlState",
+        "description": [
+          "\nHook for managing the URL state of the page."
+        ],
+        "signature": [
+          "<T extends PageUrlState>(pageKey: T[\"pageKey\"], defaultState?: T[\"pageUrlState\"] | undefined) => [T[\"pageUrlState\"], (update: Partial<T[\"pageUrlState\"]>, replaceState?: boolean | undefined) => void, ",
+          {
+            "pluginId": "@kbn/ml-url-state",
+            "scope": "common",
+            "docId": "kibKbnMlUrlStatePluginApi",
+            "section": "def-common.PageUrlStateService",
+            "text": "PageUrlStateService"
+          },
+          "<T[\"pageUrlState\"]>]"
+        ],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.usePageUrlState.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "pageKey",
+            "description": [],
+            "signature": [
+              "T[\"pageKey\"]"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.usePageUrlState.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultState",
+            "description": [],
+            "signature": [
+              "T[\"pageUrlState\"] | undefined"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.useUrlState",
+        "type": "Function",
+        "tags": [],
+        "label": "useUrlState",
+        "description": [],
+        "signature": [
+          "(accessor: ",
+          {
+            "pluginId": "@kbn/ml-url-state",
+            "scope": "common",
+            "docId": "kibKbnMlUrlStatePluginApi",
+            "section": "def-common.Accessor",
+            "text": "Accessor"
+          },
+          ") => [Record<string, any>, (attribute: string | ",
+          {
+            "pluginId": "@kbn/ml-url-state",
+            "scope": "common",
+            "docId": "kibKbnMlUrlStatePluginApi",
+            "section": "def-common.Dictionary",
+            "text": "Dictionary"
+          },
+          "<unknown>, value?: unknown, replaceState?: boolean | undefined) => void]"
+        ],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.useUrlState.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-url-state",
+                "scope": "common",
+                "docId": "kibKbnMlUrlStatePluginApi",
+                "section": "def-common.Accessor",
+                "text": "Accessor"
+              }
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.Dictionary",
+        "type": "Interface",
+        "tags": [],
+        "label": "Dictionary",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-url-state",
+            "scope": "common",
+            "docId": "kibKbnMlUrlStatePluginApi",
+            "section": "def-common.Dictionary",
+            "text": "Dictionary"
+          },
+          "<TValue>"
+        ],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.Dictionary.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[id: string]: TValue",
+            "description": [],
+            "signature": [
+              "[id: string]:  TValue"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.Accessor",
+        "type": "Type",
+        "tags": [],
+        "label": "Accessor",
+        "description": [],
+        "signature": [
+          "\"_a\" | \"_g\""
+        ],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.SetUrlState",
+        "type": "Type",
+        "tags": [],
+        "label": "SetUrlState",
+        "description": [],
+        "signature": [
+          "(accessor: ",
+          {
+            "pluginId": "@kbn/ml-url-state",
+            "scope": "common",
+            "docId": "kibKbnMlUrlStatePluginApi",
+            "section": "def-common.Accessor",
+            "text": "Accessor"
+          },
+          ", attribute: string | ",
+          {
+            "pluginId": "@kbn/ml-url-state",
+            "scope": "common",
+            "docId": "kibKbnMlUrlStatePluginApi",
+            "section": "def-common.Dictionary",
+            "text": "Dictionary"
+          },
+          "<any>, value?: any, replaceState?: boolean | undefined) => void"
+        ],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.SetUrlState.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "\"_a\" | \"_g\""
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.SetUrlState.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "attribute",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/ml-url-state",
+                "scope": "common",
+                "docId": "kibKbnMlUrlStatePluginApi",
+                "section": "def-common.Dictionary",
+                "text": "Dictionary"
+              },
+              "<any>"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.SetUrlState.$3",
+            "type": "Any",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.SetUrlState.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replaceState",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

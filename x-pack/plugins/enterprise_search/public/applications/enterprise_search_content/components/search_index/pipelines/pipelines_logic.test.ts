@@ -35,11 +35,13 @@ const DEFAULT_VALUES = {
   hasIndexIngestionPipeline: false,
   index: undefined,
   indexName: '',
+  isDeleteModalOpen: false,
   mlInferencePipelineProcessors: undefined,
   pipelineName: DEFAULT_PIPELINE_VALUES.name,
   pipelineState: DEFAULT_PIPELINE_VALUES,
   showAddMlInferencePipelineModal: false,
-  showModal: false,
+  showMissingPipelineCallout: false,
+  showPipelineSettings: false,
 };
 
 describe('PipelinesLogic', () => {
@@ -72,11 +74,11 @@ describe('PipelinesLogic', () => {
   });
 
   describe('actions', () => {
-    it('should set showModal to false and call fetchApiSuccess', async () => {
+    it('should set showPipelineSettings to false and call fetchApiSuccess', async () => {
       CachedFetchIndexApiLogic.actions.apiSuccess(connectorIndex);
       PipelinesLogic.actions.fetchIndexApiSuccess = jest.fn();
       PipelinesLogic.actions.setPipelineState(newPipeline);
-      PipelinesLogic.actions.openModal();
+      PipelinesLogic.actions.openPipelineSettings();
       PipelinesLogic.actions.apiSuccess({ connectorId: 'a', pipeline: newPipeline });
       expect(PipelinesLogic.values).toEqual({
         ...DEFAULT_VALUES,
@@ -113,17 +115,17 @@ describe('PipelinesLogic', () => {
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
-    describe('openModal', () => {
-      it('should set showModal to true', () => {
-        PipelinesLogic.actions.openModal();
-        expect(PipelinesLogic.values).toEqual({ ...DEFAULT_VALUES, showModal: true });
+    describe('openPipelineSettings', () => {
+      it('should set showPipelineSettings to true', () => {
+        PipelinesLogic.actions.openPipelineSettings();
+        expect(PipelinesLogic.values).toEqual({ ...DEFAULT_VALUES, showPipelineSettings: true });
       });
     });
-    describe('closeModal', () => {
-      it('should set showModal to false', () => {
-        PipelinesLogic.actions.openModal();
-        PipelinesLogic.actions.closeModal();
-        expect(PipelinesLogic.values).toEqual({ ...DEFAULT_VALUES, showModal: false });
+    describe('closePipelineSettings', () => {
+      it('should set showPipelineSettings to false', () => {
+        PipelinesLogic.actions.openPipelineSettings();
+        PipelinesLogic.actions.closePipelineSettings();
+        expect(PipelinesLogic.values).toEqual({ ...DEFAULT_VALUES, showPipelineSettings: false });
       });
     });
     describe('apiError', () => {
@@ -135,7 +137,7 @@ describe('PipelinesLogic', () => {
     describe('apiSuccess', () => {
       it('should call flashSuccessToast', () => {
         PipelinesLogic.actions.apiSuccess({ connectorId: 'a', pipeline: newPipeline });
-        expect(flashSuccessToast).toHaveBeenCalledWith('Pipelines successfully updated');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Pipelines updated');
       });
     });
     describe('createCustomPipelineError', () => {
@@ -145,16 +147,16 @@ describe('PipelinesLogic', () => {
       });
     });
     describe('createCustomPipelineSuccess', () => {
-      it('should call flashSuccessToast', () => {
+      it('should call flashSuccessToast and update pipelines', () => {
         PipelinesLogic.actions.setPipelineState = jest.fn();
         PipelinesLogic.actions.savePipeline = jest.fn();
         PipelinesLogic.actions.fetchCustomPipeline = jest.fn();
         PipelinesLogic.actions.fetchIndexApiSuccess(connectorIndex);
-        PipelinesLogic.actions.createCustomPipelineSuccess({ created: ['a', 'b'] });
-        expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline successfully created');
+        PipelinesLogic.actions.createCustomPipelineSuccess({ [connectorIndex.name]: {} });
+        expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline created');
         expect(PipelinesLogic.actions.setPipelineState).toHaveBeenCalledWith({
           ...PipelinesLogic.values.pipelineState,
-          name: 'a',
+          name: connectorIndex.name,
         });
         expect(PipelinesLogic.actions.savePipeline).toHaveBeenCalled();
         expect(PipelinesLogic.actions.fetchCustomPipeline).toHaveBeenCalled();
@@ -180,7 +182,7 @@ describe('PipelinesLogic', () => {
         });
       });
       it('should not set configState if modal is open', () => {
-        PipelinesLogic.actions.openModal();
+        PipelinesLogic.actions.openPipelineSettings();
         PipelinesLogic.actions.fetchIndexApiSuccess({
           ...connectorIndex,
           connector: { ...connectorIndex.connector, pipeline: newPipeline },
@@ -192,7 +194,7 @@ describe('PipelinesLogic', () => {
             connector: { ...connectorIndex.connector, pipeline: newPipeline },
           },
           indexName: 'connector',
-          showModal: true,
+          showPipelineSettings: true,
         });
       });
     });

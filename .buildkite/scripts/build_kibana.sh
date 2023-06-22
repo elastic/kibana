@@ -8,14 +8,15 @@ export KBN_NP_PLUGINS_BUILT=true
 
 echo "--- Build Kibana Distribution"
 
-BUILD_ARGS=""
-is_pr_with_label "ci:build-all-platforms" && BUILD_ARGS="--all-platforms"
-is_pr_with_label "ci:build-example-plugins" && BUILD_ARGS="$BUILD_ARGS --example-plugins"
-is_pr_with_label "ci:build-docker-cross-compile" && BUILD_ARG="$BUILD_ARGS --docker-cross-compile"
-is_pr_with_label "ci:build-os-packages" || BUILD_ARGS="$BUILD_ARGS --skip-os-packages"
-is_pr_with_label "ci:build-canvas-shareable-runtime" || BUILD_ARGS="$BUILD_ARGS --skip-canvas-shareable-runtime"
-is_pr_with_label "ci:build-docker-contexts" || BUILD_ARGS="$BUILD_ARGS --skip-docker-contexts"
-node scripts/build $BUILD_ARGS
+BUILD_ARGS=("--with-test-plugins" "--with-example-plugins")
+is_pr_with_label "ci:build-all-platforms" && BUILD_ARGS+=("--all-platforms")
+is_pr_with_label "ci:build-docker-cross-compile" && BUILD_ARGS+=("--docker-cross-compile")
+is_pr_with_label "ci:build-os-packages" || BUILD_ARGS+=("--skip-os-packages")
+is_pr_with_label "ci:build-canvas-shareable-runtime" || BUILD_ARGS+=("--skip-canvas-shareable-runtime")
+is_pr_with_label "ci:build-docker-contexts" || BUILD_ARGS+=("--skip-docker-contexts")
+
+echo "> node scripts/build" "${BUILD_ARGS[@]}"
+node scripts/build "${BUILD_ARGS[@]}"
 
 if is_pr_with_label "ci:build-cloud-image"; then
   echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
@@ -29,6 +30,7 @@ if is_pr_with_label "ci:build-cloud-image"; then
   --docker-push \
   --skip-docker-ubi \
   --skip-docker-ubuntu \
+  --skip-docker-serverless \
   --skip-docker-contexts
   docker logout docker.elastic.co
 

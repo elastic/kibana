@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { ConnectorConfiguration } from '../../../../../common/types/connectors';
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface PostConnectorConfigurationArgs {
-  configuration: ConnectorConfiguration;
+  configuration: Record<string, string | number | boolean | null>;
   connectorId: string;
   indexName: string;
 }
@@ -27,13 +29,25 @@ export const postConnectorConfiguration = async ({
 }: PostConnectorConfigurationArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/configuration`;
 
-  await HttpLogic.values.http.post<ConnectorConfiguration>(route, {
+  const responseConfig = await HttpLogic.values.http.post<ConnectorConfiguration>(route, {
     body: JSON.stringify(configuration),
   });
-  return { configuration, indexName };
+  return { configuration: responseConfig, indexName };
 };
 
 export const ConnectorConfigurationApiLogic = createApiLogic(
   ['content', 'configuration_connector_api_logic'],
-  postConnectorConfiguration
+  postConnectorConfiguration,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate(
+        'xpack.enterpriseSearch.content.indices.configurationConnector.configuration.successToast.title',
+        { defaultMessage: 'Configuration updated' }
+      ),
+  }
 );
+
+export type PostConnectorConfigurationActions = Actions<
+  PostConnectorConfigurationArgs,
+  PostConnectorConfigurationResponse
+>;

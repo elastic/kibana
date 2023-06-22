@@ -25,15 +25,20 @@ import {
   mockPrebootService,
   mockDeprecationService,
   mockDocLinksService,
+  mockCustomBrandingService,
+  mockUserSettingsService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { Server } from './server';
+import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
+import { CriticalError } from '@kbn/core-base-server-internal';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();
@@ -57,6 +62,7 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.clearAllMocks();
+  mockEnsureValidConfiguration.mockReset();
 });
 
 test('preboot services on "preboot"', async () => {
@@ -107,6 +113,8 @@ test('sets up services on "setup"', async () => {
   expect(mockI18nService.setup).not.toHaveBeenCalled();
   expect(mockDeprecationService.setup).not.toHaveBeenCalled();
   expect(mockDocLinksService.setup).not.toHaveBeenCalled();
+  expect(mockCustomBrandingService.setup).not.toHaveBeenCalled();
+  expect(mockUserSettingsService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -123,6 +131,8 @@ test('sets up services on "setup"', async () => {
   expect(mockI18nService.setup).toHaveBeenCalledTimes(1);
   expect(mockDeprecationService.setup).toHaveBeenCalledTimes(1);
   expect(mockDocLinksService.setup).toHaveBeenCalledTimes(1);
+  expect(mockCustomBrandingService.setup).toHaveBeenCalledTimes(1);
+  expect(mockUserSettingsService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -174,6 +184,7 @@ test('runs services on "start"', async () => {
   expect(mockStatusService.start).not.toHaveBeenCalled();
   expect(mockDeprecationService.start).not.toHaveBeenCalled();
   expect(mockDocLinksService.start).not.toHaveBeenCalled();
+  expect(mockCustomBrandingService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -184,6 +195,7 @@ test('runs services on "start"', async () => {
   expect(mockStatusService.start).toHaveBeenCalledTimes(1);
   expect(mockDeprecationService.start).toHaveBeenCalledTimes(1);
   expect(mockDocLinksService.start).toHaveBeenCalledTimes(1);
+  expect(mockCustomBrandingService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -210,6 +222,7 @@ test('stops services on "stop"', async () => {
   expect(mockMetricsService.stop).not.toHaveBeenCalled();
   expect(mockStatusService.stop).not.toHaveBeenCalled();
   expect(mockLoggingService.stop).not.toHaveBeenCalled();
+  expect(mockCustomBrandingService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
@@ -222,6 +235,7 @@ test('stops services on "stop"', async () => {
   expect(mockMetricsService.stop).toHaveBeenCalledTimes(1);
   expect(mockStatusService.stop).toHaveBeenCalledTimes(1);
   expect(mockLoggingService.stop).toHaveBeenCalledTimes(1);
+  expect(mockCustomBrandingService.stop).toHaveBeenCalledTimes(1);
 });
 
 test(`doesn't preboot core services if config validation fails`, async () => {
@@ -244,4 +258,34 @@ test(`doesn't preboot core services if config validation fails`, async () => {
   expect(mockLoggingService.preboot).not.toHaveBeenCalled();
   expect(mockPluginsService.preboot).not.toHaveBeenCalled();
   expect(mockPrebootService.preboot).not.toHaveBeenCalled();
+});
+
+test('migrator-only node throws exception during start', async () => {
+  rawConfigService.getConfig$.mockReturnValue(
+    new BehaviorSubject({ node: { roles: ['migrator'] } })
+  );
+  const nodeServiceContract: InternalNodeServicePreboot = {
+    roles: { migrator: true, ui: false, backgroundTasks: false },
+  };
+  mockNodeService.preboot.mockResolvedValue(nodeServiceContract);
+  mockNodeService.start.mockReturnValue(nodeServiceContract);
+
+  const server = new Server(rawConfigService, env, logger);
+
+  await server.preboot();
+  await server.setup();
+
+  let migrationException: undefined | CriticalError;
+  expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
+  await server.start().catch((e) => (migrationException = e));
+
+  expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
+  expect(mockSavedObjectsService.start).toHaveNthReturnedWith(1, expect.anything());
+
+  expect(migrationException).not.toBeUndefined();
+  expect(migrationException).toBeInstanceOf(CriticalError);
+  expect(migrationException!.message).toBe('Migrations completed, shutting down Kibana');
+  expect(migrationException!.code).toBe(MIGRATION_EXCEPTION_CODE);
+  expect(migrationException!.processExitCode).toBe(0);
+  expect(migrationException!.cause).toBeUndefined();
 });

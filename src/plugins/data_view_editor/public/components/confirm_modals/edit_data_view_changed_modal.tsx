@@ -15,31 +15,39 @@ interface EditDataViewDeps {
   onEdit: () => void;
 }
 
-export const editDataViewModal = ({ dataViewName, overlays, onEdit }: EditDataViewDeps) =>
-  overlays &&
+export const editDataViewModal = ({
+  dataViewName,
+  overlays,
+  onEdit,
+}: EditDataViewDeps): Promise<void> =>
   overlays
-    .openConfirm(
-      i18n.translate('indexPatternEditor.editDataView.editConfirmationModal.modalDescription', {
-        defaultMessage: 'Changing this data view can break other objects that depend on it.',
-      }),
-      {
-        confirmButtonText: i18n.translate(
-          'indexPatternEditor.editDataView.editConfirmationModal.confirmButton',
+    ? overlays
+        .openConfirm(
+          i18n.translate('indexPatternEditor.editDataView.editConfirmationModal.modalDescription', {
+            defaultMessage: 'Changing this data view can break other objects that depend on it.',
+          }),
           {
-            defaultMessage: 'Confirm',
+            confirmButtonText: i18n.translate(
+              'indexPatternEditor.editDataView.editConfirmationModal.confirmButton',
+              {
+                defaultMessage: 'Confirm',
+              }
+            ),
+            title: i18n.translate(
+              'indexPatternEditor.editDataView.editConfirmationModal.editHeader',
+              {
+                defaultMessage: `Edit '{name}'`,
+                values: {
+                  name: dataViewName,
+                },
+              }
+            ),
+            buttonColor: 'danger',
           }
-        ),
-        title: i18n.translate('indexPatternEditor.editDataView.editConfirmationModal.editHeader', {
-          defaultMessage: `Edit '{name}'`,
-          values: {
-            name: dataViewName,
-          },
-        }),
-        buttonColor: 'danger',
-      }
-    )
-    .then(async (isConfirmed) => {
-      if (isConfirmed) {
-        onEdit();
-      }
-    });
+        )
+        .then(async (isConfirmed) => {
+          if (isConfirmed) {
+            await onEdit();
+          }
+        })
+    : Promise.resolve();

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Chart,
@@ -261,13 +261,16 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
             target="_blank"
             iconType="help"
             iconSide="left"
+            size="xs"
             color="primary"
             href={docLink}
           >
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.exploration.featureImportanceDocsLink"
-              defaultMessage="Feature importance docs"
-            />
+            <EuiText size="xs" color="primary">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.exploration.featureImportanceDocsLink"
+                defaultMessage="Feature importance docs"
+              />
+            </EuiText>
           </EuiButtonEmpty>
         }
         headerItems={[

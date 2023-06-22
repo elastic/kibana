@@ -37,12 +37,13 @@ exports[`<IndicatorsBarChartWrapper /> when not loading or refetching should ren
               class="euiFormControlLayout__childrenWrapper"
             >
               <div
-                class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--inGroup"
+                class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--inGroup"
                 data-test-subj="comboBoxInput"
                 tabindex="-1"
               >
                 <span
                   class="euiComboBoxPill euiComboBoxPill--plainText"
+                  value="string"
                 >
                   threat.feed.name
                 </span>
@@ -54,6 +55,7 @@ exports[`<IndicatorsBarChartWrapper /> when not loading or refetching should ren
                     aria-autocomplete="list"
                     aria-controls=""
                     aria-expanded="false"
+                    aria-invalid="false"
                     data-test-subj="comboBoxSearchInput"
                     id="generated-id__eui-combobox-id"
                     role="combobox"
@@ -66,7 +68,7 @@ exports[`<IndicatorsBarChartWrapper /> when not loading or refetching should ren
                 </div>
               </div>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
               >
                 <button
                   aria-label="Open list of options"

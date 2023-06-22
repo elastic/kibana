@@ -30,7 +30,7 @@ export const addTestMonitor = async (
 ) => {
   const testData = {
     locations: [{ id: 'us_central', isServiceManaged: true }],
-    ...(params?.type !== 'browser' ? {} : data),
+    ...(params?.type !== 'browser' ? {} : testDataMonitor),
     ...(params || {}),
     name,
   };
@@ -77,9 +77,8 @@ export const cleanPrivateLocations = async (params: Record<string, any>) => {
   const server = getService('kibanaServer');
 
   try {
-    await server.savedObjects.clean({ types: [privateLocationsSavedObjectName] });
     await server.savedObjects.clean({
-      types: ['ingest-agent-policies', 'ingest-package-policies'],
+      types: [privateLocationsSavedObjectName, 'ingest-agent-policies', 'ingest-package-policies'],
     });
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -87,8 +86,21 @@ export const cleanPrivateLocations = async (params: Record<string, any>) => {
   }
 };
 
-const data = {
+export const cleanTestParams = async (params: Record<string, any>) => {
+  const getService = params.getService;
+  const server = getService('kibanaServer');
+
+  try {
+    await server.savedObjects.clean({ types: ['synthetics-param'] });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
+};
+
+export const testDataMonitor = {
   type: 'browser',
+  alert: { status: { enabled: true } },
   form_monitor_type: 'single',
   enabled: true,
   schedule: { unit: 'm', number: '10' },
@@ -105,18 +117,12 @@ const data = {
   playwright_options: '',
   __ui: {
     script_source: { is_generated_script: false, file_name: '' },
-    is_zip_url_tls_enabled: false,
   },
   params: '',
   'url.port': null,
   'source.inline.script':
     "step('Go to https://www.google.com', async () => {\n          await page.goto('https://www.google.com');\n          expect(await page.isVisible('text=Data')).toBeTruthy();\n        });",
   'source.project.content': '',
-  'source.zip_url.url': '',
-  'source.zip_url.username': '',
-  'source.zip_url.password': '',
-  'source.zip_url.folder': '',
-  'source.zip_url.proxy_url': '',
   playwright_text_assertion: 'Data',
   urls: 'https://www.google.com',
   screenshots: 'on',
@@ -124,11 +130,15 @@ const data = {
   'filter_journeys.match': '',
   'filter_journeys.tags': [],
   ignore_https_errors: false,
-  'throttling.is_enabled': true,
-  'throttling.download_speed': '5',
-  'throttling.upload_speed': '3',
-  'throttling.latency': '20',
-  'throttling.config': '5d/3u/20l',
+  throttling: {
+    id: 'custom',
+    label: 'Custom',
+    value: {
+      download: '5',
+      upload: '3',
+      latency: '20',
+    },
+  },
   'ssl.certificate_authorities': '',
   'ssl.certificate': '',
   'ssl.key': '',

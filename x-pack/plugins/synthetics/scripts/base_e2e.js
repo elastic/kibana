@@ -27,6 +27,11 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Opens the Synthetics Test Runner',
   })
+  .option('watch', {
+    default: false,
+    type: 'boolean',
+    description: 'Runs the server in watch mode, restarting on changes',
+  })
   .option('pauseOnError', {
     default: false,
     type: 'boolean',

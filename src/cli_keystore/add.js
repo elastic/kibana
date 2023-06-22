@@ -9,7 +9,7 @@
 import { Logger } from '../cli/logger';
 import { confirm, question } from './utils';
 // import from path since add.test.js mocks 'fs' required for @kbn/utils
-import { createPromiseFromStreams, createConcatStream } from '@kbn/utils/target_node/src/streams';
+import { createPromiseFromStreams, createConcatStream } from '@kbn/utils/src/streams';
 
 /**
  * @param {Keystore} keystore

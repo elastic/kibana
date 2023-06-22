@@ -13,7 +13,11 @@ import {
   ProjectMonitor,
   PrivateLocation,
 } from '../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import {
+  DEFAULT_FIELDS,
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 
 describe('browser normalizers', () => {
@@ -95,11 +99,7 @@ describe('browser normalizers', () => {
         name: 'test-name-3',
         content: 'test content 3',
         schedule: 10,
-        throttling: {
-          latency: 18,
-          upload: 15,
-          download: 10,
-        },
+        throttling: false,
         params,
         playwrightOptions,
         locations: ['us_central', 'us_east'],
@@ -147,11 +147,6 @@ describe('browser normalizers', () => {
             'service.name': '',
             'source.project.content': 'test content 1',
             tags: ['tag1', 'tag2'],
-            'throttling.config': '5d/10u/20l',
-            'throttling.download_speed': '5',
-            'throttling.is_enabled': true,
-            'throttling.latency': '20',
-            'throttling.upload_speed': '10',
             params: '',
             type: 'browser',
             project_id: projectId,
@@ -161,6 +156,15 @@ describe('browser normalizers', () => {
             timeout: null,
             id: '',
             hash: testHash,
+            throttling: {
+              id: 'custom',
+              label: 'Custom',
+              value: {
+                download: '5',
+                latency: '20',
+                upload: '10',
+              },
+            },
           },
           unsupportedKeys: [],
           errors: [],
@@ -202,11 +206,6 @@ describe('browser normalizers', () => {
             'service.name': '',
             'source.project.content': 'test content 2',
             tags: ['tag3', 'tag4'],
-            'throttling.config': '10d/15u/18l',
-            'throttling.download_speed': '10',
-            'throttling.is_enabled': true,
-            'throttling.latency': '18',
-            'throttling.upload_speed': '15',
             type: 'browser',
             project_id: projectId,
             namespace: 'test_space',
@@ -215,6 +214,15 @@ describe('browser normalizers', () => {
             timeout: null,
             id: '',
             hash: testHash,
+            throttling: {
+              id: 'custom',
+              label: 'Custom',
+              value: {
+                download: '10',
+                latency: '18',
+                upload: '15',
+              },
+            },
           },
           unsupportedKeys: [],
           errors: [],
@@ -261,11 +269,6 @@ describe('browser normalizers', () => {
             'service.name': '',
             'source.project.content': 'test content 3',
             tags: ['tag3', 'tag4'],
-            'throttling.config': '10d/15u/18l',
-            'throttling.download_speed': '10',
-            'throttling.is_enabled': true,
-            'throttling.latency': '18',
-            'throttling.upload_speed': '15',
             type: 'browser',
             project_id: projectId,
             namespace: 'test_space',
@@ -274,6 +277,147 @@ describe('browser normalizers', () => {
             timeout: null,
             id: '',
             hash: testHash,
+            throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING],
+          },
+          unsupportedKeys: [],
+          errors: [],
+        },
+      ]);
+    });
+
+    it('handles defined throttling values', () => {
+      const actual = normalizeProjectMonitors({
+        locations,
+        privateLocations,
+        monitors: [
+          {
+            ...monitors[0],
+            throttling: {
+              download: 9,
+              upload: 0.75,
+              latency: 170,
+            },
+          },
+        ],
+        projectId,
+        namespace: 'test-space',
+        version: '8.5.0',
+      });
+      expect(actual).toEqual([
+        {
+          normalizedFields: {
+            ...DEFAULT_FIELDS[DataStream.BROWSER],
+            journey_id: 'test-id-1',
+            ignore_https_errors: true,
+            origin: 'project',
+            locations: [
+              {
+                geo: {
+                  lat: 33.333,
+                  lon: 73.333,
+                },
+                id: 'us_central',
+                isServiceManaged: true,
+                label: 'Test Location',
+              },
+            ],
+            name: 'test-name-1',
+            schedule: {
+              number: '3',
+              unit: 'm',
+            },
+            screenshots: 'off',
+            'service.name': '',
+            'source.project.content': 'test content 1',
+            tags: ['tag1', 'tag2'],
+            params: '',
+            type: 'browser',
+            project_id: projectId,
+            namespace: 'test_space',
+            original_space: 'test-space',
+            custom_heartbeat_id: 'test-id-1-test-project-id-test-space',
+            timeout: null,
+            id: '',
+            hash: testHash,
+            throttling: {
+              id: '4g',
+              label: '4G',
+              value: {
+                download: '9',
+                latency: '170',
+                upload: '0.75',
+              },
+            },
+          },
+          unsupportedKeys: [],
+          errors: [],
+        },
+      ]);
+    });
+
+    it('handles custom throttling values', () => {
+      const actual = normalizeProjectMonitors({
+        locations,
+        privateLocations,
+        monitors: [
+          {
+            ...monitors[0],
+            throttling: {
+              download: 10,
+              upload: 5,
+              latency: 30,
+            },
+          },
+        ],
+        projectId,
+        namespace: 'test-space',
+        version: '8.5.0',
+      });
+      expect(actual).toEqual([
+        {
+          normalizedFields: {
+            ...DEFAULT_FIELDS[DataStream.BROWSER],
+            journey_id: 'test-id-1',
+            ignore_https_errors: true,
+            origin: 'project',
+            locations: [
+              {
+                geo: {
+                  lat: 33.333,
+                  lon: 73.333,
+                },
+                id: 'us_central',
+                isServiceManaged: true,
+                label: 'Test Location',
+              },
+            ],
+            name: 'test-name-1',
+            schedule: {
+              number: '3',
+              unit: 'm',
+            },
+            screenshots: 'off',
+            'service.name': '',
+            'source.project.content': 'test content 1',
+            tags: ['tag1', 'tag2'],
+            params: '',
+            type: 'browser',
+            project_id: projectId,
+            namespace: 'test_space',
+            original_space: 'test-space',
+            custom_heartbeat_id: 'test-id-1-test-project-id-test-space',
+            timeout: null,
+            id: '',
+            hash: testHash,
+            throttling: {
+              id: 'custom',
+              label: 'Custom',
+              value: {
+                download: '10',
+                latency: '30',
+                upload: '5',
+              },
+            },
           },
           unsupportedKeys: [],
           errors: [],

@@ -6,14 +6,17 @@
  */
 
 import { before, expect, journey, step } from '@elastic/synthetics';
+import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey('OverviewSorting', async ({ page, params }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const testMonitor1 = 'acb'; // second alpha, first created
   const testMonitor2 = 'aCd'; // third alpha, second created
@@ -29,7 +32,7 @@ journey('OverviewSorting', async ({ page, params }) => {
   });
 
   step('Go to monitor-management', async () => {
-    await syntheticsApp.navigateToOverview(true);
+    await syntheticsApp.navigateToOverview(true, 15);
   });
 
   step('sort alphabetical asc', async () => {

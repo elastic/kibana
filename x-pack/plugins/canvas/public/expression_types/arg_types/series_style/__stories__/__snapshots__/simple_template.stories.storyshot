@@ -178,7 +178,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
       >
         <span
           color="warning"
-          data-euiicon-type="alert"
+          data-euiicon-type="warning"
           onBlur={[Function]}
           onFocus={[Function]}
           tabIndex={0}

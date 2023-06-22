@@ -20,9 +20,9 @@ import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { fetchSyncJobsByConnectorId } from '../../lib/connectors/fetch_sync_jobs';
 import { cancelSyncs } from '../../lib/connectors/post_cancel_syncs';
-import { configureNativeConnector } from '../../lib/connectors/put_configure_native';
 import { updateFiltering } from '../../lib/connectors/put_update_filtering';
 import { updateFilteringDraft } from '../../lib/connectors/put_update_filtering_draft';
+import { putUpdateNative } from '../../lib/connectors/put_update_native';
 import { startConnectorSync } from '../../lib/connectors/start_sync';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
 import { updateConnectorNameAndDescription } from '../../lib/connectors/update_connector_name_and_description';
@@ -48,6 +48,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           index_name: schema.string(),
           is_native: schema.boolean(),
           language: schema.nullable(schema.string()),
+          service_type: schema.maybe(schema.string()),
         }),
       },
     },
@@ -101,7 +102,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       validate: {
         body: schema.recordOf(
           schema.string(),
-          schema.object({ label: schema.string(), value: schema.nullable(schema.string()) })
+          schema.oneOf([schema.string(), schema.number(), schema.boolean()])
         ),
         params: schema.object({
           connectorId: schema.string(),
@@ -110,8 +111,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await updateConnectorConfiguration(client, request.params.connectorId, request.body);
-      return response.ok();
+      const configuration = await updateConnectorConfiguration(
+        client,
+        request.params.connectorId,
+        request.body
+      );
+      return response.ok({ body: configuration });
     })
   );
 
@@ -159,7 +164,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           connectorId: schema.string(),
         }),
         query: schema.object({
-          page: schema.number({ defaultValue: 0, min: 0 }),
+          from: schema.number({ defaultValue: 0, min: 0 }),
           size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
@@ -169,7 +174,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const result = await fetchSyncJobsByConnectorId(
         client,
         request.params.connectorId,
-        request.query.page,
+        request.query.from,
         request.query.size
       );
       return response.ok({ body: result });
@@ -269,23 +274,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         request.body.status as ConnectorStatus
       );
       return response.ok({ body: result });
-    })
-  );
-
-  router.put(
-    {
-      path: '/internal/enterprise_search/connectors/{connectorId}/configure_native',
-      validate: {
-        body: schema.object({ service_type: schema.string() }),
-        params: schema.object({
-          connectorId: schema.string(),
-        }),
-      },
-    },
-    elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      await configureNativeConnector(client, request.params.connectorId, request.body.service_type);
-      return response.ok();
     })
   );
 
@@ -393,6 +381,26 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         // We're relying on the schema in the validator above to flag if something goes wrong
         filteringRules: filtering_rules as FilteringRule[],
       });
+      return result ? response.ok({ body: result }) : response.conflict();
+    })
+  );
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/native',
+      validate: {
+        body: schema.object({
+          is_native: schema.boolean(),
+        }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const connectorId = decodeURIComponent(request.params.connectorId);
+      const { is_native } = request.body;
+      const result = await putUpdateNative(client, connectorId, is_native);
       return result ? response.ok({ body: result }) : response.conflict();
     })
   );

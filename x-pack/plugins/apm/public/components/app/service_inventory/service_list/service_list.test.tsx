@@ -8,11 +8,12 @@
 import { composeStories } from '@storybook/testing-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { getServiceColumns } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { Breakpoints } from '../../../../hooks/use_breakpoints';
-import { getServiceColumns } from '.';
-import * as stories from './service_list.stories';
+import { apmRouter } from '../../../routing/apm_route_config';
 import * as timeSeriesColor from '../../../shared/charts/helper/get_timeseries_color';
+import * as stories from './service_list.stories';
 
 const { Example, EmptyState } = composeStories(stories);
 
@@ -79,11 +80,14 @@ describe('ServiceList', () => {
             isLarge: true,
             isXl: true,
           } as Breakpoints,
+          showAlertsColumn: true,
+          link: apmRouter.link,
+          serviceOverflowCount: 0,
         }).map((c) =>
           c.render ? c.render!(service[c.field!], service) : service[c.field!]
         );
-        expect(renderedColumns.length).toEqual(7);
-        expect(renderedColumns[2]).toMatchInlineSnapshot(`
+        expect(renderedColumns.length).toEqual(8);
+        expect(renderedColumns[3]).toMatchInlineSnapshot(`
           <EnvironmentBadge
             environments={
               Array [
@@ -92,8 +96,8 @@ describe('ServiceList', () => {
             }
           />
         `);
-        expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
-        expect(renderedColumns[4]).toMatchInlineSnapshot(`
+        expect(renderedColumns[4]).toMatchInlineSnapshot(`"request"`);
+        expect(renderedColumns[5]).toMatchInlineSnapshot(`
           <ListMetric
             color="green"
             comparisonSeriesColor="black"
@@ -117,11 +121,14 @@ describe('ServiceList', () => {
             isLarge: true,
             isXl: true,
           } as Breakpoints,
+          showAlertsColumn: true,
+          link: apmRouter.link,
+          serviceOverflowCount: 0,
         }).map((c) =>
           c.render ? c.render!(service[c.field!], service) : service[c.field!]
         );
-        expect(renderedColumns.length).toEqual(5);
-        expect(renderedColumns[2]).toMatchInlineSnapshot(`
+        expect(renderedColumns.length).toEqual(6);
+        expect(renderedColumns[3]).toMatchInlineSnapshot(`
           <ListMetric
             color="green"
             comparisonSeriesColor="black"
@@ -144,11 +151,14 @@ describe('ServiceList', () => {
               isLarge: false,
               isXl: true,
             } as Breakpoints,
+            showAlertsColumn: true,
+            link: apmRouter.link,
+            serviceOverflowCount: 0,
           }).map((c) =>
             c.render ? c.render!(service[c.field!], service) : service[c.field!]
           );
-          expect(renderedColumns.length).toEqual(6);
-          expect(renderedColumns[2]).toMatchInlineSnapshot(`
+          expect(renderedColumns.length).toEqual(7);
+          expect(renderedColumns[3]).toMatchInlineSnapshot(`
             <EnvironmentBadge
               environments={
                 Array [
@@ -157,7 +167,7 @@ describe('ServiceList', () => {
               }
             />
           `);
-          expect(renderedColumns[3]).toMatchInlineSnapshot(`
+          expect(renderedColumns[4]).toMatchInlineSnapshot(`
             <ListMetric
               color="green"
               comparisonSeriesColor="black"
@@ -181,11 +191,14 @@ describe('ServiceList', () => {
               isLarge: false,
               isXl: false,
             } as Breakpoints,
+            showAlertsColumn: true,
+            link: apmRouter.link,
+            serviceOverflowCount: 0,
           }).map((c) =>
             c.render ? c.render!(service[c.field!], service) : service[c.field!]
           );
-          expect(renderedColumns.length).toEqual(7);
-          expect(renderedColumns[2]).toMatchInlineSnapshot(`
+          expect(renderedColumns.length).toEqual(8);
+          expect(renderedColumns[3]).toMatchInlineSnapshot(`
                       <EnvironmentBadge
                         environments={
                           Array [
@@ -194,8 +207,8 @@ describe('ServiceList', () => {
                         }
                       />
                   `);
-          expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
-          expect(renderedColumns[4]).toMatchInlineSnapshot(`
+          expect(renderedColumns[4]).toMatchInlineSnapshot(`"request"`);
+          expect(renderedColumns[5]).toMatchInlineSnapshot(`
             <ListMetric
               color="green"
               comparisonSeriesColor="black"
@@ -221,6 +234,9 @@ describe('ServiceList', () => {
           isLarge: false,
           isXl: false,
         } as Breakpoints,
+        showAlertsColumn: true,
+        link: apmRouter.link,
+        serviceOverflowCount: 0,
       }).map((c) => c.field);
       expect(renderedColumns.includes('healthStatus')).toBeFalsy();
     });
@@ -238,8 +254,51 @@ describe('ServiceList', () => {
           isLarge: false,
           isXl: false,
         } as Breakpoints,
+        showAlertsColumn: true,
+        link: apmRouter.link,
+        serviceOverflowCount: 0,
       }).map((c) => c.field);
       expect(renderedColumns.includes('healthStatus')).toBeTruthy();
+    });
+  });
+
+  describe('without Alerts data', () => {
+    it('hides alertsCount column', () => {
+      const renderedColumns = getServiceColumns({
+        comparisonDataLoading: false,
+        showHealthStatusColumn: false,
+        query,
+        showTransactionTypeColumn: true,
+        breakpoints: {
+          isSmall: false,
+          isLarge: false,
+          isXl: false,
+        } as Breakpoints,
+        showAlertsColumn: false,
+        link: apmRouter.link,
+        serviceOverflowCount: 0,
+      }).map((c) => c.field);
+      expect(renderedColumns.includes('alertsCount')).toBeFalsy();
+    });
+  });
+
+  describe('with Alerts data', () => {
+    it('shows alertsCount column', () => {
+      const renderedColumns = getServiceColumns({
+        comparisonDataLoading: false,
+        showHealthStatusColumn: true,
+        query,
+        showTransactionTypeColumn: true,
+        breakpoints: {
+          isSmall: false,
+          isLarge: false,
+          isXl: false,
+        } as Breakpoints,
+        showAlertsColumn: true,
+        link: apmRouter.link,
+        serviceOverflowCount: 0,
+      }).map((c) => c.field);
+      expect(renderedColumns.includes('alertsCount')).toBeTruthy();
     });
   });
 });

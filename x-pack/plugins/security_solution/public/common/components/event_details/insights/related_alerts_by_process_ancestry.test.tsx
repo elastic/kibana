@@ -20,6 +20,7 @@ import {
   PROCESS_ANCESTRY_ERROR,
   PROCESS_ANCESTRY_EMPTY,
 } from './translations';
+import type { StatsNode } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
 
 jest.mock('../../../containers/alerts/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
@@ -96,10 +97,15 @@ describe('RelatedAlertsByProcessAncestry', () => {
 
   it('renders the text with a count and a timeline button when the request works', async () => {
     const mockAlertIds = ['1', '2'];
+    const mockStatsNodes = [
+      { id: 'testid', name: 'process', parent: 'testid2' },
+      { id: 'testid2', name: 'iexplore' },
+    ];
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
       alertIds: mockAlertIds,
+      statsNodes: mockStatsNodes,
     });
 
     render(
@@ -123,6 +129,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
       loading: false,
       error: false,
       alertIds: [] as string[],
+      statsNodes: [] as StatsNode[],
     });
 
     render(
@@ -142,6 +149,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
       loading: false,
       error: false,
       alertIds: undefined,
+      statsNodes: undefined,
     });
 
     render(

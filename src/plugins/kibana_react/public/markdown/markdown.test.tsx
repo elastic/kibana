@@ -32,7 +32,7 @@ test('should render links with parentheses correctly', () => {
   );
 });
 
-test('should add `noreferrer` and `nooopener` to unknown links in new tabs', () => {
+test('should add `noreferrer` and `nooopener` to all links in new tabs', () => {
   const component = shallow(
     <Markdown
       openLinksInNewTab={true}
@@ -40,13 +40,6 @@ test('should add `noreferrer` and `nooopener` to unknown links in new tabs', () 
     />
   );
   expect(component.render().find('a').prop('rel')).toBe('noopener noreferrer');
-});
-
-test('should only add `nooopener` to known links in new tabs', () => {
-  const component = shallow(
-    <Markdown openLinksInNewTab={true} markdown="[link](https://www.elastic.co/cool/path" />
-  );
-  expect(component.render().find('a').prop('rel')).toBe('noopener');
 });
 
 describe('props', () => {

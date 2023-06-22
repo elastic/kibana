@@ -8,18 +8,14 @@
 import expect from '@kbn/expect';
 
 export function GrokDebuggerProvider({ getService }) {
-  const aceEditor = getService('aceEditor');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const monacoEditor = getService('monacoEditor');
 
   // test subject selectors
   const SUBJ_CONTAINER = 'grokDebuggerContainer';
 
-  const SUBJ_UI_ACE_EVENT_INPUT = `${SUBJ_CONTAINER} > aceEventInput > codeEditorContainer`;
   const SUBJ_UI_ACE_PATTERN_INPUT = `${SUBJ_CONTAINER} > acePatternInput > codeEditorContainer`;
-  const SUBJ_UI_ACE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} > aceCustomPatternsInput > codeEditorContainer`;
-  const SUBJ_UI_ACE_EVENT_OUTPUT = `${SUBJ_CONTAINER} > aceEventOutput > codeEditorContainer`;
-
   const SUBJ_BTN_TOGGLE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} > btnToggleCustomPatternsInput`;
   const SUBJ_BTN_SIMULATE = `${SUBJ_CONTAINER} > btnSimulate`;
 
@@ -29,11 +25,11 @@ export function GrokDebuggerProvider({ getService }) {
     }
 
     async setEventInput(value) {
-      await aceEditor.setValue(SUBJ_UI_ACE_EVENT_INPUT, value);
+      await monacoEditor.setCodeEditorValue(value, 0);
     }
 
     async setPatternInput(value) {
-      await aceEditor.setValue(SUBJ_UI_ACE_PATTERN_INPUT, value);
+      await monacoEditor.setCodeEditorValue(value, 1);
     }
 
     async toggleCustomPatternsInput() {
@@ -41,11 +37,11 @@ export function GrokDebuggerProvider({ getService }) {
     }
 
     async setCustomPatternsInput(value) {
-      await aceEditor.setValue(SUBJ_UI_ACE_CUSTOM_PATTERNS_INPUT, value);
+      await monacoEditor.setCodeEditorValue(value, 2);
     }
 
     async getEventOutput() {
-      return await aceEditor.getValue(SUBJ_UI_ACE_EVENT_OUTPUT);
+      return await testSubjects.getVisibleText('eventOutputCodeBlock');
     }
 
     async assertExists() {

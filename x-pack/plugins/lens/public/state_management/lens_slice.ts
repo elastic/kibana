@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
@@ -56,12 +55,14 @@ export const initialState: LensAppState = {
 export const getPreloadedState = ({
   lensServices: { data },
   initialContext,
+  initialStateFromLocator,
   embeddableEditorIncomingState,
   datasourceMap,
   visualizationMap,
 }: LensStoreDeps) => {
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
+  // Initialize an empty datasourceStates for each datasource
   if (initialDatasourceId) {
     Object.keys(datasourceMap).forEach((datasourceId) => {
       datasourceStates[datasourceId] = {
@@ -69,6 +70,25 @@ export const getPreloadedState = ({
         isLoading: true,
       };
     });
+  }
+  if (initialStateFromLocator) {
+    // if anything is passed via locator then populate the empty state
+    if ('datasourceStates' in initialStateFromLocator) {
+      Object.keys(datasourceMap).forEach((datasourceId) => {
+        datasourceStates[datasourceId].state =
+          initialStateFromLocator.datasourceStates[datasourceId];
+      });
+    }
+    return {
+      ...initialState,
+      isLoading: true,
+      ...initialStateFromLocator,
+      activeDatasourceId:
+        ('activeDatasourceId' in initialStateFromLocator &&
+          initialStateFromLocator.activeDatasourceId) ||
+        initialDatasourceId,
+      datasourceStates,
+    };
   }
 
   const state = {
@@ -104,8 +124,7 @@ export const getPreloadedState = ({
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const onActiveDataChange = createAction<{
-  activeData?: TableInspectorAdapter;
-  requestWarnings?: Array<ReactNode | string>;
+  activeData: TableInspectorAdapter;
 }>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
@@ -265,14 +284,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     },
     [onActiveDataChange.type]: (
       state,
-      {
-        payload: { activeData, requestWarnings },
-      }: PayloadAction<{ activeData: TableInspectorAdapter; requestWarnings?: string[] }>
+      { payload: { activeData } }: PayloadAction<{ activeData: TableInspectorAdapter }>
     ) => {
       return {
         ...state,
-        ...(activeData ? { activeData } : {}),
-        ...(requestWarnings ? { requestWarnings } : {}),
+        activeData,
       };
     },
     [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {

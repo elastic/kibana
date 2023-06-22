@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const waitForFetches = (fetchesNumber: number) => async () => {
     const nrOfFetches = await PageObjects.discover.getNrOfFetches();
+    log.debug('actual number of fetches', nrOfFetches);
     return nrOfFetches === fetchesNumber;
   };
 
@@ -144,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('discoverNewButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.waitFor('number of fetches to be 1', waitForFetches(1));
+        await retry.waitFor('number of fetches to be 0', waitForFetches(0));
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
       });
     });

@@ -176,7 +176,6 @@ of Kibana.
 |store session data in the LocalStorage when the user navigates away from {kib}, etc.
 |===
 
-There is no equivalent behavior to `start` or `stop` in legacy plugins.
 Conversely, there is no equivalent to `uiExports` in Kibana Platform plugins.
 As a general rule of thumb, features that were registered via `uiExports` are
 now registered during the `setup` phase. Most of everything else should move
@@ -339,9 +338,3 @@ interface where the property name is the plugin's ID.
 the second argument to the plugin.
 <3> Notice that the type for the setup and start lifecycles are different. Plugin lifecycle
 functions can only access the APIs that are exposed _during_ that lifecycle.
-
-=== Migrating legacy plugins
-
-In Kibana 7.10, support for legacy plugins was removed. See
-<<migrating-legacy-plugins>> for detailed information on how to convert existing
-legacy plugins to this new API.

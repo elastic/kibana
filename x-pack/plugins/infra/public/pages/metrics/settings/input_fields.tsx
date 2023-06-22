@@ -56,7 +56,10 @@ export interface InputRangeFieldProps<
   isInvalid: boolean;
   name: string;
   onChange?: (
-    evt: React.ChangeEvent<FieldElement> | React.MouseEvent<ButtonElement>,
+    evt:
+      | React.ChangeEvent<FieldElement>
+      | React.KeyboardEvent<FieldElement>
+      | React.MouseEvent<ButtonElement>,
     isValid: boolean
   ) => void;
   value: Value;
@@ -81,7 +84,10 @@ export const createInputRangeFieldProps = <
   isInvalid: errors.length > 0,
   name,
   onChange: (
-    evt: React.ChangeEvent<FieldElement> | React.MouseEvent<ButtonElement>,
+    evt:
+      | React.ChangeEvent<FieldElement>
+      | React.KeyboardEvent<FieldElement>
+      | React.MouseEvent<ButtonElement>,
     isValid: boolean
   ) => onChange(+evt.currentTarget.value, isValid),
   value,

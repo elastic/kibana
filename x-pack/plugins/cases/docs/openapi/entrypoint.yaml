@@ -45,6 +45,8 @@ paths:
     $ref: 'paths/s@{spaceid}@api@cases@{caseid}@connector@{connectorid}@_push.yaml'
   '/s/{spaceId}/api/cases/{caseId}/user_actions':
     $ref: 'paths/s@{spaceid}@api@cases@{caseid}@user_actions.yaml'
+  '/s/{spaceId}/api/cases/{caseId}/user_actions/_find':
+    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@user_actions@_find.yaml'
 components:
   securitySchemes:
     basicAuth:

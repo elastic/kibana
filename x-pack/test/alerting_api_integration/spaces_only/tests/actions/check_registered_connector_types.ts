@@ -34,6 +34,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.swimlane',
           '.server-log',
           '.slack',
+          '.slack_api',
           '.webhook',
           '.cases-webhook',
           '.xmatters',
@@ -44,6 +45,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.resilient',
           '.teams',
           '.tines',
+          '.torq',
           '.opsgenie',
         ].sort()
       );

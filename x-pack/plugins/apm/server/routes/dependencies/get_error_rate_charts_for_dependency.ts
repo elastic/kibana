@@ -26,17 +26,7 @@ import {
 } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function getErrorRateChartsForDependency({
-  dependencyName,
-  spanName,
-  apmEventClient,
-  start,
-  end,
-  environment,
-  kuery,
-  searchServiceDestinationMetrics,
-  offset,
-}: {
+interface Options {
   dependencyName: string;
   spanName: string;
   apmEventClient: APMEventClient;
@@ -46,7 +36,19 @@ export async function getErrorRateChartsForDependency({
   kuery: string;
   searchServiceDestinationMetrics: boolean;
   offset?: string;
-}) {
+}
+
+async function getErrorRateChartsForDependencyForTimeRange({
+  dependencyName,
+  spanName,
+  apmEventClient,
+  start,
+  end,
+  environment,
+  kuery,
+  searchServiceDestinationMetrics,
+  offset,
+}: Options) {
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -144,4 +146,44 @@ export async function getErrorRateChartsForDependency({
       };
     }) ?? []
   );
+}
+
+export async function getErrorRateChartsForDependency({
+  apmEventClient,
+  dependencyName,
+  start,
+  end,
+  environment,
+  kuery,
+  searchServiceDestinationMetrics,
+  spanName,
+  offset,
+}: Options) {
+  const [currentTimeseries, comparisonTimeseries] = await Promise.all([
+    getErrorRateChartsForDependencyForTimeRange({
+      dependencyName,
+      spanName,
+      apmEventClient,
+      start,
+      end,
+      kuery,
+      environment,
+      searchServiceDestinationMetrics,
+    }),
+    offset
+      ? getErrorRateChartsForDependencyForTimeRange({
+          dependencyName,
+          spanName,
+          apmEventClient,
+          start,
+          end,
+          kuery,
+          environment,
+          offset,
+          searchServiceDestinationMetrics,
+        })
+      : null,
+  ]);
+
+  return { currentTimeseries, comparisonTimeseries };
 }

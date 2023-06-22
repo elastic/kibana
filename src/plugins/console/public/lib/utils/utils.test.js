@@ -255,5 +255,13 @@ describe('Utils class', () => {
         { url: 'test', data: ['{\n  "f": {"v1": "${v1}", "v6": "${v6}"}\n}'] }
       );
     });
+
+    describe('with uuids as field values', () => {
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v7}"\n}'] },
+        { name: 'v7', value: '9893617a-a08f-4e5c-bc41-95610dc2ded8' },
+        { url: 'test', data: ['{\n  "f": "9893617a-a08f-4e5c-bc41-95610dc2ded8"\n}'] }
+      );
+    });
   });
 });

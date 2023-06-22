@@ -162,6 +162,7 @@ export const getFieldEditorOpener =
           // Runtime field
           field = {
             name: fieldNameToEdit!,
+            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             ...dataView.getRuntimeField(fieldNameToEdit!)!,
           };
         } else {

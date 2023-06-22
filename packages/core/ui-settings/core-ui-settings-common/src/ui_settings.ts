@@ -95,12 +95,6 @@ export interface UiSettingsParams<T = unknown> {
 }
 
 /**
- * A sub-set of {@link UiSettingsParams} exposed to the client-side.
- * @public
- * */
-export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
-
-/**
  * Describes the values explicitly set by user.
  * @public
  * */

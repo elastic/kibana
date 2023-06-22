@@ -17,6 +17,9 @@ import {
   ProcessEventAlertCategory,
 } from '../../types/process_tree';
 
+export const TEST_PROCESS_INDEX = 'logs-endpoint.events.process*';
+export const TEST_SESSION_START_TIME = '2021-10-14T08:05:34.853Z';
+
 export const mockEvents: ProcessEvent[] = [
   {
     '@timestamp': '2021-11-23T15:25:04.210Z',
@@ -211,6 +214,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -354,6 +358,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -513,6 +518,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -673,7 +679,7 @@ export const mockAlerts: ProcessEvent[] = [
         reason: 'process event created low alert cmd test alert.',
         original_time: '2021-11-23T15:25:04.218Z',
         original_event: {
-          action: 'exec',
+          action: EventAction.exec,
         },
         uuid: '6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38',
       },
@@ -859,7 +865,7 @@ export const mockAlerts: ProcessEvent[] = [
         reason: 'process event created low alert cmd test alert.',
         original_time: '2021-11-23T15:25:05.202Z',
         original_event: {
-          action: 'exit',
+          action: EventAction.end,
         },
         uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
       },
@@ -1048,7 +1054,7 @@ export const mockFileAlert = {
       reason: 'process event created low alert File telemetry.',
       original_time: '2021-11-23T15:25:05.202Z',
       original_event: {
-        action: 'exit',
+        action: EventAction.end,
       },
       uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
     },
@@ -1241,7 +1247,7 @@ export const mockNetworkAlert = {
       reason: 'process event created low alert File telemetry.',
       original_time: '2021-11-23T15:25:05.202Z',
       original_event: {
-        action: 'exit',
+        action: EventAction.end,
       },
       uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
     },
@@ -1737,7 +1743,6 @@ export const childProcessMock: Process = {
       },
     } as ProcessEvent),
   isUserEntered: () => false,
-  getMaxAlertLevel: () => null,
   getEndTime: () => '',
   isDescendantOf: () => false,
 };
@@ -1796,6 +1801,7 @@ export const processMock: Process = {
         id: '1000',
         name: 'vagrant',
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       process: {
         args: ['bash'],
         args_count: 1,
@@ -1840,7 +1846,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         session_leader: {
           pid: 2442,
           user: {
@@ -1866,7 +1872,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         entry_leader: {
           pid: 2442,
           user: {
@@ -1892,7 +1898,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         group_leader: {
           pid: 2442,
           user: {
@@ -1918,11 +1924,10 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
       },
     } as ProcessEvent),
   isUserEntered: () => false,
-  getMaxAlertLevel: () => null,
   getEndTime: () => '',
   isDescendantOf: () => false,
 };
@@ -1970,7 +1975,6 @@ export const mockProcessMap = mockEvents.reduce(
       getOutput: () => '',
       getDetails: () => event,
       isUserEntered: () => false,
-      getMaxAlertLevel: () => null,
       isVerbose: () => true,
       getEndTime: () => '',
       isDescendantOf: () => false,

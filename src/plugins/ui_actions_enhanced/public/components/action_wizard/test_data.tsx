@@ -8,7 +8,6 @@
 
 import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
@@ -98,7 +97,7 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
     if (!config.dashboardId) return false;
     return true;
   },
-  CollectConfig: reactToUiComponent(DashboardDrilldownCollectConfig),
+  CollectConfig: DashboardDrilldownCollectConfig,
 
   isCompatible(context?: object): Promise<boolean> {
     return Promise.resolve(true);
@@ -164,7 +163,7 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
     if (!config.url) return false;
     return true;
   },
-  CollectConfig: reactToUiComponent(UrlDrilldownCollectConfig),
+  CollectConfig: UrlDrilldownCollectConfig,
 
   order: 10,
   isCompatible(context?: object): Promise<boolean> {

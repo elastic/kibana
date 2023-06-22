@@ -17,6 +17,7 @@ import {
 import {
   getFileMetadataIndexName,
   getIntegrationNameFromFileDataIndexName,
+  getIntegrationNameFromIndexName,
 } from '../../../common/services';
 
 import { ES_SEARCH_LIMIT } from '../../../common/constants';
@@ -73,8 +74,13 @@ export async function fileIdsWithoutChunksByIndex(
   const noChunkFileIdsByIndex = files.reduce((acc, file) => {
     allFileIds.add(file._id);
 
-    const fileIds = acc[file._index];
-    acc[file._index] = fileIds ? fileIds.add(file._id) : new Set([file._id]);
+    const integration = getIntegrationNameFromIndexName(
+      file._index,
+      FILE_STORAGE_METADATA_INDEX_PATTERN
+    );
+    const metadataIndex = getFileMetadataIndexName(integration);
+    const fileIds = acc[metadataIndex];
+    acc[metadataIndex] = fileIds ? fileIds.add(file._id) : new Set([file._id]);
     return acc;
   }, {} as FileIdsByIndex);
 

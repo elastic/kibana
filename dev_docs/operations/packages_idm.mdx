@@ -51,19 +51,16 @@ Package types allow us to have many different packages, pre-defined build tasks,
 : These packages can be imported from all other packages.
 
 `shared-browser`
-: These packages can be imported from `shared-browser` and `plugin-browser` packages. `shared-browser` packages may include Storybooks.
+: These packages can be imported from `shared-browser` and `public` directories within `plugin` packages. `shared-browser` packages may include Storybooks.
 
 `shared-server`
-: These packages can be imported from `shared-server` and `plugin-server` packages.
+: These packages can be imported from `shared-server` and `server` directories within `plugin` packages.
 
 `shared-scss`
-: These packages can be imported by `shared-browser` and `plugin-browser` packages, and expose an `index.scss` file to consumers instead of an `index.ts` file.
+: These packages can be imported by `shared-browser` and `public` directories within `plugin` packages, and expose an `index.scss` file to consumers instead of an `index.ts` file.
 
-`plugin-browser`
-: These packages expose types to other packages via a root `types.ts` file.  Module IDs must end with `-plugin-browser`. Consumers must use `import type` statements.
-
-`plugin-server`
-: These packages expose types to other packages via a root `types.ts` file. Module IDs must end with `-plugin-server`. Consumers must use `import type` statements.
+`plugin`
+: These packages were automatically created from the existing plugins at the time we switched everything over to packages. Module IDs must end with `-plugin`. Consumers must use `import type` statements.
 
 `functional-test`
 : These packages expose one or more functional testing configurations, including API integration tests, and can not be imported by other packages. Separating functional and integration tests allows us to iterate on tests without rebuilding the application. Similarly, iterating and updating the application should mostly mean the tests don't need to rebuild.
@@ -160,8 +157,7 @@ The solution to resolving a circular dependency has, thus far, been to break out
 
 There are a few package naming rules:
  - all packages must use the `@kbn/` namespace
- - `plugin-browser`-type packages must end with `-plugin-browser`
- - `plugin-server- type packages must end with `-plugin-server`
+ - `plugin`-type packages must end with `-plugin`
  - considering that we operate in a global namespace, avoid overly generic names
 
 Other than these rules, it's up to you and your team to decide on an appropriate name for your package.
@@ -205,4 +201,4 @@ We're now entering Phase 2 of the plan, more details about the phases of our pla
 
 [status]: #what-works-now
 [idm-rfc]: https://docs.google.com/document/d/1Bhg601MoGQjqGMGdLWSLnkopRexwrcbf_0MNcUkhx3I "Internal Dependency Management RFC on Google Docs"
-[pkgDirs]: https://github.com/elastic/kibana/blob/main/packages/kbn-bazel-packages/src/bazel_package_dirs.ts#L22
+[pkgDirs]: https://github.com/elastic/kibana/blob/main/packages/kbn-repo-packages/src/repo_package_dirs.js#L19

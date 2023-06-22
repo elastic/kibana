@@ -7,12 +7,13 @@
 
 import React, { FC } from 'react';
 import { pick } from 'lodash';
-
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 
+import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '../components/field_stats_flyout';
 import { useMlContext } from '../contexts/ml';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
@@ -25,7 +26,7 @@ export const ChangePointDetectionPage: FC = () => {
 
   const context = useMlContext();
   const dataView = context.currentDataView;
-  const savedSearch = context.currentSavedSearch;
+  const savedSearch = context.selectedSavedSearch;
 
   return (
     <>
@@ -46,23 +47,32 @@ export const ChangePointDetectionPage: FC = () => {
         <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
-          appDependencies={pick(services, [
-            'application',
-            'data',
-            'charts',
-            'fieldFormats',
-            'http',
-            'notifications',
-            'share',
-            'storage',
-            'uiSettings',
-            'unifiedSearch',
-            'theme',
-            'lens',
-          ])}
+          appDependencies={{
+            ...pick(services, [
+              'application',
+              'data',
+              'executionContext',
+              'charts',
+              'fieldFormats',
+              'http',
+              'notifications',
+              'share',
+              'storage',
+              'uiSettings',
+              'unifiedSearch',
+              'theme',
+              'lens',
+            ]),
+            fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
+          }}
         />
       ) : null}
-      <HelpMenu docLink={services.docLinks.links.ml.guide} />
+      <HelpMenu
+        docLink={services.docLinks.links.aggs.change_point}
+        appName={i18n.translate('xpack.ml.changePointDetection.pageHeader', {
+          defaultMessage: 'Change point detection',
+        })}
+      />
     </>
   );
 };

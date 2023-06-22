@@ -56,3 +56,7 @@ export interface SavedQuerySavedObjectAttributes {
 }
 
 export type SavedQuerySavedObject = SavedObject<PackSavedObjectAttributes>;
+
+export interface HTTPError extends Error {
+  statusCode: number;
+}

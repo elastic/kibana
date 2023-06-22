@@ -12,12 +12,24 @@ import { promisify } from 'util';
 import type { IKibanaSocket } from '@kbn/core-http-server';
 
 export class KibanaSocket implements IKibanaSocket {
+  public static getFakeSocket(): IKibanaSocket {
+    return {
+      getPeerCertificate: () => null,
+      getProtocol: () => null,
+      renegotiate: () => Promise.resolve(),
+    };
+  }
+
   public get authorized() {
     return this.socket instanceof TLSSocket ? this.socket.authorized : undefined;
   }
 
   public get authorizationError() {
     return this.socket instanceof TLSSocket ? this.socket.authorizationError : undefined;
+  }
+
+  public get remoteAddress() {
+    return this.socket.remoteAddress;
   }
 
   constructor(private readonly socket: Socket) {}

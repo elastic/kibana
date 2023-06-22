@@ -58,11 +58,17 @@ function renderTestCases(
   >
 ) {
   describe('render()', () => {
-    let uiSettings: ReturnType<typeof uiSettingsServiceMock.createClient>;
+    let uiSettings: {
+      client: ReturnType<typeof uiSettingsServiceMock.createClient>;
+      globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
+    };
 
     beforeEach(async () => {
-      uiSettings = uiSettingsServiceMock.createClient();
-      uiSettings.getRegistered.mockReturnValue({
+      uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      uiSettings.client.getRegistered.mockReturnValue({
         registered: { name: 'title' },
       });
     });
@@ -106,7 +112,7 @@ function renderTestCases(
 
     it('renders "core" page driven by settings', async () => {
       const userSettings = { 'theme:darkMode': { userValue: true } };
-      uiSettings.getUserProvided.mockResolvedValue(userSettings);
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
@@ -116,9 +122,21 @@ function renderTestCases(
       expect(data.legacyMetadata.uiSettings.user).toEqual(userSettings); // user settings are injected
     });
 
+    it('renders "core" page with global settings', async () => {
+      const userSettings = { 'foo:bar': { userValue: true } };
+      uiSettings.globalClient.getUserProvided.mockResolvedValue(userSettings);
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+      expect(data.legacyMetadata.globalUiSettings.user).toEqual(userSettings); // user settings are injected
+    });
+
     it('renders "core" with excluded user settings', async () => {
       const userSettings = { 'theme:darkMode': { userValue: true } };
-      uiSettings.getUserProvided.mockResolvedValue(userSettings);
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: true,
@@ -128,6 +146,20 @@ function renderTestCases(
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
       expect(data.legacyMetadata.uiSettings.user).toEqual({}); // user settings are not injected
+    });
+
+    it('renders "core" with excluded global user settings', async () => {
+      const userSettings = { 'foo:bar': { userValue: true } };
+      uiSettings.globalClient.getUserProvided.mockResolvedValue(userSettings);
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: true,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+      expect(data.legacyMetadata.globalUiSettings.user).toEqual({}); // user settings are not injected
     });
 
     it('calls `getStylesheetPaths` with the correct parameters', async () => {
@@ -147,6 +179,84 @@ function renderTestCases(
         themeVersion: 'v8',
         basePath: '/mock-server-basepath',
         buildNum: expect.any(Number),
+      });
+    });
+  });
+}
+
+function renderDarkModeTestCases(
+  getRender: () => Promise<
+    [
+      InternalRenderingServicePreboot['render'] | InternalRenderingServiceSetup['render'],
+      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps
+    ]
+  >
+) {
+  describe('render() Dark Mode tests', () => {
+    let uiSettings: {
+      client: ReturnType<typeof uiSettingsServiceMock.createClient>;
+      globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
+    };
+
+    beforeEach(async () => {
+      uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title' },
+      });
+    });
+
+    describe('Dark Mode', () => {
+      it('UserSettings value should override the space setting', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve(true)
+        );
+
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return false;
+          }
+          return settingName;
+        });
+
+        const settings = { 'theme:darkMode': { userValue: false } };
+        uiSettings.client.getUserProvided.mockResolvedValue(settings);
+
+        const [render] = await getRender();
+        await render(createKibanaRequest(), uiSettings);
+
+        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: true,
+          themeVersion: 'v8',
+          basePath: '/mock-server-basepath',
+          buildNum: expect.any(Number),
+        });
+      });
+
+      it('Space setting value should be used if UsersSettings value is undefined', async () => {
+        mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
+          Promise.resolve(undefined)
+        );
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return false;
+          }
+          return settingName;
+        });
+
+        const settings = { 'theme:darkMode': { userValue: false } };
+        uiSettings.client.getUserProvided.mockResolvedValue(settings);
+        const [render] = await getRender();
+        await render(createKibanaRequest(), uiSettings);
+
+        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: false,
+          themeVersion: 'v8',
+          basePath: '/mock-server-basepath',
+          buildNum: expect.any(Number),
+        });
       });
     });
   });
@@ -196,6 +306,10 @@ describe('RenderingService', () => {
     });
 
     renderTestCases(async () => {
+      await service.preboot(mockRenderingPrebootDeps);
+      return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
+    });
+    renderDarkModeTestCases(async () => {
       await service.preboot(mockRenderingPrebootDeps);
       return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
     });

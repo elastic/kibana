@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export default function loadTests({ loadTestFile }) {
+import { setupTestUsers } from '../test_users';
+
+export default function loadTests({ loadTestFile, getService }) {
   describe('EPM Endpoints', () => {
+    before(async () => {
+      await setupTestUsers(getService('security'));
+    });
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./list'));
     loadTestFile(require.resolve('./setup'));
@@ -32,5 +37,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./install_error_rollback'));
     loadTestFile(require.resolve('./final_pipeline'));
     loadTestFile(require.resolve('./custom_ingest_pipeline'));
+    loadTestFile(require.resolve('./verification_key_id'));
   });
 }

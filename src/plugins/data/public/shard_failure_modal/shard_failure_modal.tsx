@@ -41,7 +41,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
   ) {
     // this should never ever happen, but just in case
     return (
-      <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
+      <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
         The ShardFailureModal component received invalid properties
       </EuiCallOut>
     );

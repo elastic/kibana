@@ -20,7 +20,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { APP_SEARCH_PLUGIN } from '../../../../../../../common/constants';
+import { APPLICATIONS_PLUGIN } from '../../../../../../../common/constants';
+import { ENGINES_PATH } from '../../../../../applications/routes';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
 import { CreateEngineMenuItem } from './create_engine_menu_item';
@@ -52,7 +53,7 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
           onClick={toggleSearchEnginesPopover}
         >
           {i18n.translate('xpack.enterpriseSearch.content.index.searchEngines.label', {
-            defaultMessage: 'Search engines',
+            defaultMessage: 'Search Applications',
           })}
         </EuiButton>
       }
@@ -64,7 +65,7 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
             data-telemetry-id={`entSearchContent-${ingestionMethod}-header-searchEngines-viewEngines`}
             icon="eye"
             onClick={() => {
-              KibanaLogic.values.navigateToUrl(APP_SEARCH_PLUGIN.URL, {
+              KibanaLogic.values.navigateToUrl(APPLICATIONS_PLUGIN.URL + ENGINES_PATH, {
                 shouldNotCreateHref: true,
               });
             }}
@@ -72,7 +73,7 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
             <EuiText>
               <p>
                 {i18n.translate('xpack.enterpriseSearch.content.index.searchEngines.viewEngines', {
-                  defaultMessage: 'View App Search engines',
+                  defaultMessage: 'View Search Applications',
                 })}
               </p>
             </EuiText>
@@ -82,7 +83,7 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
               content={i18n.translate(
                 'xpack.enterpriseSearch.content.index.searchEngines.createEngineDisabledTooltip',
                 {
-                  defaultMessage: 'You cannot create engines from hidden indices.',
+                  defaultMessage: 'You cannot create search applications from hidden indices.',
                 }
               )}
             >

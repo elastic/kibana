@@ -1,0 +1,27 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "test-hidden-from-http-apis-importable-exportable:hidden-from-http-apis-1",
+    "index": ".kibana_1",
+    "source": {
+      "test-hidden-from-http-apis-importable-exportable": {
+        "title": "I am hidden from http apis but the client can still see me"
+      },
+      "type": "test-hidden-from-http-apis-importable-exportable"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "test-not-hidden-from-http-apis-importable-exportable:not-hidden-from-http-apis-1",
+    "index": ".kibana_1",
+    "source": {
+      "test-not-hidden-from-http-apis-importable-exportable": {
+        "title": "I am not hidden from http apis"
+      },
+      "type": "test-not-hidden-from-http-apis-importable-exportable"
+    }
+  }
+}

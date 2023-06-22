@@ -18,6 +18,18 @@ const ruleActionSchema = schema.object({
   group: schema.string(),
   id: schema.string(),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  uuid: schema.maybe(schema.string()),
+  frequency: schema.maybe(
+    schema.object({
+      summary: schema.boolean(),
+      throttle: schema.nullable(schema.string()),
+      notifyWhen: schema.oneOf([
+        schema.literal('onActionGroupChange'),
+        schema.literal('onActiveAlert'),
+        schema.literal('onThrottleInterval'),
+      ]),
+    })
+  ),
 });
 
 const operationsSchema = schema.arrayOf(

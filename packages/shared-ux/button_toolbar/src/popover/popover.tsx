@@ -10,9 +10,9 @@ import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
 
-import { PrimaryButton, Props as ButtonProps } from '../buttons/primary/primary';
+import { ToolbarButtonProps, ToolbarButton } from '../buttons';
 
-type AllowedButtonProps = Omit<ButtonProps, 'onClick' | 'fill'>;
+type AllowedButtonProps = Omit<ToolbarButtonProps, 'iconSide' | 'onClick' | 'fill'>;
 type AllowedPopoverProps = Omit<
   EuiPopoverProps,
   'button' | 'isOpen' | 'closePopover' | 'anchorPosition'
@@ -29,13 +29,18 @@ export type Props = AllowedButtonProps &
 /**
  * A button which opens a popover of additional actions within the toolbar.
  */
-export const ToolbarPopover = ({ label, iconType, children, iconSide, ...popover }: Props) => {
+export const ToolbarPopover = ({ type, label, iconType, children, ...popover }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onButtonClick = () => setIsOpen((status) => !status);
   const closePopover = () => setIsOpen(false);
 
-  const button = <PrimaryButton onClick={onButtonClick} {...{ label, iconSide, iconType }} />;
+  const button = (
+    <ToolbarButton
+      onClick={onButtonClick}
+      {...{ type, label, iconType: iconType || 'arrowDown', iconSide: iconType ? 'left' : 'right' }}
+    />
+  );
 
   return (
     // the following ts-ignore is needed until typings/* directory is exposed for consumption to packages

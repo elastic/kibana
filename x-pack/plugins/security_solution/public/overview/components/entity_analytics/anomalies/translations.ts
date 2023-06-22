@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ANOMALIES_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.anomalies.anomaliesTitle',
   {
-    defaultMessage: 'Notable Anomalies',
+    defaultMessage: 'Anomalies',
   }
 );
 
@@ -74,6 +74,13 @@ export const JOB_STATUS_FAILED = i18n.translate(
   'xpack.securitySolution.entityAnalytics.anomalies.jobStatusFailed',
   {
     defaultMessage: 'failed',
+  }
+);
+
+export const JOB_STATUS_WAITING = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.anomalies.jobStatusLoading',
+  {
+    defaultMessage: 'Waiting',
   }
 );
 

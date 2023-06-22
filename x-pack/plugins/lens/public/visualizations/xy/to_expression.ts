@@ -49,7 +49,6 @@ import type {
 } from './types';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import {
@@ -59,8 +58,12 @@ import {
   getAnnotationsLayers,
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
-import { axisExtentConfigToExpression } from '../../shared_components';
+import {
+  axisExtentConfigToExpression,
+  hasNumericHistogramDimension,
+} from '../../shared_components';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
+import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI | undefined,
@@ -314,7 +317,13 @@ export const buildXYExpression = (
     showLabels: state?.tickLabelsVisibilitySettings?.x ?? true,
     showGridLines: state?.gridlinesVisibilitySettings?.x ?? true,
     labelsOrientation: state?.labelsOrientation?.x ?? 0,
-    extent: state.xExtent ? [axisExtentConfigToExpression(state.xExtent)] : [],
+    extent:
+      state.xExtent ||
+      validDataLayers.some((layer) =>
+        hasNumericHistogramDimension(datasourceLayers[layer.layerId], layer.xAccessor)
+      )
+        ? [axisExtentConfigToExpression(state.xExtent ?? { mode: 'dataBounds', niceValues: true })]
+        : undefined,
   });
 
   const layeredXyVisFn = buildExpressionFunction<LayeredXyVisFn>('layeredXyVis', {
@@ -385,7 +394,7 @@ const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
       buildExpressionFunction<YAxisConfigFn>('yAxisConfig', {
         id: axis.id,
         position: axis.position,
-        extent: axis.extent ? axisExtentConfigToExpression(axis.extent) : undefined,
+        extent: axisExtentConfigToExpression(axis.extent ?? { mode: 'full', niceValues: true }),
         showTitle: axis.showTitle ?? true,
         title: axis.title,
         showLabels: axis.showLabels ?? true,

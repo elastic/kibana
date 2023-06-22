@@ -29,6 +29,7 @@ beforeEach(() => {
   ruleTypeRegistryParams = {
     logger: loggingSystemMock.create().get(),
     taskManager,
+    alertsService: null,
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
@@ -54,6 +55,9 @@ describe('isRuleExportable', () => {
       isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
     expect(
       isRuleExportable(
@@ -110,6 +114,9 @@ describe('isRuleExportable', () => {
       isExportable: false,
       executor: jest.fn(),
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
     expect(
       isRuleExportable(
@@ -169,6 +176,9 @@ describe('isRuleExportable', () => {
       isExportable: false,
       executor: jest.fn(),
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
     expect(
       isRuleExportable(

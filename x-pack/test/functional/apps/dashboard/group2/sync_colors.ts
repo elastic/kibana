@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardSettings = getService('dashboardSettings');
   const filterBar = getService('filterBar');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
@@ -54,7 +55,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.dashboard.clickCreateDashboardPrompt();
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
@@ -72,7 +72,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('vis1', false, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -86,10 +85,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'geo.src',
       });
 
-      await filterBar.addFilter('geo.src', 'is not', 'CN');
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });
 
       await PageObjects.lens.save('vis2', false, true);
-      await PageObjects.dashboard.useColorSync(true);
+      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboardSettings.toggleSyncColors(true);
+      await dashboardSettings.clickApplyButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
 
@@ -118,7 +119,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be possible to disable color sync', async () => {
-      await PageObjects.dashboard.useColorSync(false);
+      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboardSettings.toggleSyncColors(false);
+      await dashboardSettings.clickApplyButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const colorMapping1 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0));
       const colorMapping2 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(1));

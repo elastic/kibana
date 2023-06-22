@@ -30,20 +30,18 @@ import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './columns/cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
-import { TAGS_LABEL, URL_LABEL } from '../../common/translations';
+import { TAGS_LABEL, URL_LABEL } from '../../../../../common/translations/translations';
 import { EnableMonitorAlert } from './columns/enable_alert';
-import { STATUS_ALERT_COLUMN, TEST_NOW_COLUMN } from './translations';
+import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
-import { TestNowColumn } from './columns/test_now_col';
 import { NoItemsMessage } from './no_items_message';
 
 interface Props extends MonitorListProps {
   pageSize: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
-  refreshedMonitorIds: string[];
   isPending?: boolean;
 }
 
@@ -51,12 +49,10 @@ export const MonitorListComponent: ({
   filters,
   monitorList: { list, error, loading },
   pageSize,
-  refreshedMonitorIds,
   setPageSize,
   isPending,
 }: Props) => any = ({
   filters,
-  refreshedMonitorIds = [],
   monitorList: { list, error, loading },
   pageSize,
   setPageSize,
@@ -115,27 +111,13 @@ export const MonitorListComponent: ({
         },
         render: (
           status: string,
-          {
-            monitor_id: monitorId,
-            state: {
-              timestamp,
-              summaryPings,
-              monitor: { type, duration, checkGroup },
-              error: summaryError,
-            },
-            configId,
-          }: MonitorSummary
+          { state: { timestamp, summaryPings, error: summaryError } }: MonitorSummary
         ) => {
           return (
             <MonitorListStatusColumn
-              configId={configId}
               status={status}
               timestamp={timestamp}
               summaryPings={summaryPings ?? []}
-              monitorType={type}
-              duration={duration?.us}
-              monitorId={monitorId}
-              checkGroup={checkGroup}
               summaryError={summaryError}
             />
           );
@@ -157,7 +139,13 @@ export const MonitorListComponent: ({
         name: URL_LABEL,
         width: '30%',
         render: (url: string) => (
-          <EuiLink href={url} target="_blank" color="text" external>
+          <EuiLink
+            data-test-subj="syntheticsColumnsLink"
+            href={url}
+            target="_blank"
+            color="text"
+            external
+          >
             {url}
           </EuiLink>
         ),
@@ -203,19 +191,6 @@ export const MonitorListComponent: ({
         <EnableMonitorAlert
           monitorId={item.monitor_id}
           selectedMonitor={item.state.summaryPings[0]}
-        />
-      ),
-    },
-    {
-      align: 'center' as const,
-      field: '',
-      name: TEST_NOW_COLUMN,
-      width: '100px',
-      render: (item: MonitorSummary) => (
-        <TestNowColumn
-          monitorId={item.monitor_id}
-          configId={item.configId}
-          summaryPings={item.state.summaryPings}
         />
       ),
     },
@@ -268,7 +243,7 @@ export const MonitorListComponent: ({
                 'aria-label': labels.getExpandDrawerLabel(monitorId),
               })
             : ({ monitor_id: monitorId }) => ({
-                className: refreshedMonitorIds.includes(monitorId) ? 'refresh-row' : undefined,
+                className: undefined,
               })
         }
       />

@@ -9,7 +9,7 @@ import { useReducer, useCallback, useRef, useEffect } from 'react';
 
 import { createAttachments } from './api';
 import * as i18n from './translations';
-import type { Case } from './types';
+import type { CaseUI } from './types';
 import { useToasts } from '../common/lib/kibana';
 import type { CaseAttachmentsWithoutOwner } from '../types';
 
@@ -45,7 +45,7 @@ export interface PostComment {
   caseId: string;
   caseOwner: string;
   data: CaseAttachmentsWithoutOwner;
-  updateCase?: (newCase: Case) => void;
+  updateCase?: (newCase: CaseUI) => void;
   throwOnError?: boolean;
 }
 export interface UseCreateAttachments extends NewCommentState {

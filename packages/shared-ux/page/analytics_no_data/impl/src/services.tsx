@@ -27,10 +27,10 @@ export const AnalyticsNoDataPageProvider: FC<AnalyticsNoDataPageServices> = ({
   children,
   ...services
 }) => {
-  const { kibanaGuideDocLink } = services;
+  const { kibanaGuideDocLink, customBranding } = services;
 
   return (
-    <Context.Provider value={{ kibanaGuideDocLink }}>
+    <Context.Provider value={{ kibanaGuideDocLink, customBranding }}>
       <KibanaNoDataPageProvider {...services}>{children}</KibanaNoDataPageProvider>
     </Context.Provider>
   );
@@ -45,8 +45,10 @@ export const AnalyticsNoDataPageKibanaProvider: FC<AnalyticsNoDataPageKibanaDepe
 }) => {
   const value: Services = {
     kibanaGuideDocLink: dependencies.coreStart.docLinks.links.kibana.guide,
+    customBranding: {
+      hasCustomBranding$: dependencies.coreStart.customBranding.hasCustomBranding$,
+    },
   };
-
   return (
     <Context.Provider {...{ value }}>
       <KibanaNoDataPageKibanaProvider {...dependencies}>{children}</KibanaNoDataPageKibanaProvider>

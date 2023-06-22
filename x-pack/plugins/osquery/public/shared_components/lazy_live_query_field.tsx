@@ -12,6 +12,8 @@ import type { LiveQueryQueryFieldProps } from '../live_queries/form/live_query_q
 import type { ServicesWrapperProps } from './services_wrapper';
 import ServicesWrapper from './services_wrapper';
 
+const LiveQueryField = lazy(() => import('../live_queries/form/live_query_query_field'));
+
 export const getLazyLiveQueryField =
   (services: ServicesWrapperProps['services']) =>
   // eslint-disable-next-line react/display-name
@@ -24,10 +26,8 @@ export const getLazyLiveQueryField =
       query: string;
       ecs_mapping: Record<string, unknown>;
     }>;
-  }) => {
-    const LiveQueryField = lazy(() => import('../live_queries/form/live_query_query_field'));
-
-    return (
+  }) =>
+    (
       <Suspense fallback={null}>
         <ServicesWrapper services={services}>
           <FormProvider {...formMethods}>
@@ -36,4 +36,3 @@ export const getLazyLiveQueryField =
         </ServicesWrapper>
       </Suspense>
     );
-  };

@@ -15,21 +15,17 @@ export const StyledBasicTable = styled(EuiBasicTable)`
     }
   }
 
-  .timelines__hoverActionButton {
+  .inlineActions {
     opacity: 0;
   }
 
   .EntityAnalyticsTableHoverActions {
-    .hoverActions-active {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
+    .inlineActions-popoverOpen {
+      opacity: 1;
     }
 
-    &:hover {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
+    .inline-actions-table-cell:hover {
+      .inlineActions {
         opacity: 1;
       }
     }

@@ -46,140 +46,167 @@ export interface CountResponse {
   indices: string;
 }
 
-export type UptimeEsClient = ReturnType<typeof createUptimeESClient>;
-
-export function createUptimeESClient({
-  isDev,
-  uiSettings,
-  esClient,
-  request,
-  savedObjectsClient,
-}: {
-  isDev?: boolean;
-  uiSettings?: CoreRequestHandlerContext['uiSettings'];
-  esClient: ElasticsearchClient;
+export class UptimeEsClient {
+  isDev: boolean;
   request?: KibanaRequest;
+  baseESClient: ElasticsearchClient;
+  heartbeatIndices: string;
+  isInspectorEnabled?: Promise<boolean | undefined>;
+  inspectableEsQueries: InspectResponse = [];
+  uiSettings?: CoreRequestHandlerContext['uiSettings'];
   savedObjectsClient: SavedObjectsClientContract;
-}) {
-  const initSettings = async (self: UptimeEsClient) => {
-    if (!self.heartbeatIndices) {
-      const [isInspectorEnabled, dynamicSettings] = await Promise.all([
-        getInspectEnabled(uiSettings),
-        savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient),
-      ]);
 
-      self.heartbeatIndices = dynamicSettings?.heartbeatIndices || '';
-      self.isInspectorEnabled = isInspectorEnabled;
-
-      if (self.isInspectorEnabled || isDev) {
-        self.inspectableEsQueriesMap.set(request!, []);
-      }
+  constructor(
+    savedObjectsClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    options?: {
+      isDev?: boolean;
+      uiSettings?: CoreRequestHandlerContext['uiSettings'];
+      request?: KibanaRequest;
+      heartbeatIndices?: string;
     }
-  };
-
-  return {
-    inspectableEsQueriesMap: new WeakMap<KibanaRequest, InspectResponse>(),
-    baseESClient: esClient,
-    heartbeatIndices: '',
-    isInspectorEnabled: undefined as boolean | undefined,
-    async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
-      params: TParams,
-      operationName?: string,
-      index?: string
-    ): Promise<{ body: ESSearchResponse<DocumentSource, TParams> }> {
-      let res: any;
-      let esError: any;
-
-      await initSettings(this);
-
-      const esParams = { index: index ?? this.heartbeatIndices, ...params };
-      const startTime = process.hrtime();
-
-      const startTimeNow = Date.now();
-
-      let esRequestStatus: RequestStatus = RequestStatus.PENDING;
-
-      try {
-        res = await esClient.search(esParams, { meta: true });
-        esRequestStatus = RequestStatus.OK;
-      } catch (e) {
-        esError = e;
-        esRequestStatus = RequestStatus.ERROR;
-      }
-
-      const inspectableEsQueries = this.inspectableEsQueriesMap.get(request!);
-
-      if (inspectableEsQueries) {
-        inspectableEsQueries.push(
-          getInspectResponse({
-            esError,
-            esRequestParams: esParams,
-            esRequestStatus,
-            esResponse: res?.body,
-            kibanaRequest: request!,
-            operationName: operationName ?? '',
-            startTime: startTimeNow,
-          })
-        );
-        if (request && this.isInspectorEnabled) {
-          debugESCall({ startTime, request, esError, operationName: 'search', params: esParams });
-        }
-      }
-
-      if (esError) {
-        throw esError;
-      }
-
-      return res;
-    },
-    async count<TParams>(params: TParams): Promise<CountResponse> {
-      let res: any;
-      let esError: any;
-
-      await initSettings(this);
-
-      const esParams = { index: this.heartbeatIndices, ...params };
-      const startTime = process.hrtime();
-
-      try {
-        res = await esClient.count(esParams, { meta: true });
-      } catch (e) {
-        esError = e;
-      }
-      const inspectableEsQueries = this.inspectableEsQueriesMap.get(request!);
-
-      if (inspectableEsQueries && request && this.isInspectorEnabled) {
-        debugESCall({ startTime, request, esError, operationName: 'count', params: esParams });
-      }
-
-      if (esError) {
-        throw esError;
-      }
-
-      return { result: res, indices: this.heartbeatIndices };
-    },
-    getSavedObjectsClient() {
-      return savedObjectsClient;
-    },
-
-    getInspectData(path: string) {
-      const isInspectorEnabled =
-        (this.isInspectorEnabled || isDev) && path !== API_URLS.DYNAMIC_SETTINGS;
-
-      if (isInspectorEnabled) {
-        return { _inspect: this.inspectableEsQueriesMap.get(request!) };
-      }
-      return {};
-    },
-  };
-}
-
-function getInspectEnabled(uiSettings?: CoreRequestHandlerContext['uiSettings']) {
-  if (!uiSettings) {
-    return false;
+  ) {
+    const { isDev = false, uiSettings, request, heartbeatIndices = '' } = options ?? {};
+    this.uiSettings = uiSettings;
+    this.baseESClient = esClient;
+    this.savedObjectsClient = savedObjectsClient;
+    this.request = request;
+    this.heartbeatIndices = heartbeatIndices;
+    this.isDev = isDev;
+    this.inspectableEsQueries = [];
+    this.getInspectEnabled();
   }
 
-  return uiSettings.client.get<boolean>(enableInspectEsQueries);
+  async initSettings() {
+    const self = this;
+    const heartbeatIndices = await this.getIndices();
+    self.heartbeatIndices = heartbeatIndices || '';
+  }
+
+  async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
+    params: TParams,
+    operationName?: string,
+    index?: string
+  ): Promise<{ body: ESSearchResponse<DocumentSource, TParams> }> {
+    let res: any;
+    let esError: any;
+
+    await this.initSettings();
+
+    const esParams = { index: index ?? this.heartbeatIndices, ...params };
+    const startTime = process.hrtime();
+
+    const startTimeNow = Date.now();
+
+    let esRequestStatus: RequestStatus = RequestStatus.PENDING;
+
+    try {
+      res = await this.baseESClient.search(esParams, { meta: true });
+      esRequestStatus = RequestStatus.OK;
+    } catch (e) {
+      esError = e;
+      esRequestStatus = RequestStatus.ERROR;
+    }
+    if (this.request) {
+      this.inspectableEsQueries.push(
+        getInspectResponse({
+          esError,
+          esRequestParams: esParams,
+          esRequestStatus,
+          esResponse: res?.body,
+          kibanaRequest: this.request,
+          operationName: operationName ?? '',
+          startTime: startTimeNow,
+        })
+      );
+    }
+    const isInspectorEnabled = await this.getInspectEnabled();
+    if (isInspectorEnabled && this.request) {
+      debugESCall({
+        startTime,
+        request: this.request,
+        esError,
+        operationName: 'search',
+        params: esParams,
+      });
+    }
+
+    if (esError) {
+      throw esError;
+    }
+
+    return res;
+  }
+  async count<TParams>(params: TParams): Promise<CountResponse> {
+    let res: any;
+    let esError: any;
+
+    await this.initSettings();
+
+    const esParams = { index: this.heartbeatIndices, ...params };
+    const startTime = process.hrtime();
+
+    try {
+      res = await this.baseESClient.count(esParams, { meta: true });
+    } catch (e) {
+      esError = e;
+    }
+
+    const isInspectorEnabled = await this.getInspectEnabled();
+
+    if (isInspectorEnabled && this.request) {
+      debugESCall({
+        startTime,
+        request: this.request,
+        esError,
+        operationName: 'count',
+        params: esParams,
+      });
+    }
+
+    if (esError) {
+      throw esError;
+    }
+
+    return { result: res, indices: this.heartbeatIndices };
+  }
+  getSavedObjectsClient() {
+    return this.savedObjectsClient;
+  }
+
+  async getInspectData(path: string) {
+    const isInspectorEnabled = await this.getInspectEnabled();
+    const showInspectData =
+      (isInspectorEnabled || this.isDev) && path !== API_URLS.DYNAMIC_SETTINGS;
+
+    if (showInspectData) {
+      return { _inspect: this.inspectableEsQueries };
+    }
+    return {};
+  }
+  async getInspectEnabled() {
+    if (this.isInspectorEnabled !== undefined) {
+      return this.isInspectorEnabled;
+    }
+
+    if (!this.uiSettings) {
+      return false;
+    }
+
+    this.isInspectorEnabled = this.uiSettings.client.get<boolean>(enableInspectEsQueries);
+  }
+
+  async getIndices() {
+    if (this.heartbeatIndices) {
+      return this.heartbeatIndices;
+    }
+    const settings = await savedObjectsAdapter.getUptimeDynamicSettings(this.savedObjectsClient);
+    return settings?.heartbeatIndices || '';
+  }
+}
+
+export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
+  return params;
 }
 
 /* eslint-disable no-console */

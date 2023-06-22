@@ -23,10 +23,11 @@ import type {
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import moment from 'moment';
+import { nonNullable } from '../../../../../../utils';
 import { DateRange } from '../../../../../../../common/types';
 import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
-import { tinymathFunctions, groupArgsByType, unquotedStringRegex, nonNullable } from '../util';
+import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
@@ -395,9 +396,9 @@ export async function getNamedArgumentSuggestions({
         if (dateHistogramInterval == null) return true;
         const parsedValue = parseTimeShift(value);
         return (
-          parsedValue !== 'previous' &&
-          (parsedValue === 'invalid' ||
-            Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval))
+          parsedValue === 'previous' ||
+          parsedValue === 'invalid' ||
+          Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval)
         );
       })
       .map(({ value }) => value);

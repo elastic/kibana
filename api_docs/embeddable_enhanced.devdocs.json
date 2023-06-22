@@ -248,7 +248,13 @@
         "label": "drilldownGrouping",
         "description": [],
         "signature": [
-          "PresentableGroup",
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.PresentableGroup",
+            "text": "PresentableGroup"
+          },
           "<{ embeddable?: ",
           {
             "pluginId": "embeddable",

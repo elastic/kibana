@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/core/server';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
+import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
 /**
  * Types that are no longer registered and will be marked as unregistered
@@ -21,6 +22,8 @@ export const REMOVED_TYPES: string[] = [
   'search_sessions_monitor',
   'search_sessions_cleanup',
   'search_sessions_expire',
+
+  'cleanup_failed_action_executions',
 ];
 
 /**
@@ -43,14 +46,6 @@ export interface TaskRegisterDefinition {
    * An optional more detailed description of what this task does.
    */
   description?: string;
-  /**
-   * Function that customizes how the task should behave when the task fails. This
-   * function can return `true`, `false` or a Date. True will tell task manager
-   * to retry using default delay logic. False will tell task manager to stop retrying
-   * this task. Date will suggest when to the task manager the task should retry.
-   * This function isn't used for recurring tasks, those retry as per their configured recurring schedule.
-   */
-  getRetry?: (attempts: number, error: object) => boolean | Date;
 
   /**
    * Creates an object that has a run function which performs the task's work,
@@ -129,12 +124,25 @@ export class TaskTypeDictionary {
       throw new Error(`Task ${removed} has been removed from registration!`);
     }
 
+    for (const taskType of Object.keys(taskDefinitions)) {
+      if (
+        taskDefinitions[taskType].maxConcurrency !== undefined &&
+        !CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE.includes(taskType)
+      ) {
+        // maxConcurrency is designed to limit how many tasks of the same type a single Kibana
+        // instance should run at a time. Meaning if you have 8 Kibanas running, you will still
+        // see up to 8 tasks running at a time but one per Kibana instance. This is helpful for
+        // reporting purposes but not for many other cases and are better off not setting this value.
+        throw new Error(`maxConcurrency setting isn't allowed for task type: ${taskType}`);
+      }
+    }
+
     try {
       for (const definition of sanitizeTaskDefinitions(taskDefinitions)) {
         this.definitions.set(definition.type, definition);
       }
     } catch (e) {
-      this.logger.error('Could not sanitize task definitions');
+      this.logger.error(`Could not sanitize task definitions: ${e.message}`);
     }
   }
 }

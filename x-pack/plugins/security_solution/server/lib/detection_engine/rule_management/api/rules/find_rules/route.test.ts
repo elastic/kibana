@@ -67,7 +67,7 @@ describe('Find rules route', () => {
         query: {
           page: 2,
           per_page: 20,
-          sort_field: 'timestamp',
+          sort_field: 'name',
           fields: ['field1', 'field2'],
         },
       });

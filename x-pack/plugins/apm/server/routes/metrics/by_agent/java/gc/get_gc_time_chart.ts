@@ -8,7 +8,10 @@
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { METRIC_JAVA_GC_TIME } from '../../../../../../common/es_fields/apm';
-import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
+import {
+  fetchAndTransformGcMetrics,
+  TIME,
+} from './fetch_and_transform_gc_metrics';
 import { ChartBase } from '../../../types';
 import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMConfig } from '../../../../..';
@@ -41,6 +44,7 @@ function getGcTimeChart({
   serviceNodeName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
@@ -50,6 +54,7 @@ function getGcTimeChart({
   serviceNodeName?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
   return fetchAndTransformGcMetrics({
     environment,
@@ -61,8 +66,9 @@ function getGcTimeChart({
     start,
     end,
     chartBase,
-    fieldName: METRIC_JAVA_GC_TIME,
+    rateOrTime: TIME,
     operationName: 'get_gc_time_charts',
+    isOpenTelemetry,
   });
 }
 

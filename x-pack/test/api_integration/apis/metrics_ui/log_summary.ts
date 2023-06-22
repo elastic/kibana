@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(COMMON_HEADERS)
         .send(
           logEntriesSummaryRequestRT.encode({
-            sourceId: 'default',
+            logView: { type: 'log-view-reference', logViewId: 'default' },
             startTimestamp,
             endTimestamp,
             bucketSize,

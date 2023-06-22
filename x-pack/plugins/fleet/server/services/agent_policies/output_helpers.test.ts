@@ -7,6 +7,8 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
 import { appContextService } from '..';
 import { outputService } from '../output';
 
@@ -16,6 +18,10 @@ jest.mock('../app_context');
 jest.mock('../output');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 
 function mockHasLicence(res: boolean) {
@@ -190,7 +196,7 @@ describe('validateOutputForPolicy', () => {
       );
     });
 
-    it('should not allow APM for a logstash output', async () => {
+    it('should not allow logstash output to be used with a policy using fleet server or APM', async () => {
       mockHasLicence(true);
       mockedOutputService.get.mockResolvedValue({
         type: 'logstash',
@@ -199,16 +205,19 @@ describe('validateOutputForPolicy', () => {
         validateOutputForPolicy(
           savedObjectsClientMock.create(),
           {
+            name: 'Fleet server policy',
             data_output_id: 'test1',
             monitoring_output_id: 'test1',
           },
           { data_output_id: 'newdataoutput', monitoring_output_id: 'test1' },
-          true // hasAPM
+          ['elasticsearch']
         )
-      ).rejects.toThrow(/Logstash output is not usable with policy using the APM integration./);
+      ).rejects.toThrow(
+        'Output of type "logstash" is not usable with policy "Fleet server policy".'
+      );
     });
 
-    it('should allow APM for an elasticsearch output', async () => {
+    it('should allow elasticsearch output to be used with a policy using fleet server or APM', async () => {
       mockHasLicence(true);
       mockedOutputService.get.mockResolvedValue({
         type: 'elasticsearch',
@@ -221,7 +230,7 @@ describe('validateOutputForPolicy', () => {
           monitoring_output_id: 'test1',
         },
         { data_output_id: 'newdataoutput', monitoring_output_id: 'test1' },
-        true // hasAPM
+        ['elasticsearch']
       );
     });
 
@@ -238,7 +247,7 @@ describe('validateOutputForPolicy', () => {
           monitoring_output_id: 'test1',
         },
         { data_output_id: 'newdataoutput', monitoring_output_id: 'test1' },
-        false // do not have APM
+        ['logstash', 'elasticsearch']
       );
     });
   });

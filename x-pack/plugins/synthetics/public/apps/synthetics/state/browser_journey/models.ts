@@ -9,6 +9,7 @@ import {
   PendingBlock,
   ScreenshotBlockCache,
   ScreenshotBlockDoc,
+  SyntheticsJourneyApiResponse,
 } from '../../../../../common/runtime_types';
 
 export function isPendingBlock(data: unknown): data is PendingBlock {
@@ -24,6 +25,8 @@ export interface BrowserJourneyState {
   blocks: ScreenshotBlockCache;
   cacheSize: number;
   hitCount: CacheHitCount[];
+  journeys: Record<string, SyntheticsJourneyApiResponse>;
+  journeysLoading: Record<string, boolean>;
 }
 
 export interface PutBlocksPayload {

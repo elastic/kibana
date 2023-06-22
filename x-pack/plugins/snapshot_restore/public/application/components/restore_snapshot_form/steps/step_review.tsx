@@ -21,9 +21,9 @@ import {
   EuiLink,
   EuiIcon,
   EuiToolTip,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { serializeRestoreSettings } from '../../../../../common/lib';
-import { EuiCodeEditor } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
 import { StepProps } from '.';
 import { CollapsibleIndicesList } from '../../collapsible_lists';
@@ -285,18 +285,17 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   const renderJsonTab = () => (
     <Fragment>
       <EuiSpacer size="m" />
-      <EuiCodeEditor
-        mode="json"
-        theme="textmate"
-        isReadOnly
-        setOptions={{ maxLines: Infinity }}
-        value={JSON.stringify(serializedRestoreSettings, null, 2)}
-        editorProps={{ $blockScrolling: Infinity }}
+      <EuiCodeBlock
+        paddingSize="m"
+        language="json"
+        isCopyable
         aria-label={i18n.translate(
           'xpack.snapshotRestore.restoreForm.stepReview.jsonTab.jsonAriaLabel',
           { defaultMessage: 'Restore settings to be executed' }
         )}
-      />
+      >
+        {JSON.stringify(serializedRestoreSettings, null, 2)}
+      </EuiCodeBlock>
     </Fragment>
   );
 

@@ -56,6 +56,8 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     namespace,
     overwrite,
     refresh,
+    compatibilityMode,
+    managed,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     return importSavedObjectsFromStream({
       readStream,
@@ -63,28 +65,34 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       namespace,
       overwrite,
       refresh,
+      compatibilityMode,
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
+      managed,
     });
   }
 
   public resolveImportErrors({
     readStream,
     createNewCopies,
+    compatibilityMode,
     namespace,
     retries,
+    managed,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     return resolveSavedObjectsImportErrors({
       readStream,
       createNewCopies,
+      compatibilityMode,
       namespace,
       retries,
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
+      managed,
     });
   }
 }

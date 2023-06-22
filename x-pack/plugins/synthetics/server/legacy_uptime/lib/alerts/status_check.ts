@@ -14,18 +14,21 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar, TimeUnitChar } from '@kbn/observability-plugin/common';
+import moment from 'moment';
 import { UptimeAlertTypeFactory } from './types';
 import {
   StatusCheckFilters,
   Ping,
   GetMonitorAvailabilityParams,
+  OverviewPing,
 } from '../../../../common/runtime_types';
-import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import {
   updateState,
   getViewInAppUrl,
   setRecoveredAlertsContext,
   getAlertDetailsUrl,
+  UptimeRuleTypeAlertDefinition,
 } from './common';
 import {
   commonMonitorStateI18,
@@ -41,13 +44,12 @@ import {
 } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
-import { UMServerLibs, UptimeEsClient, createUptimeESClient } from '../lib';
+import { UMServerLibs, UptimeEsClient } from '../lib';
 import {
   ACTION_VARIABLES,
   ALERT_DETAILS_URL,
   ALERT_REASON_MSG,
   MESSAGE,
-  MONITOR_WITH_GEO,
   VIEW_IN_APP_URL,
 } from './action_variables';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
@@ -104,8 +106,8 @@ export const hasFilters = (filters?: StatusCheckFilters) => {
 
 export const generateFilterDSL = async (
   getIndexPattern: () => Promise<IndexPatternTitleAndFields | undefined>,
-  filters: StatusCheckFilters,
-  search: string
+  filters?: StatusCheckFilters,
+  search?: string
 ) => {
   const filtersExist = hasFilters(filters);
   if (!filtersExist && !search) return undefined;
@@ -122,8 +124,8 @@ export const generateFilterDSL = async (
 
 export const formatFilterString = async (
   uptimeEsClient: UptimeEsClient,
-  filters: StatusCheckFilters,
-  search: string,
+  filters?: StatusCheckFilters,
+  search?: string,
   libs?: UMServerLibs
 ) =>
   await generateFilterDSL(
@@ -137,10 +139,16 @@ export const formatFilterString = async (
     search
   );
 
-export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
+export const getMonitorSummary = (
+  monitorInfo: Ping & { '@timestamp'?: string },
+  statusMessage: string
+) => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
+  const checkedAt = moment(monitorInfo['@timestamp'] ?? monitorInfo.timestamp).format('LLL');
+
   const summary = {
+    checkedAt,
     monitorUrl: monitorInfo.url?.full,
     monitorId: monitorInfo.monitor?.id,
     monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
@@ -152,8 +160,37 @@ export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
 
   return {
     ...summary,
-    [ALERT_REASON_MSG]: `${monitorName} from ${observerLocation} ${statusMessage}`,
+    [ALERT_REASON_MSG]: getReasonMessage({
+      name: monitorName,
+      location: observerLocation,
+      status: statusMessage,
+      timestamp: monitorInfo['@timestamp'] ?? monitorInfo.timestamp,
+    }),
   };
+};
+
+export const getReasonMessage = ({
+  name,
+  status,
+  location,
+  timestamp,
+}: {
+  name: string;
+  location: string;
+  status: string;
+  timestamp: string;
+}) => {
+  const checkedAt = moment(timestamp).format('LLL');
+
+  return i18n.translate('xpack.synthetics.alerts.monitorStatus.reasonMessage', {
+    defaultMessage: `Monitor "{name}" from {location} {status} Checked at {checkedAt}.`,
+    values: {
+      name,
+      status,
+      location,
+      checkedAt,
+    },
+  });
 };
 
 export const getMonitorAlertDocument = (monitorSummary: Record<string, string | undefined>) => ({
@@ -198,7 +235,7 @@ export const getStatusMessage = (
   return statusMessage + availabilityMessage;
 };
 
-export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
+export const getInstanceId = (monitorInfo: Ping | OverviewPing, monIdByLoc: string) => {
   const normalizeText = (txt: string) => {
     // replace url and name special characters with -
     return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
@@ -289,7 +326,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   actionVariables: {
     context: [
       ACTION_VARIABLES[MESSAGE],
-      ACTION_VARIABLES[MONITOR_WITH_GEO],
       ...(plugins.observability.getAlertDetailsConfig()?.uptime.enabled
         ? [ACTION_VARIABLES[ALERT_DETAILS_URL]]
         : []),
@@ -332,10 +368,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       timerangeUnit,
     } = rawParams;
     const { basePath } = server;
-    const uptimeEsClient = createUptimeESClient({
-      esClient: scopedClusterClient.asCurrentUser,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-    });
+      scopedClusterClient.asCurrentUser
+    );
 
     const filterString = await formatFilterString(uptimeEsClient, filters, search, libs);
     const timespanInterval = `${String(timerangeCount)}${timerangeUnit}`;
@@ -416,7 +452,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
       setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
 
-      return updateState(state, downMonitorsByLocation.length > 0);
+      return { state: updateState(state, downMonitorsByLocation.length > 0) };
     }
 
     let availabilityResults: GetMonitorAvailabilityResult[] = [];
@@ -496,6 +532,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
 
-    return updateState(state, downMonitorsByLocation.length > 0);
+    return { state: updateState(state, downMonitorsByLocation.length > 0) };
   },
+  alerts: UptimeRuleTypeAlertDefinition,
 });

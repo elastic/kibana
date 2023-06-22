@@ -6,7 +6,14 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { BehaviorSubject, Observable, OperatorFunction, PartialObserver, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  OperatorFunction,
+  PartialObserver,
+  ReplaySubject,
+  Subscription,
+} from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 export const useLatest = <Value>(value: Value) => {
@@ -42,9 +49,29 @@ export const useBehaviorSubject = <
   deriveObservableOnce: (input$: Observable<InputValue>) => OutputObservable,
   createInitialValue: () => InputValue
 ) => {
-  const [subject$] = useState(() => new BehaviorSubject<InputValue>(createInitialValue()));
+  const [[subject$, next], _] = useState(() => {
+    const newSubject$ = new BehaviorSubject<InputValue>(createInitialValue());
+    const newNext = newSubject$.next.bind(newSubject$);
+    return [newSubject$, newNext] as const;
+  });
   const [output$] = useState(() => deriveObservableOnce(subject$));
-  return [output$, subject$.next.bind(subject$)] as const;
+  return [output$, next] as const;
+};
+
+export const useReplaySubject = <
+  InputValue,
+  OutputValue,
+  OutputObservable extends Observable<OutputValue>
+>(
+  deriveObservableOnce: (input$: Observable<InputValue>) => OutputObservable
+) => {
+  const [[subject$, next], _] = useState(() => {
+    const newSubject$ = new ReplaySubject<InputValue>();
+    const newNext = newSubject$.next.bind(newSubject$);
+    return [newSubject$, newNext] as const;
+  });
+  const [output$] = useState(() => deriveObservableOnce(subject$));
+  return [output$, next] as const;
 };
 
 export const useObservableState = <State, InitialState>(

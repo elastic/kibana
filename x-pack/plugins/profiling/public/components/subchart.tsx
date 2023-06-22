@@ -6,10 +6,13 @@
  */
 
 import {
+  AnnotationDomainType,
   AreaSeries,
   Axis,
   Chart,
   CurveType,
+  LineAnnotation,
+  Position,
   ScaleType,
   Settings,
   timeFormatter,
@@ -20,6 +23,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -28,14 +32,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { StackFrameMetadata } from '../../common/profiling';
-import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
-import { CountPerTime, OTHER_BUCKET_LABEL } from '../../common/topn';
+import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
 import { useProfilingParams } from '../hooks/use_profiling_params';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
+import { asNumber } from '../utils/formatters/as_number';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { StackFrameSummary } from './stack_frame_summary';
+import { getTracesViewRouteParams } from './stack_traces_view/utils';
 
 export interface SubChartProps {
   index: number;
@@ -52,11 +57,12 @@ export interface SubChartProps {
   style?: React.ComponentProps<typeof EuiFlexGroup>['style'];
   showFrames: boolean;
   padTitle: boolean;
+  sample: TopNSample | null;
 }
 
 const NUM_DISPLAYED_FRAMES = 5;
 
-export const SubChart: React.FC<SubChartProps> = ({
+export function SubChart({
   index,
   color,
   category,
@@ -71,24 +77,18 @@ export const SubChart: React.FC<SubChartProps> = ({
   style,
   showFrames,
   padTitle,
-}) => {
+  sample,
+}: SubChartProps) {
   const theme = useEuiTheme();
 
   const profilingRouter = useProfilingRouter();
 
   const { path, query } = useProfilingParams('/stacktraces/{topNType}');
 
-  const href = profilingRouter.link('/stacktraces/{topNType}', {
-    path: {
-      topNType: TopNType.Traces,
-    },
-    query: {
-      ...query,
-      kuery: `${query.kuery ? `(${query.kuery}) AND ` : ''}${getFieldNameForTopNType(
-        path.topNType
-      )}:"${category}"`,
-    },
-  });
+  const href = profilingRouter.link(
+    '/stacktraces/{topNType}',
+    getTracesViewRouteParams({ query, topNType: path.topNType, category })
+  );
 
   const timeZone = useKibanaTimeZoneSetting();
 
@@ -187,6 +187,8 @@ export const SubChart: React.FC<SubChartProps> = ({
               <EuiLink onClick={() => onShowMoreClick?.()}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
+            ) : category === OTHER_BUCKET_LABEL ? (
+              <EuiText size="s">{label}</EuiText>
             ) : (
               <EuiLink href={href}>
                 <EuiText size="s">{label}</EuiText>
@@ -194,7 +196,23 @@ export const SubChart: React.FC<SubChartProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{asPercentage(percentage / 100)}</EuiText>
+            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexEnd">
+              {sample ? (
+                <EuiFlexItem>
+                  <EuiText size="m">{asPercentage(sample.Percentage / 100)}</EuiText>
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem>
+                <EuiText size={sample ? 'xs' : 's'}>
+                  {sample
+                    ? i18n.translate('xpack.profiling.stackFrames.subChart.avg', {
+                        defaultMessage: 'avg. {percentage}',
+                        values: { percentage: asPercentage(percentage / 100) },
+                      })
+                    : asPercentage(percentage / 100)}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -218,6 +236,23 @@ export const SubChart: React.FC<SubChartProps> = ({
             curve={CurveType.CURVE_STEP_AFTER}
             color={color}
           />
+          {sample ? (
+            <LineAnnotation
+              id="highlighted_sample"
+              domainType={AnnotationDomainType.XDomain}
+              dataValues={[{ dataValue: sample.Timestamp }]}
+              style={{
+                line: {
+                  strokeWidth: 2,
+                  dash: [4, 4],
+                  opacity: 0.5,
+                },
+              }}
+              marker={<EuiIcon type="dot" />}
+              markerPosition={Position.Top}
+              hideTooltips
+            />
+          ) : null}
           {showAxes ? (
             <Axis
               id="bottom-axis"
@@ -250,14 +285,16 @@ export const SubChart: React.FC<SubChartProps> = ({
               backgroundColor: `rgba(255, 255, 255, 0.75)`,
             }}
           >
-            {i18n.translate('xpack.profiling.maxValue', {
-              defaultMessage: 'Max: {max}',
-              values: { max: Math.max(...data.map((value) => value.Count ?? 0)) },
-            })}
+            {sample
+              ? asNumber(sample.Count!)
+              : i18n.translate('xpack.profiling.maxValue', {
+                  defaultMessage: 'Max: {max}',
+                  values: { max: asNumber(Math.max(...data.map((value) => value.Count ?? 0))) },
+                })}
           </div>
         ) : null}
       </EuiFlexItem>
       {bottomElement}
     </EuiFlexGroup>
   );
-};
+}

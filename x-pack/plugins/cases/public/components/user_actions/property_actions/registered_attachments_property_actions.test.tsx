@@ -16,13 +16,16 @@ import {
   createAppMockRenderer,
 } from '../../../common/mock';
 import { RegisteredAttachmentsPropertyActions } from './registered_attachments_property_actions';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 describe('RegisteredAttachmentsPropertyActions', () => {
   let appMock: AppMockRenderer;
 
   const props = {
     isLoading: false,
+    registeredAttachmentActions: [],
     onDelete: jest.fn(),
+    hideDefaultActions: false,
   };
 
   beforeEach(() => {
@@ -33,26 +36,26 @@ describe('RegisteredAttachmentsPropertyActions', () => {
   it('renders the correct number of actions', async () => {
     const result = appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.getByTestId('property-actions-group').children.length).toBe(1);
-    expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(1);
+    expect(result.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
   });
 
   it('renders the modal info correctly', async () => {
     const result = appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-trash'));
+    userEvent.click(result.getByTestId('property-actions-user-action-trash'));
 
     await waitFor(() => {
       expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
@@ -65,14 +68,14 @@ describe('RegisteredAttachmentsPropertyActions', () => {
   it('remove attachments correctly', async () => {
     const result = appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-trash'));
+    userEvent.click(result.getByTestId('property-actions-user-action-trash'));
 
     await waitFor(() => {
       expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
@@ -86,13 +89,45 @@ describe('RegisteredAttachmentsPropertyActions', () => {
     appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
     const result = appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
 
-    expect(result.queryByTestId('property-actions')).not.toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+  });
+
+  it('does not show the property actions when hideDefaultActions is enabled', async () => {
+    const result = appMock.render(
+      <RegisteredAttachmentsPropertyActions {...props} hideDefaultActions={true} />
+    );
+
+    expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });
 
   it('does show the property actions with only delete permissions', async () => {
     appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
     const result = appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+  });
+
+  it('renders correctly registered attachments', async () => {
+    const onClick = jest.fn();
+    const action = [
+      {
+        type: AttachmentActionType.BUTTON as const,
+        label: 'My button',
+        iconType: 'download',
+        onClick,
+      },
+    ];
+
+    const result = appMock.render(
+      <RegisteredAttachmentsPropertyActions {...props} registeredAttachmentActions={action} />
+    );
+
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await waitForEuiPopoverOpen();
+
+    expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(2);
+    expect(result.queryByTestId('property-actions-user-action-download')).toBeInTheDocument();
   });
 });

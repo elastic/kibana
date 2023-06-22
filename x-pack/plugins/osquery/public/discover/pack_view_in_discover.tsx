@@ -21,7 +21,7 @@ interface PackViewInActionProps {
   actionId?: string;
 }
 const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ item }) => {
-  const { action_id: actionId, agents: agentIds, interval } = item;
+  const { action_id: actionId, interval } = item;
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
@@ -37,7 +37,6 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ it
   return (
     <ViewResultsInDiscoverAction
       actionId={actionId}
-      agentIds={agentIds}
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}

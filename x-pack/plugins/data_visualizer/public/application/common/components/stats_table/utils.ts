@@ -40,7 +40,7 @@ export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
 // Map of DataVisualizerTable breakpoints specific to the table component
 // Note that the table width is not always the full width of the browser window
 const TABLE_BREAKPOINTS = {
-  small: 600,
+  small: 700,
   medium: 1000,
   large: Infinity, // default
 };

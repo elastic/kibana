@@ -60,6 +60,7 @@ export const createVersionCheckPostAuthHandler = (kibanaVersion: string): OnPost
   };
 };
 
+// TODO: implement header required for accessing internal routes. See https://github.com/elastic/kibana/issues/151940
 export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPreResponseHandler => {
   const {
     name: serverName,

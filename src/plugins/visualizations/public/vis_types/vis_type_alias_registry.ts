@@ -30,7 +30,7 @@ export interface VisualizationListItem {
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
-  toListItem: (savedObject: SimpleSavedObject) => VisualizationListItem;
+  toListItem: (savedObject: SimpleSavedObject<any>) => VisualizationListItem;
 }
 
 export interface VisTypeAlias {

@@ -6,7 +6,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { PaletteRegistry } from '@kbn/coloring';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/common/ems_settings';
 import { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { MapsConfigType } from '../config';
@@ -41,16 +40,16 @@ export const getIndexPatternSelectComponent = () =>
   pluginsStart.unifiedSearch.ui.IndexPatternSelect;
 export const getSearchBar = () => pluginsStart.unifiedSearch.ui.SearchBar;
 export const getHttp = () => coreStart.http;
-export const getExecutionContext = () => coreStart.executionContext;
+export const getExecutionContextService = () => coreStart.executionContext;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;
 export const getToasts = () => coreStart.notifications.toasts;
-export const getSavedObjectsClient = () => coreStart.savedObjects.client;
 export const getCoreChrome = () => coreStart.chrome;
 export const getDevToolsCapabilities = () => coreStart.application.capabilities.dev_tools;
 export const getMapsCapabilities = () => coreStart.application.capabilities.maps;
 export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize;
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
+export const getCharts = () => pluginsStart.charts;
 export const getData = () => pluginsStart.data;
 export const getUiActions = () => pluginsStart.uiActions;
 export const getCore = () => coreStart;
@@ -68,6 +67,7 @@ export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getApplication = () => coreStart.application;
 export const getUsageCollection = () => pluginsStart.usageCollection;
+export const getContentManagement = () => pluginsStart.contentManagement;
 export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
 };
@@ -90,34 +90,7 @@ export const getEMSSettings: () => EMSSettings = () => {
 
 export const getEmsTileLayerId = () => mapsEms.config.emsTileLayerId;
 
-export const getTilemap = () => {
-  if (mapsEms.config.tilemap) {
-    return mapsEms.config.tilemap;
-  } else {
-    return {};
-  }
-};
-
 export const getShareService = () => pluginsStart.share;
 
 export const getIsAllowByValueEmbeddables = () =>
   pluginsStart.dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
-
-export async function getChartsPaletteServiceGetColor(): Promise<
-  ((value: string) => string) | null
-> {
-  const paletteRegistry: PaletteRegistry | null = pluginsStart.charts
-    ? await pluginsStart.charts.palettes.getPalettes()
-    : null;
-  if (!paletteRegistry) {
-    return null;
-  }
-
-  const paletteDefinition = paletteRegistry.get('default');
-  const chartConfiguration = { syncColors: true };
-  return (value: string) => {
-    const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
-    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
-    return color ? color : '#3d3d3d';
-  };
-}

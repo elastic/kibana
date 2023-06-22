@@ -168,7 +168,8 @@ export class EventLogClient implements IEventLogClient {
     type: string,
     authFilter: KueryNode,
     options?: AggregateOptionsType,
-    namespaces?: Array<string | undefined>
+    namespaces?: Array<string | undefined>,
+    includeSpaceAgnostic?: boolean
   ) {
     if (!authFilter) {
       throw new Error('No authorization filter defined!');
@@ -188,6 +189,7 @@ export class EventLogClient implements IEventLogClient {
       type,
       authFilter,
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
+      includeSpaceAgnostic,
     });
   }
 

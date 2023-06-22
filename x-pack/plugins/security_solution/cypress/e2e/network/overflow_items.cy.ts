@@ -28,6 +28,9 @@ describe('Overflow items', () => {
     before(() => {
       esArchiverLoad('network');
       login();
+    });
+
+    beforeEach(() => {
       visit(NETWORK_URL);
       cy.get(DESTINATION_DOMAIN).should('not.exist');
       cy.get(FILTER_IN).should('not.exist');

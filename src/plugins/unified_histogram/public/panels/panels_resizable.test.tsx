@@ -176,22 +176,19 @@ describe('Panels resizable', () => {
     const attachTo = document.createElement('div');
     document.body.appendChild(attachTo);
     const component = mountComponent({ attachTo });
-    const wrapper = component.find('[data-test-subj="unifiedHistogramResizableContainerWrapper"]');
+    const getContainer = () =>
+      component.find('[data-test-subj="unifiedHistogramResizableContainer"]').at(0);
     const resizeButton = component.find('button[data-test-subj="unifiedHistogramResizableButton"]');
-    const resizeButtonInner = component.find(
-      '[data-test-subj="unifiedHistogramResizableButtonInner"]'
-    );
-    const mouseEvent = {
-      pageX: 0,
-      pageY: 0,
-      clientX: 0,
-      clientY: 0,
-    };
-    resizeButtonInner.simulate('mousedown', mouseEvent);
-    resizeButton.simulate('mousedown', mouseEvent);
+    act(() => {
+      const onResizeStart = getContainer().prop('onResizeStart') as Function;
+      onResizeStart('pointer');
+    });
     (resizeButton.getDOMNode() as HTMLElement).focus();
-    wrapper.simulate('mouseup', mouseEvent);
-    resizeButton.simulate('click', mouseEvent);
+    forceRender(component);
+    act(() => {
+      const onResizeEnd = getContainer().prop('onResizeEnd') as Function;
+      onResizeEnd();
+    });
     expect(resizeButton.getDOMNode()).toHaveFocus();
     await waitFor(() => {
       expect(resizeButton.getDOMNode()).not.toHaveFocus();

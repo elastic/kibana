@@ -10,8 +10,8 @@ import { readFileSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 
 import { set } from '@kbn/safer-lodash-set';
+import { ensureDeepObject } from '@kbn/std';
 import { isPlainObject } from 'lodash';
-import { ensureDeepObject } from './ensure_deep_object';
 
 const readYaml = (path: string) => {
   try {

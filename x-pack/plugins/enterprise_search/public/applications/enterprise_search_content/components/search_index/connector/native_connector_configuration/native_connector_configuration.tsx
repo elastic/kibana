@@ -23,7 +23,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { NATIVE_CONNECTOR_ICONS } from '../../../../../../assets/source_icons/native_connector_icons';
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { hasConfiguredConfiguration } from '../../../../utils/has_configured_configuration';
@@ -32,6 +31,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { ConnectorNameAndDescription } from '../connector_name_and_description/connector_name_and_description';
 import { NATIVE_CONNECTORS } from '../constants';
 
+import { ConvertConnector } from './convert_connector';
 import { NativeConnectorAdvancedConfiguration } from './native_connector_advanced_configuration';
 import { NativeConnectorConfigurationConfig } from './native_connector_configuration_config';
 import { ResearchConfiguration } from './research_configuration';
@@ -55,8 +55,8 @@ export const NativeConnectorConfiguration: React.FC = () => {
   const hasConfigured = hasConfiguredConfiguration(index.connector.configuration);
   const hasConfiguredAdvanced = index.connector.last_synced || index.connector.scheduling.enabled;
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
+  const icon = nativeConnector.icon;
 
-  const icon = NATIVE_CONNECTOR_ICONS[nativeConnector.serviceType];
   return (
     <>
       <EuiSpacer />
@@ -202,6 +202,11 @@ export const NativeConnectorConfiguration: React.FC = () => {
                     )}
                   </EuiLink>
                 </EuiText>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPanel hasBorder hasShadow={false}>
+                <ConvertConnector />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>

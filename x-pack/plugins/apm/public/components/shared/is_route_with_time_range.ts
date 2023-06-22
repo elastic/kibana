@@ -23,6 +23,7 @@ export function isRouteWithTimeRange({
       route.path === '/dependencies' ||
       route.path === '/dependencies/inventory' ||
       route.path === '/services/{serviceName}' ||
+      route.path === '/mobile-services/{serviceName}' ||
       route.path === '/service-groups' ||
       route.path === '/storage-explorer' ||
       location.pathname === '/' ||
@@ -48,6 +49,7 @@ export function isRouteWithComparison({
       route.path === '/dependencies' ||
       route.path === '/dependencies/inventory' ||
       route.path === '/services/{serviceName}' ||
+      route.path === '/mobile-services/{serviceName}' ||
       route.path === '/service-groups' ||
       location.pathname === '/' ||
       location.pathname === ''

@@ -1,0 +1,62 @@
+import { Canvas, Meta, Story, ArgsTable } from '@storybook/addon-docs/blocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { ControlSlider } from '../ui/slider_control'
+
+
+export const Template = (args) => <I18nProvider><ControlSlider {...args} /></I18nProvider>;
+
+<Meta 
+    title="Random Sampling/Control Slider"
+    component={ControlSlider}
+/>
+
+
+# Overview
+
+The following control slider component has been designed to work as a shared component in Kibana:
+
+<Canvas>
+    <Story 
+        name='basic'
+        args={
+            {
+                values:[0.00001, 0.0001, 0.001, 0.01, 0.1, 1],
+                currentValue:0.001,
+                'data-test-subj':'test-id'
+            }
+        }
+        argTypes={
+            { onChange: { action: 'changed' } }
+        }
+        >
+    {Template.bind({})}
+    </Story>
+</Canvas>
+
+When the control slider is disabled an explanation tooltip is shown to the user:
+
+<Canvas>
+    <Story 
+    name='disabled'
+    args={
+            {
+                values:[0.00001, 0.0001, 0.001, 0.01, 0.1, 1],
+                currentValue:0.001,
+                disabled:true,
+                disabledReason:'Control was disabled due to X and Y',
+                'data-test-subj':'test-id'
+            }
+        }
+        argTypes={
+            { onChange: { action: 'changed' } }
+        }
+        >
+    {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Component props
+
+The component exposes the following properties:
+
+<ArgsTable story="basic"/>

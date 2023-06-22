@@ -172,6 +172,7 @@ export class DatasourceComponent extends PureComponent {
             className="canvasDataSource__triggerButton"
             flush="left"
             size="s"
+            data-test-subj="canvasChangeDatasourceButton"
           >
             <EuiIcon type={stateDatasource.image} className="canvasDataSource__triggerButtonIcon" />
             {stateDatasource.displayName}
@@ -188,7 +189,14 @@ export class DatasourceComponent extends PureComponent {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton disabled={isInvalid} size="s" onClick={this.save} fill color="success">
+                  <EuiButton
+                    disabled={isInvalid}
+                    size="s"
+                    onClick={this.save}
+                    fill
+                    color="success"
+                    data-test-subj="canvasSaveDatasourceButton"
+                  >
                     {strings.getSaveButtonLabel()}
                   </EuiButton>
                 </EuiFlexItem>

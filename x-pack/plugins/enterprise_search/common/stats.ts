@@ -8,8 +8,11 @@
 export interface SyncJobsStats {
   connected: number;
   errors: number;
+  idle: number;
   in_progress: number;
   incomplete: number;
   orphaned_jobs: number;
-  stuck: number;
+}
+export interface CloudHealth {
+  has_min_connector_memory: boolean;
 }

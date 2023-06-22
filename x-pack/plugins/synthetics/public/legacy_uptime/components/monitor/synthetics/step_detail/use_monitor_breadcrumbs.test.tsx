@@ -7,7 +7,8 @@
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { of } from 'rxjs';
 import { render } from '../../../../lib/helper/rtl_helpers';
 import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';

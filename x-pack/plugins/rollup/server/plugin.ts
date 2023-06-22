@@ -92,7 +92,9 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
 
     if (usageCollection) {
       try {
-        registerRollupUsageCollector(usageCollection, savedObjects.getKibanaIndex());
+        const getIndexForType = (type: string) =>
+          getStartServices().then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+        registerRollupUsageCollector(usageCollection, getIndexForType);
       } catch (e) {
         this.logger.warn(`Registering Rollup collector failed: ${e}`);
       }

@@ -7,10 +7,10 @@
 
 import { CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import type { Comment } from '../../containers/types';
+import type { CommentUI } from '../../containers/types';
 import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
 
-const comments: Comment[] = [
+const comments: CommentUI[] = [
   {
     type: CommentType.alert,
     alertId: 'alert-id-1',
@@ -62,7 +62,7 @@ describe('helpers', () => {
       ['title', true],
       ['status', true],
       ['settings', true],
-      ['create_case', false],
+      ['create_case', true],
       ['delete_case', false],
     ];
 

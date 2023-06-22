@@ -93,7 +93,7 @@ export const getRotatingNumberVisualization = ({
       {
         previewIcon: 'refresh',
         score: 0.5,
-        title: `Rotating ${table.label}` || 'Rotating number',
+        title: table.label ? `Rotating ${table.label}` : 'Rotating number',
         state: {
           layerId: table.layerId,
           color: state?.color || DEFAULT_COLOR,
@@ -180,10 +180,5 @@ export const getRotatingNumberVisualization = ({
       </KibanaThemeProvider>,
       domElement
     );
-  },
-
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
   },
 });

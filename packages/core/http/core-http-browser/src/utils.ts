@@ -10,5 +10,5 @@ import type { IHttpFetchError } from './types';
 
 /** @public */
 export function isHttpFetchError<T>(error: T | IHttpFetchError): error is IHttpFetchError {
-  return error instanceof Error && ('request' in error || 'req' in error) && 'name' in error;
+  return error instanceof Error && 'request' in error && 'name' in error;
 }

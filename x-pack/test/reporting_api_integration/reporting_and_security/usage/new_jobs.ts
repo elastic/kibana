@@ -37,7 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
         await Promise.all([reportingAPI.postJob(urls.JOB_PARAMS_CSV_DEFAULT_SPACE)])
       );
 
-      const usage = await usageAPI.getUsageStats();
+      const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+      const usage = stats.stack_stats.kibana.plugins.reporting;
       reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 1);
     });
 
@@ -49,7 +50,8 @@ export default function ({ getService }: FtrProviderContext) {
         ])
       );
 
-      const usage = await usageAPI.getUsageStats();
+      const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+      const usage = stats.stack_stats.kibana.plugins.reporting;
       reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 2);
       reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 2);
     });
@@ -62,7 +64,8 @@ export default function ({ getService }: FtrProviderContext) {
         ])
       );
 
-      const usage = await usageAPI.getUsageStats();
+      const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+      const usage = stats.stack_stats.kibana.plugins.reporting;
       reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 1);
       reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 1);
     });
