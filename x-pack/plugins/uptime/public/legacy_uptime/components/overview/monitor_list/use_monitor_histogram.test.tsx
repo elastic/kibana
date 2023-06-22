@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useMonitorHistogram } from './use_monitor_histogram';
 import * as searchHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 import * as reduxHooks from 'react-redux';
-import { WrappedHelper } from '@kbn/uptime-plugin/public/legacy_uptime/lib/helper/rtl_helpers';
+import { WrappedHelper } from '../../../lib/helper/rtl_helpers';
 
 describe('useMonitorHistogram', () => {
   const dynamicIndexPattern = 'synthetics-*';
