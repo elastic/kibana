@@ -36,7 +36,7 @@ export type {
 /**
  * @TODO move to be within @kbn-reporting-export-types
  */
-export class PdfExportType extends ExportType {
+export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;
   name = 'PDF';
   jobType = PDF_JOB_TYPE_V2;
@@ -71,7 +71,7 @@ export class PdfExportType extends ExportType {
    * @param JobParamsPDFV2
    * @returns jobParams
    */
-  public createJob({ locatorParams, ...jobParams }: JobParamsPDFV2) {
+  public createJob = ({ locatorParams, ...jobParams }: JobParamsPDFV2) => {
     return {
       ...jobParams,
       locatorParams,
@@ -79,7 +79,7 @@ export class PdfExportType extends ExportType {
       browserTimezone: jobParams.browserTimezone,
       forceNow: new Date().toISOString(),
     };
-  }
+  };
 
   /**
    *
@@ -88,12 +88,12 @@ export class PdfExportType extends ExportType {
    * @param cancellationToken
    * @param stream
    */
-  public async runTask(
+  public runTask = (
     payload: TaskPayloadPDFV2,
     jobId: string,
     cancellationToken: CancellationToken,
     stream: Writable
-  ) {
+  ) => {
     const jobLogger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
@@ -169,5 +169,5 @@ export class PdfExportType extends ExportType {
 
     apmTrans?.end();
     return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
-  }
+  };
 }
