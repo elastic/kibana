@@ -97,7 +97,7 @@ describe('Discover flyout', function () {
   it('should be rendered correctly using an data view without timefield', async () => {
     const { component, props } = await mountComponent({});
 
-    const url = findTestSubject(component, 'docTableViewSingleDocument').prop('href');
+    const url = findTestSubject(component, 'docTableRowAction').prop('href');
     expect(url).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(props.onClose).toHaveBeenCalled();
@@ -106,13 +106,10 @@ describe('Discover flyout', function () {
   it('should be rendered correctly using an data view with timefield', async () => {
     const { component, props } = await mountComponent({ dataView: dataViewWithTimefieldMock });
 
-    const viewSingleDocument = findTestSubject(component, 'docTableViewSingleDocument');
-    const viewSurroundingDocuments = findTestSubject(component, 'docTableViewSurroundingDocuments');
-
-    expect(viewSingleDocument.prop('href')).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
-    expect(viewSurroundingDocuments.prop('href')).toMatchInlineSnapshot(
-      `"mock-context-redirect-url"`
-    );
+    const actions = findTestSubject(component, 'docTableRowAction');
+    expect(actions.length).toBe(2);
+    expect(actions.first().prop('href')).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
+    expect(actions.last().prop('href')).toMatchInlineSnapshot(`"mock-context-redirect-url"`);
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(props.onClose).toHaveBeenCalled();
   });

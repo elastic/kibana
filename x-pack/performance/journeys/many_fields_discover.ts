@@ -10,6 +10,8 @@ import { subj } from '@kbn/test-subj-selector';
 import { waitForChrome } from '../utils';
 
 export const journey = new Journey({
+  // FAILING: https://github.com/elastic/kibana/issues/130287
+  // skipped: true,
   kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
   esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
 })
@@ -22,7 +24,7 @@ export const journey = new Journey({
   .step('Expand the first document', async ({ page }) => {
     const expandButtons = page.locator(subj('docTableExpandToggleColumn'));
     await expandButtons.first().click();
-    await page.waitForSelector(subj('docTableViewSingleDocument'));
-    await page.click(subj('docTableViewSingleDocument'));
+    await page.waitForSelector(subj('docTableRowAction'));
+    await page.click(subj('docTableRowAction'));
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   });
