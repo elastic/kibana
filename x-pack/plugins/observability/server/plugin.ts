@@ -242,7 +242,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     );
     registerSloUsageCollector(plugins.usageCollection);
 
-    const openAIService = config.coPilot?.enabled ? new OpenAIService(config.coPilot) : undefined;
+    const openAIService = config.aiAssistant?.enabled
+      ? new OpenAIService(config.aiAssistant)
+      : undefined;
 
     core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({

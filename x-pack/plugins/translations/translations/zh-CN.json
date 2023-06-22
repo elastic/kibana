@@ -22912,8 +22912,6 @@
     "xpack.ml.customUrlsEditor.customTimeRangeEndDate": "结束日期",
     "xpack.ml.customUrlsEditor.customTimeRangeLabel": "定制时间范围",
     "xpack.ml.customUrlsEditor.customTimeRangeStartDate": "开始日期",
-    "xpack.ml.customUrlsEditor.customTimeRangeSwitch": "添加定制时间范围？",
-    "xpack.ml.customUrlsEditor.customTimeRangeTooltip": "如果未设置，时间范围将默认采用全局设置。",
     "xpack.ml.customUrlsEditor.dashboardNameLabel": "仪表板名称",
     "xpack.ml.customUrlsEditor.dataViewLabel": "数据视图",
     "xpack.ml.customUrlsEditor.intervalLabel": "时间间隔",
