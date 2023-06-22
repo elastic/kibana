@@ -1,11 +1,23 @@
+@mixin getBackgroundColor($showBackgroundColor: true) {
+  @if $showBackgroundColor {
+    background: $euiPageBackgroundColor;
+
+  } @else {
+    background: transparent;
+  }
+}
+
 .dashboardTopNav {
   width: 100%;
   position: sticky;
   z-index: $euiZLevel2;
-  background: $euiPageBackgroundColor;
+  @include getBackgroundColor($showBackgroundColor: true);
 
   top: $kbnHeaderOffset;
   &.dashboardTopNav-fullscreenMode {
     top: 0;
+  }
+  &.dashboardTopNav-noBackgroundColor {
+  @include getBackgroundColor($showBackgroundColor: false);
   }
 }

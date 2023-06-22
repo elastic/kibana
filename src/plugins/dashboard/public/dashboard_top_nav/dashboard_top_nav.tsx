@@ -34,7 +34,6 @@ import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_edit
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 
-import './_dashboard_top_nav.scss';
 export interface InternalDashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
@@ -48,7 +47,6 @@ export function InternalDashboardTopNav({
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
-
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   /**
@@ -175,15 +173,9 @@ export function InternalDashboardTopNav({
     };
   }, [onAppLeave, getStateTransfer, hasUnsavedChanges, viewMode]);
 
-  const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    redirectTo,
-    isLabsShown,
-    setIsLabsShown,
-  });
-
   const visibilityProps = useMemo(() => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
-      (forceShow || isChromeVisible) && !fullScreenMode;
+      forceShow && isChromeVisible && !fullScreenMode;
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
       !forceHide && (filterManager.getFilters().length > 0 || !fullScreenMode);
 
@@ -202,8 +194,18 @@ export function InternalDashboardTopNav({
       showFilterBar,
       showQueryInput,
       showDatePicker,
+      showBorderBottom: embedSettings?.showBorderBottom ?? true,
+      showBackgroundColor: embedSettings?.showBackgroundColor ?? true,
+      showFullScreenButton: embedSettings?.showFullScreenButton ?? true,
     };
   }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
+
+  const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
+    redirectTo,
+    isLabsShown,
+    setIsLabsShown,
+    showFullScreenButton: visibilityProps.showFullScreenButton,
+  });
 
   UseUnmount(() => {
     dashboard.clearOverlays();
@@ -213,6 +215,7 @@ export function InternalDashboardTopNav({
     <div
       className={classNames('dashboardTopNav', {
         'dashboardTopNav-fullscreenMode': fullScreenMode,
+        'dashboardTopNav-noBackgroundColor': !visibilityProps.showBackgroundColor,
       })}
     >
       <h1
@@ -271,7 +274,7 @@ export function InternalDashboardTopNav({
         </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? <DashboardEditingToolbar /> : null}
-      <EuiHorizontalRule margin="none" />
+      {visibilityProps.showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>
   );
 }

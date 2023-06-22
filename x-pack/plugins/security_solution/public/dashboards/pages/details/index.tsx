@@ -137,9 +137,11 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
                   dashboardContainer={dashboardContainer}
                   embedSettings={{
                     forceHideFilterBar: true,
-                    forceShowTopNavMenu: false,
-                    forceShowQueryInput: true,
-                    forceShowDatePicker: true,
+                    forceShowTopNavMenu: true,
+                    forceShowQueryInput: false,
+                    forceShowDatePicker: false,
+                    showBorderBottom: false,
+                    showFullScreenButton: false,
                   }}
                 />
               )}
