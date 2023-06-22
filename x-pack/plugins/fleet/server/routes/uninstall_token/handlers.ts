@@ -13,7 +13,7 @@ import { appContextService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import type { GetUninstallTokensMetadataResponse } from '../../../common/types/rest_spec/uninstall_token';
 import type {
-  GetUninstallTokensForOnePolicyRequestSchema,
+  GetUninstallTokensByPolicyIdRequestSchema,
   GetUninstallTokensMetadataRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
 import { defaultFleetErrorHandler } from '../../errors';
@@ -48,8 +48,8 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   }
 };
 
-export const getUninstallTokensForOnePolicyHandler: FleetRequestHandler<
-  TypeOf<typeof GetUninstallTokensForOnePolicyRequestSchema.params>
+export const getUninstallTokensByPolicyIdHandler: FleetRequestHandler<
+  TypeOf<typeof GetUninstallTokensByPolicyIdRequestSchema.params>
 > = async (context, request, response) => {
   const uninstallTokenService = appContextService.getUninstallTokenService();
   if (!uninstallTokenService) {

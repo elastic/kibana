@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../hooks';
 
-import { useGetUninstallTokensForOnePolicy } from '../../hooks/use_request/uninstall_tokens';
+import { useGetUninstallTokensByPolicyId } from '../../hooks/use_request/uninstall_tokens';
 
 import { Error } from '../error';
 import { Loading } from '../loading';
@@ -83,7 +83,7 @@ const UninstallEndpointDescription = () => (
 );
 
 const UninstallCommands = ({ policyId }: { policyId: string }) => {
-  const { data, error, isLoading } = useGetUninstallTokensForOnePolicy(policyId);
+  const { data, error, isLoading } = useGetUninstallTokensByPolicyId(policyId);
 
   if (isLoading) {
     return <Loading size="l" />;

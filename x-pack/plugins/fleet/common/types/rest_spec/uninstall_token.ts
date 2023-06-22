@@ -19,7 +19,7 @@ export interface GetUninstallTokensMetadataRequest {
 
 export type GetUninstallTokensMetadataResponse = ListResult<UninstallTokenMetadata>;
 
-export interface GetUninstallTokensForOnePolicyResponse {
+export interface GetUninstallTokensByPolicyIdResponse {
   items: UninstallToken[];
   total: number;
 }

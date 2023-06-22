@@ -12,7 +12,7 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import {
-  GetUninstallTokensForOnePolicyResponse,
+  GetUninstallTokensByPolicyIdResponse,
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import * as uuid from 'uuid';
@@ -291,7 +291,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(uninstallTokensRouteService.getInfoPath(generatedPolicyId))
           .expect(200);
 
-        const body: GetUninstallTokensForOnePolicyResponse = response.body;
+        const body: GetUninstallTokensByPolicyIdResponse = response.body;
 
         expect(body.items.length).to.equal(body.total);
         expect(body.items[0]).to.have.property('policy_id', generatedPolicyId);
@@ -303,7 +303,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(uninstallTokensRouteService.getInfoPath(generatedPolicyId))
           .expect(200);
 
-        const body: GetUninstallTokensForOnePolicyResponse = response.body;
+        const body: GetUninstallTokensByPolicyIdResponse = response.body;
 
         expect(body.total).to.equal(3);
         expect(body.items.length).to.equal(3);

@@ -30,7 +30,7 @@ import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/ty
 import { UninstallTokenError } from '../../../../common/errors';
 
 import type {
-  GetUninstallTokensForOnePolicyResponse,
+  GetUninstallTokensByPolicyIdResponse,
   GetUninstallTokensMetadataResponse,
 } from '../../../../common/types/rest_spec/uninstall_token';
 
@@ -65,7 +65,7 @@ export interface UninstallTokenServiceInterface {
    * @param policyId agent policy id
    * @returns uninstall tokens for policyID
    */
-  getTokenHistoryForPolicy(policyId: string): Promise<GetUninstallTokensForOnePolicyResponse>;
+  getTokenHistoryForPolicy(policyId: string): Promise<GetUninstallTokensByPolicyIdResponse>;
 
   /**
    * Search for uninstall token metadata using partial policyID, paginated
@@ -158,7 +158,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   public async getTokenHistoryForPolicy(
     policyId: string
-  ): Promise<GetUninstallTokensForOnePolicyResponse> {
+  ): Promise<GetUninstallTokensByPolicyIdResponse> {
     const tokensFinder =
       await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
         {

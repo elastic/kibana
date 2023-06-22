@@ -14,7 +14,7 @@ export const GetUninstallTokensMetadataRequestSchema = {
   }),
 };
 
-export const GetUninstallTokensForOnePolicyRequestSchema = {
+export const GetUninstallTokensByPolicyIdRequestSchema = {
   params: schema.object({
     agentPolicyId: schema.string(),
   }),

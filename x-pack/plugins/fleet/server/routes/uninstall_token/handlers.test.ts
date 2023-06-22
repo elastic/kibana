@@ -13,7 +13,7 @@ import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 import type {
-  GetUninstallTokensForOnePolicyResponse,
+  GetUninstallTokensByPolicyIdResponse,
   GetUninstallTokensMetadataResponse,
 } from '../../../common/types/rest_spec/uninstall_token';
 
@@ -23,16 +23,13 @@ import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services';
 import type {
-  GetUninstallTokensForOnePolicyRequestSchema,
+  GetUninstallTokensByPolicyIdRequestSchema,
   GetUninstallTokensMetadataRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
 
 import { registerRoutes } from '.';
 
-import {
-  getUninstallTokensForOnePolicyHandler,
-  getUninstallTokensMetadataHandler,
-} from './handlers';
+import { getUninstallTokensByPolicyIdHandler, getUninstallTokensMetadataHandler } from './handlers';
 
 describe('uninstall token handlers', () => {
   let context: FleetRequestHandlerContext;
@@ -117,21 +114,21 @@ describe('uninstall token handlers', () => {
     });
   });
 
-  describe('getUninstallTokensForOnePolicyHandler', () => {
-    let request: KibanaRequest<TypeOf<typeof GetUninstallTokensForOnePolicyRequestSchema.params>>;
+  describe('getUninstallTokensByPolicyIdHandler', () => {
+    let request: KibanaRequest<TypeOf<typeof GetUninstallTokensByPolicyIdRequestSchema.params>>;
 
     beforeEach(() => {
       request = httpServerMock.createKibanaRequest({ params: { agentPolicyId: '123' } });
     });
 
-    it('should return uninstall tokens for all policies', async () => {
-      const tokenForOnePolicy: GetUninstallTokensForOnePolicyResponse = {
+    it('should return uninstall tokens for given policy ID', async () => {
+      const tokenForOnePolicy: GetUninstallTokensByPolicyIdResponse = {
         items: [{ ...uninstallTokensResponseFixture.items[0], token: '123456' }],
         total: 1,
       };
       getTokensForOnePolicyMock.mockResolvedValue(tokenForOnePolicy);
 
-      await getUninstallTokensForOnePolicyHandler(context, request, response);
+      await getUninstallTokensByPolicyIdHandler(context, request, response);
 
       expect(response.ok).toHaveBeenCalledWith({ body: tokenForOnePolicy });
     });
@@ -144,7 +141,7 @@ describe('uninstall token handlers', () => {
         uninstallTokenService: undefined,
       });
 
-      await getUninstallTokensForOnePolicyHandler(context, request, response);
+      await getUninstallTokensByPolicyIdHandler(context, request, response);
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
@@ -155,7 +152,7 @@ describe('uninstall token handlers', () => {
     it('should return internal error when uninstallTokenService throws error', async () => {
       getTokensForOnePolicyMock.mockRejectedValue(Error('something really happened'));
 
-      await getUninstallTokensForOnePolicyHandler(context, request, response);
+      await getUninstallTokensByPolicyIdHandler(context, request, response);
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
@@ -183,7 +180,7 @@ describe('uninstall token handlers', () => {
       );
       expect(router.get).toHaveBeenCalledWith(
         expect.any(Object),
-        getUninstallTokensForOnePolicyHandler
+        getUninstallTokensByPolicyIdHandler
       );
     });
 

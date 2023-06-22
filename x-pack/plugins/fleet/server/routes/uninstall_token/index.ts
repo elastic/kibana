@@ -9,15 +9,12 @@ import type { FleetConfigType } from '../../config';
 
 import type { FleetAuthzRouter } from '../../services/security';
 import {
-  GetUninstallTokensForOnePolicyRequestSchema,
+  GetUninstallTokensByPolicyIdRequestSchema,
   GetUninstallTokensMetadataRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
-import {
-  getUninstallTokensForOnePolicyHandler,
-  getUninstallTokensMetadataHandler,
-} from './handlers';
+import { getUninstallTokensByPolicyIdHandler, getUninstallTokensMetadataHandler } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
@@ -37,12 +34,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     router.get(
       {
         path: UNINSTALL_TOKEN_ROUTES.INFO_PATTERN,
-        validate: GetUninstallTokensForOnePolicyRequestSchema,
+        validate: GetUninstallTokensByPolicyIdRequestSchema,
         fleetAuthz: {
           fleet: { all: true },
         },
       },
-      getUninstallTokensForOnePolicyHandler
+      getUninstallTokensByPolicyIdHandler
     );
   }
 };
