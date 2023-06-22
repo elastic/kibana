@@ -8,42 +8,42 @@
 import { i18n } from '@kbn/i18n';
 
 export const FILTER_REQUESTS_LABEL = i18n.translate(
-  'xpack.synthetics.synthetics.waterfall.searchBox.placeholder',
+  'xpack.uptime.synthetics.waterfall.searchBox.placeholder',
   {
     defaultMessage: 'Filter network requests',
   }
 );
 
 export const FILTER_SCREENREADER_LABEL = i18n.translate(
-  'xpack.synthetics.synthetics.waterfall.filterGroup.filterScreenreaderLabel',
+  'xpack.uptime.synthetics.waterfall.filterGroup.filterScreenreaderLabel',
   {
     defaultMessage: 'Filter by',
   }
 );
 
 export const FILTER_REMOVE_SCREENREADER_LABEL = i18n.translate(
-  'xpack.synthetics.synthetics.waterfall.filterGroup.removeFilterScreenReaderLabel',
+  'xpack.uptime.synthetics.waterfall.filterGroup.removeFilterScreenReaderLabel',
   {
     defaultMessage: 'Remove filter by',
   }
 );
 
 export const FILTER_POPOVER_OPEN_LABEL = i18n.translate(
-  'xpack.synthetics.pingList.synthetics.waterfall.filters.popover',
+  'xpack.uptime.pingList.synthetics.waterfall.filters.popover',
   {
     defaultMessage: 'Click to open waterfall filters',
   }
 );
 
 export const FILTER_COLLAPSE_REQUESTS_LABEL = i18n.translate(
-  'xpack.synthetics.pingList.synthetics.waterfall.filters.collapseRequestsLabel',
+  'xpack.uptime.pingList.synthetics.waterfall.filters.collapseRequestsLabel',
   {
     defaultMessage: 'Collapse to only show matching requests',
   }
 );
 
 export const SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL = i18n.translate(
-  'xpack.synthetics.synthetics.waterfall.sidebar.filterMatchesScreenReaderLabel',
+  'xpack.uptime.synthetics.waterfall.sidebar.filterMatchesScreenReaderLabel',
   {
     defaultMessage: 'Resource matches filter',
   }

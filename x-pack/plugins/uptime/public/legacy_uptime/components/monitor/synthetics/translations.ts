@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const VIEW_PERFORMANCE = i18n.translate(
-  'xpack.synthetics.pingList.synthetics.performanceBreakDown',
+  'xpack.uptime.pingList.synthetics.performanceBreakDown',
   {
     defaultMessage: 'View performance breakdown',
   }

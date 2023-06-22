@@ -16,7 +16,7 @@ export const ACTION_VARIABLES = {
   [MESSAGE]: {
     name: MESSAGE,
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.message.description',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
       {
         defaultMessage: 'A generated message summarizing the currently down monitors',
       }

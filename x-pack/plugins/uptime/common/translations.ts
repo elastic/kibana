@@ -8,15 +8,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const VALUE_MUST_BE_GREATER_THAN_ZERO = i18n.translate(
-  'xpack.synthetics.settings.invalid.error',
+  'xpack.uptime.settings.invalid.error',
   {
     defaultMessage: 'Value must be greater than 0.',
   }
 );
 
-export const VALUE_MUST_BE_AN_INTEGER = i18n.translate(
-  'xpack.synthetics.settings.invalid.nanError',
-  {
-    defaultMessage: 'Value must be an integer.',
-  }
-);
+export const VALUE_MUST_BE_AN_INTEGER = i18n.translate('xpack.uptime.settings.invalid.nanError', {
+  defaultMessage: 'Value must be an integer.',
+});

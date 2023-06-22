@@ -10,18 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const commonMonitorStateI18 = [
   {
     name: 'monitorName',
-    description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitor',
-      {
-        defaultMessage:
-          'A human friendly rendering of name or ID, preferring name (e.g. My Monitor)',
-      }
-    ),
+    description: i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.state.monitor', {
+      defaultMessage: 'A human friendly rendering of name or ID, preferring name (e.g. My Monitor)',
+    }),
   },
   {
     name: 'monitorId',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitorId',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorId',
       {
         defaultMessage: 'ID of the monitor.',
       }
@@ -30,7 +26,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'monitorUrl',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitorUrl',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorUrl',
       {
         defaultMessage: 'URL of the monitor.',
       }
@@ -39,7 +35,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'monitorType',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitorType',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorType',
       {
         defaultMessage: 'Type (e.g. HTTP/TCP) of the monitor.',
       }
@@ -48,7 +44,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'statusMessage',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.statusMessage',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.statusMessage',
       {
         defaultMessage:
           'Status message e.g down or is below availability threshold in case of availability check or both.',
@@ -58,7 +54,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'latestErrorMessage',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastErrorMessage',
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastErrorMessage',
       {
         defaultMessage: 'Monitor latest error message',
       }

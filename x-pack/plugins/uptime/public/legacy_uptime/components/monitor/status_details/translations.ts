@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const healthStatusMessageAriaLabel = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.healthStatusMessageAriaLabel',
+  'xpack.uptime.monitorStatusBar.healthStatusMessageAriaLabel',
   {
     defaultMessage: 'Monitor status',
   }
@@ -23,21 +23,21 @@ export const typeAriaLabel = i18n.translate('xpack.uptime.monitorStatusBar.type.
 });
 
 export const monitorUrlLinkAriaLabel = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.monitorUrlLinkAriaLabel',
+  'xpack.uptime.monitorStatusBar.monitorUrlLinkAriaLabel',
   {
     defaultMessage: 'Monitor URL link',
   }
 );
 
 export const durationTextAriaLabel = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.durationTextAriaLabel',
+  'xpack.uptime.monitorStatusBar.durationTextAriaLabel',
   {
     defaultMessage: 'Monitor duration in milliseconds',
   }
 );
 
 export const timestampFromNowTextAriaLabel = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.timestampFromNowTextAriaLabel',
+  'xpack.uptime.monitorStatusBar.timestampFromNowTextAriaLabel',
   {
     defaultMessage: 'Time since last check',
   }
@@ -52,42 +52,42 @@ export const MonitorIDLabel = i18n.translate('xpack.uptime.monitorStatusBar.moni
 });
 
 export const OverallAvailability = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.monitor.availability',
+  'xpack.uptime.monitorStatusBar.monitor.availability',
   {
     defaultMessage: 'Overall availability',
   }
 );
 
 export const MonitoringFrom = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.monitor.monitoringFrom',
+  'xpack.uptime.monitorStatusBar.monitor.monitoringFrom',
   {
     defaultMessage: 'Monitoring from',
   }
 );
 
 export const ChangeToMapView = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.monitor.monitoringFrom.listToMap',
+  'xpack.uptime.monitorStatusBar.monitor.monitoringFrom.listToMap',
   {
     defaultMessage: 'Change to map view to check availability by location.',
   }
 );
 
 export const ChangeToListView = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.monitor.monitoringFrom.MapToList',
+  'xpack.uptime.monitorStatusBar.monitor.monitoringFrom.MapToList',
   {
     defaultMessage: 'Change to list view to check availability by location.',
   }
 );
 
 export const LocationLabel = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.monitor.availabilityReport.location',
+  'xpack.uptime.monitorStatusBar.monitor.availabilityReport.location',
   {
     defaultMessage: 'Location',
   }
 );
 
 export const AvailabilityLabel = i18n.translate(
-  'xpack.synthetics.monitorStatusBar.monitor.availabilityReport.availability',
+  'xpack.uptime.monitorStatusBar.monitor.availabilityReport.availability',
   {
     defaultMessage: 'Availability',
   }

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const SyntheticsMonitorStatusTranslations = {
   defaultActionMessage: i18n.translate(
-    'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
+    'xpack.uptime.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
       defaultMessage: `"{monitorName}" is {status} from {locationName}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- Checked at: {checkedAt}  \n- From: {locationName}  \n- Error received: {lastErrorMessage}  \n{linkMessage}`,
@@ -27,7 +27,7 @@ export const SyntheticsMonitorStatusTranslations = {
     }
   ),
   defaultSubjectMessage: i18n.translate(
-    'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultSubjectMessage',
+    'xpack.uptime.alerts.syntheticsMonitorStatus.defaultSubjectMessage',
     {
       defaultMessage: '"{monitorName}" ({locationName}) is down - Elastic Synthetics',
       values: {
@@ -37,7 +37,7 @@ export const SyntheticsMonitorStatusTranslations = {
     }
   ),
   defaultRecoverySubjectMessage: i18n.translate(
-    'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoverySubjectMessage',
+    'xpack.uptime.alerts.syntheticsMonitorStatus.defaultRecoverySubjectMessage',
     {
       defaultMessage: '"{monitorName}" ({locationName}) {recoveryStatus} - Elastic Synthetics',
       values: {
@@ -48,7 +48,7 @@ export const SyntheticsMonitorStatusTranslations = {
     }
   ),
   defaultRecoveryMessage: i18n.translate(
-    'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoveryMessage',
+    'xpack.uptime.alerts.syntheticsMonitorStatus.defaultRecoveryMessage',
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
       defaultMessage:
@@ -106,7 +106,7 @@ export const TlsTranslations = {
     defaultMessage: 'Alert when the TLS certificate of a Synthetics monitor is about to expire.',
   }),
   defaultSubjectMessage: i18n.translate(
-    'xpack.synthetics.alerts.syntheticsMonitorTLS.defaultSubjectMessage',
+    'xpack.uptime.alerts.syntheticsMonitorTLS.defaultSubjectMessage',
     {
       defaultMessage: 'Alert triggered for certificate {commonName} - Elastic Synthetics',
       values: {
@@ -115,7 +115,7 @@ export const TlsTranslations = {
     }
   ),
   defaultRecoverySubjectMessage: i18n.translate(
-    'xpack.synthetics.alerts.syntheticsMonitorTLS.defaultRecoverySubjectMessage',
+    'xpack.uptime.alerts.syntheticsMonitorTLS.defaultRecoverySubjectMessage',
     {
       defaultMessage: 'Alert has resolved for certificate {commonName} - Elastic Synthetics',
       values: {

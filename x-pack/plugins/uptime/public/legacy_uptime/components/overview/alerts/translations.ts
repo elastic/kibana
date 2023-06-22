@@ -8,35 +8,29 @@
 import { i18n } from '@kbn/i18n';
 
 export const SECONDS_TIME_RANGE = i18n.translate(
-  'xpack.synthetics.alerts.timerangeUnitSelectable.secondsOption.ariaLabel',
+  'xpack.uptime.alerts.timerangeUnitSelectable.secondsOption.ariaLabel',
   {
     defaultMessage: '"Seconds" time range select item',
   }
 );
 
-export const SECONDS = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.timerangeOption.seconds',
-  {
-    defaultMessage: 'seconds',
-  }
-);
+export const SECONDS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.seconds', {
+  defaultMessage: 'seconds',
+});
 
 export const MINUTES_TIME_RANGE = i18n.translate(
-  'xpack.synthetics.alerts.timerangeUnitSelectable.minutesOption.ariaLabel',
+  'xpack.uptime.alerts.timerangeUnitSelectable.minutesOption.ariaLabel',
   {
     defaultMessage: '"Minutes" time range select item',
   }
 );
 
-export const MINUTES = i18n.translate(
-  'xpack.synthetics.alerts.monitorStatus.timerangeOption.minutes',
-  {
-    defaultMessage: 'minutes',
-  }
-);
+export const MINUTES = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.minutes', {
+  defaultMessage: 'minutes',
+});
 
 export const HOURS_TIME_RANGE = i18n.translate(
-  'xpack.synthetics.alerts.timerangeUnitSelectable.hoursOption.ariaLabel',
+  'xpack.uptime.alerts.timerangeUnitSelectable.hoursOption.ariaLabel',
   {
     defaultMessage: '"Hours" time range select item',
   }
@@ -47,7 +41,7 @@ export const HOURS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerange
 });
 
 export const DAYS_TIME_RANGE = i18n.translate(
-  'xpack.synthetics.alerts.timerangeUnitSelectable.daysOption.ariaLabel',
+  'xpack.uptime.alerts.timerangeUnitSelectable.daysOption.ariaLabel',
   {
     defaultMessage: '"Days" time range select item',
   }
@@ -58,7 +52,7 @@ export const DAYS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeO
 });
 
 export const WEEKS_TIME_RANGE = i18n.translate(
-  'xpack.synthetics.alerts.timerangeUnitSelectable.weeksOption.ariaLabel',
+  'xpack.uptime.alerts.timerangeUnitSelectable.weeksOption.ariaLabel',
   {
     defaultMessage: '"Weeks" time range select item',
   }

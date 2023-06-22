@@ -22,18 +22,15 @@ export const MonitorStatusTranslations = {
       },
     }
   ),
-  defaultSubjectMessage: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.defaultSubjectMessage',
-    {
-      defaultMessage: 'Monitor {monitorName} with url {monitorUrl} is down',
-      values: {
-        monitorName: '{{context.monitorName}}',
-        monitorUrl: '{{{context.monitorUrl}}}',
-      },
-    }
-  ),
+  defaultSubjectMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultSubjectMessage', {
+    defaultMessage: 'Monitor {monitorName} with url {monitorUrl} is down',
+    values: {
+      monitorName: '{{context.monitorName}}',
+      monitorUrl: '{{{context.monitorUrl}}}',
+    },
+  }),
   defaultRecoverySubjectMessage: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.defaultRecoverySubjectMessage',
+    'xpack.uptime.alerts.monitorStatus.defaultRecoverySubjectMessage',
     {
       defaultMessage: 'Monitor {monitorName} with url {monitorUrl} has recovered',
       values: {
@@ -43,7 +40,7 @@ export const MonitorStatusTranslations = {
     }
   ),
   defaultRecoveryMessage: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.defaultRecoveryMessage',
+    'xpack.uptime.alerts.monitorStatus.defaultRecoveryMessage',
     {
       defaultMessage:
         'Alert for monitor {monitorName} with url {monitorUrl} from {observerLocation} has recovered',

@@ -23,22 +23,19 @@ export const STATUS_UP_LABEL = i18n.translate('xpack.uptime.monitorList.statusCo
   defaultMessage: 'Up',
 });
 
-export const STATUS_DOWN_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.statusColumn.downLabel',
-  {
-    defaultMessage: 'Down',
-  }
-);
+export const STATUS_DOWN_LABEL = i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
+  defaultMessage: 'Down',
+});
 
 export const STATUS_COMPLETE_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.statusColumn.completeLabel',
+  'xpack.uptime.monitorList.statusColumn.completeLabel',
   {
     defaultMessage: 'Complete',
   }
 );
 
 export const STATUS_FAILED_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.statusColumn.failedLabel',
+  'xpack.uptime.monitorList.statusColumn.failedLabel',
   {
     defaultMessage: 'Failed',
   }

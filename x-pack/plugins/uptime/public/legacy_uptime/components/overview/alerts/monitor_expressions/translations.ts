@@ -64,29 +64,26 @@ export const alertFilterLabels = {
 };
 
 export const statusExpLabels = {
-  ENABLED_CHECKBOX: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.statusEnabledCheck.label',
-    {
-      defaultMessage: 'Status check',
-    }
-  ),
+  ENABLED_CHECKBOX: i18n.translate('xpack.uptime.alerts.monitorStatus.statusEnabledCheck.label', {
+    defaultMessage: 'Status check',
+  }),
 };
 
 export const timeExpLabels = {
   OPEN_TIME_POPOVER: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.timerangeUnitExpression.ariaLabel',
+    'xpack.uptime.alerts.monitorStatus.timerangeUnitExpression.ariaLabel',
     {
       defaultMessage: 'Open the popover for time range unit select field',
     }
   ),
   SELECT_TIME_RANGE_ARIA: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable',
+    'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable',
     {
       defaultMessage: 'Selectable field for the time range units alerts should use',
     }
   ),
   SELECT_TIME_RANGE_HEADLINE: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.timerangeSelectionHeader',
+    'xpack.uptime.alerts.monitorStatus.timerangeSelectionHeader',
     {
       defaultMessage: 'Select time range unit',
     }

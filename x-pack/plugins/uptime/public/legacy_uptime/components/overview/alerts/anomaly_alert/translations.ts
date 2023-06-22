@@ -8,12 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const AnomalyTranslations = {
-  criteriaAriaLabel: i18n.translate(
-    'xpack.synthetics.alerts.anomaly.criteriaExpression.ariaLabel',
-    {
-      defaultMessage: 'An expression displaying the criteria for a selected monitor.',
-    }
-  ),
+  criteriaAriaLabel: i18n.translate('xpack.uptime.alerts.anomaly.criteriaExpression.ariaLabel', {
+    defaultMessage: 'An expression displaying the criteria for a selected monitor.',
+  }),
   whenMonitor: i18n.translate('xpack.uptime.alerts.anomaly.criteriaExpression.description', {
     defaultMessage: 'When monitor',
   }),
@@ -21,7 +18,7 @@ export const AnomalyTranslations = {
     defaultMessage: 'An expression displaying the criteria for an anomaly alert threshold.',
   }),
   hasAnomalyWithSeverity: i18n.translate(
-    'xpack.synthetics.alerts.anomaly.scoreExpression.description',
+    'xpack.uptime.alerts.anomaly.scoreExpression.description',
     {
       defaultMessage: 'has anomaly with severity',
       description: 'An expression displaying the criteria for an anomaly alert threshold.',

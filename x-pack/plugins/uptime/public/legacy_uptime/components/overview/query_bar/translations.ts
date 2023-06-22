@@ -13,7 +13,7 @@ export const KQL_PLACE_HOLDER = i18n.translate('xpack.uptime.kueryBar.searchPlac
 });
 
 export const SIMPLE_SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.synthetics.kueryBar.searchPlaceholder.simpleText',
+  'xpack.uptime.kueryBar.searchPlaceholder.simpleText',
   {
     defaultMessage: 'Search by monitor ID, name, URL, port or tags',
   }

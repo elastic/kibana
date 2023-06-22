@@ -7,19 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const STATUS_COLUMN_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.statusColumnLabel',
-  {
-    defaultMessage: 'Status',
-  }
-);
+export const STATUS_COLUMN_LABEL = i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
+  defaultMessage: 'Status',
+});
 
 export const NAME_COLUMN_LABEL = i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
   defaultMessage: 'Name',
 });
 
 export const HISTORY_COLUMN_LABEL = i18n.translate(
-  'xpack.synthetics.monitorList.monitorHistoryColumnLabel',
+  'xpack.uptime.monitorList.monitorHistoryColumnLabel',
   {
     defaultMessage: 'Downtime history',
   }
@@ -48,7 +45,7 @@ export const getDescriptionLabel = (itemsLength: number) => {
 };
 
 export const NO_MONITOR_ITEM_SELECTED = i18n.translate(
-  'xpack.synthetics.monitorList.noItemForSelectedFiltersMessage',
+  'xpack.uptime.monitorList.noItemForSelectedFiltersMessage',
   {
     defaultMessage: 'No monitors found for selected filter criteria',
     description:
@@ -66,9 +63,6 @@ export const NO_DATA_MESSAGE = i18n.translate('xpack.uptime.monitorList.noItemMe
   description: 'This message is shown if the monitors table is rendered but has no items.',
 });
 
-export const STATUS_ALERT_COLUMN = i18n.translate(
-  'xpack.synthetics.monitorList.statusAlert.label',
-  {
-    defaultMessage: 'Status alert',
-  }
-);
+export const STATUS_ALERT_COLUMN = i18n.translate('xpack.uptime.monitorList.statusAlert.label', {
+  defaultMessage: 'Status alert',
+});

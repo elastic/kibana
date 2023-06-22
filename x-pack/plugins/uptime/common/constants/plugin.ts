@@ -15,7 +15,6 @@ export const PLUGIN = {
   }),
   ID: 'uptime',
   SYNTHETICS_PLUGIN_ID: 'synthetics',
-  LOCAL_STORAGE_KEY: 'xpack.synthetics.',
   NAME: i18n.translate('xpack.uptime.featureRegistry.syntheticsFeatureName', {
     defaultMessage: 'Synthetics and Uptime',
   }),

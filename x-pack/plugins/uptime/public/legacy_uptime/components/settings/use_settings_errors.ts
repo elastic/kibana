@@ -102,7 +102,7 @@ export const useSettingsErrors = (
 };
 
 const REQUIRED_EMAIL = i18n.translate(
-  'xpack.synthetics.sourceConfiguration.alertDefaultForm.requiredEmail',
+  'xpack.uptime.sourceConfiguration.alertDefaultForm.requiredEmail',
   {
     defaultMessage: 'To email is required for email connector',
   }
