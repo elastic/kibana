@@ -138,7 +138,7 @@ export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =
     ...breadcrumbs,
   ]);
 
-export const useEnterpriseSearchEnginesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+export const useEnterpriseSearchApplicationsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs(breadcrumbs);
 
 export const useEsreBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
