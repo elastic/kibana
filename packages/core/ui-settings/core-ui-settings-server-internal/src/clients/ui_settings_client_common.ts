@@ -129,7 +129,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     autoCreateOrUpgradeIfMissing?: boolean;
   }) {
     try {
-      await this.savedObjectsClient.update(this.type, this.id, changes);
+      await this.savedObjectsClient.update(this.type, this.id, changes, { refresh: false });
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
         throw error;
