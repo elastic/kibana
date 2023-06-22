@@ -9,6 +9,7 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { cloudPlugin } from 'cypress-cloud/plugin';
 import path from 'path';
 import { fork } from 'child_process';
+import execa from 'execa';
 import type { ChildProcess, IOType } from 'child_process';
 import { esArchiver } from './support/es_archiver';
 import { isSkipped } from '../scripts/run_cypress/utils';
@@ -57,6 +58,15 @@ export default defineCypressConfig({
 
         if (!isSkippedSpec) {
           if (!processes[spec.relative]) {
+            try {
+              execa.commandSync('kill $(lsof -t -i:5622)', { shell: true });
+              // eslint-disable-next-line no-empty
+            } catch (e) {}
+            try {
+              execa.commandSync('kill $(lsof -t -i:9222)', { shell: true });
+              // eslint-disable-next-line no-empty
+            } catch (e) {}
+
             const program = path.resolve('../scripts/start_cypress_setup_env.js');
             const parameters = [
               `run --ftr-config-file '../../test/security_solution_cypress/cli_config.ts'`,
