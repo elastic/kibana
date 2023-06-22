@@ -6,7 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BudgetingMethod, IndicatorType, TimeWindow } from '@kbn/slo-schema';
+import {
+  APMTransactionDurationIndicatorSchema,
+  APMTransactionErrorRateIndicatorSchema,
+  BudgetingMethod,
+  IndicatorType,
+  KQLCustomIndicator,
+  MetricCustomIndicator,
+  TimeWindow,
+} from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
@@ -88,65 +96,57 @@ export const ROLLING_TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
   }),
 }));
 
-export const CUSTOM_KQL_DEFAULT_VALUES = {
-  indicator: {
-    type: 'sli.kql.custom' as const,
-    params: {
-      index: '',
-      filter: '',
-      good: '',
-      total: '',
-      timestampField: '',
-    },
+export const CUSTOM_KQL_DEFAULT_VALUES: KQLCustomIndicator = {
+  type: 'sli.kql.custom' as const,
+  params: {
+    index: '',
+    filter: '',
+    good: '',
+    total: '',
+    timestampField: '',
   },
 };
 
-export const CUSTOM_METRIC_DEFAULT_VALUES = {
-  indicator: {
-    type: 'sli.metric.custom' as const,
-    params: {
-      index: '',
-      filter: '',
-      good: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
-      total: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
-      timestampField: '',
-    },
+export const CUSTOM_METRIC_DEFAULT_VALUES: MetricCustomIndicator = {
+  type: 'sli.metric.custom' as const,
+  params: {
+    index: '',
+    filter: '',
+    good: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
+    total: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
+    timestampField: '',
   },
 };
 
-export const APM_LATENCY_DEFAULT_VALUES = {
-  indicator: {
-    type: 'sli.apm.transactionDuration' as const,
-    params: {
-      service: '',
-      environment: '',
-      transactionType: '',
-      transactionName: '',
-      threshold: 250,
-      filter: '',
-      index: '',
-    },
+export const APM_LATENCY_DEFAULT_VALUES: APMTransactionDurationIndicatorSchema = {
+  type: 'sli.apm.transactionDuration' as const,
+  params: {
+    service: '',
+    environment: '',
+    transactionType: '',
+    transactionName: '',
+    threshold: 250,
+    filter: '',
+    index: '',
   },
 };
 
-export const APM_AVAILABILITY_DEFAULT_VALUES = {
-  indicator: {
-    type: 'sli.apm.transactionErrorRate' as const,
-    params: {
-      service: '',
-      environment: '',
-      transactionType: '',
-      transactionName: '',
-      filter: '',
-      index: '',
-    },
+export const APM_AVAILABILITY_DEFAULT_VALUES: APMTransactionErrorRateIndicatorSchema = {
+  type: 'sli.apm.transactionErrorRate' as const,
+  params: {
+    service: '',
+    environment: '',
+    transactionType: '',
+    transactionName: '',
+    filter: '',
+    index: '',
   },
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
   name: '',
   description: '',
-  ...CUSTOM_KQL_DEFAULT_VALUES,
+  indicator: CUSTOM_KQL_DEFAULT_VALUES,
   timeWindow: {
     duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
     type: 'rolling',
@@ -161,7 +161,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
 export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
   name: '',
   description: '',
-  ...CUSTOM_METRIC_DEFAULT_VALUES,
+  indicator: CUSTOM_METRIC_DEFAULT_VALUES,
   timeWindow: {
     duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
     type: 'rolling',

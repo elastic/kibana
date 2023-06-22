@@ -36,24 +36,44 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
       unregister('indicator.params');
       switch (indicatorType) {
         case 'sli.metric.custom':
-          reset(Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, CUSTOM_METRIC_DEFAULT_VALUES), {
-            keepDefaultValues: true,
-          });
+          reset(
+            Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
+              indicator: CUSTOM_METRIC_DEFAULT_VALUES,
+            }),
+            {
+              keepDefaultValues: true,
+            }
+          );
           break;
         case 'sli.kql.custom':
-          reset(Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, CUSTOM_KQL_DEFAULT_VALUES), {
-            keepDefaultValues: true,
-          });
+          reset(
+            Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
+              indicator: CUSTOM_KQL_DEFAULT_VALUES,
+            }),
+            {
+              keepDefaultValues: true,
+            }
+          );
           break;
         case 'sli.apm.transactionDuration':
-          reset(Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, APM_LATENCY_DEFAULT_VALUES), {
-            keepDefaultValues: true,
-          });
+          reset(
+            Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
+              indicator: APM_LATENCY_DEFAULT_VALUES,
+            }),
+            {
+              keepDefaultValues: true,
+            }
+          );
           break;
         case 'sli.apm.transactionErrorRate':
-          reset(Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, APM_AVAILABILITY_DEFAULT_VALUES), {
-            keepDefaultValues: true,
-          });
+          reset(
+            Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
+              indicator: APM_AVAILABILITY_DEFAULT_VALUES,
+            }),
+            {
+              keepDefaultValues: true,
+            }
+          );
           break;
         default:
           assertNever(indicatorType);
