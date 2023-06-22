@@ -47,8 +47,7 @@ export const buildStateSubscribe =
     const nextQuery = nextState.query;
     const savedSearch = savedSearchState.getState();
     const prevQuery = savedSearch.searchSource.getField('query');
-    const queryChanged = !isEqual(nextQuery, prevQuery);
-
+    const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
     if (isEqualState(prevState, nextState) && !queryChanged) {
       addLog('[appstate] subscribe update ignored due to no changes', { prevState, nextState });
       return;
