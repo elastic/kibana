@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
-import { DATA_TIERS } from '../../routes/data_streams/get_data_streams_query_metadata';
+import { DATA_TIERS } from '../../../common/constants';
 
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
   try {

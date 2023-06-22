@@ -6,9 +6,7 @@
  */
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-// Nodes that can be queried by datastreams API
-// Warm and cold nodes have been excluded because of performance issues
-export const DATA_TIERS = ['data_hot'];
+import { DATA_TIERS } from '../../../common/constants';
 
 export async function getDataStreamsQueryMetadata({
   dataStreamName,
