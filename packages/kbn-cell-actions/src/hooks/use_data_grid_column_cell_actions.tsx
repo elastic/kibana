@@ -16,12 +16,12 @@ import type {
   CellAction,
   CellActionCompatibilityContext,
   CellActionExecutionContext,
-  CellActionField,
+  CellActionsData,
   CellActionsProps,
 } from '../types';
 import { useBulkLoadActions } from './use_load_actions';
 
-interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
+interface BulkData extends Omit<CellActionsData, 'value'> {
   /**
    * Array containing all the values of the field in the visible page, indexed by rowIndex
    */
@@ -30,7 +30,7 @@ interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
 
 export interface UseDataGridColumnsCellActionsProps
   extends Pick<CellActionsProps, 'triggerId' | 'metadata' | 'disabledActionTypes'> {
-  fields?: BulkField[];
+  data?: BulkData[];
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }
 export type UseDataGridColumnsCellActions<
@@ -38,7 +38,7 @@ export type UseDataGridColumnsCellActions<
 > = (props: P) => EuiDataGridColumnCellAction[][];
 
 export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
-  fields,
+  data,
   triggerId,
   metadata,
   dataGridRef,
@@ -46,12 +46,12 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
 }) => {
   const bulkContexts: CellActionCompatibilityContext[] = useMemo(
     () =>
-      fields?.map(({ values, ...field }) => ({
-        field, // we are getting the actions for the whole column field, so the compatibility check will be done without the value
+      data?.map(({ field }) => ({
+        data: [{ field }], // we are getting the actions for the whole column field, so the compatibility check will be done without the value
         trigger: { id: triggerId },
         metadata,
       })) ?? [],
-    [fields, triggerId, metadata]
+    [triggerId, metadata, data]
   );
 
   const { loading, value: columnsActions } = useBulkLoadActions(bulkContexts, {
@@ -61,37 +61,44 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
   const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
     if (loading) {
       return (
-        fields?.map(() => [
+        data?.map(() => [
           () => <EuiLoadingSpinner size="s" data-test-subj="dataGridColumnCellAction-loading" />,
         ]) ?? []
       );
     }
-    if (!columnsActions || !fields || fields.length === 0) {
+    if (!columnsActions || !data || data.length === 0) {
       return [];
     }
+
+    // Check for a temporary inconsistency because `useBulkLoadActions` takes one render loop before setting `loading` to true.
+    // It will eventually update to a consistent state
+    if (columnsActions.length !== data.length) {
+      return [];
+    }
+
     return columnsActions.map((actions, columnIndex) =>
       actions.map((action) =>
         createColumnCellAction({
           action,
           metadata,
           triggerId,
-          field: fields[columnIndex],
+          data: data[columnIndex],
           dataGridRef,
         })
       )
     );
-  }, [columnsActions, fields, loading, metadata, triggerId, dataGridRef]);
+  }, [loading, columnsActions, data, metadata, triggerId, dataGridRef]);
 
   return columnsCellActions;
 };
 
 interface CreateColumnCellActionParams
   extends Pick<UseDataGridColumnsCellActionsProps, 'triggerId' | 'metadata' | 'dataGridRef'> {
-  field: BulkField;
+  data: BulkData;
   action: CellAction;
 }
 const createColumnCellAction = ({
-  field,
+  data: { field, values },
   action,
   metadata,
   triggerId,
@@ -102,11 +109,15 @@ const createColumnCellAction = ({
     const buttonRef = useRef<HTMLAnchorElement | null>(null);
 
     const actionContext: CellActionExecutionContext = useMemo(() => {
-      const { name, type, values } = field;
       // rowIndex refers to all pages, we need to use the row index relative to the page to get the value
       const value = values[rowIndex % values.length];
       return {
-        field: { name, type, value },
+        data: [
+          {
+            field,
+            value,
+          },
+        ],
         trigger: { id: triggerId },
         nodeRef,
         metadata,
