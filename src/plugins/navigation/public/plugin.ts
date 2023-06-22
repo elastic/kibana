@@ -38,7 +38,20 @@ export class NavigationPublicPlugin
   ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
+    /*
+     *
+     *  This helps clients of navigation to create
+     *  a TopNav Search Bar which does not uses global unifiedSearch/data/query service
+     *
+     *  Useful in creating multiple stateful SearchBar in the same app without affecting
+     *  global filters
+     *
+     * */
     const createCustomTopNav = (
+      /*
+       * Custom instance of unified search if it needs to be overridden
+       *
+       * */
       customUnifiedSearch?: UnifiedSearchPublicPluginStart,
       customExtensions?: RegisteredTopNavMenuData[]
     ) => {

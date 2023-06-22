@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
-import { useDiscoverCustomizationServiceForSecuritySolution } from '../../../../app/discover_customization_provider';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export const DiscoverTabContent = () => {
@@ -23,7 +22,6 @@ export const DiscoverTabContent = () => {
       discoverDataService,
       discover,
       discoverFilterManager,
-      data,
     },
   } = useKibana();
 
@@ -38,14 +36,16 @@ export const DiscoverTabContent = () => {
       data: discoverDataService,
     });
 
-    return createTopNavWithCustomContext({
+    const customUnifiedSearch = {
       ...unifiedSearch,
       ui: {
         ...unifiedSearch.ui,
         SearchBar: CustomSearchBar,
         AggregateQuerySearchBar: CustomSearchBar,
       },
-    });
+    };
+
+    return createTopNavWithCustomContext(customUnifiedSearch);
   }, [discoverDataService, getCustomSearchBar, createTopNavWithCustomContext, unifiedSearch]);
 
   const getDiscoverLayout = useDiscoverMainRoute({
@@ -57,12 +57,8 @@ export const DiscoverTabContent = () => {
 
   const DiscoverMainRoute = getDiscoverLayout(history);
 
-  const { setDiscoverStateContainer, discoverStateContainer } =
-    useDiscoverCustomizationServiceForSecuritySolution();
-
   const customizationCallback: CustomizationCallback = useCallback(
     ({ customizations, stateContainer }) => {
-      // if (!discoverStateContainer) setDiscoverStateContainer(stateContainer);
       customizations.set({
         id: 'search_bar',
         CustomQueryBar: CustomStatefulTopMenu,

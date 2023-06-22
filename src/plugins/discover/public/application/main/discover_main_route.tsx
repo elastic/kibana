@@ -24,6 +24,7 @@ import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
@@ -32,7 +33,6 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -47,8 +47,7 @@ export interface MainRouteProps {
 
 export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
   const history = useHistory();
-  const discoverService = useDiscoverServices();
-  const services = discoverService;
+  const services = useDiscoverServices();
   const {
     core,
     chrome,
@@ -57,7 +56,6 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
     http: { basePath },
     dataViewEditor,
   } = services;
-
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
     getDiscoverStateContainer({
@@ -269,6 +267,5 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
     </DiscoverCustomizationProvider>
   );
 }
-
 // eslint-disable-next-line import/no-default-export
 export default DiscoverMainRoute;

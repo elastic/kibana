@@ -73,18 +73,13 @@ export class UnifiedSearchPublicPlugin
     setIndexPatterns(dataViews);
     const autocompleteStart = this.autocomplete.start();
 
-    // const SearchBar = createSearchBar({
-    //   core,
-    //   data,
-    //   storage: this.storage,
-    //   usageCollection: this.usageCollection,
-    //   isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
-    //   unifiedSearch: {
-    //     autocomplete: autocompleteStart,
-    //   },
-    // });
-
-    // discover-timeline integration
+    /*
+     *
+     *  unifiedsearch uses global data service to create stateful search bar.
+     *  This function helps in creating a search bar with different instances of services
+     *  so that it can be easy to use multiple stateful searchbars in the single applications
+     *
+     * */
     const getCustomSearchBar = (deps?: Partial<StatefulSearchBarDeps>) =>
       createSearchBar({
         core,

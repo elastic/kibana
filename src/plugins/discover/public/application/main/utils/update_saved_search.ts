@@ -97,6 +97,5 @@ export function updateSavedSearch(
     savedSearch.timeRestore || savedSearch.refreshInterval
       ? { value: refreshInterval.value, pause: refreshInterval.pause }
       : undefined;
-
   return savedSearch;
 }

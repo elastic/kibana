@@ -83,6 +83,13 @@ const DocViewerTable = React.lazy(() => import('./services/doc_views/components/
 const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
 
 interface UseDiscoverMainRouteProps {
+  /*
+   *  Any override that user of this hook
+   *  wants discover to use. Need to keep in mind that this
+   *  param is only for overrides for the services that Discover
+   *  already consumes.
+   *
+   * */
   services?: Partial<DiscoverServices>;
 }
 
@@ -164,7 +171,9 @@ export interface DiscoverStart {
    */
   readonly locator: undefined | DiscoverAppLocator;
   readonly customize: (profileName: string, callback: CustomizationCallback) => void;
-  readonly useDiscoverMainRoute: typeof useDiscoverMainRoute;
+  readonly useDiscoverMainRoute: (
+    props?: UseDiscoverMainRouteProps
+  ) => ReturnType<typeof useDiscoverMainRouteInternal>;
 }
 
 /**

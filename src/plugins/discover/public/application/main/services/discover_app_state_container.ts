@@ -155,7 +155,6 @@ export const getDiscoverAppStateContainer = ({
   const enhancedAppContainer = {
     ...appStateContainer,
     set: (value: DiscoverAppState | null) => {
-      addLog('[enhancedAppContainer] setting new App State', value);
       if (value) {
         previousState = appStateContainer.getState();
         appStateContainer.set(value);

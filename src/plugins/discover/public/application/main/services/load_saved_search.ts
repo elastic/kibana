@@ -113,7 +113,6 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
   // set data service filters
   const filters = savedSearch.searchSource.getField('filter');
   if (Array.isArray(filters) && filters.length) {
-    addLog('[updateBySavedSearch] Getting filters from FilterManager');
     services.data.query.filterManager.setAppFilters(cloneDeep(filters));
   }
   // some filters may not be valid for this context, so update

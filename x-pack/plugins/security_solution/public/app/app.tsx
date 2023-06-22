@@ -39,7 +39,6 @@ import { PROMPT_CONTEXTS } from '../assistant/content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from '../assistant/content/quick_prompts';
 import { BASE_SECURITY_SYSTEM_PROMPTS } from '../assistant/content/prompts/system';
 import { useAnonymizationStore } from '../assistant/use_anonymization_store';
-import { DiscoverCustomizationServiceProvider } from './discover_customization_provider';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -165,17 +164,15 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       }}
     >
       <CloudProvider>
-        <DiscoverCustomizationServiceProvider>
-          <StartApp
-            history={history}
-            onAppLeave={onAppLeave}
-            setHeaderActionMenu={setHeaderActionMenu}
-            store={store}
-            theme$={theme$}
-          >
-            {children}
-          </StartApp>
-        </DiscoverCustomizationServiceProvider>
+        <StartApp
+          history={history}
+          onAppLeave={onAppLeave}
+          setHeaderActionMenu={setHeaderActionMenu}
+          store={store}
+          theme$={theme$}
+        >
+          {children}
+        </StartApp>
       </CloudProvider>
     </KibanaContextProvider>
   );

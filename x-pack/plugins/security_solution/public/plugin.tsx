@@ -180,7 +180,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...query,
           filterManager,
         },
-        _name: 'customDiscover',
       };
 
       const services: StartServices = {

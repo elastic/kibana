@@ -31,8 +31,7 @@ export interface DiscoverMainProps {
 export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
   const savedSearch = useSavedSearchInitial();
-  const discoverServices = useDiscoverServices();
-  const services = discoverServices;
+  const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
 
   useUrlTracking(stateContainer.savedSearchState);
@@ -59,7 +58,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   }, [stateContainer]);
 
   /**
-   * SavedSearch dependent initializing
+   * SavedSearch dependend initializing
    */
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';

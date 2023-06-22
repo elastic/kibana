@@ -12,7 +12,7 @@ import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataViewPickerProps, SearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
@@ -28,15 +28,12 @@ export interface QueryBarComponentProps {
   filterManager: FilterManager;
   filters: Filter[];
   onChangedQuery?: (query: Query) => void;
-  onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter, dateRange?: TimeRange) => void;
+  onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
   refreshInterval?: number;
   savedQuery?: SavedQuery;
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
   displayStyle?: SearchBarProps['displayStyle'];
   isDisabled?: boolean;
-  dataViewPickerProps?: DataViewPickerProps;
-  showDatePicker?: boolean;
-  placeholder?: string;
 }
 
 export const QueryBar = memo<QueryBarComponentProps>(
@@ -58,17 +55,14 @@ export const QueryBar = memo<QueryBarComponentProps>(
     dataTestSubj,
     displayStyle,
     isDisabled,
-    dataViewPickerProps,
-    showDatePicker = false,
-    placeholder,
   }) => {
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
-          onSubmitQuery(payload.query, { ...payload.dateRange, refreshInterval });
+          onSubmitQuery(payload.query);
         }
       },
-      [filterQuery, onSubmitQuery, refreshInterval]
+      [filterQuery, onSubmitQuery]
     );
 
     const onQueryChange = useCallback(
@@ -130,7 +124,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         refreshInterval={refreshInterval}
         showAutoRefreshOnly={false}
         showFilterBar={!hideSavedQuery}
-        showDatePicker={showDatePicker}
+        showDatePicker={false}
         showQueryInput={true}
         showSaveQuery={true}
         timeHistory={timeHistory}
@@ -138,8 +132,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
         savedQuery={savedQuery}
         displayStyle={displayStyle}
         isDisabled={isDisabled}
-        dataViewPickerComponentProps={dataViewPickerProps}
-        placeholder={placeholder}
       />
     );
   }

@@ -40,18 +40,18 @@ export interface UnifiedSearchStartDependencies {
   screenshotMode?: ScreenshotModePluginStart;
 }
 
-type SearchBar = (props: StatefulSearchBarProps<Query>) => React.ReactElement;
+type AggQuerySearchBarComp = <QT extends Query | AggregateQuery = Query>(
+  props: StatefulSearchBarProps<QT>
+) => React.ReactElement;
 
 /**
  * Unified search plugin prewired UI components
  */
 export interface UnifiedSearchPublicPluginStartUi {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-  getCustomSearchBar: (props: Partial<StatefulSearchBarDeps>) => SearchBar;
-  SearchBar: SearchBar;
-  AggregateQuerySearchBar: <QT extends Query | AggregateQuery = Query>(
-    props: StatefulSearchBarProps<QT>
-  ) => React.ReactElement;
+  getCustomSearchBar: (props: Partial<StatefulSearchBarDeps>) => AggQuerySearchBarComp;
+  SearchBar: (props: StatefulSearchBarProps<Query>) => React.ReactElement;
+  AggregateQuerySearchBar: AggQuerySearchBarComp;
   FiltersBuilderLazy: React.ComponentType<FiltersBuilderProps>;
 }
 
