@@ -8,19 +8,7 @@
 import Url from 'url';
 import { FtrProviderContext } from './ftr_provider_context';
 
-export async function DefendWorkflowsCypressCliTestRunner(context: FtrProviderContext) {
-  return startDefendWorkflowsCypress(context);
-}
-
-export async function DefendWorkflowsCypressVisualTestRunner(context: FtrProviderContext) {
-  return startDefendWorkflowsCypress(context);
-}
-
-export async function DefendWorkflowsCypressEndpointTestRunner(context: FtrProviderContext) {
-  return startDefendWorkflowsCypress(context);
-}
-
-function startDefendWorkflowsCypress(context: FtrProviderContext) {
+export function DefendWorkflowsCypressCliTestRunner(context: FtrProviderContext) {
   const config = context.getService('config');
 
   return {
