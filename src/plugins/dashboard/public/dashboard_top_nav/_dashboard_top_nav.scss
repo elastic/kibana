@@ -14,8 +14,6 @@
     position: sticky;
     z-index: $euiZLevel2;
 
-
-
     @include getBackgroundColor($showBackgroundColor: true);
 
     &-right {
