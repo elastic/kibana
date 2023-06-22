@@ -32,7 +32,7 @@ describe('useGetCaseUsers', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith('case-1', expect.any(AbortSignal));
+    expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) });
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -46,7 +46,7 @@ describe('useGetCaseUsers', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith('case-1', expect.any(AbortSignal));
+    expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) });
     expect(addError).toHaveBeenCalled();
   });
 });
