@@ -17,6 +17,8 @@ import React, {
   useRef,
 } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import useDebounce from 'react-use/lib/useDebounce';
+import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import { RegisterFunction, UnRegisterFunction } from '../types';
@@ -30,6 +32,7 @@ interface Context {
   register: RegisterFunction;
   updateFooterChildren: (children: ReactNode) => void;
   unstyled: boolean;
+  activeNodes: ChromeProjectNavigationNode[][];
 }
 
 const NavigationContext = createContext<Context>({
@@ -39,6 +42,7 @@ const NavigationContext = createContext<Context>({
   }),
   updateFooterChildren: () => {},
   unstyled: false,
+  activeNodes: [],
 });
 
 interface Props {
@@ -52,7 +56,7 @@ interface Props {
 }
 
 export function Navigation({ children, unstyled = false, dataTestSubj }: Props) {
-  const { onProjectNavigationChange } = useNavigationServices();
+  const { onProjectNavigationChange, activeNodes$ } = useNavigationServices();
 
   // We keep a reference of the order of the children that register themselves when mounting.
   // This guarantees that the navTree items sent to the Chrome service has the same order
@@ -60,7 +64,11 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
   const orderChildrenRef = useRef<Record<string, number>>({});
   const idx = useRef(0);
 
+  const activeNodes = useObservable(activeNodes$, []);
   const [navigationItems, setNavigationItems] = useState<
+    Record<string, ChromeProjectNavigationNode>
+  >({});
+  const [debouncedNavigationItems, setDebouncedNavigationItems] = useState<
     Record<string, ChromeProjectNavigationNode>
   >({});
   const [footerChildren, setFooterChildren] = useState<ReactNode>(null);
@@ -75,7 +83,9 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
 
   const register = useCallback(
     (navNode: ChromeProjectNavigationNode) => {
-      orderChildrenRef.current[navNode.id] = idx.current++;
+      if (orderChildrenRef.current[navNode.id] === undefined) {
+        orderChildrenRef.current[navNode.id] = idx.current++;
+      }
 
       setNavigationItems((prevItems) => {
         return {
@@ -97,20 +107,31 @@ export function Navigation({ children, unstyled = false, dataTestSubj }: Props) 
       register,
       updateFooterChildren: setFooterChildren,
       unstyled,
+      activeNodes,
     }),
-    [register, unstyled]
+    [register, unstyled, activeNodes]
+  );
+
+  useDebounce(
+    () => {
+      setDebouncedNavigationItems(navigationItems);
+    },
+    100,
+    [navigationItems]
   );
 
   useEffect(() => {
+    const navigationTree = Object.values(debouncedNavigationItems).sort((a, b) => {
+      const aOrder = orderChildrenRef.current[a.id];
+      const bOrder = orderChildrenRef.current[b.id];
+      return aOrder - bOrder;
+    });
+
     // This will update the navigation tree in the Chrome service (calling the serverless.setNavigation())
     onProjectNavigationChange({
-      navigationTree: Object.values(navigationItems).sort((a, b) => {
-        const aOrder = orderChildrenRef.current[a.id];
-        const bOrder = orderChildrenRef.current[b.id];
-        return aOrder - bOrder;
-      }),
+      navigationTree,
     });
-  }, [navigationItems, onProjectNavigationChange]);
+  }, [debouncedNavigationItems, onProjectNavigationChange]);
 
   return (
     <NavigationContext.Provider value={contextValue}>
