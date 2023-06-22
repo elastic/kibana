@@ -6,6 +6,10 @@
  */
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+// Nodes that can be queried by datastreams API
+// Warm and cold nodes have been excluded because of performance issues
+export const DATA_TIERS = ['data_hot'];
+
 export async function getDataStreamsQueryMetadata({
   dataStreamName,
   esClient,
@@ -15,7 +19,7 @@ export async function getDataStreamsQueryMetadata({
 }) {
   const termsEnumIndexFilter = {
     terms: {
-      _tier: ['data_hot', 'data_warm'],
+      _tier: DATA_TIERS,
     },
   };
 
