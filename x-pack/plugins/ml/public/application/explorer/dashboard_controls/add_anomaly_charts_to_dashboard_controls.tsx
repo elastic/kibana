@@ -104,8 +104,19 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
     />
   );
 
+  const isMaxSeriesToPlotValid =
+    maxSeriesToPlot >= 1 && maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
   const extraControls = (
     <EuiFormRow
+      isInvalid={!isMaxSeriesToPlotValid}
+      error={
+        !isMaxSeriesToPlotValid ? (
+          <FormattedMessage
+            id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotError"
+            defaultMessage="Maximum number of series to plot must be between 1 and 50."
+          />
+        ) : undefined
+      }
       label={
         <FormattedMessage
           id="xpack.ml.explorer.addToDashboard.anomalyCharts.maxSeriesToPlotLabel"
@@ -119,7 +130,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
         name="selectMaxSeriesToPlot"
         value={maxSeriesToPlot}
         onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
-        min={0}
+        min={1}
         max={MAX_ANOMALY_CHARTS_ALLOWED}
       />
     </EuiFormRow>
@@ -132,7 +143,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
       isLoading={isLoading}
       search={search}
       addToDashboardAndEditCallback={addToDashboardAndEditCallback}
-      disabled={false}
+      disabled={!isMaxSeriesToPlotValid}
       title={title}
     >
       {extraControls}
