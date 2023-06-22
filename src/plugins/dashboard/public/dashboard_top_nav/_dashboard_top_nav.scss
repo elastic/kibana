@@ -1,3 +1,4 @@
+
 @mixin getBackgroundColor($showBackgroundColor: true) {
   @if $showBackgroundColor {
     background: $euiPageBackgroundColor;
@@ -7,22 +8,37 @@
   }
 }
 
-.dashboardTopNav {
-  width: 100%;
-  position: sticky;
-  z-index: $euiZLevel2;
-  @include getBackgroundColor($showBackgroundColor: true);
+.kbnBody {
+  .dashboardTopNav {
+    width: 100%;
+    position: sticky;
+    z-index: $euiZLevel2;
+    @include getBackgroundColor($showBackgroundColor: true);
 
-  &-right {
-    text-align: right;
+    &-right {
+      text-align: right;
+    }
+
+    &.dashboardTopNav-noBackgroundColor {
+      @include getBackgroundColor($showBackgroundColor: false);
+      }
   }
 
-  top: $kbnHeaderOffset;
-  &.dashboardTopNav-fullscreenMode {
-    top: 0;
-  }
-  &.dashboardTopNav-noBackgroundColor {
-  @include getBackgroundColor($showBackgroundColor: false);
+  &.kbnBody--noHeaderBanner {
+    &.kbnBody--chromeVisible .dashboardTopNav {
+      top: $kbnHeaderOffset;
+    }
+    &.kbnBody--chromeHidden .dashboardTopNav {
+      top: 0;
+    }
   }
 
+  &.kbnBody--hasHeaderBanner {
+    &.kbnBody--chromeVisible .dashboardTopNav {
+      top: $kbnHeaderOffsetWithBanner;
+    }
+    &.kbnBody--chromeHidden .dashboardTopNav {
+      top: $kbnHeaderBannerHeight;
+    }
+  }
 }
