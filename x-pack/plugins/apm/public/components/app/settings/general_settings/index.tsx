@@ -19,6 +19,9 @@ import {
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
+  enableInfrastructureHostsView,
+  enableAwsLambdaMetrics,
+  enableAgentExplorerView,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -36,6 +39,9 @@ const apmSettingsKeys = [
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
+  enableInfrastructureHostsView,
+  enableAwsLambdaMetrics,
+  enableAgentExplorerView,
 ];
 
 export function GeneralSettings() {

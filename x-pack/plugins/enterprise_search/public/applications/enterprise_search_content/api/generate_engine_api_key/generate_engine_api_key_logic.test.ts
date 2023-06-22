@@ -34,7 +34,7 @@ describe('GenerateEngineApiKeyLogic', () => {
       });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/enterprise_search/engines/puggles/api_key',
+        '/internal/enterprise_search/search_applications/puggles/api_key',
         {
           body: JSON.stringify({
             keyName: 'puggles read only key',

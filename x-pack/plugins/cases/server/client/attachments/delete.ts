@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { CommentRequest, CommentRequestAlertType } from '../../../common/api';
-import { Actions, ActionTypes } from '../../../common/api';
+import { Actions, ActionTypes, CommentRequestRt, decodeOrThrow } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
@@ -115,12 +115,17 @@ export async function deleteComment(
       refresh: false,
     });
 
+    // we only want to store the fields related to the original request of the attachment, not fields like
+    // created_at etc. So we'll use the decode to strip off the other fields. This is necessary because we don't know
+    // what type of attachment this is. Depending on the type it could have various fields.
+    const attachmentRequestAttributes = decodeOrThrow(CommentRequestRt)(attachment.attributes);
+
     await userActionService.creator.createUserAction({
       type: ActionTypes.comment,
       action: Actions.delete,
       caseId: id,
       attachmentId: attachmentID,
-      payload: { attachment: { ...attachment.attributes } },
+      payload: { attachment: attachmentRequestAttributes },
       user,
       owner: attachment.attributes.owner,
     });

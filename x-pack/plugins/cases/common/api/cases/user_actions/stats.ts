@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-export const CaseUserActionStatsRt = rt.type({
+export const CaseUserActionStatsRt = rt.strict({
   total: rt.number,
   total_comments: rt.number,
   total_other_actions: rt.number,

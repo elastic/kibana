@@ -10,7 +10,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { useCallback, useMemo } from 'react';
 import { find } from 'lodash/fp';
 import type { EuiFlexItemProps } from '@elastic/eui';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 import { isAlertFromEndpointEvent } from '../../../../../../common/utils/endpoint_alert_check';
 import { SummaryValueCell } from '../../../../../../common/components/event_details/table/summary_value_cell';
 import { useRiskScore } from '../../../../../../explore/containers/risk_score';

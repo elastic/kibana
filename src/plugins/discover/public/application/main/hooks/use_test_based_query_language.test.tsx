@@ -23,6 +23,7 @@ import { DiscoverMainProvider } from '../services/discover_state_provider';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../services/discover_state';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,
@@ -84,6 +85,7 @@ const renderHookWithContext = (
   appState?: DiscoverAppState
 ) => {
   const props = getHookProps(query, useDataViewsService ? getDataViewsService() : undefined);
+  props.stateContainer.actions.setDataView(dataViewMock);
   if (appState) {
     props.stateContainer.appState.getState = jest.fn(() => {
       return appState;
@@ -98,7 +100,7 @@ const renderHookWithContext = (
 
 describe('useTextBasedQueryLanguage', () => {
   test('a text based query should change state when loading and finished', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const { replaceUrlState, stateContainer } = renderHookWithContext(true);
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
@@ -191,11 +193,7 @@ describe('useTextBasedQueryLanguage', () => {
       query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
     });
 
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
-      });
-    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
   test('if its not a text based query coming along, it should be ignored', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
@@ -270,7 +268,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT field1 from the-data-view-title' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
     expect(replaceUrlState).toHaveBeenCalledWith({
       columns: ['field1'],
     });
@@ -288,7 +286,7 @@ describe('useTextBasedQueryLanguage', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.COMPLETE,
@@ -301,7 +299,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
     stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
@@ -344,17 +342,10 @@ describe('useTextBasedQueryLanguage', () => {
   });
 
   test('changing a text based query with an index pattern that not corresponds to a dataview should return results', async () => {
-    const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
-    dataViewsCreateMock.mockImplementation(() => ({
-      ...dataViewMock,
-    }));
-    const dataViewsService = {
-      ...discoverServiceMock.dataViews,
-      create: dataViewsCreateMock,
-    };
-    const props = getHookProps(query, dataViewsService);
+    const props = getHookProps(query, discoverServiceMock.dataViews);
     const { stateContainer, replaceUrlState } = props;
     const documents$ = stateContainer.dataState.data$.documents$;
+    props.stateContainer.actions.setDataView(dataViewMock);
 
     renderHook(() => useTextBasedQueryLanguage(props), { wrapper: getHookContext(stateContainer) });
 
@@ -374,6 +365,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT field1 from the-data-view-*' },
     });
+    props.stateContainer.actions.setDataView(dataViewAdHoc);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
 
     await waitFor(() => {

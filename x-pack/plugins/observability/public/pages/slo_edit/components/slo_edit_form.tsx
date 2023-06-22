@@ -36,7 +36,7 @@ import {
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config/paths';
-import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { sloFeatureId } from '../../../../common';
 
@@ -304,7 +304,7 @@ export function SloEditForm({ slo }: Props) {
           canChangeTrigger={false}
           consumer={sloFeatureId}
           initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
-          ruleTypeId={SLO_BURN_RATE_RULE_ID}
+          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           onClose={handleCloseRuleFlyout}
           onSave={handleCloseRuleFlyout}
         />

@@ -471,8 +471,28 @@ export async function ensureFileUploadWriteIndices(opts: {
 
   return Promise.all(
     integrationsWithFileUpload.flatMap((integrationName) => {
-      const indexName = FILE_STORAGE_INTEGRATION_INDEX_NAMES[integrationName];
-      return [ensure(getFileDataIndexName(indexName)), ensure(getFileMetadataIndexName(indexName))];
+      const {
+        name: indexName,
+        fromHost,
+        toHost,
+      } = FILE_STORAGE_INTEGRATION_INDEX_NAMES[integrationName];
+      const indexCreateRequests: Array<Promise<void>> = [];
+
+      if (fromHost) {
+        indexCreateRequests.push(
+          ensure(getFileDataIndexName(indexName)),
+          ensure(getFileMetadataIndexName(indexName))
+        );
+      }
+
+      if (toHost) {
+        indexCreateRequests.push(
+          ensure(getFileDataIndexName(indexName, true)),
+          ensure(getFileMetadataIndexName(indexName, true))
+        );
+      }
+
+      return indexCreateRequests;
     })
   );
 }
@@ -529,6 +549,8 @@ export async function ensureAliasHasWriteIndex(opts: {
   );
 
   if (!existingIndex) {
+    logger.info(`Creating write index [${writeIndexName}], alias [${aliasName}]`);
+
     await retryTransientEsErrors(
       () => esClient.indices.create({ index: writeIndexName, ...body }, { ignore: [404] }),
       {

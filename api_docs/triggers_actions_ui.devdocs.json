@@ -384,38 +384,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ButtonGroupField",
-        "type": "Function",
-        "tags": [],
-        "label": "ButtonGroupField",
-        "description": [],
-        "signature": [
-          "React.NamedExoticComponent<Props>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/components/button_group_field.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.ButtonGroupField.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.CreateConnectorFlyout",
         "type": "Function",
         "tags": [],
@@ -860,46 +828,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.HiddenField",
-        "type": "Function",
-        "tags": [],
-        "label": "HiddenField",
-        "description": [],
-        "signature": [
-          "React.NamedExoticComponent<",
-          "Props",
-          "<unknown, ",
-          "FormData",
-          ", unknown>> & { readonly type: <T>(props: ",
-          "Props",
-          "<T, ",
-          "FormData",
-          ", T>) => JSX.Element; }"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/components/hidden_field.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.HiddenField.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.JsonEditorWithMessageVariables",
         "type": "Function",
         "tags": [],
@@ -1327,38 +1255,6 @@
               "T"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.PasswordField",
-        "type": "Function",
-        "tags": [],
-        "label": "PasswordField",
-        "description": [],
-        "signature": [
-          "React.NamedExoticComponent<PasswordFieldProps>"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/components/password_field.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.PasswordField.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4428,7 +4324,7 @@
             "section": "def-common.RuleType",
             "text": "RuleType"
           },
-          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"producer\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
+          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"producer\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -4840,7 +4736,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"monitoring\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"monitoring\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -5204,6 +5100,26 @@
                 "docId": "kibDataViewEditorPluginApi",
                 "section": "def-public.PluginStart",
                 "text": "PluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.dashboard",
+            "type": "Object",
+            "tags": [],
+            "label": "dashboard",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dashboard",
+                "scope": "public",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-public.DashboardStart",
+                "text": "DashboardStart"
               }
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",

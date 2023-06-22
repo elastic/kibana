@@ -60,7 +60,7 @@ import {
   ThrottlingWrapper,
 } from './field_wrappers';
 import { getDocLinks } from '../../../../../kibana_services';
-import { useMonitorName } from '../hooks/use_monitor_name';
+import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
   ConfigKey,
   DataStream,
@@ -76,6 +76,7 @@ import {
   ResponseBodyIndexPolicy,
   ResponseCheckJSON,
   ThrottlingConfig,
+  RequestBodyCheck,
 } from '../types';
 import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
 import { getDefaultFormFields } from './defaults';
@@ -718,12 +719,20 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: (headers) => !validateHeaders(headers),
     }),
+    dependencies: [ConfigKey.REQUEST_BODY_CHECK],
     error: i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.error', {
       defaultMessage: 'Header key must be a valid HTTP token.',
     }),
-    props: (): HeaderFieldProps => ({
-      readOnly,
-    }),
+    // contentMode is optional for other implementations, but required for this implemention of this field
+    props: ({
+      dependencies,
+    }): HeaderFieldProps & { contentMode: HeaderFieldProps['contentMode'] } => {
+      const [requestBody] = dependencies;
+      return {
+        readOnly,
+        contentMode: (requestBody as RequestBodyCheck).type,
+      };
+    },
   },
   [ConfigKey.REQUEST_BODY_CHECK]: {
     fieldKey: ConfigKey.REQUEST_BODY_CHECK,

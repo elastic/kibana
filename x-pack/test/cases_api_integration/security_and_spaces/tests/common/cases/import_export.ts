@@ -24,7 +24,7 @@ import {
   CreateCaseUserAction,
   CaseStatuses,
   CaseSeverity,
-  CaseUserActionAttributesWithoutConnectorId,
+  CaseUserActionWithoutReferenceIds,
 } from '@kbn/cases-plugin/common/api';
 import {
   CasePersistedSeverity,
@@ -164,15 +164,11 @@ const expectImportToHaveOneCase = async (supertestService: supertest.SuperTest<s
   expect(findResponse.cases[0].description).to.eql('super description');
 };
 
-const expectImportToHaveCreateCaseUserAction = (
-  userAction: CaseUserActionAttributesWithoutConnectorId
-) => {
+const expectImportToHaveCreateCaseUserAction = (userAction: CaseUserActionWithoutReferenceIds) => {
   expect(userAction.action).to.eql('create');
 };
 
-const expectImportToHavePushUserAction = (
-  userAction: CaseUserActionAttributesWithoutConnectorId
-) => {
+const expectImportToHavePushUserAction = (userAction: CaseUserActionWithoutReferenceIds) => {
   const pushedUserAction = userAction as PushedUserAction;
   expect(userAction.action).to.eql('push_to_service');
   expect(userAction.type).to.eql('pushed');
@@ -183,9 +179,7 @@ const expectImportToHavePushUserAction = (
   );
 };
 
-const expectImportToHaveUpdateConnector = (
-  userAction: CaseUserActionAttributesWithoutConnectorId
-) => {
+const expectImportToHaveUpdateConnector = (userAction: CaseUserActionWithoutReferenceIds) => {
   const connectorUserAction = userAction as ConnectorUserAction;
   expect(userAction.action).to.eql('update');
   expect(userAction.type).to.eql('connector');
@@ -220,7 +214,7 @@ const expectExportToHaveCaseSavedObject = (
 };
 
 const expectExportToHaveUserActions = (objects: SavedObject[], caseRequest: CasePostRequest) => {
-  const userActionSOs = findSavedObjectsByType<CaseUserActionAttributesWithoutConnectorId>(
+  const userActionSOs = findSavedObjectsByType<CaseUserActionWithoutReferenceIds>(
     objects,
     CASE_USER_ACTION_SAVED_OBJECT
   );
@@ -232,7 +226,7 @@ const expectExportToHaveUserActions = (objects: SavedObject[], caseRequest: Case
 };
 
 const expectCaseCreateUserAction = (
-  userActions: Array<SavedObject<CaseUserActionAttributesWithoutConnectorId>>,
+  userActions: Array<SavedObject<CaseUserActionWithoutReferenceIds>>,
   caseRequest: CasePostRequest
 ) => {
   const userActionForCaseCreate = findUserActionSavedObject(userActions, 'create', 'create_case');
@@ -259,7 +253,7 @@ const expectCaseCreateUserAction = (
 };
 
 const expectCreateCommentUserAction = (
-  userActions: Array<SavedObject<CaseUserActionAttributesWithoutConnectorId>>
+  userActions: Array<SavedObject<CaseUserActionWithoutReferenceIds>>
 ) => {
   const userActionForComment = findUserActionSavedObject(userActions, 'create', 'comment');
   const createCommentUserAction = userActionForComment!.attributes as CommentUserAction;
@@ -287,9 +281,9 @@ const findSavedObjectsByType = <ReturnType>(
 };
 
 const findUserActionSavedObject = (
-  savedObjects: Array<SavedObject<CaseUserActionAttributesWithoutConnectorId>>,
+  savedObjects: Array<SavedObject<CaseUserActionWithoutReferenceIds>>,
   action: string,
   type: string
-): SavedObject<CaseUserActionAttributesWithoutConnectorId> | undefined => {
+): SavedObject<CaseUserActionWithoutReferenceIds> | undefined => {
   return savedObjects.find((so) => so.attributes.action === action && so.attributes.type === type);
 };

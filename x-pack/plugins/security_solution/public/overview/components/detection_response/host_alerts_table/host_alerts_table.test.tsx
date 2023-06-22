@@ -157,4 +157,31 @@ describe('HostAlertsTable', () => {
       },
     ]);
   });
+
+  it('should render cellActions when count is bigger than zero', () => {
+    mockUseHostAlertsItemsReturn({
+      items: [parsedVulnerableHostsAlertsResult[0]],
+    });
+    const { getAllByTestId } = renderComponent();
+
+    expect(getAllByTestId('cellActions-renderContent-host.name').length).toBe(5);
+  });
+
+  it('should not render cellActions when count is zero', () => {
+    mockUseHostAlertsItemsReturn({
+      items: [
+        {
+          hostName: 'Host-342m5gl1g2',
+          totalAlerts: 100,
+          critical: 0,
+          high: 0,
+          low: 0,
+          medium: 0,
+        },
+      ],
+    });
+    const { getAllByTestId } = renderComponent();
+
+    expect(getAllByTestId('cellActions-renderContent-host.name').length).toBe(1);
+  });
 });

@@ -53,6 +53,8 @@ export const callEnterpriseSearchConfigAPI = async ({
       features: {
         hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
+        hasDocumentLevelSecurityEnabled: config.hasDocumentLevelSecurityEnabled,
+        hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
         hasNativeConnectors: config.hasNativeConnectors,
         hasWebCrawler: config.hasWebCrawler,
       },
@@ -106,6 +108,8 @@ export const callEnterpriseSearchConfigAPI = async ({
       features: {
         hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
+        hasDocumentLevelSecurityEnabled: config.hasDocumentLevelSecurityEnabled,
+        hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
         hasNativeConnectors: config.hasNativeConnectors,
         hasWebCrawler: config.hasWebCrawler,
       },

@@ -34,13 +34,13 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { showExamplesForField } from '../../../common/utils/field_examples_calculator';
+import { showExamplesForField } from '../../services/field_stats/field_examples_calculator';
 import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation, NumberSummary } from '../../../common/types';
 import {
   canProvideStatsForField,
   canProvideNumberSummaryForField,
-} from '../../../common/utils/field_stats_utils';
+} from '../../services/field_stats/field_stats_utils';
 import { loadFieldStats } from '../../services/field_stats';
 import type { AddFieldFilterHandler } from '../../types';
 import {
@@ -284,6 +284,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   let title = <></>;
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
+    const dataTestSubjDocsCount = 'unifiedFieldStats-statsFooter-docsCount';
     const countsElement = totalDocuments ? (
       <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
         {sampledDocuments && sampledDocuments < totalDocuments ? (
@@ -293,7 +294,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             values={{
               sampledDocuments,
               sampledDocumentsFormatted: (
-                <strong>
+                <strong data-test-subj={dataTestSubjDocsCount}>
                   {fieldFormats
                     .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
                     .convert(sampledDocuments)}
@@ -308,7 +309,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             values={{
               totalDocuments,
               totalDocumentsFormatted: (
-                <strong>
+                <strong data-test-subj={dataTestSubjDocsCount}>
                   {fieldFormats
                     .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
                     .convert(totalDocuments)}
@@ -418,6 +419,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <>
         <EuiButtonGroup
+          data-test-subj="unifiedFieldStats-buttonGroup"
           buttonSize="compressed"
           isFullWidth
           legend={i18n.translate('unifiedFieldList.fieldStats.displayToggleLegend', {
@@ -480,34 +482,71 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (field.type === 'date') {
       return combineWithTitleAndFooter(
-        <div data-test-subj={`${dataTestSubject}-histogram`}>
-          <Chart size={{ height: 200, width: 300 - 32 }}>
+        <div data-test-subj="unifiedFieldStats-timeDistribution">
+          <div data-test-subj={`${dataTestSubject}-histogram`}>
+            <Chart size={{ height: 200, width: 300 - 32 }}>
+              <Settings
+                tooltip={{ type: TooltipType.None }}
+                theme={customChartTheme}
+                baseTheme={chartBaseTheme}
+                xDomain={
+                  fromDateParsed && toDateParsed
+                    ? {
+                        min: fromDateParsed.valueOf(),
+                        max: toDateParsed.valueOf(),
+                        minInterval: Math.round(
+                          (toDateParsed.valueOf() - fromDateParsed.valueOf()) / 10
+                        ),
+                      }
+                    : undefined
+                }
+              />
+
+              <Axis
+                id="key"
+                position={Position.Bottom}
+                tickFormat={
+                  fromDateParsed && toDateParsed
+                    ? niceTimeFormatter([fromDateParsed.valueOf(), toDateParsed.valueOf()])
+                    : undefined
+                }
+                showOverlappingTicks={true}
+              />
+
+              <HistogramBarSeries
+                data={histogram.buckets}
+                id={specId}
+                xAccessor={'key'}
+                yAccessors={['count']}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                timeZone="local"
+              />
+            </Chart>
+          </div>
+        </div>
+      );
+    }
+
+    if (showingHistogram || !topValues || !topValues.buckets.length) {
+      return combineWithTitleAndFooter(
+        <div data-test-subj="unifiedFieldStats-histogram">
+          <Chart
+            data-test-subj={`${dataTestSubject}-histogram`}
+            size={{ height: 200, width: '100%' }}
+          >
             <Settings
+              rotation={90}
               tooltip={{ type: TooltipType.None }}
               theme={customChartTheme}
               baseTheme={chartBaseTheme}
-              xDomain={
-                fromDateParsed && toDateParsed
-                  ? {
-                      min: fromDateParsed.valueOf(),
-                      max: toDateParsed.valueOf(),
-                      minInterval: Math.round(
-                        (toDateParsed.valueOf() - fromDateParsed.valueOf()) / 10
-                      ),
-                    }
-                  : undefined
-              }
             />
 
             <Axis
               id="key"
-              position={Position.Bottom}
-              tickFormat={
-                fromDateParsed && toDateParsed
-                  ? niceTimeFormatter([fromDateParsed.valueOf(), toDateParsed.valueOf()])
-                  : undefined
-              }
+              position={Position.Left}
               showOverlappingTicks={true}
+              tickFormat={(d) => formatter.convert(d)}
             />
 
             <HistogramBarSeries
@@ -515,44 +554,11 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               id={specId}
               xAccessor={'key'}
               yAccessors={['count']}
-              xScaleType={ScaleType.Time}
+              xScaleType={ScaleType.Linear}
               yScaleType={ScaleType.Linear}
-              timeZone="local"
             />
           </Chart>
         </div>
-      );
-    }
-
-    if (showingHistogram || !topValues || !topValues.buckets.length) {
-      return combineWithTitleAndFooter(
-        <Chart
-          data-test-subj={`${dataTestSubject}-histogram`}
-          size={{ height: 200, width: '100%' }}
-        >
-          <Settings
-            rotation={90}
-            tooltip={{ type: TooltipType.None }}
-            theme={customChartTheme}
-            baseTheme={chartBaseTheme}
-          />
-
-          <Axis
-            id="key"
-            position={Position.Left}
-            showOverlappingTicks={true}
-            tickFormat={(d) => formatter.convert(d)}
-          />
-
-          <HistogramBarSeries
-            data={histogram.buckets}
-            id={specId}
-            xAccessor={'key'}
-            yAccessors={['count']}
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-          />
-        </Chart>
       );
     }
   }
@@ -560,6 +566,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   if (topValues && topValues.buckets.length) {
     return combineWithTitleAndFooter(
       <FieldTopValues
+        areExamples={showExamplesForField(field)}
         buckets={topValues.buckets}
         dataView={dataView}
         field={field}

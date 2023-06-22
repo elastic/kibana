@@ -15,7 +15,8 @@ import {
   Query,
   toElasticsearchQuery,
 } from '@kbn/es-query';
-import { useMlContext } from '../../../../../contexts/ml';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { useDataSource } from '../../../../../contexts/ml';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 
 // `undefined` is used for a non-initialized state
@@ -33,8 +34,11 @@ export function useSavedSearch() {
   const [savedSearchQuery, setSavedSearchQuery] = useState<SavedSearchQuery>(undefined);
   const [savedSearchQueryStr, setSavedSearchQueryStr] = useState<SavedSearchQueryStr>(undefined);
 
-  const mlContext = useMlContext();
-  const { currentDataView, kibanaConfig, selectedSavedSearch } = mlContext;
+  const {
+    services: { uiSettings },
+  } = useMlKibana();
+
+  const { currentDataView, selectedSavedSearch } = useDataSource();
 
   const getQueryData = () => {
     let qry: any = {};
@@ -75,7 +79,7 @@ export function useSavedSearch() {
         qry.bool.must_not = [...qry.bool.must_not, ...filterQuery.must_not];
       } else {
         qry = buildEsQuery(currentDataView, [query], filter);
-        decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+        decorateQuery(qry, uiSettings.get('query:queryString:options'));
       }
 
       setSavedSearchQuery(qry);

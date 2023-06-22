@@ -7,20 +7,18 @@
 
 import React, { FC } from 'react';
 import { parse } from 'query-string';
-
 import { i18n } from '@kbn/i18n';
-
+import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_creation';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import {
-  loadNewJobCapabilities,
   DATA_FRAME_ANALYTICS,
+  loadNewJobCapabilities,
 } from '../../../services/new_job_capabilities/load_new_job_capabilities';
 
 export const analyticsJobsCreationRouteFactory = (
@@ -48,14 +46,11 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     sort: false,
   });
 
-  const { context } = useResolver(
-    index,
-    savedSearchId,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
+  const { context } = useRouteResolver(
+    'full',
+    ['canGetDataFrameAnalytics', 'canCreateDataFrameAnalytics'],
     {
-      ...basicResolvers(deps),
+      ...basicResolvers(),
       analyticsFields: () =>
         loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, DATA_FRAME_ANALYTICS),
     }
@@ -63,7 +58,9 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
 
   return (
     <PageLoader context={context}>
-      <Page jobId={jobId} />
+      <DataSourceContextProvider>
+        <Page jobId={jobId} />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

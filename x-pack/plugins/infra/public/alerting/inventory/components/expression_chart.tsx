@@ -10,11 +10,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { getChartTheme } from '../../../utils/get_chart_theme';
+import { useIsDarkMode } from '../../../hooks/use_is_dark_mode';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useSnapshot } from '../../../pages/metrics/inventory_view/hooks/use_snaphot';
 import { useWaffleOptionsContext } from '../../../pages/metrics/inventory_view/hooks/use_waffle_options';
 import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
@@ -24,7 +25,6 @@ import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explor
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import {
   ChartContainer,
-  getChartTheme,
   LoadingState,
   NoDataState,
   TIME_LABELS,
@@ -77,15 +77,13 @@ export const ExpressionChart: React.FC<Props> = ({
     region: options.region,
     timerange,
   });
-
-  const { uiSettings } = useKibanaContextForPlugin().services;
+  const isDarkMode = useIsDarkMode();
 
   const metric = {
     field: expression.metric,
     aggregation: 'avg' as MetricsExplorerAggregation,
     color: Color.color0,
   };
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
     const firstSeries = nodes[0]?.metrics[0]?.timeseries;
     const firstTimestamp = first(firstSeries?.rows)?.timestamp;

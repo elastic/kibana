@@ -50,6 +50,7 @@ export async function mountManagementSection(
     charts,
     fieldFormats,
     savedObjectsManagement,
+    savedSearch,
   } = plugins;
   const { docTitle } = chrome;
 
@@ -84,6 +85,7 @@ export async function mountManagementSection(
     charts,
     fieldFormats,
     savedObjectsManagement,
+    savedSearch,
   };
 
   const unmountAppCallback = renderApp(element, appDependencies);

@@ -150,7 +150,7 @@ describe('Cases API', () => {
   });
 
   describe('resolveCase', () => {
-    const targetAliasId = '12345';
+    const aliasTargetId = '12345';
     const basicResolveCase = {
       outcome: 'aliasMatch',
       case: basicCaseSnake,
@@ -159,7 +159,7 @@ describe('Cases API', () => {
 
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue({ ...basicResolveCase, target_alias_id: targetAliasId });
+      fetchMock.mockResolvedValue({ ...basicResolveCase, alias_target_id: aliasTargetId });
     });
 
     it('should be called with correct check url, method, signal', async () => {
@@ -173,21 +173,21 @@ describe('Cases API', () => {
 
     it('should return correct response', async () => {
       const resp = await resolveCase(caseId, true, abortCtrl.signal);
-      expect(resp).toEqual({ ...basicResolveCase, case: basicCase, targetAliasId });
+      expect(resp).toEqual({ ...basicResolveCase, case: basicCase, aliasTargetId });
     });
 
     it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue({
         ...basicResolveCase,
         case: caseWithRegisteredAttachmentsSnake,
-        target_alias_id: targetAliasId,
+        alias_target_id: aliasTargetId,
       });
 
       const resp = await resolveCase(caseId, true, abortCtrl.signal);
       expect(resp).toEqual({
         ...basicResolveCase,
         case: caseWithRegisteredAttachments,
-        targetAliasId,
+        aliasTargetId,
       });
     });
   });

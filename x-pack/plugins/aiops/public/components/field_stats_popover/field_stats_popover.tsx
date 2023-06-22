@@ -60,7 +60,7 @@ export function FieldStatsPopover({
           defaultMessage: 'Show top field values',
         })}
         data-test-subj={'aiopsContextPopoverButton'}
-        style={{ marginLeft: euiTheme.euiSizeXS }}
+        css={{ marginLeft: euiTheme.euiSizeXS }}
       />
     </EuiToolTip>
   );

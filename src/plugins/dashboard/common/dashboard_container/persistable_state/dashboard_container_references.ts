@@ -8,13 +8,14 @@
 
 import {
   EmbeddableInput,
-  EmbeddablePersistableStateService,
   EmbeddableStateWithType,
+  EmbeddablePersistableStateService,
 } from '@kbn/embeddable-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
+import { Reference } from '@kbn/content-management-utils';
 import { CONTROL_GROUP_TYPE, PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+
 import { DashboardPanelState } from '../types';
-import { DashboardContainerStateWithType } from '../../types';
+import { ParsedDashboardAttributesWithType } from '../../types';
 
 const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;
 
@@ -24,8 +25,10 @@ const controlGroupId = 'dashboard_control_group';
 export const createInject = (
   persistableStateService: EmbeddablePersistableStateService
 ): EmbeddablePersistableStateService['inject'] => {
-  return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
-    const workingState = { ...state } as EmbeddableStateWithType | DashboardContainerStateWithType;
+  return (state: EmbeddableStateWithType, references: Reference[]) => {
+    const workingState = { ...state } as
+      | EmbeddableStateWithType
+      | ParsedDashboardAttributesWithType;
 
     if ('panels' in workingState) {
       workingState.panels = { ...workingState.panels };
@@ -103,9 +106,11 @@ export const createExtract = (
   persistableStateService: EmbeddablePersistableStateService
 ): EmbeddablePersistableStateService['extract'] => {
   return (state: EmbeddableStateWithType) => {
-    const workingState = { ...state } as EmbeddableStateWithType | DashboardContainerStateWithType;
+    const workingState = { ...state } as
+      | EmbeddableStateWithType
+      | ParsedDashboardAttributesWithType;
 
-    const references: SavedObjectReference[] = [];
+    const references: Reference[] = [];
 
     if ('panels' in workingState) {
       workingState.panels = { ...workingState.panels };
@@ -125,7 +130,6 @@ export const createExtract = (
           });
 
           delete panel.explicitInput.savedObjectId;
-          delete panel.explicitInput.type;
         }
 
         const { state: panelState, references: panelReferences } = persistableStateService.extract({

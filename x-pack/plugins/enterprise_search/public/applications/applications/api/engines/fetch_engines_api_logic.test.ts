@@ -24,7 +24,7 @@ describe('FetchEnginesAPILogic', () => {
         meta: { from: 0, size: 10, total: 0 },
       });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/engines', {
+      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/search_applications', {
         query: { from: 0, size: 10 },
       });
 
@@ -45,7 +45,7 @@ describe('FetchEnginesAPILogic', () => {
       });
       await nextTick();
 
-      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/engines', {
+      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/search_applications', {
         query: { from: 0, size: 10, q: 'te*' },
       });
 

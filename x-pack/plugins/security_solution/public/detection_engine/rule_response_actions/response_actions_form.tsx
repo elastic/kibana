@@ -90,7 +90,7 @@ export const ResponseActionsForm = ({
     <>
       <EuiSpacer size="xxl" data-test-subj={'response-actions-form'} />
       <ResponseActionsHeader />
-      {uiFieldErrors?.length && form.isSubmitted ? (
+      {uiFieldErrors?.length ? (
         <>
           <p css={FieldErrorsContainer}>
             <EuiCallOut

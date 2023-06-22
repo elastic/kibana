@@ -9,6 +9,7 @@
 import { valid } from 'semver';
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import buffer from 'buffer';
 
 const migrationSchema = schema.object({
   algorithm: schema.oneOf([schema.literal('v2'), schema.literal('zdt')], {
@@ -16,6 +17,10 @@ const migrationSchema = schema.object({
   }),
   batchSize: schema.number({ defaultValue: 1_000 }),
   maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
+  maxReadBatchSizeBytes: schema.byteSize({
+    defaultValue: buffer.constants.MAX_STRING_LENGTH,
+    max: buffer.constants.MAX_STRING_LENGTH,
+  }),
   discardUnknownObjects: schema.maybe(
     schema.string({
       validate: (value: string) =>

@@ -16,7 +16,7 @@ describe('Configuration', () => {
         created_at: '123',
       });
 
-      expect(res).toMatchObject({
+      expect(res).toStrictEqual({
         created_at: '123',
       });
     });

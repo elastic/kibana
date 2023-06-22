@@ -14,6 +14,15 @@ import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 import { APMPlugin } from './plugin';
 
+const disabledOnServerless = schema.conditional(
+  schema.contextRef('serverless'),
+  true,
+  schema.boolean({
+    defaultValue: false,
+  }),
+  schema.oneOf([schema.literal(true)], { defaultValue: true })
+);
+
 // All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/main/docs/settings/apm-settings.asciidoc
 // and be included on cloud allow list unless there are specific reasons not to
 const configSchema = schema.object({
@@ -57,6 +66,27 @@ const configSchema = schema.object({
     defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
   }),
   enabled: schema.boolean({ defaultValue: true }),
+  serverlessOnboarding: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.never()
+  ),
+  managedServiceUrl: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.string({ defaultValue: '' }),
+    schema.never()
+  ),
+  featureFlags: schema.object({
+    agentConfigurationAvailable: disabledOnServerless,
+    configurableIndicesAvailable: disabledOnServerless,
+    infrastructureTabAvailable: disabledOnServerless,
+    infraUiAvailable: disabledOnServerless,
+    migrationToFleetAvailable: disabledOnServerless,
+    sourcemapApiAvailable: disabledOnServerless,
+    storageExplorerAvailable: disabledOnServerless,
+  }),
 });
 
 // plugin config
@@ -115,6 +145,9 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     serviceMapEnabled: true,
     ui: true,
     latestAgentVersionsUrl: true,
+    managedServiceUrl: true,
+    serverlessOnboarding: true,
+    featureFlags: true,
   },
   schema: configSchema,
 };

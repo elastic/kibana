@@ -40,7 +40,7 @@ import {
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
   getRuleForSignalTesting,
   waitForRuleSuccess,
@@ -195,6 +195,62 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(data).to.eql({
           ...postCaseResp(),
           severity: CaseSeverity.MEDIUM,
+          updated_by: defaultUser,
+        });
+      });
+
+      it('should patch the category of a case correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        // the default category
+        expect(postedCase.category).equal(null);
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                category: 'foobar',
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          category: 'foobar',
+          updated_by: defaultUser,
+        });
+      });
+
+      it('should unset the category of a case correctly', async () => {
+        const postedCase = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+
+        // the default category
+        expect(postedCase.category).equal('foobar');
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                category: null,
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          category: null,
           updated_by: defaultUser,
         });
       });
@@ -391,7 +447,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('406s when excess data sent', async () => {
+      it('400s when excess data sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await updateCase({
           supertest,
@@ -405,7 +461,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          expectedHttpCode: 406,
+          expectedHttpCode: 400,
         });
       });
 
@@ -794,7 +850,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });

@@ -46,4 +46,9 @@ export const unifiedHistogramServicesMock = {
     clear: jest.fn(),
   },
   expressions: expressionsPluginMock.createStartContract(),
+  capabilities: {
+    dashboard: {
+      showWriteControls: true,
+    },
+  },
 } as unknown as UnifiedHistogramServices;

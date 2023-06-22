@@ -209,4 +209,27 @@ describe('DiscoverGrid', () => {
       expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(false);
     });
   });
+
+  describe('sorting', () => {
+    it('should enable in memory sorting with plain records', () => {
+      const component = getComponent({
+        ...getProps(),
+        columns: ['message'],
+        isPlainRecord: true,
+      });
+
+      expect(
+        (
+          findTestSubject(component, 'docTable')
+            .find('EuiDataGridInMemoryRenderer')
+            .first()
+            .props() as Record<string, string>
+        ).inMemory
+      ).toMatchInlineSnapshot(`
+        Object {
+          "level": "sorting",
+        }
+      `);
+    });
+  });
 });

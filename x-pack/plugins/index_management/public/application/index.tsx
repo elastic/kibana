@@ -37,13 +37,15 @@ export const renderApp = (
 
   const { i18n, docLinks, notifications, application, executionContext, overlays } = core;
   const { Context: I18nContext } = i18n;
-  const { services, history, setBreadcrumbs, uiSettings, kibanaVersion, theme$ } = dependencies;
+  const { services, history, setBreadcrumbs, uiSettings, settings, kibanaVersion, theme$ } =
+    dependencies;
 
   // uiSettings is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
     createKibanaReactContext<KibanaReactContextServices>({
       application,
       uiSettings,
+      settings,
       kibanaVersion: {
         get: () => kibanaVersion,
       },
@@ -90,6 +92,7 @@ export const renderApp = (
 interface KibanaReactContextServices {
   application: ApplicationStart;
   uiSettings: CoreSetup['uiSettings'];
+  settings: CoreSetup['settings'];
   kibanaVersion: {
     get: () => SemVer;
   };

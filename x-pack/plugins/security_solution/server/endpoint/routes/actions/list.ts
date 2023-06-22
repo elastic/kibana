@@ -11,10 +11,7 @@
  * 2.0.
  */
 
-import {
-  BASE_ENDPOINT_ACTION_ALERTS_ROUTE,
-  BASE_ENDPOINT_ACTION_ROUTE,
-} from '../../../../common/endpoint/constants';
+import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointActionListRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { actionListHandler } from './list_handler';
 
@@ -41,20 +38,4 @@ export function registerActionListRoutes(
       actionListHandler(endpointContext)
     )
   );
-
-  // TODO: This route is a temporary solution until we decide on how RBAC should look like for Actions in Alerts
-  if (endpointContext.experimentalFeatures.endpointResponseActionsEnabled) {
-    router.get(
-      {
-        path: BASE_ENDPOINT_ACTION_ALERTS_ROUTE,
-        validate: EndpointActionListRequestSchema,
-        options: { authRequired: true, tags: ['access:securitySolution'] },
-      },
-      withEndpointAuthz(
-        {},
-        endpointContext.logFactory.get('endpointActionList'),
-        actionListHandler(endpointContext)
-      )
-    );
-  }
 }

@@ -61,8 +61,11 @@ export interface AlertingFrameworkHealth {
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
-export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
-export const INTERNAL_ALERTING_API_FIND_RULES_PATH = `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`;
+export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
+export const INTERNAL_ALERTING_SNOOZE_RULE =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_snooze` as const;
+export const INTERNAL_ALERTING_API_FIND_RULES_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find` as const;
 
 export const INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window` as const;

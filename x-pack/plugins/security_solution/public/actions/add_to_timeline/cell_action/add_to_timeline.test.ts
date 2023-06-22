@@ -87,6 +87,29 @@ describe('createAddToTimelineCellAction', () => {
       expect(mockWarningToast).not.toHaveBeenCalled();
     });
 
+    it('should execute with number value', async () => {
+      await addToTimelineAction.execute({
+        field: { name: 'process.parent.pid', value: 12345, type: 'number' },
+      } as unknown as CellActionExecutionContext); // TODO: remove `as unknown` when number value type is supported
+      expect(mockDispatch).toHaveBeenCalledWith(
+        set(
+          'payload.providers[0]',
+          {
+            ...defaultDataProvider,
+            id: 'event-field-default-timeline-1-process_parent_pid-0-12345',
+            name: 'process.parent.pid',
+            queryMatch: {
+              field: 'process.parent.pid',
+              value: '12345',
+              operator: ':',
+            },
+          },
+          defaultDataProviderAction
+        )
+      );
+      expect(mockWarningToast).not.toHaveBeenCalled();
+    });
+
     it('should execute with null value', async () => {
       await addToTimelineAction.execute({
         field: { name: 'user.name', value: null, type: 'text' },

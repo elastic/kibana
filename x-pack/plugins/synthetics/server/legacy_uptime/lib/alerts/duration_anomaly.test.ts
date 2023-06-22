@@ -68,6 +68,7 @@ const mockPing: Partial<Ping> = {
 };
 
 const mockRecoveredAlerts = mockAnomaliesResult.anomalies.map((result) => ({
+  alertDetailsUrl: 'mockedAlertsLocator > getLocation',
   firstCheckedAt: 'date',
   firstTriggeredAt: undefined,
   lastCheckedAt: 'date',
@@ -108,6 +109,7 @@ const mockOptions = (
     state,
     services,
     setContext,
+    startedAt: new Date(),
   };
 };
 
@@ -235,6 +237,7 @@ Response times as high as ${slowestResponse} ms have been detected from location
         Array [
           "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
+            "alertDetailsUrl": "mockedAlertsLocator > getLocation",
             "anomalyStartTimestamp": "date",
             "bucketSpan": 900,
             "expectedResponseTime": "10 ms",
@@ -254,6 +257,7 @@ Response times as high as ${slowestResponse} ms have been detected from location
         Array [
           "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
+            "alertDetailsUrl": "mockedAlertsLocator > getLocation",
             "anomalyStartTimestamp": "date",
             "bucketSpan": 900,
             "expectedResponseTime": "20 ms",

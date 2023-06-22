@@ -13,6 +13,7 @@ export {
   YamlLang,
   HandlebarsLang,
   HJsonLang,
+  GrokLang,
   CodeEditor,
   CodeEditorField,
 } from './code_editor';

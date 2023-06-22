@@ -14,7 +14,7 @@ import { ObservabilityOnboardingPlugin } from './plugin';
 
 const configSchema = schema.object({
   ui: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
 });
 

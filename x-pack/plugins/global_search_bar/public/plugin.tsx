@@ -8,7 +8,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
-import { UiCounterMetricType } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApplicationStart, CoreTheme, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -16,6 +15,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { SearchBar } from './components/search_bar';
+import { TrackUiMetricFn } from './types';
 
 export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
@@ -32,9 +32,12 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     core: CoreStart,
     { globalSearch, savedObjectsTagging, usageCollection }: GlobalSearchBarPluginStartDeps
   ) {
-    const trackUiMetric = usageCollection
-      ? usageCollection.reportUiCounter.bind(usageCollection, 'global_search_bar')
-      : (metricType: UiCounterMetricType, eventName: string | string[]) => {};
+    let trackUiMetric: TrackUiMetricFn = () => {};
+    if (usageCollection) {
+      trackUiMetric = (...args) => {
+        usageCollection.reportUiCounter('global_search_bar', ...args);
+      };
+    }
 
     core.chrome.navControls.registerCenter({
       order: 1000,
@@ -70,7 +73,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     basePathUrl: string;
     darkMode: boolean;
     theme$: Observable<CoreTheme>;
-    trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+    trackUiMetric: TrackUiMetricFn;
   }) {
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>

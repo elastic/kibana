@@ -11,7 +11,7 @@ import { pick } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
@@ -38,12 +38,15 @@ export interface ExplainLogRateSpikesAppStateProps {
   savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
+  /** Option to make main histogram sticky */
+  stickyHistogram?: boolean;
 }
 
 export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
+  stickyHistogram,
 }) => {
   if (!dataView) return null;
 
@@ -80,7 +83,7 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
           <SpikeAnalysisTableRowStateProvider>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <ExplainLogRateSpikesPage />
+                <ExplainLogRateSpikesPage stickyHistogram={stickyHistogram} />
               </DatePickerContextProvider>
             </StorageContextProvider>
           </SpikeAnalysisTableRowStateProvider>

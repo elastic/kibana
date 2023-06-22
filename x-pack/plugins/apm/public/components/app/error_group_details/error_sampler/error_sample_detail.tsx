@@ -49,12 +49,8 @@ import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_i
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
-import {
-  ErrorTab,
-  exceptionStacktraceTab,
-  getTabs,
-  logStacktraceTab,
-} from './error_tabs';
+import { ErrorSampleCoPilotPrompt } from './error_sample_co_pilot_prompt';
+import { ErrorTab, ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { ExceptionStacktrace } from './exception_stacktrace';
 import { SampleSummary } from './sample_summary';
@@ -340,6 +336,8 @@ export function ErrorSampleDetails({
         <SampleSummary error={error} />
       )}
 
+      <ErrorSampleCoPilotPrompt error={error} transaction={transaction} />
+
       <EuiTabs>
         {tabs.map(({ key, label }) => {
           return (
@@ -365,13 +363,13 @@ export function ErrorSampleDetails({
       {isLoading || !error ? (
         <EuiSkeletonText lines={3} data-test-sub="loading-content" />
       ) : (
-        <TabContent error={error} currentTab={currentTab} />
+        <ErrorSampleDetailTabContent error={error} currentTab={currentTab} />
       )}
     </EuiPanel>
   );
 }
 
-function TabContent({
+export function ErrorSampleDetailTabContent({
   error,
   currentTab,
 }: {
@@ -383,11 +381,11 @@ function TabContent({
   const logStackframes = error?.error.log?.stacktrace;
 
   switch (currentTab.key) {
-    case logStacktraceTab.key:
+    case ErrorTabKey.LogStackTrace:
       return (
         <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />
       );
-    case exceptionStacktraceTab.key:
+    case ErrorTabKey.ExceptionStacktrace:
       return (
         <ExceptionStacktrace
           codeLanguage={codeLanguage}

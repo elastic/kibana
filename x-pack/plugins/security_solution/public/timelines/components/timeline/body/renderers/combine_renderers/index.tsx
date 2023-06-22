@@ -8,7 +8,8 @@
 import React from 'react';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { RowRenderer, RowRendererId } from '../../../../../../../common/types';
+import type { RowRenderer } from '../../../../../../../common/types';
+import type { RowRendererId } from '../../../../../../../common/types/timeline/api';
 
 export const combineRenderers = ({
   a,

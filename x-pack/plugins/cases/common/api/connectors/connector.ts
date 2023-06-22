@@ -28,37 +28,37 @@ export enum ConnectorTypes {
   swimlane = '.swimlane',
 }
 
-const ConnectorCasesWebhookTypeFieldsRt = rt.type({
+const ConnectorCasesWebhookTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.casesWebhook),
   fields: rt.null,
 });
 
-const ConnectorJiraTypeFieldsRt = rt.type({
+const ConnectorJiraTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.jira),
   fields: rt.union([JiraFieldsRT, rt.null]),
 });
 
-const ConnectorResilientTypeFieldsRt = rt.type({
+const ConnectorResilientTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.resilient),
   fields: rt.union([ResilientFieldsRT, rt.null]),
 });
 
-const ConnectorServiceNowITSMTypeFieldsRt = rt.type({
+const ConnectorServiceNowITSMTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.serviceNowITSM),
   fields: rt.union([ServiceNowITSMFieldsRT, rt.null]),
 });
 
-const ConnectorSwimlaneTypeFieldsRt = rt.type({
+const ConnectorSwimlaneTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.swimlane),
   fields: rt.union([SwimlaneFieldsRT, rt.null]),
 });
 
-const ConnectorServiceNowSIRTypeFieldsRt = rt.type({
+const ConnectorServiceNowSIRTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.serviceNowSIR),
   fields: rt.union([ServiceNowSIRFieldsRT, rt.null]),
 });
 
-const ConnectorNoneTypeFieldsRt = rt.type({
+const ConnectorNoneTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.none),
   fields: rt.null,
 });
@@ -79,21 +79,35 @@ export const ConnectorTypeFieldsRt = rt.union([
  * This type represents the connector's format when it is encoded within a user action.
  */
 export const CaseUserActionConnectorRt = rt.union([
-  rt.intersection([ConnectorCasesWebhookTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorJiraTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorNoneTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorResilientTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorServiceNowITSMTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorServiceNowSIRTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorSwimlaneTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorCasesWebhookTypeFieldsRt, rt.strict({ name: rt.string })]),
+  rt.intersection([ConnectorJiraTypeFieldsRt, rt.strict({ name: rt.string })]),
+  rt.intersection([ConnectorNoneTypeFieldsRt, rt.strict({ name: rt.string })]),
+  rt.intersection([ConnectorResilientTypeFieldsRt, rt.strict({ name: rt.string })]),
+  rt.intersection([ConnectorServiceNowITSMTypeFieldsRt, rt.strict({ name: rt.string })]),
+  rt.intersection([ConnectorServiceNowSIRTypeFieldsRt, rt.strict({ name: rt.string })]),
+  rt.intersection([ConnectorSwimlaneTypeFieldsRt, rt.strict({ name: rt.string })]),
 ]);
 
 export const CaseConnectorRt = rt.intersection([
-  rt.type({
+  rt.strict({
     id: rt.string,
   }),
   CaseUserActionConnectorRt,
 ]);
+
+const ActionConnectorResultRt = rt.intersection([
+  rt.strict({
+    id: rt.string,
+    actionTypeId: rt.string,
+    name: rt.string,
+    isDeprecated: rt.boolean,
+    isPreconfigured: rt.boolean,
+    referencedByCount: rt.number,
+  }),
+  rt.exact(rt.partial({ config: rt.record(rt.string, rt.unknown), isMissingSecrets: rt.boolean })),
+]);
+
+export const FindActionConnectorResponseRt = rt.array(ActionConnectorResultRt);
 
 export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;

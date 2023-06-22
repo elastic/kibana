@@ -10,7 +10,7 @@ import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
 import { SyntheticsStreamingRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
 
@@ -18,7 +18,7 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
   libs: UMServerLibs
 ) => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY,
   validate: {
     body: schema.object({
       project: schema.string(),

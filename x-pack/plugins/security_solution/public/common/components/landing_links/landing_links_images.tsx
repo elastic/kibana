@@ -18,11 +18,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { withSecuritySolutionLink } from '../links';
 import { NavItemBetaBadge } from '../navigation/nav_item_beta_badge';
-import type { NavLinkItem } from '../navigation/types';
+import type { NavigationLink } from '../../links/types';
 import { TELEMETRY_EVENT, track } from '../../lib/telemetry';
 
 interface LandingImagesProps {
-  items: NavLinkItem[];
+  items: NavigationLink[];
 }
 
 const PrimaryEuiTitle = styled(EuiTitle)`

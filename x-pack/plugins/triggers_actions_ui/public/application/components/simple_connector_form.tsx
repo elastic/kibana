@@ -7,11 +7,10 @@
 
 import React, { memo, ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
-import { PasswordField } from './password_field';
 
 export interface CommonFieldSchema {
   id: string;
@@ -104,12 +103,17 @@ const FormRow: React.FC<FormRowProps> = ({
               }}
             />
           ) : (
-            <PasswordField
+            <UseField
               path={id}
-              label={label}
-              readOnly={readOnly}
-              data-test-subj={dataTestSub}
+              config={getFieldConfig({ label })}
               helpText={helpText}
+              component={PasswordField}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': dataTestSub,
+                  readOnly,
+                },
+              }}
             />
           )}
         </EuiFlexItem>

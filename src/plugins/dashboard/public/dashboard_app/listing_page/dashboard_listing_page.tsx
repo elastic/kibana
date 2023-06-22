@@ -38,7 +38,7 @@ export const DashboardListingPage = ({
   const {
     data: { query },
     chrome: { setBreadcrumbs },
-    dashboardSavedObject: { findDashboards },
+    dashboardContentManagement: { findDashboards },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);

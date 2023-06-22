@@ -14,7 +14,7 @@ const TEST_INVALID_QUERY = '{"bool":{"must":[';
 const TEST_EMPTY_STRING = '';
 const TEST_DATE = '2022-06-09T22:36:46.628Z';
 const VALID_RESULT =
-  '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"process.entry_leader.entity_id"}}],"minimum_should_match":1}},{"bool":{"should":[{"match":{"process.entry_leader.same_as_process":true}}],"minimum_should_match":1}},{"range":{"@timestamp":{"gte":"2022-06-09T22:36:46.628Z","lte":"2022-06-09T22:36:46.628Z"}}}],"should":[],"must_not":[]}}';
+  '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"orchestrator.cluster.id"}}],"minimum_should_match":1}},{"bool":{"should":[{"match":{"process.entry_leader.same_as_process":true}}],"minimum_should_match":1}},{"range":{"@timestamp":{"gte":"2022-06-09T22:36:46.628Z","lte":"2022-06-09T22:36:46.628Z"}}}],"should":[],"must_not":[]}}';
 
 describe('addTimerangeAndDefaultFilterToQuery(query, startDate, endDate)', () => {
   it('works for valid query, startDate, and endDate', () => {

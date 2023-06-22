@@ -29,6 +29,7 @@ import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -43,6 +44,7 @@ export interface DependencyCache {
   autocomplete: UnifiedSearchPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
   savedObjectsClient: SavedObjectsClientContract | null;
+  savedSearch: SavedSearchPublicPluginStart | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
   security: SecurityPluginStart | undefined | null;
@@ -68,6 +70,7 @@ const cache: DependencyCache = {
   autocomplete: null,
   basePath: null,
   savedObjectsClient: null,
+  savedSearch: null,
   application: null,
   http: null,
   security: null,
@@ -93,6 +96,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.autocomplete = deps.autocomplete || null;
   cache.basePath = deps.basePath || null;
   cache.savedObjectsClient = deps.savedObjectsClient || null;
+  cache.savedSearch = deps.savedSearch || null;
   cache.application = deps.application || null;
   cache.http = deps.http || null;
   cache.security = deps.security || null;
@@ -192,6 +196,13 @@ export function getSavedObjectsClient() {
     throw new Error("savedObjectsClient hasn't been initialized");
   }
   return cache.savedObjectsClient;
+}
+
+export function getSavedSearch() {
+  if (cache.savedSearch === null) {
+    throw new Error("savedSearch hasn't been initialized");
+  }
+  return cache.savedSearch;
 }
 
 export function getApplication() {

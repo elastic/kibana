@@ -311,7 +311,7 @@ describe('calculateIntegrationStatus for vul_mgmt', () => {
       },
       mockInstallation,
       1,
-      61,
+      241,
       [VULN_MGMT_POLICY_TEMPLATE]
     );
 

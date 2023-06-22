@@ -14,11 +14,10 @@
 import { each, get, find } from 'lodash';
 import moment from 'moment-timezone';
 
-import { isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils';
+import { isMultiBucketAnomaly, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 import { getBoundsRoundedToInterval, getTimeBucketsFromCache } from '../../util/time_buckets';
 import { CHARTS_POINT_TARGET, TIME_FIELD_NAME } from '../timeseriesexplorer_constants';

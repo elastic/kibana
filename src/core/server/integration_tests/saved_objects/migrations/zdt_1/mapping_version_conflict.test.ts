@@ -24,7 +24,7 @@ export const logFilePath = Path.join(__dirname, 'mapping_version_conflict.test.l
 describe('ZDT upgrades - mapping model version conflict', () => {
   let esServer: TestElasticsearchUtils['es'];
 
-  const baseMigratorParams = getBaseMigratorParams();
+  const baseMigratorParams = getBaseMigratorParams({ kibanaVersion: '8.8.0' });
 
   beforeAll(async () => {
     await fs.unlink(logFilePath).catch(() => {});

@@ -48,7 +48,7 @@ export function SelectLogs() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="ghost" fill onClick={onBack}>
+            <EuiButton color="text" onClick={onBack}>
               {i18n.translate('xpack.observability_onboarding.steps.back', {
                 defaultMessage: 'Back',
               })}

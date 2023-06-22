@@ -52,3 +52,8 @@ type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
 
 export type AwaitReturnType<T> = T extends PromiseLike<infer U> ? U : T;
+
+/**
+ * Removes an optional modifier from a property in a type.
+ */
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: Exclude<T[P], null> };

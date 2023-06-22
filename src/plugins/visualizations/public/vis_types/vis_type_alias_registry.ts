@@ -44,7 +44,14 @@ export interface VisTypeAlias {
   note?: string;
   getSupportedTriggers?: () => string[];
   stage: VisualizationStage;
-  hidden?: boolean;
+  /*
+   * Set to true to hide visualization type in create UIs.
+   */
+  disableCreate?: boolean;
+  /*
+   * Set to true to hide edit links for visualization type in UIs.
+   */
+  disableEdit?: boolean;
   isDeprecated?: boolean;
 
   appExtensions?: {

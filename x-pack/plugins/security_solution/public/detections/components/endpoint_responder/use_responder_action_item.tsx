@@ -13,16 +13,12 @@ import {
   isTimelineEventItemAnAlert,
 } from '../../../common/utils/endpoint_alert_check';
 import { ResponderContextMenuItem } from './responder_context_menu_item';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getFieldValue } from '../host_isolation/helpers';
 
 export const useResponderActionItem = (
   eventDetailsData: TimelineEventsDetailsItem[] | null,
   onClick: () => void
 ): JSX.Element[] => {
-  const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsConsoleEnabled'
-  );
   const { loading: isAuthzLoading, canAccessResponseConsole } =
     useUserPrivileges().endpointPrivileges;
 
@@ -42,7 +38,7 @@ export const useResponderActionItem = (
   return useMemo(() => {
     const actions: JSX.Element[] = [];
 
-    if (isResponseActionsConsoleEnabled && !isAuthzLoading && canAccessResponseConsole && isAlert) {
+    if (!isAuthzLoading && canAccessResponseConsole && isAlert) {
       actions.push(
         <ResponderContextMenuItem
           key="endpointResponseActions-action-item"
@@ -53,13 +49,5 @@ export const useResponderActionItem = (
     }
 
     return actions;
-  }, [
-    canAccessResponseConsole,
-    endpointId,
-    isAlert,
-    isAuthzLoading,
-    isEndpointAlert,
-    isResponseActionsConsoleEnabled,
-    onClick,
-  ]);
+  }, [canAccessResponseConsole, endpointId, isAlert, isAuthzLoading, isEndpointAlert, onClick]);
 };

@@ -66,7 +66,7 @@ import { User } from '../../../../common/lib/authentication/types';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
 } from '../../../../../detection_engine_api_integration/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -250,7 +250,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });

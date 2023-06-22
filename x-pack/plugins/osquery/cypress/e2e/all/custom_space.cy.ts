@@ -49,8 +49,8 @@ describe('ALL - Custom space', () => {
             },
             space as string
           ).then((data) => {
-            packId = data.id;
-            packName = data.attributes.name;
+            packId = data.saved_object_id;
+            packName = data.name;
           });
         });
       });
@@ -96,7 +96,7 @@ describe('ALL - Custom space', () => {
         cy.contains('Packs').click();
         cy.contains('Create pack').click();
         cy.react('CustomItemAction', {
-          props: { item: { attributes: { name: packName } } },
+          props: { item: { name: packName } },
         }).click();
         selectAllAgents();
         cy.contains('Submit').click();

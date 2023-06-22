@@ -52,7 +52,7 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 {links.map(({ label, href }, index) => (
-                  <EuiText size="s">
+                  <EuiText size="s" key={`overviewPanel.link.${index}`}>
                     <EuiLink key={index} href={href} target="_blank">
                       {label}
                     </EuiLink>

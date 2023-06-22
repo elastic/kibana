@@ -92,6 +92,29 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('can filter by reserved kql characters in tags', async () => {
+        const tagsColon = ['super:bad:case'];
+        const tagsSlashQuote = ['awesome\\"'];
+
+        const postedCase1 = await createCase(supertest, { ...postCaseReq, tags: tagsSlashQuote });
+        const postedCase2 = await createCase(supertest, {
+          ...postCaseReq,
+          tags: tagsColon,
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { tags: [...tagsColon, ...tagsSlashQuote] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [postedCase1, postedCase2],
+          count_open_cases: 2,
+        });
+      });
+
       it('filters by status', async () => {
         await createCase(supertest, postCaseReq);
         const toCloseCase = await createCase(supertest, postCaseReq);
@@ -156,6 +179,38 @@ export default ({ getService }: FtrProviderContext): void => {
           ...findCasesResp,
           total: 0,
           cases: [],
+        });
+      });
+
+      it('filters by a single category', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+
+        const cases = await findCases({ supertest, query: { category: ['foobar'] } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [foobarCategory],
+          count_open_cases: 1,
+        });
+      });
+
+      it('filters by multiple categories', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+        const otherCategory = await createCase(supertest, { ...postCaseReq, category: 'other' });
+
+        const cases = await findCases({
+          supertest,
+          query: { category: ['foobar', 'other'] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [foobarCategory, otherCategory],
+          count_open_cases: 2,
         });
       });
 

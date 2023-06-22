@@ -6,8 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { niceTimeFormatter, TooltipValue } from '@elastic/charts';
-import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { niceTimeFormatter, TooltipProps } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
@@ -18,9 +17,8 @@ import { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../
 
 type Series = GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series'];
 
-export const tooltipProps = {
-  headerFormatter: (tooltipValue: TooltipValue) =>
-    moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss'),
+export const tooltipProps: TooltipProps = {
+  headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss'),
 };
 
 export const NUM_BUCKETS = 20;
@@ -70,11 +68,6 @@ export const getDomain = (series: Series, stacked: boolean = false) => {
   const minTimestamp = getMin(timestampValues) || 0;
   const maxTimestamp = getMax(timestampValues) || 0;
   return { yMin: min || 0, yMax: max || 0, xMin: minTimestamp, xMax: maxTimestamp };
-};
-
-// TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
-export const getChartTheme = (isDarkMode: boolean): Theme => {
-  return isDarkMode ? DARK_THEME : LIGHT_THEME;
 };
 
 export const EmptyContainer: React.FC = ({ children }) => (

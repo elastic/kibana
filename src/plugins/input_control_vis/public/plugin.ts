@@ -18,6 +18,7 @@ import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-pl
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
+import { InputControlPublicConfig } from '../config';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 
@@ -51,7 +52,7 @@ export interface InputControlVisPluginStartDependencies {
 
 /** @internal */
 export class InputControlVisPlugin implements Plugin<void, void> {
-  constructor(public initializerContext: PluginInitializerContext) {}
+  constructor(public initializerContext: PluginInitializerContext<InputControlPublicConfig>) {}
 
   public setup(
     core: InputControlVisCoreSetup,
@@ -69,8 +70,9 @@ export class InputControlVisPlugin implements Plugin<void, void> {
 
     expressions.registerFunction(createInputControlVisFn);
     expressions.registerRenderer(getInputControlVisRenderer(visualizationDependencies));
+    const { readOnly } = this.initializerContext.config.get<InputControlPublicConfig>();
     visualizations.createBaseVisualization(
-      createInputControlVisTypeDefinition(visualizationDependencies)
+      createInputControlVisTypeDefinition(visualizationDependencies, Boolean(readOnly))
     );
   }
 

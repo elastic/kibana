@@ -59,6 +59,7 @@ const mockMonitors = [
 
 const mockRecoveredAlerts = [
   {
+    alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     currentTriggerStarted: '2022-04-25T14:36:31.511Z',
     firstCheckedAt: '2022-04-25T14:10:30.785Z',
     firstTriggeredAt: '2022-04-25T14:10:30.785Z',
@@ -81,6 +82,7 @@ const mockRecoveredAlerts = [
     duration: 315110000000,
   },
   {
+    alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     currentTriggerStarted: '2022-04-25T14:36:31.511Z',
     firstCheckedAt: '2022-04-25T14:10:30.785Z',
     firstTriggeredAt: '2022-04-25T14:10:30.785Z',
@@ -182,6 +184,7 @@ const mockOptions = (
     services,
     rule,
     setContext,
+    startedAt: new Date(),
   };
 };
 
@@ -300,7 +303,7 @@ describe('status check alert', () => {
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
-            "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+            "alertDetailsUrl": "mockedAlertsLocator > getLocation",
             "checkedAt": "July 6, 2020 9:14 PM",
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
@@ -382,7 +385,7 @@ describe('status check alert', () => {
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
-            "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+            "alertDetailsUrl": "mockedAlertsLocator > getLocation",
             "checkedAt": "July 6, 2020 9:14 PM",
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
@@ -867,7 +870,7 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
-              "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+              "alertDetailsUrl": "mockedAlertsLocator > getLocation",
               "checkedAt": "July 6, 2020 9:14 PM",
               "latestErrorMessage": undefined,
               "monitorId": "foo",
@@ -884,7 +887,7 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
-              "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+              "alertDetailsUrl": "mockedAlertsLocator > getLocation",
               "checkedAt": "July 6, 2020 9:14 PM",
               "latestErrorMessage": undefined,
               "monitorId": "foo",
@@ -901,7 +904,7 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
-              "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+              "alertDetailsUrl": "mockedAlertsLocator > getLocation",
               "checkedAt": "July 6, 2020 9:14 PM",
               "latestErrorMessage": undefined,
               "monitorId": "unreliable",
@@ -918,7 +921,7 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
-              "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+              "alertDetailsUrl": "mockedAlertsLocator > getLocation",
               "checkedAt": "July 6, 2020 9:14 PM",
               "latestErrorMessage": undefined,
               "monitorId": "no-name",

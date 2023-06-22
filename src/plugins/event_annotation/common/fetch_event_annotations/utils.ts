@@ -12,6 +12,7 @@ import { omit, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { LineStyle } from '@kbn/visualization-ui-components/common/types';
 import {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationOutput,
@@ -22,7 +23,6 @@ import {
   annotationColumns,
   AvailableAnnotationIcon,
   EventAnnotationOutput,
-  LineStyle,
   PointStyleProps,
 } from '../types';
 

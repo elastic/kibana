@@ -33,7 +33,7 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
       };
     },
     { body: { error: string; message: string } },
-    SavedQuerySO
+    SavedQuerySO & { error?: { error: string; message: string } }
   >(
     [SAVED_QUERY_ID, { savedQueryId }],
     () => http.get(`/api/osquery/saved_queries/${savedQueryId}`),

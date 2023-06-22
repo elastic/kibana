@@ -38,15 +38,10 @@ export interface Group {
 
 interface Props {
   anomalyTimelineService: AnomalyTimelineService;
-  jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({
-  anomalyTimelineService,
-  jobCreationDisabled,
-  setLazyJobCount,
-}) => {
+export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLazyJobCount }) => {
   const {
     services: { charts: chartsService },
   } = useMlKibana();

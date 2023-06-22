@@ -23,7 +23,7 @@ import type {
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
-  CaseUserActionAttributesWithoutConnectorId,
+  CaseUserActionWithoutReferenceIds,
   CommentRequest,
   CommentUserAction,
   ConnectorUserAction,
@@ -174,7 +174,7 @@ export interface PushInfo {
 }
 
 export interface UserActionItem {
-  attributes: CaseUserActionAttributesWithoutConnectorId;
+  attributes: CaseUserActionWithoutReferenceIds;
   references: SavedObjectReference[];
 }
 

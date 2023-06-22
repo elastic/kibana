@@ -10,12 +10,14 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 import {
-  loadPrebuiltDetectionRules,
   selectNumberOfRules,
   unselectNumberOfRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
-import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
+import {
+  excessivelyInstallAllPrebuiltRules,
+  getAvailablePrebuiltRulesCount,
+} from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -29,7 +31,7 @@ describe.skip('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are individually selected and unselected', () => {
-    loadPrebuiltDetectionRules();
+    excessivelyInstallAllPrebuiltRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     selectNumberOfRules(2);
@@ -42,7 +44,7 @@ describe.skip('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are bulk selected and then bulk un-selected', () => {
-    loadPrebuiltDetectionRules();
+    excessivelyInstallAllPrebuiltRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(SELECT_ALL_RULES_BTN).click();
@@ -51,10 +53,8 @@ describe.skip('Rules selection', () => {
       cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', availablePrebuiltRulesCount);
     });
 
-    const bulkSelectButton = cy.get(SELECT_ALL_RULES_BTN);
-
     // Un-select all rules via the Bulk Selection button from the Utility bar
-    bulkSelectButton.click();
+    cy.get(SELECT_ALL_RULES_BTN).click();
 
     // Current selection should be 0 rules
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');
@@ -65,7 +65,7 @@ describe.skip('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are bulk selected and then unselected via the table select all checkbox', () => {
-    loadPrebuiltDetectionRules();
+    excessivelyInstallAllPrebuiltRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(SELECT_ALL_RULES_BTN).click();

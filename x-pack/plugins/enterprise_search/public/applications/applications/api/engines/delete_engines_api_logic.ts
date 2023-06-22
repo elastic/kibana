@@ -20,7 +20,7 @@ export interface DeleteEnginesApiLogicResponse {
 export const deleteEngine = async ({
   engineName,
 }: DeleteEnginesApiLogicArguments): Promise<DeleteEnginesApiLogicResponse> => {
-  const route = `/internal/enterprise_search/engines/${engineName}`;
+  const route = `/internal/enterprise_search/search_applications/${engineName}`;
   await HttpLogic.values.http.delete<DeleteEnginesApiLogicResponse>(route);
   return { engineName };
 };

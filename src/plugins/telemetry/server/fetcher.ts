@@ -190,7 +190,7 @@ export class FetcherTask {
     } catch (err) {
       await this.updateReportFailure(telemetryConfig);
 
-      this.logger.warn(`Error sending telemetry usage data. (${err})`);
+      this.logger.warn(`Error sending usage to Elastic. (${err})`);
     }
   }
 

@@ -28,6 +28,8 @@ import { createFleetAuthzMock } from '../../common/mocks';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
 import { packageServiceMock } from '../services/epm/package_service.mock';
+import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
+import type { MessageSigningServiceInterface } from '../services/security';
 
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
@@ -66,7 +68,10 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: { diagnosticFileUploadEnabled: true } as ExperimentalFeatures,
+    experimentalFeatures: {
+      agentTamperProtectionEnabled: true,
+      diagnosticFileUploadEnabled: true,
+    } as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -119,6 +124,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
+    inspect: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
     getByIDs: jest.fn(),
@@ -165,22 +171,22 @@ export const createMockAgentClient = () => agentServiceMock.createClient();
  */
 export const createMockPackageService = () => packageServiceMock.create();
 
-export function createMessageSigningServiceMock() {
+export function createMessageSigningServiceMock(): MessageSigningServiceInterface {
   return {
     isEncryptionAvailable: true,
     generateKeyPair: jest.fn(),
     sign: jest.fn(),
     getPublicKey: jest.fn(),
-    removeKeyPair: jest.fn(),
     rotateKeyPair: jest.fn(),
   };
 }
 
-export function createUninstallTokenServiceMock() {
+export function createUninstallTokenServiceMock(): UninstallTokenServiceInterface {
   return {
     getTokenForPolicyId: jest.fn(),
     getTokensForPolicyIds: jest.fn(),
     getAllTokens: jest.fn(),
+    findTokensForPartialPolicyId: jest.fn(),
     getHashedTokenForPolicyId: jest.fn(),
     getHashedTokensForPolicyIds: jest.fn(),
     getAllHashedTokens: jest.fn(),

@@ -7,12 +7,16 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { getApmPolicy } from './steps/get_apm_policy';
+import { getCollectorPolicy } from './fleet_policies';
+import { getApmPolicy } from './get_apm_policy';
 
 export interface SetupDataCollectionInstructions {
-  variables: {
-    apmServerUrl: string;
-    secretToken: string;
+  collector: {
+    secretToken?: string;
+    host?: string;
+  };
+  symbolizer: {
+    host?: string;
   };
 }
 
@@ -23,18 +27,33 @@ export async function getSetupInstructions({
   packagePolicyClient: PackagePolicyClient;
   soClient: SavedObjectsClientContract;
 }): Promise<SetupDataCollectionInstructions> {
-  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
+  const [collectorPolicy, apmPolicy] = await Promise.all([
+    getCollectorPolicy({ packagePolicyClient, soClient }),
+    getApmPolicy({ packagePolicyClient, soClient }),
+  ]);
+
+  if (!collectorPolicy) {
+    throw new Error('Could not find Collector policy');
+  }
 
   if (!apmPolicy) {
     throw new Error('Could not find APM policy');
   }
 
+  const collectorVars = collectorPolicy.inputs[0].vars;
   const apmServerVars = apmPolicy.inputs[0].vars;
 
+  const apmHost: string | undefined = apmServerVars?.host?.value;
+  const symbolizerHost = apmHost?.replace(/\.apm\./, '.symbols.');
+  const collectorHost = apmHost?.replace(/\.apm\./, '.profiling.')?.replace('https://', '');
+
   return {
-    variables: {
-      apmServerUrl: apmServerVars!.url.value!,
-      secretToken: apmServerVars!.secret_token.value!,
+    collector: {
+      secretToken: collectorVars?.secret_token?.value,
+      host: collectorHost,
+    },
+    symbolizer: {
+      host: symbolizerHost,
     },
   };
 }

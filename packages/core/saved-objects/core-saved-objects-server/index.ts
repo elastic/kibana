@@ -136,6 +136,7 @@ export type {
   SavedObjectModelDataBackfillFn,
   SavedObjectsModelVersionSchemaDefinitions,
   SavedObjectModelVersionForwardCompatibilityFn,
+  SavedObjectModelVersionForwardCompatibilityObjectSchema,
   SavedObjectModelVersionForwardCompatibilitySchema,
 } from './src/model_version';
 

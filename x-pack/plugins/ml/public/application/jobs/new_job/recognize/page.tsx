@@ -21,8 +21,10 @@ import { isEqual, merge } from 'lodash';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
+import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { useDataSource } from '../../../contexts/ml';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
-import { useMlContext } from '../../../contexts/ml';
 import {
   DatafeedResponse,
   JobOverride,
@@ -39,9 +41,7 @@ import { JobSettingsForm, JobSettingsFormValues } from './components/job_setting
 import { TimeRange } from '../common/components';
 import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
-import { RuntimeMappings } from '../../../../../common/types/fields';
 import { MlPageHeader } from '../../../components/page_header';
 
 export interface ModuleJobUI extends ModuleJob {
@@ -92,7 +92,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
   // #endregion
 
-  const { selectedSavedSearch, currentDataView: dataView, combinedQuery } = useMlContext();
+  const { selectedSavedSearch, currentDataView: dataView, combinedQuery } = useDataSource();
   const pageTitle = selectedSavedSearch
     ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
         defaultMessage: 'saved search {savedSearchTitle}',

@@ -106,6 +106,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -159,6 +160,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -216,6 +218,7 @@ describe('common utils', () => {
               "uid": "1",
             },
           ],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -276,6 +279,7 @@ describe('common utils', () => {
           "cases": Array [
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -317,6 +321,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -358,6 +363,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -403,6 +409,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": "2019-11-25T22:32:17.947Z",
               "closed_by": Object {
                 "email": "testemail@elastic.co",
@@ -473,6 +480,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -530,6 +538,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -588,6 +597,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [
@@ -669,6 +679,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],

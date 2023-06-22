@@ -59,6 +59,8 @@ jest.mock('./dimension_panel/reference_editor', () => ({
   ReferenceEditor: () => null,
 }));
 
+const nowInstant = new Date();
+
 const fieldsOne = [
   {
     name: 'timestamp',
@@ -365,7 +367,14 @@ describe('IndexPattern Data Source', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = FormBasedDatasource.initialize();
       expect(
-        FormBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange, 'testing-seed')
+        FormBasedDatasource.toExpression(
+          state,
+          'first',
+          indexPatterns,
+          dateRange,
+          nowInstant,
+          'testing-seed'
+        )
       ).toEqual(null);
     });
 
@@ -395,6 +404,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         )
       ).toEqual({
@@ -450,6 +460,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         )
       ).toMatchInlineSnapshot(`
@@ -530,6 +541,9 @@ describe('IndexPattern Data Source', () => {
                     ],
                     "type": "expression",
                   },
+                ],
+                "ignoreGlobalFilters": Array [
+                  false,
                 ],
                 "index": Array [
                   Object {
@@ -637,6 +651,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
@@ -678,6 +693,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
@@ -891,6 +907,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const count = (ast.chain[1].arguments.aggs[1] as Ast).chain[0];
@@ -961,6 +978,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
@@ -1091,6 +1109,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
@@ -1162,6 +1181,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const filteredMetricAgg = (ast.chain[1].arguments.aggs[0] as Ast).chain[0].arguments;
@@ -1219,6 +1239,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
@@ -1273,6 +1294,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
@@ -1318,6 +1340,7 @@ describe('IndexPattern Data Source', () => {
         'first',
         indexPatterns,
         dateRange,
+        nowInstant,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
@@ -1381,6 +1404,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         );
 
@@ -1455,6 +1479,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
 
@@ -1525,6 +1550,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
 
@@ -1636,6 +1662,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
         // @ts-expect-error we can't isolate just the reference type
@@ -1675,6 +1702,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
 
@@ -1768,6 +1796,7 @@ describe('IndexPattern Data Source', () => {
           'first',
           indexPatterns,
           dateRange,
+          nowInstant,
           'testing-seed'
         ) as Ast;
         const chainLength = ast.chain.length;
@@ -1805,6 +1834,7 @@ describe('IndexPattern Data Source', () => {
             columns: {},
             sampling: 1,
             linkToLayers: ['link-to-id'],
+            ignoreGlobalFilters: false,
           },
         },
       });
@@ -1895,6 +1925,7 @@ describe('IndexPattern Data Source', () => {
               indexPatternId: '1',
               columnOrder: [],
               columns: {},
+              ignoreGlobalFilters: false,
               linkToLayers: ['some-layer'],
               sampling: 1,
             },
@@ -1925,7 +1956,12 @@ describe('IndexPattern Data Source', () => {
         newState: {
           ...state,
           layers: {
-            first: { ...state.layers.first, linkToLayers: undefined, sampling: 1 },
+            first: {
+              ...state.layers.first,
+              linkToLayers: undefined,
+              sampling: 1,
+              ignoreGlobalFilters: false,
+            },
           },
         },
       });

@@ -16,13 +16,28 @@
     "misc": [
       {
         "parentPluginId": "profiling",
+        "id": "def-server.PackageInputType",
+        "type": "Type",
+        "tags": [],
+        "label": "PackageInputType",
+        "description": [],
+        "signature": [
+          "{ readonly host?: string | undefined; readonly secret_token?: string | undefined; readonly tls_enabled?: boolean | undefined; readonly tls_supported_protocols?: string[] | undefined; readonly tls_certificate_path?: string | undefined; readonly tls_key_path?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/profiling/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profiling",
         "id": "def-server.ProfilingConfig",
         "type": "Type",
         "tags": [],
         "label": "ProfilingConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch?: Readonly<{} & { username: string; hosts: string; password: string; }> | undefined; readonly enabled: boolean; }"
+          "{ readonly elasticsearch?: Readonly<{} & { username: string; hosts: string; password: string; }> | undefined; readonly symbolizer?: Readonly<{ host?: string | undefined; secret_token?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly collector?: Readonly<{ host?: string | undefined; secret_token?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly enabled: boolean; }"
         ],
         "path": "x-pack/plugins/profiling/server/index.ts",
         "deprecated": false,

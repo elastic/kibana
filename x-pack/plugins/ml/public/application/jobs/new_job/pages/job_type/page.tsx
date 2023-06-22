@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
-import { useMlContext } from '../../../../contexts/ml';
+import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
@@ -37,7 +37,7 @@ export const Page: FC = () => {
     services: { share },
   } = useMlKibana();
 
-  const mlContext = useMlContext();
+  const mlContext = useDataSource();
   const navigateToPath = useNavigateToPath();
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX

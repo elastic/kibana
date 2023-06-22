@@ -44,17 +44,50 @@
             "OsqueryActionProps",
             " & { ecsData?: ",
             {
-              "pluginId": "@kbn/securitysolution-ecs",
+              "pluginId": "cases",
               "scope": "common",
-              "docId": "kibKbnSecuritysolutionEcsPluginApi",
-              "section": "def-common.EcsSecurityExtension",
-              "text": "EcsSecurityExtension"
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.Ecs",
+              "text": "Ecs"
             },
             " | undefined; }) => JSX.Element) | undefined"
           ],
           "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.OsqueryResult",
+          "type": "Function",
+          "tags": [],
+          "label": "OsqueryResult",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "OsqueryActionResultProps",
+            ") => JSX.Element"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.OsqueryResult.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "OsqueryActionResultProps"
+              ],
+              "path": "x-pack/plugins/osquery/public/shared_components/lazy_osquery_result.tsx",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
         },
         {
           "parentPluginId": "osquery",

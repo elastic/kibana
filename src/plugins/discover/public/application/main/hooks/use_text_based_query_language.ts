@@ -37,6 +37,7 @@ export function useTextBasedQueryLanguage({
     columns: [],
     query: undefined,
   });
+  const indexTitle = useRef<string>('');
   const savedSearch = useSavedSearchInitial();
 
   const cleanup = useCallback(() => {
@@ -80,34 +81,22 @@ export function useTextBasedQueryLanguage({
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-        const internalState = stateContainer.internalState.getState();
-        const dataViewList = [...internalState.savedDataViews, ...internalState.adHocDataViews];
-        let dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
-        // no dataview found but the index pattern is valid
-        // create an adhoc instance instead
-        if (!dataViewObj) {
-          dataViewObj = await dataViews.create({
-            title: indexPatternFromQuery,
-          });
-          stateContainer.internalState.transitions.setAdHocDataViews([dataViewObj]);
-
-          if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-            dataViewObj.timeFieldName = '@timestamp';
-          } else if (dataViewObj.fields.getByType('date')?.length) {
-            const dateFields = dataViewObj.fields.getByType('date');
-            dataViewObj.timeFieldName = dateFields[0].name;
-          }
-        }
+        const dataViewObj = stateContainer.internalState.getState().dataView!;
 
         // don't set the columns on initial fetch, to prevent overwriting existing state
         const addColumnsToState = Boolean(
           nextColumns.length && (!initialFetch || !stateColumns?.length)
         );
         // no need to reset index to state if it hasn't changed
-        const addDataViewToState = Boolean(dataViewObj.id !== index);
-        if (!addColumnsToState && !addDataViewToState) {
+        const addDataViewToState = Boolean(dataViewObj?.id !== index) || initialFetch;
+        const queryChanged = indexPatternFromQuery !== indexTitle.current;
+        if (!addColumnsToState && !queryChanged) {
           return;
+        }
+
+        if (queryChanged) {
+          indexTitle.current = indexPatternFromQuery;
         }
 
         const nextState = {

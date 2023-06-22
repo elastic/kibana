@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { useGroupActions } from './actions';
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
 import { JobStatsBarStats, StatsBar } from '../../../components/stats_bar';

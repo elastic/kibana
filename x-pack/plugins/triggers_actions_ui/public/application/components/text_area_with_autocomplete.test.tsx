@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TextAreaWithAutocomplete } from './text_area_with_autocomplete';
 import { useKibana } from '../../common/lib/kibana';
 

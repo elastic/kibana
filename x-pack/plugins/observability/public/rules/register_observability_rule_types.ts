@@ -11,15 +11,53 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { SLO_ID_FIELD } from '../../common/field_names/infra_metrics';
 import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
-import { SLO_BURN_RATE_RULE_ID } from '../../common/constants';
+import {
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
+} from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
+import { validateMetricThreshold } from '../pages/threshold/components/validation';
+import { formatReason } from '../pages/threshold/rule_data_formatters';
+
+const sloBurnRateDefaultActionMessage = i18n.translate(
+  'xpack.observability.slo.rules.burnRate.defaultActionMessage',
+  {
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} is active with the following conditions:
+
+- SLO: \\{\\{context.sloName\\}\\}'
+- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
+- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
+- Threshold: \\{\\{context.burnRateThreshold\\}\\}
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+const sloBurnRateDefaultRecoveryMessage = i18n.translate(
+  'xpack.observability.slo.rules.burnRate.defaultRecoveryMessage',
+  {
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} has recovered.
+
+- SLO: \\{\\{context.sloName\\}\\}'
+- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
+- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
+- Threshold: \\{\\{context.burnRateThreshold\\}\\}
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
 
 export const registerObservabilityRuleTypes = (
   config: ConfigSchema,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) => {
   observabilityRuleTypeRegistry.register({
-    id: SLO_BURN_RATE_RULE_ID,
+    id: SLO_BURN_RATE_RULE_TYPE_ID,
     description: i18n.translate('xpack.observability.slo.rules.burnRate.description', {
       defaultMessage: 'Alert when your SLO burn rate is too high over a defined period of time.',
     }),
@@ -36,16 +74,39 @@ export const registerObservabilityRuleTypes = (
     ruleParamsExpression: lazy(() => import('../components/burn_rate_rule_editor')),
     validate: validateBurnRateRule,
     requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.observability.slo.rules.burnRate.defaultActionMessage',
-      {
-        defaultMessage: `The rule \\{\\{rule.name\\}\\} for the SLO '\\{\\{context.sloName\\}\\}' is firing:
-- Reason: \\{\\{context.reason\\}\\}
-- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
-- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
-- The burn rate threshold is set to \\{\\{context.burnRateThreshold\\}\\}
-- View in the SLO details page: \\{\\{context.viewInAppUrl\\}\\}`,
-      }
-    ),
+    defaultActionMessage: sloBurnRateDefaultActionMessage,
+    defaultRecoveryMessage: sloBurnRateDefaultRecoveryMessage,
   });
+  if (config.unsafe.thresholdRule.enabled) {
+    observabilityRuleTypeRegistry.register({
+      id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+      description: i18n.translate(
+        'xpack.observability.threshold.rule.alertFlyout.alertDescription',
+        {
+          defaultMessage: 'Alert when threshold breached.',
+        }
+      ),
+      iconClass: 'bell',
+      documentationUrl(docLinks) {
+        return `${docLinks.links.observability.metricsThreshold}`;
+      },
+      ruleParamsExpression: lazy(() => import('../pages/threshold/components/expression')),
+      validate: validateMetricThreshold,
+      defaultActionMessage: i18n.translate(
+        'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
+        {
+          defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
+
+  Reason:
+  \\{\\{context.reason\\}\\}
+  `,
+        }
+      ),
+      requiresAppContext: false,
+      format: formatReason,
+      alertDetailsAppSection: lazy(
+        () => import('../pages/threshold/components/alert_details_app_section')
+      ),
+    });
+  }
 };

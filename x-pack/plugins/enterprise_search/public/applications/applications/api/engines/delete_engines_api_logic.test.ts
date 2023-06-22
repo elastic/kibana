@@ -23,7 +23,7 @@ describe('deleteEngineApiLogic', () => {
       const result = deleteEngine({ engineName: 'deleteEngineName' });
       await nextTick();
       expect(http.delete).toHaveBeenCalledWith(
-        '/internal/enterprise_search/engines/deleteEngineName'
+        '/internal/enterprise_search/search_applications/deleteEngineName'
       );
       await expect(result).resolves;
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EnterpriseSearchEngineFieldCapabilities } from '../../../../../common/types/engines';
+import { EnterpriseSearchApplicationFieldCapabilities } from '../../../../../common/types/search_applications';
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -13,14 +13,14 @@ export interface FetchEngineFieldCapabilitiesApiParams {
   engineName: string;
 }
 
-export type FetchEngineFieldCapabilitiesApiResponse = EnterpriseSearchEngineFieldCapabilities;
+export type FetchEngineFieldCapabilitiesApiResponse = EnterpriseSearchApplicationFieldCapabilities;
 
 export const fetchEngineFieldCapabilities = async ({
   engineName,
 }: FetchEngineFieldCapabilitiesApiParams): Promise<FetchEngineFieldCapabilitiesApiResponse> => {
-  const route = `/internal/enterprise_search/engines/${engineName}/field_capabilities`;
+  const route = `/internal/enterprise_search/search_applications/${engineName}/field_capabilities`;
 
-  return await HttpLogic.values.http.get<EnterpriseSearchEngineFieldCapabilities>(route);
+  return await HttpLogic.values.http.get<EnterpriseSearchApplicationFieldCapabilities>(route);
 };
 
 export const FetchEngineFieldCapabilitiesApiLogic = createApiLogic(

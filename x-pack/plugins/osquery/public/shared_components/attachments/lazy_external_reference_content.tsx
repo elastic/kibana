@@ -6,13 +6,10 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { OsqueryIcon } from '../../components/osquery_icon';
 import { useKibana } from '../../common/lib/kibana';
 import type { ServicesWrapperProps } from '../services_wrapper';
 import ServicesWrapper from '../services_wrapper';
-import { PERMISSION_DENIED } from '../osquery_action/translations';
+import { EmptyPrompt } from '../../routes/components/empty_prompt';
 
 export interface IExternalReferenceMetaDataProps {
   externalReferenceMetadata: {
@@ -35,24 +32,7 @@ export const getLazyExternalContent =
     } = useKibana();
 
     if (!osquery.read) {
-      return (
-        <EuiEmptyPrompt
-          icon={<OsqueryIcon />}
-          title={<h2>{PERMISSION_DENIED}</h2>}
-          titleSize="xs"
-          body={
-            <FormattedMessage
-              id="xpack.osquery.cases.permissionDenied"
-              defaultMessage=" To access these results, ask your administrator for {osquery} Kibana
-              privileges."
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              values={{
-                osquery: <EuiCode>osquery</EuiCode>,
-              }}
-            />
-          }
-        />
-      );
+      return <EmptyPrompt />;
     }
 
     return (

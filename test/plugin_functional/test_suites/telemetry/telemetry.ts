@@ -74,8 +74,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('shows the banner in the default configuration', async () => {
         await PageObjects.common.navigateToApp('home');
-        expect(await find.existsByCssSelector('[data-test-subj="enable"]')).to.eql(true);
-        expect(await find.existsByCssSelector('[data-test-subj="disable"]')).to.eql(true);
+        expect(await find.existsByLinkText('Enable usage collection.')).to.eql(true);
+        expect(await find.existsByLinkText('Disable usage collection.')).to.eql(false);
       });
 
       it('does not show the banner if opted-in', async () => {
@@ -86,8 +86,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           .expect(200);
 
         await PageObjects.common.navigateToApp('home');
-        expect(await find.existsByCssSelector('[data-test-subj="enable"]')).to.eql(false);
-        expect(await find.existsByCssSelector('[data-test-subj="disable"]')).to.eql(false);
+        expect(await find.existsByLinkText('Enable usage collection.')).to.eql(false);
+        expect(await find.existsByLinkText('Disable usage collection.')).to.eql(false);
       });
 
       it('does not show the banner if opted-out in this version', async () => {
@@ -98,8 +98,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           .expect(200);
 
         await PageObjects.common.navigateToApp('home');
-        expect(await find.existsByCssSelector('[data-test-subj="enable"]')).to.eql(false);
-        expect(await find.existsByCssSelector('[data-test-subj="disable"]')).to.eql(false);
+        expect(await find.existsByLinkText('Enable usage collection.')).to.eql(false);
+        expect(await find.existsByLinkText('Disable usage collection.')).to.eql(false);
       });
 
       it('shows the banner if opted-out in a previous version', async () => {
@@ -111,8 +111,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         });
 
         await PageObjects.common.navigateToApp('home');
-        expect(await find.existsByCssSelector('[data-test-subj="enable"]')).to.eql(true);
-        expect(await find.existsByCssSelector('[data-test-subj="disable"]')).to.eql(true);
+        expect(await find.existsByLinkText('Enable usage collection.')).to.eql(true);
+        expect(await find.existsByLinkText('Disable usage collection.')).to.eql(false);
       });
 
       it('does not show the banner if opted-in in a previous version', async () => {
@@ -124,8 +124,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         });
 
         await PageObjects.common.navigateToApp('home');
-        expect(await find.existsByCssSelector('[data-test-subj="enable"]')).to.eql(false);
-        expect(await find.existsByCssSelector('[data-test-subj="disable"]')).to.eql(false);
+        expect(await find.existsByLinkText('Enable usage collection.')).to.eql(false);
+        expect(await find.existsByLinkText('Disable usage collection.')).to.eql(false);
       });
     });
   });

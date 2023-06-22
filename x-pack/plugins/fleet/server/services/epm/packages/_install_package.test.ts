@@ -122,6 +122,7 @@ describe('_installPackage', () => {
       createAppContextStartContractMock({
         internal: {
           disableILMPolicies: true,
+          fleetServerStandalone: false,
         },
       })
     );
@@ -172,6 +173,7 @@ describe('_installPackage', () => {
       createAppContextStartContractMock({
         internal: {
           disableILMPolicies: false,
+          fleetServerStandalone: false,
         },
       })
     );

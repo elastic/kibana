@@ -24,7 +24,8 @@
     "@kbn/core-doc-links-browser",
     "@kbn/core",
     "@kbn/ui-theme",
-    "@kbn/coloring"
+    "@kbn/coloring",
+    "@kbn/field-formats-plugin"
   ],
   "exclude": [
     "target/**/*",
