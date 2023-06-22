@@ -202,6 +202,7 @@ export default function (providerContext: FtrProviderContext) {
             username: 'user',
             password: 'pass',
             is_default: true,
+            is_default_monitoring: true,
             topics: [{ topic: 'topic1' }],
           })
           .expect(400);
