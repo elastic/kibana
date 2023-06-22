@@ -10,8 +10,6 @@ import { EuiTextArea, EuiFormRow, EuiSelectable, EuiSelectableOption } from '@el
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import getCaretCoordinates from 'textarea-caret';
-import { AddMessageVariables } from './add_message_variables';
-import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -81,7 +79,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   label,
   errors,
 }) => {
-  const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
   const suggestions = convertArrayToObject(messageVariables?.map(({ name }) => name));
   const [matches, setMatches] = useState<string[]>([]);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -99,65 +96,62 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     }));
   }, [matches]);
 
-  const onSelectMessageVariable = (variable: ActionVariable) => {
-    const templatedVar = templateActionVariable(variable);
-    const startPosition = currentTextElement?.selectionStart ?? 0;
-    const endPosition = currentTextElement?.selectionEnd ?? 0;
-    const newValue =
-      (inputTargetValue ?? '').substring(0, startPosition) +
-      templatedVar +
-      (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
-    editAction(paramsProperty, newValue, index);
-  };
+  const onChangeWithMessageVariable = () => {
+    if (!textAreaRef.current) return;
+    const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
 
-  const onChangeWithMessageVariable = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const inputValue = event.target.value;
+    const newCaretPosition = getCaretCoordinates(
+      textAreaRef.current,
+      textAreaRef.current.selectionStart
+    );
 
-    if (textAreaRef.current) {
-      const newCaretPosition =
-        textAreaRef.current &&
-        getCaretCoordinates(textAreaRef.current, textAreaRef.current.selectionStart);
+    const parentTop = parentRef.current?.getBoundingClientRect().top;
+    const top = textAreaRef.current?.getBoundingClientRect().top;
 
-      const parentTop = parentRef.current?.getBoundingClientRect().top;
-      const top = textAreaRef.current?.getBoundingClientRect().top;
+    setCaretPosition({
+      top: top + newCaretPosition?.top + newCaretPosition.height - parentTop,
+      left: newCaretPosition.left,
+      height: newCaretPosition.height,
+    });
 
-      setCaretPosition({
-        top: top + newCaretPosition?.top + newCaretPosition.height - parentTop,
-        left: newCaretPosition.left,
-        height: newCaretPosition.height,
-      });
-    }
+    const lastCloseBracketIndex = value.slice(0, selectionStart).lastIndexOf(' ');
+    const lastDoubleCurlyBracket = value.slice(0, selectionStart).lastIndexOf('{{');
+    const currentWordStartIndex = Math.max(lastCloseBracketIndex, lastDoubleCurlyBracket);
 
-    const lastOpenBracketIndex = inputValue.lastIndexOf('{{');
-    const lastCloseBracketIndex = inputValue.lastIndexOf('}}');
-    const lastBracketIndex = Math.max(lastOpenBracketIndex, lastCloseBracketIndex);
-
-    if (lastBracketIndex !== -1 && lastOpenBracketIndex === lastBracketIndex) {
-      const lastWord = inputValue.slice(lastBracketIndex + 2).trim();
-      const filteredMatches = filterSuggestions(suggestions, lastWord);
+    const currentWord = value
+      .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex, selectionStart)
+      .trim();
+    if (currentWord.startsWith('{{')) {
+      const filteredMatches = filterSuggestions(suggestions, currentWord.slice(2));
       setMatches(filteredMatches);
     } else {
       setMatches([]);
     }
-    editAction(paramsProperty, inputValue, index);
+
+    editAction(paramsProperty, value, index);
   };
 
   const onOptionPick = (newOptions: EuiSelectableOption[]) => {
-    const lastOpenBracketIndex = inputTargetValue?.lastIndexOf('{{');
-    const lastCloseBracketIndex = inputTargetValue?.lastIndexOf('}}');
-    const lastBracketIndex = Math.max(lastOpenBracketIndex ?? 0, lastCloseBracketIndex ?? 0);
+    if (!textAreaRef.current) return;
+    const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
+    const lastCloseBracketIndex = value.slice(0, selectionStart).lastIndexOf(' ');
+    const lastDoubleCurlyBracket = value.slice(0, selectionStart).lastIndexOf('{{');
+    const currentWordStartIndex = Math.max(lastCloseBracketIndex, lastDoubleCurlyBracket);
 
-    const start = inputTargetValue?.slice(0, lastBracketIndex + 2);
-    const words =
-      inputTargetValue
-        ?.slice(lastBracketIndex + 2)
-        .trim()
-        .split('.') || [];
+    const words = value
+      .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex + 2, selectionStart)
+      .trim()
+      .split('.');
 
     const checkedElement = newOptions.find(({ checked }) => checked === 'on');
     if (checkedElement) {
       words[words.length - 1] = checkedElement.label;
-      const newInputText = start + words.join('.') + '}}';
+      const newInputText =
+        value.slice(0, currentWordStartIndex) +
+        '{{' +
+        words.join('.') +
+        '}}' +
+        value.slice(selectionStart);
       editAction(paramsProperty, newInputText, index);
       setMatches([]);
     }
@@ -171,13 +165,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
         isDisabled={isDisabled}
         isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
         label={label}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={onSelectMessageVariable}
-            paramsProperty={paramsProperty}
-          />
-        }
       >
         <EuiTextArea
           disabled={isDisabled}
@@ -189,7 +176,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
           data-test-subj={`${paramsProperty}TextArea`}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
           onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-            setCurrentTextElement(e.target);
             setListOpen(true);
           }}
           // onKeyDown={}
