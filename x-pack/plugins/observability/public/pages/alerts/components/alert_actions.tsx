@@ -207,14 +207,7 @@ export function AlertActions({
     <>
       {/* Hide the View In App for the Threshold alerts, temporarily https://github.com/elastic/kibana/pull/159915  */}
       {alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID ? (
-        <EuiFlexItem>
-          <EuiButtonIcon
-            iconType=""
-            disabled
-            data-test-subj="o11yAlertActionsButtonThresholdRuleDisabled"
-            size="s"
-          />
-        </EuiFlexItem>
+        <EuiFlexItem style={{ width: 32 }} />
       ) : (
         <EuiFlexItem>
           <EuiToolTip
