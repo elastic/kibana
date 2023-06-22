@@ -25,9 +25,14 @@ const SearchBarWrapper = styled(EuiFlexItem)`
 interface RuleSearchFieldProps {
   initialValue?: string;
   onSearch: (value: string) => void;
+  placeholder?: string;
 }
 
-export function RuleSearchField({ initialValue, onSearch }: RuleSearchFieldProps): JSX.Element {
+export function RuleSearchField({
+  initialValue,
+  onSearch,
+  placeholder,
+}: RuleSearchFieldProps): JSX.Element {
   const [searchText, setSearchText] = useState(initialValue);
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value),
@@ -45,7 +50,7 @@ export function RuleSearchField({ initialValue, onSearch }: RuleSearchFieldProps
         aria-label={i18n.SEARCH_RULES}
         fullWidth
         incremental={false}
-        placeholder={i18n.SEARCH_PLACEHOLDER}
+        placeholder={placeholder ?? i18n.SEARCH_PLACEHOLDER}
         value={searchText}
         onChange={handleChange}
         onSearch={onSearch}

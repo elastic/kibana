@@ -149,7 +149,7 @@ export class DashboardAddPanelService extends FtrService {
   }
 
   async closeAddPanel() {
-    await this.flyout.ensureClosed('dashboardAddPanel');
+    await this.flyout.ensureAllClosed();
   }
 
   async filterEmbeddableNames(name: string) {
