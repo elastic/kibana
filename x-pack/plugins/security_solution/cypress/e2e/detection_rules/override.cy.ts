@@ -48,7 +48,6 @@ import {
 } from '../../screens/rule_details';
 
 import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { cleanKibana } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
@@ -69,10 +68,6 @@ describe('Detection rules, override', () => {
   const expectedTags = rule.tags?.join('');
   const mitreAttack = rule.threat;
   const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
-
-  before(() => {
-    cleanKibana();
-  });
 
   beforeEach(() => {
     login();
