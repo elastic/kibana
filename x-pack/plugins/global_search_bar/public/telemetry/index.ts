@@ -7,7 +7,7 @@
 
 import { AnalyticsServiceStart } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { CLICK_METRIC, TrackUiMetricFn } from '../types';
+import { ClickMetric, TrackUiMetricFn } from '../types';
 import { EventReporter } from './event_reporter';
 
 interface ReporterOpts {
@@ -20,8 +20,8 @@ export const getTrackUiMetric = ({ analytics, usageCollection }: ReporterOpts): 
     if (usageCollection) {
       let counter: [string, string | [string, string]];
       switch (eventName) {
-        case CLICK_METRIC.USER_NAVIGATED_TO_APPLICATION:
-        case CLICK_METRIC.USER_NAVIGATED_TO_SAVED_OBJECT:
+        case ClickMetric.USER_NAVIGATED_TO_APPLICATION:
+        case ClickMetric.USER_NAVIGATED_TO_SAVED_OBJECT:
           counter = [metricType, [eventName, `${eventName}_${context}`]];
           break;
         default:
@@ -43,5 +43,5 @@ export const getTrackUiMetric = ({ analytics, usageCollection }: ReporterOpts): 
   return track;
 };
 
-export { getEventTypes } from './event_types';
+export { eventTypes } from './event_types';
 export type { EventReporter };

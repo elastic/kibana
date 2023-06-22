@@ -9,7 +9,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { EventReporter } from './telemetry';
 
 /* @internal */
-export enum COUNT_METRIC {
+export enum CountMetric {
   UNHANDLED_ERROR = 'unhandled_error',
   SHORTCUT_USED = 'shortcut_used',
   SEARCH_FOCUS = 'search_focus',
@@ -17,13 +17,13 @@ export enum COUNT_METRIC {
 }
 
 /* @internal */
-export enum CLICK_METRIC {
+export enum ClickMetric {
   USER_NAVIGATED_TO_APPLICATION = 'user_navigated_to_application',
   USER_NAVIGATED_TO_SAVED_OBJECT = 'user_navigated_to_saved_object',
 }
 
 /* @internal */
-export enum EVENT_TYPE {
+export enum EventMetric {
   SEARCH_BLUR = 'global_search_bar_blur',
   CLICK_APPLICATION = 'global_search_bar_click_application',
   CLICK_SAVED_OBJECT = 'global_search_bar_click_saved_object',
@@ -31,7 +31,16 @@ export enum EVENT_TYPE {
 }
 
 /* @internal */
-type EventType = COUNT_METRIC | CLICK_METRIC;
+export enum FieldType {
+  FOCUS_TIME = 'focus_time_ms',
+  APPLICATION = 'application',
+  SAVED_OBJECT_TYPE = 'saved_object_type',
+  ERROR_MESSAGE = 'error_message',
+  TERMS = 'terms',
+}
+
+/* @internal */
+type EventType = CountMetric | ClickMetric;
 
 /* @internal */
 type UiCounterTrackingFn = (

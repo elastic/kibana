@@ -5,57 +5,65 @@
  * 2.0.
  */
 
+import { RootSchema } from '@kbn/analytics-client';
 import { EventTypeOpts } from '@kbn/core/public';
-import { EVENT_TYPE } from '../types';
+import { EventMetric, FieldType } from '../types';
 
-export const getEventTypes = () => {
-  const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
-    {
-      eventType: EVENT_TYPE.SEARCH_BLUR,
-      schema: {
-        focus_time_ms: {
-          type: 'long',
-          _meta: {
-            description:
-              'The length in milliseconds the user viewed the global search bar before closing.',
-          },
-        },
+const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
+  [FieldType.FOCUS_TIME]: {
+    [FieldType.FOCUS_TIME]: {
+      type: 'long',
+      _meta: {
+        description:
+          'The length in milliseconds the user viewed the global search bar before closing.',
       },
     },
-    {
-      eventType: EVENT_TYPE.CLICK_APPLICATION,
-      schema: {
-        application: {
-          type: 'keyword',
-          _meta: {
-            description: 'The name of the application selected in the global search bar results.',
-          },
-        },
-        terms: { type: 'keyword', _meta: { description: 'The search terms entered by the user.' } },
+  },
+  [FieldType.APPLICATION]: {
+    [FieldType.APPLICATION]: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the application selected in the global search bar results.',
       },
     },
-    {
-      eventType: EVENT_TYPE.CLICK_SAVED_OBJECT,
-      schema: {
-        savedObjectType: {
-          type: 'keyword',
-          _meta: {
-            description: 'The type of the saved object selected in the global search bar results.',
-          },
-        },
-        terms: { type: 'keyword', _meta: { description: 'The search terms entered by the user.' } },
+  },
+  [FieldType.SAVED_OBJECT_TYPE]: {
+    [FieldType.SAVED_OBJECT_TYPE]: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the saved object selected in the global search bar results.',
       },
     },
-    {
-      eventType: EVENT_TYPE.ERROR,
-      schema: {
-        application: {
-          type: 'keyword',
-          _meta: { description: 'A message from an error that was caught.' },
-        },
-        terms: { type: 'keyword', _meta: { description: 'The search terms entered by the user.' } },
-      },
+  },
+  [FieldType.ERROR_MESSAGE]: {
+    [FieldType.ERROR_MESSAGE]: {
+      type: 'keyword',
+      _meta: { description: 'A message from an error that was caught.' },
     },
-  ];
-  return eventTypes;
+  },
+  [FieldType.TERMS]: {
+    [FieldType.TERMS]: {
+      type: 'keyword',
+      _meta: { description: 'The search terms entered by the user.' },
+    },
+  },
 };
+
+export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
+  {
+    eventType: EventMetric.SEARCH_BLUR,
+    schema: { ...fields[FieldType.FOCUS_TIME] },
+  },
+  {
+    eventType: EventMetric.CLICK_APPLICATION,
+    schema: { ...fields[FieldType.APPLICATION], ...fields[FieldType.TERMS] },
+  },
+  {
+    eventType: EventMetric.CLICK_SAVED_OBJECT,
+    schema: { ...fields[FieldType.SAVED_OBJECT_TYPE], ...fields[FieldType.TERMS] },
+  },
+  {
+    eventType: EventMetric.ERROR,
+    schema: { ...fields[FieldType.ERROR_MESSAGE], ...fields[FieldType.TERMS] },
+  },
+];

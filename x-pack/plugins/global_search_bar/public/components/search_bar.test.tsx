@@ -14,7 +14,7 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/m
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { getTrackUiMetric } from '../telemetry';
 import type { TrackUiMetricFn } from '../types';
@@ -212,67 +212,99 @@ describe('SearchBar', () => {
       await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
     });
 
-    it('tracks the application navigated to', async () => {
-      searchService.find.mockReturnValueOnce(
-        of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
-      );
+    describe('telemetry', () => {
+      it('tracks the application navigated to', async () => {
+        searchService.find.mockReturnValueOnce(
+          of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
+        );
 
-      render(
-        <IntlProvider locale="en">
-          <SearchBar
-            globalSearch={searchService}
-            navigateToUrl={applications.navigateToUrl}
-            basePathUrl={basePathUrl}
-            darkMode={darkMode}
-            chromeStyle$={chromeStyle$}
-            trackUiMetric={trackUiMetric}
-          />
-        </IntlProvider>
-      );
+        render(
+          <IntlProvider locale="en">
+            <SearchBar
+              globalSearch={searchService}
+              navigateToUrl={applications.navigateToUrl}
+              basePathUrl={basePathUrl}
+              darkMode={darkMode}
+              chromeStyle$={chromeStyle$}
+              trackUiMetric={trackUiMetric}
+            />
+          </IntlProvider>
+        );
 
-      await focusAndUpdate();
-      fireEvent.click(await screen.findByTestId('nav-search-option'));
+        await focusAndUpdate();
+        fireEvent.click(await screen.findByTestId('nav-search-option'));
 
-      expect(reportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
-        application: 'discover',
-        terms: '',
+        expect(reportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
+          application: 'discover',
+          terms: '',
+        });
+        expect(reportEvent).nthCalledWith(2, 'global_search_bar_blur', {
+          focus_time_ms: expect.any(Number),
+        });
+        expect(reportEvent).toHaveBeenCalledTimes(2);
       });
-      expect(reportEvent).nthCalledWith(2, 'global_search_bar_blur', {
-        focus_time_ms: expect.any(Number),
+
+      it('tracks the searchValue', async () => {
+        searchService.find.mockReturnValueOnce(
+          of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
+        );
+
+        render(
+          <IntlProvider locale="en">
+            <SearchBar
+              globalSearch={searchService}
+              navigateToUrl={applications.navigateToUrl}
+              basePathUrl={basePathUrl}
+              darkMode={darkMode}
+              chromeStyle$={chromeStyle$}
+              trackUiMetric={trackUiMetric}
+            />
+          </IntlProvider>
+        );
+
+        await focusAndUpdate();
+
+        userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
+        fireEvent.click(await screen.findByTestId('nav-search-option'));
+
+        expect(reportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
+          application: 'discover',
+          terms: 'Ahoy!',
+        });
+        expect(reportEvent).nthCalledWith(2, 'global_search_bar_blur', {
+          focus_time_ms: expect.any(Number),
+        });
+        expect(reportEvent).toHaveBeenCalledTimes(2);
       });
-      expect(reportEvent).toHaveBeenCalledTimes(2);
-    });
 
-    it('tracks the searchValue', async () => {
-      searchService.find.mockReturnValueOnce(
-        of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
-      );
+      it('tracks errors', async () => {
+        searchService.find.mockReturnValueOnce(
+          throwError(() => new Error('service unavailable :('))
+        );
 
-      render(
-        <IntlProvider locale="en">
-          <SearchBar
-            globalSearch={searchService}
-            navigateToUrl={applications.navigateToUrl}
-            basePathUrl={basePathUrl}
-            darkMode={darkMode}
-            chromeStyle$={chromeStyle$}
-            trackUiMetric={trackUiMetric}
-          />
-        </IntlProvider>
-      );
+        render(
+          <IntlProvider locale="en">
+            <SearchBar
+              globalSearch={searchService}
+              navigateToUrl={applications.navigateToUrl}
+              basePathUrl={basePathUrl}
+              darkMode={darkMode}
+              chromeStyle$={chromeStyle$}
+              trackUiMetric={trackUiMetric}
+            />
+          </IntlProvider>
+        );
 
-      await focusAndUpdate();
-      userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
-      fireEvent.click(await screen.findByTestId('nav-search-option'));
+        userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
 
-      expect(reportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
-        application: 'discover',
-        terms: 'Ahoy!',
+        await focusAndUpdate();
+
+        expect(reportEvent).nthCalledWith(1, 'global_search_bar_unhandled_error', {
+          error_message: 'Error: service unavailable :(',
+          terms: 'Ahoy!',
+        });
+        expect(reportEvent).toHaveBeenCalledTimes(1);
       });
-      expect(reportEvent).nthCalledWith(2, 'global_search_bar_blur', {
-        focus_time_ms: expect.any(Number),
-      });
-      expect(reportEvent).toHaveBeenCalledTimes(2);
     });
   });
 

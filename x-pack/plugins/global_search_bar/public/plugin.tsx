@@ -14,7 +14,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { SearchBar } from './components/search_bar';
-import { getEventTypes, getTrackUiMetric } from './telemetry';
+import { eventTypes, getTrackUiMetric } from './telemetry';
 
 export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
@@ -24,7 +24,7 @@ export interface GlobalSearchBarPluginStartDeps {
 
 export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
   public setup({ analytics }: CoreSetup) {
-    getEventTypes().forEach((eventType) => {
+    eventTypes.forEach((eventType) => {
       analytics.registerEventType(eventType);
     });
 

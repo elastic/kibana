@@ -18,6 +18,7 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -30,7 +31,7 @@ import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
-import { CLICK_METRIC, COUNT_METRIC } from '../types';
+import { ClickMetric, CountMetric } from '../types';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
@@ -129,7 +130,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
-          trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SEARCH_REQUEST);
+          trackUiMetric(METRIC_TYPE.COUNT, CountMetric.SEARCH_REQUEST);
         }
 
         const rawParams = parseSearchParams(searchValue);
@@ -168,8 +169,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           error: (err) => {
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
-            trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.UNHANDLED_ERROR);
-            trackUiMetric.error(err);
+            trackUiMetric(METRIC_TYPE.COUNT, CountMetric.UNHANDLED_ERROR);
+            trackUiMetric.error({ message: err, searchValue });
           },
           complete: () => {},
         });
@@ -183,7 +184,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     (event: KeyboardEvent) => {
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SHORTCUT_USED);
+        trackUiMetric(METRIC_TYPE.COUNT, CountMetric.SHORTCUT_USED);
         if (chromeStyle === 'project' && !isVisible) {
           visibilityButtonRef.current?.click();
         } else if (searchRef) {
@@ -218,10 +219,10 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         if (type === 'application') {
           const key = selected.key ?? 'unknown';
           const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
-          trackUiMetric(METRIC_TYPE.CLICK, CLICK_METRIC.USER_NAVIGATED_TO_APPLICATION, application);
+          trackUiMetric(METRIC_TYPE.CLICK, ClickMetric.USER_NAVIGATED_TO_APPLICATION, application);
           trackUiMetric.navigateToApplication({ application, searchValue });
         } else {
-          trackUiMetric(METRIC_TYPE.CLICK, CLICK_METRIC.USER_NAVIGATED_TO_SAVED_OBJECT, type);
+          trackUiMetric(METRIC_TYPE.CLICK, ClickMetric.USER_NAVIGATED_TO_SAVED_OBJECT, type);
           trackUiMetric.navigateToSavedObject({ type, searchValue });
         }
       } catch (e) {
@@ -310,7 +311,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         'aria-label': i18nStrings.placeholderText,
         placeholder: i18nStrings.placeholderText,
         onFocus: () => {
-          trackUiMetric(METRIC_TYPE.COUNT, COUNT_METRIC.SEARCH_FOCUS);
+          trackUiMetric(METRIC_TYPE.COUNT, CountMetric.SEARCH_FOCUS);
           trackUiMetric.searchFocus();
           setInitialLoad(true);
           setShowAppend(false);
