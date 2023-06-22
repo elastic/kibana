@@ -6,6 +6,7 @@
  */
 
 import { SyntheticsRestApiRouteFactory } from './types';
+import { getSyntheticsCertsRoute } from './certs/get_certificates';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
 import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
@@ -98,4 +99,5 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsFilters,
   inspectSyntheticsMonitorRoute,
   getAgentPoliciesRoute,
+  getSyntheticsCertsRoute,
 ];
