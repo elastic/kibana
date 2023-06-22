@@ -9,7 +9,13 @@ import { stringify } from 'query-string';
 import { UptimeUrlParams } from '..';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
-const { FOCUS_CONNECTOR_FIELD, DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS;
+const {
+  FOCUS_CONNECTOR_FIELD,
+  DATE_RANGE_START,
+  DATE_RANGE_END,
+  AUTOREFRESH_INTERVAL,
+  AUTOREFRESH_IS_PAUSED,
+} = CLIENT_DEFAULTS;
 
 export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty = false) => {
   if (ignoreEmpty) {
@@ -29,6 +35,12 @@ export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty
         delete params[key];
       }
       if (key === 'dateRangeEnd' && val === DATE_RANGE_END) {
+        delete params[key];
+      }
+      if (key === 'autorefreshIsPaused' && val === AUTOREFRESH_IS_PAUSED) {
+        delete params[key];
+      }
+      if (key === 'autorefreshInterval' && val === AUTOREFRESH_INTERVAL) {
         delete params[key];
       }
       if (key === 'focusConnectorField' && val === FOCUS_CONNECTOR_FIELD) {

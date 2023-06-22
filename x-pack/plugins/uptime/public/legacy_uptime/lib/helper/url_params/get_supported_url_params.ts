@@ -27,6 +27,8 @@ export interface UptimeUrlParams {
 const {
   ABSOLUTE_DATE_RANGE_START,
   ABSOLUTE_DATE_RANGE_END,
+  AUTOREFRESH_INTERVAL,
+  AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
   SEARCH,
@@ -78,8 +80,6 @@ export const getSupportedUrlParams = (params: {
   } = filteredParams;
 
   return {
-    autorefreshInterval: autorefreshInterval ? parseInt(autorefreshInterval, 10) : undefined,
-    autorefreshIsPaused: autorefreshIsPaused === 'true',
     pagination,
     absoluteDateRangeStart: parseAbsoluteDate(
       dateRangeStart || DATE_RANGE_START,
@@ -90,6 +90,8 @@ export const getSupportedUrlParams = (params: {
       ABSOLUTE_DATE_RANGE_END,
       { roundUp: true }
     ),
+    autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
+    autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
     filters: filters || FILTERS,
@@ -99,4 +101,19 @@ export const getSupportedUrlParams = (params: {
     focusConnectorField: !!focusConnectorField,
     query: query || '',
   };
+};
+
+export const parseUrlInt = (value: string | undefined, defaultValue: number): number => {
+  const parsed = parseInt(value || '', 10);
+  return isNaN(parsed) ? defaultValue : parsed;
+};
+
+export const parseIsPaused = (value: string | undefined, defaultValue: boolean): boolean => {
+  if (value === 'true') {
+    return true;
+  }
+  if (value === 'false') {
+    return false;
+  }
+  return defaultValue;
 };
