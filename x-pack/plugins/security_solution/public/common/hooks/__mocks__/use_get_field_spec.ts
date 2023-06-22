@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-export interface UserDetailsProps {
-  contextID: string;
-  scopeId: string;
-  userName: string;
-  handleOnClose: () => void;
-  isFlyoutView?: boolean;
-  isDraggable?: boolean;
-  isNewUserDetailsFlyoutEnable?: boolean;
-}
+export const useGetFieldSpec = () => {
+  return (name: string) => ({
+    name,
+    type: 'string',
+  });
+};
