@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import type { PartialBy } from '../../../common/types/common';
 import type { ModelItemFull } from './models_list';
 import { ModelPipelines } from './pipelines';
@@ -138,7 +139,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       Exclude<TrainedModelStat['inference_stats'], undefined>,
       'cache_miss_count'
     >;
-    if (item.model_type === 'pytorch') {
+    if (item.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
       delete result.cache_miss_count;
     }
     return result;
