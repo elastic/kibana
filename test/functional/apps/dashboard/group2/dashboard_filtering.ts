@@ -76,7 +76,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('adding a filter that excludes all data', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/160062
+    describe.skip('adding a filter that excludes all data', () => {
       before(async () => {
         await populateDashboard();
         await addFilterAndRefresh();
@@ -135,9 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/159931
-    // FLAKY: https://github.com/elastic/kibana/issues/159932
-    describe.skip('using a pinned filter that excludes all data', () => {
+    describe('using a pinned filter that excludes all data', () => {
       before(async () => {
         // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
         await populateDashboard();
@@ -198,8 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/159933
-    describe.skip('disabling a filter unfilters the data on', function () {
+    describe('disabling a filter unfilters the data on', function () {
       before(async () => {
         // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
         await populateDashboard();
