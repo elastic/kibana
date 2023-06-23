@@ -67,9 +67,7 @@ export function useTextBasedQueryLanguage({
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
-      const hasResults =
-        next.result?.length &&
-        (next.fetchStatus === FetchStatus.COMPLETE || next.fetchStatus === FetchStatus.PARTIAL);
+      const hasResults = Boolean(next.result?.length);
       const initialFetch = !prev.current.columns.length;
 
       if (isTextBasedQueryLang) {
