@@ -26,7 +26,7 @@ export interface FilterContextType {
 }
 
 export type FilterItemObj = Omit<AddOptionsListControlProps, 'controlId' | 'dataViewId'> &
-  Pick<OptionsListEmbeddableInput, 'existsSelected' | 'exclude'>;
+  Pick<OptionsListEmbeddableInput, 'existsSelected' | 'exclude' | 'hideActionBar'>;
 
 export type FilterGroupHandler = ControlGroupContainer;
 

@@ -21,7 +21,7 @@ export const getFilterItemObjListFromControlInput = (controlInput: ControlGroupI
   const panels = getPanelsInOrderFromControlsInput(controlInput);
   return panels.map((panel) => {
     const {
-      explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude },
+      explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude, hideActionBar },
     } = panel as ControlPanelState<OptionsListEmbeddableInput>;
 
     return {
@@ -30,6 +30,7 @@ export const getFilterItemObjListFromControlInput = (controlInput: ControlGroupI
       title,
       existsSelected: existsSelected ?? false,
       exclude: exclude ?? false,
+      hideActionBar: hideActionBar ?? false,
     };
   });
 };

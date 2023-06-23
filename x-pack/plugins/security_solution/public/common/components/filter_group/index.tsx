@@ -78,7 +78,6 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const filterChangedSubscription = useRef<Subscription>();
   const inputChangedSubscription = useRef<Subscription>();
-  const controlGroupOutputSubscription = useRef<Subscription>();
 
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
@@ -297,6 +296,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           selectedOptions: item.selectedOptions ?? [],
           existsSelected: item.existsSelected ?? false,
           exclude: item.exclude,
+          hideActionBar: item.hideActionBar,
         })),
       ];
     }
