@@ -17,7 +17,7 @@ import { FlameGraphsView } from '../views/flame_graphs_view';
 import { FunctionsView } from '../views/functions';
 import { DifferentialTopNFunctionsView } from '../views/functions/differential_topn';
 import { TopNFunctionsView } from '../views/functions/topn';
-import { NoDataView } from '../views/no_data_view';
+import { NoDataTabs, NoDataView } from '../views/no_data_view';
 import { StackTracesView } from '../views/stack_traces_view';
 import { RouteBreadcrumb } from './route_breadcrumb';
 
@@ -35,13 +35,25 @@ const routes = {
     ),
     children: {
       '/add-data-instructions': {
-        element: (
-          <NoDataView
-            subTitle={i18n.translate('xpack.profiling.addDataTitle', {
-              defaultMessage: 'Select an option below to deploy the host-agent.',
-            })}
-          />
-        ),
+        element: <NoDataView />,
+        params: t.type({
+          query: t.type({
+            selectedTab: t.union([
+              t.literal(NoDataTabs.Binary),
+              t.literal(NoDataTabs.Deb),
+              t.literal(NoDataTabs.Docker),
+              t.literal(NoDataTabs.ElasticAgentIntegration),
+              t.literal(NoDataTabs.Kubernete),
+              t.literal(NoDataTabs.RPM),
+              t.literal(NoDataTabs.Symbols),
+            ]),
+          }),
+        }),
+        defaults: {
+          query: {
+            selectedTab: NoDataTabs.Kubernete,
+          },
+        },
       },
       '/': {
         children: {
