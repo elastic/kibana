@@ -18,7 +18,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
+import { FormattedRelativeTime, FormattedMessage } from '@kbn/i18n-react';
 
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
@@ -249,7 +249,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         render(updatedAt: InMemoryPackagePolicyAndAgentPolicy['packagePolicy']['updated_at']) {
           return (
             <span className="eui-textTruncate" title={updatedAt}>
-              <FormattedRelative value={updatedAt} />
+              <FormattedRelativeTime value={updatedAt} />
             </span>
           );
         },

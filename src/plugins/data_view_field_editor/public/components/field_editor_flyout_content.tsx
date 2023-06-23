@@ -217,7 +217,7 @@ const FieldEditorFlyoutContentComponent = ({
                   {fieldToEdit ? (
                     <FormattedMessage
                       id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
-                      defaultMessage="Edit field '{fieldName}'"
+                      defaultMessage="Edit field ''{fieldName}''"
                       values={{
                         fieldName: fieldToEdit.name,
                       }}

@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { EuiFormControlLayoutDelimited } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { useI18n } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -26,7 +26,6 @@ interface Props {
   field: DataViewField;
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
-  intl: InjectedIntl;
   fullWidth?: boolean;
   compressed?: boolean;
   disabled?: boolean;
@@ -37,6 +36,7 @@ export function isRangeParams(params: any): params is RangeParams {
 }
 
 function RangeValueInputUI(props: Props) {
+  const intl = useI18n();
   const kibana = useKibana();
 
   const formatDateChange = (value: string | number | boolean) => {
@@ -69,7 +69,7 @@ function RangeValueInputUI(props: Props) {
       <EuiFormControlLayoutDelimited
         compressed={props.compressed}
         fullWidth={props.fullWidth}
-        aria-label={props.intl.formatMessage({
+        aria-label={intl.formatMessage({
           id: 'unifiedSearch.filter.filterEditor.rangeInputLabel',
           defaultMessage: 'Range',
         })}
@@ -83,7 +83,7 @@ function RangeValueInputUI(props: Props) {
             onBlur={(value) => {
               onFromChange(formatDateChange(value));
             }}
-            placeholder={props.intl.formatMessage({
+            placeholder={intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.rangeStartInputPlaceholder',
               defaultMessage: 'Start',
             })}
@@ -101,7 +101,7 @@ function RangeValueInputUI(props: Props) {
             onBlur={(value) => {
               onToChange(formatDateChange(value));
             }}
-            placeholder={props.intl.formatMessage({
+            placeholder={intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.rangeEndInputPlaceholder',
               defaultMessage: 'End',
             })}
@@ -114,4 +114,4 @@ function RangeValueInputUI(props: Props) {
   );
 }
 
-export const RangeValueInput = injectI18n(RangeValueInputUI);
+export const RangeValueInput = React.memo(RangeValueInputUI);

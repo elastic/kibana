@@ -49,7 +49,7 @@ export function addMessages({
   isRecovered = false,
 }: AddMessagesOpts): ActionContext {
   const title = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle', {
-    defaultMessage: `rule '{name}' {verb}`,
+    defaultMessage: `rule ''{name}'' {verb}`,
     values: {
       name: ruleName,
       verb: isRecovered ? 'recovered' : `matched query${group ? ` for group ${group}` : ''}`,
@@ -58,7 +58,7 @@ export function addMessages({
 
   const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
   const message = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextMessageDescription', {
-    defaultMessage: `rule '{name}' is {verb}:
+    defaultMessage: `rule ''{name}'' is {verb}:
 
 - Value: {value}
 - Conditions Met: {conditions} over {window}

@@ -15,17 +15,20 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mockManagementPlugin } from '../../../../../mocks';
 
 import { Header } from './header';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('Header', () => {
-  const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
+  const mockedContext = mockManagementPlugin.createIndexPatternManagementContext();
   test('should render normally', () => {
     const component = mount(
-      <Header.WrappedComponent
-        indexPatternId="test"
-        history={scopedHistoryMock.create() as unknown as ScopedHistory}
-        location={{} as unknown as RouteComponentProps['location']}
-        match={{} as unknown as RouteComponentProps['match']}
-      />,
+      <I18nProvider>
+        <Header.WrappedComponent
+          indexPatternId="test"
+          history={scopedHistoryMock.create() as unknown as ScopedHistory}
+          location={{} as unknown as RouteComponentProps['location']}
+          match={{} as unknown as RouteComponentProps['match']}
+        />
+      </I18nProvider>,
       {
         wrappingComponent: KibanaContextProvider,
         wrappingComponentProps: {

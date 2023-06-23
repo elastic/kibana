@@ -147,7 +147,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.edit.pageTitle"
-              defaultMessage="Edit pipeline '{name}'"
+              defaultMessage="Edit pipeline ''{name}''"
               values={{ name: decodedPipelineName }}
             />
           </span>

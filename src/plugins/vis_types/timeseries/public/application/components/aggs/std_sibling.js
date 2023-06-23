@@ -26,11 +26,12 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { useI18n, FormattedMessage } from '@kbn/i18n-react';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const StandardSiblingAggUi = (props) => {
-  const { siblings, intl, fields, indexPattern } = props;
+  const intl = useI18n();
+  const { siblings, fields, indexPattern } = props;
   const defaults = { sigma: '' };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
@@ -175,4 +176,4 @@ StandardSiblingAggUi.propTypes = {
   exclude: PropTypes.array,
 };
 
-export const StandardSiblingAgg = injectI18n(StandardSiblingAggUi);
+export const StandardSiblingAgg = React.memo(StandardSiblingAggUi);

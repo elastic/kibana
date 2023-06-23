@@ -20,7 +20,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedDate, FormattedTime, FormattedRelativeTime } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
 
 import type {
@@ -397,7 +397,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
               </>
             }
           >
-            <FormattedRelative value={lastResultsData['@timestamp']} />
+            <FormattedRelativeTime value={lastResultsData['@timestamp']} />
           </EuiToolTip>
         ) : (
           '-'

@@ -43,7 +43,7 @@ export const ConfirmDeleteModal: FunctionComponent<Props> = ({
       await spacesManager.deleteSpace(space);
       services.notifications!.toasts.addSuccess(
         i18n.translate('xpack.spaces.management.confirmDeleteModal.successMessage', {
-          defaultMessage: "Deleted space '{name}'",
+          defaultMessage: "Deleted space ''{name}''",
           values: { name: space.name },
         })
       );
@@ -55,7 +55,7 @@ export const ConfirmDeleteModal: FunctionComponent<Props> = ({
     } catch (error) {
       services.notifications!.toasts.addDanger({
         title: i18n.translate('xpack.spaces.management.confirmDeleteModal.errorMessage', {
-          defaultMessage: "Could not delete space '{name}'",
+          defaultMessage: "Could not delete space ''{name}''",
           values: { name: space.name },
         }),
         text: (error as any).body?.message || error.message,
@@ -66,7 +66,7 @@ export const ConfirmDeleteModal: FunctionComponent<Props> = ({
   return (
     <EuiConfirmModal
       title={i18n.translate('xpack.spaces.management.confirmDeleteModal.title', {
-        defaultMessage: "Delete space '{name}'?",
+        defaultMessage: "Delete space ''{name}''?",
         values: { name: space.name },
       })}
       onCancel={onCancel}

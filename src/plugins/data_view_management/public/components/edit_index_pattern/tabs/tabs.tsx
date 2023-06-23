@@ -36,7 +36,7 @@ import {
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternManagmentContext } from '../../../types';
+import { IndexPatternManagementContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import {
   TAB_INDEXED_FIELDS,
@@ -158,7 +158,7 @@ export function Tabs({
     http,
     application,
     savedObjectsManagement,
-  } = useKibana<IndexPatternManagmentContext>().services;
+  } = useKibana<IndexPatternManagementContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [syncingStateFunc, setSyncingStateFunc] = useState<{
     getCurrentTab: () => string;

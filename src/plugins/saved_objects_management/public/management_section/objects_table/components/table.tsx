@@ -28,7 +28,7 @@ import {
   CriteriaWithPagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
@@ -153,13 +153,13 @@ export class Table extends PureComponent<TableProps, TableState> {
 
       if (updatedAt.diff(moment(), 'days') > -7) {
         return (
-          <FormattedRelative value={new Date(dateTime).getTime()}>
+          <FormattedRelativeTime value={new Date(dateTime).getTime()}>
             {(formattedDate: string) => (
               <EuiToolTip content={updatedAt.format('LL LT')}>
                 <span>{formattedDate}</span>
               </EuiToolTip>
             )}
-          </FormattedRelative>
+          </FormattedRelativeTime>
         );
       }
       return (

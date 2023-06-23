@@ -11,27 +11,21 @@ exports[`Header should render normally 1`] = `
       class="euiText emotion-euiText-s"
     >
       <p>
-        <span>
-          Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched.
-        </span>
+        Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched.
         <br />
         <span
           color="warning"
           data-euiicon-type="warning"
           style="margin-right: 4px;"
         />
-        <span>
-          Scripted fields are deprecated. Use 
-          <button
-            class="euiLink emotion-euiLink-primary"
-            type="button"
-          >
-            <span>
-              runtime fields
-            </span>
-          </button>
-           instead.
-        </span>
+        Scripted fields are deprecated. Use 
+        <button
+          class="euiLink emotion-euiLink-primary"
+          type="button"
+        >
+          runtime fields
+        </button>
+         instead.
       </p>
     </div>
   </div>

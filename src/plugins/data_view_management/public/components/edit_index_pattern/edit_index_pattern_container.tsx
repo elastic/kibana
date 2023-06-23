@@ -12,12 +12,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { EditIndexPattern } from '.';
-import { IndexPatternManagmentContext } from '../../types';
+import { IndexPatternManagementContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
   const { dataViews, setBreadcrumbs, notifications } =
-    useKibana<IndexPatternManagmentContext>().services;
+    useKibana<IndexPatternManagementContext>().services;
   const [error, setError] = useState<Error | undefined>();
   const [indexPattern, setIndexPattern] = useState<DataView>();
 

@@ -522,7 +522,7 @@ export class SavedMap {
 
     getToasts().addSuccess({
       title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {
-        defaultMessage: `Saved '{title}'`,
+        defaultMessage: `Saved ''{title}''`,
         values: { title: newTitle },
       }),
     });

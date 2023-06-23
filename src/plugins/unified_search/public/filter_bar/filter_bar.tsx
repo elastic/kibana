@@ -7,7 +7,6 @@
  */
 
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import React, { useRef } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -20,7 +19,6 @@ export interface Props {
   onFiltersUpdated?: (filters: Filter[]) => void;
   className?: string;
   indexPatterns: DataView[];
-  intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   hiddenPanelOptions?: FilterItemsProps['hiddenPanelOptions'];
@@ -63,7 +61,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   );
 });
 
-const FilterBar = injectI18n(FilterBarUI);
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default FilterBar;
+export default FilterBarUI;

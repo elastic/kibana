@@ -8,15 +8,12 @@
 
 import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
-import IntlRelativeFormat from 'intl-relativeformat';
+import IntlRelativeFormat from '@formatjs/intl-relativetimeformat';
 
 import { Translation } from '../translation';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
-
-// Add all locale data to `IntlMessageFormat`.
-import './locales';
 
 const EN_LOCALE = 'en';
 const translationsForLocale: Record<string, Translation> = {};
@@ -181,7 +178,7 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
   if (message) {
     try {
       // We should call `format` even for messages without any value references
-      // to let it handle escaped curly braces `\\{` that are the part of the text itself
+      // to let it handle escaped curly braces `'{` that are the part of the text itself
       // and not value reference boundaries.
       const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { IntlShape, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
@@ -19,7 +19,7 @@ import { TruncatedLabel } from './truncated_label';
 interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;
   onChange: (value: string | number | boolean) => void;
-  intl: InjectedIntl;
+  intl: IntlShape;
   fullWidth?: boolean;
   compressed?: boolean;
   disabled?: boolean;

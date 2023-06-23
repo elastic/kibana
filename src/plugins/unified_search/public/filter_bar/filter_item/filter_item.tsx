@@ -16,7 +16,7 @@ import {
   euiShadowMedium,
   useEuiTheme,
 } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n-react';
+import { useI18n } from '@kbn/i18n-react';
 import {
   Filter,
   isFilterPinned,
@@ -52,7 +52,6 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   className?: string;
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
-  intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart;
   hiddenPanelOptions?: FilterPanelOption[];
@@ -81,6 +80,7 @@ export type FilterLabelStatus =
 export const FILTER_EDITOR_WIDTH = 960;
 
 function FilterItemComponent(props: FilterItemProps) {
+  const intl = useI18n();
   const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -192,11 +192,11 @@ function FilterItemComponent(props: FilterItemProps) {
     let mainPanelItems = [
       {
         name: isFilterPinned(filter)
-          ? props.intl.formatMessage({
+          ? intl.formatMessage({
               id: 'unifiedSearch.filter.filterBar.unpinFilterButtonLabel',
               defaultMessage: 'Unpin',
             })
-          : props.intl.formatMessage({
+          : intl.formatMessage({
               id: 'unifiedSearch.filter.filterBar.pinFilterButtonLabel',
               defaultMessage: 'Pin across all apps',
             }),
@@ -208,7 +208,7 @@ function FilterItemComponent(props: FilterItemProps) {
         'data-test-subj': 'pinFilter',
       },
       {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
           id: 'unifiedSearch.filter.filterBar.editFilterButtonLabel',
           defaultMessage: 'Edit filter',
         }),
@@ -220,11 +220,11 @@ function FilterItemComponent(props: FilterItemProps) {
       },
       {
         name: negate
-          ? props.intl.formatMessage({
+          ? intl.formatMessage({
               id: 'unifiedSearch.filter.filterBar.includeFilterButtonLabel',
               defaultMessage: 'Include results',
             })
-          : props.intl.formatMessage({
+          : intl.formatMessage({
               id: 'unifiedSearch.filter.filterBar.excludeFilterButtonLabel',
               defaultMessage: 'Exclude results',
             }),
@@ -237,11 +237,11 @@ function FilterItemComponent(props: FilterItemProps) {
       },
       {
         name: disabled
-          ? props.intl.formatMessage({
+          ? intl.formatMessage({
               id: 'unifiedSearch.filter.filterBar.enableFilterButtonLabel',
               defaultMessage: 'Re-enable',
             })
-          : props.intl.formatMessage({
+          : intl.formatMessage({
               id: 'unifiedSearch.filter.filterBar.disableFilterButtonLabel',
               defaultMessage: 'Temporarily disable',
             }),
@@ -253,7 +253,7 @@ function FilterItemComponent(props: FilterItemProps) {
         'data-test-subj': 'disableFilter',
       },
       {
-        name: props.intl.formatMessage({
+        name: intl.formatMessage({
           id: 'unifiedSearch.filter.filterBar.deleteFilterButtonLabel',
           defaultMessage: 'Delete',
         }),
@@ -314,7 +314,7 @@ function FilterItemComponent(props: FilterItemProps) {
         label.title = getDisplayValueFromFilter(filter, indexPatterns);
       } catch (e) {
         label.status = FILTER_ITEM_WARNING;
-        label.title = props.intl.formatMessage({
+        label.title = intl.formatMessage({
           id: 'unifiedSearch.filter.filterBar.labelWarningText',
           defaultMessage: `Warning`,
         });
@@ -322,11 +322,11 @@ function FilterItemComponent(props: FilterItemProps) {
       }
     } else {
       label.status = FILTER_ITEM_WARNING;
-      label.title = props.intl.formatMessage({
+      label.title = intl.formatMessage({
         id: 'unifiedSearch.filter.filterBar.labelWarningText',
         defaultMessage: `Warning`,
       });
-      label.message = props.intl.formatMessage(
+      label.message = intl.formatMessage(
         {
           id: 'unifiedSearch.filter.filterBar.labelWarningInfo',
           defaultMessage: 'Field {fieldName} does not exist in current view',

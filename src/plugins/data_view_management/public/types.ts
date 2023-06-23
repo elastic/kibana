@@ -29,7 +29,7 @@ import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { IndexPatternManagementStart } from '.';
 
-export interface IndexPatternManagmentContext {
+export interface IndexPatternManagementContext {
   application: ApplicationStart;
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
@@ -52,5 +52,5 @@ export interface IndexPatternManagmentContext {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
-export type IndexPatternManagmentContextValue =
-  KibanaReactContextValue<IndexPatternManagmentContext>;
+export type IndexPatternManagementContextValue =
+  KibanaReactContextValue<IndexPatternManagementContext>;

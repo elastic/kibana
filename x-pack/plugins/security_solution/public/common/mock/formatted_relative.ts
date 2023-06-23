@@ -11,10 +11,10 @@ export {};
 
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
-  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
+  const FormattedRelativeTime = jest.fn().mockImplementation(() => '20 hours ago');
 
   return {
     ...originalModule,
-    FormattedRelative,
+    FormattedRelativeTime,
   };
 });

@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 
 import { ExtractionRule } from '../../../../../../../../common/types/extraction_rules';
 import { CANCEL_BUTTON_LABEL } from '../../../../../../shared/constants';
@@ -135,7 +135,7 @@ export const ExtractionRulesTable: React.FC = () => {
       name: i18n.translate('xpack.enterpriseSearch.crawler.extractionRulesTable.lastUpdatedLabel', {
         defaultMessage: 'Last updated',
       }),
-      render: (lastUpdated: string) => <FormattedRelative value={lastUpdated} />,
+      render: (lastUpdated: string) => <FormattedRelativeTime value={lastUpdated} />,
       textOnly: true,
     },
     {

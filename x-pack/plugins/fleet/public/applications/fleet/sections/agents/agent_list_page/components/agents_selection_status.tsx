@@ -82,13 +82,20 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
             </FlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.fleet.agentBulkActions.agentsSelected"
-                  defaultMessage="{count, plural, one {# agent} other {# agents} =all {All agents}} selected"
-                  values={{
-                    count: selectionMode === 'manual' ? selectedAgents.length : 'all',
-                  }}
-                />
+                {selectionMode === 'manual' ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentBulkActions.agentsSelected"
+                    defaultMessage="{count, plural, one {# agent} other {# agents}} selected"
+                    values={{
+                      count: selectedAgents.length,
+                    }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentBulkActions.allAgentsSelected"
+                    defaultMessage="All agents selected"
+                  />
+                )}
               </EuiText>
             </EuiFlexItem>
             {showSelectEverything ? (

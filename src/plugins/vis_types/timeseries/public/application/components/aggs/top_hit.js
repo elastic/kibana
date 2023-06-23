@@ -24,7 +24,7 @@ import {
   EuiFormRow,
   EuiFieldNumber,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { PANEL_TYPES } from '../../../../common/enums';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
@@ -276,4 +276,4 @@ const TopHitAggUi = (props) => {
   );
 };
 
-export const TopHitAgg = injectI18n(TopHitAggUi);
+export const TopHitAgg = React.memo(TopHitAggUi);

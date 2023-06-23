@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
+import { FormattedRelativeTime, I18nProvider } from '@kbn/i18n-react';
 import React, { PropsWithChildren, useCallback, useState } from 'react';
 
 import {
@@ -222,7 +222,7 @@ export const DashboardListing = ({
                 ui: savedObjectsTagging,
               } as TableListViewKibanaDependencies['savedObjectsTagging'])
             : undefined,
-          FormattedRelative,
+          FormattedRelativeTime,
         }}
       >
         <TableListView<DashboardSavedObjectUserContent>

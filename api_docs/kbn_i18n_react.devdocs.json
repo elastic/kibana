@@ -106,7 +106,7 @@
         "label": "FormattedRelative",
         "description": [],
         "signature": [
-          "ReactIntl.FormattedRelative extends React.Component<ReactIntl.FormattedRelative.Props, {}, any>"
+          "ReactIntl.FormattedRelativeTime extends React.Component<ReactIntl.FormattedRelative.Props, {}, any>"
         ],
         "path": "node_modules/@types/react-intl/index.d.ts",
         "deprecated": false,

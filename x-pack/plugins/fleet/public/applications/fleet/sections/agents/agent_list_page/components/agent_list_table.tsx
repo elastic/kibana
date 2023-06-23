@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../services';
@@ -268,7 +268,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       }),
       width: '180px',
       render: (lastCheckin: string, agent: any) =>
-        lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
+        lastCheckin ? <FormattedRelativeTime value={lastCheckin} /> : null,
     },
     {
       field: VERSION_FIELD,

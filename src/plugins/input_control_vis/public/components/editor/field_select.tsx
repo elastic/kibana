@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage, IntlShape } from '@kbn/i18n-react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -20,14 +20,15 @@ interface FieldSelectUiState {
   indexPatternId: string;
 }
 
-export type FieldSelectUiProps = InjectedIntlProps & {
+export interface FieldSelectUiProps {
   getIndexPattern: (indexPatternId: string) => Promise<DataView>;
   indexPatternId: string;
   onChange: (value: any) => void;
   fieldName?: string;
   filterField?: (field: DataViewField) => boolean;
   controlIndex: number;
-};
+  intl: IntlShape;
+}
 
 class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
   private hasUnmounted: boolean;

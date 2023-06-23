@@ -49,7 +49,7 @@ export function SelectAnomalySeverity({ onChange, value }: Props) {
               <p data-test-subj="SelectAnomalySeverity option text">
                 <FormattedMessage
                   id="xpack.apm.alerts.anomalySeverity.scoreDetailsDescription"
-                  defaultMessage="score {value} {value, select, critical {} other {and above}}"
+                  defaultMessage="score {value} '{value, select, critical {} other {and above}}'"
                   values={{ value: option.type }}
                 />
               </p>

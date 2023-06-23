@@ -18,7 +18,7 @@ export function displayDuplicateTitleConfirmModal(
   const confirmMessage = i18n.translate(
     'xpack.lens.confirmModal.saveDuplicateConfirmationMessage',
     {
-      defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
+      defaultMessage: `A {name} with the title ''{title}'' already exists. Would you like to save anyway?`,
       values: { title, name: displayName },
     }
   );

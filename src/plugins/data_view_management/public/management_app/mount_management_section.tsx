@@ -24,7 +24,7 @@ import {
   CreateEditFieldContainer,
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
-import { IndexPatternManagmentContext } from '../types';
+import { IndexPatternManagementContext } from '../types';
 
 const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
@@ -60,7 +60,7 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
-  const deps: IndexPatternManagmentContext = {
+  const deps: IndexPatternManagementContext = {
     application,
     chrome,
     uiSettings,

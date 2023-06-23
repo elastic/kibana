@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion } from '../../../../../hooks';
@@ -136,7 +136,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Last activity',
               }),
               description: agent.last_checkin ? (
-                <FormattedRelative value={new Date(agent.last_checkin)} />
+                <FormattedRelativeTime value={new Date(agent.last_checkin)} />
               ) : (
                 '-'
               ),

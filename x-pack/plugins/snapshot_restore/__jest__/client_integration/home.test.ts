@@ -247,7 +247,7 @@ describe('<SnapshotRestoreHome />', () => {
           expect(
             document.body.querySelector('[data-test-subj="deleteRepositoryConfirmation"]')!
               .textContent
-          ).toContain(`Remove repository '${repo1.name}'?`);
+          ).toContain(`Remove repository ''${repo1.name}''?`);
         });
 
         test('should send the correct HTTP request to delete repository', async () => {

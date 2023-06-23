@@ -11,13 +11,13 @@ exports[`Advanced Settings: Voice Announcement should render announcement 1`] = 
       delay={500}
     >
       <FormattedMessage
-        defaultMessage="You searched for {query}. There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
+        defaultMessage="You searched for {query}. There {optionLength, plural, one {is # option} other {are # options}} in {sectionLength, plural, one {# section} other {# sections}}"
         id="advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
         values={
           Object {
-            "optionLenght": 1,
+            "optionLength": 1,
             "query": "dark theme",
-            "sectionLenght": 1,
+            "sectionLength": 1,
           }
         }
       />
@@ -37,12 +37,12 @@ exports[`Advanced Settings: Voice Announcement should render nothing 1`] = `
       delay={500}
     >
       <FormattedMessage
-        defaultMessage="There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
+        defaultMessage="There {optionLength, plural, one {is # option} other {are # options}} in {sectionLength, plural, one {# section} other {# sections}}"
         id="advancedSettings.voiceAnnouncement.noSearchResultScreenReaderMessage"
         values={
           Object {
-            "optionLenght": 1,
-            "sectionLenght": 1,
+            "optionLength": 1,
+            "sectionLength": 1,
           }
         }
       />

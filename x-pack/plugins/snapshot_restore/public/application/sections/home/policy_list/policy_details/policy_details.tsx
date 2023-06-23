@@ -332,7 +332,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
               >
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyDetails.inProgressSnapshotLinkText"
-                  defaultMessage="'{snapshotName}' in progress"
+                  defaultMessage="''{snapshotName}'' in progress"
                   values={{ snapshotName: policyDetails.policy.inProgress.snapshotName }}
                 />
               </EuiLink>

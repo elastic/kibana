@@ -22,30 +22,30 @@ exports[`I18n engine translate should throw error if translation message and def
 
 exports[`I18n engine translate should throw error if used format is not specified 1`] = `
 "[I18n] Error formatting message: \\"a.b.c\\" for locale: \\"en\\".
-SyntaxError: Expected \\"date\\", \\"number\\", \\"plural\\", \\"select\\", \\"selectordinal\\" or \\"time\\" but \\"f\\" found."
+SyntaxError: Expected \\"date\\", \\"number\\", \\"plural\\", \\"select\\", \\"selectordinal\\", or \\"time\\" but \\"f\\" found."
 `;
 
 exports[`I18n engine translate should throw error if used format is not specified 2`] = `
 "[I18n] Error formatting the default message for: \\"d.e.f\\".
-SyntaxError: Expected \\"date\\", \\"number\\", \\"plural\\", \\"select\\", \\"selectordinal\\" or \\"time\\" but \\"b\\" found."
+SyntaxError: Expected \\"date\\", \\"number\\", \\"plural\\", \\"select\\", \\"selectordinal\\", or \\"time\\" but \\"b\\" found."
 `;
 
 exports[`I18n engine translate should throw error if wrong context is provided to the translation string 1`] = `
 "[I18n] Error formatting message: \\"a.b.c\\" for locale: \\"en\\".
-Error: The intl string context variable 'numPhotos' was not provided to the string 'You have {numPhotos, plural,
+Error: The intl string context variable \\"numPhotos\\" was not provided to the string \\"You have {numPhotos, plural,
                       =0 {no photos.}
                       =1 {one photo.}
                       other {# photos.}
-                   }'"
+                   }\\""
 `;
 
 exports[`I18n engine translate should throw error if wrong context is provided to the translation string 2`] = `
 "[I18n] Error formatting the default message for: \\"d.e.f\\".
-Error: The intl string context variable 'numPhotos' was not provided to the string 'You have {numPhotos, plural,
+Error: The intl string context variable \\"numPhotos\\" was not provided to the string \\"You have {numPhotos, plural,
                              =0 {no photos.}
                              =1 {one photo.}
                              other {# photos.}
-                          }'"
+                          }\\""
 `;
 
 exports[`I18n engine translateUsingPseudoLocale should translate message using pseudo-locale 1`] = `"Ṁéšššàĝĝé ŵîîţĥ àà [ɱàŕŕķðôôŵñ ļļîñķķ](http://localhost:5601/url) àñðð àñ <strong>ĥĥţɱļļ éļééɱéññţ</strong>"`;

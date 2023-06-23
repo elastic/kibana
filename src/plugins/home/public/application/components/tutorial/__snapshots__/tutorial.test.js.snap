@@ -5,7 +5,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
   template="empty"
 >
   <div>
-    <InjectIntl(IntroductionUI)
+    <injectIntl(IntroductionUI)
       basePath={
         Object {
           "prepend": [Function],
@@ -16,7 +16,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
       title="jest test tutorial"
     />
     <EuiSpacer />
-    <InjectIntl(InstructionSetUi)
+    <injectIntl(InstructionSetUi)
       instructionVariants={
         Array [
           Object {
@@ -47,7 +47,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
   template="empty"
 >
   <div>
-    <InjectIntl(IntroductionUI)
+    <injectIntl(IntroductionUI)
       basePath={
         Object {
           "prepend": [Function],
@@ -90,7 +90,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
       />
     </EuiFormRow>
     <EuiSpacer />
-    <InjectIntl(InstructionSetUi)
+    <injectIntl(InstructionSetUi)
       instructionVariants={
         Array [
           Object {
@@ -121,7 +121,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
   template="empty"
 >
   <div>
-    <InjectIntl(IntroductionUI)
+    <injectIntl(IntroductionUI)
       basePath={
         Object {
           "prepend": [Function],
@@ -133,7 +133,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
       title="jest test tutorial"
     />
     <EuiSpacer />
-    <InjectIntl(InstructionSetUi)
+    <injectIntl(InstructionSetUi)
       instructionVariants={
         Array [
           Object {

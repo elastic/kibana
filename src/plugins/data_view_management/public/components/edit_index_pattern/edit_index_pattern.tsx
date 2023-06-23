@@ -28,7 +28,7 @@ import {
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
-import { IndexPatternManagmentContext } from '../../types';
+import { IndexPatternManagementContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
@@ -68,7 +68,7 @@ const getCompositeRuntimeFields = (dataView: DataView) =>
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
     const { uiSettings, overlays, chrome, dataViews, IndexPatternEditor, savedObjectsManagement } =
-      useKibana<IndexPatternManagmentContext>().services;
+      useKibana<IndexPatternManagementContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [compositeRuntimeFields, setCompositeRuntimeFields] = useState<
       Record<string, RuntimeField>

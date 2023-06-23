@@ -46,7 +46,7 @@ export function ServiceField({
         customOptionText={i18n.translate(
           'xpack.apm.serviceNamesSelectCustomOptionText',
           {
-            defaultMessage: 'Add \\{searchValue\\} as a new service name',
+            defaultMessage: `Add '{searchValue}' as a new service name`,
           }
         )}
         defaultValue={currentValue}
@@ -83,7 +83,7 @@ export function EnvironmentField({
         customOptionText={i18n.translate(
           'xpack.apm.environmentsSelectCustomOptionText',
           {
-            defaultMessage: 'Add \\{searchValue\\} as a new environment',
+            defaultMessage: `Add '{searchValue}' as a new environment`,
           }
         )}
         defaultValue={getEnvironmentLabel(currentValue)}
@@ -120,7 +120,7 @@ export function TransactionNameField({
         customOptionText={i18n.translate(
           'xpack.apm.alerting.transaction.name.custom.text',
           {
-            defaultMessage: 'Add \\{searchValue\\} as a new transaction name',
+            defaultMessage: `Add '{searchValue}' as a new transaction name`,
           }
         )}
         defaultValue={currentValue}
@@ -159,7 +159,7 @@ export function TransactionTypeField({
         customOptionText={i18n.translate(
           'xpack.apm.transactionTypesSelectCustomOptionText',
           {
-            defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
+            defaultMessage: `Add '{searchValue}' as a new transaction type`,
           }
         )}
         defaultValue={currentValue}
@@ -198,7 +198,7 @@ export function ErrorGroupingKeyField({
         customOptionText={i18n.translate(
           'xpack.apm.errorKeySelectCustomOptionText',
           {
-            defaultMessage: 'Add \\{searchValue\\} as a new error grouping key',
+            defaultMessage: `Add '{searchValue}' as a new error grouping key`,
           }
         )}
         defaultValue={currentValue}

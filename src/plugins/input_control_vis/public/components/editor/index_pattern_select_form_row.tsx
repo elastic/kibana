@@ -7,16 +7,17 @@
  */
 
 import React, { ComponentType } from 'react';
-import { injectI18n, InjectedIntlProps } from '@kbn/i18n-react';
+import { injectI18n, IntlShape } from '@kbn/i18n-react';
 import { EuiFormRow } from '@elastic/eui';
 import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
 
-export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
+export interface IndexPatternSelectFormRowUiProps {
   onChange: (opt: any) => void;
   indexPatternId: string;
   controlIndex: number;
   IndexPatternSelect: ComponentType<IndexPatternSelectProps>;
-};
+  intl: IntlShape;
+}
 
 function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
   const { controlIndex, indexPatternId, intl, onChange } = props;

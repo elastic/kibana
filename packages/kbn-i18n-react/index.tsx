@@ -7,13 +7,15 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/module_migration
-export type { InjectedIntl, InjectedIntlProps } from 'react-intl';
+export type { IntlShape } from 'react-intl';
 
 export {
-  intlShape,
+  useIntl as useI18n,
+  createIntl,
+  createIntlCache,
   FormattedDate,
   FormattedTime,
-  FormattedRelative,
+  FormattedRelativeTime,
   FormattedNumber,
   FormattedPlural,
   FormattedMessage,

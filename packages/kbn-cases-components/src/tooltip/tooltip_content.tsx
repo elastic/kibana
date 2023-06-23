@@ -7,7 +7,7 @@
  */
 
 import React, { memo } from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
 
 import { Status } from '../status/status';
@@ -47,7 +47,7 @@ const CaseTooltipContentComponent = React.memo<CaseTooltipContentProps>(
       <EuiHorizontalRule margin="xs" />
       <EuiText size="relative">
         {status === CaseStatuses.closed ? i18n.CLOSED : i18n.OPENED}{' '}
-        <FormattedRelative value={createdAt} />{' '}
+        <FormattedRelativeTime value={createdAt} />{' '}
         {createdBy.username || createdBy.fullName ? (
           <>
             {i18n.BY}{' '}

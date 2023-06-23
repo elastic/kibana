@@ -7,7 +7,7 @@
  */
 
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { IntlShape, injectI18n } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
@@ -19,7 +19,7 @@ interface Props {
   onChange: (value: string | number | boolean) => void;
   onBlur?: (value: string | number | boolean) => void;
   placeholder: string;
-  intl: InjectedIntl;
+  intl: IntlShape;
   controlOnly?: boolean;
   className?: string;
   fullWidth?: boolean;

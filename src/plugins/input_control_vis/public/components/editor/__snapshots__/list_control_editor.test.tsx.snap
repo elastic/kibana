@@ -2,13 +2,13 @@
 
 exports[`renders dynamic options should display disabled dynamic options with tooltip for non-string fields 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     controlIndex={0}
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="numberField"
     filterField={[Function]}
@@ -110,13 +110,13 @@ exports[`renders dynamic options should display disabled dynamic options with to
 
 exports[`renders dynamic options should display dynamic options for string fields 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     controlIndex={0}
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="keywordField"
     filterField={[Function]}
@@ -188,13 +188,13 @@ exports[`renders dynamic options should display dynamic options for string field
 
 exports[`renders dynamic options should display size field when dynamic options is disabled 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     controlIndex={0}
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="keywordField"
     filterField={[Function]}
@@ -296,13 +296,13 @@ exports[`renders dynamic options should display size field when dynamic options 
 
 exports[`renders should display chaining input when parents are provided 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     controlIndex={0}
     indexPatternId="indexPattern1"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="keywordField"
     filterField={[Function]}
@@ -448,13 +448,13 @@ exports[`renders should display chaining input when parents are provided 1`] = `
 
 exports[`renders should not display any options until field is selected 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     controlIndex={0}
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName=""
     filterField={[Function]}

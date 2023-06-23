@@ -7,7 +7,8 @@
 
 import moment from 'moment-timezone';
 import React from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
+import { selectUnit } from '@formatjs/intl-utils';
 
 import { useDateFormat, useTimeZone, useUiSetting$ } from '../../lib/kibana';
 import { getOrEmptyTagFromValue } from '../empty_value';
@@ -167,7 +168,7 @@ export const FormattedRelativePreferenceDate = React.memo<FormattedRelativePrefe
             dateFormat={dateFormat}
           />
         ) : (
-          <FormattedRelative data-test-subj="relative-time" value={date} />
+          <FormattedRelativeTime data-test-subj="relative-time" {...selectUnit(date)} />
         )}
       </LocalizedDateTooltip>
     );
