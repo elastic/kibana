@@ -23,10 +23,7 @@ export const useDeleteFileAttachment = () => {
   const refreshAttachmentsTable = useRefreshCaseViewPage();
 
   return useMutation(
-    ({ caseId, fileId }: MutationArgs) => {
-      const abortCtrlRef = new AbortController();
-      return deleteFileAttachments({ caseId, fileIds: [fileId], signal: abortCtrlRef.signal });
-    },
+    ({ caseId, fileId }: MutationArgs) => deleteFileAttachments({ caseId, fileIds: [fileId] }),
     {
       mutationKey: casesMutationsKeys.deleteFileAttachment,
       onSuccess: () => {

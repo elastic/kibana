@@ -144,12 +144,14 @@ describe('MonitorTags component', () => {
 
   it('render against summary', () => {
     const component = shallowWithRouter(<MonitorTags summary={summaryPing} />);
-    expect(component).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(component.dive()).toMatchSnapshot();
   });
 
   it('renders against ping', () => {
     const component = shallowWithRouter(<MonitorTags ping={summaryPing.state.summaryPings[0]} />);
-    expect(component).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(component.dive()).toMatchSnapshot();
   });
 
   it('it shows expand tag on too many tags', () => {

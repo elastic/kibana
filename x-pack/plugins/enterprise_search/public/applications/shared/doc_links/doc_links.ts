@@ -122,6 +122,7 @@ class DocLinks {
   public supportedNlpModels: string;
   public syncRules: string;
   public trainedModels: string;
+  public textEmbedding: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
@@ -273,6 +274,7 @@ class DocLinks {
     this.supportedNlpModels = '';
     this.syncRules = '';
     this.trainedModels = '';
+    this.textEmbedding = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
@@ -426,6 +428,7 @@ class DocLinks {
     this.supportedNlpModels = docLinks.links.enterpriseSearch.supportedNlpModels;
     this.syncRules = docLinks.links.enterpriseSearch.syncRules;
     this.trainedModels = docLinks.links.enterpriseSearch.trainedModels;
+    this.textEmbedding = docLinks.links.enterpriseSearch.textEmbedding;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
