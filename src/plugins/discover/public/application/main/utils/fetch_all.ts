@@ -8,6 +8,7 @@
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
@@ -80,10 +81,19 @@ export function fetchAll(
       useSql && query
         ? fetchSql(query, dataView, data, services.expressions, inspectorAdapters)
         : fetchDocuments(searchSource, fetchDeps);
-
+    const fetchType = useSql && query ? 'fetchSql' : 'fetchDocuments';
+    const startTime = window.performance.now();
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records, textBasedQueryColumns }) => {
+        if (services.analytics) {
+          const duration = window.performance.now() - startTime;
+          reportPerformanceMetricEvent(services.analytics, {
+            eventName: 'discoverFetchAllRequestsOnly',
+            duration,
+            meta: { fetchType },
+          });
+        }
         // If the total hits (or chart) query is still loading, emit a partial
         // hit count that's at least our retrieved document count
         if (dataSubjects.totalHits$.getValue().fetchStatus === FetchStatus.LOADING) {
