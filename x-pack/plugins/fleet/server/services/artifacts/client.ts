@@ -113,8 +113,8 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     }
   }
 
-  async bulkDeleteArtifacts(ids: string[], packageName: string) {
-    return await bulkDeleteArtifacts(this.esClient, ids, packageName);
+  async bulkDeleteArtifacts(ids: string[]) {
+    return await bulkDeleteArtifacts(this.esClient, ids, this.packageName);
   }
 
   /**

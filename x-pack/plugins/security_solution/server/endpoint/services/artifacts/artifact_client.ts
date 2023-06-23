@@ -100,6 +100,6 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
   }
 
   async bulkDeleteArtifacts(ids: string[]): Promise<void> {
-    await this.fleetArtifacts.bulkDeleteArtifacts(ids, 'endpoint');
+    await this.fleetArtifacts.bulkDeleteArtifacts(ids);
   }
 }

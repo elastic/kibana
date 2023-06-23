@@ -86,7 +86,7 @@ export interface ArtifactsClientInterface {
 
   deleteArtifact(id: string): Promise<void>;
 
-  bulkDeleteArtifacts(ids: string[], packageName: string): Promise<void>;
+  bulkDeleteArtifacts(ids: string[]): Promise<void>;
 
   listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 
