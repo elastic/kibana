@@ -78,6 +78,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const filterChangedSubscription = useRef<Subscription>();
   const inputChangedSubscription = useRef<Subscription>();
+  const controlGroupOutputSubscription = useRef<Subscription>();
 
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
@@ -203,8 +204,10 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const handleOutputFilterUpdates = useCallback(
-    ({ filters: newFilters }: ControlGroupOutput) => {
+    ({ filters: newFilters, embeddableLoaded }: ControlGroupOutput) => {
+      const haveAllEmbeddablesLoaded = Object.values(embeddableLoaded).every(Boolean);
       if (isEqual(currentFiltersRef.current, newFilters)) return;
+      if (!haveAllEmbeddablesLoaded) return;
       if (onFilterChange) onFilterChange(newFilters ?? []);
       currentFiltersRef.current = newFilters ?? [];
     },
@@ -374,38 +377,43 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const upsertPersistableControls = useCallback(async () => {
     const persistableControls = initialControls.filter((control) => control.persist === true);
+    const persistableFieldNames = persistableControls.map((p) => p.fieldName);
     if (persistableControls.length > 0) {
       const currentPanels = Object.values(controlGroup?.getInput().panels ?? []) as Array<
         ControlPanelState<OptionsListEmbeddableInput>
       >;
       const orderedPanels = currentPanels.sort((a, b) => a.order - b.order);
       let filterControlsDeleted = false;
-      for (const control of persistableControls) {
-        const controlExists = currentPanels.some(
-          (currControl) => control.fieldName === currControl.explicitInput.fieldName
+      for (const persistableControl of persistableControls) {
+        const persistableControlInExistingPanels = currentPanels.find(
+          (currControl) => persistableControl.fieldName === currControl.explicitInput.fieldName
         );
-        if (!controlExists) {
-          // delete current controls
-          if (!filterControlsDeleted) {
-            controlGroup?.updateInput({ panels: {} });
-            filterControlsDeleted = true;
-          }
-
-          // add persitable controls
-          await controlGroup?.addOptionsListControl({
-            title: control.title,
-            ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-            // option List controls will handle an invalid dataview
-            // & display an appropriate message
-            dataViewId: dataViewId ?? '',
-            selectedOptions: control.selectedOptions,
-            ...control,
-          });
+        // delete current controls
+        if (!filterControlsDeleted) {
+          controlGroup?.updateInput({ panels: {}, filters: [] });
+          filterControlsDeleted = true;
         }
+
+        // add persitable controls
+        await controlGroup?.addOptionsListControl({
+          title: persistableControl.title,
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+          // option List controls will handle an invalid dataview
+          // & display an appropriate message
+          dataViewId: dataViewId ?? '',
+          selectedOptions: persistableControl.selectedOptions,
+          ...persistableControl,
+          // restore actual values
+          ...persistableControlInExistingPanels?.explicitInput,
+        });
       }
 
       for (const panel of orderedPanels) {
-        if (panel.explicitInput.fieldName)
+        // add rest of the ordered panels
+        if (
+          panel.explicitInput.fieldName &&
+          !persistableFieldNames.includes(panel.explicitInput.fieldName)
+        )
           await controlGroup?.addOptionsListControl({
             selectedOptions: [],
             fieldName: panel.explicitInput.fieldName,

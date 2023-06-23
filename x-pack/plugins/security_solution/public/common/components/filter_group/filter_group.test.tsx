@@ -329,7 +329,7 @@ describe(' Filter Group Component ', () => {
         // edit model gone
         expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0);
 
-        // check if upsert was called correctely
+        // check if upsert was called correctly
         expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(1);
         expect(controlGroupMock.addOptionsListControl.mock.calls[0][0]).toMatchObject({
           ...initialInputData.panels['0'].explicitInput,

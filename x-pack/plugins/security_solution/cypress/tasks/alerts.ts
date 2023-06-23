@@ -405,9 +405,10 @@ export const waitForPageFilters = () => {
 };
 
 export const resetFilters = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
-  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
+  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).trigger('click');
+  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).trigger('click');
   waitForPageFilters();
+  cy.log('Resetting filters complete');
 };
 
 export const parseAlertsCountToInt = (count: string | number) =>

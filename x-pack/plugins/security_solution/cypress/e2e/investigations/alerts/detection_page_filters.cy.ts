@@ -83,7 +83,14 @@ const customFilters = [
     title: 'Rule Name',
   },
 ];
-const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_PAGE_FILTERS) => {
+const assertFilterControlsWithFilterObject = (
+  filterObject: Array<{
+    fieldName: string;
+    title: string;
+    selectedOptions?: string[];
+    [k: string]: unknown;
+  }> = DEFAULT_DETECTION_PAGE_FILTERS
+) => {
   cy.get(CONTROL_FRAMES).should((sub) => {
     expect(sub.length).eq(filterObject.length);
   });
@@ -96,18 +103,16 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
 
   filterObject.forEach((filter, idx) => {
     cy.get(OPTION_LIST_VALUES(idx)).should((sub) => {
-      expect(sub.text().replace(',', '')).satisfy((txt: string) => {
-        return txt.startsWith(
-          filter.selectedOptions && filter.selectedOptions.length > 0
-            ? filter.selectedOptions.join('')
-            : ''
-        );
-      });
+      const selectedOptionsText =
+        filter.selectedOptions && filter.selectedOptions.length > 0
+          ? filter.selectedOptions.join('')
+          : '';
+      expect(sub.text().replace(',', '').replace(' ', '')).to.have.string(selectedOptionsText);
     });
   });
 };
 
-describe('Detections : Page Filters', () => {
+describe(`Detections : Page Filters`, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
@@ -181,10 +186,11 @@ describe('Detections : Page Filters', () => {
   it('Page filters are loaded with custom values provided in the URL', () => {
     const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.filter((item) => item.persist).map(
       (filter) => {
-        if (filter.title === 'Status') {
-          filter.selectedOptions = ['open', 'acknowledged'];
-        }
-        return filter;
+        return {
+          ...filter,
+          selectedOptions:
+            filter.title === 'Status' ? ['open', 'acknowledged'] : filter.selectedOptions,
+        };
       }
     );
 
@@ -260,10 +266,10 @@ describe('Detections : Page Filters', () => {
   it(`URL is updated when filters are updated`, () => {
     cy.on('url:changed', (urlString) => {
       const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
-        if (filter.title === 'Severity') {
-          filter.selectedOptions = ['high'];
-        }
-        return filter;
+        return {
+          ...filter,
+          selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
+        };
       });
       const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));
       expect(urlString).to.contain.text(expectedVal);
