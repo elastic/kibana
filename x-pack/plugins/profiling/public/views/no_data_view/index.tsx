@@ -41,9 +41,9 @@ export function NoDataView({ subTitle }: { subTitle: string }) {
     [setupDataCollectionInstructions]
   );
 
-  const secretToken = data?.variables.collector.secretToken;
-  const collectionAgentHost = data?.variables.collector.host.replace('https://', '');
-  const symbolUrl = data?.variables.symbolizer.host.replace('https://', '');
+  const secretToken = data?.collector?.secretToken;
+  const collectionAgentHost = data?.collector?.host;
+  const symbolUrl = data?.symbolizer?.host;
   const hostAgentVersion = 'v3';
 
   const tabs = [
@@ -309,7 +309,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
               iconType="gear"
               fill
               href={`${core.http.basePath.prepend(
-                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview'
+                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview?prerelease=true'
               )}`}
             >
               {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {

@@ -761,6 +761,22 @@
             "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ExplainLogRateSpikesAppStateProps.stickyHistogram",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stickyHistogram",
+            "description": [
+              "Option to make main histogram sticky"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -14,7 +14,7 @@ import {
 } from './translations';
 
 /**
- * Base System Prompts for Elastic Assistant (if not overridden on initialization).
+ * Base System Prompts for Elastic AI Assistant (if not overridden on initialization).
  */
 export const BASE_SYSTEM_PROMPTS: Prompt[] = [
   {

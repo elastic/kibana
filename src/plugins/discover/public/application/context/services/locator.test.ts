@@ -113,4 +113,16 @@ describe('Discover context url generator', () => {
       `"#/context/c367b774-a4c2-11ea-bb37-0242ac130002/mock-row-id?_g=h@3a04046&_a=h@9ad8c77"`
     );
   });
+
+  it('should encode rowId', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      index: dataViewId,
+      rowId: 'id with special characters: /&?#+=',
+      referrer: 'mock-referrer',
+    });
+    expect(path).toMatchInlineSnapshot(
+      `"#/context/c367b774-a4c2-11ea-bb37-0242ac130002/id%20with%20special%20characters%3A%20%2F%26%3F%23%2B%3D"`
+    );
+  });
 });

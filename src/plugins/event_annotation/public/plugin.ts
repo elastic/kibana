@@ -12,6 +12,10 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
@@ -27,6 +31,7 @@ import {
 import { getFetchEventAnnotations } from './fetch_event_annotations';
 import type { EventAnnotationListingPageServices } from './get_table_list';
 import { ANNOTATIONS_LISTING_VIEW_ID } from '../common/constants';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface EventAnnotationStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
@@ -35,11 +40,13 @@ export interface EventAnnotationStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 interface SetupDependencies {
   expressions: ExpressionsSetup;
   visualizations: VisualizationsSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 /** @public */
@@ -62,6 +69,16 @@ export class EventAnnotationPlugin
       getFetchEventAnnotations({ getStartServices: core.getStartServices })
     );
 
+    dependencies.contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: i18n.translate('eventAnnotation.content.name', {
+        defaultMessage: 'Annotation group',
+      }),
+    });
+
     dependencies.visualizations.listingViewRegistry.add({
       title: i18n.translate('eventAnnotation.listingViewTitle', {
         defaultMessage: 'Annotation groups',
@@ -72,6 +89,7 @@ export class EventAnnotationPlugin
 
         const eventAnnotationService = await new EventAnnotationService(
           coreStart,
+          pluginsStart.contentManagement,
           pluginsStart.savedObjectsManagement
         ).getService();
 
@@ -107,6 +125,10 @@ export class EventAnnotationPlugin
     core: CoreStart,
     startDependencies: EventAnnotationStartDependencies
   ): EventAnnotationService {
-    return new EventAnnotationService(core, startDependencies.savedObjectsManagement);
+    return new EventAnnotationService(
+      core,
+      startDependencies.contentManagement,
+      startDependencies.savedObjectsManagement
+    );
   }
 }

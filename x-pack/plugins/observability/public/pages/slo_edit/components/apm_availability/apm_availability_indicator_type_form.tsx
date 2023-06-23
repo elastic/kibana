@@ -16,7 +16,7 @@ import { FieldSelector } from '../apm_common/field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { control, setValue, watch } = useFormContext<CreateSLOInput>();
+  const { setValue, watch } = useFormContext<CreateSLOInput>();
   const { data: apmIndex } = useFetchApmIndex();
   useEffect(() => {
     setValue('indicator.params.index', apmIndex);
@@ -99,7 +99,6 @@ export function ApmAvailabilityIndicatorTypeForm() {
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
           <QueryBuilder
-            control={control}
             dataTestSubj="apmLatencyFilterInput"
             indexPatternString={watch('indicator.params.index')}
             label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {

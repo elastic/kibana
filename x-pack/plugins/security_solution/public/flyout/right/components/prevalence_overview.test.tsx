@@ -133,6 +133,7 @@ describe('<PrevalenceOverview />', () => {
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,
+        scopeId: panelContextValue.scopeId,
       },
     });
   });

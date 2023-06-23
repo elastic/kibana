@@ -1248,7 +1248,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async syncSavedObjects(simulate: boolean = false, space?: string) {
       const { body, status } = await kbnSupertest
         .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/sync?simulate=${simulate}`)
-        .set(getCommonRequestHeader('2023-05-15'));
+        .set(getCommonRequestHeader('2023-10-31'));
       this.assertResponseStatusCode(200, status, body);
 
       return body;

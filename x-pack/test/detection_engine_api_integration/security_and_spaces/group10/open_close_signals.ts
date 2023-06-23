@@ -20,7 +20,7 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   setSignalStatus,
-  getSignalStatusByQueryEmptyResponse,
+  getAlertUpdateByQueryEmptyResponse,
   getQuerySignalIds,
   deleteAllRules,
   createRule,
@@ -53,6 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
           body.items.forEach((_: any, index: number) => {
             delete body.items[index].update.error.index_uuid;
           });
+          delete body.took;
 
           expect(body).to.eql({
             errors: true,
@@ -86,6 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
           body.items.forEach((_: any, index: number) => {
             delete body.items[index].update.error.index_uuid;
           });
+          delete body.took;
 
           expect(body).to.eql({
             errors: true,
@@ -106,9 +108,11 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           });
 
+          expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
           await deleteAllAlerts(supertest, log, es);
         });
       });
+
       describe('update by query', () => {
         it('should not give errors when querying and the signals index does not exist yet', async () => {
           const { body } = await supertest
@@ -120,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           // remove any server generated items that are indeterministic
           delete body.took;
 
-          expect(body).to.eql(getSignalStatusByQueryEmptyResponse());
+          expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
         });
 
         it('should not give errors when querying and the signals index does exist and is empty', async () => {
@@ -134,7 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
           // remove any server generated items that are indeterministic
           delete body.took;
 
-          expect(body).to.eql(getSignalStatusByQueryEmptyResponse());
+          expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
 
           await deleteAllAlerts(supertest, log, es);
         });

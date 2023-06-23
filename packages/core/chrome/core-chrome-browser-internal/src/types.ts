@@ -13,6 +13,7 @@ import type {
   ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
+import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
 import type { Observable } from 'rxjs';
 
 /** @internal */
@@ -51,6 +52,11 @@ export interface InternalChromeStart extends ChromeStart {
      * Use {@link ServerlessPluginStart.setNavigation} to set project navigation config.
      */
     setNavigation(projectNavigation: ChromeProjectNavigation): void;
+
+    /**
+     * Returns an observable of the active nodes in the project navigation.
+     */
+    getActiveNavigationNodes$(): Observable<ChromeProjectNavigationNode[][]>;
 
     /**
      * Set custom project sidenav component to be used instead of the default project sidenav.

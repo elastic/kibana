@@ -183,10 +183,16 @@ export const termsOperation: OperationDefinition<
   getDefaultVisualSettings: (column) => ({
     truncateText: Boolean(!column.params?.secondaryFields?.length),
   }),
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type,
+    timeSeriesMetric,
+  }) => {
     if (
       supportedTypes.has(type) &&
       aggregatable &&
+      timeSeriesMetric !== 'counter' &&
       (!aggregationRestrictions || aggregationRestrictions.terms)
     ) {
       return {

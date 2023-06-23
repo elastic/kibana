@@ -15,7 +15,7 @@ export const usePerformUpgradeAllRules = () => {
 
   return usePerformAllRulesUpgradeMutation({
     onError: (err) => {
-      addError(err, { title: i18n.FAILED_ALL_RULES_UPGRADE });
+      addError(err, { title: i18n.RULE_UPGRADE_FAILED });
     },
     onSuccess: (result) => {
       addSuccess(getSuccessToastMessage(result));
@@ -28,7 +28,7 @@ export const usePerformUpgradeSpecificRules = () => {
 
   return usePerformSpecificRulesUpgradeMutation({
     onError: (err) => {
-      addError(err, { title: i18n.FAILED_SPECIFIC_RULES_UPGRADE });
+      addError(err, { title: i18n.RULE_UPGRADE_FAILED });
     },
     onSuccess: (result) => {
       addSuccess(getSuccessToastMessage(result));
@@ -44,18 +44,18 @@ const getSuccessToastMessage = (result: {
     failed: number;
   };
 }) => {
-  let toastMessage: string = '';
+  const toastMessage: string[] = [];
   const {
     summary: { succeeded, skipped, failed },
   } = result;
   if (succeeded > 0) {
-    toastMessage += i18n.UPGRADE_RULE_SUCCESS(succeeded);
+    toastMessage.push(i18n.UPGRADE_RULE_SUCCESS(succeeded));
   }
   if (skipped > 0) {
-    toastMessage += i18n.UPGRADE_RULE_SKIPPED(skipped);
+    toastMessage.push(i18n.UPGRADE_RULE_SKIPPED(skipped));
   }
   if (failed > 0) {
-    toastMessage += i18n.UPGRADE_RULE_FAILED(failed);
+    toastMessage.push(i18n.UPGRADE_RULE_FAILED(failed));
   }
-  return toastMessage;
+  return toastMessage.join(' ');
 };

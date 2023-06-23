@@ -19,6 +19,7 @@ import { SeverityBadge } from '../../../../../detections/components/rules/severi
 import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
+import { getNormalizedSeverity } from '../helpers';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 
@@ -130,7 +131,8 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         field: 'rule.severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: true,
+        sortable: ({ rule: { severity } }: RuleUpgradeInfoForReview) =>
+          getNormalizedSeverity(severity),
         truncateText: true,
         width: '12%',
       },

@@ -29,12 +29,6 @@ export const stateToAlertMessage = {
   [AlertStates.ALERT]: i18n.translate('xpack.observability.threshold.rule.threshold.alertState', {
     defaultMessage: 'ALERT',
   }),
-  [AlertStates.WARNING]: i18n.translate(
-    'xpack.observability.threshold.rule.threshold.warningState',
-    {
-      defaultMessage: 'WARNING',
-    }
-  ),
   [AlertStates.NO_DATA]: i18n.translate(
     'xpack.observability.threshold.rule.threshold.noDataState',
     {

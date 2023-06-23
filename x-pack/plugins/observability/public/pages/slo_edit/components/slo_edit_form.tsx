@@ -272,17 +272,16 @@ export function SloEditForm({ slo }: Props) {
                   })}
             </EuiButton>
 
-            <EuiButton
-              color="ghost"
+            <EuiButtonEmpty
+              color="primary"
               data-test-subj="sloFormCancelButton"
-              fill
               disabled={isCreateSloLoading || isUpdateSloLoading}
               onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
             >
               {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
                 defaultMessage: 'Cancel',
               })}
-            </EuiButton>
+            </EuiButtonEmpty>
 
             <EuiButtonEmpty
               color="primary"

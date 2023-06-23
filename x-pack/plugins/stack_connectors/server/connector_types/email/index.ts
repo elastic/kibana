@@ -154,6 +154,7 @@ const ParamsSchemaProps = {
   bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
   subject: schema.string(),
   message: schema.string(),
+  messageHTML: schema.nullable(schema.string()),
   // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
   // provide a more contextual URL in the footer (ex: URL to the alert details page)
   kibanaFooterLink: schema.object({
@@ -320,6 +321,8 @@ async function executor(
   }
 
   let actualMessage = params.message;
+  const actualHTMLMessage = params.messageHTML;
+
   if (configurationUtilities.enableFooterInEmail()) {
     const footerMessage = getFooterMessage({
       publicBaseUrl,
@@ -340,6 +343,7 @@ async function executor(
     content: {
       subject: params.subject,
       message: actualMessage,
+      messageHTML: actualHTMLMessage,
     },
     hasAuth: config.hasAuth,
     configurationUtilities,
