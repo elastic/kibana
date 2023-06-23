@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HOSTS_RISK_SCORES_NOT_FOUND = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.hosts.notFound',
-  {
-    defaultMessage: 'No host risk scores found',
-  }
-);
-
-export const USERS_RISK_SCORES_NOT_FOUND = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.hosts.notFound',
-  {
-    defaultMessage: 'No user risk scores found',
-  }
-);
-
 export const SHOW_HOSTS_RISK_SCORE = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.hosts.show',
   {
