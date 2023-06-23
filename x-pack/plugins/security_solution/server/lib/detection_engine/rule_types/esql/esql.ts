@@ -62,7 +62,6 @@ export const esqlExecutor = async ({
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
 
-
     const esqlRequest = buildEsqlSearchRequest({
       query: ruleParams.query,
       from: tuple.from.toISOString(),
