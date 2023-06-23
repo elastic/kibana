@@ -9,8 +9,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { defaultFleetErrorHandler } from '../../errors';
-import { agentPolicyService } from '../../services';
+import { defaultFleetErrorHandler, FleetServerHostUnauthorizedError } from '../../errors';
+import { agentPolicyService, appContextService } from '../../services';
 import {
   createFleetServerHost,
   deleteFleetServerHost,
@@ -24,6 +24,13 @@ import type {
   PutFleetServerHostRequestSchema,
 } from '../../types';
 
+function checkFleetServerHostsWriteAPIsAllowed() {
+  const config = appContextService.getConfig();
+  if (config?.internal?.fleetServerStandalone) {
+    throw new FleetServerHostUnauthorizedError('Fleet server host write APIs are disabled');
+  }
+}
+
 export const postFleetServerHost: RequestHandler<
   undefined,
   undefined,
@@ -32,7 +39,10 @@ export const postFleetServerHost: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+
   try {
+    checkFleetServerHostsWriteAPIsAllowed();
+
     const { id, ...data } = request.body;
     const FleetServerHost = await createFleetServerHost(
       soClient,
@@ -53,7 +63,7 @@ export const postFleetServerHost: RequestHandler<
   }
 };
 
-export const getFleetServerPolicyHandler: RequestHandler<
+export const getFleetServerHostHandler: RequestHandler<
   TypeOf<typeof GetOneFleetServerHostRequestSchema.params>
 > = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
@@ -75,10 +85,12 @@ export const getFleetServerPolicyHandler: RequestHandler<
   }
 };
 
-export const deleteFleetServerPolicyHandler: RequestHandler<
+export const deleteFleetServerHostHandler: RequestHandler<
   TypeOf<typeof GetOneFleetServerHostRequestSchema.params>
 > = async (context, request, response) => {
   try {
+    checkFleetServerHostsWriteAPIsAllowed();
+
     const coreContext = await context.core;
     const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -99,12 +111,14 @@ export const deleteFleetServerPolicyHandler: RequestHandler<
   }
 };
 
-export const putFleetServerPolicyHandler: RequestHandler<
+export const putFleetServerHostHandler: RequestHandler<
   TypeOf<typeof PutFleetServerHostRequestSchema.params>,
   undefined,
   TypeOf<typeof PutFleetServerHostRequestSchema.body>
 > = async (context, request, response) => {
   try {
+    checkFleetServerHostsWriteAPIsAllowed();
+
     const coreContext = await await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const soClient = coreContext.savedObjects.client;
@@ -132,7 +146,7 @@ export const putFleetServerPolicyHandler: RequestHandler<
   }
 };
 
-export const getAllFleetServerPolicyHandler: RequestHandler<
+export const getAllFleetServerHostsHandler: RequestHandler<
   TypeOf<typeof PutFleetServerHostRequestSchema.params>,
   undefined,
   TypeOf<typeof PutFleetServerHostRequestSchema.body>
