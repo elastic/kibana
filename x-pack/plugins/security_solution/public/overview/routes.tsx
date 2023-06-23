@@ -14,7 +14,7 @@ import {
   DETECTION_RESPONSE_PATH,
   SecurityPageName,
   ENTITY_ANALYTICS_PATH,
-  MITRE_ATTACK_COVERAGE_PATH,
+  COVERAGE_OVERVIEW_PATH,
 } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 
@@ -25,7 +25,7 @@ import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPage } from './pages/entity_analytics';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
-import { MitreAttackCoverage } from './pages/mitre_attack_coverage';
+import { CoverageOverview } from '../detection_engine/rule_management_ui/pages/coverage_overview';
 
 const OverviewRoutes = () => (
   <PluginTemplateWrapper>
@@ -65,10 +65,10 @@ const DataQualityRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const MitreAttackCoverageRoutes = () => (
+const coverageOverviewRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.mitreAttackCoverage}>
-      <MitreAttackCoverage />
+    <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
+      <CoverageOverview />
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
@@ -95,7 +95,7 @@ export const routes: SecuritySubPluginRoutes = [
     component: DataQualityRoutes,
   },
   {
-    path: MITRE_ATTACK_COVERAGE_PATH,
-    component: MitreAttackCoverageRoutes,
+    path: COVERAGE_OVERVIEW_PATH,
+    component: coverageOverviewRoutes,
   },
 ];

@@ -146,7 +146,7 @@ export enum SecurityPageName {
   usersEvents = 'users-events',
   usersRisk = 'users-risk',
   entityAnalytics = 'entity-analytics',
-  mitreAttackCoverage = 'mitre-attack-coverage',
+  coverageOverview = 'coverage-overview',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -171,7 +171,7 @@ export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
-export const MITRE_ATTACK_COVERAGE_PATH = '/mitre_attack_coverage' as const;
+export const COVERAGE_OVERVIEW_PATH = '/coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;

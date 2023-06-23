@@ -48,8 +48,8 @@ export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dash
   defaultMessage: 'Dashboards',
 });
 
-export const MITRE_ATTACK_COVERAGE = i18n.translate(
-  'xpack.securitySolution.navigation.mitreAttackCoverageDashboard',
+export const COVERAGE_OVERVIEW = i18n.translate(
+  'xpack.securitySolution.navigation.coverageOverviewDashboard',
   {
     defaultMessage: 'MITRE ATT&CK\u00AE Coverage',
   }

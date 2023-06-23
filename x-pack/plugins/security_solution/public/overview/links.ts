@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  COVERAGE_OVERVIEW_PATH,
   DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   ENTITY_ANALYTICS_PATH,
@@ -14,7 +15,6 @@ import {
   OVERVIEW_PATH,
   SecurityPageName,
   SERVER_APP_ID,
-  MITRE_ATTACK_COVERAGE_PATH,
 } from '../../common/constants';
 import {
   DATA_QUALITY,
@@ -22,7 +22,7 @@ import {
   GETTING_STARTED,
   OVERVIEW,
   ENTITY_ANALYTICS,
-  MITRE_ATTACK_COVERAGE,
+  COVERAGE_OVERVIEW,
 } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
@@ -113,20 +113,20 @@ export const ecsDataQualityDashboardLinks: LinkItem = {
 };
 
 export const mitreAttackCoverageDashboardLinks: LinkItem = {
-  id: SecurityPageName.mitreAttackCoverage,
-  title: MITRE_ATTACK_COVERAGE,
-  landingImage: dataQualityDashboardPageImg,
+  id: SecurityPageName.coverageOverview,
+  title: COVERAGE_OVERVIEW,
+  landingImage: overviewPageImg, // TODO: change with updated image before removing feature flag https://github.com/elastic/security-team/issues/2905
   description: i18n.translate(
-    'xpack.securitySolution.appLinks.mitreAttackCoverageDashboardDescription',
+    'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
     {
       defaultMessage:
         'An overview of rule coverage according to the MITRE ATT&CK\u00AE specifications',
     }
   ),
-  path: MITRE_ATTACK_COVERAGE_PATH,
+  path: COVERAGE_OVERVIEW_PATH,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.mitreAttackCoverageDashboard', {
+    i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
       defaultMessage: 'MITRE ATT&CK Coverage',
     }),
   ],
