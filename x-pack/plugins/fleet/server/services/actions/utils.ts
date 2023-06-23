@@ -29,7 +29,7 @@ export const isFieldDefined = (
 
 export const hasFieldKeyError = (
   key: string | null | undefined,
-  fieldTypes: string[],
+  fieldTypes: Readonly<string[]>,
   indexMapping: FleetActionsIndexMapping | FleetActionsResultsIndexMapping,
   indexType: IndexType
 ): string | null => {
@@ -137,7 +137,7 @@ export type IndexType = 'actions' | 'results';
 
 interface ValidateFilterKueryNodeParams {
   astFilter: KueryNode;
-  types: string[];
+  types: Readonly<string[]>;
   indexMapping: FleetActionsIndexMapping;
   indexType?: IndexType;
   path?: string;
