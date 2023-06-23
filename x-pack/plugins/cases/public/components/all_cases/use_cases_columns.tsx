@@ -234,6 +234,18 @@ export const useCasesColumns = ({
     });
   }
 
+  columns.push({
+    field: 'category',
+    name: i18n.CATEGORY,
+    sortable: true,
+    render: (category: CaseUI['category']) => {
+      if (category != null) {
+        return category;
+      }
+      return getEmptyTagValue();
+    },
+  });
+
   if (filterStatus === CaseStatuses.closed) {
     columns.push({
       field: 'closedAt',

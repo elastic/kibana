@@ -8,22 +8,19 @@
 import type { VFC } from 'react';
 import React from 'react';
 import { PREVALENCE_ROW_UNCOMMON } from './translations';
-import { useFetchUniqueHostsWithFieldPair } from '../hooks/use_fetch_unique_hosts_with_field_value_pair';
-import { useFetchUniqueHosts } from '../hooks/use_fetch_unique_hosts';
+import { useFetchFieldValuePairWithAggregation } from '../../shared/hooks/use_fetch_field_value_pair_with_aggregation';
+import { useFetchUniqueByField } from '../../shared/hooks/use_fetch_unique_by_field';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { TimelineId } from '../../../../common/types';
 
+const HOST_FIELD = 'host.name';
 const PERCENTAGE_THRESHOLD = 0.1; // we show the prevalence if its value is below 10%
 
 export interface PrevalenceOverviewRowProps {
   /**
-   * Highlighted field
-   */
-  field: string;
-  /**
-   * Highlighted field value
-   */
-  values: string[];
+   * The highlighted field name and values
+   * */
+  highlightedField: { name: string; values: string[] };
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
@@ -44,8 +41,7 @@ export interface PrevalenceOverviewRowProps {
  * the row will render null.
  */
 export const PrevalenceOverviewRow: VFC<PrevalenceOverviewRowProps> = ({
-  field,
-  values,
+  highlightedField,
   scopeId,
   callbackIfNull,
   'data-test-subj': dataTestSubj,
@@ -56,23 +52,25 @@ export const PrevalenceOverviewRow: VFC<PrevalenceOverviewRowProps> = ({
     loading: hostsLoading,
     error: hostsError,
     count: hostsCount,
-  } = useFetchUniqueHostsWithFieldPair({
-    field,
-    values,
+  } = useFetchFieldValuePairWithAggregation({
+    highlightedField,
     isActiveTimelines,
+    aggregationField: HOST_FIELD,
   });
 
   const {
     loading: uniqueHostsLoading,
     error: uniqueHostsError,
     count: uniqueHostsCount,
-  } = useFetchUniqueHosts();
+  } = useFetchUniqueByField({ field: HOST_FIELD });
+
+  const { name, values } = highlightedField;
 
   // prevalence is number of host(s) where the field/value pair was found divided by the total number of hosts in the environment
   const prevalence = hostsCount / uniqueHostsCount;
   const loading = hostsLoading || uniqueHostsLoading;
   const error = hostsError || uniqueHostsError;
-  const text = `${field}, ${values} ${PREVALENCE_ROW_UNCOMMON}`;
+  const text = `${name}, ${values} ${PREVALENCE_ROW_UNCOMMON}`;
 
   // we do not want to render the row is the prevalence is Infinite, 0 or above the decided threshold
   const shouldNotRender =

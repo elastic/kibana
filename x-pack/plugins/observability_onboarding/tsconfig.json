@@ -24,7 +24,6 @@
     "@kbn/shared-ux-router",
     "@kbn/i18n-react",
     "@kbn/cloud-plugin",
-    "@kbn/fleet-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/core-http-server",

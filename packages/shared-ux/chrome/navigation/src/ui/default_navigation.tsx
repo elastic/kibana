@@ -7,23 +7,24 @@
  */
 
 import React, { FC, useCallback } from 'react';
+import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 
 import { Navigation } from './components';
 import type {
   GroupDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
-  NodeDefinition,
   ProjectNavigationDefinition,
   ProjectNavigationTreeDefinition,
   RootNavigationItemDefinition,
 } from './types';
-import { CloudLink } from './components/cloud_link';
 import { RecentlyAccessed } from './components/recently_accessed';
 import { NavigationFooter } from './components/navigation_footer';
 import { getPresets } from './nav_tree_presets';
 
-type NodeDefinitionWithPreset = NodeDefinition & { preset?: NavigationGroupPreset };
+type NodeDefinitionWithPreset = NodeDefinition<AppDeepLinkId, string> & {
+  preset?: NavigationGroupPreset;
+};
 
 const isRootNavigationItemDefinition = (
   item: RootNavigationItemDefinition | NodeDefinitionWithPreset
@@ -37,10 +38,6 @@ const getDefaultNavigationTree = (
 ): NavigationTreeDefinition => {
   return {
     body: [
-      {
-        type: 'cloudLink',
-        preset: 'deployments',
-      },
       {
         type: 'recentlyAccessed',
       },
@@ -70,7 +67,6 @@ const getDefaultNavigationTree = (
 let idCounter = 0;
 
 export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?: string }> = ({
-  homeRef,
   projectNavigationTree,
   navigationTree,
   dataTestSubj,
@@ -85,19 +81,13 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
 
   const renderItems = useCallback(
     (
-      items: Array<RootNavigationItemDefinition | NodeDefinitionWithPreset> = [],
+      items: RootNavigationItemDefinition[] | NodeDefinitionWithPreset[] = [],
       path: string[] = []
     ) => {
       return items.map((item) => {
         const isRootNavigationItem = isRootNavigationItemDefinition(item);
-        if (isRootNavigationItem) {
-          if (item.type === 'cloudLink') {
-            return <CloudLink {...item} key={`cloudLink-${idCounter++}`} />;
-          }
-
-          if (item.type === 'recentlyAccessed') {
-            return <RecentlyAccessed {...item} key={`recentlyAccessed-${idCounter++}`} />;
-          }
+        if (isRootNavigationItem && item.type === 'recentlyAccessed') {
+          return <RecentlyAccessed {...item} key={`recentlyAccessed-${idCounter++}`} />;
         }
 
         if (item.preset) {
@@ -112,18 +102,15 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
           );
         }
 
-        const { type, ...rest } = item as GroupDefinition;
+        const { ...copy } = item as GroupDefinition;
+        delete (copy as any).type;
 
-        return (
-          <React.Fragment key={id}>
-            {rest.children ? (
-              <Navigation.Group {...rest}>
-                {renderItems(rest.children, [...path, id])}
-              </Navigation.Group>
-            ) : (
-              <Navigation.Item {...rest} />
-            )}
-          </React.Fragment>
+        return copy.children ? (
+          <Navigation.Group {...copy} key={id}>
+            {renderItems(copy.children, [...path, id])}
+          </Navigation.Group>
+        ) : (
+          <Navigation.Item {...copy} key={id} />
         );
       });
     },
@@ -131,7 +118,7 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
   );
 
   return (
-    <Navigation homeRef={homeRef} dataTestSubj={dataTestSubj}>
+    <Navigation dataTestSubj={dataTestSubj}>
       <>
         {renderItems(navigationDefinition.body)}
         {navigationDefinition.footer && (

@@ -41,9 +41,9 @@ export function NoDataView({ subTitle }: { subTitle: string }) {
     [setupDataCollectionInstructions]
   );
 
-  const secretToken = data?.variables.secretToken;
-  const collectionAgentHostPort = data?.variables.apmServerUrl.replace('https://', '');
-  const symbolUrl = data?.variables.apmServerUrl.replace(/\.apm\./, '.symbols.');
+  const secretToken = data?.collector?.secretToken;
+  const collectionAgentHost = data?.collector?.host;
+  const symbolUrl = data?.symbolizer?.host;
   const hostAgentVersion = 'v3';
 
   const tabs = [
@@ -71,7 +71,7 @@ export function NoDataView({ subTitle }: { subTitle: string }) {
             <EuiCodeBlock paddingSize="s" isCopyable>
               {`helm install --create-namespace -n=universal-profiling universal-profiling-agent \\
 --set "projectID=1,secretToken=${secretToken}" \\
---set "collectionAgentHostPort=${collectionAgentHostPort}" \\
+--set "collectionAgentHostPort=${collectionAgentHost}" \\
 --set "version=${hostAgentVersion}" \\
 optimyze/pf-host-agent`}
             </EuiCodeBlock>
@@ -112,7 +112,7 @@ optimyze/pf-host-agent`}
 -v /var/run/docker.sock:/var/run/docker.sock -v /sys/kernel/debug:/sys/kernel/debug:ro \\
 docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-host-agent \\
 -project-id=1 -secret-token=${secretToken} \\
--collection-agent=${collectionAgentHostPort}`}
+-collection-agent=${collectionAgentHost}`}
             </EuiCodeBlock>
           ),
         },
@@ -150,7 +150,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo pf-host-agent/pf-host-agent -project-id=1 -secret-token=${secretToken} -collection-agent=${collectionAgentHostPort}`}
+              {`sudo pf-host-agent/pf-host-agent -project-id=1 -secret-token=${secretToken} -collection-agent=${collectionAgentHost}`}
             </EuiCodeBlock>
           ),
         },
@@ -192,7 +192,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHostPort}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
+              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
             </EuiCodeBlock>
           ),
         },
@@ -245,7 +245,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHostPort}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
+              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
             </EuiCodeBlock>
           ),
         },
@@ -258,6 +258,64 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
             <EuiCodeBlock paddingSize="s" isCopyable>
               {`sudo systemctl enable pf-host-agent && sudo systemctl restart pf-host-agent`}
             </EuiCodeBlock>
+          ),
+        },
+      ],
+    },
+    {
+      key: 'elasticAgentIntegration',
+      title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.title', {
+        defaultMessage: 'Elastic Agent Integration',
+      }),
+      steps: [
+        {
+          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1', {
+            defaultMessage: 'Copy credentials',
+          }),
+          content: (
+            <>
+              <EuiText>
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.hint', {
+                  defaultMessage:
+                    "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
+                })}
+              </EuiText>
+              <EuiSpacer />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.secretToken', {
+                  defaultMessage: 'Secret token: {secretToken}',
+                  values: { secretToken },
+                })}
+              </EuiCodeBlock>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {i18n.translate(
+                  'xpack.profiling.tabs.elasticAgentIntegrarion.step1.collectionAgentUrl',
+                  {
+                    defaultMessage: 'Universal Profiling Collector url: {collectionAgentHost}',
+                    values: { collectionAgentHost },
+                  }
+                )}
+              </EuiCodeBlock>
+            </>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2', {
+            defaultMessage: 'Fleet',
+          }),
+          content: (
+            <EuiButton
+              iconType="gear"
+              fill
+              href={`${core.http.basePath.prepend(
+                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview?prerelease=true'
+              )}`}
+            >
+              {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {
+                defaultMessage: 'Manage Universal Profiling agent in Fleet',
+              })}
+            </EuiButton>
           ),
         },
       ],
@@ -345,61 +403,6 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
                 />
               </EuiText>
             </div>
-          ),
-        },
-      ],
-    },
-    {
-      key: 'elasticAgentIntegration',
-      title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.title', {
-        defaultMessage: 'Elastic Agent Integration',
-      }),
-      steps: [
-        {
-          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1', {
-            defaultMessage: 'Copy credentials',
-          }),
-          content: (
-            <>
-              <EuiText>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.hint', {
-                  defaultMessage:
-                    "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
-                })}
-              </EuiText>
-              <EuiSpacer />
-              <EuiCodeBlock paddingSize="s" isCopyable>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.secretToken', {
-                  defaultMessage: 'Secret token: {secretToken}',
-                  values: { secretToken },
-                })}
-              </EuiCodeBlock>
-              <EuiSpacer size="s" />
-              <EuiCodeBlock paddingSize="s" isCopyable>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.apmServerUrl', {
-                  defaultMessage: 'APM server url: {apmServerUrl}',
-                  values: { apmServerUrl: collectionAgentHostPort },
-                })}
-              </EuiCodeBlock>
-            </>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2', {
-            defaultMessage: 'Fleet',
-          }),
-          content: (
-            <EuiButton
-              iconType="gear"
-              fill
-              href={`${core.http.basePath.prepend(
-                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview'
-              )}`}
-            >
-              {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {
-                defaultMessage: 'Manage Universal Profiling agent in Fleet',
-              })}
-            </EuiButton>
           ),
         },
       ],

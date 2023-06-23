@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../../common/constants';
@@ -12,8 +13,14 @@ import { API_URLS } from '../../../../common/constants';
 export const createGetIndexStatusRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.INDEX_STATUS,
-  validate: {},
-  handler: async ({ uptimeEsClient }): Promise<any> => {
-    return await libs.requests.getIndexStatus({ uptimeEsClient });
+  validate: {
+    query: schema.object({
+      from: schema.maybe(schema.string()),
+      to: schema.maybe(schema.string()),
+    }),
+  },
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
+    const { from, to } = request.query;
+    return await libs.requests.getIndexStatus({ uptimeEsClient, range: { from, to } });
   },
 });

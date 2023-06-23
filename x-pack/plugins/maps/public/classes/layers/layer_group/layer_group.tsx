@@ -58,7 +58,7 @@ export class LayerGroup implements ILayer {
     };
   }
 
-  constructor({ layerDescriptor }: { layerDescriptor: LayerGroupDescriptor }) {
+  constructor({ layerDescriptor }: { layerDescriptor: Partial<LayerGroupDescriptor> }) {
     this._descriptor = LayerGroup.createDescriptor(layerDescriptor);
   }
 
@@ -283,9 +283,9 @@ export class LayerGroup implements ILayer {
     return undefined;
   }
 
-  isLayerLoading(): boolean {
+  isLayerLoading(zoom: number): boolean {
     return this._children.some((child) => {
-      return child.isLayerLoading();
+      return child.isLayerLoading(zoom);
     });
   }
 

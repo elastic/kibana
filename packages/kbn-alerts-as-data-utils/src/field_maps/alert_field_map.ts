@@ -33,6 +33,7 @@ import {
   ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
@@ -171,6 +172,11 @@ export const alertFieldMap = {
   [ALERT_WORKFLOW_STATUS]: {
     type: 'keyword',
     array: false,
+    required: false,
+  },
+  [ALERT_WORKFLOW_TAGS]: {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   [SPACE_IDS]: {

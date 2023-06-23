@@ -13,7 +13,6 @@ import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters
 // @ts-ignore
 import { WmsClient } from './wms_client';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { registerSource } from '../source_registry';
 import { IRasterSource, RasterTileSourceData } from '../raster_source';
 import { WMSSourceDescriptor } from '../../../../common/descriptor_types';
 export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
@@ -80,8 +79,3 @@ export class WMSSource extends AbstractSource implements IRasterSource {
     return client.getUrlTemplate(this._descriptor.layers, this._descriptor.styles || '');
   }
 }
-
-registerSource({
-  ConstructorFunction: WMSSource,
-  type: SOURCE_TYPES.WMS,
-});

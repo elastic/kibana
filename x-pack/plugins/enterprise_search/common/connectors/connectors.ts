@@ -129,15 +129,26 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 's3',
   },
   {
-    iconPath: 'sharepoint_online.svg',
-    isBeta: false,
+    iconPath: 'sharepoint.svg',
+    isBeta: true,
     isNative: false,
-    isTechPreview: true,
+    isTechPreview: false,
     keywords: ['sharepoint', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint.name', {
-      defaultMessage: 'Sharepoint Online & Server',
+      defaultMessage: 'Sharepoint Server',
     }),
-    serviceType: 'sharepoint',
+    serviceType: 'sharepoint_server',
+  },
+  {
+    iconPath: 'sharepoint_online.svg',
+    isBeta: false,
+    isNative: true,
+    isTechPreview: false,
+    keywords: ['sharepoint', 'office365', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint_online.name', {
+      defaultMessage: 'Sharepoint Online',
+    }),
+    serviceType: 'sharepoint_online',
   },
   {
     iconPath: 'custom.svg',

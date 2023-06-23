@@ -287,7 +287,9 @@ export function getDiscoverStateContainer({
       await undoSavedSearchChanges();
     } else {
       addLog('[discoverState] onOpenSavedSearch open view URL');
-      history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
+      services.locator.navigate({
+        savedSearchId: newSavedSearchId,
+      });
     }
   };
 

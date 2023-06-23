@@ -8,13 +8,9 @@
 import React from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
 import type { AssetDetailsProps, RenderMode } from './types';
-import type { InventoryItemType } from '../../../common/inventory_models/types';
-import { TabContent } from './tab_content/tab_content';
+import { Content } from './content/content';
 import { Header } from './header/header';
 import { TabSwitcherProvider } from './hooks/use_tab_switcher';
-
-// Setting host as default as it will be the only supported type for now
-const NODE_TYPE = 'host' as InventoryItemType;
 
 interface ContentTemplateProps {
   header: React.ReactElement;
@@ -42,9 +38,9 @@ export const AssetDetails = ({
   activeTabId,
   overrides,
   onTabsStateChange,
-  tabs,
-  links,
-  nodeType = NODE_TYPE,
+  tabs = [],
+  links = [],
+  nodeType = 'host',
   renderMode = {
     showInFlyout: false,
   },
@@ -58,14 +54,16 @@ export const AssetDetails = ({
           <Header
             node={node}
             nodeType={nodeType}
+            currentTimeRange={currentTimeRange}
             compact={renderMode.showInFlyout}
             tabs={tabs}
             links={links}
+            overrides={overrides}
             onTabsStateChange={onTabsStateChange}
           />
         }
         body={
-          <TabContent
+          <Content
             node={node}
             nodeType={nodeType}
             currentTimeRange={currentTimeRange}

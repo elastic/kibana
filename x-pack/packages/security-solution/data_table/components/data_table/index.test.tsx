@@ -48,13 +48,6 @@ jest.mock('../../hooks/use_selector', () => ({
   useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
 }));
 
-jest.mock(
-  'react-visibility-sensor',
-  () =>
-    ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-      children({ isVisible: true })
-);
-
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
     matches: false,
@@ -178,14 +171,20 @@ describe('DataTable', () => {
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
         triggerId: 'mockCellActionsTrigger',
-        fields: [
+        data: [
           {
-            name: '@timestamp',
             values: [data[0]?.data[0]?.value],
-            type: 'date',
-            aggregatable: true,
+            field: {
+              name: '@timestamp',
+              type: 'date',
+              aggregatable: true,
+              esTypes: ['date'],
+              searchable: true,
+              subType: undefined,
+            },
           },
         ],
+
         metadata: {
           scopeId: 'table-test',
         },
@@ -203,7 +202,7 @@ describe('DataTable', () => {
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          fields: [],
+          data: [],
         })
       );
     });

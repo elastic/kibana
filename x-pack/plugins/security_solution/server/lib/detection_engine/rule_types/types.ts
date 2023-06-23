@@ -40,7 +40,7 @@ import type { SetupPlugins } from '../../../plugin';
 import type { CompleteRule, RuleParams } from '../rule_schema';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
-import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '../rule_monitoring';
+import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../rule_monitoring';
 import type { RefreshTypes } from '../types';
 
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -133,7 +133,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   config: ConfigType;
   publicBaseUrl: string | undefined;
   ruleDataClient: IRuleDataClient;
-  ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
+  ruleExecutionLoggerFactory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
   version: string;
   isPreview?: boolean;
 }

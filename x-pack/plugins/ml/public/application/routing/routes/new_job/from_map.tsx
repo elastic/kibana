@@ -6,14 +6,12 @@
  */
 
 import React, { FC } from 'react';
-
 import { Redirect } from 'react-router-dom';
 import { parse } from 'query-string';
-
+import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../locator';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-
+import { useRouteResolver } from '../../use_resolver';
 import { resolver } from '../../../jobs/new_job/job_from_map';
 
 export const fromMapRouteFactory = (): MlRoute => ({
@@ -22,7 +20,7 @@ export const fromMapRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<PageProps> = ({ location }) => {
   const {
     dashboard,
     dataViewId,
@@ -36,10 +34,34 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     sort: false,
   });
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
+  const {
+    services: {
+      data: {
+        query: {
+          timefilter: { timefilter: timeFilter },
+        },
+      },
+      dashboard: dashboardService,
+      uiSettings: kibanaConfig,
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
+
+  const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () =>
-      resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to, layer),
+      resolver(
+        { mlApiServices, timeFilter, kibanaConfig, dashboardService },
+        dashboard,
+        dataViewId,
+        embeddable,
+        geoField,
+        splitField,
+        from,
+        to,
+        layer
+      ),
   });
+
   return (
     <PageLoader context={context}>
       {<Redirect to={createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB)} />}

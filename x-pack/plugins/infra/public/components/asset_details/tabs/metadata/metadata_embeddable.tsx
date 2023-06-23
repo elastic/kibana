@@ -72,7 +72,7 @@ export class MetadataEmbeddable extends Embeddable<MetadataEmbeddableInput> {
           <div style={{ width: '100%' }}>
             <LazyMetadataWrapper
               currentTimeRange={this.input.currentTimeRange}
-              node={this.input.node}
+              nodeName={this.input.nodeName}
               nodeType={this.input.nodeType}
               showActionsColumn={this.input.showActionsColumn}
               onSearchChange={this.input.onSearchChange}

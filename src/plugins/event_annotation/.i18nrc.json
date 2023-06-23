@@ -1,0 +1,6 @@
+{
+  "prefix": "eventAnnotations",
+  "paths": {
+    "eventAnnotations": "."
+  }
+}

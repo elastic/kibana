@@ -69,7 +69,7 @@ export class ObservabilityOnboardingPlugin
         euiIconType: 'logoObservability',
         category: DEFAULT_APP_CATEGORIES.observability,
         keywords: [],
-        async mount(appMountParameters: AppMountParameters<unknown>) {
+        async mount(appMountParameters: AppMountParameters) {
           // Load application bundle and Get start service
           const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
             import('./application/app'),

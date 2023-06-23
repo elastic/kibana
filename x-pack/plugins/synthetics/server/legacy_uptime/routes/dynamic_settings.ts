@@ -9,11 +9,8 @@ import { schema } from '@kbn/config-schema';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMServerLibs } from '../lib/lib';
-import {
-  DynamicSettings,
-  DynamicSettingsAttributes,
-  DynamicSettingsType,
-} from '../../../common/runtime_types';
+import { DynamicSettings, DynamicSettingsCodec } from '../../../common/runtime_types';
+import { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { UMRestApiRouteFactory } from '.';
 import { savedObjectsAdapter } from '../lib/saved_objects/saved_objects';
 import {
@@ -22,12 +19,22 @@ import {
 } from '../../../common/translations';
 import { API_URLS } from '../../../common/constants';
 
-export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMServerLibs) => ({
+export const createGetDynamicSettingsRoute: UMRestApiRouteFactory<DynamicSettings> = (
+  _libs: UMServerLibs
+) => ({
   method: 'GET',
   path: API_URLS.DYNAMIC_SETTINGS,
   validate: false,
-  handler: async ({ savedObjectsClient }): Promise<any> => {
-    return savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
+  handler: async ({ savedObjectsClient }) => {
+    const dynamicSettingsAttributes: DynamicSettingsAttributes =
+      await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
+    return {
+      heartbeatIndices: dynamicSettingsAttributes.heartbeatIndices,
+      certExpirationThreshold: dynamicSettingsAttributes.certExpirationThreshold,
+      certAgeThreshold: dynamicSettingsAttributes.certAgeThreshold,
+      defaultConnectors: dynamicSettingsAttributes.defaultConnectors,
+      defaultEmail: dynamicSettingsAttributes.defaultEmail,
+    };
   },
 });
 
@@ -70,7 +77,7 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMS
   },
   writeAccess: true,
   handler: async ({ savedObjectsClient, request, response }): Promise<any> => {
-    const decoded = DynamicSettingsType.decode(request.body);
+    const decoded = DynamicSettingsCodec.decode(request.body);
     const certThresholdErrors = validateCertsValues(request.body as DynamicSettings);
 
     if (isRight(decoded) && !certThresholdErrors) {

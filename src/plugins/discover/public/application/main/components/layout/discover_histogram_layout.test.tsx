@@ -43,6 +43,8 @@ function getStateContainer(savedSearch?: SavedSearch) {
     hideChart: false,
   });
 
+  stateContainer.internalState.transitions.setDataView(dataViewMock);
+
   return stateContainer;
 }
 

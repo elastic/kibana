@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -22,7 +22,7 @@ export class SyntheticsMonitorTestService {
 
   async getMonitor(monitorId: string, decrypted: boolean = true, space?: string) {
     let url =
-      API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId) +
+      SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId) +
       (decrypted ? '?decrypted=true' : '');
     if (space) {
       url = '/s/' + space + url;
@@ -32,7 +32,7 @@ export class SyntheticsMonitorTestService {
 
   async addMonitor(monitor: any) {
     const res = await this.supertest
-      .post(API_URLS.SYNTHETICS_MONITORS)
+      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
       .set('kbn-xsrf', 'true')
       .send(monitor)
       .expect(200);
@@ -42,7 +42,7 @@ export class SyntheticsMonitorTestService {
 
   async inspectMonitor(monitor: any, hideParams: boolean = true) {
     const res = await this.supertest
-      .post(API_URLS.SYNTHETICS_MONITOR_INSPECT)
+      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT)
       .set('kbn-xsrf', 'true')
       .send(monitor)
       .expect(200);
@@ -61,7 +61,7 @@ export class SyntheticsMonitorTestService {
 
   async addProjectMonitors(project: string, monitors: any) {
     const { body } = await this.supertest
-      .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
+      .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
       .set('kbn-xsrf', 'true')
       .send({ monitors })
       .expect(200);
@@ -76,7 +76,7 @@ export class SyntheticsMonitorTestService {
   ) {
     try {
       const response = await this.supertest
-        .get(`/s/${space}${API_URLS.SYNTHETICS_MONITORS}`)
+        .get(`/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .query({
           filter: `${syntheticsMonitorType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorType}.attributes.project_id: "${projectId}"`,
         })
@@ -85,7 +85,7 @@ export class SyntheticsMonitorTestService {
       const { monitors } = response.body;
       if (monitors[0]?.id) {
         await this.supertest
-          .delete(`/s/${space}${API_URLS.SYNTHETICS_MONITORS}/${monitors[0].id}`)
+          .delete(`/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitors[0].id}`)
           .set('kbn-xsrf', 'true')
           .send(projectMonitors)
           .expect(200);

@@ -22,6 +22,7 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
+  RULES_ADD_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -29,6 +30,7 @@ import {
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
+  ADD_RULES,
   BLOCKLIST,
   CREATE_NEW_RULE,
   ENDPOINTS,
@@ -115,6 +117,13 @@ export const links: LinkItem = {
         }),
       ],
       links: [
+        {
+          id: SecurityPageName.rulesAdd,
+          title: ADD_RULES,
+          path: RULES_ADD_PATH,
+          skipUrlState: true,
+          hideTimeline: true,
+        },
         {
           id: SecurityPageName.rulesCreate,
           title: CREATE_NEW_RULE,

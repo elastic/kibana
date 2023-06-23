@@ -19,6 +19,7 @@
     "data": "src/plugins/data",
     "observabilityAlertDetails": "x-pack/packages/observability/alert_details",
     "dataViews": "src/plugins/data_views",
+    "defaultNavigation": "packages/default-nav",
     "devTools": "src/plugins/dev_tools",
     "discover": "src/plugins/discover",
     "savedSearch": "src/plugins/saved_search",

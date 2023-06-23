@@ -9,6 +9,7 @@
 import React, { FunctionComponent, useMemo } from 'react';
 // eslint-disable-next-line no-restricted-imports
 import { RouteComponentProps, Router, Route, Switch } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { History } from 'history';
 import { EMPTY, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -55,60 +56,62 @@ export const AppRouter: FunctionComponent<Props> = ({
 
   return (
     <Router history={history}>
-      <Switch>
-        {[...mounters].map(([appId, mounter]) => (
+      <CompatRouter>
+        <Switch>
+          {[...mounters].map(([appId, mounter]) => (
+            <Route
+              key={mounter.appRoute}
+              path={mounter.appRoute}
+              exact={mounter.exactRoute}
+              render={({ match: { path } }) => (
+                <AppContainer
+                  appPath={path}
+                  appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                  createScopedHistory={createScopedHistory}
+                  {...{
+                    appId,
+                    mounter,
+                    setAppLeaveHandler,
+                    setAppActionMenu,
+                    setIsMounting,
+                    theme$,
+                    showPlainSpinner,
+                  }}
+                />
+              )}
+            />
+          ))}
+          {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
           <Route
-            key={mounter.appRoute}
-            path={mounter.appRoute}
-            exact={mounter.exactRoute}
-            render={({ match: { path } }) => (
-              <AppContainer
-                appPath={path}
-                appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                createScopedHistory={createScopedHistory}
-                {...{
-                  appId,
-                  mounter,
-                  setAppLeaveHandler,
-                  setAppActionMenu,
-                  setIsMounting,
-                  theme$,
-                  showPlainSpinner,
-                }}
-              />
-            )}
+            path="/app/:appId"
+            render={({
+              match: {
+                params: { appId },
+                url,
+              },
+            }: RouteComponentProps<Params>) => {
+              // the id/mounter retrieval can be removed once #76348 is addressed
+              const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
+              return (
+                <AppContainer
+                  appPath={url}
+                  appId={id ?? appId}
+                  appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                  createScopedHistory={createScopedHistory}
+                  {...{
+                    mounter,
+                    setAppLeaveHandler,
+                    setAppActionMenu,
+                    setIsMounting,
+                    theme$,
+                    showPlainSpinner,
+                  }}
+                />
+              );
+            }}
           />
-        ))}
-        {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
-        <Route
-          path="/app/:appId"
-          render={({
-            match: {
-              params: { appId },
-              url,
-            },
-          }: RouteComponentProps<Params>) => {
-            // the id/mounter retrieval can be removed once #76348 is addressed
-            const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
-            return (
-              <AppContainer
-                appPath={url}
-                appId={id ?? appId}
-                appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                createScopedHistory={createScopedHistory}
-                {...{
-                  mounter,
-                  setAppLeaveHandler,
-                  setAppActionMenu,
-                  setIsMounting,
-                  theme$,
-                  showPlainSpinner,
-                }}
-              />
-            );
-          }}
-        />
-      </Switch>
+        </Switch>
+      </CompatRouter>
     </Router>
   );
 };
