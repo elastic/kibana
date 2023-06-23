@@ -47,6 +47,7 @@ import {
   buildAlertSuppressionDescription,
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
+  buildAlertEsqlDescription,
 } from './helpers';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
 import { buildActionsDescription } from './actions_description';
@@ -229,28 +230,12 @@ export const getDescriptionItem = (
   } else if (field === 'eqlOptions') {
     const eqlOptions: EqlOptionsSelected = get(field, data);
     return buildEqlOptionsDescription(eqlOptions);
-    // TODO: make code production ready
   } else if (field === 'esqlOptions') {
     const esqlSuppressionDuration = get('esqlOptions.suppressionDuration', data);
     const esqlGroupByFields = get('esqlOptions.groupByFields', data);
-    return [
-      ...(esqlSuppressionDuration
-        ? [
-            {
-              title: 'ESQL suppression window',
-              description: `${esqlSuppressionDuration?.value}${esqlSuppressionDuration?.unit}`,
-            },
-          ]
-        : []),
-      ...(esqlGroupByFields.length
-        ? [
-            {
-              title: 'ESQL group by fields',
-              description: esqlGroupByFields?.join(', '),
-            },
-          ]
-        : []),
-    ];
+    const suppressionMode = get('esqlOptions.suppressionMode', data);
+
+    return buildAlertEsqlDescription(esqlSuppressionDuration, esqlGroupByFields, suppressionMode);
   } else if (field === 'threat') {
     const threats: Threats = get(field, data);
     return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });

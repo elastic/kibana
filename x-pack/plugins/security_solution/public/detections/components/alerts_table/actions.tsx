@@ -292,6 +292,13 @@ export const isNewTermsAlert = (ecsData: Ecs): boolean => {
   );
 };
 
+export const isEsqlAlert = (ecsData: Ecs): boolean => {
+  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  const isEsql = ruleType === 'esql' || (Array.isArray(ruleType) && ruleType[0] === 'esql');
+
+  return isEsql;
+};
+
 const isSuppressedAlert = (ecsData: Ecs): boolean => {
   return getField(ecsData, ALERT_SUPPRESSION_DOCS_COUNT) != null;
 };
@@ -1028,7 +1035,7 @@ export const sendAlertToTimelineAction = async ({
             },
             getExceptionFilter
           );
-        } else if (isSuppressedAlert(ecsData)) {
+        } else if (isSuppressedAlert(ecsData) && !isEsqlAlert(ecsData)) {
           return createSuppressedTimeline(
             ecsData,
             createTimeline,
@@ -1098,7 +1105,7 @@ export const sendAlertToTimelineAction = async ({
     return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else if (isNewTermsAlert(ecsData)) {
     return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
-  } else if (isSuppressedAlert(ecsData)) {
+  } else if (isSuppressedAlert(ecsData) && !isEsqlAlert(ecsData)) {
     return createSuppressedTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(
