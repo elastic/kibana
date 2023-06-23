@@ -113,7 +113,9 @@ class DocLinks {
   public queryDsl: string;
   public rrf: string;
   public searchApplications: string;
+  public searchApplicationsGettingStarted: string;
   public searchApplicationsTemplates: string;
+  public searchApplicationsSearchApi: string;
   public searchTemplates: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
@@ -267,6 +269,8 @@ class DocLinks {
     this.searchUIElasticsearch = '';
     this.searchApplicationsTemplates = '';
     this.searchApplications = '';
+    this.searchApplicationsGettingStarted = '';
+    this.searchApplicationsSearchApi = '';
     this.searchTemplates = '';
     this.start = '';
     this.supportedNlpModels = '';
@@ -419,7 +423,10 @@ class DocLinks {
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
     this.searchApplicationsTemplates = docLinks.links.enterpriseSearch.searchApplicationsTemplates;
+    this.searchApplicationsSearchApi = docLinks.links.enterpriseSearch.searchApplicationsSearchApi;
     this.searchApplications = docLinks.links.enterpriseSearch.searchApplications;
+    this.searchApplicationsGettingStarted =
+      docLinks.links.enterpriseSearch.searchApplicationsGettingStarted;
     this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
     this.start = docLinks.links.enterpriseSearch.start;
     this.supportedNlpModels = docLinks.links.enterpriseSearch.supportedNlpModels;
