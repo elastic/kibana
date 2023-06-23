@@ -11,7 +11,14 @@ import useAsync from 'react-use/lib/useAsync';
 import React, { useEffect, useState } from 'react';
 
 import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
-import { EuiSpacer, EuiSelectable, EuiLoadingSpinner, EuiSelectableOption } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiSelectable,
+  EuiLoadingSpinner,
+  EuiSelectableOption,
+  EuiFieldSearch,
+  EuiHighlight,
+} from '@elastic/eui';
 
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 
@@ -25,52 +32,51 @@ export const NavigationEmbeddableDashboardList = ({ onDashboardSelected, ...othe
     (state) => state.componentState.currentDashboardId
   );
 
+  const [searchString, setSearchString] = useState<string>('');
   const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
-    return await navEmbeddable.fetchDashboardList();
-  }, []);
+    return await navEmbeddable.fetchDashboardList(searchString);
+  }, [searchString]);
 
   useEffect(() => {
     const dashboardOptions =
       dashboardList?.map((dashboard: DashboardItem) => {
-        const isCurrentDashboard = dashboard.id === currentDashboardId;
-        if (isCurrentDashboard) {
-          onDashboardSelected(dashboard);
-        }
         return {
           data: dashboard, // just store the ID here - that's all that is necessary
           className: classNames({
-            'navEmbeddable-currentDashboard': isCurrentDashboard,
+            'navEmbeddable-currentDashboard': dashboard.id === currentDashboardId,
           }),
-          checked: isCurrentDashboard ? 'on' : undefined,
           label: dashboard.attributes.title,
         } as EuiSelectableOption;
       }) ?? [];
     setDashboardListOptions(dashboardOptions);
   }, [dashboardList, currentDashboardId, onDashboardSelected]);
 
-  return loadingDashboardList ? (
-    <EuiLoadingSpinner />
-  ) : (
-    <EuiSelectable
-      {...other} // needed so that it's treated as part of the form
-      searchable // will need our own implementation of search, since we can't fetch **all** dashboards in one go
-      singleSelection={'always'}
-      options={dashboardListOptions}
-      onChange={(newOptions, _, selected) => {
-        onDashboardSelected(selected.data as DashboardItem);
-        setDashboardListOptions(newOptions);
-      }}
-      listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}
-    >
-      {(list, search) => (
-        <>
-          {search}
-          <EuiSpacer size="s" />
-          {list}
-        </>
-      )}
-    </EuiSelectable>
+  // {...other} is needed so all inner elements are treated as part of the form
+  return (
+    <div {...other}>
+      <EuiFieldSearch
+        isClearable={true}
+        placeholder={'Search for a dashboard or enter external URL'}
+        onSearch={(value) => {
+          setSearchString(value);
+        }}
+      />
+      <EuiSpacer size="s" />
+      <EuiSelectable
+        singleSelection={true}
+        options={dashboardListOptions}
+        isLoading={loadingDashboardList}
+        onChange={(newOptions, _, selected) => {
+          onDashboardSelected(selected.data as DashboardItem);
+          setDashboardListOptions(newOptions);
+        }}
+        listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}
+        renderOption={(option) => <EuiHighlight search={searchString}>{option.label}</EuiHighlight>}
+      >
+        {(list) => list}
+      </EuiSelectable>
+    </div>
   );
 };
