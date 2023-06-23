@@ -12,6 +12,12 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 import { DashboardLink, NavigationEmbeddableReduxState } from './types';
 
 export const navigationEmbeddableReducers = {
+  setLoading: (
+    state: WritableDraft<NavigationEmbeddableReduxState>,
+    action: PayloadAction<boolean>
+  ) => {
+    state.output.loading = action.payload;
+  },
   setDashboardList: (
     state: WritableDraft<NavigationEmbeddableReduxState>,
     action: PayloadAction<DashboardItem[]>

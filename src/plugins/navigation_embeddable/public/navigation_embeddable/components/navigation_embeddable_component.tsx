@@ -67,7 +67,7 @@ export const NavigationEmbeddableComponent = () => {
       <EuiListGroup flush listItems={dashboardListGroupItems} size="s" />
       <EuiPopover
         button={addLinkButton}
-        panelStyle={{ width: 300 }}
+        panelStyle={{ width: 400 }}
         isOpen={isEditPopoverOpen}
         panelPaddingSize="s"
         closePopover={() => setIsEditPopoverOpen(false)}

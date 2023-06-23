@@ -8,7 +8,15 @@
 
 import React, { useState } from 'react';
 
-import { EuiForm, EuiButton, EuiFormRow, EuiFieldText, EuiPopoverFooter } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiButton,
+  EuiFormRow,
+  EuiFieldText,
+  EuiPopoverFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
@@ -27,13 +35,13 @@ export const NavigationEmbeddableLinkEditor = ({
   return (
     <>
       <EuiForm component="form">
-        <EuiFormRow label="Dashboard">
+        <EuiFormRow label="Choose destination">
           <NavigationEmbeddableDashboardList onDashboardSelected={setSelectedDashboard} />
         </EuiFormRow>
         <EuiFormRow label="Text">
           <EuiFieldText
             placeholder={
-              selectedDashboard ? selectedDashboard.attributes.title : 'Select a dashboard'
+              selectedDashboard ? selectedDashboard.attributes.title : 'Enter text for link'
             }
             value={dashboardLabel}
             onChange={(e) => {
@@ -44,24 +52,27 @@ export const NavigationEmbeddableLinkEditor = ({
         </EuiFormRow>
       </EuiForm>
       <EuiPopoverFooter>
-        <EuiButton
-          size="s"
-          fullWidth
-          onClick={() => {
-            if (selectedDashboard) {
-              navEmbeddable.dispatch.addLink({
-                label: dashboardLabel,
-                id: selectedDashboard.id,
-                title: selectedDashboard.attributes.title,
-                description: selectedDashboard.attributes.description,
-              });
-            }
-            setDashboardLabel('');
-            setIsPopoverOpen(false);
-          }}
-        >
-          Confirm
-        </EuiButton>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              onClick={() => {
+                if (selectedDashboard) {
+                  navEmbeddable.dispatch.addLink({
+                    label: dashboardLabel,
+                    id: selectedDashboard.id,
+                    title: selectedDashboard.attributes.title,
+                    description: selectedDashboard.attributes.description,
+                  });
+                }
+                setDashboardLabel('');
+                setIsPopoverOpen(false);
+              }}
+            >
+              Apply
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopoverFooter>
     </>
   );

@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
+import { isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import { distinctUntilChanged, Subscription } from 'rxjs';
-import { batch } from 'react-redux';
-import ReactDOM from 'react-dom';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
@@ -18,11 +19,10 @@ import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { coreServices, dashboardServices } from '../services/navigation_embeddable_services';
 import { navigationEmbeddableReducers } from '../navigation_embeddable_reducers';
 import { NavigationEmbeddableInput, NavigationEmbeddableReduxState } from '../types';
+import { coreServices, dashboardServices } from '../services/navigation_embeddable_services';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
-import { isEmpty, isEqual } from 'lodash';
 
 export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
 
@@ -114,11 +114,12 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     const { dashboardLinks } = this.getInput();
 
     if (dashboardLinks && !isEmpty(dashboardLinks)) {
+      this.dispatch.setLoading(true);
       const findDashboardsService = await dashboardServices.findDashboardsService();
       const responses = await findDashboardsService.findByIds(
         dashboardLinks.map((link) => link.id)
       );
-      const componentStateDashboardLinks = responses.map((response, i) => {
+      const updatedDashboardLinks = responses.map((response, i) => {
         if (response.status === 'error') {
           throw new Error('failure');
         }
@@ -129,8 +130,10 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
           description: response.attributes.description,
         };
       });
-
-      this.dispatch.setDashboardLinks(componentStateDashboardLinks);
+      batch(() => {
+        this.dispatch.setDashboardLinks(updatedDashboardLinks);
+        this.dispatch.setLoading(false);
+      });
     } else {
       this.dispatch.setDashboardLinks([]);
     }
@@ -159,11 +162,14 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     return responses.hits;
   }
 
-  public reload() {}
+  public async reload() {
+    await this.updateDashboardLinks();
+  }
 
   public destroy() {
     super.destroy();
     this.cleanupStateTools();
+    this.subscriptions.unsubscribe();
     if (this.node) ReactDOM.unmountComponentAtNode(this.node);
   }
 
