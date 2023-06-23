@@ -40,11 +40,6 @@ export const navigationEmbeddableReducers = {
     state: WritableDraft<NavigationEmbeddableReduxState>,
     action: PayloadAction<DashboardLink>
   ) => {
-    if (!state.componentState.dashboardLinks) {
-      state.componentState.dashboardLinks = [];
-    }
-    state.componentState.dashboardLinks.push(action.payload);
-
     if (!state.explicitInput.dashboardLinks) {
       state.explicitInput.dashboardLinks = [];
     }

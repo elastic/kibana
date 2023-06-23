@@ -7,8 +7,9 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import ReactDOM from 'react-dom';
+import { distinctUntilChanged, Subscription } from 'rxjs';
 import { batch } from 'react-redux';
+import ReactDOM from 'react-dom';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
@@ -21,7 +22,7 @@ import { coreServices, dashboardServices } from '../services/navigation_embeddab
 import { navigationEmbeddableReducers } from '../navigation_embeddable_reducers';
 import { NavigationEmbeddableInput, NavigationEmbeddableReduxState } from '../types';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 
 export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
 
@@ -47,6 +48,7 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
 
   private node?: HTMLElement;
+  private subscriptions: Subscription = new Subscription();
 
   // state management
   public select: NavigationReduxEmbeddableTools['select'];
@@ -83,36 +85,33 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     this.initialize();
   }
 
-  public destroy() {
-    super.destroy();
-    this.cleanupStateTools();
-    if (this.node) ReactDOM.unmountComponentAtNode(this.node);
-  }
-
-  public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
-    }
-    this.node = node;
-
-    ReactDOM.render(
-      <KibanaThemeProvider theme$={coreServices.theme.theme$}>
-        <NavigationEmbeddableContext.Provider value={this}>
-          <NavigationEmbeddableComponent />
-        </NavigationEmbeddableContext.Provider>
-      </KibanaThemeProvider>,
-      node
-    );
-  }
-
   private async initialize() {
-    const { dashboardLinks } = this.getInput();
-
     const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
       .componentState.lastSavedId;
     if (parentDashboardId) {
       this.dispatch.setCurrentDashboardId(parentDashboardId);
     }
+    await this.updateDashboardLinks();
+
+    this.setupSubscriptions();
+    this.setInitializationFinished();
+  }
+
+  private setupSubscriptions() {
+    /**
+     * when input dashboard links changes, update component state to match
+     **/
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(distinctUntilChanged((a, b) => isEqual(a.dashboardLinks, b.dashboardLinks)))
+        .subscribe(async () => {
+          await this.updateDashboardLinks();
+        })
+    );
+  }
+
+  private async updateDashboardLinks() {
+    const { dashboardLinks } = this.getInput();
 
     if (dashboardLinks && !isEmpty(dashboardLinks)) {
       const findDashboardsService = await dashboardServices.findDashboardsService();
@@ -132,19 +131,9 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
       });
 
       this.dispatch.setDashboardLinks(componentStateDashboardLinks);
-      console.log('componentStateDashboardLinks', componentStateDashboardLinks);
+    } else {
+      this.dispatch.setDashboardLinks([]);
     }
-
-    this.setInitializationFinished();
-    console.log(dashboardLinks);
-  }
-
-  public async getDashboard(id: string) {
-    const findDashboardsService = await dashboardServices.findDashboardsService();
-
-    const responses = await findDashboardsService.findByIds([id]);
-    console.log(responses);
-    return responses;
   }
 
   public async fetchDashboardList(
@@ -171,4 +160,26 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
   }
 
   public reload() {}
+
+  public destroy() {
+    super.destroy();
+    this.cleanupStateTools();
+    if (this.node) ReactDOM.unmountComponentAtNode(this.node);
+  }
+
+  public render(node: HTMLElement) {
+    if (this.node) {
+      ReactDOM.unmountComponentAtNode(this.node);
+    }
+    this.node = node;
+
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={coreServices.theme.theme$}>
+        <NavigationEmbeddableContext.Provider value={this}>
+          <NavigationEmbeddableComponent />
+        </NavigationEmbeddableContext.Provider>
+      </KibanaThemeProvider>,
+      node
+    );
+  }
 }
