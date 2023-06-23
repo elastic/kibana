@@ -23,10 +23,10 @@ import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { createSkipError, throwRetryableError, throwUnrecoverableError } from './errors';
-import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
   calculateDelay,
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
@@ -439,17 +439,20 @@ describe('TaskManagerRunner', () => {
         `[Error: type: Bad Request]`
       );
 
-      expect(store.update).toHaveBeenCalledWith({
-        ...mockInstance({
-          id,
-          attempts: initialAttempts + 1,
-          schedule: undefined,
-        }),
-        status: TaskStatus.Idle,
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
-      });
+      expect(store.update).toHaveBeenCalledWith(
+        {
+          ...mockInstance({
+            id,
+            attempts: initialAttempts + 1,
+            schedule: undefined,
+          }),
+          status: TaskStatus.Idle,
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        },
+        { validate: false }
+      );
     });
 
     test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails for version conflict`, async () => {
@@ -841,7 +844,9 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+        validate: true,
+      });
     });
 
     test('reschedules tasks that return a schedule', async () => {
@@ -869,7 +874,9 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+        validate: true,
+      });
     });
 
     test(`doesn't reschedule recurring tasks that throw an unrecoverable error`, async () => {
@@ -943,7 +950,9 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
+      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+        validate: true,
+      });
     });
 
     test('removes non-recurring tasks after they complete', async () => {
@@ -2039,7 +2048,7 @@ describe('TaskManagerRunner', () => {
 
     const instance = mockInstance(opts.instance);
 
-    const store = taskStoreMock.create();
+    const store = bufferedTaskStoreMock.create();
     const usageCounter = usageCountersServiceMock.createSetupContract().createUsageCounter('test');
 
     store.update.mockResolvedValue(instance);

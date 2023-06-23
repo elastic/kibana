@@ -90,7 +90,7 @@ export interface TaskRunning<Stage extends TaskRunningStage, Instance> {
 }
 
 export interface Updatable {
-  update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
+  update(doc: ConcreteTaskInstance, options: { validate: boolean }): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
 }
 
@@ -431,27 +431,30 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       this.instance = asReadyToRun(
-        (await this.bufferedTaskStore.update({
-          ...taskWithoutEnabled(taskInstance),
-          status: TaskStatus.Running,
-          startedAt: now,
-          attempts,
-          retryAt:
-            (this.instance.task.schedule
-              ? maxIntervalFromDate(
-                  now,
-                  this.instance.task.schedule.interval,
-                  this.definition.timeout
-                )
-              : this.getRetryDelay({
-                  attempts,
-                  // Fake an error. This allows retry logic when tasks keep timing out
-                  // and lets us set a proper "retryAt" value each time.
-                  error: new Error('Task timeout'),
-                  addDuration: this.definition.timeout,
-                })) ?? null,
-          // This is a safe convertion as we're setting the startAt above
-        })) as ConcreteTaskInstanceWithStartedAt
+        (await this.bufferedTaskStore.update(
+          {
+            ...taskWithoutEnabled(taskInstance),
+            status: TaskStatus.Running,
+            startedAt: now,
+            attempts,
+            retryAt:
+              (this.instance.task.schedule
+                ? maxIntervalFromDate(
+                    now,
+                    this.instance.task.schedule.interval,
+                    this.definition.timeout
+                  )
+                : this.getRetryDelay({
+                    attempts,
+                    // Fake an error. This allows retry logic when tasks keep timing out
+                    // and lets us set a proper "retryAt" value each time.
+                    error: new Error('Task timeout'),
+                    addDuration: this.definition.timeout,
+                  })) ?? null,
+            // This is a safe convertion as we're setting the startAt above
+          },
+          { validate: false }
+        )) as ConcreteTaskInstanceWithStartedAt
       );
 
       const timeUntilClaimExpiresAfterUpdate =
@@ -512,14 +515,17 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
     return promiseResult(
-      this.bufferedTaskStore.update({
-        ...taskWithoutEnabled(this.instance.task),
-        status: TaskStatus.Idle,
-        attempts: this.instance.task.attempts + 1,
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
-      })
+      this.bufferedTaskStore.update(
+        {
+          ...taskWithoutEnabled(this.instance.task),
+          status: TaskStatus.Idle,
+          attempts: this.instance.task.attempts + 1,
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        },
+        { validate: false }
+      )
     );
   }
 
@@ -656,7 +662,8 @@ export class TaskManagerRunner implements TaskRunner {
               ownerId: null,
             },
             taskWithoutEnabled(this.instance.task)
-          )
+          ),
+          { validate: true }
         )
       );
     }

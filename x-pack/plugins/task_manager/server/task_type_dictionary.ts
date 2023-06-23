@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ObjectType } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { ObjectType } from '@kbn/config-schema';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
@@ -66,6 +67,13 @@ export interface TaskRegisterDefinition {
    * The default value, if not given, is 0.
    */
   maxConcurrency?: number;
+  stateSchemaByVersion?: Record<
+    number,
+    {
+      schema: ObjectType;
+      up: (state: Record<string, unknown>) => Record<string, unknown>;
+    }
+  >;
 
   paramsSchema?: ObjectType;
 }

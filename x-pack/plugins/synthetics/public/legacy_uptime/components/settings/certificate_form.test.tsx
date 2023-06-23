@@ -25,7 +25,8 @@ describe('CertificateForm', () => {
           fieldErrors={null}
           isDisabled={false}
         />
-      )
+        // dive() removes all unnecessary React-Router wrapping elements
+      ).dive()
     ).toMatchSnapshot();
   });
 

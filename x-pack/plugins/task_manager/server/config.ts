@@ -144,6 +144,7 @@ export const configSchema = schema.object(
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
     }),
     requeue_invalid_tasks: requeueInvalidTasksConfig,
+    allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
   },
   {
     validate: (config) => {
