@@ -60,6 +60,7 @@ export type ConnectorConfiguration = Record<
   string,
   ConnectorConfigProperties | ConnectorConfigCategoryProperties | null
 > & {
+  document_level_security?: ConnectorConfigProperties;
   extract_full_html?: { label: string; value: boolean }; // This only exists for Crawler
   use_text_extraction_service?: ConnectorConfigProperties; // This only exists for SharePoint Online
 };

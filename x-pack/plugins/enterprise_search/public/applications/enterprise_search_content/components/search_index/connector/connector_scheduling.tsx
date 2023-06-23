@@ -81,6 +81,9 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     return <></>;
   }
 
+  const isDocumentLevelSecurityDisabled =
+    !index.connector.configuration.document_level_security?.value;
+
   if (
     index.connector.status === ConnectorStatus.CREATED ||
     index.connector.status === ConnectorStatus.NEEDS_CONFIGURATION
@@ -200,25 +203,51 @@ export const ConnectorSchedulingComponent: React.FC = () => {
         </EuiFlexItem>
         {shouldShowAccessControlSync && (
           <EuiFlexItem>
-            <SchedulePanel
-              title={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.title',
-                { defaultMessage: 'Document Level Security' }
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <SchedulePanel
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.title',
+                    { defaultMessage: 'Document Level Security' }
+                  )}
+                  description={i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.description',
+                    {
+                      defaultMessage:
+                        'Control the documents users can access, based on their permissions and roles. Schedule syncs to keep these access controls up to date.',
+                    }
+                  )}
+                >
+                  <ConnectorContentScheduling
+                    type={SyncJobType.ACCESS_CONTROL}
+                    index={index}
+                    hasPlatinumLicense={hasPlatinumLicense}
+                  />
+                </SchedulePanel>
+              </EuiFlexItem>
+              {isDocumentLevelSecurityDisabled && (
+                <EuiFlexItem>
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.title',
+                      { defaultMessage: 'Permissions and identity syncs not allowed' }
+                    )}
+                    color="warning"
+                    iconType="iInCircle"
+                  >
+                    <p>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.text',
+                        {
+                          defaultMessage:
+                            'Enable DLS connector’s configurations to activate these options.',
+                        }
+                      )}
+                    </p>
+                  </EuiCallOut>
+                </EuiFlexItem>
               )}
-              description={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.description',
-                {
-                  defaultMessage:
-                    'Control the documents users can access, based on their permissions and roles. Schedule syncs to keep these access controls up to date.',
-                }
-              )}
-            >
-              <ConnectorContentScheduling
-                type={SyncJobType.ACCESS_CONTROL}
-                index={index}
-                hasPlatinumLicense={hasPlatinumLicense}
-              />
-            </SchedulePanel>
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
