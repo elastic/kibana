@@ -152,7 +152,11 @@ export const getFieldEditorOpener =
 
       let field: Field | undefined;
       if (dataViewField) {
-        if (isExistingRuntimeField && dataViewField.runtimeField!.type === 'composite') {
+        if (
+          isExistingRuntimeField &&
+          dataViewField.runtimeField!.type === 'composite' &&
+          dataViewField.spec.parentName
+        ) {
           // Composite runtime subfield
           const [compositeName] = fieldNameToEdit!.split('.');
           field = {
