@@ -1092,9 +1092,9 @@ describe('ManifestManager', () => {
       const artifactToBeRemoved = await context.artifactClient.getArtifact('');
       expect(artifactToBeRemoved).not.toBeUndefined();
 
-      expect(context.artifactClient.deleteArtifact).toHaveBeenCalledWith(
-        getArtifactId(artifactToBeRemoved!)
-      );
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        getArtifactId(artifactToBeRemoved!),
+      ]);
     });
 
     test('When there is no artifact to be removed', async () => {
@@ -1131,7 +1131,7 @@ describe('ManifestManager', () => {
 
       await manifestManager.cleanup(manifest);
 
-      expect(context.artifactClient.deleteArtifact).toHaveBeenCalledTimes(0);
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledTimes(0);
     });
   });
 });

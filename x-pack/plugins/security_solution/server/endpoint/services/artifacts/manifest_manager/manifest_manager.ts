@@ -686,7 +686,7 @@ export class ManifestManager {
   }
 
   /**
-   * @deprecated
+   *
    * Cleanup .fleet-artifacts index if there are some orphan artifacts
    */
   public async cleanup(manifest: Manifest) {
@@ -718,6 +718,7 @@ export class ManifestManager {
       }
 
       const badArtifacts = [];
+      const badArtifactIds = [];
 
       const manifestArtifactsIds = manifest
         .getAllArtifacts()
@@ -729,6 +730,7 @@ export class ManifestManager {
 
         if (!isArtifactInManifest) {
           badArtifacts.push(fleetArtifact);
+          badArtifactIds.push(artifactId);
         }
       }
 
@@ -740,16 +742,7 @@ export class ManifestManager {
         new EndpointError(`Cleaning up ${badArtifacts.length} orphan artifacts`, badArtifacts)
       );
 
-      await pMap(
-        badArtifacts,
-        async (badArtifact) => this.artifactClient.deleteArtifact(getArtifactId(badArtifact)),
-        {
-          concurrency: 5,
-          /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
-           * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
-          stopOnError: false,
-        }
-      );
+      await this.artifactClient.bulkDeleteArtifacts(badArtifactIds);
 
       this.logger.info(`All orphan artifacts has been removed successfully`);
     } catch (error) {
