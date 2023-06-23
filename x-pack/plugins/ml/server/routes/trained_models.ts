@@ -313,8 +313,12 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           const { with_pipelines: withPipelines, force } = request.query;
 
           if (withPipelines) {
-            // first we need to delete pipelines, otherwise ml api return an error
-            await modelsProvider(client).deleteModelPipelines(modelId.split(','));
+            try {
+              // first we need to delete pipelines, otherwise ml api return an error
+              await modelsProvider(client).deleteModelPipelines(modelId.split(','));
+            } catch (e) {
+              // temp fail silently
+            }
           }
 
           const body = await mlClient.deleteTrainedModel({
