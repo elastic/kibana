@@ -25,6 +25,7 @@ export const ActionTypes = {
   severity: 'severity',
   create_case: 'create_case',
   delete_case: 'delete_case',
+  category: 'category',
 } as const;
 
 type ActionTypeKeys = keyof typeof ActionTypes;

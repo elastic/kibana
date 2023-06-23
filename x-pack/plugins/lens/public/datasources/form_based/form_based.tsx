@@ -42,6 +42,7 @@ import type {
   UserMessage,
   FrameDatasourceAPI,
   StateSetter,
+  IndexPatternMap,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -171,10 +172,12 @@ export function getFormBasedDatasource({
   const { uiSettings, settings } = core;
 
   const DATASOURCE_ID = 'formBased';
+  const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
   const formBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState> = {
     id: DATASOURCE_ID,
+    alias: ALIAS_IDS,
 
     initialize(
       persistedState?: FormBasedPersistedState,
@@ -496,7 +499,7 @@ export function getFormBasedDatasource({
       );
     },
 
-    uniqueLabels(state: FormBasedPrivateState) {
+    uniqueLabels(state: FormBasedPrivateState, indexPatternsMap: IndexPatternMap) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
 
@@ -507,7 +510,15 @@ export function getFormBasedDatasource({
           return;
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
-          columnLabelMap[columnId] = uniqueLabelGenerator(column.label);
+          columnLabelMap[columnId] = uniqueLabelGenerator(
+            column.customLabel
+              ? column.label
+              : operationDefinitionMap[column.operationType].getDefaultLabel(
+                  column,
+                  indexPatternsMap[layer.indexPatternId],
+                  layer.columns
+                )
+          );
         });
       });
 
@@ -518,7 +529,7 @@ export function getFormBasedDatasource({
       domElement: Element,
       props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
     ) => {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
+      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const uniqueLabel = columnLabelMap[props.columnId];
       const formattedLabel = wrapOnDot(uniqueLabel);
 
@@ -550,7 +561,7 @@ export function getFormBasedDatasource({
       domElement: Element,
       props: DatasourceDimensionEditorProps<FormBasedPrivateState>
     ) => {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
+      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
 
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -744,12 +755,13 @@ export function getFormBasedDatasource({
     },
 
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<FormBasedPrivateState>) {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(state);
+      const columnLabelMap = formBasedDatasource.uniqueLabels(state, indexPatterns);
       const layer = state.layers[layerId];
       const visibleColumnIds = layer.columnOrder.filter((colId) => !isReferenced(layer, colId));
 
       return {
         datasourceId: DATASOURCE_ID,
+        datasourceAliasIds: ALIAS_IDS,
         getTableSpec: () => {
           // consider also referenced columns in this case
           // but map fields to the top referencing column

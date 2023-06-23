@@ -160,9 +160,11 @@ export function DashboardApp({
       },
       getInitialInput,
       validateLoadedSavedObject: validateOutcome,
+      isEmbeddedExternally: Boolean(embedSettings), // embed settings are only sent if the dashboard URL has `embed=true`
     });
   }, [
     history,
+    embedSettings,
     validateOutcome,
     getScopedHistory,
     isScreenshotMode,

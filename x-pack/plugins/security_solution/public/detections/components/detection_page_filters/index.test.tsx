@@ -33,6 +33,8 @@ const mockedDataViewServiceGetter = jest.fn(() => {
   } as unknown as DataView);
 });
 
+const mockDataViewCreator = jest.fn();
+
 const getKibanaServiceWithMockedGetter = (
   mockedDataViewGetter: DataViewsServicePublic['get'] = mockedDataViewServiceGetter
 ) => {
@@ -42,6 +44,7 @@ const getKibanaServiceWithMockedGetter = (
       ...basicKibanaServicesMock.dataViews,
       clearInstanceCache: jest.fn(),
       get: mockedDataViewGetter,
+      create: mockDataViewCreator,
     },
   };
 };
@@ -55,7 +58,6 @@ const TestComponent = (props: Partial<ComponentProps<typeof DetectionPageFilterS
     <TestProviders>
       <DetectionPageFilterSet
         chainingSystem="HIERARCHICAL"
-        dataViewId=""
         onFilterChange={onFilterChangeMock}
         {...props}
       />
@@ -84,29 +86,32 @@ describe('Detection Page Filters', () => {
     });
   });
 
-  it('should check all the fields till any absent field is found', async () => {
+  it('should create dataview on render', async () => {
     render(<TestComponent />);
-    expect(screen.getByTestId(TEST_IDS.FILTER_LOADING)).toBeInTheDocument();
+
     await waitFor(() => {
-      expect(getFieldByNameMock).toHaveBeenCalledTimes(4);
-      expect(kibanaServiceDefaultMock.dataViews.clearInstanceCache).toHaveBeenCalledTimes(0);
+      expect(mockDataViewCreator).toHaveBeenCalledTimes(1);
+      expect(mockDataViewCreator).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'security_solution_alerts_dv',
+          name: 'Security Solution Alerts DataView',
+          allowNoIndex: true,
+          title: '.siem-signals-spacename',
+        })
+      );
     });
   });
 
-  it('should stop checking fields if blank field is found and clear the cache', async () => {
-    const getFieldByNameLocalMock = jest.fn(() => false);
-    const mockGetter = jest.fn(() =>
-      Promise.resolve({ getFieldByName: getFieldByNameLocalMock } as unknown as DataView)
-    );
-    const modifiedKibanaServicesMock = getKibanaServiceWithMockedGetter(mockGetter);
-    (useKibana as jest.Mock).mockReturnValueOnce({ services: modifiedKibanaServicesMock });
+  it('should clear cache on unmount', async () => {
+    const { unmount } = render(<TestComponent />);
 
-    render(<TestComponent />);
-    expect(screen.getByTestId(TEST_IDS.FILTER_LOADING)).toBeInTheDocument();
     await waitFor(() => {
-      expect(getFieldByNameLocalMock).toHaveBeenCalledTimes(1);
-      expect(modifiedKibanaServicesMock.dataViews.clearInstanceCache).toHaveBeenCalledTimes(1);
-      expect(screen.getByTestId(TEST_IDS.MOCKED_CONTROL)).toBeInTheDocument();
+      // wait for the document to completely load.
+      unmount();
+    });
+
+    await waitFor(() => {
+      expect(kibanaServiceDefaultMock.dataViews.clearInstanceCache).toHaveBeenCalledTimes(1);
     });
   });
 
