@@ -48,6 +48,7 @@ interface UserDetailsContentComponentProps {
   managedUser: ManagedUserData;
   riskScoreState: RiskScoreState<RiskScoreEntity.user>;
   contextID: string;
+  scopeId: string;
   isDraggable: boolean;
 }
 
@@ -61,6 +62,7 @@ export const UserDetailsContentComponent = ({
   managedUser,
   riskScoreState,
   contextID,
+  scopeId,
   isDraggable,
 }: UserDetailsContentComponentProps) => {
   const { euiTheme } = useEuiTheme();
@@ -130,9 +132,19 @@ export const UserDetailsContentComponent = ({
       <RiskScoreField riskScoreState={riskScoreState} />
       <EuiHorizontalRule margin="xs" />
       <EuiSpacer size="xxl" />
-      <ObservedUser observedUser={observedUser} contextID={contextID} isDraggable={isDraggable} />
+      <ObservedUser
+        observedUser={observedUser}
+        contextID={contextID}
+        scopeId={scopeId}
+        isDraggable={isDraggable}
+      />
       <EuiSpacer />
-      <ManagedUser managedUser={managedUser} contextID={contextID} isDraggable={isDraggable} />
+      <ManagedUser
+        managedUser={managedUser}
+        contextID={contextID}
+        scopeId={scopeId}
+        isDraggable={isDraggable}
+      />
     </>
   );
 };
@@ -140,10 +152,12 @@ export const UserDetailsContentComponent = ({
 export const UserDetailsContent = ({
   userName,
   contextID,
+  scopeId,
   isDraggable = false,
 }: {
   userName: string;
   contextID: string;
+  scopeId: string;
   isDraggable?: boolean;
 }) => {
   const { to, from, isInitializing } = useGlobalTime();
@@ -174,6 +188,7 @@ export const UserDetailsContent = ({
           }}
           riskScoreState={riskScoreState}
           contextID={contextID}
+          scopeId={scopeId}
           isDraggable={isDraggable}
         />
       )}
