@@ -6,99 +6,47 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  KibanaRequest,
-  Logger,
-  IBasePath,
-  SavedObjectsServiceStart,
-  UiSettingsServiceStart,
-  PluginInitializerContext,
-  CoreSetup,
-  HttpServiceSetup,
-  CoreKibanaRequest,
-  FakeRawRequest,
-  Headers,
-  SavedObjectsClientContract,
-  IClusterClient,
-} from '@kbn/core/server';
-import { LicenseType } from '@kbn/licensing-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { KibanaRequest, CoreSetup, IClusterClient } from '@kbn/core/server';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { CsvGenerator } from '@kbn/generate-csv';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { Writable } from 'stream';
 import { CancellationToken } from '@kbn/reporting-common';
 import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
 import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/types';
-import {
-  CSV_REPORT_TYPE_V2,
-  LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_ENTERPRISE,
-  LICENSE_TYPE_GOLD,
-  LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_TRIAL,
-} from '../../../common/constants';
-import { ReportingConfigType } from '../../config';
-import { decryptJobHeaders, ExportType } from '../common';
+import { CSV_REPORT_TYPE_V2 } from '../../../common/constants';
+import { ExportType, ExportTypeSetupDeps, ExportTypeStartDeps } from '../common';
 import { ReportingRequestHandlerContext } from '../../types';
 import { getFieldFormats } from '../../services';
+import { decryptJobHeaders } from '../common/decrypt_job_headers';
 
 /*
  * @TODO move to be within @kbn/reporitng-export-types
  */
-export interface CsvExportTypeSetupDeps {
-  basePath: Pick<IBasePath, 'set'>;
-  spaces?: SpacesPluginSetup;
-  logger: Logger;
-}
 
-export interface CsvExportTypeStartDeps {
-  savedObjects: SavedObjectsServiceStart;
-  uiSettings: UiSettingsServiceStart;
-  logger: Logger;
+export interface CsvExportTypeStartDeps extends ExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
   esClient: IClusterClient;
 }
 
-export class CsvV2ExportType
-  implements
-    ExportType<
-      CsvExportTypeSetupDeps,
-      CsvExportTypeStartDeps,
-      JobParamsCsvFromSavedObject,
-      TaskPayloadCsvFromSavedObject
-    >
-{
-  private http: HttpServiceSetup;
-
+export class CsvV2ExportType extends ExportType<
+  JobParamsCsvFromSavedObject,
+  TaskPayloadCsvFromSavedObject
+> {
   id = CSV_REPORT_TYPE_V2;
-  name = 'CSV'; // CSV_V2?
-  validLicenses: LicenseType[] = [
-    LICENSE_TYPE_TRIAL,
-    LICENSE_TYPE_CLOUD_STANDARD,
-    LICENSE_TYPE_GOLD,
-    LICENSE_TYPE_PLATINUM,
-    LICENSE_TYPE_ENTERPRISE,
-  ];
+  name = 'csv_v2';
   jobType = CONTENT_TYPE_CSV;
   jobContentEncoding = 'base64' as const;
-  jobContentExtension = 'png' as const;
-  setupDeps!: CsvExportTypeSetupDeps;
-  startDeps!: CsvExportTypeStartDeps;
+  jobContentExtension = 'csv' as const;
+  declare startDeps: CsvExportTypeStartDeps;
 
-  constructor(
-    core: CoreSetup,
-    private config: ReportingConfigType,
-    private logger: Logger,
-    private context: PluginInitializerContext<ReportingConfigType>
-  ) {
-    this.logger = logger.get('pdf-export');
+  super(core: CoreSetup) {
+    this.logger = this.logger.get('csv-export');
     this.http = core.http;
   }
 
-  setup(setupDeps: CsvExportTypeSetupDeps) {
+  setup(setupDeps: ExportTypeSetupDeps) {
     this.setupDeps = setupDeps;
   }
 
@@ -106,73 +54,15 @@ export class CsvV2ExportType
     this.startDeps = startDeps;
   }
 
-  public async getEsClient() {
-    const startDeps = await this.startDeps;
-    return startDeps.esClient;
+  public getEsClient() {
+    return this.startDeps.esClient;
   }
 
-  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.setupDeps!.spaces?.spacesService;
-    if (spacesService) {
-      const spaceId = spacesService?.getSpaceId(request);
-
-      if (spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Request uses Space ID: ${spaceId}`);
-        return spaceId;
-      } else {
-        logger.debug(`Request uses default Space`);
-      }
-    }
-  }
-
-  private async getSavedObjectsClient(request: KibanaRequest) {
-    const { savedObjects } = this.startDeps;
-    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
-  }
-
-  public getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-    const { uiSettings: uiSettingsService } = this.startDeps;
-    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
-    return scopedUiSettingsService;
-  }
-
-  public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
-    const spacesService = this.setupDeps.spaces?.spacesService;
-    const spaceId = await this.getSpaceId(request, logger);
-
-    if (spacesService && spaceId) {
-      logger.info(`Creating UI Settings Client for space: ${spaceId}`);
-    }
-    const savedObjectsClient = await this.getSavedObjectsClient(request);
-    return await this.getUiSettingsServiceFactory(savedObjectsClient);
-  }
-
-  public getFakeRequest(
-    headers: Headers,
-    spaceId: string | undefined,
-    logger = this.logger
-  ): KibanaRequest {
-    const rawRequest: FakeRawRequest = {
-      headers,
-      path: '/',
-    };
-    const fakeRequest = CoreKibanaRequest.from(rawRequest);
-
-    const spacesService = this.setupDeps.spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        this.setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
-    return fakeRequest;
-  }
-
-  public async createJob(
+  public createJob = async (
     jobParams: JobParamsCsvFromSavedObject,
     _context: ReportingRequestHandlerContext,
     req: KibanaRequest
-  ) {
+  ) => {
     // 1. Validation of locatorParams
     const { locatorParams } = jobParams;
     const { id, params } = locatorParams[0];
@@ -195,15 +85,15 @@ export class CsvV2ExportType
     const locatorClient = await discoverPluginStart.locator.asScopedClient(req);
     const title = await locatorClient.titleFromLocator(params);
 
-    return { ...jobParams, title };
-  }
+    return { ...jobParams, title, isDeprecated: false };
+  };
 
-  public async runTask(
+  public runTask = async (
     job: TaskPayloadCsvFromSavedObject,
     jobId: string,
     cancellationToken: CancellationToken,
     stream: Writable
-  ) {
+  ) => {
     const config = this.config;
     const { encryptionKey, csv: csvConfig } = config;
     const logger = this.logger.get(`execute:${jobId}`);
@@ -245,5 +135,5 @@ export class CsvV2ExportType
       stream
     );
     return await csv.generateData();
-  }
+  };
 }
