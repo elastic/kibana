@@ -4036,6 +4036,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-service@link:packages/kbn-data-service":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-view-editor-plugin@link:src/plugins/data_view_editor":
   version "0.0.0"
   uid ""
@@ -5708,7 +5712,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-field-list-plugin@link:src/plugins/unified_field_list":
+"@kbn/unified-field-list@link:packages/kbn-unified-field-list":
   version "0.0.0"
   uid ""
 
