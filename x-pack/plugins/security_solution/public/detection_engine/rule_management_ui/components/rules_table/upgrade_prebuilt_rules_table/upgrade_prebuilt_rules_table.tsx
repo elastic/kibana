@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
@@ -36,20 +35,23 @@ const NO_ITEMS_MESSAGE = (
  * Table Component for displaying rules that have available updates
  */
 export const UpgradePrebuiltRulesTable = React.memo(() => {
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
-
   const upgradeRulesTableContext = useUpgradePrebuiltRulesTableContext();
 
   const {
-    state: { rules, filteredRules, isFetched, isLoading, isRefetching, selectedRules },
+    state: {
+      rules,
+      filteredRules,
+      isFetched,
+      isLoading,
+      selectedRules,
+      shouldShowLoadingOverlay,
+      shouldShowLinearProgress,
+    },
     actions: { selectRules },
   } = upgradeRulesTableContext;
   const rulesColumns = useUpgradePrebuiltRulesTableColumns();
 
   const isTableEmpty = isFetched && rules.length === 0;
-
-  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
-  const shouldShowLoadingOverlay = !isFetched && isRefetching;
 
   return (
     <>

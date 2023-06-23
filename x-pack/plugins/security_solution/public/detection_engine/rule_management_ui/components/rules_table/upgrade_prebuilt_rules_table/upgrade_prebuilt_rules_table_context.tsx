@@ -7,6 +7,7 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
@@ -50,9 +51,14 @@ export interface UpgradePrebuiltRulesTableState {
    */
   isFetched: boolean;
   /**
-   * Is true whenever a background refetch is in-flight, which does not include initial loading
+   * Is true when doing an initial fetch of rules to upgrade
    */
-  isRefetching: boolean;
+  shouldShowLoadingOverlay: boolean;
+  /**
+   * Is true when installing security_detection_rules package in background
+   * or refetching rules to upgrade rules in the background
+   */
+  shouldShowLinearProgress: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -100,6 +106,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     tags: [],
   });
 
+  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+
   const {
     data: { rules, stats: { tags } } = {
       rules: [],
@@ -117,6 +125,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 
   const { mutateAsync: upgradeAllRulesRequest } = usePerformUpgradeAllRules();
   const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
+
+  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
+  const shouldShowLoadingOverlay = !isFetched && isRefetching;
 
   // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
   // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
@@ -211,6 +222,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isFetched,
         isLoading: isLoading && loadingJobs,
         isRefetching,
+        shouldShowLoadingOverlay,
+        shouldShowLinearProgress,
         selectedRules,
         loadingRules,
         lastUpdated: dataUpdatedAt,
@@ -228,6 +241,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     isLoading,
     loadingJobs,
     isRefetching,
+    shouldShowLoadingOverlay,
+    shouldShowLinearProgress,
     selectedRules,
     loadingRules,
     dataUpdatedAt,

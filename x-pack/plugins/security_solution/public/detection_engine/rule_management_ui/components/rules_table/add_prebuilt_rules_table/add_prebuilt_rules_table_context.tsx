@@ -7,6 +7,7 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -44,9 +45,14 @@ export interface AddPrebuiltRulesTableState {
    */
   isFetched: boolean;
   /**
-   * Is true whenever a background refetch is in-flight, which does not include initial loading
+   * Is true when doing an initial fetch of rules to install
    */
-  isRefetching: boolean;
+  shouldShowLoadingOverlay: boolean;
+  /**
+   * Is true when installing security_detection_rules package in background
+   * or refetching rules to install rules in the background
+   */
+  shouldShowLinearProgress: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -92,6 +98,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     tags: [],
   });
 
+  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+
   const {
     data: { rules, stats: { tags } } = {
       rules: [],
@@ -109,6 +117,9 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
   const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
+
+  const shouldShowLoadingOverlay = !isFetched && isRefetching;
+  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
 
   const installOneRule = useCallback(
     async (ruleId: RuleSignatureId) => {
@@ -175,6 +186,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isLoading,
         loadingRules,
         isRefetching,
+        shouldShowLoadingOverlay,
+        shouldShowLinearProgress,
         selectedRules,
         lastUpdated: dataUpdatedAt,
       },
@@ -189,6 +202,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isLoading,
     loadingRules,
     isRefetching,
+    shouldShowLoadingOverlay,
+    shouldShowLinearProgress,
     selectedRules,
     dataUpdatedAt,
     actions,

@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_items_message';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
@@ -25,20 +24,23 @@ import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_
  * Table Component for displaying new rules that are available to be installed
  */
 export const AddPrebuiltRulesTable = React.memo(() => {
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
-
   const addRulesTableContext = useAddPrebuiltRulesTableContext();
 
   const {
-    state: { rules, filteredRules, isFetched, isLoading, isRefetching, selectedRules },
+    state: {
+      rules,
+      filteredRules,
+      isFetched,
+      isLoading,
+      selectedRules,
+      shouldShowLoadingOverlay,
+      shouldShowLinearProgress,
+    },
     actions: { selectRules },
   } = addRulesTableContext;
   const rulesColumns = useAddPrebuiltRulesTableColumns();
 
   const isTableEmpty = isFetched && rules.length === 0;
-
-  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
-  const shouldShowLoadingOverlay = !isFetched && isRefetching;
 
   return (
     <>

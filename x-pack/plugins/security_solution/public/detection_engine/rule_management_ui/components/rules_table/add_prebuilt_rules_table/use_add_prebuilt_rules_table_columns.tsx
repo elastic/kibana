@@ -85,14 +85,20 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
 const createInstallButtonColumn = (
   installOneRule: AddPrebuiltRulesTableActions['installOneRule'],
-  loadingRules: RuleSignatureId[]
+  loadingRules: RuleSignatureId[],
+  shouldShowLinearProgress: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: '',
   render: (ruleId: RuleSignatureId) => {
     const isRuleInstalling = loadingRules.includes(ruleId);
+    const isInstallButtonDisabled = isRuleInstalling || shouldShowLinearProgress;
     return (
-      <EuiButtonEmpty size="s" disabled={isRuleInstalling} onClick={() => installOneRule(ruleId)}>
+      <EuiButtonEmpty
+        size="s"
+        disabled={isInstallButtonDisabled}
+        onClick={() => installOneRule(ruleId)}
+      >
         {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : i18n.INSTALL_RULE_BUTTON}
       </EuiButtonEmpty>
     );
@@ -106,7 +112,7 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules },
+    state: { loadingRules, shouldShowLinearProgress },
     actions: { installOneRule },
   } = useAddPrebuiltRulesTableContext();
 
@@ -135,8 +141,16 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions ? [createInstallButtonColumn(installOneRule, loadingRules)] : []),
+      ...(hasCRUDPermissions
+        ? [createInstallButtonColumn(installOneRule, loadingRules, shouldShowLinearProgress)]
+        : []),
     ],
-    [hasCRUDPermissions, installOneRule, loadingRules, showRelatedIntegrations]
+    [
+      hasCRUDPermissions,
+      installOneRule,
+      loadingRules,
+      shouldShowLinearProgress,
+      showRelatedIntegrations,
+    ]
   );
 };
