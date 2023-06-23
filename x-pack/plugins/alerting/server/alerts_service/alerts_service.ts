@@ -109,6 +109,7 @@ export type PublicFrameworkAlertsService = PublicAlertsService & {
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
+  private isInitializing: boolean = false;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
   private commonInitPromise: Promise<InitializationPromise>;
@@ -160,12 +161,21 @@ export class AlertsService implements IAlertsService {
     if (!initialized && error) {
       let initPromise: Promise<InitializationPromise> | undefined;
 
-      // If this flag is false, then common resource initialization failed and
-      // we need to retry this before retrying the context specific resources
+      // If !this.initialized, we know that common resource initialization failed
+      // and we need to retry this before retrying the context specific resources
+      // However, if this.isInitializing, then the alerts service is in the process
+      // of retrying common installation, so we don't want to kick off another retry
       if (!this.initialized) {
-        this.options.logger.info(`Retrying common resource initialization`);
-        initPromise = this.initializeCommon(this.options.timeoutMs);
+        if (!this.isInitializing) {
+          this.options.logger.info(`Retrying common resource initialization`);
+          initPromise = this.initializeCommon(this.options.timeoutMs);
+        } else {
+          this.options.logger.info(
+            `Skipped retrying common resource initialization because it is already being retried.`
+          );
+        }
       }
+
       this.options.logger.info(
         `Retrying resource initialization for context "${opts.ruleType.alerts.context}"`
       );
@@ -277,6 +287,7 @@ export class AlertsService implements IAlertsService {
    * - Component template - common mappings for fields populated and used by the framework
    */
   private async initializeCommon(timeoutMs?: number): Promise<InitializationPromise> {
+    this.isInitializing = true;
     try {
       this.options.logger.debug(`Initializing resources for AlertsService`);
       const esClient = await this.options.elasticsearchClientPromise;
@@ -334,12 +345,14 @@ export class AlertsService implements IAlertsService {
       );
 
       this.initialized = true;
+      this.isInitializing = false;
       return successResult();
     } catch (err) {
       this.options.logger.error(
         `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
       );
       this.initialized = false;
+      this.isInitializing = false;
       return errorResult(err.message);
     }
   }

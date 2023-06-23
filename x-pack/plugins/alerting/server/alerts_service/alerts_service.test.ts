@@ -1303,6 +1303,113 @@ describe('Alerts Service', () => {
       );
     });
 
+    test('should not retry initializing common resources if common resource initialization is in progress', async () => {
+      // this is the initial call that fails
+      clusterClient.ilm.putLifecycle.mockRejectedValueOnce(new Error('fail'));
+
+      // this is the retry call that we'll artificially inflate the duration of
+      clusterClient.ilm.putLifecycle.mockImplementationOnce(async () => {
+        await new Promise((r) => setTimeout(r, 1000));
+        return { acknowledged: true };
+      });
+
+      alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+        kibanaVersion: '8.8.0',
+      });
+      alertsService.register(TestRegistrationContext);
+
+      await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
+
+      expect(alertsService.isInitialized()).toEqual(false);
+
+      // Installing ILM policy failed so no calls to install context-specific resources
+      // should be made
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(1);
+      expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+      expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+      expect(clusterClient.indices.create).not.toHaveBeenCalled();
+
+      // call createAlertsClient at the same time which will trigger the retries
+      const result = await Promise.all([
+        alertsService.createAlertsClient({
+          logger,
+          ruleType: ruleTypeWithAlertDefinition,
+          namespace: 'default',
+          rule: {
+            consumer: 'bar',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            id: '1',
+            name: 'rule-name',
+            parameters: {
+              bar: true,
+            },
+            revision: 0,
+            spaceId: 'default',
+            tags: ['rule-', '-tags'],
+          },
+        }),
+        alertsService.createAlertsClient({
+          logger,
+          ruleType: ruleTypeWithAlertDefinition,
+          namespace: 'default',
+          rule: {
+            consumer: 'bar',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            id: '1',
+            name: 'rule-name',
+            parameters: {
+              bar: true,
+            },
+            revision: 0,
+            spaceId: 'default',
+            tags: ['rule-', '-tags'],
+          },
+        }),
+      ]);
+
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+      expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+      expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+      expect(clusterClient.indices.create).toHaveBeenCalled();
+
+      expect(AlertsClient).toHaveBeenCalledWith({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType: ruleTypeWithAlertDefinition,
+        namespace: 'default',
+        rule: {
+          consumer: 'bar',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          id: '1',
+          name: 'rule-name',
+          parameters: {
+            bar: true,
+          },
+          revision: 0,
+          spaceId: 'default',
+          tags: ['rule-', '-tags'],
+        },
+      });
+
+      expect(result[0]).not.toBe(null);
+      expect(result[1]).not.toBe(null);
+      expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+      expect(logger.info).toHaveBeenCalledWith(
+        `Retrying resource initialization for context "test"`
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        `Resource installation for "test" succeeded after retry`
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        `Skipped retrying common resource initialization because it is already being retried.`
+      );
+    });
+
     test('should retry initializing context specific resources if context specific resource initialization failed', async () => {
       clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
         ...SimulateTemplateResponse,
@@ -1370,6 +1477,104 @@ describe('Alerts Service', () => {
       expect(logger.info).toHaveBeenCalledWith(
         `Resource installation for "test" succeeded after retry`
       );
+    });
+
+    test('should not retry initializing context specific resources if context specific resource initialization is in progress', async () => {
+      // this is the initial call that fails
+      clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
+        ...SimulateTemplateResponse,
+        template: {
+          ...SimulateTemplateResponse.template,
+          mappings: {},
+        },
+      }));
+
+      // this is the retry call that we'll artificially inflate the duration of
+      clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => {
+        await new Promise((r) => setTimeout(r, 1000));
+        return SimulateTemplateResponse;
+      });
+
+      alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+        kibanaVersion: '8.8.0',
+      });
+      alertsService.register(TestRegistrationContext);
+
+      await retryUntil(
+        'alert service initialized',
+        async () => alertsService.isInitialized() === true
+      );
+
+      const createAlertsClientWithDelay = async (delayMs: number | null) => {
+        if (delayMs) {
+          await new Promise((r) => setTimeout(r, delayMs));
+        }
+
+        return await alertsService.createAlertsClient({
+          logger,
+          ruleType: ruleTypeWithAlertDefinition,
+          namespace: 'default',
+          rule: {
+            consumer: 'bar',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            id: '1',
+            name: 'rule-name',
+            parameters: {
+              bar: true,
+            },
+            revision: 0,
+            spaceId: 'default',
+            tags: ['rule-', '-tags'],
+          },
+        });
+      };
+
+      const result = await Promise.all([
+        createAlertsClientWithDelay(null),
+        createAlertsClientWithDelay(1),
+      ]);
+
+      expect(AlertsClient).toHaveBeenCalledTimes(2);
+      expect(AlertsClient).toHaveBeenCalledWith({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType: ruleTypeWithAlertDefinition,
+        namespace: 'default',
+        rule: {
+          consumer: 'bar',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          id: '1',
+          name: 'rule-name',
+          parameters: {
+            bar: true,
+          },
+          revision: 0,
+          spaceId: 'default',
+          tags: ['rule-', '-tags'],
+        },
+      });
+
+      expect(result[0]).not.toBe(null);
+      expect(result[1]).not.toBe(null);
+      expect(logger.info).not.toHaveBeenCalledWith(`Retrying common resource initialization`);
+
+      // Should only log the retry once because the second call should
+      // leverage the outcome of the first retry
+      expect(
+        logger.info.mock.calls.filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
+        ).length
+      ).toEqual(1);
+      expect(
+        logger.info.mock.calls.filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (calls: any[]) => calls[0] === `Resource installation for "test" succeeded after retry`
+        ).length
+      ).toEqual(1);
     });
 
     test('should return null if retrying common resources initialization fails again', async () => {
