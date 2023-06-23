@@ -201,7 +201,7 @@ export const getDiscoverAppStateContainer = ({
       appStateContainer,
       {
         filters: FilterStateStore.APP_STATE,
-        query: true,
+        query: false,
       }
     );
 

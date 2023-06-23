@@ -407,6 +407,8 @@ export function getDiscoverStateContainer({
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       dataStateContainer.fetch();
+    } else {
+      appStateContainer.update({ query: payload.query });
     }
   };
 
