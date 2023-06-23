@@ -6,7 +6,6 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { EventReporter } from './telemetry';
 
 /* @internal */
 export enum CountMetric {
@@ -24,28 +23,27 @@ export enum ClickMetric {
 
 /* @internal */
 export enum EventMetric {
-  SEARCH_BLUR = 'global_search_bar_blur',
   CLICK_APPLICATION = 'global_search_bar_click_application',
   CLICK_SAVED_OBJECT = 'global_search_bar_click_saved_object',
+  SEARCH_BLUR = 'global_search_bar_blur',
+  SEARCH_CLOSE = 'global_search_bar_close',
   ERROR = 'global_search_bar_unhandled_error',
 }
 
 /* @internal */
 export enum FieldType {
-  FOCUS_TIME = 'focus_time_ms',
   APPLICATION = 'application',
   SAVED_OBJECT_TYPE = 'saved_object_type',
+  FOCUS_TIME = 'focus_time_ms',
+  VISIBLE_TIME = 'visible_time_ms',
   ERROR_MESSAGE = 'error_message',
   TERMS = 'terms',
 }
 
 /* @internal */
-type EventType = CountMetric | ClickMetric;
-
-/* @internal */
-type UiCounterTrackingFn = (
+export type TrackUiMetricFn = (
   metricType: UiCounterMetricType,
-  eventName: EventType,
+  eventName: CountMetric | ClickMetric,
   context?: string
 ) => void;
 
@@ -64,8 +62,3 @@ export interface TrackedError {
   message: string | Error;
   searchValue?: string;
 }
-
-type IEventReporter = Pick<EventReporter, keyof EventReporter>; // public methods of EventReporter
-
-/* @internal */
-export type TrackUiMetricFn = UiCounterTrackingFn & IEventReporter;

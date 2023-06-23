@@ -10,15 +10,6 @@ import { EventTypeOpts } from '@kbn/core/public';
 import { EventMetric, FieldType } from '../types';
 
 const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
-  [FieldType.FOCUS_TIME]: {
-    [FieldType.FOCUS_TIME]: {
-      type: 'long',
-      _meta: {
-        description:
-          'The length in milliseconds the user viewed the global search bar before closing.',
-      },
-    },
-  },
   [FieldType.APPLICATION]: {
     [FieldType.APPLICATION]: {
       type: 'keyword',
@@ -32,6 +23,23 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       type: 'keyword',
       _meta: {
         description: 'The type of the saved object selected in the global search bar results.',
+      },
+    },
+  },
+  [FieldType.FOCUS_TIME]: {
+    [FieldType.FOCUS_TIME]: {
+      type: 'long',
+      _meta: {
+        description: 'The length in milliseconds the global search bar had the cursor focused.',
+      },
+    },
+  },
+  [FieldType.VISIBLE_TIME]: {
+    [FieldType.VISIBLE_TIME]: {
+      type: 'long',
+      _meta: {
+        description:
+          'The length in milliseconds the search bar was visible before hidden by the user.',
       },
     },
   },
@@ -51,10 +59,6 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
 
 export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
   {
-    eventType: EventMetric.SEARCH_BLUR,
-    schema: { ...fields[FieldType.FOCUS_TIME] },
-  },
-  {
     eventType: EventMetric.CLICK_APPLICATION,
     schema: { ...fields[FieldType.APPLICATION], ...fields[FieldType.TERMS] },
   },
@@ -65,5 +69,13 @@ export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
   {
     eventType: EventMetric.ERROR,
     schema: { ...fields[FieldType.ERROR_MESSAGE], ...fields[FieldType.TERMS] },
+  },
+  {
+    eventType: EventMetric.SEARCH_BLUR,
+    schema: { ...fields[FieldType.FOCUS_TIME] },
+  },
+  {
+    eventType: EventMetric.SEARCH_CLOSE,
+    schema: { ...fields[FieldType.VISIBLE_TIME] },
   },
 ];
