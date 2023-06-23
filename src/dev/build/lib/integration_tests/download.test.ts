@@ -113,7 +113,7 @@ describe('downloadToDisk', () => {
       shaAlgorithm: 'sha256',
     });
     await expect(promise).rejects.toMatchInlineSnapshot(
-      `[Error: Downloaded checksum 2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae does not match the expected sha256 checksum.]`
+      `[Error: Downloaded checksum ${FOO_SHA256} does not match the expected (sha256) checksum bar, for file: ${serverUrl}.]`
     );
 
     try {
@@ -175,7 +175,7 @@ describe('downloadToDisk', () => {
           " info Retrying in 0.1 seconds",
           " debg [2/3] Attempting download of TEST_SERVER_URL sha256",
           " debg Downloaded 3 bytes to TMP_DIR/__tmp_download_js_test_file__",
-          " debg Download failed: Downloaded checksum fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9 does not match the expected sha256 checksum.",
+          " debg Download failed: Downloaded checksum fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9 does not match the expected (sha256) checksum 2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae, for file: TEST_SERVER_URL.",
           " debg Deleting downloaded data at TMP_DIR/__tmp_download_js_test_file__",
           " info Retrying in 0.2 seconds",
           " debg [3/3] Attempting download of TEST_SERVER_URL sha256",
