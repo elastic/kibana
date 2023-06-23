@@ -10,7 +10,7 @@ import { useParams, Redirect } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route } from '@kbn/shared-ux-router';
 
 import { Status } from '../../../../../common/types/api';
 
