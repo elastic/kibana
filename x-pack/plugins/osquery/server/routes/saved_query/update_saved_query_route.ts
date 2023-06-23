@@ -122,9 +122,24 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           {};
       }
 
+      const { attributes } = updatedSavedQuerySO;
+
       return response.ok({
         body: {
-          data: { ...updatedSavedQuerySO.attributes, saved_object_id: updatedSavedQuerySO.id },
+          data: {
+            description: attributes.description,
+            id: attributes.id,
+            removed: attributes.removed,
+            snapshot: attributes.snapshot,
+            version: attributes.version,
+            ecs_mapping: attributes.ecs_mapping,
+            interval: attributes.interval,
+            platform: attributes.platform,
+            query: attributes.query,
+            updated_at: attributes.updated_at,
+            updated_by: attributes.updated_by,
+            saved_object_id: updatedSavedQuerySO.id,
+          },
         },
       });
     }

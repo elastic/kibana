@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import type { SavedQuerySavedObject } from '../../common/types';
 import { isSavedQueryPrebuilt } from './utils';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
@@ -28,10 +29,10 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
       const coreContext = await context.core;
       const savedObjectsClient = coreContext.savedObjects.client;
 
-      const savedQuery = await savedObjectsClient.get<{
-        ecs_mapping: Array<{ key: string; value: Record<string, object> }>;
-        prebuilt: boolean;
-      }>(savedQuerySavedObjectType, request.params.id);
+      const savedQuery = await savedObjectsClient.get<SavedQuerySavedObject>(
+        savedQuerySavedObjectType,
+        request.params.id
+      );
 
       if (savedQuery.attributes.ecs_mapping) {
         // @ts-expect-error update types
@@ -45,8 +46,43 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         savedQuery.id
       );
 
+      const {
+        created_at: createdAt,
+        created_by: createdBy,
+        description,
+        id,
+        interval,
+        platform,
+        query,
+        removed,
+        snapshot,
+        version,
+        ecs_mapping: ecsMapping,
+        updated_at: updatedAt,
+        updated_by: updatedBy,
+        prebuilt,
+      } = savedQuery.attributes;
+
       return response.ok({
-        body: { data: { ...savedQuery.attributes, saved_object_id: savedQuery.id } },
+        body: {
+          data: {
+            created_at: createdAt,
+            created_by: createdBy,
+            description,
+            id,
+            removed,
+            snapshot,
+            version,
+            ecs_mapping: ecsMapping,
+            interval,
+            platform,
+            query,
+            updated_at: updatedAt,
+            updated_by: updatedBy,
+            prebuilt,
+            saved_object_id: savedQuery.id,
+          },
+        },
       });
     }
   );
