@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { MAJOR_VERSION } from './plugin';
-export { API_BASE_PATH, KIBANA_API_PREFIX } from './api';
-export { DEFAULT_VARIABLES } from './variables';
-export { AUTOCOMPLETE_DEFINITIONS_FOLDER } from './autocomplete_definitions';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-generate-console-definitions'],
+};
