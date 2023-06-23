@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { MAJOR_VERSION } from './plugin';
-export { API_BASE_PATH, KIBANA_API_PREFIX } from './api';
-export { DEFAULT_VARIABLES } from './variables';
-export { AUTOCOMPLETE_DEFINITIONS_FOLDER } from './autocomplete_definitions';
+import { resolve } from 'path';
+
+export const AUTOCOMPLETE_DEFINITIONS_FOLDER = resolve(
+  __dirname,
+  '../../server/lib/spec_definitions/json'
+);

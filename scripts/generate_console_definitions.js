@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { MAJOR_VERSION } from './plugin';
-export { API_BASE_PATH, KIBANA_API_PREFIX } from './api';
-export { DEFAULT_VARIABLES } from './variables';
-export { AUTOCOMPLETE_DEFINITIONS_FOLDER } from './autocomplete_definitions';
+require('../src/setup_node_env');
+require('@kbn/generate-console-definitions').runGenerateConsoleDefinitionsCli();

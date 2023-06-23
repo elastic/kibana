@@ -8,13 +8,12 @@
 
 import _, { merge } from 'lodash';
 import globby from 'globby';
-import { basename, join, resolve } from 'path';
+import { basename, join } from 'path';
 import normalizePath from 'normalize-path';
 import { readFileSync } from 'fs';
 
+import { AUTOCOMPLETE_DEFINITIONS_FOLDER } from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
-
-const PATH_TO_OSS_JSON_SPEC = resolve(__dirname, '../lib/spec_definitions/json');
 
 interface EndpointDescription {
   methods?: string[];
@@ -129,7 +128,7 @@ export class SpecDefinitionsService {
   }
 
   private loadJsonSpec() {
-    const result = this.loadJSONSpecInDir(PATH_TO_OSS_JSON_SPEC);
+    const result = this.loadJSONSpecInDir(AUTOCOMPLETE_DEFINITIONS_FOLDER);
     this.extensionSpecFilePaths.forEach((extensionSpecFilePath) => {
       merge(result, this.loadJSONSpecInDir(extensionSpecFilePath));
     });
