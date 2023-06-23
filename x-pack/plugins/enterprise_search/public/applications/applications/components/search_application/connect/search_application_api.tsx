@@ -239,7 +239,7 @@ export const SearchApplicationAPI = () => {
               <EuiLink
                 data-test-subj="search-documentation-link"
                 href={docLinks.searchApplicationsSearchApi}
-                data-telemetry-id="entSearchApplications-safeSearchApi-documentation-viewDocumentaion"
+                data-telemetry-id="entSearchApplications-searchApi-documentation-viewDocumentaion"
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocLink',
