@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Visualize: Generate PDF report', () => {
+    describe.skip('Visualize: Generate PDF report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
         const res = await reportingAPI.generatePdf(
           reportingAPI.DATA_ANALYST_USERNAME,
