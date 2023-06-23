@@ -87,15 +87,6 @@ export class SpecDefinitionsService {
     this.extensionSpecFilePaths.push(path);
   }
 
-  public addProcessorDefinition(processor: unknown) {
-    if (!this.hasLoadedSpec) {
-      throw new Error(
-        'Cannot add a processor definition because spec definitions have not loaded!'
-      );
-    }
-    this.endpoints._processor!.data_autocomplete_rules.__one_of.push(processor);
-  }
-
   public setup() {
     return {
       addExtensionSpecFilePath: this.addExtensionSpecFilePath.bind(this),
@@ -107,9 +98,6 @@ export class SpecDefinitionsService {
       this.loadJsonSpec();
       this.loadJSSpec();
       this.hasLoadedSpec = true;
-      return {
-        addProcessorDefinition: this.addProcessorDefinition.bind(this),
-      };
     } else {
       throw new Error('Service has already started!');
     }

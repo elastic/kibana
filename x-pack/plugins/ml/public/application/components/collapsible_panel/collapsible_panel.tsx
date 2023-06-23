@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { type FC } from 'react';
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 import { useCurrentThemeVars } from '../../contexts/kibana';
 
 export interface CollapsiblePanelProps {

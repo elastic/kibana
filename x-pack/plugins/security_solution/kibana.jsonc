@@ -16,8 +16,9 @@
       "cloudSecurityPosture",
       "dashboard",
       "data",
-      "ecsDataQualityDashboard",
       "dataViews",
+      "discover",
+      "ecsDataQualityDashboard",
       "embeddable",
       "eventLog",
       "features",
@@ -39,7 +40,6 @@
       "unifiedSearch",
       "files",
       "controls",
-      "dataViews",
       "savedObjectsManagement",
       "stackConnectors"
     ],

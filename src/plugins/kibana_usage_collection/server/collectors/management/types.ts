@@ -12,6 +12,7 @@ export interface UsageStats {
    */
   'securitySolution:defaultIndex': string;
   'securitySolution:defaultThreatIndex': string;
+  'securitySolution:alertTags': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;

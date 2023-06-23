@@ -31,13 +31,23 @@ export const createCopyToClipboardActionFactory = createCellActionFactory(
     getIconType: () => ICON,
     getDisplayName: () => COPY_TO_CLIPBOARD,
     getDisplayNameTooltip: () => COPY_TO_CLIPBOARD,
-    isCompatible: async ({ field }) => field.name != null,
-    execute: async ({ field }) => {
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 && // TODO Add support for multiple values
+        field.name != null
+      );
+    },
+    execute: async ({ data }) => {
+      const field = data[0]?.field;
+      const value = data[0]?.value;
+
       let textValue: undefined | string;
-      if (field.value != null) {
-        textValue = Array.isArray(field.value)
-          ? field.value.map((value) => `"${escapeValue(value)}"`).join(' AND ')
-          : `"${escapeValue(field.value)}"`;
+      if (value != null) {
+        textValue = Array.isArray(value)
+          ? value.map((v) => `"${escapeValue(v)}"`).join(' AND ')
+          : `"${escapeValue(value)}"`;
       }
       const text = textValue ? `${field.name}: ${textValue}` : field.name;
       const isSuccess = copy(text, { debug: true });
