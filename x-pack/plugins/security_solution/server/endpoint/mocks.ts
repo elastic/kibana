@@ -182,6 +182,7 @@ export const createMockEndpointAppContextServiceStartContract =
     );
 
     const casesMock = casesPluginMock.createStartContract();
+    const fleetActionsClientMock = createFleetActionsClientMock();
 
     return {
       endpointMetadataService,
@@ -208,7 +209,7 @@ export const createMockEndpointAppContextServiceStartContract =
       experimentalFeatures: createMockConfig().experimentalFeatures,
       messageSigningService: createMessageSigningServiceMock(),
       actionCreateService: undefined,
-      createFleetActionsClient: jest.fn((..._) => createFleetActionsClientMock()),
+      createFleetActionsClient: jest.fn((_) => fleetActionsClientMock),
     };
   };
 
