@@ -80,16 +80,19 @@ const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
 
 interface InspectFlyoutWrapperProps {
   searchSession: UISession;
+  uiSettings: CoreStart['uiSettings'];
   settings: CoreStart['settings'];
   theme: CoreStart['theme'];
 }
 
 const InspectFlyoutWrapper: React.FC<InspectFlyoutWrapperProps> = ({
   searchSession,
+  uiSettings,
   settings,
   theme,
 }) => {
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+    uiSettings,
     settings,
     theme,
   });
@@ -116,7 +119,12 @@ export const createInspectActionDescriptor = (
   ),
   onClick: async () => {
     const flyoutWrapper = (
-      <InspectFlyoutWrapper settings={core.settings} theme={core.theme} searchSession={uiSession} />
+      <InspectFlyoutWrapper
+        uiSettings={core.uiSettings}
+        settings={core.settings}
+        theme={core.theme}
+        searchSession={uiSession}
+      />
     );
     const overlay = core.overlays.openFlyout(
       toMountPoint(flyoutWrapper, { theme$: core.theme.theme$ })
