@@ -57,7 +57,6 @@ export function MissingSymbolsCallout({ frameType }: Props) {
           href={router.link('/add-data-instructions', {
             query: { selectedTab: NoDataTabs.Symbols },
           })}
-          target="_blank"
           color="warning"
         >
           {i18n.translate(

@@ -461,7 +461,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ) : (
         <>
           <EuiText>
-            {i18n.translate('xpack.profiling.addDataTitle', {
+            {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
               defaultMessage: 'Select an option below to deploy the host-agent.',
             })}
           </EuiText>
