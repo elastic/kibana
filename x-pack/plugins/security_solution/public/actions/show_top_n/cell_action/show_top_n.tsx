@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import type { History } from 'history';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
