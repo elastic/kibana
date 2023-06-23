@@ -148,6 +148,32 @@ export default function fieldsEndpointTests({ getService }: FtrProviderContext) 
       const result = await runQueryExpect({ indexPatterns: ['*a:b,c:d*'] }, 200);
       expect(result.fields.length).to.be(0);
     });
+
+    it('should handle runtime mappings', async () => {
+      const result = await runQueryExpect(
+        {
+          indexPatterns: ['.kibana'],
+          runtimeMappings: {
+            day_of_week: {
+              type: 'keyword',
+              script: {
+                source:
+                  "emit(doc['created_at'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+              },
+            },
+          },
+        },
+        200
+      );
+      const field = getFieldNamed(result.fields, 'day_of_week');
+      expect(field).to.eql({
+        name: 'day_of_week',
+        type: 'keyword',
+        normalizedType: 'keyword',
+        aggregatable: true,
+        searchable: true,
+      });
+    });
   });
 
   function getFieldNamed(fields: any[], fieldName: string): any | undefined {
