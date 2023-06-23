@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ADD_DATA_PATH } from '@kbn/security-solution-plugin/common';
-import { useVariation } from '../../hooks/use_variation';
+import { useVariation } from '../../../common/hooks/use_variation';
 import * as i18n from './translations';
 import endpointSvg from '../../images/endpoint1.svg';
 import cloudSvg from '../../images/cloud1.svg';

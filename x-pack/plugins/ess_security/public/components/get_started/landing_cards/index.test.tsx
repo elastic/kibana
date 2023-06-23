@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { LandingCards } from '.';
 import { ADD_DATA_PATH } from '@kbn/security-solution-plugin/common';
-import { useVariation } from '../../hooks/use_variation';
+import { useVariation } from '../../../common/hooks/use_variation';
 
 jest.mock('../../hooks/use_variation');
 jest.mock('../../../services');

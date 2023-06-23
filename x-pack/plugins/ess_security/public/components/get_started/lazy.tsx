@@ -7,7 +7,7 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingLogo } from '@elastic/eui';
 
-const LandingCardsLazy = lazy(() => import('../../common/components/landing_cards'));
+const LandingCardsLazy = lazy(() => import('./landing_cards'));
 
 const centerLogoStyle = { display: 'flex', margin: 'auto' };
 
