@@ -7,6 +7,8 @@
 
 import * as esKuery from '@kbn/es-query';
 
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
+
 import {
   validateFilterKueryNode,
   allowedFleetActionsFields,
@@ -107,8 +109,8 @@ describe('utils', () => {
 
   describe('#hasFieldKeyError', () => {
     describe.each([
-      ['.fleet-actions', 'actions', ['keyword', 'date']],
-      ['.fleet-actions-results', 'results', ['keyword']],
+      [AGENT_ACTIONS_INDEX, 'actions', ['keyword', 'date']],
+      [AGENT_ACTIONS_RESULTS_INDEX, 'results', ['keyword']],
     ])('%s', (indexName, indexType, fieldTypes) => {
       it('Return no error if filter key is valid', () => {
         const hasError = hasFieldKeyError(

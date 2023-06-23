@@ -7,6 +7,7 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import { get } from 'lodash';
+import { deepFreeze } from '@kbn/std';
 
 const getFieldType = (
   key: string | undefined | null,
@@ -51,8 +52,8 @@ export const hasFieldKeyError = (
   return null;
 };
 
-export const ALLOWED_FLEET_ACTIONS_RESULTS_FIELD_TYPES = ['keyword'];
-export const ALLOWED_FLEET_ACTIONS_FIELD_TYPES = ['keyword', 'date'];
+export const ALLOWED_FLEET_ACTIONS_RESULTS_FIELD_TYPES: Readonly<string[]> = ['keyword'];
+export const ALLOWED_FLEET_ACTIONS_FIELD_TYPES: Readonly<string[]> = ['keyword', 'date'];
 
 export interface FleetActionsIndexMapping {
   properties: {
@@ -88,7 +89,7 @@ export interface FleetActionsResultsIndexMapping {
   };
 }
 
-export const allowedFleetActionsFields = Object.freeze({
+export const allowedFleetActionsFields: FleetActionsIndexMapping = deepFreeze({
   properties: {
     action_id: {
       type: 'keyword',
@@ -109,9 +110,9 @@ export const allowedFleetActionsFields = Object.freeze({
       type: 'keyword',
     },
   },
-}) as FleetActionsIndexMapping;
+});
 
-export const allowedFleetActionsResultsFields = Object.freeze({
+export const allowedFleetActionsResultsFields: FleetActionsResultsIndexMapping = deepFreeze({
   properties: {
     action_id: {
       type: 'keyword',
@@ -120,7 +121,7 @@ export const allowedFleetActionsResultsFields = Object.freeze({
       type: 'keyword',
     },
   },
-}) as FleetActionsResultsIndexMapping;
+});
 
 interface ValidateFilterKueryNode {
   astPath: string;
