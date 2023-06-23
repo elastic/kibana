@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor, within, screen } from '@testing-library/react';
+import { waitFor, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ConnectorTypes } from '../../../common/api';
@@ -132,6 +132,44 @@ describe('CaseViewPage', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
   const caseUsers = getCaseUsersMockResponse();
 
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+  const platinumLicense = licensingMock.createLicense({
+    license: { type: 'platinum' },
+  });
+
+  beforeAll(() => {
+    // The JSDOM implementation is too slow
+    // Especially for dropdowns that try to position themselves
+    // perf issue - https://github.com/jsdom/jsdom/issues/3234
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetCase();
@@ -150,12 +188,13 @@ describe('CaseViewPage', () => {
     });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
-    const license = licensingMock.createLicense({
-      license: { type: 'platinum' },
-    });
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
 
-    appMockRenderer = createAppMockRenderer({ license });
+    appMockRenderer = createAppMockRenderer({ license: platinumLicense });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
   });
 
   it('should render CaseViewPage', async () => {
@@ -170,32 +209,31 @@ describe('CaseViewPage', () => {
       },
     };
 
-    const license = licensingMock.createLicense({
-      license: { type: 'platinum' },
-    });
-
     const props = { ...caseProps, caseData: caseDataWithDamagedRaccoon };
-    appMockRenderer = createAppMockRenderer({ features: { metrics: ['alerts.count'] }, license });
-    const result = appMockRenderer.render(<CaseViewPage {...props} />);
+    appMockRenderer = createAppMockRenderer({
+      features: { metrics: ['alerts.count'] },
+      license: platinumLicense,
+    });
+    appMockRenderer.render(<CaseViewPage {...props} />);
 
-    expect(result.getByTestId('header-page-title')).toHaveTextContent(data.title);
-    expect(result.getByTestId('case-view-status-dropdown')).toHaveTextContent('Open');
-    expect(result.getByTestId('case-view-metrics-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('header-page-title')).toHaveTextContent(data.title);
+    expect(screen.getByTestId('case-view-status-dropdown')).toHaveTextContent('Open');
+    expect(screen.getByTestId('case-view-metrics-panel')).toBeInTheDocument();
     expect(
-      within(result.getByTestId('case-view-tag-list')).getByTestId('tag-coke')
+      within(screen.getByTestId('case-view-tag-list')).getByTestId('tag-coke')
     ).toHaveTextContent(data.tags[0]);
 
     expect(
-      within(result.getByTestId('case-view-tag-list')).getByTestId('tag-pepsi')
+      within(screen.getByTestId('case-view-tag-list')).getByTestId('tag-pepsi')
     ).toHaveTextContent(data.tags[1]);
 
-    expect(result.getAllByText(data.createdBy.fullName!)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(data.createdBy.fullName!)[0]).toBeInTheDocument();
 
     expect(
-      within(result.getByTestId('description')).getByTestId('scrollable-markdown')
+      within(screen.getByTestId('description')).getByTestId('scrollable-markdown')
     ).toHaveTextContent(data.description);
 
-    expect(result.getByTestId('case-view-status-action-button')).toHaveTextContent(
+    expect(screen.getByTestId('case-view-status-action-button')).toHaveTextContent(
       'Mark in progress'
     );
   });
@@ -206,18 +244,18 @@ describe('CaseViewPage', () => {
       caseData: basicCaseClosed,
     }));
 
-    const result = appMockRenderer.render(<CaseViewPage {...caseClosedProps} />);
+    appMockRenderer.render(<CaseViewPage {...caseClosedProps} />);
 
-    expect(result.getByTestId('case-view-status-dropdown')).toHaveTextContent('Closed');
+    expect(screen.getByTestId('case-view-status-dropdown')).toHaveTextContent('Closed');
   });
 
   it('should update status', async () => {
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-    const dropdown = result.getByTestId('case-view-status-dropdown');
+    const dropdown = screen.getByTestId('case-view-status-dropdown');
     userEvent.click(dropdown.querySelector('button')!);
     await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('case-view-status-dropdown-closed'));
+    userEvent.click(screen.getByTestId('case-view-status-dropdown-closed'));
     const updateObject = updateCaseProperty.mock.calls[0][0];
 
     await waitFor(() => {
@@ -228,12 +266,12 @@ describe('CaseViewPage', () => {
   });
 
   it('should update title', async () => {
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
     const newTitle = 'The new title';
-    userEvent.click(result.getByTestId('editable-title-edit-icon'));
-    userEvent.clear(result.getByTestId('editable-title-input-field'));
-    userEvent.type(result.getByTestId('editable-title-input-field'), newTitle);
-    userEvent.click(result.getByTestId('editable-title-submit-btn'));
+    userEvent.click(screen.getByTestId('editable-title-edit-icon'));
+    userEvent.clear(screen.getByTestId('editable-title-input-field'));
+    userEvent.type(screen.getByTestId('editable-title-input-field'), newTitle);
+    userEvent.click(screen.getByTestId('editable-title-submit-btn'));
 
     const updateObject = updateCaseProperty.mock.calls[0][0];
     await waitFor(() => {
@@ -254,11 +292,11 @@ describe('CaseViewPage', () => {
       },
     }));
 
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-    expect(result.getByTestId('push-to-external-service')).toBeInTheDocument();
+    expect(screen.getByTestId('push-to-external-service')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('push-to-external-service'));
+    userEvent.click(screen.getByTestId('push-to-external-service'));
 
     await waitFor(() => {
       expect(pushCaseToExternalService).toHaveBeenCalled();
@@ -266,7 +304,7 @@ describe('CaseViewPage', () => {
   });
 
   it('should disable the push button when connector is invalid', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <CaseViewPage
         {...{
           ...caseProps,
@@ -275,12 +313,12 @@ describe('CaseViewPage', () => {
       />
     );
     await waitFor(() => {
-      expect(result.getByTestId('push-to-external-service')).toBeDisabled();
+      expect(screen.getByTestId('push-to-external-service')).toBeDisabled();
     });
   });
 
   it('should update connector', async () => {
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <CaseViewPage
         {...caseProps}
         caseData={{
@@ -295,16 +333,16 @@ describe('CaseViewPage', () => {
       />
     );
 
-    userEvent.click(result.getByTestId('connector-edit').querySelector('button')!);
-    userEvent.click(result.getByTestId('dropdown-connectors'));
+    userEvent.click(screen.getByTestId('connector-edit').querySelector('button')!);
+    userEvent.click(screen.getByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('dropdown-connector-resilient-2'));
+    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
-      expect(result.getByTestId('connector-fields-resilient')).toBeInTheDocument();
+      expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
     });
 
-    userEvent.click(result.getByTestId('edit-connectors-submit'));
+    userEvent.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() => {
       expect(updateCaseProperty).toHaveBeenCalledTimes(1);
@@ -337,22 +375,18 @@ describe('CaseViewPage', () => {
     const useFetchAlertData = jest.fn().mockReturnValue([true]);
     useGetCaseUserActionsStatsMock.mockReturnValue({ isLoading: true });
 
-    const result = appMockRenderer.render(
-      <CaseViewPage {...caseProps} useFetchAlertData={useFetchAlertData} />
-    );
+    appMockRenderer.render(<CaseViewPage {...caseProps} useFetchAlertData={useFetchAlertData} />);
     await waitFor(() => {
-      expect(result.getByTestId('case-view-loading-content')).toBeInTheDocument();
-      expect(result.queryByTestId('user-actions-list')).not.toBeInTheDocument();
+      expect(screen.getByTestId('case-view-loading-content')).toBeInTheDocument();
+      expect(screen.queryByTestId('user-actions-list')).not.toBeInTheDocument();
     });
   });
 
   it('should call show alert details with expected arguments', async () => {
     const showAlertDetails = jest.fn();
-    const result = appMockRenderer.render(
-      <CaseViewPage {...caseProps} showAlertDetails={showAlertDetails} />
-    );
+    appMockRenderer.render(<CaseViewPage {...caseProps} showAlertDetails={showAlertDetails} />);
 
-    userEvent.click(result.getAllByTestId('comment-action-show-alert-alert-action-id')[1]);
+    userEvent.click(screen.getAllByTestId('comment-action-show-alert-alert-action-id')[1]);
 
     await waitFor(() => {
       expect(showAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
@@ -360,11 +394,11 @@ describe('CaseViewPage', () => {
   });
 
   it('should show the rule name', async () => {
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
     await waitFor(() => {
       expect(
-        result
+        screen
           .getAllByTestId('user-action-alert-comment-create-action-alert-action-id')[1]
           .querySelector('.euiCommentEvent__headerEvent')
       ).toHaveTextContent('added an alert from Awesome rule');
@@ -372,8 +406,8 @@ describe('CaseViewPage', () => {
   });
 
   it('should update settings', async () => {
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-    userEvent.click(result.getByTestId('sync-alerts-switch'));
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    userEvent.click(screen.getByTestId('sync-alerts-switch'));
     const updateObject = updateCaseProperty.mock.calls[0][0];
 
     await waitFor(() => {
@@ -385,12 +419,12 @@ describe('CaseViewPage', () => {
   it('should show the correct connector name on the push button', async () => {
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
 
-    const result = appMockRenderer.render(
+    appMockRenderer.render(
       <CaseViewPage {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('push-to-external-service')).toHaveTextContent(
+      expect(screen.getByTestId('push-to-external-service')).toHaveTextContent(
         'My Resilient connector'
       );
     });
@@ -412,68 +446,25 @@ describe('CaseViewPage', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/149775
-  // FLAKY: https://github.com/elastic/kibana/issues/149776
-  // FLAKY: https://github.com/elastic/kibana/issues/149777
-  // FLAKY: https://github.com/elastic/kibana/issues/149778
-  // FLAKY: https://github.com/elastic/kibana/issues/149779
-  // FLAKY: https://github.com/elastic/kibana/issues/149780
-  // FLAKY: https://github.com/elastic/kibana/issues/149781
-  // FLAKY: https://github.com/elastic/kibana/issues/149782
-  // FLAKY: https://github.com/elastic/kibana/issues/153335
-  // FLAKY: https://github.com/elastic/kibana/issues/153336
-  describe.skip('Tabs', () => {
-    jest.mock('@kbn/kibana-react-plugin/public', () => ({
-      useKibana: () => ({
-        services: {
-          application: {
-            capabilities: {
-              fakeCases: {
-                create_cases: true,
-                read_cases: true,
-                update_cases: true,
-                delete_cases: true,
-                push_cases: true,
-              },
-            },
-          },
-          cases: {
-            ui: {
-              getCasesContext: () => null,
-            },
-            helpers: {
-              getUICapabilities: () => ({
-                all: true,
-                read: true,
-                create: true,
-                update: true,
-                delete: true,
-                push: true,
-              }),
-            },
-          },
-          notifications: {
-            toasts: {
-              addDanger: () => {},
-            },
-          },
-        },
-      }),
-    }));
+  describe('Tabs', () => {
+    const getAlertsStateTableMock = jest.fn();
+
+    beforeEach(() => {
+      appMockRenderer.coreStart.triggersActionsUi.getAlertsStateTable =
+        getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
+      jest.clearAllMocks();
+    });
+
     it('renders tabs correctly', async () => {
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      await act(async () => {
-        expect(result.getByTestId('case-view-tab-title-activity')).toBeTruthy();
-        expect(result.getByTestId('case-view-tab-title-alerts')).toBeTruthy();
-        expect(result.getByTestId('case-view-tab-title-files')).toBeTruthy();
-      });
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+      expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-tab-title-files')).toBeInTheDocument();
     });
 
     it('renders the activity tab by default', async () => {
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      await act(async () => {
-        expect(result.getByTestId('case-view-tab-content-activity')).toBeTruthy();
-      });
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+      expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
     });
 
     it('renders the alerts tab when the query parameter tabId has alerts', async () => {
@@ -482,10 +473,11 @@ describe('CaseViewPage', () => {
           tabId: CASE_VIEW_PAGE_TABS.ALERTS,
         },
       });
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      await act(async () => {
-        expect(result.getByTestId('case-view-tab-content-alerts')).toBeTruthy();
-      });
+
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('case-view-tab-content-alerts')).toBeInTheDocument();
+      expect(await screen.findByTestId('alerts-table')).toBeInTheDocument();
     });
 
     it('renders the activity tab when the query parameter tabId has activity', async () => {
@@ -494,10 +486,10 @@ describe('CaseViewPage', () => {
           tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
         },
       });
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      await act(async () => {
-        expect(result.getByTestId('case-view-tab-content-activity')).toBeTruthy();
-      });
+
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
     });
 
     it('renders the activity tab when the query parameter tabId has an unknown value', async () => {
@@ -506,18 +498,20 @@ describe('CaseViewPage', () => {
           tabId: 'what-is-love',
         },
       });
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      await act(async () => {
-        expect(result.getByTestId('case-view-tab-content-activity')).toBeTruthy();
-        expect(result.queryByTestId('case-view-tab-content-alerts')).toBeFalsy();
-      });
+
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
+      expect(screen.queryByTestId('case-view-tab-content-alerts')).not.toBeInTheDocument();
     });
 
     it('navigates to the activity tab when the activity tab is clicked', async () => {
       const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      userEvent.click(result.getByTestId('case-view-tab-title-activity'));
-      await act(async () => {
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
+
+      await waitFor(() => {
         expect(navigateToCaseViewMock).toHaveBeenCalledWith({
           detailName: caseData.id,
           tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
@@ -527,9 +521,11 @@ describe('CaseViewPage', () => {
 
     it('navigates to the alerts tab when the alerts tab is clicked', async () => {
       const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      userEvent.click(result.getByTestId('case-view-tab-title-alerts'));
-      await act(async () => {
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
+
+      await waitFor(async () => {
         expect(navigateToCaseViewMock).toHaveBeenCalledWith({
           detailName: caseData.id,
           tabId: CASE_VIEW_PAGE_TABS.ALERTS,
@@ -539,38 +535,36 @@ describe('CaseViewPage', () => {
 
     it('should display the alerts tab when the feature is enabled', async () => {
       appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: true } } });
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      await act(async () => {
-        expect(result.queryByTestId('case-view-tab-title-activity')).toBeTruthy();
-        expect(result.queryByTestId('case-view-tab-title-alerts')).toBeTruthy();
-      });
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
     });
 
     it('should not display the alerts tab when the feature is disabled', async () => {
       appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: false } } });
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      await act(async () => {
-        expect(result.queryByTestId('case-view-tab-title-activity')).toBeTruthy();
-        expect(result.queryByTestId('case-view-tab-title-alerts')).toBeFalsy();
-      });
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
+      expect(screen.queryByTestId('case-view-tab-title-alerts')).not.toBeInTheDocument();
     });
 
     it('should not show the experimental badge on the alerts table', async () => {
       appMockRenderer = createAppMockRenderer({ features: { alerts: { isExperimental: false } } });
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      await act(async () => {
-        expect(result.queryByTestId('case-view-alerts-table-experimental-badge')).toBeFalsy();
-      });
+      expect(
+        screen.queryByTestId('case-view-alerts-table-experimental-badge')
+      ).not.toBeInTheDocument();
     });
 
     it('should show the experimental badge on the alerts table', async () => {
       appMockRenderer = createAppMockRenderer({ features: { alerts: { isExperimental: true } } });
-      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      await act(async () => {
-        expect(result.queryByTestId('case-view-alerts-table-experimental-badge')).toBeTruthy();
-      });
+      expect(
+        await screen.findByTestId('case-view-alerts-table-experimental-badge')
+      ).toBeInTheDocument();
     });
 
     describe('description', () => {
@@ -596,6 +590,7 @@ describe('CaseViewPage', () => {
         });
       });
 
+      // TODO: Move this to an integration test
       it.skip('it should persist the draft of new comment while description is updated', async () => {
         const newComment = 'another cool comment';
 
