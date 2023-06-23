@@ -721,40 +721,9 @@ describe('processFields', () => {
         ]
       `);
     });
-    test('Replaces metric_type with time_series_metric field when tsds is enabled and name has wildcard', () => {
-      expect(processFieldsWithWildcard(wildcardFields, true)).toMatchInlineSnapshot(`
-        [
-          {
-            "name": "a.*.b",
-            "type": "object",
-            "format": "bytes",
-            "unit": "byte",
-            "description": "Total swap memory.\\n",
-            "object_type": "long",
-            "time_series_metric": "gauge"
-          }
-        ]
-      `);
-    });
-
-    test('Returns metric_type input field when tsds is disabled', () => {
-      expect(processFieldsWithWildcard(wildcardFields, false)).toMatchInlineSnapshot(`
-        [
-          {
-            "name": "a.*.b",
-            "type": "object",
-            "format": "bytes",
-            "unit": "byte",
-            "metric_type": "gauge",
-            "description": "Total swap memory.\\n",
-            "object_type": "long"
-          }
-        ]
-      `);
-    });
 
     test('Returns input fields when name has no wildcard', () => {
-      expect(processFieldsWithWildcard(noWildcardFields, true)).toMatchInlineSnapshot(`
+      expect(processFieldsWithWildcard(noWildcardFields)).toMatchInlineSnapshot(`
         [
           {
             "name": "test",
