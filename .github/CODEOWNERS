@@ -818,13 +818,13 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/serverless_security/ @elastic/appex-sharedux
 
-### Observability packages
+### Observability Plugins
 
-# Observability App > Alert Details
+# Actionable observability
 x-pack/packages/observability/alert_details @elastic/actionable-observability
-
-# Observability App > Functional Tests
 x-pack/test/observability_functional @elastic/actionable-observability
+x-pack/plugins/infra/public/alerting @elastic/actionable-observability
+x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
