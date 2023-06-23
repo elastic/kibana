@@ -315,15 +315,16 @@ export const coPilotPrompts = {
 
       const content = `You are an observability expert being consulted about an alert raised on elastic observability suite.
 
-There has been a threshold alert on a spike of logs. The AIOps feature "Explain Log Rate Spikes" ran a statistical analysis and returned the following CSV formatted output which lists statistically significant field/value combinations that contribute to the spike:
+      There has been a threshold alert on a spike of logs. The AIOps feature "Explain Log Rate Spikes" ran a statistical analysis and returned the following analysis results which lists statistically significant co-occuring field/value combinations that contribute to the spike:
 
-${header}
-${rows}
+      ${header}
+      ${rows}
 
-Please provide a root cause analysis on why this combination of field/value combinations could cause a spike in logs in up to 2 parapraphs. Then suggest remediations for this alert with up to 3 bullet points. Don't mention that the original given format is CSV.
-        `;
-
-      console.log('content', content);
+      Based on the above analysis results and your observability expert knowledge, output the following:
+      Analyse the type of these logs and explain their usual purpose (1 paragraph).
+      Based on the type of these logs do a root cause analysis on why the field and value combinations from the anlaysis results are causing this spike in logs (2 parapraphs).
+      Recommend concrete remediations to resolve the root cause of the affected systems (3 bullet points).
+      Do not repeat the given instructions in your output.`;
 
       return [
         LOGS_SYSTEM_MESSAGE,
