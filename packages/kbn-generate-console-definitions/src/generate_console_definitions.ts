@@ -156,7 +156,7 @@ export function generateConsoleDefinitions({
     };
     fs.writeFileSync(
       join(definitionsFolder, `${name}.json`),
-      JSON.stringify(fileContent + '\n', null, 2),
+      JSON.stringify(fileContent, null, 2) + '\n',
       'utf8'
     );
   });
