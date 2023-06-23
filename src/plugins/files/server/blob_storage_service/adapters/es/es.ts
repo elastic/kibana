@@ -7,7 +7,6 @@
  */
 
 import assert from 'assert';
-import { once } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Semaphore } from '@kbn/std';
@@ -16,6 +15,7 @@ import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
 import { lastValueFrom, defer } from 'rxjs';
 import { PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { memoize } from 'lodash';
 import { FilesPlugin } from '../../../plugin';
 import { FILE_UPLOAD_PERFORMANCE_EVENT_NAME } from '../../../performance';
 import type { BlobStorageClient } from '../../types';
@@ -65,15 +65,10 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
   }
 
   /**
-   * This function acts as a singleton i.t.o. execution: it can only be called once.
-   * Subsequent calls should not re-execute it.
-   *
-   * There is a known issue where calling this function simultaneously can result
-   * in a race condition where one of the calls will fail because the index is already
-   * being created. This is only an issue for the very first time the index is being
-   * created.
+   * This function acts as a singleton i.t.o. execution: it can only be called once per index.
+   * Subsequent calls for the same index should not re-execute it.
    */
-  private static createIndexIfNotExists = once(
+  protected static createIndexIfNotExists = memoize(
     async (
       index: string,
       esClient: ElasticsearchClient,
@@ -88,11 +83,11 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
 
       try {
         if (await esClient.indices.exists({ index })) {
-          logger.debug(`${index} already exists. Nothing to do`);
+          logger.debug(`[${index}] already exists. Nothing to do`);
           return;
         }
 
-        logger.info(`Creating ${index} for Elasticsearch blob store.`);
+        logger.info(`Creating [${index}] index for Elasticsearch blob store.`);
 
         await esClient.indices.create({
           index,
