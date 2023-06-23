@@ -133,7 +133,7 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={true} data-test-subj="inspectorRequestCodeViewerContainer">
-        <CodeEditor // TODO theme provided in context in src/plugins/inspector/public/ui/inspector_panel.tsx
+        <CodeEditor
           languageId={XJsonLang.ID}
           value={json}
           options={{

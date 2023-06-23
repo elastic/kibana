@@ -77,7 +77,7 @@ class EssqlDatasource extends PureComponent {
           </EuiText>
         }
       >
-        <CodeEditorField // TODO theme appears to be provided in x-pack/plugins/canvas/public/application.tsx
+        <CodeEditorField
           languageId={SQLLang.ID}
           value={this.getQuery()}
           onChange={this.onChange}

@@ -53,7 +53,7 @@ const EditorArg: FC<EditorArgProps> = ({ argValue, typeInstance, onValueChange, 
 
   return (
     <EuiFormRow display="rowCompressed" data-test-subj="canvasCodeEditorField">
-      <CodeEditorField // TODO theme appears to be provided in x-pack/plugins/canvas/public/application.tsx
+      <CodeEditorField
         languageId={language ?? ''}
         value={value}
         onChange={onChange}
