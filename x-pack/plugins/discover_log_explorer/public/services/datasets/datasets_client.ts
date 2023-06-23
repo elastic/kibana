@@ -9,26 +9,25 @@ import { HttpStart } from '@kbn/core/public';
 import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATASETS_URL,
+  findDatasetsRequestHttpFetchQueryRT,
   FindDatasetsRequestQuery,
-  findDatasetsRequestQueryRT,
   FindDatasetsResponse,
   findDatasetsResponseRT,
+  findIntegrationsRequestHttpFetchQueryRT,
   FindIntegrationsRequestQuery,
-  findIntegrationsRequestQueryRT,
   FindIntegrationsResponse,
   findIntegrationsResponseRT,
-  formatSearch,
   INTEGRATIONS_URL,
 } from '../../../common/latest';
 import { FindDatasetsError, FindIntegrationsError } from '../../../common/datasets/errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { IDatasetsClient } from './types';
 
-const defaultIntegrationsParams = {
+const defaultIntegrationsParams: Pick<FindIntegrationsRequestQuery, 'dataStreamType'> = {
   dataStreamType: 'logs',
 };
 
-const defaultDatasetsParams = {
+const defaultDatasetsParams: Pick<FindDatasetsRequestQuery, 'type' | 'uncategorisedOnly'> = {
   type: 'logs',
   uncategorisedOnly: true,
 };
@@ -41,13 +40,7 @@ export class DatasetsClient implements IDatasetsClient {
   ): Promise<FindIntegrationsResponse> {
     const search = { ...params, ...defaultIntegrationsParams };
 
-    const decodedSearch = decodeOrThrow(
-      findIntegrationsRequestQueryRT,
-      (message: string) =>
-        new FindIntegrationsError(`Failed to decode integrations search param: ${message}"`)
-    )(search);
-
-    const query = formatSearch(decodedSearch);
+    const query = findIntegrationsRequestHttpFetchQueryRT.encode(search);
 
     const response = await this.http.get(INTEGRATIONS_URL, { query }).catch((error) => {
       throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
@@ -65,13 +58,7 @@ export class DatasetsClient implements IDatasetsClient {
   public async findDatasets(params: FindDatasetsRequestQuery = {}): Promise<FindDatasetsResponse> {
     const search = { ...params, ...defaultDatasetsParams };
 
-    const decodedSearch = decodeOrThrow(
-      findDatasetsRequestQueryRT,
-      (message: string) =>
-        new FindDatasetsError(`Failed to decode data streams search param: ${message}"`)
-    )(search);
-
-    const query = formatSearch(decodedSearch);
+    const query = findDatasetsRequestHttpFetchQueryRT.encode(search);
 
     const response = await this.http.get(DATASETS_URL, { query }).catch((error) => {
       throw new FindDatasetsError(`Failed to fetch data streams": ${error}`);

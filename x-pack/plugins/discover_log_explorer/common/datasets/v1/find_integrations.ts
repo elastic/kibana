@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { HttpFetchQuery } from '@kbn/core-http-browser';
 import * as rt from 'io-ts';
 import { integrationRT } from '../types';
-import { sortOrderRT } from './common';
+import { formatSearch, sortOrderRT } from './common';
 
 const searchAfterRT = rt.array(rt.union([rt.number, rt.string]));
 
@@ -31,6 +32,17 @@ export const findIntegrationsRequestQueryRT = rt.exact(
     searchAfter: searchAfterRT,
     sortOrder: sortOrderRT,
   })
+);
+
+export const findIntegrationsRequestHttpFetchQueryRT = new rt.Type<
+  FindIntegrationsRequestQuery,
+  HttpFetchQuery,
+  unknown
+>(
+  'FindIntegrationsRequestHttpQuery',
+  findIntegrationsRequestQueryRT.is,
+  findIntegrationsRequestQueryRT.decode,
+  formatSearch
 );
 
 export type SearchAfter = rt.TypeOf<typeof searchAfterRT>;
