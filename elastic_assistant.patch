@@ -1,0 +1,1146 @@
+Index: x-pack/plugins/observability/kibana.jsonc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/x-pack/plugins/observability/kibana.jsonc b/x-pack/plugins/observability/kibana.jsonc
+--- a/x-pack/plugins/observability/kibana.jsonc	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/x-pack/plugins/observability/kibana.jsonc	(date 1686713779651)
+@@ -8,6 +8,7 @@
+     "browser": true,
+     "configPath": ["xpack", "observability"],
+     "requiredPlugins": [
++      "actions",
+       "alerting",
+       "cases",
+       "charts",
+@@ -26,6 +27,7 @@
+       "security",
+       "share",
+       "spaces",
++      "stackConnectors",
+       "unifiedSearch",
+       "visualizations"
+     ],
+Index: x-pack/plugins/observability/public/components/alerts_flyout/alerts_flyout_header.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/x-pack/plugins/observability/public/components/alerts_flyout/alerts_flyout_header.tsx b/x-pack/plugins/observability/public/components/alerts_flyout/alerts_flyout_header.tsx
+--- a/x-pack/plugins/observability/public/components/alerts_flyout/alerts_flyout_header.tsx	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/x-pack/plugins/observability/public/components/alerts_flyout/alerts_flyout_header.tsx	(date 1686713594467)
+@@ -4,10 +4,17 @@
+  * 2.0; you may not use this file except in compliance with the Elastic License
+  * 2.0.
+  */
+-import React from 'react';
++import React, { useCallback } from 'react';
+ import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+ import { EuiSpacer, EuiTitle } from '@elastic/eui';
++import { NewChat } from '@kbn/elastic-assistant';
+ import type { TopAlert } from '../../typings/alerts';
++import {
++  ALERT_CONTEXT_DESCRIPTION,
++  ALERT_SUMMARIZATION_PROMPT,
++  ALERT_SUMMARY_CONVERSATION_ID,
++} from '../../assistant/translations';
++import { PROMPT_CONTEXT_ALERT_CATEGORY } from '../../assistant/conversations';
+ 
+ interface FlyoutProps {
+   alert: TopAlert;
+@@ -15,11 +22,35 @@
+ }
+ 
+ export function AlertsFlyoutHeader({ alert }: FlyoutProps) {
++  // Elastic Assistant Prompt Context Data Provider for Event fields
++  const getPromptContext = useCallback(
++    async () =>
++      Object.entries(alert.fields)
++        .map((k) => {
++          return k;
++        })
++        .join('\n'),
++    [alert]
++  );
++
+   return (
+     <>
+       <EuiSpacer size="s" />
+       <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
+-        <h2>{alert.fields[ALERT_RULE_NAME]}</h2>
++        <h2>
++          {alert.fields[ALERT_RULE_NAME]}{' '}
++          <NewChat
++            category={PROMPT_CONTEXT_ALERT_CATEGORY}
++            conversationId={ALERT_SUMMARY_CONVERSATION_ID}
++            description={ALERT_CONTEXT_DESCRIPTION}
++            getPromptContext={getPromptContext}
++            iconType={null}
++            suggestedUserPrompt={ALERT_SUMMARIZATION_PROMPT}
++            tooltip={null}
++          >
++            {'🪄✨'}
++          </NewChat>
++        </h2>
+       </EuiTitle>
+     </>
+   );
+Index: x-pack/plugins/observability/public/application/index.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/x-pack/plugins/observability/public/application/index.tsx b/x-pack/plugins/observability/public/application/index.tsx
+--- a/x-pack/plugins/observability/public/application/index.tsx	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/x-pack/plugins/observability/public/application/index.tsx	(date 1686713097341)
+@@ -5,8 +5,17 @@
+  * 2.0.
+  */
+ 
+-import { EuiErrorBoundary } from '@elastic/eui';
+-import React from 'react';
++import {
++  EuiAvatar,
++  EuiButtonIcon,
++  EuiCommentProps,
++  EuiCopy,
++  EuiErrorBoundary,
++  EuiMarkdownFormat,
++  EuiText,
++  EuiToolTip,
++} from '@elastic/eui';
++import React, { useCallback } from 'react';
+ import ReactDOM from 'react-dom';
+ import { Router, Switch } from 'react-router-dom';
+ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+@@ -22,16 +31,110 @@
+ } from '@kbn/kibana-react-plugin/public';
+ import { Storage } from '@kbn/kibana-utils-plugin/public';
+ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
++import { useLocalStorage } from 'react-use/lib';
++import { AssistantOverlay, AssistantProvider, Conversation } from '@kbn/elastic-assistant';
++
+ import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
+ import { PluginContext } from '../context/plugin_context/plugin_context';
+ import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
+ import { routes } from '../routes';
+ import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
+ import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
++import {
++  BASE_OBSERVABILITY_CONVERSATIONS,
++  BASE_OBSERVABILITY_QUICK_PROMPTS,
++  BASE_SYSTEM_PROMPTS,
++} from '../assistant/conversations';
++import { ELASTIC_OBSERVABILITY_ASSISTANT } from '../assistant/translations';
++import { useKibana } from '../utils/kibana_react';
+ 
+ function App() {
++  const {
++    http,
++    triggersActionsUi: { actionTypeRegistry },
++  } = useKibana().services;
++
++  /**
++   * Elastic Assistant Discover Integration
++   */
++  // Local storage for saving Discover Conversations
++  const [localStorageConversations, setLocalStorageConversations] = useLocalStorage(
++    `observability.observabilityAssistant`,
++    BASE_OBSERVABILITY_CONVERSATIONS
++  );
++
++  const getInitialConversation = useCallback(() => {
++    return localStorageConversations ?? {};
++  }, [localStorageConversations]);
++
++  // Solution Specific Comment Rendering
++  const getComments = useCallback(
++    ({
++      currentConversation,
++      lastCommentRef,
++    }: {
++      currentConversation: Conversation;
++      lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
++    }): EuiCommentProps[] =>
++      currentConversation.messages.map((message, index) => {
++        const isUser = message.role === 'user';
++
++        return {
++          actions: (
++            <EuiToolTip position="top" content={'Copy'}>
++              <EuiCopy textToCopy={message.content}>
++                {(copy) => (
++                  <EuiButtonIcon
++                    aria-label={'Copy'}
++                    color="primary"
++                    iconType="copyClipboard"
++                    onClick={copy}
++                  />
++                )}
++              </EuiCopy>
++            </EuiToolTip>
++          ),
++          children:
++            index !== currentConversation.messages.length - 1 ? (
++              <EuiText>
++                <EuiMarkdownFormat className={`message-${index}`}>
++                  {message.content}
++                </EuiMarkdownFormat>
++              </EuiText>
++            ) : (
++              <EuiText>
++                <EuiMarkdownFormat className={`message-${index}`}>
++                  {message.content}
++                </EuiMarkdownFormat>
++                <span ref={lastCommentRef} />
++              </EuiText>
++            ),
++          timelineAvatar: isUser ? (
++            <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
++          ) : (
++            <EuiAvatar name="machine" size="l" color="subdued" iconType="logoObservability" />
++          ),
++          timestamp: `at ${message.timestamp}`,
++          username: isUser ? 'You' : 'Assistant',
++        };
++      }),
++    []
++  );
++
+   return (
+-    <>
++    <AssistantProvider
++      actionTypeRegistry={actionTypeRegistry}
++      augmentMessageCodeBlocks={() => []}
++      baseQuickPrompts={BASE_OBSERVABILITY_QUICK_PROMPTS}
++      baseSystemPrompts={BASE_SYSTEM_PROMPTS}
++      getComments={getComments}
++      getInitialConversations={getInitialConversation}
++      http={http}
++      nameSpace={'observability'}
++      setConversations={setLocalStorageConversations}
++      title={ELASTIC_OBSERVABILITY_ASSISTANT}
++    >
++      <AssistantOverlay />
+       <Switch>
+         {Object.keys(routes).map((key) => {
+           const path = key as keyof typeof routes;
+@@ -42,7 +145,7 @@
+           return <Route key={path} path={path} exact={exact} component={Wrapper} />;
+         })}
+       </Switch>
+-    </>
++    </AssistantProvider>
+   );
+ }
+ 
+Index: src/plugins/discover/public/application/main/discover_main_route.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/plugins/discover/public/application/main/discover_main_route.tsx b/src/plugins/discover/public/application/main/discover_main_route.tsx
+--- a/src/plugins/discover/public/application/main/discover_main_route.tsx	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/src/plugins/discover/public/application/main/discover_main_route.tsx	(date 1686709435615)
+@@ -16,6 +16,18 @@
+ } from '@kbn/shared-ux-page-analytics-no-data';
+ import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
+ import useObservable from 'react-use/lib/useObservable';
++import { AssistantOverlay, AssistantProvider, Conversation } from '@kbn/elastic-assistant';
++import {
++  EuiAvatar,
++  EuiButtonIcon,
++  EuiCommentProps,
++  EuiCopy,
++  EuiMarkdownFormat,
++  EuiText,
++  EuiToolTip,
++} from '@elastic/eui';
++import { useLocalStorage } from 'react-use/lib';
++import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ import { useUrl } from './hooks/use_url';
+ import { useSingleton } from './hooks/use_singleton';
+ import { MainHistoryLocationState } from '../../../common/locator';
+@@ -28,6 +40,13 @@
+ import { getScopedHistory, getUrlTracker } from '../../kibana_services';
+ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
+ import { DiscoverMainProvider } from './services/discover_state_provider';
++import { APP_ICON, PLUGIN_ID } from '../../../common';
++import {
++  BASE_DISCOVER_CONVERSATIONS,
++  BASE_DISCOVER_QUICK_PROMPTS,
++  BASE_SYSTEM_PROMPTS,
++} from './assistant/conversations';
++import { ELASTIC_DISCOVER_ASSISTANT } from './assistant/translations';
+ 
+ const DiscoverMainAppMemoized = memo(DiscoverMainApp);
+ 
+@@ -49,7 +68,9 @@
+     data,
+     toastNotifications,
+     http: { basePath },
++    http,
+     dataViewEditor,
++    triggersActionsUi: { actionTypeRegistry },
+   } = services;
+   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
+   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
+@@ -65,6 +86,76 @@
+   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+   const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$, false);
+ 
++  /**
++   * Elastic Assistant Discover Integration
++   */
++  // UseQuery client used by 'actions' hooks in Elastic Assistant
++  const queryClient = new QueryClient();
++
++  // Local storage for saving Discover Conversations
++  const [localStorageConversations, setLocalStorageConversations] = useLocalStorage(
++    `${PLUGIN_ID}.discoverAssistant`,
++    BASE_DISCOVER_CONVERSATIONS
++  );
++
++  const getInitialConversation = useCallback(() => {
++    return localStorageConversations ?? {};
++  }, [localStorageConversations]);
++
++  // Solution Specific Comment Rendering
++  const getComments = useCallback(
++    ({
++      currentConversation,
++      lastCommentRef,
++    }: {
++      currentConversation: Conversation;
++      lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
++    }): EuiCommentProps[] =>
++      currentConversation.messages.map((message, index) => {
++        const isUser = message.role === 'user';
++
++        return {
++          actions: (
++            <EuiToolTip position="top" content={'Copy'}>
++              <EuiCopy textToCopy={message.content}>
++                {(copy) => (
++                  <EuiButtonIcon
++                    aria-label={'Copy'}
++                    color="primary"
++                    iconType="copyClipboard"
++                    onClick={copy}
++                  />
++                )}
++              </EuiCopy>
++            </EuiToolTip>
++          ),
++          children:
++            index !== currentConversation.messages.length - 1 ? (
++              <EuiText>
++                <EuiMarkdownFormat className={`message-${index}`}>
++                  {message.content}
++                </EuiMarkdownFormat>
++              </EuiText>
++            ) : (
++              <EuiText>
++                <EuiMarkdownFormat className={`message-${index}`}>
++                  {message.content}
++                </EuiMarkdownFormat>
++                <span ref={lastCommentRef} />
++              </EuiText>
++            ),
++          timelineAvatar: isUser ? (
++            <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
++          ) : (
++            <EuiAvatar name="machine" size="l" color="subdued" iconType={APP_ICON} />
++          ),
++          timestamp: `at ${message.timestamp}`,
++          username: isUser ? 'You' : 'Assistant',
++        };
++      }),
++    []
++  );
++
+   /**
+    * Get location state of scoped history only on initial load
+    */
+@@ -251,7 +342,23 @@
+ 
+   return (
+     <DiscoverMainProvider value={stateContainer}>
+-      <DiscoverMainAppMemoized stateContainer={stateContainer} />
++      <QueryClientProvider client={queryClient}>
++        <AssistantProvider
++          actionTypeRegistry={actionTypeRegistry}
++          augmentMessageCodeBlocks={() => []}
++          baseQuickPrompts={BASE_DISCOVER_QUICK_PROMPTS}
++          baseSystemPrompts={BASE_SYSTEM_PROMPTS}
++          getComments={getComments}
++          getInitialConversations={getInitialConversation}
++          http={http}
++          nameSpace={PLUGIN_ID}
++          setConversations={setLocalStorageConversations}
++          title={ELASTIC_DISCOVER_ASSISTANT}
++        >
++          <AssistantOverlay />
++          <DiscoverMainAppMemoized stateContainer={stateContainer} />
++        </AssistantProvider>
++      </QueryClientProvider>
+     </DiscoverMainProvider>
+   );
+ }
+Index: x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/translations.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/translations.ts b/x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/translations.ts
+--- a/x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/translations.ts	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/translations.ts	(date 1686711109196)
+@@ -23,7 +23,7 @@
+ export const ELASTIC_SECURITY_ASSISTANT_TITLE = i18n.translate(
+   'xpack.elasticAssistant.assistant.useConversation.elasticSecurityAssistantTitle',
+   {
+-    defaultMessage: 'Elastic Security Assistant',
++    defaultMessage: 'Elastic Assistant',
+   }
+ );
+ 
+Index: x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/sample_conversations.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/sample_conversations.tsx b/x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/sample_conversations.tsx
+--- a/x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/sample_conversations.tsx	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/sample_conversations.tsx	(date 1686711120181)
+@@ -88,10 +88,10 @@
+     id: WELCOME_CONVERSATION_TITLE,
+     theme: {
+       title: ELASTIC_SECURITY_ASSISTANT_TITLE,
+-      titleIcon: 'logoSecurity',
++      titleIcon: 'logoElastic',
+       assistant: {
+         name: ELASTIC_SECURITY_ASSISTANT,
+-        icon: 'logoSecurity',
++        icon: 'logoElastic',
+       },
+       system: {
+         icon: 'logoElastic',
+Index: x-pack/packages/kbn-elastic-assistant/impl/assistant/index.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/x-pack/packages/kbn-elastic-assistant/impl/assistant/index.tsx b/x-pack/packages/kbn-elastic-assistant/impl/assistant/index.tsx
+--- a/x-pack/packages/kbn-elastic-assistant/impl/assistant/index.tsx	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/x-pack/packages/kbn-elastic-assistant/impl/assistant/index.tsx	(date 1686711024082)
+@@ -121,7 +121,7 @@
+   const currentTitle: { title: string | JSX.Element; titleIcon: string } =
+     isWelcomeSetup && welcomeConversation.theme?.title && welcomeConversation.theme?.titleIcon
+       ? { title: welcomeConversation.theme?.title, titleIcon: welcomeConversation.theme?.titleIcon }
+-      : { title, titleIcon: 'logoSecurity' };
++      : { title, titleIcon: 'logoElastic' };
+ 
+   const bottomRef = useRef<HTMLDivElement | null>(null);
+   const lastCommentRef = useRef<HTMLDivElement | null>(null);
+Index: src/plugins/discover/public/components/discover_grid/discover_grid_flyout.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/plugins/discover/public/components/discover_grid/discover_grid_flyout.tsx b/src/plugins/discover/public/components/discover_grid/discover_grid_flyout.tsx
+--- a/src/plugins/discover/public/components/discover_grid/discover_grid_flyout.tsx	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/src/plugins/discover/public/components/discover_grid/discover_grid_flyout.tsx	(date 1686709435623)
+@@ -26,12 +26,19 @@
+   keys,
+ } from '@elastic/eui';
+ import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
++import { NewChat } from '@kbn/elastic-assistant';
+ import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
+ import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+ import { useNavigationProps } from '../../hooks/use_navigation_props';
+ import { useDiscoverServices } from '../../hooks/use_discover_services';
+ import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
+ import type { DataTableRecord } from '../../types';
++import { PROMPT_CONTEXT_EVENT_CATEGORY } from '../../application/main/assistant/conversations';
++import {
++  EVENT_CONTEXT_DESCRIPTION,
++  EVENT_SUMMARIZATION_PROMPT,
++  EVENT_SUMMARY_CONVERSATION_ID,
++} from '../../application/main/assistant/translations';
+ 
+ export interface DiscoverGridFlyoutProps {
+   savedSearchId?: string;
+@@ -108,6 +115,17 @@
+     { dataView, rowIndex: hit.raw._index, rowId: hit.raw._id, columns, filters, savedSearchId }
+   );
+ 
++  // Elastic Assistant Prompt Context Data Provider for Event fields
++  const getPromptContext = useCallback(
++    async () =>
++      Object.entries(actualHit.flattened)
++        .map((k) => {
++          return k;
++        })
++        .join('\n'),
++    [actualHit]
++  );
++
+   return (
+     <EuiPortal>
+       <EuiFlyout
+@@ -202,6 +220,19 @@
+                           className: 'eui-alignTop',
+                         }}
+                       />
++                    </EuiFlexItem>
++                    <EuiFlexItem grow={false}>
++                      <NewChat
++                        category={PROMPT_CONTEXT_EVENT_CATEGORY}
++                        conversationId={EVENT_SUMMARY_CONVERSATION_ID}
++                        description={EVENT_CONTEXT_DESCRIPTION}
++                        getPromptContext={getPromptContext}
++                        iconType={null}
++                        suggestedUserPrompt={EVENT_SUMMARIZATION_PROMPT}
++                        tooltip={null}
++                      >
++                        {'🪄✨'}
++                      </NewChat>
+                     </EuiFlexItem>
+                   </EuiFlexGroup>
+                 )}
+Index: packages/core/plugins/core-plugins-server-internal/src/plugins_service.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/core/plugins/core-plugins-server-internal/src/plugins_service.ts b/packages/core/plugins/core-plugins-server-internal/src/plugins_service.ts
+--- a/packages/core/plugins/core-plugins-server-internal/src/plugins_service.ts	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/packages/core/plugins/core-plugins-server-internal/src/plugins_service.ts	(date 1686696123407)
+@@ -372,16 +372,16 @@
+     }
+ 
+     // validate that OSS plugins do not have required dependencies on X-Pack plugins
+-    if (plugin.source === 'oss') {
+-      for (const id of [...requiredPlugins, ...requiredBundles]) {
+-        const requiredPlugin = pluginEnableStatuses.get(id);
+-        if (requiredPlugin && requiredPlugin.plugin.source === 'x-pack') {
+-          throw new Error(
+-            `X-Pack plugin or bundle with id "${id}" is required by OSS plugin "${name}", which is prohibited. Consider making this an optional dependency instead.`
+-          );
+-        }
+-      }
+-    }
++    // if (plugin.source === 'oss') {
++    //   for (const id of [...requiredPlugins, ...requiredBundles]) {
++    //     const requiredPlugin = pluginEnableStatuses.get(id);
++    //     if (requiredPlugin && requiredPlugin.plugin.source === 'x-pack') {
++    //       throw new Error(
++    //         `X-Pack plugin or bundle with id "${id}" is required by OSS plugin "${name}", which is prohibited. Consider making this an optional dependency instead.`
++    //       );
++    //     }
++    //   }
++    // }
+   }
+ 
+   private shouldEnablePlugin(
+Index: src/plugins/discover/public/application/main/assistant/conversations.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/plugins/discover/public/application/main/assistant/conversations.tsx b/src/plugins/discover/public/application/main/assistant/conversations.tsx
+new file mode 100644
+--- /dev/null	(date 1686711301971)
++++ b/src/plugins/discover/public/application/main/assistant/conversations.tsx	(date 1686711301971)
+@@ -0,0 +1,125 @@
++/*
++ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
++ * or more contributor license agreements. Licensed under the Elastic License
++ * 2.0 and the Server Side Public License, v 1; you may not use this file except
++ * in compliance with, at your election, the Elastic License 2.0 or the Server
++ * Side Public License, v 1.
++ */
++
++import type { Conversation, Prompt, QuickPrompt } from '@kbn/elastic-assistant';
++import { APP_ICON } from '../../../../common';
++import {
++  WELCOME_CONVERSATION_TITLE,
++  WELCOME_GENERAL,
++  WELCOME_GENERAL_2,
++  WELCOME_GENERAL_3,
++  ELASTIC_DISCOVER_ASSISTANT,
++  EVENT_SUMMARY_CONVERSATION_ID,
++  SUPERHERO_SYSTEM_PROMPT_NAME,
++  SUPERHERO_SYSTEM_PROMPT_NON_I18N,
++  DEFAULT_SYSTEM_PROMPT_NAME,
++  DEFAULT_SYSTEM_PROMPT_NON_I18N,
++  EVENT_SUMMARIZATION_TITLE,
++  EVENT_SUMMARIZATION_PROMPT,
++} from './translations';
++
++export const BASE_DISCOVER_CONVERSATIONS: Record<string, Conversation> = {
++  [EVENT_SUMMARY_CONVERSATION_ID]: {
++    id: EVENT_SUMMARY_CONVERSATION_ID,
++    isDefault: true,
++    theme: {
++      title: ELASTIC_DISCOVER_ASSISTANT,
++      titleIcon: APP_ICON,
++      assistant: {
++        name: ELASTIC_DISCOVER_ASSISTANT,
++        icon: APP_ICON,
++      },
++      system: {
++        icon: 'logoElastic',
++      },
++      user: {},
++    },
++    messages: [],
++    apiConfig: {},
++  },
++  [WELCOME_CONVERSATION_TITLE]: {
++    id: WELCOME_CONVERSATION_TITLE,
++    isDefault: true,
++    theme: {
++      title: ELASTIC_DISCOVER_ASSISTANT,
++      titleIcon: APP_ICON,
++      assistant: {
++        name: ELASTIC_DISCOVER_ASSISTANT,
++        icon: APP_ICON,
++      },
++      system: {
++        icon: 'logoElastic',
++      },
++      user: {},
++    },
++    messages: [
++      {
++        role: 'assistant',
++        content: WELCOME_GENERAL,
++        timestamp: '',
++        presentation: {
++          delay: 2 * 1000,
++          stream: true,
++        },
++      },
++      {
++        role: 'assistant',
++        content: WELCOME_GENERAL_2,
++        timestamp: '',
++        presentation: {
++          delay: 1000,
++          stream: true,
++        },
++      },
++      {
++        role: 'assistant',
++        content: WELCOME_GENERAL_3,
++        timestamp: '',
++        presentation: {
++          delay: 1000,
++          stream: true,
++        },
++      },
++    ],
++    apiConfig: {},
++  },
++};
++
++/**
++ * Base System Prompts for Elastic Discover Assistant
++ */
++export const BASE_SYSTEM_PROMPTS: Prompt[] = [
++  {
++    id: 'default-system-prompt',
++    content: DEFAULT_SYSTEM_PROMPT_NON_I18N,
++    name: DEFAULT_SYSTEM_PROMPT_NAME,
++    promptType: 'system',
++  },
++  {
++    id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
++    content: SUPERHERO_SYSTEM_PROMPT_NON_I18N,
++    name: SUPERHERO_SYSTEM_PROMPT_NAME,
++    promptType: 'system',
++  },
++];
++
++/**
++ * Global list of QuickPrompts intended to be used throughout Discover.
++ * Useful if wanting to see all available QuickPrompts in one place, or if needing
++ * to reference when constructing a new chat window to include a QuickPrompt.
++ */
++export const PROMPT_CONTEXT_EVENT_CATEGORY = 'event';
++export const BASE_DISCOVER_QUICK_PROMPTS: QuickPrompt[] = [
++  {
++    title: EVENT_SUMMARIZATION_TITLE,
++    prompt: EVENT_SUMMARIZATION_PROMPT,
++    color: '#F68FBE',
++    categories: [PROMPT_CONTEXT_EVENT_CATEGORY],
++    isDefault: true,
++  },
++];
+Index: x-pack/plugins/observability/public/assistant/conversations.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/x-pack/plugins/observability/public/assistant/conversations.tsx b/x-pack/plugins/observability/public/assistant/conversations.tsx
+new file mode 100644
+--- /dev/null	(date 1686713454886)
++++ b/x-pack/plugins/observability/public/assistant/conversations.tsx	(date 1686713454886)
+@@ -0,0 +1,123 @@
++/*
++ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
++ * or more contributor license agreements. Licensed under the Elastic License
++ * 2.0; you may not use this file except in compliance with the Elastic License
++ * 2.0.
++ */
++
++import type { Conversation, Prompt, QuickPrompt } from '@kbn/elastic-assistant';
++import {
++  WELCOME_CONVERSATION_TITLE,
++  WELCOME_GENERAL,
++  WELCOME_GENERAL_2,
++  WELCOME_GENERAL_3,
++  ELASTIC_OBSERVABILITY_ASSISTANT,
++  SUPERHERO_SYSTEM_PROMPT_NAME,
++  SUPERHERO_SYSTEM_PROMPT_NON_I18N,
++  DEFAULT_SYSTEM_PROMPT_NAME,
++  DEFAULT_SYSTEM_PROMPT_NON_I18N,
++  ALERT_SUMMARIZATION_TITLE,
++  ALERT_SUMMARIZATION_PROMPT,
++  ALERT_SUMMARY_CONVERSATION_ID,
++} from './translations';
++
++export const BASE_OBSERVABILITY_CONVERSATIONS: Record<string, Conversation> = {
++  [ALERT_SUMMARY_CONVERSATION_ID]: {
++    id: ALERT_SUMMARY_CONVERSATION_ID,
++    isDefault: true,
++    theme: {
++      title: ELASTIC_OBSERVABILITY_ASSISTANT,
++      titleIcon: 'logoObservability',
++      assistant: {
++        name: ELASTIC_OBSERVABILITY_ASSISTANT,
++        icon: 'logoObservability',
++      },
++      system: {
++        icon: 'logoElastic',
++      },
++      user: {},
++    },
++    messages: [],
++    apiConfig: {},
++  },
++  [WELCOME_CONVERSATION_TITLE]: {
++    id: WELCOME_CONVERSATION_TITLE,
++    isDefault: true,
++    theme: {
++      title: ELASTIC_OBSERVABILITY_ASSISTANT,
++      titleIcon: 'logoObservability',
++      assistant: {
++        name: ELASTIC_OBSERVABILITY_ASSISTANT,
++        icon: 'logoObservability',
++      },
++      system: {
++        icon: 'logoElastic',
++      },
++      user: {},
++    },
++    messages: [
++      {
++        role: 'assistant',
++        content: WELCOME_GENERAL,
++        timestamp: '',
++        presentation: {
++          delay: 2 * 1000,
++          stream: true,
++        },
++      },
++      {
++        role: 'assistant',
++        content: WELCOME_GENERAL_2,
++        timestamp: '',
++        presentation: {
++          delay: 1000,
++          stream: true,
++        },
++      },
++      {
++        role: 'assistant',
++        content: WELCOME_GENERAL_3,
++        timestamp: '',
++        presentation: {
++          delay: 1000,
++          stream: true,
++        },
++      },
++    ],
++    apiConfig: {},
++  },
++};
++
++/**
++ * Base System Prompts for Elastic Observability Assistant
++ */
++export const BASE_SYSTEM_PROMPTS: Prompt[] = [
++  {
++    id: 'default-system-prompt',
++    content: DEFAULT_SYSTEM_PROMPT_NON_I18N,
++    name: DEFAULT_SYSTEM_PROMPT_NAME,
++    promptType: 'system',
++  },
++  {
++    id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
++    content: SUPERHERO_SYSTEM_PROMPT_NON_I18N,
++    name: SUPERHERO_SYSTEM_PROMPT_NAME,
++    promptType: 'system',
++  },
++];
++
++/**
++ * Global list of QuickPrompts intended to be used throughout Observability.
++ * Useful if wanting to see all available QuickPrompts in one place, or if needing
++ * to reference when constructing a new chat window to include a QuickPrompt.
++ */
++export const PROMPT_CONTEXT_ALERT_CATEGORY = 'alert';
++export const BASE_OBSERVABILITY_QUICK_PROMPTS: QuickPrompt[] = [
++  {
++    title: ALERT_SUMMARIZATION_TITLE,
++    prompt: ALERT_SUMMARIZATION_PROMPT,
++    color: '#F68FBE',
++    categories: [PROMPT_CONTEXT_ALERT_CATEGORY],
++    isDefault: true,
++  },
++];
+Index: x-pack/plugins/observability/public/assistant/translations.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/x-pack/plugins/observability/public/assistant/translations.ts b/x-pack/plugins/observability/public/assistant/translations.ts
+new file mode 100644
+--- /dev/null	(date 1686713568420)
++++ b/x-pack/plugins/observability/public/assistant/translations.ts	(date 1686713568420)
+@@ -0,0 +1,131 @@
++/*
++ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
++ * or more contributor license agreements. Licensed under the Elastic License
++ * 2.0; you may not use this file except in compliance with the Elastic License
++ * 2.0.
++ */
++
++import { i18n } from '@kbn/i18n';
++
++export const ELASTIC_OBSERVABILITY_ASSISTANT = i18n.translate(
++  'xpack.observability.assistant.elasticObservabilityAssistantTitle',
++  {
++    defaultMessage: 'Elastic Observability Assistant',
++  }
++);
++
++export const ALERT_SUMMARY_CONVERSATION_ID = i18n.translate(
++  'xpack.observability.assistant.alertSummaryViewConversationId',
++  {
++    defaultMessage: 'Alert summary',
++  }
++);
++
++export const WELCOME_CONVERSATION_TITLE = i18n.translate(
++  'xpack.observability.assistant.welcomeConversationTitle',
++  {
++    defaultMessage: 'Welcome',
++  }
++);
++
++// Welcome conversation
++export const WELCOME_GENERAL = i18n.translate(
++  'xpack.observability.assistant.welcomeGeneralPrompt',
++  {
++    defaultMessage:
++      'Welcome to your Elastic Assistant! I am your 100% open-code portal into your Elastic life. In time, I will be able to answer questions and provide assistance across all your information in Elastic, and oh-so much more. Till then, I hope this early preview will open your mind to the possibilities of what we can create when we work together, in the open. Cheers!',
++  }
++);
++
++export const WELCOME_GENERAL_2 = i18n.translate(
++  'xpack.observability.assistant.welcomeGeneral2Prompt',
++  {
++    defaultMessage:
++      "First things first, we'll need to set up a Generative AI Connector to get this chat experience going! With the Generative AI Connector, you'll be able to configure access to either an Azure OpenAI Service or OpenAI API account, but you better believe you'll be able to deploy your own models within your Elastic Cloud instance and use those here in the future... 😉",
++  }
++);
++
++export const WELCOME_GENERAL_3 = i18n.translate(
++  'xpack.observability.assistant.welcomeGeneral3Prompt',
++  {
++    defaultMessage:
++      'Go ahead and click the add connector button below to continue the conversation!',
++  }
++);
++
++// Base System Prompts
++
++export const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT = i18n.translate(
++  'xpack.observability.assistant.content.prompts.system.youAreAHelpfulExpertAssistant',
++  {
++    defaultMessage:
++      'You are a helpful, expert assistant who only answers questions about the Elastic Observability.',
++  }
++);
++
++export const USE_THE_FOLLOWING_CONTEXT_TO_ANSWER = i18n.translate(
++  'xpack.observability.assistant.content.prompts.system.useTheFollowingContextToAnswer',
++  {
++    defaultMessage: 'Use the following context to answer questions:',
++  }
++);
++
++export const IF_YOU_DONT_KNOW_THE_ANSWER = i18n.translate(
++  'xpack.observability.assistant.content.prompts.system.ifYouDontKnowTheAnswer',
++  {
++    defaultMessage: 'Do not answer questions unrelated to the Elastic Observability.',
++  }
++);
++
++export const SUPERHERO_PERSONALITY = i18n.translate(
++  'xpack.observability.assistant.content.prompts.system.superheroPersonality',
++  {
++    defaultMessage:
++      'Provide the most detailed and relevant answer possible, as if you were relaying this information back to an experienced data analyst.',
++  }
++);
++
++export const DEFAULT_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
++${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
++
++export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
++  'xpack.observability.assistant.content.prompts.system.defaultSystemPromptName',
++  {
++    defaultMessage: 'Default system prompt',
++  }
++);
++
++export const SUPERHERO_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
++${SUPERHERO_PERSONALITY}
++${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
++
++export const SUPERHERO_SYSTEM_PROMPT_NAME = i18n.translate(
++  'xpack.observability.assistant.content.prompts.system.superheroSystemPromptName',
++  {
++    defaultMessage: 'Enhanced system prompt',
++  }
++);
++
++// Base Quick Prompts
++
++export const ALERT_SUMMARIZATION_TITLE = i18n.translate(
++  'xpack.observability.assistant.content.prompts.quick.alertSummarizationTitle',
++  {
++    defaultMessage: 'Alert summarization',
++  }
++);
++
++export const ALERT_SUMMARIZATION_PROMPT = i18n.translate(
++  'xpack.observability.assistant.content.prompts.quick.alertSummarizationPrompt',
++  {
++    defaultMessage:
++      'As an expert observability engineer in data and log analysis, provide a breakdown of the attached alert and summarize what it might mean for my organization.',
++  }
++);
++
++export const ALERT_CONTEXT_DESCRIPTION = i18n.translate(
++  'xpack.observability.assistant.content.prompts.context.alertContextDescription',
++  {
++    defaultMessage: 'Selected Alert',
++  }
++);
+Index: src/plugins/discover/public/application/main/assistant/translations.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/plugins/discover/public/application/main/assistant/translations.ts b/src/plugins/discover/public/application/main/assistant/translations.ts
+new file mode 100644
+--- /dev/null	(date 1686709435620)
++++ b/src/plugins/discover/public/application/main/assistant/translations.ts	(date 1686709435620)
+@@ -0,0 +1,122 @@
++/*
++ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
++ * or more contributor license agreements. Licensed under the Elastic License
++ * 2.0 and the Server Side Public License, v 1; you may not use this file except
++ * in compliance with, at your election, the Elastic License 2.0 or the Server
++ * Side Public License, v 1.
++ */
++
++import { i18n } from '@kbn/i18n';
++
++export const ELASTIC_DISCOVER_ASSISTANT = i18n.translate(
++  'discover.assistant.elasticDiscoverAssistantTitle',
++  {
++    defaultMessage: 'Elastic Discover Assistant',
++  }
++);
++
++export const EVENT_SUMMARY_CONVERSATION_ID = i18n.translate(
++  'discover.assistant.eventSummaryViewConversationId',
++  {
++    defaultMessage: 'Event summary',
++  }
++);
++
++export const WELCOME_CONVERSATION_TITLE = i18n.translate(
++  'discover.assistant.welcomeConversationTitle',
++  {
++    defaultMessage: 'Welcome',
++  }
++);
++
++// Welcome conversation
++export const WELCOME_GENERAL = i18n.translate('discover.assistant.welcomeGeneralPrompt', {
++  defaultMessage:
++    'Welcome to your Elastic Assistant! I am your 100% open-code portal into your Elastic life. In time, I will be able to answer questions and provide assistance across all your information in Elastic, and oh-so much more. Till then, I hope this early preview will open your mind to the possibilities of what we can create when we work together, in the open. Cheers!',
++});
++
++export const WELCOME_GENERAL_2 = i18n.translate('discover.assistant.welcomeGeneral2Prompt', {
++  defaultMessage:
++    "First things first, we'll need to set up a Generative AI Connector to get this chat experience going! With the Generative AI Connector, you'll be able to configure access to either an Azure OpenAI Service or OpenAI API account, but you better believe you'll be able to deploy your own models within your Elastic Cloud instance and use those here in the future... 😉",
++});
++
++export const WELCOME_GENERAL_3 = i18n.translate('discover.assistant.welcomeGeneral3Prompt', {
++  defaultMessage: 'Go ahead and click the add connector button below to continue the conversation!',
++});
++
++// Base System Prompts
++
++export const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT = i18n.translate(
++  'discover.assistant.content.prompts.system.youAreAHelpfulExpertAssistant',
++  {
++    defaultMessage:
++      'You are a helpful, expert assistant who only answers questions about the Elastic Stack.',
++  }
++);
++
++export const USE_THE_FOLLOWING_CONTEXT_TO_ANSWER = i18n.translate(
++  'discover.assistant.content.prompts.system.useTheFollowingContextToAnswer',
++  {
++    defaultMessage: 'Use the following context to answer questions:',
++  }
++);
++
++export const IF_YOU_DONT_KNOW_THE_ANSWER = i18n.translate(
++  'discover.assistant.content.prompts.system.ifYouDontKnowTheAnswer',
++  {
++    defaultMessage: 'Do not answer questions unrelated to the Elastic Stack.',
++  }
++);
++
++export const SUPERHERO_PERSONALITY = i18n.translate(
++  'discover.assistant.content.prompts.system.superheroPersonality',
++  {
++    defaultMessage:
++      'Provide the most detailed and relevant answer possible, as if you were relaying this information back to an experienced data analyst.',
++  }
++);
++
++export const DEFAULT_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
++${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
++
++export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
++  'discover.assistant.content.prompts.system.defaultSystemPromptName',
++  {
++    defaultMessage: 'Default system prompt',
++  }
++);
++
++export const SUPERHERO_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
++${SUPERHERO_PERSONALITY}
++${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
++
++export const SUPERHERO_SYSTEM_PROMPT_NAME = i18n.translate(
++  'discover.assistant.content.prompts.system.superheroSystemPromptName',
++  {
++    defaultMessage: 'Enhanced system prompt',
++  }
++);
++
++// Base Quick Prompts
++
++export const EVENT_SUMMARIZATION_TITLE = i18n.translate(
++  'discover.assistant.content.prompts.quick.eventSummarizationTitle',
++  {
++    defaultMessage: 'Event summarization',
++  }
++);
++
++export const EVENT_SUMMARIZATION_PROMPT = i18n.translate(
++  'discover.assistant.content.prompts.quick.eventSummarizationPrompt',
++  {
++    defaultMessage:
++      'As an expert in data and log analysis, provide a breakdown of the attached event and summarize what it might mean for my organization.',
++  }
++);
++
++export const EVENT_CONTEXT_DESCRIPTION = i18n.translate(
++  'discover.assistant.content.prompts.context.eventContextDescription',
++  {
++    defaultMessage: 'Selected Event',
++  }
++);
+Index: src/plugins/discover/kibana.jsonc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/plugins/discover/kibana.jsonc b/src/plugins/discover/kibana.jsonc
+--- a/src/plugins/discover/kibana.jsonc	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/src/plugins/discover/kibana.jsonc	(date 1686694052625)
+@@ -8,6 +8,7 @@
+     "server": true,
+     "browser": true,
+     "requiredPlugins": [
++      "actions",
+       "charts",
+       "data",
+       "dataViews",
+@@ -24,6 +25,8 @@
+       "dataViewFieldEditor",
+       "dataViewEditor",
+       "expressions",
++      "stackConnectors",
++      "triggersActionsUi",
+       "unifiedFieldList",
+       "unifiedSearch",
+       "unifiedHistogram"
+Index: x-pack/packages/kbn-elastic-assistant/impl/assistant/context_pills/index.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/x-pack/packages/kbn-elastic-assistant/impl/assistant/context_pills/index.tsx b/x-pack/packages/kbn-elastic-assistant/impl/assistant/context_pills/index.tsx
+--- a/x-pack/packages/kbn-elastic-assistant/impl/assistant/context_pills/index.tsx	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/x-pack/packages/kbn-elastic-assistant/impl/assistant/context_pills/index.tsx	(date 1686697604467)
+@@ -14,7 +14,7 @@
+ import type { PromptContext } from '../prompt_context/types';
+ 
+ const PillButton = styled(EuiButton)`
+-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
++  margin-right: 4px;
+ `;
+ 
+ interface Props {
+Index: x-pack/packages/kbn-elastic-assistant/impl/assistant/prompt_editor/system_prompt/helpers.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/x-pack/packages/kbn-elastic-assistant/impl/assistant/prompt_editor/system_prompt/helpers.tsx b/x-pack/packages/kbn-elastic-assistant/impl/assistant/prompt_editor/system_prompt/helpers.tsx
+--- a/x-pack/packages/kbn-elastic-assistant/impl/assistant/prompt_editor/system_prompt/helpers.tsx	(revision 6b65e909356a8f9e9f29db28ac8c41edae9959e1)
++++ b/x-pack/packages/kbn-elastic-assistant/impl/assistant/prompt_editor/system_prompt/helpers.tsx	(date 1686694455770)
+@@ -15,7 +15,7 @@
+ import type { Prompt } from '../../types';
+ 
+ const Strong = styled.strong`
+-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
++  margin-right: 8px;
+ `;
+ 
+ export const getOptionFromPrompt = ({
