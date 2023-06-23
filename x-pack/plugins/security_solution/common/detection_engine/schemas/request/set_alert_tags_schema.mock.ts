@@ -9,5 +9,6 @@ import type { SetAlertTagsSchema } from './set_alert_tags_schema';
 
 export const getSetAlertTagsRequestMock = (
   tagsToAdd: string[] = [],
-  tagsToRemove: string[] = []
-): SetAlertTagsSchema => ({ tags: { tags_to_add: tagsToAdd, tags_to_remove: tagsToRemove } });
+  tagsToRemove: string[] = [],
+  ids: string[] = []
+): SetAlertTagsSchema => ({ tags: { tags_to_add: tagsToAdd, tags_to_remove: tagsToRemove }, ids });

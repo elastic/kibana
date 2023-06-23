@@ -8,7 +8,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../common/constants';
 import type { AlertTags } from '../../../../common/detection_engine/schemas/common';
-import { getUpdateAlertsQuery } from '../../components/toolbar/bulk_actions/use_bulk_action_items';
 import { KibanaServices } from '../../lib/kibana';
 
 export const setAlertTags = async ({
@@ -19,14 +18,10 @@ export const setAlertTags = async ({
   tags: AlertTags;
   ids: string[];
   signal: AbortSignal | undefined;
-}): Promise<estypes.UpdateByQueryResponse> => {
-  const query: Record<string, unknown> = getUpdateAlertsQuery(ids);
-  return KibanaServices.get().http.fetch<estypes.UpdateByQueryResponse>(
-    DETECTION_ENGINE_ALERT_TAGS_URL,
-    {
-      method: 'POST',
-      body: JSON.stringify({ tags, query }),
-      signal,
-    }
-  );
+}): Promise<estypes.BulkResponse> => {
+  return KibanaServices.get().http.fetch<estypes.BulkResponse>(DETECTION_ENGINE_ALERT_TAGS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ tags, ids }),
+    signal,
+  });
 };

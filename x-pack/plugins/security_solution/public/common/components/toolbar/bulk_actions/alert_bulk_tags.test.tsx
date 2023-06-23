@@ -33,7 +33,6 @@ const mockTagItems = [
 (useAppToasts as jest.Mock).mockReturnValue({
   addError: jest.fn(),
   addSuccess: jest.fn(),
-  addWarning: jest.fn(),
 });
 (useSetAlertTags as jest.Mock).mockReturnValue([false, jest.fn()]);
 (getUpdateAlertsQuery as jest.Mock).mockReturnValue({ query: {} });

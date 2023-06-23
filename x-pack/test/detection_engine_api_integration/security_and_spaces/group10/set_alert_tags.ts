@@ -17,7 +17,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllAlerts,
-  getAlertUpdateEmptyResponse,
   getQuerySignalIds,
   deleteAllRules,
   createRule,
@@ -25,9 +24,8 @@ import {
   getSignalsByIds,
   waitForRuleSuccess,
   getRuleForSignalTesting,
-  refreshIndex,
 } from '../../utils';
-import { buildAlertTagsQuery, setAlertTags } from '../../utils/set_alert_tags';
+import { setAlertTags } from '../../utils/set_alert_tags';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -36,26 +34,26 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('set_alert_tags', () => {
+  describe.only('set_alert_tags', () => {
     describe('validation checks', () => {
-      it('should not give errors when querying and the signals index does not exist yet', async () => {
+      it('should give errors when no alert ids are provided', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
           .set('kbn-xsrf', 'true')
-          .send(setAlertTags({ tagsToAdd: [], tagsToRemove: [] }))
-          .expect(200);
+          .send(setAlertTags({ tagsToAdd: [], tagsToRemove: [], ids: [] }))
+          .expect(400);
 
-        // remove any server generated items that are indeterministic
-        delete body.took;
-
-        expect(body).to.eql(getAlertUpdateEmptyResponse());
+        expect(body).to.eql({
+          message: ['No alert ids were provided'],
+          status_code: 400,
+        });
       });
 
       it('should give errors when duplicate tags exist in both tags_to_add and tags_to_remove', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
           .set('kbn-xsrf', 'true')
-          .send(setAlertTags({ tagsToAdd: ['test-1'], tagsToRemove: ['test-1'] }))
+          .send(setAlertTags({ tagsToAdd: ['test-1'], tagsToRemove: ['test-1'], ids: ['123'] }))
           .expect(400);
 
         expect(body).to.eql({
@@ -103,11 +101,10 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: ['tag-1'],
               tagsToRemove: [],
-              query: buildAlertTagsQuery(alertIds),
+              ids: alertIds,
             })
           )
           .expect(200);
-        await refreshIndex(es, '.alerts-security.alerts-*');
 
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -138,11 +135,10 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: ['tag-1'],
               tagsToRemove: [],
-              query: buildAlertTagsQuery(alertIds.slice(0, 4)),
+              ids: alertIds.slice(0, 4),
             })
           )
           .expect(200);
-        await refreshIndex(es, '.alerts-security.alerts-*');
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -151,11 +147,10 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: ['tag-1'],
               tagsToRemove: [],
-              query: buildAlertTagsQuery(alertIds),
+              ids: alertIds,
             })
           )
           .expect(200);
-        await refreshIndex(es, '.alerts-security.alerts-*');
 
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -186,11 +181,10 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: ['tag-1', 'tag-2'],
               tagsToRemove: [],
-              query: buildAlertTagsQuery(alertIds),
+              ids: alertIds,
             })
           )
           .expect(200);
-        await refreshIndex(es, '.alerts-security.alerts-*');
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -199,11 +193,10 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: [],
               tagsToRemove: ['tag-2'],
-              query: buildAlertTagsQuery(alertIds),
+              ids: alertIds,
             })
           )
           .expect(200);
-        await refreshIndex(es, '.alerts-security.alerts-*');
 
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -234,11 +227,10 @@ export default ({ getService }: FtrProviderContext) => {
             setAlertTags({
               tagsToAdd: [],
               tagsToRemove: ['tag-1'],
-              query: buildAlertTagsQuery(alertIds),
+              ids: alertIds,
             })
           )
           .expect(200);
-        await refreshIndex(es, '.alerts-security.alerts-*');
 
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)

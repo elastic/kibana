@@ -34,21 +34,12 @@ export type ReturnSetAlertTags = [SetAlertTagsFunc | null];
  */
 export const useSetAlertTags = (): ReturnSetAlertTags => {
   const { http } = useKibana<CoreStart>().services;
-  const { addSuccess, addError, addWarning } = useAppToasts();
+  const { addSuccess, addError } = useAppToasts();
   const setAlertTagsRef = useRef<SetAlertTagsFunc | null>(null);
 
   const onUpdateSuccess = useCallback(
-    (updated: number, conflicts: number) => {
-      if (conflicts > 0) {
-        addWarning({
-          title: i18n.UPDATE_ALERT_TAGS_FAILED(conflicts),
-          text: i18n.UPDATE_ALERT_TAGS_FAILED_DETAILED(updated, conflicts),
-        });
-      } else {
-        addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated));
-      }
-    },
-    [addSuccess, addWarning]
+    (updated: number) => addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated)),
+    [addSuccess]
   );
 
   const onUpdateFailure = useCallback(
@@ -68,11 +59,8 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
         const response = await setAlertTags({ tags, ids, signal: abortCtrl.signal });
         if (!ignore) {
           onSuccess();
-          if (response.version_conflicts && ids.length === 1) {
-            throw new Error(i18n.BULK_ACTION_FAILED_SINGLE_ALERT);
-          }
           setTableLoading(false);
-          onUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0);
+          onUpdateSuccess(response.items.length);
         }
       } catch (error) {
         if (!ignore) {
