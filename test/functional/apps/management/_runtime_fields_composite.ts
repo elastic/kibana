@@ -57,7 +57,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             startingCount + 1
           );
         });
-        // todo verify subfield
       });
 
       it('should modify runtime field', async function () {
