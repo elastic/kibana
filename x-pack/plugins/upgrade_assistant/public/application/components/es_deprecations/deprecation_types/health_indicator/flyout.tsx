@@ -103,13 +103,13 @@ export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndica
         </EuiText>
         <EuiSpacer size="s" />
 
-        (showLearnMore && (
-            <EuiText>
+        {showLearnMore && (
+          <EuiText>
             <p>
               <DeprecationFlyoutLearnMoreLink documentationUrl={url} />
             </p>
           </EuiText>
-        )
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
