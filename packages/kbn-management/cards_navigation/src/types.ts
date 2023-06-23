@@ -15,6 +15,8 @@ export interface Application {
 }
 
 export interface AppRegistrySections {
+  id: string;
+  title: string;
   apps: Application[];
 }
 
