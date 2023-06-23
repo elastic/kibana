@@ -11,7 +11,7 @@ import { LandingCards } from '.';
 import { ADD_DATA_PATH } from '@kbn/security-solution-plugin/common';
 import { useVariation } from '../../../common/hooks/use_variation';
 
-jest.mock('../../hooks/use_variation');
+jest.mock('../../../common/hooks/use_variation');
 jest.mock('../../../services');
 
 describe('LandingCards component', () => {

@@ -19,9 +19,9 @@ import { css } from '@emotion/react';
 import { ADD_DATA_PATH } from '@kbn/security-solution-plugin/common';
 import { useVariation } from '../../../common/hooks/use_variation';
 import * as i18n from './translations';
-import endpointSvg from '../../images/endpoint1.svg';
-import cloudSvg from '../../images/cloud1.svg';
-import siemSvg from '../../images/siem1.svg';
+import endpointSvg from '../images/endpoint1.svg';
+import cloudSvg from '../images/cloud1.svg';
+import siemSvg from '../images/siem1.svg';
 import { useKibana } from '../../../services';
 
 const imgUrls = {
