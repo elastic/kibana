@@ -7,6 +7,8 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { range } from 'lodash';
+import pMap from 'p-map';
 import type { CoverageOverviewRequestBody } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
 import { CoverageOverviewRuleActivity } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
 import type { CoverageOverviewResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/response_schema';
@@ -14,6 +16,8 @@ import type { RuleParams } from '../../../../rule_schema';
 import { convertFilterToKQL } from './utils/convert_filter_to_kql';
 
 type CoverageOverviewRuleParams = Pick<RuleParams, 'threat'>;
+
+const RULES_CHUNK_SIZE = 10000;
 
 interface CoverageOverviewRouteDependencies {
   rulesClient: RulesClient;
@@ -29,22 +33,67 @@ export async function handleCoverageOverviewRequest({
   resolveDependencies,
 }: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
   const { filter } = resolveParameters();
+  const kqlFilter = filter ? convertFilterToKQL(filter) : undefined;
   const { rulesClient } = await resolveDependencies();
 
-  const rules = await rulesClient.find<CoverageOverviewRuleParams>({
-    options: {
-      filter: filter ? convertFilterToKQL(filter) : undefined,
-      fields: ['name', 'enabled', 'params.threat'],
-      page: 1,
-      perPage: 10000,
-    },
-  });
+  return processRulesByPages(rulesClient, kqlFilter, RULES_CHUNK_SIZE);
+}
 
-  return rules.data.reduce(appendRuleToResponse, {
+async function processRulesByPages(
+  rulesClient: RulesClient,
+  kqlFilter: string | undefined,
+  perPage: number
+): Promise<CoverageOverviewResponse> {
+  const response: CoverageOverviewResponse = {
     coverage: {},
     unmapped_rule_ids: [],
     rules_data: {},
-  } as CoverageOverviewResponse);
+  };
+
+  const { total } = await processPage(rulesClient, response, {
+    kqlFilter,
+    page: 1,
+    perPage,
+  });
+
+  // As it's unknown how many rules are there in total we calculate it after fetching the first chunk.
+  // If there is something left fetch it in chunks
+  const pages = range(2, Math.ceil(total / perPage) + 1);
+
+  pMap(pages, async (page) =>
+    processPage(rulesClient, response, {
+      kqlFilter,
+      page,
+      perPage,
+    })
+  );
+
+  return response;
+}
+
+async function processPage(
+  rulesClient: RulesClient,
+  response: CoverageOverviewResponse,
+  options: {
+    kqlFilter: string | undefined;
+    page: number;
+    perPage: number;
+  }
+): Promise<{ total: number }> {
+  const rules = await rulesClient.find<CoverageOverviewRuleParams>({
+    options: {
+      filter: options.kqlFilter,
+      fields: ['name', 'enabled', 'params.threat'],
+      page: options.page,
+      perPage: options.perPage,
+    },
+  });
+
+  for (const rule of rules.data) {
+    appendRuleToResponse(response, rule);
+  }
+
+  return { total: rules.total };
 }
 
 /**
