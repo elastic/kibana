@@ -434,7 +434,7 @@ export class ManifestManager {
         return [];
       }
       const errors = await this.artifactClient.bulkDeleteArtifacts(artifactIds);
-      if (errors) {
+      if (!isEmpty(errors)) {
         return errors;
       }
       for (const artifactId of artifactIds) {
