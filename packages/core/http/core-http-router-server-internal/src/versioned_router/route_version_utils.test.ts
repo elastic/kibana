@@ -85,7 +85,7 @@ describe('readVersion', () => {
     expect(readVersion({ headers: {}, query: { apiVersion: '1' } } as any, true)).toBe('1');
     expect(readVersion({ headers: {} } as any, false)).toBe(undefined);
   });
-  test('header version takes precedence', () => {
+  test('header version takes precedence over query param version', () => {
     expect(
       readVersion(
         { headers: { 'elastic-api-version': '3' }, query: { apiVersion: '2' } } as any,
