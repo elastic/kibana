@@ -25,6 +25,7 @@ import {
 } from '../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import {
   FETCH_STATUS,
@@ -56,6 +57,7 @@ const INITIAL_STATE: InitialState = {
     maxTransactionGroupsExceeded: false,
     transactionOverflowCount: 0,
     transactionGroupsTotalItems: 0,
+    hasActiveAlerts: false,
   },
 };
 
@@ -96,8 +98,10 @@ export function TransactionsTable({
   saveTableOptionsToUrl = false,
 }: Props) {
   const history = useHistory();
+  const { link } = useApmRouter();
 
   const {
+    query,
     query: {
       comparisonEnabled,
       offset,
@@ -221,6 +225,7 @@ export function TransactionsTable({
       maxTransactionGroupsExceeded,
       transactionOverflowCount,
       transactionGroupsTotalItems,
+      hasActiveAlerts,
     },
   } = data;
 
@@ -284,6 +289,9 @@ export function TransactionsTable({
     shouldShowSparkPlots,
     offset,
     transactionOverflowCount,
+    showAlertsColumn: hasActiveAlerts,
+    link,
+    query,
   });
 
   const pagination = useMemo(

@@ -84,8 +84,6 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, navMenuEnabled }) 
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
-    dataViewsContract: deps.data.dataViews,
-    config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
     navMenuEnabled,
   };
@@ -182,7 +180,6 @@ export const renderApp = (
     theme: coreStart.theme,
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
     basePath: coreStart.http.basePath,
-    savedObjectsClient: coreStart.savedObjects.client,
     savedSearch: deps.savedSearch,
     application: coreStart.application,
     http: coreStart.http,

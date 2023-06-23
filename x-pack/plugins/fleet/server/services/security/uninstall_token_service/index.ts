@@ -152,7 +152,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
             latest: {
               top_hits: {
                 size: 1,
-                sort: [{ [`${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.created_at`]: { order: 'desc' } }],
+                sort: [{ created_at: { order: 'desc' } }],
               },
             },
           },

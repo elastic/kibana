@@ -23,14 +23,15 @@ import { createAppMockRenderer } from '../../common/mock';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useGetCategories } from '../../containers/use_get_categories';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/use_get_categories');
 jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 
 const onFilterChanged = jest.fn();
-const refetch = jest.fn();
 const setFilterRefetch = jest.fn();
 
 const props = {
@@ -51,7 +52,11 @@ describe('CasesTableFilters ', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch });
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
+    (useGetCategories as jest.Mock).mockReturnValue({
+      data: ['twix', 'snickers'],
+      isLoading: false,
+    });
     (useSuggestUserProfiles as jest.Mock).mockReturnValue({ data: userProfiles, isLoading: false });
   });
 
@@ -83,6 +88,16 @@ describe('CasesTableFilters ', () => {
     userEvent.click(screen.getByTestId('options-filter-popover-item-coke'));
 
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
+  });
+
+  it('should call onFilterChange when selected category changes', async () => {
+    appMockRender.render(<CasesTableFilters {...props} />);
+
+    userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
+    await waitForEuiPopoverOpen();
+    userEvent.click(screen.getByTestId('options-filter-popover-item-twix'));
+
+    expect(onFilterChanged).toBeCalledWith({ category: ['twix'] });
   });
 
   it('should call onFilterChange when selected assignees change', async () => {

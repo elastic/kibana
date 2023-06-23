@@ -456,6 +456,15 @@ export const getCaseToUpdate = (
     { id: queryCase.id, version: queryCase.version }
   );
 
+/**
+ * TODO: Backend is not connected with the
+ * frontend in x-pack/plugins/cases/common/ui/types.ts.
+ * It is easy to forget to update a sort field.
+ * We should fix it and make it common.
+ * Also the sortField in x-pack/plugins/cases/common/api/cases/case.ts
+ * is set to string. We should narrow it to the
+ * acceptable values
+ */
 enum SortFieldCase {
   closedAt = 'closed_at',
   createdAt = 'created_at',
@@ -463,6 +472,7 @@ enum SortFieldCase {
   title = 'title.keyword',
   severity = 'severity',
   updatedAt = 'updated_at',
+  category = 'category',
 }
 
 export const convertSortField = (sortField: string | undefined): SortFieldCase => {
@@ -482,6 +492,8 @@ export const convertSortField = (sortField: string | undefined): SortFieldCase =
     case 'updatedAt':
     case 'updated_at':
       return SortFieldCase.updatedAt;
+    case 'category':
+      return SortFieldCase.category;
     default:
       return SortFieldCase.createdAt;
   }
