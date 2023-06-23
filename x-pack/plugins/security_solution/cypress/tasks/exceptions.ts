@@ -279,3 +279,8 @@ export const deleteFirstExceptionItemInListDetailPage = () => {
   // Delete exception
   cy.get(EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE).click();
 };
+export const validateHighlightedFieldsPopulatedAsExceptionConditions = (
+  highlightedFields: string[]
+) => {
+  return highlightedFields.every((field) => validateExceptionConditionField(field));
+};
