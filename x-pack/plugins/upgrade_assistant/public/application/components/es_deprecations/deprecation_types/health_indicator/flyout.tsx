@@ -72,7 +72,6 @@ export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndica
           <p className="eui-textBreakWord">{details}</p>
         </EuiText>
         <EuiSpacer size="s" />
-
         <EuiText>
           <EuiTitle size="s" data-test-subj="flyoutTitle">
             <h3>{i18nTexts.healthIndicatorCauseHeader}</h3>
@@ -80,7 +79,6 @@ export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndica
           <p className="eui-textBreakWord">{cause}</p>
         </EuiText>
         <EuiSpacer size="s" />
-
         {showAction && (
           <>
             <EuiText>
@@ -92,7 +90,6 @@ export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndica
             <EuiSpacer size="s" />
           </>
         )}
-
         <EuiText>
           <EuiTitle size="s" data-test-subj="flyoutTitle">
             <h3>{i18nTexts.healthIndicatorImpactHeader}</h3>
@@ -102,13 +99,12 @@ export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndica
           </EuiCodeBlock>
         </EuiText>
         <EuiSpacer size="s" />
-
         (showLearnMore && (
-            <EuiText>
-            <p>
-              <DeprecationFlyoutLearnMoreLink documentationUrl={url} />
-            </p>
-          </EuiText>
+        <EuiText>
+          <p>
+            <DeprecationFlyoutLearnMoreLink documentationUrl={url} />
+          </p>
+        </EuiText>
         )
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
