@@ -171,20 +171,17 @@ describe('DataTable', () => {
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
         triggerId: 'mockCellActionsTrigger',
-        data: [
+        fields: [
           {
-            values: [data[0]?.data[0]?.value],
-            field: {
-              name: '@timestamp',
-              type: 'date',
-              aggregatable: true,
-              esTypes: ['date'],
-              searchable: true,
-              subType: undefined,
-            },
+            name: '@timestamp',
+            type: 'date',
+            aggregatable: true,
+            esTypes: ['date'],
+            searchable: true,
+            subType: undefined,
           },
         ],
-
+        getCellValue: expect.any(Function),
         metadata: {
           scopeId: 'table-test',
         },
@@ -202,7 +199,8 @@ describe('DataTable', () => {
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: [],
+          triggerId: undefined,
+          fields: undefined,
         })
       );
     });
