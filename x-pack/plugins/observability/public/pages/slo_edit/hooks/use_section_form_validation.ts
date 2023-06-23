@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateSLOInput, MetricCustomIndicatorSchema } from '@kbn/slo-schema';
+import { CreateSLOInput, MetricCustomIndicator } from '@kbn/slo-schema';
 import { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
 import { isObject } from 'lodash';
 
@@ -22,9 +22,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
   switch (watch('indicator.type')) {
     case 'sli.metric.custom':
       const isGoodParamsValid = () => {
-        const data = getValues(
-          'indicator.params.good'
-        ) as MetricCustomIndicatorSchema['params']['good'];
+        const data = getValues('indicator.params.good') as MetricCustomIndicator['params']['good'];
         const isEquationValid = !getFieldState('indicator.params.good.equation').invalid;
         const areMetricsValid =
           isObject(data) && (data.metrics ?? []).every((metric) => Boolean(metric.field));
@@ -34,7 +32,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
       const isTotalParamsValid = () => {
         const data = getValues(
           'indicator.params.total'
-        ) as MetricCustomIndicatorSchema['params']['total'];
+        ) as MetricCustomIndicator['params']['total'];
         const isEquationValid = !getFieldState('indicator.params.total.equation').invalid;
         const areMetricsValid =
           isObject(data) && (data.metrics ?? []).every((metric) => Boolean(metric.field));

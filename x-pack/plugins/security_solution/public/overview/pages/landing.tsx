@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
 import { LandingPageComponent } from '../../common/components/landing_page';
@@ -13,8 +15,9 @@ import { useKibana } from '../../common/lib/kibana';
 import { PluginTemplateWrapper } from '../../common/components/plugin_template_wrapper';
 
 export const LandingPage = memo(() => {
-  const { getStartedComponent } = useKibana().services;
-  const GetStartedComponent = useMemo(() => getStartedComponent?.(), [getStartedComponent]);
+  const { getStartedComponent$ } = useKibana().services;
+  const GetStartedComponent = useObservable(getStartedComponent$);
+
   return (
     <>
       {GetStartedComponent ?? (
@@ -22,6 +25,7 @@ export const LandingPage = memo(() => {
           <LandingPageComponent />
         </PluginTemplateWrapper>
       )}
+      <Chat />
       <SpyRoute pageName={SecurityPageName.landing} />
     </>
   );

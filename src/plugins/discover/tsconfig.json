@@ -52,6 +52,7 @@
     "@kbn/storybook",
     "@kbn/shared-ux-router",
     "@kbn/dom-drag-drop",
+    "@kbn/core-saved-objects-api-server",
   ],
   "exclude": [
     "target/**/*",

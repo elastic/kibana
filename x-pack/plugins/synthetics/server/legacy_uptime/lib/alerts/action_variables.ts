@@ -37,7 +37,7 @@ export const ACTION_VARIABLES = {
       'xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertDetailUrl.description',
       {
         defaultMessage:
-          'Link to the view within Elastic that shows further details and context surrounding this alert',
+          'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
       }
     ),
     usesPublicBaseUrl: true,
@@ -47,8 +47,7 @@ export const ACTION_VARIABLES = {
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.context.viewInAppUrl.description',
       {
-        defaultMessage:
-          'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+        defaultMessage: 'Link to the alert source',
       }
     ),
     usesPublicBaseUrl: true,

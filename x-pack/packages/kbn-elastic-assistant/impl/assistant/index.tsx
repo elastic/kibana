@@ -15,6 +15,8 @@ import {
   EuiCommentList,
   EuiToolTip,
   EuiSplitPanel,
+  EuiSwitchEvent,
+  EuiSwitch,
   EuiCallOut,
   EuiIcon,
   EuiTitle,
@@ -25,23 +27,25 @@ import styled from 'styled-components';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { getMessageFromRawResponse } from './helpers';
 
-import { SettingsPopover } from './settings_popover';
+import { ConversationSettingsPopover } from './conversation_settings_popover/conversation_settings_popover';
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
+import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
+import { SettingsPopover } from '../data_anonymization/settings/settings_popover';
 import { PromptTextArea } from './prompt_textarea';
-import type { PromptContext } from './prompt_context/types';
+import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
 import { CodeBlockDetails } from './use_conversation/helpers';
 import { useSendMessages } from './use_send_messages';
 import type { Message } from '../assistant_context/types';
 import { ConversationSelector } from './conversation_selector';
 import { PromptEditor } from './prompt_editor';
-import { getCombinedMessage, getDefaultSystemPrompt, getSuperheroPrompt } from './prompt/helpers';
+import { getCombinedMessage } from './prompt/helpers';
 import * as i18n from './translations';
-import type { Prompt } from './types';
-import { getPromptById } from './prompt_editor/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { ConnectorSetup } from '../connectorland/connector_setup';
@@ -85,14 +89,23 @@ const AssistantComponent: React.FC<Props> = ({
     actionTypeRegistry,
     augmentMessageCodeBlocks,
     conversations,
+    defaultAllow,
+    defaultAllowReplacement,
     getComments,
     http,
     promptContexts,
     title,
   } = useAssistantContext();
-  const [selectedPromptContextIds, setSelectedPromptContextIds] = useState<string[]>([]);
+  const [selectedPromptContexts, setSelectedPromptContexts] = useState<
+    Record<string, SelectedPromptContext>
+  >({});
+  const selectedPromptContextsCount = useMemo(
+    () => Object.keys(selectedPromptContexts).length,
+    [selectedPromptContexts]
+  );
 
-  const { appendMessage, clearConversation, createConversation } = useConversation();
+  const { appendMessage, appendReplacements, clearConversation, createConversation } =
+    useConversation();
   const { isLoading, sendMessages } = useSendMessages();
 
   const [selectedConversationId, setSelectedConversationId] = useState<string>(conversationId);
@@ -109,24 +122,30 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const { data: connectors, refetch: refetchConnectors } = useLoadConnectors({ http });
+  const defaultConnectorId = useMemo(() => connectors?.[0]?.id, [connectors]);
+  const defaultProvider = useMemo(
+    () =>
+      (connectors?.[0] as ActionConnectorProps<{ apiProvider: OpenAiProviderType }, unknown>)
+        ?.config?.apiProvider,
+    [connectors]
+  );
+
   const isWelcomeSetup = (connectors?.length ?? 0) === 0;
   const currentTitle: { title: string | JSX.Element; titleIcon: string } =
     isWelcomeSetup && welcomeConversation.theme?.title && welcomeConversation.theme?.titleIcon
       ? { title: welcomeConversation.theme?.title, titleIcon: welcomeConversation.theme?.titleIcon }
-      : { title, titleIcon: 'logoElastic' };
+      : { title, titleIcon: 'logoSecurity' };
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const lastCommentRef = useRef<HTMLDivElement | null>(null);
 
   const [promptTextPreview, setPromptTextPreview] = useState<string>('');
-  const [systemPrompts] = useState<Prompt[]>([getDefaultSystemPrompt(), getSuperheroPrompt()]);
-  const [selectedSystemPromptId, setSelectedSystemPromptId] = useState<string | null>(
-    getDefaultSystemPrompt().id
-  );
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
   const [suggestedUserPrompt, setSuggestedUserPrompt] = useState<string | null>(null);
 
   const [showMissingConnectorCallout, setShowMissingConnectorCallout] = useState<boolean>(false);
+
+  const [showAnonymizedValues, setShowAnonymizedValues] = useState<boolean>(false);
 
   const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>(
     augmentMessageCodeBlocks(currentConversation)
@@ -175,21 +194,25 @@ const AssistantComponent: React.FC<Props> = ({
       bottomRef.current?.scrollIntoView({ behavior: 'auto' });
       promptTextAreaRef?.current?.focus();
     }, 0);
-  }, [currentConversation.messages.length, selectedPromptContextIds.length]);
+  }, [currentConversation.messages.length, selectedPromptContextsCount]);
   ////
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText) => {
+      const onNewReplacements = (newReplacements: Record<string, string>) =>
+        appendReplacements({
+          conversationId: selectedConversationId,
+          replacements: newReplacements,
+        });
+
       const message = await getCombinedMessage({
         isNewChat: currentConversation.messages.length === 0,
-        promptContexts,
+        currentReplacements: currentConversation.replacements,
+        onNewReplacements,
         promptText,
-        selectedPromptContextIds,
-        selectedSystemPrompt: getPromptById({
-          id: selectedSystemPromptId ?? '',
-          prompts: systemPrompts,
-        }),
+        selectedPromptContexts,
+        selectedSystemPrompt: currentConversation.apiConfig.defaultSystemPrompt,
       });
 
       const updatedMessages = appendMessage({
@@ -198,7 +221,7 @@ const AssistantComponent: React.FC<Props> = ({
       });
 
       // Reset prompt context selection and preview before sending:
-      setSelectedPromptContextIds([]);
+      setSelectedPromptContexts({});
       setPromptTextPreview('');
 
       const rawResponse = await sendMessages({
@@ -211,15 +234,14 @@ const AssistantComponent: React.FC<Props> = ({
     },
     [
       appendMessage,
+      appendReplacements,
       currentConversation.apiConfig,
       currentConversation.messages.length,
+      currentConversation.replacements,
       http,
-      promptContexts,
       selectedConversationId,
-      selectedPromptContextIds,
-      selectedSystemPromptId,
+      selectedPromptContexts,
       sendMessages,
-      systemPrompts,
     ]
   );
 
@@ -238,7 +260,24 @@ const AssistantComponent: React.FC<Props> = ({
   codeBlockContainers.forEach((e) => (e.style.minHeight = '75px'));
   ////
 
-  const comments = getComments({ currentConversation, lastCommentRef });
+  const onToggleShowAnonymizedValues = useCallback(
+    (e: EuiSwitchEvent) => {
+      if (setShowAnonymizedValues != null) {
+        setShowAnonymizedValues(e.target.checked);
+      }
+    },
+    [setShowAnonymizedValues]
+  );
+
+  const comments = useMemo(
+    () =>
+      getComments({
+        currentConversation,
+        lastCommentRef,
+        showAnonymizedValues,
+      }),
+    [currentConversation, getComments, showAnonymizedValues]
+  );
 
   useEffect(() => {
     // Adding `conversationId !== selectedConversationId` to prevent auto-run still executing after changing selected conversation
@@ -254,12 +293,24 @@ const AssistantComponent: React.FC<Props> = ({
     if (promptContext != null) {
       setAutoPopulatedOnce(true);
 
-      // select this prompt context
-      if (!selectedPromptContextIds.includes(promptContext.id)) {
-        setSelectedPromptContextIds((prev) => [...prev, promptContext.id]);
+      if (!Object.keys(selectedPromptContexts).includes(promptContext.id)) {
+        const addNewSelectedPromptContext = async () => {
+          const newSelectedPromptContext = await getNewSelectedPromptContext({
+            defaultAllow,
+            defaultAllowReplacement,
+            promptContext,
+          });
+
+          setSelectedPromptContexts((prev) => ({
+            ...prev,
+            [promptContext.id]: newSelectedPromptContext,
+          }));
+        };
+
+        addNewSelectedPromptContext();
       }
 
-      if (promptContext?.suggestedUserPrompt != null) {
+      if (promptContext.suggestedUserPrompt != null) {
         setSuggestedUserPrompt(promptContext.suggestedUserPrompt);
       }
     }
@@ -270,8 +321,10 @@ const AssistantComponent: React.FC<Props> = ({
     handleSendMessage,
     conversationId,
     selectedConversationId,
-    selectedPromptContextIds,
+    selectedPromptContexts,
     autoPopulatedOnce,
+    defaultAllow,
+    defaultAllowReplacement,
   ]);
 
   // Show missing connector callout if no connectors are configured
@@ -306,13 +359,49 @@ const AssistantComponent: React.FC<Props> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  width: 335px;
+                `}
+              >
                 <ConversationSelector
                   conversationId={selectedConversationId}
+                  defaultConnectorId={defaultConnectorId}
+                  defaultProvider={defaultProvider}
                   onSelectionChange={(id) => setSelectedConversationId(id)}
                   shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
                   isDisabled={isWelcomeSetup}
                 />
+
+                <>
+                  <EuiSpacer size={'s'} />
+                  <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={i18n.SHOW_ANONYMIZED_TOOLTIP}
+                        position="left"
+                        repositionOnScroll={true}
+                      >
+                        <EuiSwitch
+                          checked={
+                            currentConversation.replacements != null &&
+                            Object.keys(currentConversation.replacements).length > 0 &&
+                            showAnonymizedValues
+                          }
+                          compressed={true}
+                          disabled={currentConversation.replacements == null}
+                          label={i18n.SHOW_ANONYMIZED}
+                          onChange={onToggleShowAnonymizedValues}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>
+                      <SettingsPopover />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin={'m'} />
@@ -348,9 +437,11 @@ const AssistantComponent: React.FC<Props> = ({
         {!isWelcomeSetup && (
           <>
             <ContextPills
+              defaultAllow={defaultAllow}
+              defaultAllowReplacement={defaultAllowReplacement}
               promptContexts={promptContexts}
-              selectedPromptContextIds={selectedPromptContextIds}
-              setSelectedPromptContextIds={setSelectedPromptContextIds}
+              selectedPromptContexts={selectedPromptContexts}
+              setSelectedPromptContexts={setSelectedPromptContexts}
             />
             {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
           </>
@@ -369,23 +460,22 @@ const AssistantComponent: React.FC<Props> = ({
           <CommentsContainer className="eui-scrollBar">
             <>
               <StyledCommentList comments={comments} />
-              <div ref={bottomRef} />
 
               <EuiSpacer size={'m'} />
 
               {(currentConversation.messages.length === 0 ||
-                selectedPromptContextIds.length > 0) && (
+                Object.keys(selectedPromptContexts).length > 0) && (
                 <PromptEditor
+                  conversation={currentConversation}
                   isNewConversation={currentConversation.messages.length === 0}
                   promptContexts={promptContexts}
                   promptTextPreview={promptTextPreview}
-                  selectedPromptContextIds={selectedPromptContextIds}
-                  selectedSystemPromptId={selectedSystemPromptId}
-                  setSelectedPromptContextIds={setSelectedPromptContextIds}
-                  setSelectedSystemPromptId={setSelectedSystemPromptId}
-                  systemPrompts={systemPrompts}
+                  selectedPromptContexts={selectedPromptContexts}
+                  setSelectedPromptContexts={setSelectedPromptContexts}
                 />
               )}
+
+              <div ref={bottomRef} />
             </>
           </CommentsContainer>
         )}
@@ -422,8 +512,7 @@ const AssistantComponent: React.FC<Props> = ({
                     onClick={() => {
                       setPromptTextPreview('');
                       clearConversation(selectedConversationId);
-                      setSelectedSystemPromptId(getDefaultSystemPrompt().id);
-                      setSelectedPromptContextIds([]);
+                      setSelectedPromptContexts({});
                       setSuggestedUserPrompt('');
                     }}
                   />
@@ -443,7 +532,7 @@ const AssistantComponent: React.FC<Props> = ({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
-                <SettingsPopover
+                <ConversationSettingsPopover
                   actionTypeRegistry={actionTypeRegistry}
                   conversation={currentConversation}
                   isDisabled={isWelcomeSetup}

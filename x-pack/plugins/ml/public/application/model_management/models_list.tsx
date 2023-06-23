@@ -133,7 +133,7 @@ export const ModelsList: FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
-  const [modelIdsToDelete, setModelIdsToDelete] = useState<string[]>([]);
+  const [modelsToDelete, setModelsToDelete] = useState<ModelItem[]>([]);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
@@ -348,7 +348,7 @@ export const ModelsList: FC<Props> = ({
     isLoading,
     fetchModels: fetchModelsData,
     onTestAction: setModelToTest,
-    onModelsDeleteRequest: setModelIdsToDelete,
+    onModelsDeleteRequest: setModelsToDelete,
     onLoading: setIsLoading,
     modelAndDeploymentIds,
   });
@@ -502,13 +502,7 @@ export const ModelsList: FC<Props> = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton
-            color="danger"
-            onClick={setModelIdsToDelete.bind(
-              null,
-              selectedModels.map((m) => m.model_id)
-            )}
-          >
+          <EuiButton color="danger" onClick={setModelsToDelete.bind(null, selectedModels)}>
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.deleteModelsButtonLabel"
               defaultMessage="Delete"
@@ -634,15 +628,15 @@ export const ModelsList: FC<Props> = ({
           data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
         />
       </div>
-      {modelIdsToDelete.length > 0 && (
+      {modelsToDelete.length > 0 && (
         <DeleteModelsModal
           onClose={(refreshList) => {
-            setModelIdsToDelete([]);
+            setModelsToDelete([]);
             if (refreshList) {
               fetchModelsData();
             }
           }}
-          modelIds={modelIdsToDelete}
+          models={modelsToDelete}
         />
       )}
       {modelToTest === null ? null : (

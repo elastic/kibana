@@ -240,9 +240,252 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.CloudDefendPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudDefendPolicy",
+        "description": [],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.CloudDefendPolicy.package_policy",
+            "type": "Object",
+            "tags": [],
+            "label": "package_policy",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackagePolicy",
+                "text": "PackagePolicy"
+              }
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.CloudDefendPolicy.agent_policy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "agent_policy",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.AgentPolicy",
+                "text": "AgentPolicy"
+              },
+              ", \"id\" | \"name\"> & { agents: number; }"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.IndexDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexDetails",
+        "description": [],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.IndexDetails.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.IndexDetails.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"empty\" | \"not-empty\" | \"unprivileged\""
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.AgentPolicyStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentPolicyStatus",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.AgentPolicy",
+            "text": "AgentPolicy"
+          },
+          ", \"id\" | \"name\"> & { agents: number; }"
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.CloudDefendSetupStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudDefendSetupStatus",
+        "description": [],
+        "signature": [
+          "CloudDefendSetupInstalledStatus | CloudDefendSetupNotInstalledStatus"
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.CloudDefendStatusCode",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudDefendStatusCode",
+        "description": [],
+        "signature": [
+          "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.IndexStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexStatus",
+        "description": [],
+        "signature": [
+          "\"empty\" | \"not-empty\" | \"unprivileged\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.PoliciesQueryParams",
+        "type": "Type",
+        "tags": [],
+        "label": "PoliciesQueryParams",
+        "description": [],
+        "signature": [
+          "{ readonly policy_name?: string | undefined; readonly per_page: number; readonly page: number; readonly sort_field: \"package_policy.id\" | \"package_policy.name\" | \"package_policy.policy_id\" | \"package_policy.namespace\" | \"package_policy.updated_at\" | \"package_policy.updated_by\" | \"package_policy.created_at\" | \"package_policy.created_by\" | \"package_policy.package.name\" | \"package_policy.package.title\"; readonly sort_order: \"asc\" | \"desc\"; }"
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/schemas/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.policiesQueryParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "policiesQueryParamsSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ page: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; per_page: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; sort_field: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"package_policy.id\" | \"package_policy.name\" | \"package_policy.policy_id\" | \"package_policy.namespace\" | \"package_policy.updated_at\" | \"package_policy.updated_by\" | \"package_policy.created_at\" | \"package_policy.created_by\" | \"package_policy.package.name\" | \"package_policy.package.title\">; sort_order: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"asc\" | \"desc\">; policy_name: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; }>"
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/schemas/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

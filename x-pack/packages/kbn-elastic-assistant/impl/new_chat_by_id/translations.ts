@@ -10,6 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const NEW_CHAT = i18n.translate(
   'xpack.elasticAssistant.assistant.newChatById.newChatByIdButton',
   {
-    defaultMessage: 'New chat',
+    defaultMessage: 'Chat',
   }
 );

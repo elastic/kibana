@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { Status } from '@kbn/cases-components';
+import { Status } from '@kbn/cases-components/src/status/status';
 import type { CaseStatuses } from '../../../common/api';
 import { caseStatuses } from '../../../common/api';
 import { StatusPopoverButton } from '../status';

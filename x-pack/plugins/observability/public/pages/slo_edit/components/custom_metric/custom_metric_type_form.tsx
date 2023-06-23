@@ -109,7 +109,6 @@ export function CustomMetricIndicatorTypeForm() {
 
       <EuiFlexItem>
         <QueryBuilder
-          control={control}
           dataTestSubj="customMetricIndicatorFormQueryFilterInput"
           indexPatternString={watch('indicator.params.index')}
           label={i18n.translate(

@@ -149,9 +149,16 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { analytics, http, savedObjects }: CoreSetup,
+    { analytics, docLinks, http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
+    this.isOptedIn$.subscribe((optedIn) => {
+      const optInStatusMsg = optedIn ? 'enabled' : 'disabled';
+      this.logger.info(
+        `Telemetry collection is ${optInStatusMsg}. For more information on telemetry settings, refer to ${docLinks.links.telemetry.settings}.`
+      );
+    });
+
     if (this.isOptedIn !== undefined) {
       analytics.optIn({ global: { enabled: this.isOptedIn } });
     }
@@ -198,8 +205,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getTelemetryUrl: async () => {
-        const { sendUsageTo } = await firstValueFrom(config$);
+        const { appendServerlessChannelsSuffix, sendUsageTo } = await firstValueFrom(config$);
         const telemetryUrl = getTelemetryChannelEndpoint({
+          appendServerlessChannelsSuffix,
           env: sendUsageTo,
           channelName: 'snapshot',
         });

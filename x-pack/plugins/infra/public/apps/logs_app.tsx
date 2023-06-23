@@ -68,6 +68,7 @@ const LogsApp: React.FC<{
         storage={storage}
         theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
+        observabilityCopilot={plugins.observability.getCoPilotService()}
       >
         <Router history={history}>
           <KbnUrlStateStorageFromRouterProvider

@@ -162,7 +162,7 @@ export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO 
   return createSLO({
     timeWindow: {
       duration: oneWeek(),
-      isCalendar: true,
+      type: 'calendarAligned',
     },
     ...params,
   });

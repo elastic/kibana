@@ -826,6 +826,26 @@
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramServices.capabilities",
+            "type": "Object",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

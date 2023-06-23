@@ -3091,7 +3091,7 @@
         "label": "CasesSupportedOperations",
         "description": [],
         "signature": [
-          "\"pushCase\" | \"createCase\" | \"createComment\" | \"createConfiguration\" | \"getCase\" | \"getComment\" | \"getTags\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"updateConfiguration\" | \"deleteCase\" | \"deleteComment\""
+          "\"getTags\" | \"pushCase\" | \"createCase\" | \"createComment\" | \"createConfiguration\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"updateConfiguration\" | \"deleteCase\" | \"deleteComment\""
         ],
         "path": "x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
@@ -4963,14 +4963,14 @@
           {
             "parentPluginId": "security",
             "id": "def-common.UserProfileAvatarData.imageUrl",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "imageUrl",
             "description": [
               "\nBase64 data URL for the user avatar image."
             ],
             "signature": [
-              "string | undefined"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/user_profile.ts",
             "deprecated": false,

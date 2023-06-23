@@ -22,7 +22,7 @@ import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { HostsLensLineChartFormulas } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import { createHostsFilter } from '../../../utils';
+import { buildCombinedHostsFilter } from '../../../utils';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { LensWrapper } from '../../chart/lens_wrapper';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
@@ -62,10 +62,11 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
 
   const filters = useMemo(() => {
     return [
-      createHostsFilter(
-        currentPage.map((p) => p.name),
-        dataView
-      ),
+      buildCombinedHostsFilter({
+        field: 'host.name',
+        values: currentPage.map((p) => p.name),
+        dataView,
+      }),
     ];
   }, [currentPage, dataView]);
 
@@ -94,8 +95,8 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
       hasBorder
       paddingSize={error ? 'm' : 'none'}
       css={css`
-        min-height: calc(${MIN_HEIGHT} + ${euiTheme.size.l});
-        position: 'relative';
+        min-height: calc(${MIN_HEIGHT}px + ${euiTheme.size.l});
+        position: relative;
       `}
       data-test-subj={`hostsView-metricChart-${type}`}
     >

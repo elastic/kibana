@@ -11,8 +11,8 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
-import { TableListView } from '@kbn/content-management-table-list';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
+import { TableListView } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 import { deleteSavedWorkspace, findSavedWorkspace } from '../helpers/saved_workspace_utils';
 import { getEditPath, getEditUrl, getNewPath, setBreadcrumbs } from '../services/url';
 import { GraphWorkspaceSavedObject } from '../types';
@@ -111,7 +111,7 @@ export function ListingRoute({
         entityNamePlural={i18n.translate('xpack.graph.listing.table.entityNamePlural', {
           defaultMessage: 'graphs',
         })}
-        tableListTitle={i18n.translate('xpack.graph.listing.graphsTitle', {
+        title={i18n.translate('xpack.graph.listing.graphsTitle', {
           defaultMessage: 'Graphs',
         })}
         getDetailViewLink={({ id }) => getEditUrl(addBasePath, { id })}

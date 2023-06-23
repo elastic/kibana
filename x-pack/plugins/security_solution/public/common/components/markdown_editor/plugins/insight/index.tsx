@@ -14,7 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiSpacer,
-  EuiBetaBadge,
+  EuiCallOut,
   EuiCodeBlock,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -54,6 +54,7 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/consta
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 import { filtersToInsightProviders } from './provider';
+import { useLicense } from '../../../../hooks/use_license';
 import * as i18n from './translations';
 
 interface InsightComponentProps {
@@ -64,7 +65,7 @@ interface InsightComponentProps {
   relativeTo?: string;
 }
 
-const insightPrefix = '!{investigate';
+export const insightPrefix = '!{investigate';
 
 export const parser: Plugin = function () {
   const Parser = this.Parser;
@@ -132,8 +133,7 @@ export const parser: Plugin = function () {
 
 const resultFormat = '0,0.[000]a';
 
-// receives the configuration from the parser and renders
-const InsightComponent = ({
+const LicensedInsightComponent = ({
   label,
   description,
   providers,
@@ -208,9 +208,8 @@ const InsightComponent = ({
       };
     }
   }, [oldestTimestamp, relativeTimerange]);
-
   if (isQueryLoading) {
-    return <EuiLoadingSpinner size="l" />;
+    return <EuiLoadingSpinner />;
   } else {
     return (
       <>
@@ -228,6 +227,43 @@ const InsightComponent = ({
         </InvestigateInTimelineButton>
         <div>{description}</div>
       </>
+    );
+  }
+};
+
+// receives the configuration from the parser and renders
+const InsightComponent = ({
+  label,
+  description,
+  providers,
+  relativeFrom,
+  relativeTo,
+}: InsightComponentProps) => {
+  const isPlatinum = useLicense().isPlatinumPlus();
+
+  if (isPlatinum === false) {
+    return (
+      <>
+        <EuiButton
+          isDisabled={true}
+          iconSide={'left'}
+          iconType={'timeline'}
+          data-test-subj="insight-investigate-in-timeline-button"
+        >
+          {`${label}`}
+        </EuiButton>
+        <div>{description}</div>
+      </>
+    );
+  } else {
+    return (
+      <LicensedInsightComponent
+        label={label}
+        description={description}
+        providers={providers}
+        relativeFrom={relativeFrom}
+        relativeTo={relativeTo}
+      />
     );
   }
 };
@@ -371,6 +407,8 @@ const InsightEditorComponent = ({
       },
     ];
   }, [indexPattern]);
+  const isPlatinum = useLicense().isAtLeast('platinum');
+
   return (
     <>
       <EuiModalHeader
@@ -393,13 +431,15 @@ const InsightEditorComponent = ({
                 />
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge color={'hollow'} label={i18n.TECH_PREVIEW} size="s" />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-
+      {isPlatinum === false && (
+        <EuiCallOut
+          title="To add suggested queries to an investigation guide, please upgrade to platinum"
+          iconType="timeline"
+        />
+      )}
       <EuiModalBody>
         <FormProvider {...formMethods}>
           <EuiForm fullWidth>
@@ -490,19 +530,22 @@ const exampleInsight = `${insightPrefix}{
   ]
 }}`;
 
-export const plugin = {
-  name: 'insights',
-  button: {
-    label: 'Insights',
-    iconType: 'aggregate',
-  },
-  helpText: (
-    <div>
-      <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
-        {exampleInsight}
-      </EuiCodeBlock>
-      <EuiSpacer size="s" />
-    </div>
-  ),
-  editor: InsightEditor,
+export const plugin = ({ licenseIsPlatinum }: { licenseIsPlatinum: boolean }) => {
+  return {
+    name: 'insights',
+    button: {
+      label: licenseIsPlatinum ? i18n.INVESTIGATE : i18n.INIGHT_UPSELL,
+      iconType: 'timelineWithArrow',
+      isDisabled: !licenseIsPlatinum,
+    },
+    helpText: (
+      <div>
+        <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
+          {exampleInsight}
+        </EuiCodeBlock>
+        <EuiSpacer size="s" />
+      </div>
+    ),
+    editor: InsightEditor,
+  };
 };

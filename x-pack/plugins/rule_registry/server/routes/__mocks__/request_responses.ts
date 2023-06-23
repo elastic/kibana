@@ -46,3 +46,10 @@ export const getO11yBrowserFields = () =>
     path: `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
     query: { featureIds: ['apm', 'logs'] },
   });
+
+export const getMetricThresholdAADFields = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${BASE_RAC_ALERTS_API_PATH}/aad_fields`,
+    query: { ruleTypeId: 'metrics.alert.threshold' },
+  });

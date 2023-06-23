@@ -22,7 +22,6 @@ export enum API_URLS {
   JOURNEY_FAILED_STEPS = `/internal/uptime/journeys/failed_steps`,
   JOURNEY_SCREENSHOT = `/internal/uptime/journey/screenshot/{checkGroup}/{stepIndex}`,
   JOURNEY_SCREENSHOT_BLOCKS = `/internal/uptime/journey/screenshot/block`,
-  LOG_PAGE_VIEW = `/internal/uptime/log_page_view`,
 
   ML_MODULE_JOBS = `/internal/ml/modules/jobs_exist/`,
   ML_SETUP_MODULE = '/internal/ml/modules/setup/',
@@ -35,22 +34,4 @@ export enum API_URLS {
   DELETE_RULE = '/api/alerting/rule/',
   RULES_FIND = '/api/alerting/rules/_find',
   CONNECTOR_TYPES = '/api/actions/connector_types',
-
-  // Service end points
-  INDEX_TEMPLATES = '/internal/uptime/service/index_templates',
-  SERVICE_LOCATIONS = '/internal/uptime/service/locations',
-  SYNTHETICS_MONITORS = '/internal/uptime/service/monitors',
-  GET_SYNTHETICS_MONITOR = '/internal/uptime/service/monitor/{monitorId}',
-  SYNTHETICS_ENABLEMENT = '/internal/uptime/service/enablement',
-  RUN_ONCE_MONITOR = '/internal/uptime/service/monitors/run_once',
-  TRIGGER_MONITOR = '/internal/uptime/service/monitors/trigger',
-  SERVICE_ALLOWED = '/internal/uptime/service/allowed',
-  SYNTHETICS_APIKEY = '/internal/uptime/service/api_key',
-  SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/uptime/fleet/has_integration_monitors',
-
-  // Project monitor public endpoint
-  SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/project/{projectName}/monitors',
-  SYNTHETICS_MONITORS_PROJECT_UPDATE = '/api/synthetics/project/{projectName}/monitors/_bulk_update',
-  SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
-  SYNTHETICS_MONITORS_PROJECT_LEGACY = '/api/synthetics/service/project/monitors',
 }

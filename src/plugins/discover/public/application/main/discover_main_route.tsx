@@ -40,6 +40,11 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
+import {
+  CustomizationCallback,
+  DiscoverCustomizationProvider,
+  useDiscoverCustomizationService,
+} from '../../customizations';
 import { APP_ICON, PLUGIN_ID } from '../../../common';
 import {
   BASE_DISCOVER_CONVERSATIONS,
@@ -54,14 +59,14 @@ interface DiscoverLandingParams {
   id: string;
 }
 
-interface Props {
+export interface MainRouteProps {
+  customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
 }
 
-export function DiscoverMainRoute(props: Props) {
+export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
-  const { isDev } = props;
   const {
     core,
     chrome,
@@ -79,6 +84,10 @@ export function DiscoverMainRoute(props: Props) {
       services,
     })
   );
+  const customizationService = useDiscoverCustomizationService({
+    customizationCallbacks,
+    stateContainer,
+  });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [hasESData, setHasESData] = useState(false);
@@ -236,8 +245,8 @@ export function DiscoverMainRoute(props: Props) {
 
         chrome.setBreadcrumbs(
           currentSavedSearch && currentSavedSearch.title
-            ? getSavedSearchBreadcrumbs(currentSavedSearch.title)
-            : getRootBreadcrumbs()
+            ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
+            : getRootBreadcrumbs({ services })
         );
 
         setLoading(false);
@@ -271,6 +280,7 @@ export function DiscoverMainRoute(props: Props) {
       savedSearchId,
       historyLocationState?.dataViewSpec,
       chrome,
+      services,
       history,
       core.application.navigateToApp,
       core.theme,
@@ -336,12 +346,13 @@ export function DiscoverMainRoute(props: Props) {
     return <DiscoverError error={error} />;
   }
 
-  if (loading) {
+  if (loading || !customizationService) {
     return <LoadingIndicator type={hasCustomBranding ? 'spinner' : 'elastic'} />;
   }
 
   return (
-    <DiscoverMainProvider value={stateContainer}>
+    <DiscoverCustomizationProvider value={customizationService}>
+      <DiscoverMainProvider value={stateContainer}>
       <QueryClientProvider client={queryClient}>
         <AssistantProvider
           actionTypeRegistry={actionTypeRegistry}
@@ -359,6 +370,7 @@ export function DiscoverMainRoute(props: Props) {
           <DiscoverMainAppMemoized stateContainer={stateContainer} />
         </AssistantProvider>
       </QueryClientProvider>
-    </DiscoverMainProvider>
+      </DiscoverMainProvider>
+    </DiscoverCustomizationProvider>
   );
 }

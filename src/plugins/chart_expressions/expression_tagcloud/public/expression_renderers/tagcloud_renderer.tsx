@@ -68,8 +68,6 @@ export const tagcloudRenderer: (
 
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
 
-    const showNoResult = config.visData.rows.length === 0;
-
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
         <I18nProvider>
@@ -81,7 +79,6 @@ export const tagcloudRenderer: (
                 // It is used for rendering at `Canvas`.
                 className={cx('tagCloudContainer', css(tagCloudVisClass))}
                 renderComplete={renderComplete}
-                showNoResult={showNoResult}
               >
                 <TagCloudChart
                   {...config}

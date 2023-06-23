@@ -34,6 +34,7 @@ import { EphemeralTask, ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { setupIntervalLogging } from './lib/log_health_metrics';
 
 export interface TaskManagerSetupContract {
   /**
@@ -66,6 +67,8 @@ export type TaskManagerStartContract = Pick<
     getRegisteredTypes: () => string[];
   };
 
+const LogHealthForBackgroundTasksOnlyMinutes = 60;
+
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
 {
@@ -82,6 +85,7 @@ export class TaskManagerPlugin
   private shouldRunBackgroundTasks: boolean;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private adHocTaskCounter: AdHocTaskCounter;
+  private nodeRoles: PluginInitializerContext['node']['roles'];
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -89,8 +93,14 @@ export class TaskManagerPlugin
     this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
     this.kibanaVersion = initContext.env.packageInfo.version;
-    this.shouldRunBackgroundTasks = initContext.node.roles.backgroundTasks;
+    this.nodeRoles = initContext.node.roles;
+    this.shouldRunBackgroundTasks = this.nodeRoles.backgroundTasks;
     this.adHocTaskCounter = new AdHocTaskCounter();
+  }
+
+  isNodeBackgroundTasksOnly() {
+    const { backgroundTasks, migrator, ui } = this.nodeRoles;
+    return backgroundTasks && !migrator && !ui;
   }
 
   public setup(
@@ -182,6 +192,11 @@ export class TaskManagerPlugin
 
     if (this.config.unsafe.authenticate_background_task_utilization === false) {
       this.logger.warn(`Disabling authentication for background task utilization API`);
+    }
+
+    // for nodes with background_tasks mode only, log health metrics every hour
+    if (this.isNodeBackgroundTasksOnly()) {
+      setupIntervalLogging(monitoredHealth$, this.logger, LogHealthForBackgroundTasksOnlyMinutes);
     }
 
     return {

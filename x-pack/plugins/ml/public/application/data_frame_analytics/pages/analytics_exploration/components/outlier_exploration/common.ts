@@ -10,8 +10,7 @@ import {
   FEATURE_INFLUENCE,
   OUTLIER_SCORE,
 } from '@kbn/ml-data-frame-analytics-utils';
-
-import { DataGridItem } from '../../../../../components/data_grid';
+import type { DataGridItem } from '@kbn/ml-data-grid';
 
 export const getOutlierScoreFieldName = (jobConfig: DataFrameAnalyticsConfig) =>
   `${jobConfig.dest.results_field}.${OUTLIER_SCORE}`;

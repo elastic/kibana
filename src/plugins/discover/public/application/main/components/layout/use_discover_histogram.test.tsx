@@ -152,7 +152,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.state$.subscribe).toHaveBeenCalledTimes(3);
+      expect(api.state$.subscribe).toHaveBeenCalledTimes(2);
     });
 
     it('should sync Unified Histogram state with the state container', async () => {

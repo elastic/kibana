@@ -6,4 +6,3 @@
  */
 
 export * from './framework';
-export * from './telemetry';

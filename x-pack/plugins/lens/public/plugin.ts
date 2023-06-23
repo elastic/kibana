@@ -90,6 +90,7 @@ import type {
 } from './visualizations/partition';
 import type { HeatmapVisualization as HeatmapVisualizationType } from './visualizations/heatmap';
 import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
+import type { TagcloudVisualization as TagcloudVisualizationType } from './visualizations/tagcloud';
 
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
@@ -270,6 +271,7 @@ export class LensPlugin {
   private pieVisualization: PieVisualizationType | undefined;
   private heatmapVisualization: HeatmapVisualizationType | undefined;
   private gaugeVisualization: GaugeVisualizationType | undefined;
+  private tagcloudVisualization: TagcloudVisualizationType | undefined;
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
@@ -308,8 +310,10 @@ export class LensPlugin {
         fieldFormats,
         plugins.fieldFormats.deserialize
       );
-      const visualizationMap = await this.editorFrameService!.loadVisualizations();
-      const datasourceMap = await this.editorFrameService!.loadDatasources();
+      const [visualizationMap, datasourceMap] = await Promise.all([
+        this.editorFrameService!.loadVisualizations(),
+        this.editorFrameService!.loadDatasources(),
+      ]);
       const eventAnnotationService = await plugins.eventAnnotation.getService();
 
       if (plugins.usageCollection) {
@@ -332,6 +336,7 @@ export class LensPlugin {
             storage: new Storage(localStorage),
             uiSettings: core.uiSettings,
             timefilter: plugins.data.query.timefilter.timefilter,
+            nowProvider: plugins.data.nowProvider,
             eventAnnotationService,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
@@ -500,6 +505,7 @@ export class LensPlugin {
       PieVisualization,
       HeatmapVisualization,
       GaugeVisualization,
+      TagcloudVisualization,
       TextBasedDatasource,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
@@ -512,6 +518,7 @@ export class LensPlugin {
     this.pieVisualization = new PieVisualization();
     this.heatmapVisualization = new HeatmapVisualization();
     this.gaugeVisualization = new GaugeVisualization();
+    this.tagcloudVisualization = new TagcloudVisualization();
 
     const editorFrameSetupInterface = this.editorFrameService.setup();
 
@@ -536,6 +543,7 @@ export class LensPlugin {
     this.pieVisualization.setup(core, dependencies);
     this.heatmapVisualization.setup(core, dependencies);
     this.gaugeVisualization.setup(core, dependencies);
+    this.tagcloudVisualization.setup(core, dependencies);
 
     this.queuedVisualizations.forEach((queuedVis) => {
       editorFrameSetupInterface.registerVisualization(queuedVis);

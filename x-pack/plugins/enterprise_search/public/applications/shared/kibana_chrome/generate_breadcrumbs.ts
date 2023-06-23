@@ -16,6 +16,7 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
+  ESRE_PLUGIN,
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
@@ -137,5 +138,8 @@ export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =
     ...breadcrumbs,
   ]);
 
-export const useEnterpriseSearchEnginesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+export const useEnterpriseSearchApplicationsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs(breadcrumbs);
+
+export const useEsreBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([{ text: ESRE_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);

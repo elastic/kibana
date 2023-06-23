@@ -72,3 +72,8 @@ export const stopDeploymentSchema = schema.object({
   /** force stop */
   force: schema.maybe(schema.boolean()),
 });
+
+export const deleteTrainedModelQuerySchema = schema.object({
+  with_pipelines: schema.maybe(schema.boolean({ defaultValue: false })),
+  force: schema.maybe(schema.boolean({ defaultValue: false })),
+});

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import { privateLocationsSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 import { privateLocationsSavedObjectId } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/private_locations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -34,6 +34,12 @@ export class PrivateLocationTestService {
     }
   }
 
+  async addTestPrivateLocation() {
+    const apiResponse = await this.addFleetPolicy(uuidv4());
+    const testPolicyId = apiResponse.body.item.id;
+    return (await this.setTestLocations([testPolicyId]))[0];
+  }
+
   async addFleetPolicy(name: string) {
     return this.supertest
       .post('/api/fleet/agent_policies?sys_monitoring=true')
@@ -50,22 +56,25 @@ export class PrivateLocationTestService {
   async setTestLocations(testFleetPolicyIds: string[]) {
     const server = this.getService('kibanaServer');
 
+    const locations = testFleetPolicyIds.map((id, index) => ({
+      label: 'Test private location ' + index,
+      agentPolicyId: id,
+      id,
+      geo: {
+        lat: '',
+        lon: '',
+      },
+      concurrentMonitors: 1,
+    }));
+
     await server.savedObjects.create({
       type: privateLocationsSavedObjectName,
       id: privateLocationsSavedObjectId,
       attributes: {
-        locations: testFleetPolicyIds.map((id, index) => ({
-          label: 'Test private location ' + index,
-          agentPolicyId: id,
-          id,
-          geo: {
-            lat: '',
-            lon: '',
-          },
-          concurrentMonitors: 1,
-        })),
+        locations,
       },
       overwrite: true,
     });
+    return locations;
   }
 }

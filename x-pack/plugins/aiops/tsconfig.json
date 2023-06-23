@@ -22,7 +22,6 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
-    "@kbn/discover-plugin",
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/field-formats-plugin",

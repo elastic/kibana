@@ -21,6 +21,78 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-common.createConfigService",
+        "type": "Function",
+        "tags": [],
+        "label": "createConfigService",
+        "description": [],
+        "signature": [
+          "({ server, externalUrl, csp, }?: Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; host: string; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; port: number; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; versioned: Readonly<{} & { versionResolution: \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
+          {
+            "pluginId": "@kbn/core-http-common",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpCommonPluginApi",
+            "section": "def-common.IExternalUrlPolicy",
+            "text": "IExternalUrlPolicy"
+          },
+          "[]; }>>; csp: Partial<Readonly<{} & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>) => ",
+          {
+            "pluginId": "@kbn/config-mocks",
+            "scope": "common",
+            "docId": "kibKbnConfigMocksPluginApi",
+            "section": "def-common.IConfigServiceMock",
+            "text": "IConfigServiceMock"
+          }
+        ],
+        "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-common.createConfigService.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  server,\n  externalUrl,\n  csp,\n}",
+            "description": [],
+            "signature": [
+              "Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; host: string; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; port: number; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; versioned: Readonly<{} & { versionResolution: \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
+              {
+                "pluginId": "@kbn/core-http-common",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpCommonPluginApi",
+                "section": "def-common.IExternalUrlPolicy",
+                "text": "IExternalUrlPolicy"
+              },
+              "[]; }>>; csp: Partial<Readonly<{} & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>"
+            ],
+            "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
         "id": "def-common.createCoreContext",
         "type": "Function",
         "tags": [],
@@ -535,23 +607,7 @@
             "section": "def-common.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           },
-          ">]>; registerPrebootRoutes: jest.MockInstance<void, [path: string, callback: (router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouter",
-            "text": "IRouter"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
-          ">) => void]>; } & Omit<",
+          ">]>; } & Omit<",
           "InternalHttpServiceSetup",
           ", \"createRouter\" | \"basePath\" | \"auth\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
           {

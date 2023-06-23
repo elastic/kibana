@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BudgetingMethod, CreateSLOInput } from '@kbn/slo-schema';
+import { BudgetingMethod, CreateSLOInput, TimeWindow } from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
@@ -49,9 +49,39 @@ export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: str
   },
 ];
 
-export const TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
+export const TIMEWINDOW_TYPE_OPTIONS: Array<{ value: TimeWindow; text: string }> = [
+  {
+    value: 'rolling',
+    text: i18n.translate('xpack.observability.slo.sloEdit.timeWindow.rolling', {
+      defaultMessage: 'Rolling',
+    }),
+  },
+  {
+    value: 'calendarAligned',
+    text: i18n.translate('xpack.observability.slo.sloEdit.timeWindow.calendarAligned', {
+      defaultMessage: 'Calendar aligned',
+    }),
+  },
+];
+
+export const CALENDARALIGNED_TIMEWINDOW_OPTIONS = [
+  {
+    value: '1w',
+    text: i18n.translate('xpack.observability.slo.sloEdit.calendarTimeWindow.weekly', {
+      defaultMessage: 'Weekly',
+    }),
+  },
+  {
+    value: '1M',
+    text: i18n.translate('xpack.observability.slo.sloEdit.calendarTimeWindow.monthly', {
+      defaultMessage: 'Monthly',
+    }),
+  },
+];
+
+export const ROLLING_TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
   value: `${number}d`,
-  text: i18n.translate('xpack.observability.slo.sloEdit.timeWindow.days', {
+  text: i18n.translate('xpack.observability.slo.sloEdit.rollingTimeWindow.days', {
     defaultMessage: '{number} days',
     values: { number },
   }),
@@ -71,9 +101,8 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
     },
   },
   timeWindow: {
-    duration:
-      TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
-    isRolling: true,
+    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
+    type: 'rolling',
   },
   tags: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
@@ -96,9 +125,8 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOInput = {
     },
   },
   timeWindow: {
-    duration:
-      TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
-    isRolling: true,
+    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
+    type: 'rolling',
   },
   tags: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,

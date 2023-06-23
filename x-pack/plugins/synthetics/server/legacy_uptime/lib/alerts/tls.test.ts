@@ -60,12 +60,14 @@ const mockCertResult: CertResult = {
 
 const mockRecoveredAlerts = [
   {
+    alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     commonName: mockCertResult.certs[0].common_name ?? '',
     issuer: mockCertResult.certs[0].issuer ?? '',
     summary: 'sample summary',
     status: 'expired',
   },
   {
+    alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     commonName: mockCertResult.certs[1].common_name ?? '',
     issuer: mockCertResult.certs[1].issuer ?? '',
     summary: 'sample summary 2',
@@ -84,6 +86,7 @@ const mockOptions = (state = {}): any => {
     state,
     services,
     setContext,
+    startedAt: new Date(),
   };
 };
 

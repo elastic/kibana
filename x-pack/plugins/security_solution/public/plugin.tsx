@@ -27,7 +27,6 @@ import type {
   SubPlugins,
   StartedSubPlugins,
   StartPluginsDependencies,
-  GetStartedComponent,
 } from './types';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
@@ -82,15 +81,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   readonly experimentalFeatures: ExperimentalFeatures;
   private upsellingService: UpsellingService;
   private isSidebarEnabled$: BehaviorSubject<boolean>;
-  private getStartedComponent?: GetStartedComponent;
+  private getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
-    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      this.config.enableExperimental || []
+    ).features;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+    this.getStartedComponent$ = new BehaviorSubject<React.ComponentType | null>(null);
     this.upsellingService = new UpsellingService();
     this.telemetry = new TelemetryService();
   }
@@ -167,7 +169,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         isSidebarEnabled$: this.isSidebarEnabled$,
-        getStartedComponent: this.getStartedComponent,
+        getStartedComponent$: this.getStartedComponent$,
         upselling: this.upsellingService,
         telemetry: this.telemetry.start(),
       };
@@ -268,18 +270,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         Component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
 
-      if (this.experimentalFeatures.policyResponseInFleetEnabled) {
-        registerExtension({
-          package: 'endpoint',
-          view: 'package-policy-response',
-          Component: getLazyEndpointPolicyResponseExtension(core, plugins),
-        });
-        registerExtension({
-          package: 'endpoint',
-          view: 'package-generic-errors-list',
-          Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
-        });
-      }
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-response',
+        Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-generic-errors-list',
+        Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
+      });
 
       registerExtension({
         package: 'endpoint',
@@ -313,8 +314,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       getNavLinks$: () => navLinks$,
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
-      setGetStartedPage: (getStartedComponent: GetStartedComponent) => {
-        this.getStartedComponent = getStartedComponent;
+      setGetStartedPage: (getStartedComponent) => {
+        this.getStartedComponent$.next(getStartedComponent);
       },
     };
   }

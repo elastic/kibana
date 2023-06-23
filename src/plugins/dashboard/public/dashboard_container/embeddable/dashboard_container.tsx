@@ -28,7 +28,10 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
-import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
+import {
+  getDefaultControlGroupInput,
+  persistableControlGroupInputIsEqual,
+} from '@kbn/controls-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import {
@@ -172,6 +175,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           ...DEFAULT_DASHBOARD_INPUT,
           id: initialInput.id,
         },
+        isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
         animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
         hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
         lastSavedId: savedObjectId,
@@ -326,10 +330,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     if (
       this.controlGroup &&
-      lastSavedControlGroupInput &&
       !persistableControlGroupInputIsEqual(this.controlGroup.getInput(), lastSavedControlGroupInput)
     ) {
-      this.controlGroup.updateInput(lastSavedControlGroupInput);
+      this.controlGroup.updateInput(lastSavedControlGroupInput ?? getDefaultControlGroupInput());
     }
 
     // if we are using the unified search integration, we need to force reset the time picker.
@@ -355,12 +358,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.stopSyncingWithUnifiedSearch?.();
 
     const {
-      dashboardSavedObject: { loadDashboardStateFromSavedObject },
+      dashboardContentManagement: { loadDashboardState },
     } = pluginServices.getServices();
     if (newCreationOptions) {
       this.creationOptions = { ...this.creationOptions, ...newCreationOptions };
     }
-    const loadDashboardReturn = await loadDashboardStateFromSavedObject({ id: newSavedObjectId });
+    const loadDashboardReturn = await loadDashboardState({ id: newSavedObjectId });
 
     const dashboardContainerReady$ = new Subject<DashboardContainer>();
     const untilDashboardReady = () =>

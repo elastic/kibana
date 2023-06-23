@@ -38,7 +38,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  describe('discover field visualize button', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/148225
+  describe.skip('discover field visualize button', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);
     });
@@ -183,6 +184,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
         return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
       });
+    });
+
+    it('should save correctly chart to dashboard', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('TextBasedLangEditor-expand');
+      await testSubjects.click('unifiedHistogramSaveVisualization');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.lens.saveModal('TextBasedChart', false, false, false, 'new');
+      await testSubjects.existOrFail('embeddablePanelHeading-TextBasedChart');
     });
   });
 }

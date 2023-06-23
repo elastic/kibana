@@ -139,12 +139,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization('mtrVis');
       const metricData = await PageObjects.lens.getMetricVisualizationData();
-      expect(metricData[0].value).to.eql('5.73K');
+      expect(metricData[0].value).to.eql('5,727.322');
       expect(metricData[0].title).to.eql('Average of bytes');
       await PageObjects.lens.save('New Lens from Modal', false, false, false, 'new');
 
       await PageObjects.dashboard.waitForRenderComplete();
-      expect(metricData[0].value).to.eql('5.73K');
+      expect(metricData[0].value).to.eql('5,727.322');
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('Lens with adhoc data view');
       await PageObjects.lens.waitForVisualization('mtrVis');
       const metricData = await PageObjects.lens.getMetricVisualizationData();
-      expect(metricData[0].value).to.eql('5.73K');
+      expect(metricData[0].value).to.eql('5,727.322');
       expect(metricData[0].title).to.eql('Average of bytes');
     });
 

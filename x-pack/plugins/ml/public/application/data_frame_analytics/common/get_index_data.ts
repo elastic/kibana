@@ -7,18 +7,21 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { type DataFrameAnalyticsConfig, INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
+import { type DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import {
+  EsSorting,
+  UseDataGridReturnType,
+  getProcessedFields,
+  INDEX_STATUS,
+} from '@kbn/ml-data-grid';
 
-import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
 import { ml } from '../../services/ml_api_service';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-
-import { SavedSearchQuery } from '../../contexts/ml';
 
 export const getIndexData = async (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   dataGrid: UseDataGridReturnType,
-  searchQuery: SavedSearchQuery,
+  searchQuery: estypes.QueryDslQueryContainer,
   options: { didCancel: boolean }
 ) => {
   if (jobConfig !== undefined) {

@@ -8,7 +8,7 @@
 import React, { FC, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { Aggregation, Field } from '../../../../../../../../../common/types/fields';
+import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
 import { AdvancedDetectorModal, ModalPayload } from '../advanced_detector_modal';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 

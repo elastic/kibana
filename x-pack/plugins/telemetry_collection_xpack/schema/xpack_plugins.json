@@ -5659,6 +5659,34 @@
               }
             }
           }
+        },
+        "installation_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "package_policy_id": {
+                "type": "keyword"
+              },
+              "feature": {
+                "type": "keyword"
+              },
+              "package_version": {
+                "type": "keyword"
+              },
+              "agent_policy_id": {
+                "type": "keyword"
+              },
+              "deployment_mode": {
+                "type": "keyword"
+              },
+              "created_at": {
+                "type": "date"
+              },
+              "agent_count": {
+                "type": "long"
+              }
+            }
+          }
         }
       }
     },
@@ -14398,6 +14426,40 @@
         }
       }
     },
+    "transform": {
+      "properties": {
+        "alertRules": {
+          "properties": {
+            "transform_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "notStarted": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error message health check"
+                      }
+                    },
+                    "healthCheck": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the health check with the stats API"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "upgrade-assistant-telemetry": {
       "properties": {
         "features": {
@@ -14408,147 +14470,6 @@
                   "type": "boolean",
                   "_meta": {
                     "description": "Whether user has enabled Elasticsearch deprecation logging"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "uptime": {
-      "properties": {
-        "last_24_hours": {
-          "properties": {
-            "hits": {
-              "properties": {
-                "autoRefreshEnabled": {
-                  "type": "boolean"
-                },
-                "autorefreshInterval": {
-                  "type": "array",
-                  "items": {
-                    "type": "long"
-                  }
-                },
-                "dateRangeEnd": {
-                  "type": "array",
-                  "items": {
-                    "type": "date"
-                  }
-                },
-                "dateRangeStart": {
-                  "type": "array",
-                  "items": {
-                    "type": "date"
-                  }
-                },
-                "monitor_frequency": {
-                  "type": "array",
-                  "items": {
-                    "type": "long"
-                  }
-                },
-                "monitor_name_stats": {
-                  "properties": {
-                    "avg_length": {
-                      "type": "float",
-                      "_meta": {
-                        "description": "This field represents the average length of monitor names"
-                      }
-                    },
-                    "max_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the max length of monitor names"
-                      }
-                    },
-                    "min_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the min length of monitor names"
-                      }
-                    }
-                  }
-                },
-                "monitor_page": {
-                  "type": "long"
-                },
-                "no_of_unique_monitors": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "This field represents the number of unique configured monitors"
-                  }
-                },
-                "no_of_unique_observer_locations": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "This field represents the number of unique monitor observer locations"
-                  }
-                },
-                "observer_location_name_stats": {
-                  "properties": {
-                    "avg_length": {
-                      "type": "float",
-                      "_meta": {
-                        "description": "This field represents the average length of monitor observer location names"
-                      }
-                    },
-                    "max_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the max length of monitor observer location names"
-                      }
-                    },
-                    "min_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the min length of monitor observer location names"
-                      }
-                    }
-                  }
-                },
-                "overview_page": {
-                  "type": "long"
-                },
-                "settings_page": {
-                  "type": "long"
-                },
-                "fleet_monitor_name_stats": {
-                  "properties": {
-                    "avg_length": {
-                      "type": "float",
-                      "_meta": {
-                        "description": "This field represents the average length of fleet managed monitor names"
-                      }
-                    },
-                    "max_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the max length of fleet managed monitor names"
-                      }
-                    },
-                    "min_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the min length of fleet managed monitor names"
-                      }
-                    }
-                  }
-                },
-                "fleet_monitor_frequency": {
-                  "type": "array",
-                  "items": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "This field represents the average the monitor frequency of fleet managed monitors"
-                    }
-                  }
-                },
-                "fleet_no_of_unique_monitors": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "This field represents the number of unique configured fleet managed monitors"
                   }
                 }
               }

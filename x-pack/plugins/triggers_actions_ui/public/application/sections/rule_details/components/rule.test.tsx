@@ -9,6 +9,8 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
+import type { Capabilities } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { RuleComponent, alertToListItem } from './rule';
 import { AlertListItem } from './types';
 import { RuleAlertList } from './rule_alert_list';
@@ -16,12 +18,16 @@ import { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../t
 import { mockRule } from './test_helpers';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
+import { getMaintenanceWindowMockMap } from '../../alerts_table/maintenance_windows/index.mock';
 
 jest.mock('../../../../common/lib/kibana');
-
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
+jest.mock('../../alerts_table/hooks/use_bulk_get_maintenance_windows');
+
+const mocks = coreMock.createSetup();
 
 const ruleTypeR: RuleTypeModel = {
   id: 'my-rule-type',
@@ -36,6 +42,7 @@ const ruleTypeR: RuleTypeModel = {
 };
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindows as jest.Mock;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -52,15 +59,32 @@ const mockAPIs = {
   onChangeDuration: jest.fn(),
 };
 
-beforeAll(() => {
+let capabilities: Capabilities;
+const maintenanceWindowsMap = getMaintenanceWindowMockMap();
+
+beforeAll(async () => {
   jest.clearAllMocks();
   ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
   useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+
+  const services = await mocks.getStartServices();
+  capabilities = services[0].application.capabilities;
+
   global.Date.now = jest.fn(() => fakeNow.getTime());
 });
 
 beforeEach(() => {
   (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+  useKibanaMock().services.application.capabilities = {
+    ...capabilities,
+    maintenanceWindow: {
+      show: true,
+    },
+  };
+  useBulkGetMaintenanceWindowsMock.mockReturnValue({
+    data: maintenanceWindowsMap,
+    isFetching: false,
+  });
 });
 
 describe('rules', () => {

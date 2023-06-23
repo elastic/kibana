@@ -1,4 +1,4 @@
-title: Create Composite SLO response
+title: Create composite SLO response
 type: object
 required:
   - id

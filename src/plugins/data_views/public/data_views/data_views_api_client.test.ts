@@ -8,6 +8,7 @@
 
 import { http } from './data_views_api_client.test.mock';
 import { DataViewsApiClient } from './data_views_api_client';
+import { FIELDS_FOR_WILDCARD_PATH as expectedPath } from '../../common/constants';
 
 describe('IndexPatternsApiClient', () => {
   let fetchSpy: jest.SpyInstance;
@@ -19,8 +20,6 @@ describe('IndexPatternsApiClient', () => {
   });
 
   test('uses the right URI to fetch fields for wildcard', async function () {
-    const expectedPath = '/api/index_patterns/_fields_for_wildcard';
-
     await indexPatternsApiClient.getFieldsForWildcard({ pattern: 'blah' });
 
     expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));

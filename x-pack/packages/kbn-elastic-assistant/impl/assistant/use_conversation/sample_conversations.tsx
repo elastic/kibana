@@ -9,8 +9,8 @@ import { Conversation } from '../../assistant_context/types';
 import * as i18n from '../../content/prompts/welcome/translations';
 import {
   DEFAULT_CONVERSATION_TITLE,
-  ELASTIC_SECURITY_ASSISTANT,
-  ELASTIC_SECURITY_ASSISTANT_TITLE,
+  ELASTIC_AI_ASSISTANT,
+  ELASTIC_AI_ASSISTANT_TITLE,
   WELCOME_CONVERSATION_TITLE,
 } from './translations';
 
@@ -87,11 +87,11 @@ export const BASE_CONVERSATIONS: Record<string, Conversation> = {
   [WELCOME_CONVERSATION_TITLE]: {
     id: WELCOME_CONVERSATION_TITLE,
     theme: {
-      title: ELASTIC_SECURITY_ASSISTANT_TITLE,
-      titleIcon: 'logoElastic',
+      title: ELASTIC_AI_ASSISTANT_TITLE,
+      titleIcon: 'logoSecurity',
       assistant: {
-        name: ELASTIC_SECURITY_ASSISTANT,
-        icon: 'logoElastic',
+        name: ELASTIC_AI_ASSISTANT,
+        icon: 'logoSecurity',
       },
       system: {
         icon: 'logoElastic',

@@ -56,7 +56,7 @@ import {
   useIsGuidedOnboardingActive,
 } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
-import type { DetailViewPanelName, PackageInfo } from '../../../../types';
+import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import {
   Error,
@@ -85,6 +85,14 @@ import { CustomViewPage } from './custom';
 import { DocumentationPage } from './documentation';
 
 import './index.scss';
+
+export type DetailViewPanelName =
+  | 'overview'
+  | 'policies'
+  | 'assets'
+  | 'settings'
+  | 'custom'
+  | 'api-reference';
 
 export interface DetailParams {
   pkgkey: string;
@@ -123,6 +131,7 @@ export function Detail() {
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
+  const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
 
   const canInstallPackages = useAuthz().integrations.installPackages;
   const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
@@ -167,9 +176,9 @@ export function Detail() {
 
   const updateAvailable =
     packageInfo &&
-    'savedObject' in packageInfo &&
-    packageInfo.savedObject &&
-    semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
+    'installationInfo' in packageInfo &&
+    packageInfo.installationInfo?.version &&
+    semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
@@ -178,9 +187,9 @@ export function Detail() {
   const { data: settings } = useGetSettingsQuery();
 
   useEffect(() => {
-    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled) || prerelease;
     setPrereleaseIntegrationsEnabled(isEnabled);
-  }, [settings?.item.prerelease_integrations_enabled]);
+  }, [settings?.item.prerelease_integrations_enabled, prerelease]);
 
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
@@ -248,8 +257,8 @@ export function Detail() {
 
       let installedVersion;
       const { name } = packageInfoData.item;
-      if ('savedObject' in packageInfoResponse) {
-        installedVersion = packageInfoResponse.savedObject.attributes.version;
+      if ('installationInfo' in packageInfoResponse) {
+        installedVersion = packageInfoResponse.installationInfo?.version;
       }
       const status: InstallStatus = packageInfoResponse?.status as any;
       if (name) {

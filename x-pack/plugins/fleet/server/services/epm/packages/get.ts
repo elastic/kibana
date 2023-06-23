@@ -27,6 +27,7 @@ import type {
   PackageUsageStats,
   Installable,
   PackageDataStreamTypes,
+  PackageList,
 } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
@@ -121,6 +122,8 @@ export async function getPackages(
       )
     )
     .concat(uploadedPackagesNotInRegistry as Installable<any>)
+    // hides profiling collector and symbolizer packages
+    .filter((item) => item.id !== 'profiler_collector' && item.id !== 'profiler_symbolizer')
     .sort(sortByName);
 
   for (const pkg of packageList) {
@@ -146,7 +149,7 @@ export async function getPackages(
     return newPkg;
   });
 
-  return packageListWithoutStatus;
+  return packageListWithoutStatus as PackageList;
 }
 
 interface GetInstalledPackagesOptions {

@@ -32,6 +32,7 @@ const KEY_AFTER_END = {
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
+  'Elastic-Api-Version': '1',
 };
 
 export default function ({ getService }: FtrProviderContext) {
