@@ -8,9 +8,12 @@
 import { createHash } from 'crypto';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+
+import { SO_SEARCH_LIMIT } from '../../../../common';
 
 import type {
   UninstallToken,
@@ -216,7 +219,7 @@ describe('UninstallTokenService', () => {
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${so.id}"`,
-              perPage: 10000,
+              perPage: SO_SEARCH_LIMIT,
             }
           );
         });
@@ -245,6 +248,7 @@ describe('UninstallTokenService', () => {
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id: "${so.attributes.policy_id}"`,
+              perPage: SO_SEARCH_LIMIT,
               sortField: 'created_at',
               sortOrder: 'desc',
             }

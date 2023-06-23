@@ -150,82 +150,25 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
 
   public async getToken(id: string): Promise<UninstallToken | null> {
-    const tokensFinder =
-      await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
-        {
-          type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-          perPage: SO_SEARCH_LIMIT,
-          filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${id}"`,
-        }
-      );
-    let tokenObject: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
+    const filter = `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${id}"`;
 
-    for await (const result of tokensFinder.find()) {
-      tokenObject = result.saved_objects;
-      break;
-    }
-    tokensFinder.close();
+    const uninstallTokens = await this.getDecryptedTokens({ filter });
 
-    if (tokenObject.length === 0) {
-      return null;
-    }
-
-    const uninstallTokens: UninstallToken[] = tokenObject.map(
-      ({ id: _id, attributes, created_at: createdAt }) => {
-        this.assertPolicyId(attributes);
-        this.assertToken(attributes);
-        this.assertCreatedAt(createdAt);
-
-        return {
-          id: _id,
-          policy_id: attributes.policy_id,
-          token: attributes.token || attributes.token_plain,
-          created_at: createdAt,
-        };
-      }
-    );
-
-    return uninstallTokens[0];
+    return uninstallTokens.length === 1 ? uninstallTokens[0] : null;
   }
 
   public async getTokenHistoryForPolicy(
     policyId: string
   ): Promise<GetUninstallTokensByPolicyIdResponse> {
-    const tokensFinder =
-      await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
-        {
-          type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-          filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"`,
-          sortField: 'created_at',
-          sortOrder: 'desc',
-        }
-      );
-    let decryptedTokenObjects: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
-
-    for await (const result of tokensFinder.find()) {
-      decryptedTokenObjects = result.saved_objects;
-      break;
-    }
-    tokensFinder.close();
-
-    const decryptedTokens = decryptedTokenObjects.map<UninstallToken>(
-      ({ id, created_at: createdAt, attributes }) => {
-        this.assertPolicyId(attributes);
-        this.assertToken(attributes);
-        this.assertCreatedAt(createdAt);
-
-        return {
-          id,
-          policy_id: attributes.policy_id,
-          token: attributes.token || attributes.token_plain,
-          created_at: createdAt,
-        };
-      }
-    );
+    const decryptedTokens = await this.getDecryptedTokens({
+      filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"`,
+      sortField: 'created_at',
+      sortOrder: 'desc',
+    });
 
     return {
       items: decryptedTokens,
-      total: decryptedTokenObjects.length,
+      total: decryptedTokens.length,
     };
   }
 
@@ -267,30 +210,36 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       })
       .join(' or ');
 
+    return this.getDecryptedTokens({ filter });
+  }
+
+  private getDecryptedTokens = async (
+    options: Partial<SavedObjectsCreatePointInTimeFinderOptions>
+  ): Promise<UninstallToken[]> => {
     const tokensFinder =
       await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
         {
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
           perPage: SO_SEARCH_LIMIT,
-          filter,
+          ...options,
         }
       );
-    let tokenObjects: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
+    let tokenObject: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
 
     for await (const result of tokensFinder.find()) {
-      tokenObjects = result.saved_objects;
+      tokenObject = result.saved_objects;
       break;
     }
     tokensFinder.close();
 
-    const uninstallTokens: UninstallToken[] = tokenObjects.map(
-      ({ id, attributes, created_at: createdAt }) => {
+    const uninstallTokens: UninstallToken[] = tokenObject.map(
+      ({ id: _id, attributes, created_at: createdAt }) => {
         this.assertPolicyId(attributes);
         this.assertToken(attributes);
         this.assertCreatedAt(createdAt);
 
         return {
-          id,
+          id: _id,
           policy_id: attributes.policy_id,
           token: attributes.token || attributes.token_plain,
           created_at: createdAt,
@@ -299,7 +248,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     );
 
     return uninstallTokens;
-  }
+  };
 
   private async getTokenObjectsByIncludeFilter(
     include?: AggregationsTermsInclude
