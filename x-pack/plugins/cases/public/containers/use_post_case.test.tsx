@@ -35,7 +35,6 @@ describe('usePostCase', () => {
     owner: SECURITY_SOLUTION_OWNER,
   };
 
-  const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   const addError = jest.fn();
 
@@ -60,7 +59,7 @@ describe('usePostCase', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(samplePost, abortCtrl.signal);
+    expect(spy).toHaveBeenCalledWith({ newCase: samplePost });
   });
 
   it('invalidates the queries correctly', async () => {
