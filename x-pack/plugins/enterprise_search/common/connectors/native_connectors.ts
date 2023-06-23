@@ -85,7 +85,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: DisplayType.TEXTBOX,
         label: i18n.translate(
-          'xpack.enterpriseSearch.nativeConnectors.azureBlobStorage.accountNameLabel',
+          'xpack.enterpriseSearch.nativeConnectors.azureBlobStorage.accountKeyLabel',
           {
             defaultMessage: 'Account key',
           }

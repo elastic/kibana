@@ -38,9 +38,9 @@ export interface ConnectorConfigCategoryProperties {
   type: 'category';
 }
 
-interface Validation {
-  type: string;
+export interface Validation {
   constraint: string | number;
+  type: string;
 }
 
 export interface ConnectorConfigProperties {
