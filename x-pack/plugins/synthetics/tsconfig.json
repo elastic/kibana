@@ -84,6 +84,8 @@
     "@kbn/core-application-browser",
     "@kbn/std",
     "@kbn/core-saved-objects-server-mocks",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/shared-ux-link-redirect-app",
   ],
   "exclude": [
     "target/**/*",
