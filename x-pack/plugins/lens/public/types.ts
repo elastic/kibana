@@ -318,6 +318,7 @@ export function isMessageRemovable(message: UserMessage): message is RemovableUs
  */
 export interface Datasource<T = unknown, P = unknown> {
   id: string;
+  alias?: string[];
 
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
@@ -539,6 +540,7 @@ export interface DatasourceFixAction<T> {
  */
 export interface DatasourcePublicAPI {
   datasourceId: string;
+  datasourceAliasIds?: string[];
   getTableSpec: () => Array<{ columnId: string; fields: string[] }>;
   getOperationForColumnId: (columnId: string) => OperationDescriptor | null;
   /**
@@ -1028,6 +1030,7 @@ export interface VisualizationLayerDescription {
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
+  alias?: string[];
 
   /**
    * Initialize is allowed to modify the state stored in memory. The initialize function

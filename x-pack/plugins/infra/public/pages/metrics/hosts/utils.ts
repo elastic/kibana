@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { DataViewBase, Filter, isCombinedFilter } from '@kbn/es-query';
-
-import { BooleanRelation, buildCombinedFilter, buildPhraseFilter } from '@kbn/es-query';
+import {
+  BooleanRelation,
+  buildCombinedFilter,
+  buildPhraseFilter,
+  Filter,
+  isCombinedFilter,
+} from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 export const buildCombinedHostsFilter = ({
@@ -35,24 +39,6 @@ export const buildCombinedHostsFilter = ({
   return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
 };
 
-export const createHostsFilter = (hostNames: string[], dataView?: DataViewBase): Filter => {
-  return {
-    query: {
-      terms: {
-        'host.name': hostNames,
-      },
-    },
-    meta: dataView
-      ? {
-          value: hostNames.join(),
-          type: 'phrases',
-          params: hostNames,
-          index: dataView.id,
-          key: 'host.name',
-        }
-      : {},
-  };
-};
 export const retrieveFieldsFromFilter = (filters: Filter[], fields: string[] = []) => {
   for (const filter of filters) {
     if (isCombinedFilter(filter)) {
