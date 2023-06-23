@@ -15,10 +15,6 @@ interface DatasetSpec {
   title: DatasetType['name'];
 }
 
-export interface DatasetPlain extends DatasetType {
-  id: DatasetId;
-  parentIntegration?: IntegrationBase;
-}
 export class Dataset {
   id: DatasetId;
   name: DatasetType['name'];
