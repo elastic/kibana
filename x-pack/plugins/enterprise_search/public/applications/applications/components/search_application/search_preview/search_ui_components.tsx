@@ -13,7 +13,9 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButton,
   EuiComboBox,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -43,6 +45,9 @@ import { convertResultToFieldsAndIndex, ConvertedResult, FieldValue } from './co
 import { useSelectedDocument } from './document_context';
 import { FieldValueCell } from './field_value_cell';
 
+interface InputProps {
+  additionalInputProps: JSX.Element;
+}
 export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
   return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
 };
@@ -143,7 +148,16 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     </button>
   );
 };
-
+export const SearchBar: React.FC<InputProps> = ({ additionalInputProps }) => (
+  <EuiFlexGroup gutterSize="s">
+    <EuiFieldSearch fullWidth {...additionalInputProps} />
+    <EuiButton type="submit" color="primary" fill>
+      {i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.inputView.searchLabel', {
+        defaultMessage: 'Search',
+      })}
+    </EuiButton>
+  </EuiFlexGroup>
+);
 export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, totalResults }) => (
   <EuiText size="s">
     <FormattedHTMLMessage

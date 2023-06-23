@@ -12,13 +12,11 @@ import { useActions, useValues } from 'kea';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldSearch,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
@@ -78,6 +76,7 @@ import {
   ResultsPerPageView,
   ResultsView,
   Sorting,
+  SearchBar,
 } from './search_ui_components';
 import '../search_application_layout.scss';
 
@@ -417,41 +416,27 @@ export const SearchApplicationSearchPreview: React.FC = () => {
             <EuiFlexItem>
               <SearchBox
                 inputView={({ getInputProps }) => (
-                  <EuiFlexGroup gutterSize="s">
-                    <EuiFieldSearch
-                      fullWidth
-                      placeholder={i18n.translate(
+                  <SearchBar
+                    additionalInputProps={getInputProps({
+                      append: (
+                        <EuiButtonEmpty
+                          color="primary"
+                          iconType="eye"
+                          onClick={() => setShowAPICallFlyout(true)}
+                          isLoading={lastAPICall == null}
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.searchApplication.searchPreview.inputView.appendButtonLabel',
+                            { defaultMessage: 'View API call' }
+                          )}
+                        </EuiButtonEmpty>
+                      ),
+                      placeholder: i18n.translate(
                         'xpack.enterpriseSearch.content.engine.searchPreview.inputView.placeholder',
                         { defaultMessage: 'Search' }
-                      )}
-                      {...getInputProps({
-                        append: (
-                          <EuiButtonEmpty
-                            color="primary"
-                            iconType="eye"
-                            onClick={() => setShowAPICallFlyout(true)}
-                            isLoading={lastAPICall == null}
-                          >
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.content.engine.searchPreview.inputView.appendButtonLabel',
-                              { defaultMessage: 'View API call' }
-                            )}
-                          </EuiButtonEmpty>
-                        ),
-                      })}
-                      isClearable
-                      aria-label={i18n.translate(
-                        'xpack.enterpriseSearch.content.engine.searchPreview.inputView.label',
-                        { defaultMessage: 'Search Input' }
-                      )}
-                    />
-                    <EuiButton type="submit" color="primary" fill>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.engine.searchPreview.inputView.searchLabel',
-                        { defaultMessage: 'Search' }
-                      )}
-                    </EuiButton>
-                  </EuiFlexGroup>
+                      ),
+                    })}
+                  />
                 )}
               />
             </EuiFlexItem>
