@@ -81,7 +81,7 @@ const IndicesContent = ({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            title={i18n.translate(
+            label={i18n.translate(
               'xpack.serverlessSearch.content.indexingApi.index.comboBox.title',
               { defaultMessage: 'Index' }
             )}
