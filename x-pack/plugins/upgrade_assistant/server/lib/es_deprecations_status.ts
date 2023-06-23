@@ -104,7 +104,6 @@ export async function getHealthIndicators(
     ...[healthIndicators.indicators.disk as estypes.HealthReportDiskIndicator]
       .filter(isStatusNotGreen)
       .flatMap(({ status, symptom, details }) => {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         return {
           type: 'health_indicator',
           isCritical: status === 'red',
