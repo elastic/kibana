@@ -55,6 +55,7 @@ const i18nTexts = {
 export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndicatorFlyoutProps) => {
   const { message, url, details, correctiveAction } = deprecation;
   const { action, cause, impacts } = correctiveAction as HealthIndicatorAction;
+  const showAction = Boolean(action && action !== '');
 
   return (
     <>
@@ -79,13 +80,17 @@ export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndica
         </EuiText>
         <EuiSpacer size="s" />
 
-        <EuiText>
-          <EuiTitle size="s" data-test-subj="flyoutTitle">
-            <h3>{i18nTexts.healthIndicatorActionHeader}</h3>
-          </EuiTitle>
-          <p className="eui-textBreakWord">{action}</p>
-        </EuiText>
-        <EuiSpacer size="s" />
+        {showAction && (
+          <>
+            <EuiText>
+              <EuiTitle size="s" data-test-subj="flyoutTitle">
+                <h3>{i18nTexts.healthIndicatorActionHeader}</h3>
+              </EuiTitle>
+              <p className="eui-textBreakWord">{action}</p>
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
 
         <EuiText>
           <EuiTitle size="s" data-test-subj="flyoutTitle">

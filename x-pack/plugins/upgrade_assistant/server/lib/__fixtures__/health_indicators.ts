@@ -23,11 +23,11 @@ export const diskIndicatorRed: estypes.HealthReportDiskIndicator = {
   status: 'red',
   symptom: 'The cluster does not have enough available disk space.',
   details: {
-    indices_with_readonly_block: 0,
+    indices_with_readonly_block: 1,
     nodes_with_enough_disk_space: 1,
-    nodes_with_unknown_disk_status: 0,
+    nodes_with_unknown_disk_status: 1,
     nodes_over_high_watermark: 1,
-    nodes_over_flood_stage_watermark: 0,
+    nodes_over_flood_stage_watermark: 1,
   },
 };
 

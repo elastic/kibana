@@ -80,8 +80,7 @@ describe('getHealthIndicators', () => {
     `);
   });
 
-  // TODO: Check with ES team the red status payload.
-  it.skip('returns unhealthy disk indicator', async () => {
+  it('returns unhealthy disk indicator', async () => {
     esClient.asCurrentUser.healthReport.mockResponse({
       cluster_name: 'mock',
       indicators: {
@@ -92,7 +91,31 @@ describe('getHealthIndicators', () => {
     });
 
     const result = await getHealthIndicators(esClient);
-    expect(result).toMatchInlineSnapshot(`Array []`);
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "correctiveAction": Object {
+            "cause": "The number of indices the system enforced a read-only index block (\`index.blocks.read_only_allow_delete\`) on because the cluster is running out of space.
+      The number of nodes that are running low on disk and it is likely that they will run out of space. Their disk usage has tripped the <<cluster-routing-watermark-high, high watermark threshold>>.
+      The number of nodes that have run out of disk. Their disk usage has tripped the <<cluster-routing-flood-stage, flood stagewatermark threshold>>.",
+            "impacts": Object {
+              "indices_with_readonly_block": 1,
+              "nodes_over_flood_stage_watermark": 1,
+              "nodes_over_high_watermark": 1,
+              "nodes_with_enough_disk_space": 1,
+              "nodes_with_unknown_disk_status": 1,
+            },
+            "type": "healthIndicator",
+          },
+          "details": "The cluster does not have enough available disk space.",
+          "isCritical": true,
+          "message": "The cluster does not have enough available disk space.",
+          "resolveDuringUpgrade": false,
+          "type": "health_indicator",
+          "url": null,
+        },
+      ]
+    `);
   });
 });
 
