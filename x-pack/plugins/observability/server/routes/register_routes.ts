@@ -16,12 +16,15 @@ import {
 } from '@kbn/server-route-repository';
 import axios from 'axios';
 import * as t from 'io-ts';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { IOpenAIClient } from '../services/openai/types';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
+import { ObservabilityConfig } from '..';
 
 interface RegisterRoutes {
+  config: ObservabilityConfig;
   core: CoreSetup;
   repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
@@ -29,12 +32,15 @@ interface RegisterRoutes {
 }
 
 export interface RegisterRoutesDependencies {
+  pluginsSetup: {
+    cloud?: CloudSetup;
+  };
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
   getOpenAIClient: () => IOpenAIClient | undefined;
 }
 
-export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {
+export function registerRoutes({ config, repository, core, logger, dependencies }: RegisterRoutes) {
   const routes = Object.values(repository);
 
   const router = core.http.createRouter();
@@ -60,13 +66,14 @@ export function registerRoutes({ repository, core, logger, dependencies }: Regis
             params ?? t.strict({})
           );
 
-          const data = (await handler({
+          const data = await handler({
+            config,
             context,
             request,
             logger,
             params: decodedParams,
             dependencies,
-          })) as any;
+          });
 
           if (data === undefined) {
             return response.noContent();

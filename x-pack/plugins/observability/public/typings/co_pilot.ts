@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import type { ChatCompletionRequestMessage } from 'openai';
 import type { Observable } from 'rxjs';
-import {
-  type CoPilotPromptId,
-  type PromptParamsOf,
-  type CreateChatCompletionResponseChunk,
+import type {
+  CoPilotPromptId,
+  PromptParamsOf,
+  CreateChatCompletionResponseChunk,
 } from '../../common/co_pilot';
 
 export interface PromptObservableState {
   chunks: CreateChatCompletionResponseChunk[];
   message?: string;
+  messages: ChatCompletionRequestMessage[];
   loading: boolean;
 }
 
@@ -24,4 +26,11 @@ export interface CoPilotService {
     promptId: TPromptId,
     params: PromptParamsOf<TPromptId>
   ): Observable<PromptObservableState>;
+  submitFeedback: (options: {
+    messages: ChatCompletionRequestMessage[];
+    response: string;
+    promptId: CoPilotPromptId;
+    positive: boolean;
+    responseTime: number;
+  }) => Promise<void>;
 }

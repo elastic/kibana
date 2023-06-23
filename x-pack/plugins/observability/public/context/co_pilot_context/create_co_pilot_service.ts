@@ -7,7 +7,7 @@
 
 import { type HttpSetup } from '@kbn/core/public';
 import { concatMap, delay, Observable, of } from 'rxjs';
-import { type CreateChatCompletionResponseChunk } from '../../../common/co_pilot';
+import { coPilotPrompts, type CreateChatCompletionResponseChunk } from '../../../common/co_pilot';
 import { type CoPilotService, type PromptObservableState } from '../../typings/co_pilot';
 
 function getMessageFromChunks(chunks: CreateChatCompletionResponseChunk[]) {
@@ -23,7 +23,9 @@ export function createCoPilotService({ enabled, http }: { enabled: boolean; http
     isEnabled: () => enabled,
     prompt: (promptId, params) => {
       return new Observable<PromptObservableState>((observer) => {
-        observer.next({ chunks: [], loading: true });
+        const messages = coPilotPrompts[promptId].messages(params as any);
+
+        observer.next({ messages, chunks: [], loading: true });
 
         http
           .post(`/internal/observability/copilot/prompts/${promptId}`, {
@@ -55,6 +57,7 @@ export function createCoPilotService({ enabled, http }: { enabled: boolean; http
                 try {
                   if (done) {
                     observer.next({
+                      messages,
                       chunks,
                       message: getMessageFromChunks(chunks),
                       loading: false,
@@ -86,7 +89,12 @@ export function createCoPilotService({ enabled, http }: { enabled: boolean; http
 
                   nextChunks.forEach((chunk) => {
                     chunks.push(chunk);
-                    observer.next({ chunks, message: getMessageFromChunks(chunks), loading: true });
+                    observer.next({
+                      chunks,
+                      messages,
+                      message: getMessageFromChunks(chunks),
+                      loading: true,
+                    });
                   });
                 } catch (err) {
                   observer.error(err);
@@ -105,7 +113,17 @@ export function createCoPilotService({ enabled, http }: { enabled: boolean; http
           .catch((err) => {
             observer.error(err);
           });
-      }).pipe(concatMap((value) => of(value).pipe(delay(50))));
+      }).pipe(concatMap((value) => of(value).pipe(delay(25))));
+    },
+    submitFeedback: async ({ messages, response, responseTime, positive, promptId }) => {
+      await http.post(`/internal/observability/copilot/prompts/${promptId}/feedback`, {
+        body: JSON.stringify({
+          response,
+          positive,
+          messages,
+          responseTime,
+        }),
+      });
     },
   };
 

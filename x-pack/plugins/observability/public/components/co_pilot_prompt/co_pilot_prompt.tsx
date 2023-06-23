@@ -18,12 +18,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import type { ChatCompletionRequestMessage } from 'openai';
+import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, Observable, of } from 'rxjs';
 import { CoPilotPromptId } from '../../../common';
 import type { PromptParamsOf } from '../../../common/co_pilot';
 import type { CoPilotService, PromptObservableState } from '../../typings/co_pilot';
+import { CoPilotPromptFeedback } from './co_pilot_prompt_feedback';
 
 const cursorCss = css`
   @keyframes blink {
@@ -64,21 +66,41 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
 
   const theme = useEuiTheme();
 
+  const [responseTime, setResponseTime] = useState<number | undefined>(undefined);
+
   const conversation$ = useMemo(() => {
-    return hasOpened
-      ? coPilot
-          .prompt(promptId, params)
-          .pipe(
-            catchError((err) => of({ loading: false, error: err, message: String(err.message) }))
-          )
-      : new Observable<PromptObservableState>(() => {});
-  }, [params, promptId, coPilot, hasOpened]);
+    if (hasOpened) {
+      setResponseTime(undefined);
+
+      const now = Date.now();
+
+      const observable = coPilot.prompt(promptId, params).pipe(
+        catchError((err) =>
+          of({
+            messages: [] as ChatCompletionRequestMessage[],
+            loading: false,
+            error: err,
+            message: String(err.message),
+          })
+        )
+      );
+
+      observable.subscribe({
+        complete: () => {
+          setResponseTime(Date.now() - now);
+        },
+      });
+
+      return observable;
+    }
+
+    return new Observable<PromptObservableState>(() => {});
+  }, [params, promptId, coPilot, hasOpened, setResponseTime]);
 
   const conversation = useObservable(conversation$);
 
-  useEffect(() => {}, [conversation$]);
-
   const content = conversation?.message ?? '';
+  const messages = conversation?.messages;
 
   let state: 'init' | 'loading' | 'streaming' | 'error' | 'complete' = 'init';
 
@@ -94,10 +116,24 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
 
   if (state === 'complete' || state === 'streaming') {
     inner = (
-      <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
-        {content}
-        {state === 'streaming' ? <span className={cursorCss} /> : <></>}
-      </p>
+      <>
+        <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+          {content}
+          {state === 'streaming' ? <span className={cursorCss} /> : undefined}
+        </p>
+        {state === 'complete' ? (
+          <>
+            <EuiSpacer size="m" />
+            <CoPilotPromptFeedback
+              messages={messages}
+              response={content}
+              responseTime={responseTime!}
+              promptId={promptId}
+              coPilot={coPilot}
+            />
+          </>
+        ) : undefined}
+      </>
     );
   } else if (state === 'init' || state === 'loading') {
     inner = (
@@ -129,7 +165,7 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
   }
 
   const tooltipContent = i18n.translate('xpack.observability.coPilotPrompt.askCoPilot', {
-    defaultMessage: 'Ask Observability AI Assistent for help',
+    defaultMessage: 'Ask the AI assistant for help',
   });
 
   return (

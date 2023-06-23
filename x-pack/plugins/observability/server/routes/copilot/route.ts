@@ -6,9 +6,10 @@
  */
 import Boom from '@hapi/boom';
 import { ServerRoute } from '@kbn/server-route-repository';
+import axios from 'axios';
 import * as t from 'io-ts';
 import { map } from 'lodash';
-import { CreateChatCompletionResponse } from 'openai';
+import { ChatCompletionRequestMessageRoleEnum, CreateChatCompletionResponse } from 'openai';
 import { Readable } from 'stream';
 import { CoPilotPromptMap, coPilotPrompts } from '../../../common/co_pilot';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
@@ -46,6 +47,67 @@ const promptRoutes: {
   })
 );
 
+const feedbackRoute = createObservabilityServerRoute({
+  endpoint: 'POST /internal/observability/copilot/prompts/{promptId}/feedback',
+  params: t.type({
+    path: t.type({
+      promptId: t.string,
+    }),
+    body: t.type({
+      positive: t.boolean,
+      responseTime: t.number,
+      messages: t.array(
+        t.intersection([
+          t.type({
+            role: t.union([
+              t.literal(ChatCompletionRequestMessageRoleEnum.System),
+              t.literal(ChatCompletionRequestMessageRoleEnum.User),
+              t.literal(ChatCompletionRequestMessageRoleEnum.Assistant),
+            ]),
+            content: t.string,
+          }),
+          t.partial({
+            name: t.string,
+          }),
+        ])
+      ),
+      response: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  handler: async (resources): Promise<void> => {
+    const { params, config } = resources;
+
+    if (!config.aiAssistant?.enabled) {
+      throw Boom.notImplemented;
+    }
+
+    const deploymentId = resources.dependencies.pluginsSetup.cloud?.deploymentId || 'local';
+
+    const feedbackBody = {
+      cluster_id: deploymentId,
+      prompt_name: params.path.promptId,
+      feedback_action: params.body.positive ? 'thumbsup' : 'thumbsdown',
+      model:
+        'openAI' in config.aiAssistant.provider
+          ? config.aiAssistant.provider.openAI.model
+          : config.aiAssistant.provider.azureOpenAI.resourceName,
+      response_time: params.body.responseTime,
+      conversation: [
+        ...params.body.messages.map(({ role, content }) => ({ role, content })),
+        { role: 'system', content: params.body.response },
+      ],
+    };
+
+    resources.logger.debug(JSON.stringify(feedbackBody));
+
+    await axios.post(config.aiAssistant.feedbackUrl, feedbackBody);
+  },
+});
+
 export const observabilityCoPilotRouteRepository = {
   ...promptRoutes,
+  ...feedbackRoute,
 };
