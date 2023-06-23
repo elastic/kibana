@@ -34,6 +34,7 @@ import { ConversationSettings } from '../conversations/conversation_settings/con
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
+  height: 575px;
 `;
 
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
@@ -151,23 +152,24 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 <EuiIcon type="eyeClosed" size="l" />
               </EuiKeyPadMenuItem>
-              <EuiKeyPadMenuItem
-                id={FUNCTIONS_TAB}
-                label={i18n.FUNCTIONS_MENU_ITEM}
-                isSelected={selectedTab === FUNCTIONS_TAB}
-                isDisabled
-                onClick={() => setSelectedTab(FUNCTIONS_TAB)}
-              >
-                <EuiIcon type="function" size="l" />
-              </EuiKeyPadMenuItem>
-              <EuiKeyPadMenuItem
-                id={ADVANCED_TAB}
-                label={i18n.ADVANCED_MENU_ITEM}
-                isSelected={selectedTab === ADVANCED_TAB}
-                onClick={() => setSelectedTab(ADVANCED_TAB)}
-              >
-                <EuiIcon type="wrench" size="l" />
-              </EuiKeyPadMenuItem>
+              {/* TODO: Additional settings coming soon! */}
+              {/* <EuiKeyPadMenuItem*/}
+              {/*  id={FUNCTIONS_TAB}*/}
+              {/*  label={i18n.FUNCTIONS_MENU_ITEM}*/}
+              {/*  isSelected={selectedTab === FUNCTIONS_TAB}*/}
+              {/*  isDisabled*/}
+              {/*  onClick={() => setSelectedTab(FUNCTIONS_TAB)}*/}
+              {/* >*/}
+              {/*  <EuiIcon type="function" size="l" />*/}
+              {/* </EuiKeyPadMenuItem>*/}
+              {/* <EuiKeyPadMenuItem*/}
+              {/*  id={ADVANCED_TAB}*/}
+              {/*  label={i18n.ADVANCED_MENU_ITEM}*/}
+              {/*  isSelected={selectedTab === ADVANCED_TAB}*/}
+              {/*  onClick={() => setSelectedTab(ADVANCED_TAB)}*/}
+              {/* >*/}
+              {/*  <EuiIcon type="wrench" size="l" />*/}
+              {/* </EuiKeyPadMenuItem>*/}
             </EuiKeyPadMenu>
           </EuiPageSidebar>
           <EuiPageBody paddingSize="none" panelled={true}>

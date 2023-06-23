@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { Conversation } from '../../..';
 import { AssistantSettings } from './assistant_settings';
 import * as i18n from './translations';
-import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
 
 interface Props {
   selectedConversation: Conversation;
@@ -23,7 +22,7 @@ interface Props {
  */
 export const AssistantSettingsButton: React.FC<Props> = React.memo(
   ({ selectedConversation, showSettingsModal }) => {
-    const { isModalVisible, setIsModalVisible } = useSettingsUpdater();
+    const [isModalVisible, setIsModalVisible] = useState(false);
     // Modal control functions
     const cleanupAndCloseModal = useCallback(() => {
       setIsModalVisible(false);
