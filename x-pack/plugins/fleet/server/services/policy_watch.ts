@@ -17,7 +17,7 @@ import type {
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 
-import { cloneDeep } from 'lodash';
+import { pick } from 'lodash';
 
 import type { LicenseService } from '../../common/services/license';
 
@@ -96,9 +96,9 @@ export class PolicyWatcher {
         );
         return;
       }
-
+      let updatedPolicyIds: string[];
       for (const policy of response.items as AgentPolicy[]) {
-        let updatePolicy = cloneDeep(policy) as AgentPolicy;
+        let updatePolicy = pick(policy, ['is_protected']) as Partial<AgentPolicy>;
 
         try {
           if (!isAgentPolicyValidForLicense(updatePolicy, license)) {
@@ -110,6 +110,8 @@ export class PolicyWatcher {
                 policy.id,
                 updatePolicy
               );
+              // accumulate list of policies updated
+              updatedPolicyIds.push(policy.id);
             } catch (e) {
               // try again for transient issues
               try {
@@ -134,6 +136,7 @@ export class PolicyWatcher {
           this.logger.warn(error);
         }
       }
+      this.logger.info(`Agent policies updated by license change: [${updatedPolicyIds}]`);
     } while (response.page * response.perPage < response.total);
   }
 }

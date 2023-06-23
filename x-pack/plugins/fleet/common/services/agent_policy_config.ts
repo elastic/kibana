@@ -16,7 +16,10 @@ import {
   agentPolicyWithoutPaidFeatures,
 } from './generate_new_agent_policy';
 
-function isAgentTamperingPolicyValidForLicense(policy: AgentPolicy, license: ILicense | null) {
+function isAgentTamperingPolicyValidForLicense(
+  policy: Partial<AgentPolicy>,
+  license: ILicense | null
+) {
   if (hasAtLeast(license, 'platinum')) {
     // platinum allows agent tamper protection
     return true;
@@ -33,7 +36,7 @@ function isAgentTamperingPolicyValidForLicense(policy: AgentPolicy, license: ILi
 }
 
 export const isAgentPolicyValidForLicense = (
-  policy: AgentPolicy,
+  policy: Partial<AgentPolicy>,
   license: ILicense | null
 ): boolean => {
   return isAgentTamperingPolicyValidForLicense(policy, license);
@@ -44,7 +47,7 @@ export const isAgentPolicyValidForLicense = (
  * when unsupported by the given license level.
  */
 export const unsetAgentPolicyAccordingToLicenseLevel = (
-  policy: AgentPolicy,
+  policy: Partial<AgentPolicy>,
   license: ILicense | null
 ): AgentPolicy => {
   if (hasAtLeast(license, 'platinum')) {
