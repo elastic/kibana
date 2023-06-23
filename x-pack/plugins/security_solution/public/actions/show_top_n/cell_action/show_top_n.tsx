@@ -6,12 +6,13 @@
  */
 import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
-import type * as H from 'history';
+import type { History } from 'history';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 import { APP_NAME, DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { SecurityAppStore } from '../../../common/store';
@@ -28,7 +29,7 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 const ICON = 'visBarVertical';
-const UNSUPPORTED_FIELD_TYPES = ['date', 'text'];
+const UNSUPPORTED_FIELD_TYPES = [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.TEXT];
 
 export const createShowTopNCellActionFactory = createCellActionFactory(
   ({
@@ -37,17 +38,25 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
     services,
   }: {
     store: SecurityAppStore;
-    history: H.History;
+    history: History;
     services: StartServices;
   }): CellActionTemplate<SecurityCellAction> => ({
     type: SecurityCellActionType.SHOW_TOP_N,
     getIconType: () => ICON,
-    getDisplayName: ({ field }) => SHOW_TOP(field.name),
-    getDisplayNameTooltip: ({ field }) => SHOW_TOP(field.name),
-    isCompatible: async ({ field }) =>
-      fieldHasCellActions(field.name) &&
-      !UNSUPPORTED_FIELD_TYPES.includes(field.type) &&
-      !!field.aggregatable,
+    getDisplayName: ({ data }) => SHOW_TOP(data[0]?.field.name),
+    getDisplayNameTooltip: ({ data }) => SHOW_TOP(data[0]?.field.name),
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 &&
+        fieldHasCellActions(field.name) &&
+        (field.esTypes ?? []).every(
+          (esType) => !UNSUPPORTED_FIELD_TYPES.includes(esType as ES_FIELD_TYPES)
+        ) &&
+        !!field.aggregatable
+      );
+    },
     execute: async (context) => {
       if (!context.nodeRef.current) return;
 
