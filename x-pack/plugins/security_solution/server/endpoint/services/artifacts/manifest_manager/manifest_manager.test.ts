@@ -598,7 +598,7 @@ describe('ManifestManager', () => {
           ARTIFACT_ID_EXCEPTIONS_MACOS,
           ARTIFACT_ID_EXCEPTIONS_WINDOWS,
         ])
-      ).resolves.toStrictEqual(undefined);
+      ).resolves.toStrictEqual([]);
 
       expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
         ARTIFACT_ID_EXCEPTIONS_MACOS,
@@ -612,20 +612,19 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
       const error = new Error();
 
-      artifactClient.bulkDeleteArtifacts.mockImplementation(
-        async (ids): Promise<Error[] | undefined> => {
-          if (ids[1] === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
-            return [error];
-          }
+      artifactClient.bulkDeleteArtifacts.mockImplementation(async (ids): Promise<Error[]> => {
+        if (ids[1] === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
+          return [error];
         }
-      );
+        return [];
+      });
 
-      expect(
-        await manifestManager.deleteArtifacts([
+      await expect(
+        manifestManager.deleteArtifacts([
           ARTIFACT_ID_EXCEPTIONS_MACOS,
           ARTIFACT_ID_EXCEPTIONS_WINDOWS,
         ])
-      ).toEqual([error]);
+      ).resolves.toStrictEqual([error]);
 
       expect(artifactClient.bulkDeleteArtifacts).toHaveBeenCalledTimes(1);
       expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([

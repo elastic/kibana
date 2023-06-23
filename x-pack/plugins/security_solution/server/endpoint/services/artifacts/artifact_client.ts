@@ -24,7 +24,7 @@ export interface EndpointArtifactClientInterface {
 
   deleteArtifact(id: string): Promise<void>;
 
-  bulkDeleteArtifacts(ids: string[]): Promise<Error[] | undefined>;
+  bulkDeleteArtifacts(ids: string[]): Promise<Error[]>;
 
   listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 }
@@ -99,7 +99,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
     return this.fleetArtifacts.deleteArtifact(artifactId);
   }
 
-  async bulkDeleteArtifacts(ids: string[]): Promise<Error[] | undefined> {
+  async bulkDeleteArtifacts(ids: string[]): Promise<Error[]> {
     return this.fleetArtifacts.bulkDeleteArtifacts(ids);
   }
 }

@@ -205,7 +205,7 @@ export const deleteArtifact = async (esClient: ElasticsearchClient, id: string):
 export const bulkDeleteArtifacts = async (
   esClient: ElasticsearchClient,
   ids: string[]
-): Promise<Error[] | undefined> => {
+): Promise<Error[]> => {
   try {
     const body = ids.flatMap((id) => [
       {
@@ -219,15 +219,17 @@ export const bulkDeleteArtifacts = async (
         refresh: 'wait_for',
       })
     );
+    let errors: Error[] = [];
     // Track errors of the bulk delete action
     if (res.errors) {
-      return res.items.reduce<Error[]>((acc, item) => {
+      errors = res.items.reduce<Error[]>((acc, item) => {
         if (item.delete?.error) {
           acc.push(new Error(item.delete.error.reason));
         }
         return acc;
       }, []);
     }
+    return errors;
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);
   }
