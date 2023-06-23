@@ -5,7 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { KibanaRequest } from '@kbn/core-http-server';
+import { hapiMocks } from '@kbn/hapi-mocks';
+import { CoreKibanaRequest } from '../request';
+import { passThroughValidation } from './core_versioned_route';
 import {
   isValidRouteVersion,
   isAllowedPublicVersion,
@@ -60,37 +63,62 @@ describe('isValidRouteVersion', () => {
   });
 });
 
+function getRequest(arg: { headers?: any; query?: any } = {}): KibanaRequest {
+  const request = hapiMocks.createRequest({ ...arg });
+  return CoreKibanaRequest.from(request, passThroughValidation);
+}
+
 describe('hasVersion', () => {
   test('detects the version header', () => {
-    expect(hasVersion({ headers: { 'elastic-api-version': '1' } } as any)).toBe(true);
-    expect(hasVersion({ headers: {} } as any)).toBe(false);
+    {
+      const req = getRequest({ headers: { 'elastic-api-version': '1' } });
+      expect(hasVersion(req)).toBe(true);
+    }
+    {
+      const req = getRequest();
+      expect(hasVersion(req)).toBe(false);
+    }
   });
+
   test('detects query version, when enabled', () => {
-    expect(hasVersion({ headers: {}, query: { apiVersion: '1' } } as any, true)).toBe(true);
-    expect(hasVersion({ headers: {} } as any, false)).toBe(false);
+    {
+      const req = getRequest({ headers: {}, query: { apiVersion: '1' } });
+      expect(hasVersion(req, true)).toBe(true);
+    }
+    {
+      const req = getRequest();
+      expect(hasVersion(req, true)).toBe(false);
+    }
   });
   test('returns true when both are present', () => {
-    expect(
-      hasVersion({ headers: { 'elastic-api-version': 1 }, query: { apiVersion: '2' } } as any, true)
-    ).toBe(true);
+    const req = getRequest({ headers: { 'elastic-api-version': 1 }, query: { apiVersion: '2' } });
+    expect(hasVersion(req, true)).toBe(true);
   });
 });
 
 describe('readVersion', () => {
   test('reads the version header', () => {
-    expect(readVersion({ headers: { 'elastic-api-version': '1' } } as any)).toBe('1');
-    expect(readVersion({ headers: {} } as any)).toBe(undefined);
+    {
+      const req = getRequest({ headers: { 'elastic-api-version': '1' } });
+      expect(readVersion(req)).toBe('1');
+    }
+    {
+      const req = getRequest({ headers: {} });
+      expect(readVersion(req)).toBe(undefined);
+    }
   });
   test('reads query version when enabled', () => {
-    expect(readVersion({ headers: {}, query: { apiVersion: '1' } } as any, true)).toBe('1');
-    expect(readVersion({ headers: {} } as any, false)).toBe(undefined);
+    {
+      const req = getRequest({ headers: {}, query: { apiVersion: '1' } });
+      expect(readVersion(req, true)).toBe('1');
+    }
+    {
+      const req = getRequest({ headers: {} });
+      expect(readVersion(req, false)).toBe(undefined);
+    }
   });
   test('header version takes precedence over query param version', () => {
-    expect(
-      readVersion(
-        { headers: { 'elastic-api-version': '3' }, query: { apiVersion: '2' } } as any,
-        true
-      )
-    ).toBe('3');
+    const req = getRequest({ headers: { 'elastic-api-version': '3' }, query: { apiVersion: '2' } });
+    expect(readVersion(req, true)).toBe('3');
   });
 });

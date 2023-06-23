@@ -68,6 +68,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   private isPublic: boolean;
   private isInternal: boolean;
+  private enableQueryVersion: boolean;
   private constructor(
     private readonly router: CoreVersionedRouter,
     public readonly method: Method,
@@ -75,6 +76,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     public readonly options: VersionedRouteConfig<Method>
   ) {
     this.isPublic = this.options.access === 'public';
+    this.enableQueryVersion = this.options.enableQueryVersion === true;
     this.isInternal = !this.isPublic;
     this.router.router[this.method](
       {
@@ -114,10 +116,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
 
-    if (
-      !hasVersion(req, this.options.enableQueryVersion) &&
-      (this.isInternal || this.router.isDev)
-    ) {
+    if (!hasVersion(req, this.enableQueryVersion) && (this.isInternal || this.router.isDev)) {
       return res.badRequest({
         body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
       });
@@ -194,7 +193,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   };
 
   private getVersion(request: KibanaRequest): ApiVersion {
-    return readVersion(request, this.options.enableQueryVersion) ?? this.getDefaultVersion();
+    return readVersion(request, this.enableQueryVersion) ?? this.getDefaultVersion();
   }
 
   private validateVersion(version: string) {
