@@ -874,7 +874,7 @@
             "section": "def-common.AvailableAnnotationIcon",
             "text": "AvailableAnnotationIcon"
           },
-          "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; canFill?: boolean | undefined; }[]"
+          "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/plugins/event_annotation/public/components/annotation_editor_controls/icon_set.ts",
         "deprecated": false,

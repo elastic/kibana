@@ -110,7 +110,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           disabled={status === Status.LOADING}
           placeholder={placeholder}
           required={required}
-          value={ensureStringType(value)}
+          value={ensureStringType(value) || undefined} // ensures placeholder shows up when value is empty string
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.value });
           }}

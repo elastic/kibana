@@ -17,6 +17,7 @@ import { encode } from '@kbn/rison';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 interface Props {
   dismissCallout: () => void;
@@ -48,7 +49,7 @@ export function SloCallout({
       type: 'sli.apm.transactionErrorRate',
       params: {
         service: serviceName,
-        environment,
+        environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
         transactionName: transactionName ?? '',
         transactionType: transactionType ?? '',
       },

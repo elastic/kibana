@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
-import { MAX_DOCS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import { MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import {
   Alerts,
   createCaseAttachAlertAndDeleteCase,
@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
             query: {
-              perPage: MAX_DOCS_PER_PAGE,
+              perPage: MAX_COMMENTS_PER_PAGE,
             },
           }),
         ]);
@@ -210,14 +210,14 @@ export default ({ getService }: FtrProviderContext): void => {
               supertest: supertestWithoutAuth,
               caseId: postedCase1.id,
               query: {
-                perPage: MAX_DOCS_PER_PAGE,
+                perPage: MAX_COMMENTS_PER_PAGE,
               },
             }),
             findAttachments({
               supertest: supertestWithoutAuth,
               caseId: postedCase2.id,
               query: {
-                perPage: MAX_DOCS_PER_PAGE,
+                perPage: MAX_COMMENTS_PER_PAGE,
               },
             }),
           ]);
@@ -457,7 +457,7 @@ export default ({ getService }: FtrProviderContext): void => {
               supertest: supertestWithoutAuth,
               caseId: postedCase.id,
               query: {
-                perPage: MAX_DOCS_PER_PAGE,
+                perPage: MAX_COMMENTS_PER_PAGE,
               },
               auth: { user: secAllUser, space: 'space1' },
             }),
