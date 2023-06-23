@@ -81,7 +81,7 @@ const DocViewerLegacyTable = React.lazy(
 const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
 const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
 
-window.ELASTIC_DISCOVER_LOGGER="debug"
+window.ELASTIC_DISCOVER_LOGGER = 'debug';
 
 /**
  * @public
