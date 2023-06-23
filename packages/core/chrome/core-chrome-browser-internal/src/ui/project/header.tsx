@@ -224,7 +224,7 @@ export const ProjectHeader = ({
           </EuiHeaderSectionItem>
 
           <EuiHeaderSectionItem>
-            <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+            <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} application={application} />
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
 

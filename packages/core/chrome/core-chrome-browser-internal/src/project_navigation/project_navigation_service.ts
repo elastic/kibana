@@ -92,12 +92,15 @@ export class ProjectNavigationService {
         });
       },
       getProjectBreadcrumbs$: (): Observable<ChromeProjectBreadcrumb[]> => {
-        return combineLatest([this.projectBreadcrumbs$, this.activeNodes$, this.projectHome$]).pipe(
+        return combineLatest([
+          this.projectBreadcrumbs$,
+          this.activeNodes$,
+          this.projectHome$.pipe(map((homeHref) => homeHref ?? '/')),
+        ]).pipe(
           map(([breadcrumbs, activeNodes, homeHref]) => {
-            const homeBreadcrumb = createHomeBreadcrumb(
-              { homeHref: this.http?.basePath.prepend?.(homeHref ?? '/') ?? homeHref ?? '/' },
-              { navigateToUrl: this.application?.navigateToUrl }
-            );
+            const homeBreadcrumb = createHomeBreadcrumb({
+              homeHref: this.http?.basePath.prepend?.(homeHref) ?? homeHref,
+            });
 
             if (breadcrumbs.params.absolute) {
               return [homeBreadcrumb, ...breadcrumbs.breadcrumbs];

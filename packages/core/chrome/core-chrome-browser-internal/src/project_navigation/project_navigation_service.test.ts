@@ -81,7 +81,6 @@ describe('breadcrumbs', () => {
       Array [
         Object {
           "href": "/",
-          "onClick": [Function],
           "text": <EuiIcon
             type="home"
           />,
