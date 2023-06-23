@@ -207,8 +207,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(total).to.be(5);
 
         expect(data.map((foundEvent: IEvent) => foundEvent?.message)).to.eql([
-          'test legacy 2020-10-28T15:19:55.913Z',
           'test 2020-10-28T15:19:55.913Z',
+          'test legacy 2020-10-28T15:19:55.913Z',
           'test 2020-10-28T15:19:55.938Z',
           'test legacy 2020-10-28T15:19:55.962Z',
           'test 2020-10-28T15:19:55.962Z',

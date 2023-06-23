@@ -40,8 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           previewText = await testSubjects.getVisibleText('value');
           return previewText !== 'Value not set';
         });
-        // FIXME this test is poorly designed, as it relies on a random document
-        expect(previewText).to.be('png');
+        expect(previewText).to.be('css');
         await PageObjects.settings.closeIndexPatternFieldEditor();
       });
 
@@ -54,8 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           previewText = await testSubjects.getVisibleText('value');
           return previewText !== 'Value not set';
         });
-        // FIXME this test is poorly designed, as it relies on a random document
-        expect(previewText).to.be('png');
+        expect(previewText).to.be('css');
         await PageObjects.settings.closeIndexPatternFieldEditor();
       });
     });
