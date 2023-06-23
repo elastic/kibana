@@ -78,7 +78,15 @@ export const useOsqueryTab = ({
     []
   );
 
-  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled || !ecsData;
+  const expandedEventFieldsObject = rawEventData
+    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
+    : undefined;
+
+  const responseActions =
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
+
+  const shouldEarlyReturn =
+    !osquery || !rawEventData || !responseActionsEnabled || !ecsData || !responseActions?.length;
   const alertId = rawEventData?._id ?? '';
 
   const { OsqueryResults, fetchAllLiveQueries } = osquery;
@@ -88,13 +96,6 @@ export const useOsqueryTab = ({
     alertId,
     skip: shouldEarlyReturn,
   });
-
-  const expandedEventFieldsObject = rawEventData
-    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
-    : undefined;
-
-  const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
   const osqueryResponseActions = useMemo(
     () =>
