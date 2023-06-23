@@ -60,6 +60,9 @@ export const EntryItem: React.FC<EntryItemProps> = ({
     [onChange, entry]
   );
 
+  // @TODO: remove type casting as DataView once FieldComponent accepts DataViewSpec
+  // this will happen after the Exceptions components + code are updated to use
+  // DataViewSpec rather than DataViewBase
   const dataViewInstance = useMemo(() => {
     if (indexPattern != null) {
       const dv = new DataView({ spec: indexPattern, fieldFormats });
