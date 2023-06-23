@@ -179,7 +179,7 @@ describe('Detections Alerts API', () => {
         comment: 'commento',
         caseIds: ['88c04a90-b19c-11eb-b838-bf3c7840b969'],
       });
-      expect(postMock).toHaveBeenCalledWith('/api/endpoint/isolate', {
+      expect(postMock).toHaveBeenCalledWith('/api/endpoint/action/isolate', {
         body: '{"endpoint_ids":["fd8a122b-4c54-4c05-b295-e5f8381fc59d"],"comment":"commento","case_ids":["88c04a90-b19c-11eb-b838-bf3c7840b969"]}',
         version: '2023-10-31',
       });
