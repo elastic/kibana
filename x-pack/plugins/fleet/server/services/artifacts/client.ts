@@ -18,7 +18,7 @@ import type {
   NewArtifact,
   ListArtifactsProps,
 } from './types';
-import { relativeDownloadUrlFromArtifact } from './mappings';
+import { relativeDownloadUrlFromArtifact, uniqueIdFromId } from './mappings';
 
 import {
   createArtifact,
@@ -114,7 +114,8 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
   }
 
   async bulkDeleteArtifacts(ids: string[]) {
-    return await bulkDeleteArtifacts(this.esClient, ids, this.packageName);
+    const idsMappedWithPackageName = ids.map((id) => uniqueIdFromId(id, this.packageName));
+    return await bulkDeleteArtifacts(this.esClient, idsMappedWithPackageName);
   }
 
   /**

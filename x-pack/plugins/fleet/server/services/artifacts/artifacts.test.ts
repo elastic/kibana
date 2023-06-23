@@ -343,14 +343,14 @@ describe('When using the artifacts services', () => {
 
   describe('and calling `bulkDeleteArtifacts()`', () => {
     it('should delete single artifact', async () => {
-      bulkDeleteArtifacts(esClientMock, ['123'], 'endpoint');
+      bulkDeleteArtifacts(esClientMock, ['123']);
 
       expect(esClientMock.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',
         body: [
           {
             delete: {
-              _id: 'endpoint:123',
+              _id: '123',
               _index: FLEET_SERVER_ARTIFACTS_INDEX,
             },
           },
@@ -359,20 +359,20 @@ describe('When using the artifacts services', () => {
     });
 
     it('should delete all the artifacts', async () => {
-      bulkDeleteArtifacts(esClientMock, ['123', '231'], 'endpoint');
+      bulkDeleteArtifacts(esClientMock, ['123', '231']);
 
       expect(esClientMock.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',
         body: [
           {
             delete: {
-              _id: 'endpoint:123',
+              _id: '123',
               _index: FLEET_SERVER_ARTIFACTS_INDEX,
             },
           },
           {
             delete: {
-              _id: 'endpoint:231',
+              _id: '231',
               _index: FLEET_SERVER_ARTIFACTS_INDEX,
             },
           },
@@ -383,7 +383,7 @@ describe('When using the artifacts services', () => {
     it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
       setEsClientMethodResponseToError(esClientMock, 'bulk');
 
-      await expect(bulkDeleteArtifacts(esClientMock, ['123'], 'endpoint')).rejects.toBeInstanceOf(
+      await expect(bulkDeleteArtifacts(esClientMock, ['123'])).rejects.toBeInstanceOf(
         ArtifactsElasticsearchError
       );
     });

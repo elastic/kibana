@@ -160,7 +160,7 @@ describe('When using the Fleet Artifacts Client', () => {
   describe('and calling `bulkDeleteArtifacts()`', () => {
     it('should bulk delete the artifact', async () => {
       setEsClientGetMock();
-      await artifactClient.bulkDeleteArtifacts(['123'], 'endpoint');
+      await artifactClient.bulkDeleteArtifacts(['123']);
       expect(esClientMock.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           body: [

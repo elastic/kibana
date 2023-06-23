@@ -39,7 +39,6 @@ import {
   esSearchHitToArtifact,
   newArtifactToElasticsearchProperties,
   uniqueIdFromArtifact,
-  uniqueIdFromId,
 } from './mappings';
 
 const deflateAsync = promisify(deflate);
@@ -205,13 +204,12 @@ export const deleteArtifact = async (esClient: ElasticsearchClient, id: string):
 
 export const bulkDeleteArtifacts = async (
   esClient: ElasticsearchClient,
-  ids: string[],
-  packageName: string
+  ids: string[]
 ): Promise<void> => {
   try {
     const body = ids.flatMap((id) => [
       {
-        delete: { _index: FLEET_SERVER_ARTIFACTS_INDEX, _id: uniqueIdFromId(id, packageName) },
+        delete: { _index: FLEET_SERVER_ARTIFACTS_INDEX, _id: id },
       },
     ]);
 
