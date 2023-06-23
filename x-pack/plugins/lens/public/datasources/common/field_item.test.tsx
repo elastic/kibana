@@ -22,11 +22,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { loadFieldStats } from '@kbn/unified-field-list-plugin/public/services/field_stats';
+import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { FieldIcon, FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list-plugin/public';
+import { FieldIcon, FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list';
 
-jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
+jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
 }));
 
