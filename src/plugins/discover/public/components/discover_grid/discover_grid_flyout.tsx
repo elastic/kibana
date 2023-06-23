@@ -26,12 +26,19 @@ import {
   keys,
 } from '@elastic/eui';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { NewChat } from '@kbn/elastic-assistant';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
 import type { DataTableRecord } from '../../types';
+import { PROMPT_CONTEXT_EVENT_CATEGORY } from '../../application/main/assistant/conversations';
+import {
+  EVENT_CONTEXT_DESCRIPTION,
+  EVENT_SUMMARIZATION_PROMPT,
+  EVENT_SUMMARY_CONVERSATION_ID,
+} from '../../application/main/assistant/translations';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
@@ -106,6 +113,17 @@ export function DiscoverGridFlyout({
 
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
     { dataView, rowIndex: hit.raw._index, rowId: hit.raw._id, columns, filters, savedSearchId }
+  );
+
+  // Elastic Assistant Prompt Context Data Provider for Event fields
+  const getPromptContext = useCallback(
+    async () =>
+      Object.entries(actualHit.flattened)
+        .map((k) => {
+          return k;
+        })
+        .join('\n'),
+    [actualHit]
   );
 
   return (
@@ -202,6 +220,19 @@ export function DiscoverGridFlyout({
                           className: 'eui-alignTop',
                         }}
                       />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <NewChat
+                        category={PROMPT_CONTEXT_EVENT_CATEGORY}
+                        conversationId={EVENT_SUMMARY_CONVERSATION_ID}
+                        description={EVENT_CONTEXT_DESCRIPTION}
+                        getPromptContext={getPromptContext}
+                        iconType={null}
+                        suggestedUserPrompt={EVENT_SUMMARIZATION_PROMPT}
+                        tooltip={null}
+                      >
+                        {'🪄✨'}
+                      </NewChat>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 )}

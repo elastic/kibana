@@ -16,6 +16,18 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { AssistantOverlay, AssistantProvider, Conversation } from '@kbn/elastic-assistant';
+import {
+  EuiAvatar,
+  EuiButtonIcon,
+  EuiCommentProps,
+  EuiCopy,
+  EuiMarkdownFormat,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import { useLocalStorage } from 'react-use/lib';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -28,6 +40,13 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
+import { APP_ICON, PLUGIN_ID } from '../../../common';
+import {
+  BASE_DISCOVER_CONVERSATIONS,
+  BASE_DISCOVER_QUICK_PROMPTS,
+  BASE_SYSTEM_PROMPTS,
+} from './assistant/conversations';
+import { ELASTIC_DISCOVER_ASSISTANT } from './assistant/translations';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -49,7 +68,9 @@ export function DiscoverMainRoute(props: Props) {
     data,
     toastNotifications,
     http: { basePath },
+    http,
     dataViewEditor,
+    triggersActionsUi: { actionTypeRegistry },
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
@@ -64,6 +85,76 @@ export function DiscoverMainRoute(props: Props) {
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$, false);
+
+  /**
+   * Elastic Assistant Discover Integration
+   */
+  // UseQuery client used by 'actions' hooks in Elastic Assistant
+  const queryClient = new QueryClient();
+
+  // Local storage for saving Discover Conversations
+  const [localStorageConversations, setLocalStorageConversations] = useLocalStorage(
+    `${PLUGIN_ID}.discoverAssistant`,
+    BASE_DISCOVER_CONVERSATIONS
+  );
+
+  const getInitialConversation = useCallback(() => {
+    return localStorageConversations ?? {};
+  }, [localStorageConversations]);
+
+  // Solution Specific Comment Rendering
+  const getComments = useCallback(
+    ({
+      currentConversation,
+      lastCommentRef,
+    }: {
+      currentConversation: Conversation;
+      lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+    }): EuiCommentProps[] =>
+      currentConversation.messages.map((message, index) => {
+        const isUser = message.role === 'user';
+
+        return {
+          actions: (
+            <EuiToolTip position="top" content={'Copy'}>
+              <EuiCopy textToCopy={message.content}>
+                {(copy) => (
+                  <EuiButtonIcon
+                    aria-label={'Copy'}
+                    color="primary"
+                    iconType="copyClipboard"
+                    onClick={copy}
+                  />
+                )}
+              </EuiCopy>
+            </EuiToolTip>
+          ),
+          children:
+            index !== currentConversation.messages.length - 1 ? (
+              <EuiText>
+                <EuiMarkdownFormat className={`message-${index}`}>
+                  {message.content}
+                </EuiMarkdownFormat>
+              </EuiText>
+            ) : (
+              <EuiText>
+                <EuiMarkdownFormat className={`message-${index}`}>
+                  {message.content}
+                </EuiMarkdownFormat>
+                <span ref={lastCommentRef} />
+              </EuiText>
+            ),
+          timelineAvatar: isUser ? (
+            <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
+          ) : (
+            <EuiAvatar name="machine" size="l" color="subdued" iconType={APP_ICON} />
+          ),
+          timestamp: `at ${message.timestamp}`,
+          username: isUser ? 'You' : 'Assistant',
+        };
+      }),
+    []
+  );
 
   /**
    * Get location state of scoped history only on initial load
@@ -251,7 +342,23 @@ export function DiscoverMainRoute(props: Props) {
 
   return (
     <DiscoverMainProvider value={stateContainer}>
-      <DiscoverMainAppMemoized stateContainer={stateContainer} />
+      <QueryClientProvider client={queryClient}>
+        <AssistantProvider
+          actionTypeRegistry={actionTypeRegistry}
+          augmentMessageCodeBlocks={() => []}
+          baseQuickPrompts={BASE_DISCOVER_QUICK_PROMPTS}
+          baseSystemPrompts={BASE_SYSTEM_PROMPTS}
+          getComments={getComments}
+          getInitialConversations={getInitialConversation}
+          http={http}
+          nameSpace={PLUGIN_ID}
+          setConversations={setLocalStorageConversations}
+          title={ELASTIC_DISCOVER_ASSISTANT}
+        >
+          <AssistantOverlay />
+          <DiscoverMainAppMemoized stateContainer={stateContainer} />
+        </AssistantProvider>
+      </QueryClientProvider>
     </DiscoverMainProvider>
   );
 }

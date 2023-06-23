@@ -23,7 +23,7 @@ export const DEFAULT_CONVERSATION_TITLE = i18n.translate(
 export const ELASTIC_SECURITY_ASSISTANT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.useConversation.elasticSecurityAssistantTitle',
   {
-    defaultMessage: 'Elastic Security Assistant',
+    defaultMessage: 'Elastic Assistant',
   }
 );
 

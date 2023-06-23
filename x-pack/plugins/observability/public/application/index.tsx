@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiAvatar,
+  EuiButtonIcon,
+  EuiCommentProps,
+  EuiCopy,
+  EuiErrorBoundary,
+  EuiMarkdownFormat,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -22,16 +31,110 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { useLocalStorage } from 'react-use/lib';
+import { AssistantOverlay, AssistantProvider, Conversation } from '@kbn/elastic-assistant';
+
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
+import {
+  BASE_OBSERVABILITY_CONVERSATIONS,
+  BASE_OBSERVABILITY_QUICK_PROMPTS,
+  BASE_SYSTEM_PROMPTS,
+} from '../assistant/conversations';
+import { ELASTIC_OBSERVABILITY_ASSISTANT } from '../assistant/translations';
+import { useKibana } from '../utils/kibana_react';
 
 function App() {
+  const {
+    http,
+    triggersActionsUi: { actionTypeRegistry },
+  } = useKibana().services;
+
+  /**
+   * Elastic Assistant Discover Integration
+   */
+  // Local storage for saving Discover Conversations
+  const [localStorageConversations, setLocalStorageConversations] = useLocalStorage(
+    `observability.observabilityAssistant`,
+    BASE_OBSERVABILITY_CONVERSATIONS
+  );
+
+  const getInitialConversation = useCallback(() => {
+    return localStorageConversations ?? {};
+  }, [localStorageConversations]);
+
+  // Solution Specific Comment Rendering
+  const getComments = useCallback(
+    ({
+      currentConversation,
+      lastCommentRef,
+    }: {
+      currentConversation: Conversation;
+      lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+    }): EuiCommentProps[] =>
+      currentConversation.messages.map((message, index) => {
+        const isUser = message.role === 'user';
+
+        return {
+          actions: (
+            <EuiToolTip position="top" content={'Copy'}>
+              <EuiCopy textToCopy={message.content}>
+                {(copy) => (
+                  <EuiButtonIcon
+                    aria-label={'Copy'}
+                    color="primary"
+                    iconType="copyClipboard"
+                    onClick={copy}
+                  />
+                )}
+              </EuiCopy>
+            </EuiToolTip>
+          ),
+          children:
+            index !== currentConversation.messages.length - 1 ? (
+              <EuiText>
+                <EuiMarkdownFormat className={`message-${index}`}>
+                  {message.content}
+                </EuiMarkdownFormat>
+              </EuiText>
+            ) : (
+              <EuiText>
+                <EuiMarkdownFormat className={`message-${index}`}>
+                  {message.content}
+                </EuiMarkdownFormat>
+                <span ref={lastCommentRef} />
+              </EuiText>
+            ),
+          timelineAvatar: isUser ? (
+            <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
+          ) : (
+            <EuiAvatar name="machine" size="l" color="subdued" iconType="logoObservability" />
+          ),
+          timestamp: `at ${message.timestamp}`,
+          username: isUser ? 'You' : 'Assistant',
+        };
+      }),
+    []
+  );
+
   return (
-    <>
+    <AssistantProvider
+      actionTypeRegistry={actionTypeRegistry}
+      augmentMessageCodeBlocks={() => []}
+      baseQuickPrompts={BASE_OBSERVABILITY_QUICK_PROMPTS}
+      baseSystemPrompts={BASE_SYSTEM_PROMPTS}
+      getComments={getComments}
+      getInitialConversations={getInitialConversation}
+      http={http}
+      nameSpace={'observability'}
+      setConversations={setLocalStorageConversations}
+      title={ELASTIC_OBSERVABILITY_ASSISTANT}
+    >
+      <AssistantOverlay />
       <Switch>
         {Object.keys(routes).map((key) => {
           const path = key as keyof typeof routes;
@@ -42,7 +145,7 @@ function App() {
           return <Route key={path} path={path} exact={exact} component={Wrapper} />;
         })}
       </Switch>
-    </>
+    </AssistantProvider>
   );
 }
 

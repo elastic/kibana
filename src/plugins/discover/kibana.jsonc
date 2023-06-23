@@ -8,6 +8,7 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
+      "actions",
       "charts",
       "data",
       "dataViews",
@@ -23,6 +24,8 @@
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressions",
+      "stackConnectors",
+      "triggersActionsUi",
       "unifiedFieldList",
       "unifiedSearch",
       "unifiedHistogram"

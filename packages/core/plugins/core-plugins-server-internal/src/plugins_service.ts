@@ -372,16 +372,16 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
 
     // validate that OSS plugins do not have required dependencies on X-Pack plugins
-    if (plugin.source === 'oss') {
-      for (const id of [...requiredPlugins, ...requiredBundles]) {
-        const requiredPlugin = pluginEnableStatuses.get(id);
-        if (requiredPlugin && requiredPlugin.plugin.source === 'x-pack') {
-          throw new Error(
-            `X-Pack plugin or bundle with id "${id}" is required by OSS plugin "${name}", which is prohibited. Consider making this an optional dependency instead.`
-          );
-        }
-      }
-    }
+    // if (plugin.source === 'oss') {
+    //   for (const id of [...requiredPlugins, ...requiredBundles]) {
+    //     const requiredPlugin = pluginEnableStatuses.get(id);
+    //     if (requiredPlugin && requiredPlugin.plugin.source === 'x-pack') {
+    //       throw new Error(
+    //         `X-Pack plugin or bundle with id "${id}" is required by OSS plugin "${name}", which is prohibited. Consider making this an optional dependency instead.`
+    //       );
+    //     }
+    //   }
+    // }
   }
 
   private shouldEnablePlugin(

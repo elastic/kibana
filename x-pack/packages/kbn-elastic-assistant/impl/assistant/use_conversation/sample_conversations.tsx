@@ -88,10 +88,10 @@ export const BASE_CONVERSATIONS: Record<string, Conversation> = {
     id: WELCOME_CONVERSATION_TITLE,
     theme: {
       title: ELASTIC_SECURITY_ASSISTANT_TITLE,
-      titleIcon: 'logoSecurity',
+      titleIcon: 'logoElastic',
       assistant: {
         name: ELASTIC_SECURITY_ASSISTANT,
-        icon: 'logoSecurity',
+        icon: 'logoElastic',
       },
       system: {
         icon: 'logoElastic',

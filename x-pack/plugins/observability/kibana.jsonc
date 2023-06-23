@@ -8,6 +8,7 @@
     "browser": true,
     "configPath": ["xpack", "observability"],
     "requiredPlugins": [
+      "actions",
       "alerting",
       "cases",
       "charts",
@@ -26,6 +27,7 @@
       "security",
       "share",
       "spaces",
+      "stackConnectors",
       "unifiedSearch",
       "visualizations"
     ],

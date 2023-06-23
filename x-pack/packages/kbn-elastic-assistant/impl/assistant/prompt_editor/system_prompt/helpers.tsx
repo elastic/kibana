@@ -15,7 +15,7 @@ import { css } from '@emotion/react';
 import type { Prompt } from '../../types';
 
 const Strong = styled.strong`
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
+  margin-right: 8px;
 `;
 
 export const getOptionFromPrompt = ({

@@ -113,7 +113,7 @@ const AssistantComponent: React.FC<Props> = ({
   const currentTitle: { title: string | JSX.Element; titleIcon: string } =
     isWelcomeSetup && welcomeConversation.theme?.title && welcomeConversation.theme?.titleIcon
       ? { title: welcomeConversation.theme?.title, titleIcon: welcomeConversation.theme?.titleIcon }
-      : { title, titleIcon: 'logoSecurity' };
+      : { title, titleIcon: 'logoElastic' };
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const lastCommentRef = useRef<HTMLDivElement | null>(null);

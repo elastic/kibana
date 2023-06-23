@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import type { PromptContext } from '../prompt_context/types';
 
 const PillButton = styled(EuiButton)`
-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
+  margin-right: 4px;
 `;
 
 interface Props {
