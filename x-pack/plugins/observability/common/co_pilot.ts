@@ -313,9 +313,7 @@ export const coPilotPrompts = {
       const header = 'Field name,Field value,Doc count,p-value';
       const rows = significantFieldValues.map((item) => Object.values(item).join(',')).join('\n');
 
-      const content = `You are an observability expert being consulted about an alert raised on elastic observability suite.
-
-      There has been a threshold alert on a spike of logs. The AIOps feature "Explain Log Rate Spikes" ran a statistical analysis and returned the following analysis results which lists statistically significant co-occuring field/value combinations that contribute to the spike:
+      const content = `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a spike of log messages. Your job is to take immediate action and proceed with both urgency and precision. You used the AIOps feature "Explain Log Rate Spikes" to run a statistical analysis on the log messages which occured during the alert. You received the following analysis results which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that contribute to the log messages spike:
 
       ${header}
       ${rows}
@@ -323,7 +321,7 @@ export const coPilotPrompts = {
       Based on the above analysis results and your observability expert knowledge, output the following:
       Analyse the type of these logs and explain their usual purpose (1 paragraph).
       Based on the type of these logs do a root cause analysis on why the field and value combinations from the anlaysis results are causing this spike in logs (2 parapraphs).
-      Recommend concrete remediations to resolve the root cause of the affected systems (3 bullet points).
+      Recommend concrete remediations to resolve the root cause (3 bullet points).
       Do not repeat the given instructions in your output.`;
 
       return [
