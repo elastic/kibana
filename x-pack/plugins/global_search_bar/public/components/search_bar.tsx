@@ -18,7 +18,6 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -31,7 +30,6 @@ import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
-import { ClickMetric, CountMetric } from '../types';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
@@ -50,7 +48,7 @@ const EmptyMessage = () => (
 );
 
 export const SearchBar: FC<SearchBarProps> = (opts) => {
-  const { globalSearch, taggingApi, navigateToUrl, trackUiMetric, chromeStyle$, ...props } = opts;
+  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
 
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
@@ -130,7 +128,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
-          trackUiMetric(METRIC_TYPE.COUNT, CountMetric.SEARCH_REQUEST);
+          reportEvent.searchRequest();
         }
 
         const rawParams = parseSearchParams(searchValue);
@@ -169,8 +167,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           error: (err) => {
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
-            trackUiMetric(METRIC_TYPE.COUNT, CountMetric.UNHANDLED_ERROR);
-            trackUiMetric.error({ message: err, searchValue });
+            reportEvent.error({ message: err, searchValue });
           },
           complete: () => {},
         });
@@ -184,8 +181,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     (event: KeyboardEvent) => {
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        trackUiMetric(METRIC_TYPE.COUNT, CountMetric.SHORTCUT_USED);
-        trackUiMetric.searchBarOpen();
+        reportEvent.shortcutUsed();
         if (chromeStyle === 'project' && !isVisible) {
           visibilityButtonRef.current?.click();
         } else if (searchRef) {
@@ -195,7 +191,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         }
       }
     },
-    [chromeStyle, isVisible, buttonRef, searchRef, trackUiMetric]
+    [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
   );
 
   const onChange = useCallback(
@@ -220,11 +216,9 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         if (type === 'application') {
           const key = selected.key ?? 'unknown';
           const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
-          trackUiMetric(METRIC_TYPE.CLICK, ClickMetric.USER_NAVIGATED_TO_APPLICATION, application);
-          trackUiMetric.navigateToApplication({ application, searchValue });
+          reportEvent.navigateToApplication({ application, searchValue });
         } else {
-          trackUiMetric(METRIC_TYPE.CLICK, ClickMetric.USER_NAVIGATED_TO_SAVED_OBJECT, type);
-          trackUiMetric.navigateToSavedObject({ type, searchValue });
+          reportEvent.navigateToSavedObject({ type, searchValue });
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -239,7 +233,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [trackUiMetric, navigateToUrl, searchRef, searchValue]
+    [reportEvent, navigateToUrl, searchRef, searchValue]
   );
 
   const clearField = () => setSearchValue('');
@@ -259,7 +253,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         data-test-subj="nav-search-reveal"
         iconType="search"
         onClick={() => {
-          trackUiMetric.searchBarClose();
+          reportEvent.searchBarClose();
           setIsVisible(true);
         }}
       />
@@ -275,7 +269,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           data-test-subj="nav-search-conceal"
           iconType="cross"
           onClick={() => {
-            trackUiMetric.searchBarOpen();
+            reportEvent.searchBarOpen();
             setIsVisible(false);
           }}
         />
@@ -313,13 +307,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         'aria-label': i18nStrings.placeholderText,
         placeholder: i18nStrings.placeholderText,
         onFocus: () => {
-          trackUiMetric(METRIC_TYPE.COUNT, CountMetric.SEARCH_FOCUS);
-          trackUiMetric.searchFocus();
+          reportEvent.searchFocus();
           setInitialLoad(true);
           setShowAppend(false);
         },
         onBlur: () => {
-          trackUiMetric.searchBlur();
+          reportEvent.searchBlur();
           setShowAppend(!searchValue.length);
         },
         fullWidth: true,

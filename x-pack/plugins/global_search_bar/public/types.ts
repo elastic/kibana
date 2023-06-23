@@ -6,7 +6,6 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { EventReporter } from './telemetry';
 
 /* @internal */
 export enum CountMetric {
@@ -40,12 +39,9 @@ export enum FieldType {
 }
 
 /* @internal */
-type EventType = CountMetric | ClickMetric;
-
-/* @internal */
-type UiCounterTrackingFn = (
+export type TrackUiMetricFn = (
   metricType: UiCounterMetricType,
-  eventName: EventType,
+  eventName: CountMetric | ClickMetric,
   context?: string
 ) => void;
 
@@ -64,8 +60,3 @@ export interface TrackedError {
   message: string | Error;
   searchValue?: string;
 }
-
-type IEventReporter = Pick<EventReporter, keyof EventReporter>; // public methods of EventReporter
-
-/* @internal */
-export type TrackUiMetricFn = UiCounterTrackingFn & IEventReporter;

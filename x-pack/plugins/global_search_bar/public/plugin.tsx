@@ -14,7 +14,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { SearchBar } from './components/search_bar';
-import { eventTypes, getTrackUiMetric } from './telemetry';
+import { EventReporter, eventTypes } from './telemetry';
 
 export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
@@ -39,6 +39,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
   private getNavControl(deps: { core: CoreStart } & GlobalSearchBarPluginStartDeps) {
     const { core, globalSearch, savedObjectsTagging, usageCollection } = deps;
     const { application, http, theme, uiSettings } = core;
+    const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
     const navControl: ChromeNavControl = {
       order: 1000,
@@ -53,7 +54,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
                 basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
                 darkMode={uiSettings.get('theme:darkMode')}
                 chromeStyle$={core.chrome.getChromeStyle$()}
-                trackUiMetric={getTrackUiMetric({ analytics: core.analytics, usageCollection })}
+                reportEvent={reportEvent}
               />
             </I18nProvider>
           </KibanaThemeProvider>,
