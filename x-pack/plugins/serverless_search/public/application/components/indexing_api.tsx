@@ -214,6 +214,19 @@ export const ElasticsearchIndexingApi = () => {
               />
             </>
           }
+          links={
+            showNoIndices
+              ? undefined
+              : [
+                  {
+                    label: i18n.translate(
+                      'xpack.serverlessSearch.content.indexingApi.ingestDocsLink',
+                      { defaultMessage: 'Ingestion documentation' }
+                    ),
+                    href: '#', // TODO: get doc links ?
+                  },
+                ]
+          }
         >
           {showNoIndices ? (
             <NoIndicesContent />
