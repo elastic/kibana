@@ -19,15 +19,24 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
 } from '../..';
 import { uiActions } from '../../kibana_services';
-import { EmbeddableBadgeAction, EmbeddableNotificationAction } from '../types';
+import {
+  EmbeddableBadgeAction,
+  EmbeddableNotificationAction,
+  EmbeddablePanelProps,
+} from '../types';
 
-export const useEmbeddablePanelBadges = (embeddable: IEmbeddable) => {
+export const useEmbeddablePanelBadges = (
+  embeddable: IEmbeddable,
+  getActions: EmbeddablePanelProps['getActions']
+) => {
+  const getActionsForTrigger = getActions ?? uiActions.getTriggerCompatibleActions;
+
   const [badges, setBadges] = useState<EmbeddableBadgeAction[]>();
   const [notifications, setNotifications] = useState<EmbeddableNotificationAction[]>();
 
   const getAllBadgesFromEmbeddable = useCallback(async () => {
     let currentBadges: EmbeddableBadgeAction[] =
-      ((await uiActions.getTriggerCompatibleActions(PANEL_BADGE_TRIGGER, {
+      ((await getActionsForTrigger(PANEL_BADGE_TRIGGER, {
         embeddable,
       })) as EmbeddableBadgeAction[]) ?? [];
 
@@ -36,11 +45,11 @@ export const useEmbeddablePanelBadges = (embeddable: IEmbeddable) => {
       currentBadges = currentBadges.filter((badge) => disabledActions.indexOf(badge.id) === -1);
     }
     return currentBadges;
-  }, [embeddable]);
+  }, [embeddable, getActionsForTrigger]);
 
   const getAllNotificationsFromEmbeddable = useCallback(async () => {
     let currentNotifications: EmbeddableNotificationAction[] =
-      ((await uiActions.getTriggerCompatibleActions(PANEL_NOTIFICATION_TRIGGER, {
+      ((await getActionsForTrigger(PANEL_NOTIFICATION_TRIGGER, {
         embeddable,
       })) as EmbeddableNotificationAction[]) ?? [];
 
@@ -51,7 +60,7 @@ export const useEmbeddablePanelBadges = (embeddable: IEmbeddable) => {
       );
     }
     return currentNotifications;
-  }, [embeddable]);
+  }, [embeddable, getActionsForTrigger]);
 
   /**
    * On embeddable creation get initial badges & notifications then subscribe to all

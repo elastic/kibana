@@ -36,7 +36,10 @@ export const EmbeddablePanelHeader = ({
     [embeddable]
   );
 
-  const { notificationComponents, badgeComponents } = useEmbeddablePanelBadges(embeddable);
+  const { notificationComponents, badgeComponents } = useEmbeddablePanelBadges(
+    embeddable,
+    getActions
+  );
   const embeddablePanelContextMenu = useEmbeddablePanelContextMenu({
     index,
     embeddable,

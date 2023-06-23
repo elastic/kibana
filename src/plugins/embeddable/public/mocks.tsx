@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
-
-import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import {
   SavedObjectManagementTypeInfo,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { EmbeddablePublicPlugin } from './plugin';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+
 import {
   EmbeddableStart,
   EmbeddableSetup,
@@ -30,6 +30,8 @@ import {
   SelfStyledEmbeddable,
   FilterableEmbeddable,
 } from '.';
+import { EmbeddablePublicPlugin } from './plugin';
+import { setKibanaServices } from './kibana_services';
 import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 
 export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
@@ -153,4 +155,15 @@ export const embeddablePluginMock = {
   mockRefOrValEmbeddable,
   mockSelfStyledEmbeddable,
   mockFilterableEmbeddable,
+};
+
+export const setStubKibanaServices = () => {
+  const core = coreMock.createStart();
+  const selfStart = embeddablePluginMock.createStartContract();
+
+  setKibanaServices(core, selfStart, {
+    uiActions: uiActionsPluginMock.createStartContract(),
+    inspector: inspectorPluginMock.createStartContract(),
+    savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
+  });
 };

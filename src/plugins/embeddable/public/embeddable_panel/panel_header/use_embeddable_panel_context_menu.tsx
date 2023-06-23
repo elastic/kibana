@@ -151,7 +151,7 @@ export const useEmbeddablePanelContextMenu = ({
     <EuiButtonIcon
       color="text"
       className="embPanel__optionsMenuButton"
-      onClick={() => setIsContextMenuOpen(true)}
+      onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
       data-test-subj="embeddablePanelToggleMenuIcon"
       aria-label={getContextMenuAriaLabel(title, index)}
       iconType={viewMode === ViewMode.VIEW ? 'boxesHorizontal' : 'gear'}

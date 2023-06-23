@@ -7,31 +7,33 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import { mount, ReactWrapper } from 'enzyme';
 
-import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
-import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
-import { I18nProvider } from '@kbn/i18n-react';
 import {
-  CONTEXT_MENU_TRIGGER,
+  ViewMode,
   EmbeddablePanel,
   isErrorEmbeddable,
-  ViewMode,
+  CONTEXT_MENU_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import {
+  EMPTY_EMBEDDABLE,
   ContactCardEmbeddable,
-  ContactCardEmbeddableFactory,
+  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
-  EMPTY_EMBEDDABLE,
+  ContactCardEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { I18nProvider } from '@kbn/i18n-react';
+import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
+import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 import { createEditModeActionDefinition } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
-import { buildMockDashboard, getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
-import { pluginServices } from '../../services/plugin_services';
 import { DashboardContainer } from './dashboard_container';
+import { pluginServices } from '../../services/plugin_services';
+import { buildMockDashboard, getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest
@@ -181,6 +183,8 @@ test('searchSessionId propagates to children', async () => {
 });
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
+  // mock embeddable dependencies so that the embeddable panel renders
+  setStubKibanaServices();
   const uiActionsSetup = uiActionsPluginMock.createSetupContract();
 
   const editModeAction = createEditModeActionDefinition();
@@ -197,16 +201,26 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
     firstName: 'Bob',
   });
 
-  const component = mount(
-    <I18nProvider>
-      <EmbeddablePanel embeddable={embeddable} />
-    </I18nProvider>
-  );
+  let wrapper: ReactWrapper;
+  await act(async () => {
+    wrapper = await mount(
+      <I18nProvider>
+        <EmbeddablePanel embeddable={embeddable} />
+      </I18nProvider>
+    );
+  });
+  const component = wrapper!;
+  await component.update();
+  await nextTick();
 
   const button = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
 
   expect(button.length).toBe(1);
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  act(() => {
+    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  });
+  await nextTick();
+  await component.update();
 
   expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
 
@@ -214,16 +228,26 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
 
   expect(editAction.length).toBe(0);
 
-  container.updateInput({ viewMode: ViewMode.EDIT });
+  act(() => {
+    container.updateInput({ viewMode: ViewMode.EDIT });
+  });
+  await nextTick();
+  await component.update();
+
+  act(() => {
+    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  });
   await nextTick();
   component.update();
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
-  component.update();
+
   expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(0);
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+
+  act(() => {
+    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  });
   await nextTick();
   component.update();
+
   expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(1);
 
   await nextTick();
