@@ -14,11 +14,19 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 
 export const LandingPage = memo(() => {
   return (
-    <SecuritySolutionPageWrapper noPadding>
-      <LandingPageComponent />
-      <Chat />
-      <SpyRoute pageName={SecurityPageName.landing} />
-    </SecuritySolutionPageWrapper>
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+      `}
+    >
+      <SecuritySolutionPageWrapper noPadding>
+        <LandingPageComponent />
+        <Chat />
+        <SpyRoute pageName={SecurityPageName.landing} />
+      </SecuritySolutionPageWrapper>
+    </div>
   );
 });
 

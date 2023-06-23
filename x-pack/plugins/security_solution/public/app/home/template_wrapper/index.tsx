@@ -52,10 +52,6 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   }
 `;
 
-const CONTENT_PROPS = {
-  style: { display: 'flex', flexGrow: 1, flexDirection: 'column' as const },
-};
-
 export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplateProps, 'ref'>> =
   React.memo(({ children, ...rest }) => {
     const solutionNavProps = useSecuritySolutionNavigation();
@@ -97,8 +93,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
             paddingSize="l"
             alignment="top"
             component="div"
-            grow={true}
-            contentProps={CONTENT_PROPS}
           >
             {children}
           </KibanaPageTemplate.Section>
