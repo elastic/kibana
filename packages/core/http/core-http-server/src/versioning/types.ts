@@ -211,6 +211,21 @@ export interface AddVersionOpts<P, Q, B> {
    * @experimental
    */
   validate: false | FullValidationConfig<P, Q, B>;
+  /**
+   * When enabled, the router will also check for the presence of an `apiVersion`
+   * query parameter to determine the route version to resolve to:
+   *
+   * /api/my-app/foo?apiVersion=1
+   *
+   * This enables use cases like, for example, using a versioned Kibana endpoint
+   * inside an <img /> tag's href. Otherwise it should _not_ be enabled.
+   *
+   * @note When enabled and both query parameter and header are present, header
+   *       will take precedence.
+   * @experimental
+   * @default false
+   */
+  enableQueryVersionFallback?: boolean;
 }
 
 /**
