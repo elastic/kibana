@@ -13,3 +13,9 @@ export const GetUninstallTokensMetadataRequestSchema = {
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
   }),
 };
+
+export const GetUninstallTokenRequestSchema = {
+  params: schema.object({
+    uninstallTokenId: schema.string(),
+  }),
+};

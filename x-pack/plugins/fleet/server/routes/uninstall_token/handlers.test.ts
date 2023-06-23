@@ -12,35 +12,34 @@ import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
-import type { GetUninstallTokensMetadataResponse } from '../../../common/types/rest_spec/uninstall_token';
+import type {
+  UninstallToken,
+  UninstallTokenMetadata,
+} from '../../../common/types/models/uninstall_token';
+
+import type {
+  GetUninstallTokenRequest,
+  GetUninstallTokensMetadataResponse,
+} from '../../../common/types/rest_spec/uninstall_token';
 
 import type { FleetRequestHandlerContext } from '../..';
 
 import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services';
-import type { GetUninstallTokensMetadataRequestSchema } from '../../types/rest_spec/uninstall_token';
+import type {
+  GetUninstallTokenRequestSchema,
+  GetUninstallTokensMetadataRequestSchema,
+} from '../../types/rest_spec/uninstall_token';
 
 import { registerRoutes } from '.';
 
-import { getUninstallTokensMetadataHandler } from './handlers';
+import { getUninstallTokenHandler, getUninstallTokensMetadataHandler } from './handlers';
 
 describe('uninstall token handlers', () => {
   let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let appContextStartContractMock: MockedFleetAppContext;
-  let getTokenMetadataMock: jest.Mock;
-
-  const uninstallTokensResponseFixture: GetUninstallTokensMetadataResponse = {
-    items: [
-      { id: 'id-1', policy_id: 'policy-id-1', created_at: '2023-06-15T16:46:48.274Z' },
-      { id: 'id-2', policy_id: 'policy-id-2', created_at: '2023-06-15T16:46:48.274Z' },
-      { id: 'id-3', policy_id: 'policy-id-3', created_at: '2023-06-15T16:46:48.274Z' },
-    ],
-    total: 3,
-    page: 1,
-    perPage: 20,
-  };
 
   beforeEach(async () => {
     context = coreMock.createCustomRequestHandlerContext(xpackMocks.createRequestHandlerContext());
@@ -48,9 +47,6 @@ describe('uninstall token handlers', () => {
 
     appContextStartContractMock = createAppContextStartContractMock();
     appContextService.start(appContextStartContractMock);
-
-    const uninstallTokenService = appContextService.getUninstallTokenService()!;
-    getTokenMetadataMock = uninstallTokenService.getTokenMetadata as jest.Mock;
   });
 
   afterEach(async () => {
@@ -59,12 +55,29 @@ describe('uninstall token handlers', () => {
   });
 
   describe('getUninstallTokensMetadataHandler', () => {
+    const uninstallTokensFixture: UninstallTokenMetadata[] = [
+      { id: 'id-1', policy_id: 'policy-id-1', created_at: '2023-06-15T16:46:48.274Z' },
+      { id: 'id-2', policy_id: 'policy-id-2', created_at: '2023-06-15T16:46:48.274Z' },
+      { id: 'id-3', policy_id: 'policy-id-3', created_at: '2023-06-15T16:46:48.274Z' },
+    ];
+
+    const uninstallTokensResponseFixture: GetUninstallTokensMetadataResponse = {
+      items: uninstallTokensFixture,
+      total: 3,
+      page: 1,
+      perPage: 20,
+    };
+
+    let getTokenMetadataMock: jest.Mock;
     let request: KibanaRequest<
       unknown,
       TypeOf<typeof GetUninstallTokensMetadataRequestSchema.query>
     >;
 
     beforeEach(() => {
+      const uninstallTokenService = appContextService.getUninstallTokenService()!;
+      getTokenMetadataMock = uninstallTokenService.getTokenMetadata as jest.Mock;
+
       request = httpServerMock.createKibanaRequest();
     });
 
@@ -106,6 +119,70 @@ describe('uninstall token handlers', () => {
     });
   });
 
+  describe('getUninstallTokenHandler', () => {
+    const uninstallTokenFixture: UninstallToken = {
+      id: 'id-1',
+      policy_id: 'policy-id-1',
+      created_at: '2023-06-15T16:46:48.274Z',
+      token: '123456789',
+    };
+
+    let getTokenMock: jest.Mock;
+    let request: KibanaRequest<TypeOf<typeof GetUninstallTokenRequestSchema.params>>;
+
+    beforeEach(() => {
+      const uninstallTokenService = appContextService.getUninstallTokenService()!;
+      getTokenMock = uninstallTokenService.getToken as jest.Mock;
+
+      const requestOptions: GetUninstallTokenRequest = {
+        params: {
+          uninstallTokenId: uninstallTokenFixture.id,
+        },
+      };
+      request = httpServerMock.createKibanaRequest(requestOptions);
+    });
+
+    it('should return requested uninstall token', async () => {
+      getTokenMock.mockResolvedValue(uninstallTokenFixture);
+
+      await getUninstallTokenHandler(context, request, response);
+
+      expect(getTokenMock).toHaveBeenCalledWith(uninstallTokenFixture.id);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          item: uninstallTokenFixture,
+        },
+      });
+    });
+
+    it('should return internal error when uninstallTokenService is unavailable', async () => {
+      appContextService.stop();
+      appContextService.start({
+        ...appContextStartContractMock,
+        // @ts-expect-error
+        uninstallTokenService: undefined,
+      });
+
+      await getUninstallTokenHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Uninstall Token Service is unavailable.' },
+      });
+    });
+
+    it('should return internal error when uninstallTokenService throws error', async () => {
+      getTokenMock.mockRejectedValue(Error('something happened'));
+
+      await getUninstallTokenHandler(context, request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'something happened' },
+      });
+    });
+  });
+
   describe('Agent Tamper Protection feature flag', () => {
     let config: { enableExperimental: string[] };
     let router: RouterMock;
@@ -123,6 +200,7 @@ describe('uninstall token handlers', () => {
         expect.any(Object),
         getUninstallTokensMetadataHandler
       );
+      expect(router.get).toHaveBeenCalledWith(expect.any(Object), getUninstallTokenHandler);
     });
 
     it('should NOT register handlers if feature flag is disabled', async () => {

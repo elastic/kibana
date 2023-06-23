@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UninstallTokenMetadata } from '../models/uninstall_token';
+import type { UninstallToken, UninstallTokenMetadata } from '../models/uninstall_token';
 
 import type { ListResult } from './common';
 
@@ -18,3 +18,13 @@ export interface GetUninstallTokensMetadataRequest {
 }
 
 export type GetUninstallTokensMetadataResponse = ListResult<UninstallTokenMetadata>;
+
+export interface GetUninstallTokenRequest {
+  params: {
+    uninstallTokenId: string;
+  };
+}
+
+export interface GetUninstallTokenResponse {
+  item: UninstallToken;
+}

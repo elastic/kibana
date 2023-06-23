@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { GetUninstallTokensMetadataResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
+import {
+  GetUninstallTokensMetadataResponse,
+  GetUninstallTokenResponse,
+} from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services';
 import { testUsers } from '../test_users';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -19,8 +22,6 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Uninstall Token API', () => {
-    let generatedPolicyIds: Set<string>;
-
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -31,6 +32,8 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('GET uninstall_tokens', () => {
       describe('pagination', () => {
+        let generatedPolicyIds: Set<string>;
+
         before(async () => {
           generatedPolicyIds = new Set(await generateNPolicies(supertest, 20));
         });
@@ -153,7 +156,6 @@ export default function (providerContext: FtrProviderContext) {
 
         before(async () => {
           generatedPolicyIdsArray = await generateNPolicies(supertest, 20);
-          generatedPolicyIds = new Set(generatedPolicyIdsArray);
 
           timestampBeforeAddingNewTokens = Date.now();
 
@@ -174,7 +176,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           const body: GetUninstallTokensMetadataResponse = response.body;
-          expect(body.total).to.equal(generatedPolicyIds.size);
+          expect(body.total).to.equal(generatedPolicyIdsArray.length);
           expect(body.page).to.equal(1);
           expect(body.perPage).to.equal(20);
 
@@ -186,8 +188,10 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('when `policyId` query param is used', () => {
+        let generatedPolicyIdsArray: string[];
+
         before(async () => {
-          generatedPolicyIds = new Set(await generateNPolicies(supertest, 5));
+          generatedPolicyIdsArray = await generateNPolicies(supertest, 5);
         });
 
         after(async () => {
@@ -195,7 +199,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return token metadata for full policyID if found', async () => {
-          const selectedPolicyId = [...generatedPolicyIds][3];
+          const selectedPolicyId = generatedPolicyIdsArray[3];
 
           const response = await supertest
             .get(uninstallTokensRouteService.getListPath())
@@ -212,7 +216,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return token metadata for partial policyID if found', async () => {
-          const selectedPolicyId = [...generatedPolicyIds][2];
+          const selectedPolicyId = generatedPolicyIdsArray[2];
 
           const response = await supertest
             .get(uninstallTokensRouteService.getListPath())
@@ -259,6 +263,67 @@ export default function (providerContext: FtrProviderContext) {
 
           await supertestWithoutAuth
             .get(uninstallTokensRouteService.getListPath())
+            .auth(username, password)
+            .expect(403);
+        });
+      });
+    });
+
+    describe('GET uninstall_tokens/{uninstallTokenId}', () => {
+      let generatedUninstallTokenId: string;
+
+      before(async () => {
+        generatedUninstallTokenId = await addUninstallTokenToPolicy(
+          kibanaServer,
+          'the policy id',
+          'the token'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
+      it('should return decrypted token', async () => {
+        const response = await supertest
+          .get(uninstallTokensRouteService.getInfoPath(generatedUninstallTokenId))
+          .expect(200);
+
+        const body: GetUninstallTokenResponse = response.body;
+
+        expect(body.item.id).to.equal(generatedUninstallTokenId);
+        expect(body.item.policy_id).to.equal('the policy id');
+        expect(body.item.token).to.equal('the token');
+        expect(body.item).to.have.property('created_at');
+      });
+
+      it('should return 404 if token is not found', async () => {
+        const response = await supertest
+          .get(uninstallTokensRouteService.getInfoPath('i-dont-exist'))
+          .expect(404);
+
+        expect(response.body).to.have.property('statusCode', 404);
+        expect(response.body).to.have.property(
+          'message',
+          'Uninstall Token not found with id i-dont-exist'
+        );
+      });
+
+      describe('authorization', () => {
+        it('should return 200 if the user has FLEET ALL (and INTEGRATIONS READ) privilege', async () => {
+          const { username, password } = testUsers.fleet_all_int_read;
+
+          await supertestWithoutAuth
+            .get(uninstallTokensRouteService.getInfoPath(generatedUninstallTokenId))
+            .auth(username, password)
+            .expect(200);
+        });
+
+        it('should return 403 if the user does not have FLEET ALL privilege', async () => {
+          const { username, password } = testUsers.fleet_no_access;
+
+          await supertestWithoutAuth
+            .get(uninstallTokensRouteService.getInfoPath(generatedUninstallTokenId))
             .auth(username, password)
             .expect(403);
         });

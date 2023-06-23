@@ -58,6 +58,13 @@ interface UninstallTokenSOAggregation {
 
 export interface UninstallTokenServiceInterface {
   /**
+   * Get uninstall token based on its id.
+   *
+   * @param id
+   * @returns uninstall token if found, null if not found
+   */
+  getToken(id: string): Promise<UninstallToken | null>;
+  /**
    * Get all uninstall tokens for given policy id
    *
    * @param policyId agent policy id
@@ -141,6 +148,45 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   private _soClient: SavedObjectsClientContract | undefined;
 
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
+
+  public async getToken(id: string): Promise<UninstallToken | null> {
+    const tokensFinder =
+      await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
+        {
+          type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+          perPage: SO_SEARCH_LIMIT,
+          filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${id}"`,
+        }
+      );
+    let tokenObject: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
+
+    for await (const result of tokensFinder.find()) {
+      tokenObject = result.saved_objects;
+      break;
+    }
+    tokensFinder.close();
+
+    if (tokenObject.length === 0) {
+      return null;
+    }
+
+    const uninstallTokens: UninstallToken[] = tokenObject.map(
+      ({ id: _id, attributes, created_at: createdAt }) => {
+        this.assertPolicyId(attributes);
+        this.assertToken(attributes);
+        this.assertCreatedAt(createdAt);
+
+        return {
+          id: _id,
+          policy_id: attributes.policy_id,
+          token: attributes.token || attributes.token_plain,
+          created_at: createdAt,
+        };
+      }
+    );
+
+    return uninstallTokens[0];
+  }
 
   public async getTokenHistoryForPolicy(
     policyId: string

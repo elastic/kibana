@@ -196,6 +196,32 @@ describe('UninstallTokenService', () => {
     });
 
     describe('get uninstall tokens', () => {
+      describe('getToken', () => {
+        it('can correctly get one token', async () => {
+          const so = getDefaultSO(canEncrypt);
+          mockCreatePointInTimeFinderAsInternalUser([so]);
+
+          const token = await uninstallTokenService.getToken(so.id);
+
+          const expectedItem: UninstallToken = {
+            id: so.id,
+            policy_id: so.attributes.policy_id,
+            token: getToken(so, canEncrypt),
+            created_at: so.created_at,
+          };
+
+          expect(token).toEqual(expectedItem);
+
+          expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
+            {
+              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+              filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${so.id}"`,
+              perPage: 10000,
+            }
+          );
+        });
+      });
+
       describe('getTokenHistoryForPolicy', () => {
         it('can correctly get token history', async () => {
           const so = getDefaultSO(canEncrypt);
