@@ -5,26 +5,15 @@
  * 2.0.
  */
 
-import { UPDATE_PREBUILT_RULES_CALLOUT_BUTTON } from '../screens/alerts_detection_rules';
+import { RULES_ADD_PATH, RULES_UPDATES } from '../../common/constants';
+import { ADD_ELASTIC_RULES_BTN, RULES_UPDATES_TAB } from '../screens/alerts_detection_rules';
 
-export const installPrebuiltRulesButtonClick = (buttonSelector: string) => {
-  cy.get(buttonSelector).click();
-  cy.get(buttonSelector).should('have.attr', 'disabled');
-  cy.get(buttonSelector).should('not.exist');
+export const addElasticRulessButtonClick = () => {
+  cy.get(ADD_ELASTIC_RULES_BTN).click();
+  cy.location('pathname').should('include', RULES_ADD_PATH);
 };
 
-export const installPrebuiltRulesButtonClickWithError = (buttonSelector: string) => {
-  cy.get(buttonSelector).click();
-  cy.get(buttonSelector).should('have.attr', 'disabled');
-};
-
-export const updatePrebuiltRulesButtonClick = () => {
-  cy.get(UPDATE_PREBUILT_RULES_CALLOUT_BUTTON).click();
-  cy.get(UPDATE_PREBUILT_RULES_CALLOUT_BUTTON).should('have.attr', 'disabled');
-  cy.get(UPDATE_PREBUILT_RULES_CALLOUT_BUTTON).should('not.exist');
-};
-
-export const updatePrebuiltRulesButtonClickWithError = () => {
-  cy.get(UPDATE_PREBUILT_RULES_CALLOUT_BUTTON).click();
-  cy.get(UPDATE_PREBUILT_RULES_CALLOUT_BUTTON).should('have.attr', 'disabled');
+export const ruleUpdatesTabClick = () => {
+  cy.get(RULES_UPDATES_TAB).click();
+  cy.location('pathname').should('include', RULES_UPDATES);
 };

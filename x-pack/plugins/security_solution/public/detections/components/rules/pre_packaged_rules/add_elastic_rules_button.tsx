@@ -14,17 +14,17 @@ import { useGetSecuritySolutionLinkProps } from '../../../../common/components/l
 import { SecurityPageName } from '../../../../../common';
 import { usePrebuiltRulesStatus } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
-interface LoadPrePackagedRulesButtonProps {
+interface AddElasticRulesButtonProps {
   'data-test-subj'?: string;
   fill?: boolean;
   showBadge?: boolean;
 }
 
-export const LoadPrePackagedRulesButton = ({
-  'data-test-subj': dataTestSubj = 'loadPrebuiltRulesBtn',
+export const AddElasticRulesButton = ({
+  'data-test-subj': dataTestSubj = 'addElasticRulesButton',
   fill,
   showBadge = true,
-}: LoadPrePackagedRulesButtonProps) => {
+}: AddElasticRulesButtonProps) => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const { onClick: onClickLink } = getSecuritySolutionLinkProps({
     deepLinkId: SecurityPageName.rulesAdd,

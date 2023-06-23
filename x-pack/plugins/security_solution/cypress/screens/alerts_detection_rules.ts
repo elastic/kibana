@@ -59,15 +59,9 @@ export const INTEGRATIONS_POPOVER = '[data-test-subj="IntegrationsDisplayPopover
 
 export const INTEGRATIONS_POPOVER_TITLE = '[data-test-subj="IntegrationsPopoverTitle"]';
 
-export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
-
-export const LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN = '[data-test-subj="loadPrebuiltRulesBtn"]';
+export const ADD_ELASTIC_RULES_BTN = '[data-test-subj="addElasticRulesButton"]';
 
 export const INSTALL_ALL_RULES_BUTTON = '[data-test-subj="installAllRulesButton"]';
-
-export const UPDATE_PREBUILT_RULES_CALLOUT = '[data-test-subj="update-callout"]';
-
-export const UPDATE_PREBUILT_RULES_CALLOUT_BUTTON = '[data-test-subj="update-callout-button"]';
 
 export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
@@ -93,6 +87,8 @@ export const RULE_SWITCH_LOADER = '[data-test-subj="ruleSwitchLoader"]';
 export const RULES_MANAGEMENT_TAB = '[data-test-subj="navigation-management"]';
 
 export const RULES_MONITORING_TAB = '[data-test-subj="navigation-monitoring"]';
+
+export const RULES_UPDATES_TAB = '[data-test-subj="navigation-updates"]';
 
 export const RULES_MANAGEMENT_TABLE = '[data-test-subj="rules-management-table"]';
 

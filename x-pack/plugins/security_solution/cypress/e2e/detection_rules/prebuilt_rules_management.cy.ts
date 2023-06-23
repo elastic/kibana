@@ -8,7 +8,7 @@
 import {
   COLLAPSED_ACTION_BTN,
   ELASTIC_RULES_BTN,
-  LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
+  ADD_ELASTIC_RULES_BTN,
   RULES_EMPTY_PROMPT,
   RULES_MONITORING_TAB,
   RULES_ROW,
@@ -114,10 +114,10 @@ describe('Prebuilt rules', () => {
             'have.text',
             `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
           );
-          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('have.text', `Add Elastic rules1`);
+          cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules1`);
 
           // Navigate to the prebuilt rule installation page
-          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click();
+          cy.get(ADD_ELASTIC_RULES_BTN).click();
 
           // Click the "Install all rules" button
           cy.get(INSTALL_ALL_RULES_BUTTON).click();
@@ -144,7 +144,7 @@ describe('Prebuilt rules', () => {
           selectNumberOfRules(numberOfRulesToBeSelected);
           deleteSelectedRules();
 
-          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should(
+          cy.get(ADD_ELASTIC_RULES_BTN).should(
             'have.text',
             `Add Elastic rules${numberOfRulesToBeSelected}`
           );
@@ -154,7 +154,7 @@ describe('Prebuilt rules', () => {
           );
 
           // Navigate to the prebuilt rule installation page
-          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click();
+          cy.get(ADD_ELASTIC_RULES_BTN).click();
 
           // Click the "Install all rules" button
           cy.get(INSTALL_ALL_RULES_BUTTON).click();

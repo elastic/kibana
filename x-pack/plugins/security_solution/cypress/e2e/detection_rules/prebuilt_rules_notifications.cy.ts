@@ -6,21 +6,16 @@
  */
 
 import { createRuleAssetSavedObject } from '../../helpers/rules';
-import {
-  LOAD_PREBUILT_RULES_BTN,
-  LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
-  UPDATE_PREBUILT_RULES_CALLOUT,
-} from '../../screens/alerts_detection_rules';
+import { ADD_ELASTIC_RULES_BTN, RULES_UPDATES_TAB } from '../../screens/alerts_detection_rules';
 import { deleteFirstRule, waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
-  installAvailableRules,
+  excessivelyInstallAllPrebuiltRules,
   createNewRuleAsset,
   preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
-import { installPrebuiltRulesButtonClick } from '../../tasks/prebuilt_rules';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
@@ -30,6 +25,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
+    /* Prevent security_detection_engine from being installed; install assets manually */
     preventPrebuiltRulesPackageInstallation();
     createNewRuleAsset({
       rule: createRuleAssetSavedObject({
@@ -45,28 +41,27 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
 
     it('should notify user about prebuilt rules available for installation', () => {
-      cy.get(LOAD_PREBUILT_RULES_BTN).should('be.visible');
-      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
+      cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
     });
   });
 
   describe('No notifications', () => {
     it('should display no install or update notifications when latest rules are installed', () => {
       /* Install current available rules */
-      installAvailableRules();
+      excessivelyInstallAllPrebuiltRules();
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
       waitForRulesTableToBeLoaded();
 
       /* Assert that there are no installation or update notifications */
-      cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
-      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('not.exist');
-      cy.get(UPDATE_PREBUILT_RULES_CALLOUT).should('not.exist');
+      /* Add Elastic Rules button and Rule Upgrade tabs should not contain a number badge */
+      cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', 'Add Elastic rules');
+      cy.get(RULES_UPDATES_TAB).should('have.text', 'Rule Updates');
     });
   });
 
   describe('Rule installation notification when at least one rule already installed', () => {
     beforeEach(() => {
-      installAvailableRules();
+      excessivelyInstallAllPrebuiltRules();
       /* Create new rule assets with a different rule_id as the one that was */
       /* installed before in order to trigger the installation notification */
       createNewRuleAsset({
@@ -87,25 +82,28 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
 
     it('should notify user about prebuilt rules package available for installation', () => {
-      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
-      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should(
+      const numberOfAvailableRules = 2;
+      cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
+      cy.get(ADD_ELASTIC_RULES_BTN).should(
         'have.text',
-        'Install 2 Elastic prebuilt rules '
+        `Add Elastic rules${numberOfAvailableRules}`
       );
     });
 
     it('should notify user a rule is again available for installation if it is deleted', () => {
       /* Install available rules, assert that the notification is gone */
       /* then delete one rule and assert that the notification is back */
-      installPrebuiltRulesButtonClick(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN);
+      excessivelyInstallAllPrebuiltRules();
+      reload();
       deleteFirstRule();
-      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
+      cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
+      cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
     });
   });
 
   describe('Rule update notification', () => {
     beforeEach(() => {
-      installAvailableRules();
+      excessivelyInstallAllPrebuiltRules();
       /* Create new rule asset with the same rule_id as the one that was installed  */
       /* but with a higher version, in order to trigger the update notification     */
       createNewRuleAsset({
@@ -121,8 +119,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
 
     it('should notify user about prebuilt rules package available for update', () => {
-      cy.get(UPDATE_PREBUILT_RULES_CALLOUT).should('be.visible');
-      cy.get(UPDATE_PREBUILT_RULES_CALLOUT).contains('Update 1 Elastic prebuilt rule');
+      cy.get(RULES_UPDATES_TAB).should('be.visible');
+      cy.get(RULES_UPDATES_TAB).should('have.text', `Rule Updates${1}`);
     });
   });
 });
