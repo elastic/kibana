@@ -9,12 +9,14 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../common/flamegraph';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
+import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
 import { FlameGraphsView } from '../views/flame_graphs_view';
-import { FunctionsView } from '../views/functions_view';
+import { FunctionsView } from '../views/functions';
+import { DifferentialTopNFunctionsView } from '../views/functions/differential_topn';
+import { TopNFunctionsView } from '../views/functions/topn';
 import { NoDataView } from '../views/no_data_view';
 import { StackTracesView } from '../views/stack_traces_view';
 import { RouteBreadcrumb } from './route_breadcrumb';
@@ -117,14 +119,14 @@ const routes = {
                       comparisonRangeTo: t.string,
                       comparisonKuery: t.string,
                       comparisonMode: t.union([
-                        t.literal(FlameGraphComparisonMode.Absolute),
-                        t.literal(FlameGraphComparisonMode.Relative),
+                        t.literal(ComparisonMode.Absolute),
+                        t.literal(ComparisonMode.Relative),
                       ]),
                     }),
                     t.partial({
                       normalizationMode: t.union([
-                        t.literal(FlameGraphNormalizationMode.Scale),
-                        t.literal(FlameGraphNormalizationMode.Time),
+                        t.literal(NormalizationMode.Scale),
+                        t.literal(NormalizationMode.Time),
                       ]),
                       baseline: toNumberRt,
                       comparison: toNumberRt,
@@ -133,8 +135,8 @@ const routes = {
                 }),
                 defaults: {
                   query: {
-                    comparisonMode: FlameGraphComparisonMode.Absolute,
-                    normalizationMode: FlameGraphNormalizationMode.Time,
+                    comparisonMode: ComparisonMode.Absolute,
+                    normalizationMode: NormalizationMode.Time,
                   },
                 },
               },
@@ -174,7 +176,7 @@ const routes = {
                     })}
                     href="/functions/topn"
                   >
-                    <Outlet />
+                    <TopNFunctionsView />
                   </RouteBreadcrumb>
                 ),
               },
@@ -186,16 +188,34 @@ const routes = {
                     })}
                     href="/functions/differential"
                   >
-                    <Outlet />
+                    <DifferentialTopNFunctionsView />
                   </RouteBreadcrumb>
                 ),
                 params: t.type({
-                  query: t.type({
-                    comparisonRangeFrom: t.string,
-                    comparisonRangeTo: t.string,
-                    comparisonKuery: t.string,
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      comparisonRangeFrom: t.string,
+                      comparisonRangeTo: t.string,
+                      comparisonKuery: t.string,
+                      normalizationMode: t.union([
+                        t.literal(NormalizationMode.Scale),
+                        t.literal(NormalizationMode.Time),
+                      ]),
+                    }),
+                    t.partial({
+                      baseline: toNumberRt,
+                      comparison: toNumberRt,
+                    }),
+                  ]),
                 }),
+                defaults: {
+                  query: {
+                    comparisonRangeFrom: 'now-15m',
+                    comparisonRangeTo: 'now',
+                    comparisonKuery: '',
+                    normalizationMode: NormalizationMode.Time,
+                  },
+                },
               },
             },
           },

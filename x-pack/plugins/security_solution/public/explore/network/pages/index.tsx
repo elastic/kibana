@@ -74,7 +74,7 @@ const NetworkContainerComponent = () => {
         }) => (
           <Redirect
             to={{
-              pathname: getPathWithFlowType(detailName, flowTarget),
+              pathname: getPathWithFlowType(detailName, flowTarget as FlowTargetSourceDest),
               search,
             }}
           />

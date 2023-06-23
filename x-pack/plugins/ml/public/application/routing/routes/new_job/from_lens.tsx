@@ -8,6 +8,7 @@
 import React, { FC } from 'react';
 import { Redirect } from 'react-router-dom';
 import { parse } from 'query-string';
+import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../locator';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
@@ -20,15 +21,37 @@ export const fromLensRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ location }) => {
-  const { lensId, vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
+  const { vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
     location.search,
     {
       sort: false,
     }
   );
+  const {
+    services: {
+      data: {
+        query: {
+          timefilter: { timefilter: timeFilter },
+        },
+      },
+      dashboard: dashboardService,
+      uiSettings: kibanaConfig,
+      mlServices: { mlApiServices },
+      lens,
+    },
+  } = useMlKibana();
 
   const { context } = useRouteResolver('full', ['canCreateJob'], {
-    redirect: () => resolver(lensId, vis, from, to, query, filters, layerIndex),
+    redirect: () =>
+      resolver(
+        { lens, mlApiServices, timeFilter, kibanaConfig, dashboardService },
+        vis,
+        from,
+        to,
+        query,
+        filters,
+        layerIndex
+      ),
   });
 
   return (

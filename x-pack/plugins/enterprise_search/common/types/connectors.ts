@@ -46,6 +46,7 @@ export interface ConnectorConfigProperties {
   label: string;
   options: SelectOption[];
   order?: number | null;
+  placeholder?: string;
   required: boolean;
   sensitive: boolean;
   tooltip: string;
@@ -60,6 +61,7 @@ export type ConnectorConfiguration = Record<
   ConnectorConfigProperties | ConnectorConfigCategoryProperties | null
 > & {
   extract_full_html?: { label: string; value: boolean }; // This only exists for Crawler
+  use_text_extraction_service?: ConnectorConfigProperties; // This only exists for SharePoint Online
 };
 
 export interface ConnectorSyncConfigProperties {

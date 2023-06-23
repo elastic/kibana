@@ -11,6 +11,7 @@ import { CoreStart } from '@kbn/core/public';
 import { of } from 'rxjs';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { MemoryHistory } from 'history';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -38,11 +39,13 @@ export const render = (
 
   return testLibRender(
     <Router history={history}>
-      <KibanaContextProvider services={{ ...core }}>
-        <UrlParamsProvider>
-          <EuiThemeProvider>{component}</EuiThemeProvider>
-        </UrlParamsProvider>
-      </KibanaContextProvider>
+      <CompatRouter>
+        <KibanaContextProvider services={{ ...core }}>
+          <UrlParamsProvider>
+            <EuiThemeProvider>{component}</EuiThemeProvider>
+          </UrlParamsProvider>
+        </KibanaContextProvider>
+      </CompatRouter>
     </Router>
   );
 };

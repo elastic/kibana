@@ -94,8 +94,7 @@ const alertReasonMessageActionVariableDescription = i18n.translate(
 const viewInAppUrlActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.viewInAppUrlActionVariableDescription',
   {
-    defaultMessage:
-      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+    defaultMessage: 'Link to the alert source',
   }
 );
 

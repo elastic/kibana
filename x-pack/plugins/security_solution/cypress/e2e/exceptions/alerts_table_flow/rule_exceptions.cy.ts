@@ -6,7 +6,7 @@
  */
 
 import { LOADING_INDICATOR } from '../../../screens/security_header';
-import { getNewRule } from '../../../objects/rule';
+import { getNewRule, getEndpointRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
@@ -24,6 +24,8 @@ import {
   submitNewExceptionItem,
   validateExceptionItemFirstAffectedRuleNameInRulePage,
   validateExceptionItemAffectsTheCorrectRulesInRulePage,
+  validateExceptionConditionField,
+  validateExceptionCommentCountAndText,
 } from '../../../tasks/exceptions';
 import {
   esArchiverLoad,
@@ -47,19 +49,22 @@ describe('Rule Exceptions workflows from Alert', () => {
   const EXPECTED_NUMBER_OF_ALERTS = '1 alert';
   const ITEM_NAME = 'Sample Exception List Item';
   const newRule = getNewRule();
-  before(() => {
-    esArchiverResetKibana();
-    esArchiverLoad('exceptions');
-    login();
-    postDataView('exceptions-*');
-  });
 
+  beforeEach(() => {
+    esArchiverResetKibana();
+    deleteAlertsAndRules();
+  });
   after(() => {
     esArchiverUnload('exceptions');
   });
+  afterEach(() => {
+    esArchiverUnload('exceptions_2');
+  });
 
-  beforeEach(() => {
-    deleteAlertsAndRules();
+  it('Creates an exception item from alert actions overflow menu and close all matching alerts', () => {
+    esArchiverLoad('exceptions');
+    login();
+    postDataView('exceptions-*');
     createRule({
       ...newRule,
       query: 'agent.name:*',
@@ -70,13 +75,7 @@ describe('Rule Exceptions workflows from Alert', () => {
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     waitForAlertsToPopulate();
-  });
 
-  afterEach(() => {
-    esArchiverUnload('exceptions_2');
-  });
-
-  it('Creates an exception item from alert actions overflow menu  and close all matching alerts', () => {
     cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
 
@@ -119,5 +118,46 @@ describe('Rule Exceptions workflows from Alert', () => {
     waitForAlertsToPopulate();
 
     cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
+  });
+
+  it('Creates an exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields ', () => {
+    esArchiverLoad('endpoint');
+    login();
+    createRule(getEndpointRule());
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    goToRuleDetails();
+    waitForAlertsToPopulate();
+
+    cy.get(LOADING_INDICATOR).should('not.exist');
+    addExceptionFromFirstAlert();
+
+    const highlightedFieldsBasedOnAlertDoc = [
+      'host.name',
+      'agent.id',
+      'user.name',
+      'process.executable',
+      'file.path',
+    ];
+
+    /**
+     * Validate the highlighted fields are auto populated, these
+     * fields are based on the alert document that should be generated
+     * when the endpoint rule runs
+     */
+    highlightedFieldsBasedOnAlertDoc.forEach((field, index) => {
+      validateExceptionConditionField(field);
+    });
+
+    /**
+     * Validate that the comments are opened by default with one comment added
+     * showing a text contains information about the pre-filled conditions
+     */
+    validateExceptionCommentCountAndText(
+      1,
+      'Exception conditions are pre-filled with relevant data from'
+    );
+
+    addExceptionFlyoutItemName(ITEM_NAME);
+    submitNewExceptionItem();
   });
 });

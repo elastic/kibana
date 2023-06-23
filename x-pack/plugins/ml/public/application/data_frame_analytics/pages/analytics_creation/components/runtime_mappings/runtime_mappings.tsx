@@ -93,7 +93,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     xJson: advancedRuntimeMappingsConfig,
   } = useXJsonMode(runtimeMappings || '');
 
-  const { currentDataView } = useDataSource();
+  const { selectedDataView } = useDataSource();
 
   const applyChanges = () => {
     const removeRuntimeMappings = advancedRuntimeMappingsConfig === '';
@@ -131,7 +131,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   };
 
   useEffect(function getInitialRuntimeMappings() {
-    const combinedRuntimeMappings = getCombinedRuntimeMappings(currentDataView, runtimeMappings);
+    const combinedRuntimeMappings = getCombinedRuntimeMappings(selectedDataView, runtimeMappings);
 
     const prettySourceConfig = JSON.stringify(combinedRuntimeMappings, null, 2);
 

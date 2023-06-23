@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/server';
 import { firstValueFrom, map, type Observable, ReplaySubject, type Subject } from 'rxjs';
-import type { EmailService, PlainTextEmail } from './types';
+import type { EmailService, HTMLEmail, PlainTextEmail } from './types';
 import { PLUGIN_ID } from '../../common';
 
 export class LicensedEmailService implements EmailService {
@@ -27,6 +27,14 @@ export class LicensedEmailService implements EmailService {
   async sendPlainTextEmail(payload: PlainTextEmail): Promise<void> {
     if (await firstValueFrom(this.validLicense$, { defaultValue: false })) {
       await this.emailService.sendPlainTextEmail(payload);
+    } else {
+      throw new Error('The current license does not allow sending email notifications');
+    }
+  }
+
+  async sendHTMLEmail(payload: HTMLEmail): Promise<void> {
+    if (await firstValueFrom(this.validLicense$, { defaultValue: false })) {
+      await this.emailService.sendHTMLEmail(payload);
     } else {
       throw new Error('The current license does not allow sending email notifications');
     }

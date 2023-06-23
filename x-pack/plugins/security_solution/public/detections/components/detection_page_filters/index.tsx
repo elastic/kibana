@@ -10,15 +10,30 @@ import React, { useEffect, useState, useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { EuiFlexItem } from '@elastic/eui';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FilterGroupLoading } from '../../../common/components/filter_group/loading';
 import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
 import { FilterGroup } from '../../../common/components/filter_group';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
-type FilterItemSetProps = Omit<ComponentProps<typeof FilterGroup>, 'initialControls'>;
+type FilterItemSetProps = Omit<
+  ComponentProps<typeof FilterGroup>,
+  'initialControls' | 'dataViewId'
+>;
+
+const SECURITY_ALERT_DATA_VIEW = {
+  id: 'security_solution_alerts_dv',
+  name: 'Security Solution Alerts DataView',
+};
 
 const FilterItemSetComponent = (props: FilterItemSetProps) => {
-  const { dataViewId, onFilterChange, ...restFilterItemGroupProps } = props;
+  const { onFilterChange, ...restFilterItemGroupProps } = props;
+
+  const {
+    indexPattern: { title },
+    dataViewId,
+  } = useSourcererDataView(SourcererScopeName.detections);
 
   const [loadingPageFilters, setLoadingPageFilters] = useState(true);
 
@@ -27,24 +42,21 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
   } = useKibana();
 
   useEffect(() => {
-    // this makes sure, that if fields are not present in existing copy of the
-    // dataView, clear the cache before filter group is loaded. This is only
-    // applicable to `alert` page as new alert mappings are added when first alert
-    // is encountered
     (async () => {
-      const dataView = await dataViewService.get(dataViewId ?? '');
-      if (!dataView) return;
-      for (const filter of DEFAULT_DETECTION_PAGE_FILTERS) {
-        const fieldExists = dataView.getFieldByName(filter.fieldName);
-        if (!fieldExists) {
-          dataViewService.clearInstanceCache(dataViewId ?? '');
-          setLoadingPageFilters(false);
-          return;
-        }
-      }
+      // creates an adhoc dataview if it does not already exists just for alert index
+      const { timeFieldName = '@timestamp' } = await dataViewService.get(dataViewId ?? '');
+      await dataViewService.create({
+        id: SECURITY_ALERT_DATA_VIEW.id,
+        name: SECURITY_ALERT_DATA_VIEW.name,
+        title,
+        allowNoIndex: true,
+        timeFieldName,
+      });
       setLoadingPageFilters(false);
     })();
-  }, [dataViewId, dataViewService]);
+
+    return () => dataViewService.clearInstanceCache();
+  }, [title, dataViewService, dataViewId]);
 
   const [initialFilterControls] = useState(DEFAULT_DETECTION_PAGE_FILTERS);
 
@@ -78,7 +90,7 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
 
   return (
     <FilterGroup
-      dataViewId={dataViewId}
+      dataViewId={SECURITY_ALERT_DATA_VIEW.id}
       onFilterChange={filterChangesHandler}
       initialControls={initialFilterControls}
       {...restFilterItemGroupProps}

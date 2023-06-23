@@ -139,7 +139,11 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       </Route>
       <Route
         exact
-        path={[VisualizeConstants.LANDING_PAGE_PATH, VisualizeConstants.WIZARD_STEP_1_PAGE_PATH]}
+        path={[
+          VisualizeConstants.LANDING_PAGE_PATH,
+          VisualizeConstants.WIZARD_STEP_1_PAGE_PATH,
+          VisualizeConstants.LANDING_PAGE_PATH_WITH_TAB,
+        ]}
       >
         <VisualizeListing />
       </Route>

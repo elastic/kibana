@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import {
   OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
   ObservabilityOnboardingState,
@@ -15,26 +15,33 @@ import {
 interface Options {
   savedObjectsClient: SavedObjectsClientContract;
   observabilityOnboardingState: ObservabilityOnboardingState;
-  apiKeyId: string;
+  savedObjectId?: string;
 }
 export async function saveObservabilityOnboardingState({
   savedObjectsClient,
   observabilityOnboardingState,
-  apiKeyId,
+  savedObjectId,
 }: Options): Promise<SavedObservabilityOnboardingState> {
-  const {
-    id,
-    attributes,
-    updated_at: updatedAt,
-  } = await savedObjectsClient.update<ObservabilityOnboardingState>(
-    OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-    apiKeyId,
-    observabilityOnboardingState,
-    { upsert: observabilityOnboardingState }
-  );
+  let savedObject: Omit<
+    SavedObject<ObservabilityOnboardingState>,
+    'attributes' | 'references'
+  >;
+  if (savedObjectId) {
+    savedObject = await savedObjectsClient.update<ObservabilityOnboardingState>(
+      OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+      savedObjectId,
+      observabilityOnboardingState
+    );
+  } else {
+    savedObject = await savedObjectsClient.create<ObservabilityOnboardingState>(
+      OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+      observabilityOnboardingState
+    );
+  }
+  const { id, updated_at: updatedAt } = savedObject;
   return {
     id,
-    ...(attributes as ObservabilityOnboardingState),
+    ...observabilityOnboardingState,
     updatedAt: updatedAt ? Date.parse(updatedAt) : 0,
   };
 }
