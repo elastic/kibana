@@ -80,7 +80,7 @@ export const DatasetsList = ({
   }
 
   return datasets.map((dataset) => (
-    <EuiContextMenuItem key={dataset.name} onClick={() => onDatasetClick(dataset)}>
+    <EuiContextMenuItem key={dataset.id} onClick={() => onDatasetClick(dataset)}>
       {dataset.name}
     </EuiContextMenuItem>
   ));
