@@ -112,7 +112,7 @@ export const ecsDataQualityDashboardLinks: LinkItem = {
   ],
 };
 
-export const mitreAttackCoverageDashboardLinks: LinkItem = {
+export const coverageOverviewDashboardLinks: LinkItem = {
   id: SecurityPageName.coverageOverview,
   title: COVERAGE_OVERVIEW,
   landingImage: overviewPageImg, // TODO: change with updated image before removing feature flag https://github.com/elastic/security-team/issues/2905

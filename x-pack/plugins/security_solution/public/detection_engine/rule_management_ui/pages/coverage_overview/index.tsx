@@ -5,10 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
@@ -20,10 +17,9 @@ import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 import { LandingPageComponent } from '../../../../common/components/landing_page';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../../../common/components/no_privileges';
-import { FiltersGlobal } from '../../../../common/components/filters_global';
 
 const CoverageOverviewComponent = () => {
-  const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
+  const { indicesExist } = useSourcererDataView();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadCases = useGetUserCasesPermissions().read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
@@ -36,16 +32,9 @@ const CoverageOverviewComponent = () => {
     <>
       {indicesExist ? (
         <>
-          <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
-          </FiltersGlobal>
           <SecuritySolutionPageWrapper data-test-subj="coverageOverviewPage">
             <HeaderPage title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE} />
-            {isSourcererLoading ? (
-              <EuiLoadingSpinner size="l" data-test-subj="coverageOverviewLoader" />
-            ) : (
-              <></>
-            )}
+            <></>
           </SecuritySolutionPageWrapper>
         </>
       ) : (

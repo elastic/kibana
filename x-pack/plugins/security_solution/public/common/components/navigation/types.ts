@@ -29,7 +29,7 @@ export type UrlStateType =
   | 'findings'
   | 'entity_analytics'
   | 'data_quality'
-  | 'mitre_attack_coverage';
+  | 'coverage_overview';
 
 export interface NavTab {
   id: string;
