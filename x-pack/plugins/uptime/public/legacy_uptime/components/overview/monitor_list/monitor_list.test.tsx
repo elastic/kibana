@@ -253,7 +253,7 @@ describe('MonitorList component', () => {
         await waitFor(() => {
           expect(
             getByTestId(
-              `xpack.uptime.monitorList.${list.summaries[0].monitor_id}.expandMonitorDetail`
+              `xpack.synthetics.monitorList.${list.summaries[0].monitor_id}.expandMonitorDetail`
             )
           ).toBeInTheDocument();
           expect(getByText('Downtime history')).toBeInTheDocument();
