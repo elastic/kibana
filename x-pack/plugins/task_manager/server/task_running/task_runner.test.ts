@@ -1837,7 +1837,8 @@ describe('TaskManagerRunner', () => {
             numSkippedRuns: 10,
             state: {},
             status: TaskStatus.Idle,
-          })
+          }),
+          { validate: true }
         );
         expect(store.remove).not.toHaveBeenCalled();
         expect(logger.warn).not.toHaveBeenCalled();
@@ -1883,7 +1884,8 @@ describe('TaskManagerRunner', () => {
             numSkippedRuns: mockTaskInstance.numSkippedRuns,
             state: mockTaskInstance.state,
             status: TaskStatus.DeadLetter,
-          })
+          }),
+          { validate: true }
         );
         expect(store.remove).not.toHaveBeenCalled();
         expect(logger.warn).not.toHaveBeenCalled();
