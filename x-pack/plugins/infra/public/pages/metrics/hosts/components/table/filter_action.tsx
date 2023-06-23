@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { useBoolean } from '../../../../../hooks/use_boolean';
 
 const selectedHostsLabel = (selectedHostsCount: number) => {
@@ -31,7 +31,9 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
     closePopover();
   };
 
-  return (
+  return selectedItemsCount === 0 ? (
+    <EuiSpacer />
+  ) : (
     <EuiPopover
       isOpen={isPopoverOpen}
       closePopover={closePopover}
