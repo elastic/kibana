@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty, useEuiTheme, euiCanAnimate } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+
 import { useBoolean } from '../../../../../hooks/use_boolean';
 
 const selectedHostsLabel = (selectedHostsCount: number) => {
@@ -24,6 +27,7 @@ interface FilterActionProps {
 }
 
 export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: FilterActionProps) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   const onAddFilterClick = () => {
@@ -31,35 +35,53 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
     closePopover();
   };
 
-  return selectedItemsCount === 0 ? (
-    <EuiSpacer />
-  ) : (
-    <EuiPopover
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      data-test-subj="bulkAction"
-      panelPaddingSize="s"
-      button={
-        <EuiButtonEmpty
-          data-test-subj="infraUseHostsTableButton"
-          size="xs"
-          iconSide="right"
-          iconType="arrowDown"
-          onClick={() => togglePopover()}
-        >
-          {selectedHostsLabel(selectedItemsCount)}
-        </EuiButtonEmpty>
-      }
-    >
-      <EuiButtonEmpty
-        data-test-subj="infraHostsTableAddFilterButton"
-        iconType="filter"
-        onClick={onAddFilterClick}
+  return (
+    <Container>
+      <EuiPopover
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        data-test-subj="bulkAction"
+        panelPaddingSize="s"
+        className={selectedItemsCount === 0 ? '' : 'is-visible'}
+        css={css`
+          position: absolute;
+          opacity: 0;
+          visibility: hidden;
+          &:is(.is-visible) {
+            opacity: 1;
+            ${euiCanAnimate} {
+              transition: opacity ${euiTheme.animation.extraFast} ease-in;
+            }
+            visibility: visible;
+          }
+        `}
+        button={
+          <EuiButtonEmpty
+            data-test-subj="hostsViewTableSelectHostsFilterButton"
+            size="xs"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={togglePopover}
+          >
+            {selectedHostsLabel(selectedItemsCount)}
+          </EuiButtonEmpty>
+        }
       >
-        {i18n.translate('xpack.infra.hostsViewPage.table.addFilter', {
-          defaultMessage: 'Add filter',
-        })}
-      </EuiButtonEmpty>
-    </EuiPopover>
+        <EuiButtonEmpty
+          data-test-subj="hostsViewTableAddFilterButton"
+          iconType="filter"
+          onClick={onAddFilterClick}
+        >
+          {i18n.translate('xpack.infra.hostsViewPage.table.addFilter', {
+            defaultMessage: 'Add filter',
+          })}
+        </EuiButtonEmpty>
+      </EuiPopover>
+    </Container>
   );
 };
+
+const Container = euiStyled.div`
+  position: relative;
+  height:  ${({ theme }) => theme.eui.euiSizeL};
+`;
