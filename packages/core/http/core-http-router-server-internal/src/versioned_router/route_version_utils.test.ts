@@ -14,6 +14,7 @@ import {
   isAllowedPublicVersion,
   hasVersion,
   readVersion,
+  redactQueryVersion,
 } from './route_version_utils';
 
 describe('isAllowedPublicVersion', () => {
@@ -120,5 +121,19 @@ describe('readVersion', () => {
   test('header version takes precedence over query param version', () => {
     const req = getRequest({ headers: { 'elastic-api-version': '3' }, query: { apiVersion: '2' } });
     expect(readVersion(req, true)).toBe('3');
+  });
+});
+
+describe('redactQueryVersion', () => {
+  it('removes the apiVersion query param by mutation', () => {
+    const req = getRequest({
+      headers: { foo: 'bar' },
+      query: { apiVersion: '1', baz: 'qux' },
+    });
+    expect(hasVersion(req, true)).toBe(true);
+    redactQueryVersion(req);
+    expect(hasVersion(req, true)).toBe(false);
+    expect(req.query).toEqual({ baz: 'qux' });
+    expect(req.headers).toEqual({ foo: 'bar' });
   });
 });

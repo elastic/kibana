@@ -342,28 +342,70 @@ describe('Routing versioned requests', () => {
   });
 
   describe('query parameter version negotiation', () => {
+    let publicHandler: jest.Mock;
+    let internalHandler: jest.Mock;
     beforeEach(() => {
+      publicHandler = jest.fn(async (ctx: any, req: any, res: any) => {
+        return res.ok({ body: 'ok' });
+      });
+      internalHandler = jest.fn(async (ctx: any, req: any, res: any) => {
+        return res.ok({ body: 'ok' });
+      });
       router.versioned
         .get({ path: '/my-public', access: 'public', enableQueryVersion: true })
-        .addVersion({ validate: false, version: '2023-10-31' }, async (ctx, req, res) => {
-          return res.ok({ body: 'ok' });
-        });
+        .addVersion(
+          {
+            validate: { request: { query: schema.object({ a: schema.number() }) } },
+            version: '2023-10-31',
+          },
+          publicHandler
+        );
 
       router.versioned
         .get({ path: '/my-internal', access: 'internal', enableQueryVersion: true })
-        .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
-          return res.ok({ body: 'ok' });
-        });
+        .addVersion(
+          {
+            validate: { request: { query: schema.object({ a: schema.number() }) } },
+            version: '1',
+          },
+          internalHandler
+        );
     });
     it('finds version based on header', async () => {
       await server.start();
-      await supertest.get('/my-public').set('Elastic-Api-Version', '2023-10-31').expect(200);
-      await supertest.get('/my-internal').set('Elastic-Api-Version', '1').expect(200);
+      await supertest
+        .get('/my-public')
+        .set('Elastic-Api-Version', '2023-10-31')
+        .query({ a: 1 })
+        .expect(200);
+      expect(publicHandler).toHaveBeenCalledTimes(1);
+      {
+        const [[_, req]] = publicHandler.mock.calls;
+        expect(req.query).toEqual({ a: 1 }); // does not contain apiVersion key
+      }
+      await supertest
+        .get('/my-internal')
+        .set('Elastic-Api-Version', '1')
+        .query({ a: 2 })
+        .expect(200);
+      expect(internalHandler).toHaveBeenCalledTimes(1);
+      {
+        const [[_, req]] = internalHandler.mock.calls;
+        expect(req.query).toEqual({ a: 2 }); // does not contain apiVersion key
+      }
     });
     it('finds version based on query param', async () => {
       await server.start();
-      await supertest.get('/my-public').query({ apiVersion: '2023-10-31' }).expect(200);
-      await supertest.get('/my-internal').query({ apiVersion: '1' }).expect(200);
+      await supertest.get('/my-public').query({ apiVersion: '2023-10-31', a: 1 }).expect(200);
+      {
+        const [[_, req]] = publicHandler.mock.calls;
+        expect(req.query).toEqual({ a: 1 }); // does not contain apiVersion key
+      }
+      await supertest.get('/my-internal').query({ apiVersion: '1', a: 2 }).expect(200);
+      {
+        const [[_, req]] = internalHandler.mock.calls;
+        expect(req.query).toEqual({ a: 2 }); // does not contain apiVersion key
+      }
     });
   });
 });

@@ -10,10 +10,10 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   ELASTIC_HTTP_VERSION_QUERY_PARAM,
 } from '@kbn/core-http-common';
-import { isObject } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { isObject, get, omit } from 'lodash';
 import { KibanaRequest } from '@kbn/core-http-server';
 import moment from 'moment';
+import type { Mutable } from 'utility-types';
 
 const PUBLIC_VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
@@ -57,21 +57,16 @@ export function hasVersion(request: KibanaRequest, isQueryVersionEnabled?: boole
   );
 }
 
-export const queryVersionSchema = schema.object(
-  {
-    [ELASTIC_HTTP_VERSION_QUERY_PARAM]: schema.maybe(schema.string()),
-  },
-  { unknowns: 'ignore' }
-);
-function readQueryVersion(request: KibanaRequest): undefined | ApiVersion {
-  try {
-    const { [ELASTIC_HTTP_VERSION_QUERY_PARAM]: version } = queryVersionSchema.validate(
-      request.query
-    );
-    return version;
-  } catch (e) {
-    return undefined;
+export function redactQueryVersion(request: KibanaRequest): void {
+  const mutableRequest = request as Mutable<KibanaRequest>;
+  if (hasQueryVersion(request)) {
+    mutableRequest.query = omit({ ...(request.query as {}) }, ELASTIC_HTTP_VERSION_QUERY_PARAM);
   }
+}
+
+function readQueryVersion(request: KibanaRequest): undefined | ApiVersion {
+  const version = get(request.query, ELASTIC_HTTP_VERSION_QUERY_PARAM);
+  if (typeof version === 'string') return version;
 }
 /** Reading from header takes precedence over query param */
 export function readVersion(
