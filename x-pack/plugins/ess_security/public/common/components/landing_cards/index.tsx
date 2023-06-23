@@ -46,7 +46,6 @@ const pageHeaderStyles = css`
 const getFlexItemStyles = (euiTheme: EuiThemeComputed) => css`
   background: ${euiTheme.colors.lightestShade};
   padding: 20px;
-  margin: -12px;
 `;
 
 const cardStyles = css`
@@ -184,3 +183,6 @@ export const LandingCards = memo(() => {
   );
 });
 LandingCards.displayName = 'LandingCards';
+
+// eslint-disable-next-line import/no-default-export
+export default LandingCards;

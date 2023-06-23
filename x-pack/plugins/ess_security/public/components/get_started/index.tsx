@@ -9,13 +9,13 @@ import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaServicesProvider } from '../../services';
 import { EssSecurityPluginStartDependencies } from '../../types';
-import { LandingCards } from '../../common/components/landing_cards';
+import { GetStarted } from './lazy';
 
 export const getSecurityGetStartedComponent =
   (core: CoreStart, pluginsStart: EssSecurityPluginStartDependencies): React.ComponentType =>
   () =>
     (
       <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>
-        <LandingCards />
+        <GetStarted />
       </KibanaServicesProvider>
     );

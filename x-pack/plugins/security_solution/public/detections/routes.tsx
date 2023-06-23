@@ -13,7 +13,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { Alerts } from './pages/alerts';
 
 const AlertsRoutes = () => (
-  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
+  <PluginTemplateWrapper>
     <Alerts />
   </PluginTemplateWrapper>
 );

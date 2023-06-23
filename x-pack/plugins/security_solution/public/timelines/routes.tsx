@@ -15,7 +15,7 @@ import { SecurityPageName } from '../app/types';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 const TimelinesRoutes = () => (
-  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
+  <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.timelines}>
       <Timelines />
     </TrackApplicationView>

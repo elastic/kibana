@@ -18,7 +18,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { ExploreLandingPage } from './landing';
 
 const ExploreLanding = () => (
-  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
+  <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
       <ExploreLandingPage />
     </TrackApplicationView>
@@ -26,7 +26,7 @@ const ExploreLanding = () => (
 );
 
 const NetworkRoutes = () => (
-  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
+  <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.network}>
       <NetworkContainer />
     </TrackApplicationView>
@@ -34,7 +34,7 @@ const NetworkRoutes = () => (
 );
 
 const UsersRoutes = () => (
-  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
+  <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.users}>
       <UsersContainer />
     </TrackApplicationView>
@@ -42,7 +42,7 @@ const UsersRoutes = () => (
 );
 
 const HostsRoutes = () => (
-  <PluginTemplateWrapper paddingSize="none" restrictWidth={false}>
+  <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.hosts}>
       <HostsContainer />
     </TrackApplicationView>

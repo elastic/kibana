@@ -22,7 +22,14 @@ export const GetStartedComponent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
+    <KibanaPageTemplate
+      restrictWidth={false}
+      contentBorder={false}
+      grow={true}
+      css={css`
+        margin: -${euiTheme.size.l};
+      `}
+    >
       <KibanaPageTemplate.Header
         css={css`
           padding: 0 ${euiTheme.base * 2.25}px;
