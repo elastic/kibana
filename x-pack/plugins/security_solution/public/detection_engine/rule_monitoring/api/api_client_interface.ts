@@ -17,6 +17,12 @@ import type {
 
 export interface IRuleMonitoringApiClient {
   /**
+   * Installs resources (dashboards, data views, etc) related to rule monitoring
+   * and Detection Engine health, and can do any other setup work.
+   */
+  setupDetectionEngineHealthApi(): Promise<void>;
+
+  /**
    * Fetches plain rule execution events (status changes, metrics, generic events) from Event Log.
    * @throws An error if response is not OK.
    */
@@ -33,7 +39,14 @@ export interface IRuleMonitoringApiClient {
   ): Promise<GetRuleExecutionResultsResponse>;
 }
 
-export interface FetchRuleExecutionEventsArgs {
+export interface RuleMonitoringApiCallArgs {
+  /**
+   * Optional signal for cancelling the request.
+   */
+  signal?: AbortSignal;
+}
+
+export interface FetchRuleExecutionEventsArgs extends RuleMonitoringApiCallArgs {
   /**
    * Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`).
    */
@@ -63,14 +76,9 @@ export interface FetchRuleExecutionEventsArgs {
    * Number of results to fetch per page.
    */
   perPage?: number;
-
-  /**
-   * Optional signal for cancelling the request.
-   */
-  signal?: AbortSignal;
 }
 
-export interface FetchRuleExecutionResultsArgs {
+export interface FetchRuleExecutionResultsArgs extends RuleMonitoringApiCallArgs {
   /**
    * Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`).
    */
@@ -116,9 +124,4 @@ export interface FetchRuleExecutionResultsArgs {
    * Number of results to fetch per page.
    */
   perPage?: number;
-
-  /**
-   * Optional signal for cancelling the request.
-   */
-  signal?: AbortSignal;
 }

@@ -88,20 +88,33 @@ export const getNormalizeCommonFields = ({
       ? JSON.stringify(monitor.params)
       : defaultFields[ConfigKey.PARAMS],
     // picking out keys specifically, so users can't add arbitrary fields
-    [ConfigKey.ALERT_CONFIG]: monitor.alert
-      ? {
-          ...defaultFields[ConfigKey.ALERT_CONFIG],
-          status: {
-            ...defaultFields[ConfigKey.ALERT_CONFIG]?.status,
-            enabled:
-              monitor.alert?.status?.enabled ??
-              defaultFields[ConfigKey.ALERT_CONFIG]?.status?.enabled ??
-              true,
-          },
-        }
-      : defaultFields[ConfigKey.ALERT_CONFIG],
+    [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
   };
   return { normalizedFields, errors };
+};
+
+const getAlertConfig = (monitor: ProjectMonitor) => {
+  const defaultFields = DEFAULT_COMMON_FIELDS;
+
+  return monitor.alert
+    ? {
+        ...defaultFields[ConfigKey.ALERT_CONFIG],
+        status: {
+          ...defaultFields[ConfigKey.ALERT_CONFIG]?.status,
+          enabled:
+            monitor.alert?.status?.enabled ??
+            defaultFields[ConfigKey.ALERT_CONFIG]?.status?.enabled ??
+            true,
+        },
+        tls: {
+          ...defaultFields[ConfigKey.ALERT_CONFIG]?.tls,
+          enabled:
+            monitor.alert?.tls?.enabled ??
+            defaultFields[ConfigKey.ALERT_CONFIG]?.tls?.enabled ??
+            true,
+        },
+      }
+    : defaultFields[ConfigKey.ALERT_CONFIG];
 };
 
 export const getCustomHeartbeatId = (

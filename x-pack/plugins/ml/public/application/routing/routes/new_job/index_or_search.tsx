@@ -174,18 +174,19 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
-const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
+const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
   const {
     services: {
       http: { basePath },
       application: { navigateToUrl },
+      data: { dataViews: dataViewsService },
     },
   } = useMlKibana();
 
   const newJobResolvers = {
     ...basicResolvers(),
     preConfiguredJobRedirect: () =>
-      preConfiguredJobRedirect(deps.dataViewsContract, basePath.get(), navigateToUrl),
+      preConfiguredJobRedirect(dataViewsService, basePath.get(), navigateToUrl),
   };
 
   const { context } = useRouteResolver(
